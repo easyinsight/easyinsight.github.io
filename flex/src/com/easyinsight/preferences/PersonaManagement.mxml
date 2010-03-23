@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setup()" width="100%" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
+        private var backgroundImage:Class;
+
+        [Bindable]
+        private var personas:ArrayCollection;
+
+        [Bindable]
+        private var stackIndex:int;
+
+        private function setup():void {
+            addEventListener(PersonaEvent.DELETE_PERSONA, deletePersona);
+            preferencesService.getPersonas.send();
+        }
+
+        private function deletePersona(event:PersonaEvent):void {
+
+        }
+
+        private function gotPersonas():void {
+            personas = preferencesService.getPersonas.lastResult as ArrayCollection;
+            stackIndex = 1;
+        }
+
+        private function createPersona():void {
+            var window:PersonaConfigurationWindow = new PersonaConfigurationWindow();
+            window.addEventListener(PersonaEvent.NEW_PERSONA, newPersona);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function newPersona(event:PersonaEvent):void {
+            personas.addItem(event.persona);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="preferencesService" id="preferencesService">
+        <mx:method name="getPersonas" result="gotPersonas()"/>
+    </mx:RemoteObject>
+    <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+            paddingTop="5" paddingBottom="5">
+        <mx:Label text="Persona Configuration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+    </mx:Box>
+    <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
+        <mx:Box>
+            <mx:Button label="Create Persona" click="createPersona()"/>
+        </mx:Box>
+        <mx:VBox>
+            <mx:Button label="Create Persona" click="createPersona()"/>
+            <mx:DataGrid dataProvider="{personas}" width="500">
+                <mx:columns>
+                    <util:EIDataGridColumn dataField="name" headerText="Persona Name"/>
+                    <util:EIDataGridColumn dataField="name" headerText="" sortable="false" itemRenderer="com.easyinsight.preferences.PersonaControls"
+                            width="100"/>    
+                </mx:columns>
+
+            </mx:DataGrid>
+        </mx:VBox>
+
+    </mx:ViewStack>
+</mx:VBox>

@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -87,7 +88,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, null);
+                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -105,7 +106,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             if(categoryID != null) {
                 contactName = categoryCache.get(categoryID);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url, null);
+                    Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url);
                     Nodes dealNodes = contactInfo.query("/deal-category");
                     if (dealNodes.size() > 0) {
                         Node deal = dealNodes.get(0);
@@ -127,20 +128,20 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_DEAL;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 
         DataSet ds = new DataSet();
-        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false);
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         if (token == null) {
             token = new Token();
             token.setTokenValue(credentials.getUserName());
             token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
             token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
@@ -150,7 +151,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             EIPageInfo info = new EIPageInfo();
             info.currentPage = 1;
             //do {
-                Document deals = runRestRequest("/deals.xml", client, builder, url, null);
+                Document deals = runRestRequest("/deals.xml", client, builder, url);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
                     try {

@@ -1,6 +1,8 @@
 package com.easyinsight.framework
 {
-	[Bindable]
+import com.easyinsight.preferences.UISettings;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.users.UserServiceResponse")]
 	public class UserServiceResponse
 	{
@@ -20,6 +22,7 @@ package com.easyinsight.framework
         public var activated:Boolean;
         public var billingInformationGiven:Boolean;
         public var accountState:int;
+        public var uiSettings:UISettings;
 		
 		public function UserServiceResponse()
 			{

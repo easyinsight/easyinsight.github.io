@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.salesforce;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.storage.DataStorage;
@@ -168,7 +169,7 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
         return items;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
     }
 

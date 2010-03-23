@@ -56,7 +56,7 @@ public class DataSourceMigration {
         compositeServerDataSource.getConnections().add(connection);
     }
 
-    protected void addChildDataSource(FeedDefinition childDataSource, Connection conn) throws SQLException {
+    protected void addChildDataSource(FeedDefinition childDataSource, EIConnection conn) throws SQLException {
         CompositeServerDataSource compositeServerDataSource = (CompositeServerDataSource) dataSource;
         UploadPolicy uploadPolicy = dataSource.getUploadPolicy();
         compositeServerDataSource.newDefinition((IServerDataSourceDefinition) childDataSource, conn, null, "", uploadPolicy);        

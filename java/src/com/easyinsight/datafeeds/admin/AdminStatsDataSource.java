@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.admin;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -58,7 +59,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
         return null;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         HealthInfo healthInfo = new AdminService().getHealthInfo();
         DataSet dataSet = new DataSet();
         IRow row = dataSet.createRow();

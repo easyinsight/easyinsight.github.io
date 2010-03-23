@@ -64,8 +64,6 @@
                 user.name = fullName.text;
                 user.email = email.text;
                 user.accountAdmin = true;
-                user.insightCreator = true;
-                user.dataSourceCreator = true;
                 _account.name = userName.text;
                 _account.optInEmail = optInCheckbox.selected;
                 creationService.doesUserExist.send(userName.text, email.text);

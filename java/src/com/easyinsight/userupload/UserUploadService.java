@@ -292,7 +292,7 @@ public class UserUploadService implements IUserUploadService {
                 task.setExecutionDate(new Date());
                 task.setUserID(SecurityUtil.getUserID());
                 task.setAccountID(SecurityUtil.getAccountID());
-                if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
+                /*if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
                     Scheduler.instance().saveTask(task, conn);
                     AsyncCreatedEvent e = new AsyncCreatedEvent();
                     e.setTask(task);
@@ -302,10 +302,10 @@ public class UserUploadService implements IUserUploadService {
                     EventDispatcher.instance().dispatch(e);
                     uploadResponse = new UploadResponse("Your file has been uploaded and verified, and will be processed shortly.");
                 }
-                else {
-                    task.createFeed(conn, rawUploadData.getUserData(), uploadFormat);
-                    uploadResponse = new UploadResponse(task.getFeedID(), task.getAnalysisID());
-                }
+                else {*/
+                task.createFeed(conn, rawUploadData.getUserData(), uploadFormat);
+                uploadResponse = new UploadResponse(task.getFeedID(), task.getAnalysisID());
+                //}
             }
         } catch (StorageLimitException se) {
             try {
@@ -888,7 +888,7 @@ public class UserUploadService implements IUserUploadService {
         if (SecurityUtil.getAccountTier() < feedDefinition.getRequiredAccountTier()) {
             throw new RuntimeException("You are not allowed to create data sources of this type with your account.");
         }
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             if (credentials != null && credentials.isEncrypted()) {
@@ -899,19 +899,11 @@ public class UserUploadService implements IUserUploadService {
             conn.commit();
             return id;
         } catch (Exception e) {
-            LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            LogClass.error(e);            
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -936,8 +928,7 @@ public class UserUploadService implements IUserUploadService {
                 session.close();
             }
             if (results.size() > 0) {
-                user = (User) results.get(0);
-                user.setLicenses(new ArrayList<SubscriptionLicense>());
+                user = (User) results.get(0);                
             }
             return user;
         } catch (Exception e) {

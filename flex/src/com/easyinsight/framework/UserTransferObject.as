@@ -1,7 +1,5 @@
 package com.easyinsight.framework
-{
-	import mx.collections.ArrayCollection;
-	
+{		
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.users.UserTransferObject")]
 	public class UserTransferObject
@@ -10,11 +8,11 @@ package com.easyinsight.framework
 		public var userID:int;
 		public var userName:String;
 		public var email:String;
-		public var name:String;		
-		public var licenses:ArrayCollection;
+		public var name:String;
         public var accountAdmin:Boolean;
-        public var dataSourceCreator:Boolean;
-        public var insightCreator:Boolean;
+        public var firstName:String;
+        public var title:String;
+        public var personaID:int;
 		
 		public function UserTransferObject()
 		{

@@ -1,5 +1,6 @@
 package com.easyinsight.billing;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.database.Database;
 import com.easyinsight.users.Account;
@@ -28,7 +29,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 @Table(name="billing_scheduled_task")
 @PrimaryKeyJoinColumn(name="scheduled_task_id")
 public class BillingScheduledTask extends ScheduledTask {
-    protected void execute(Date now, Connection conn) throws Exception {
+    protected void execute(Date now, EIConnection conn) throws Exception {
         expireTrials(now, conn);
         billCustomers(now, conn);
 

@@ -1,10 +1,10 @@
 package com.easyinsight.datafeeds.composite;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
-import com.easyinsight.users.SubscriptionLicense;
 import com.easyinsight.users.Account;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.DataSet;
@@ -20,9 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.hibernate.Session;
-import flex.messaging.MessageBroker;
-import flex.messaging.messages.AsyncMessage;
-import flex.messaging.util.UUIDUtils;
 
 /**
  * User: James Boe
@@ -59,7 +56,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return false;
     }
 
-    public long create(Credentials credentials, Connection conn) throws SQLException, CloneNotSupportedException {
+    public long create(Credentials credentials, EIConnection conn) throws SQLException, CloneNotSupportedException {
         setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
         UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         setUploadPolicy(uploadPolicy);
@@ -69,7 +66,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return feedCreationResult.getFeedID();
     }
 
-    protected List<IServerDataSourceDefinition> obtainChildDataSources(Connection conn, Credentials credentials) throws SQLException, CloneNotSupportedException {
+    protected List<IServerDataSourceDefinition> obtainChildDataSources(EIConnection conn, Credentials credentials) throws SQLException, CloneNotSupportedException {
         List<IServerDataSourceDefinition> dataSources = new ArrayList<IServerDataSourceDefinition>();
         Map<FeedType, IServerDataSourceDefinition> feedMap = new HashMap<FeedType, IServerDataSourceDefinition>();
         List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
@@ -108,7 +105,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return dataSources;
     }
 
-    public void newDefinition(IServerDataSourceDefinition definition, Connection conn, Credentials credentials, String userName, UploadPolicy uploadPolicy) throws SQLException {
+    public void newDefinition(IServerDataSourceDefinition definition, EIConnection conn, Credentials credentials, String userName, UploadPolicy uploadPolicy) throws SQLException {
         DataStorage metadata = null;
         try {
             FeedDefinition feedDefinition = (FeedDefinition) definition;
@@ -116,7 +113,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             Map<String, Key> keys = feedDefinition.newDataSourceFields(credentials);
             DataSet dataSet;
             if (SecurityUtil.getUserID(false) > 0) {
-                dataSet = feedDefinition.getDataSet(credentials, keys, new Date(), this, null);
+                dataSet = feedDefinition.getDataSet(credentials, keys, new Date(), this, null, conn);
             } else {
                 dataSet = new DataSet();
             }
@@ -156,8 +153,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 session.close();
             }
             if (results.size() > 0) {
-                user = (User) results.get(0);
-                user.setLicenses(new ArrayList<SubscriptionLicense>());
+                user = (User) results.get(0);                
             }
             return user;
         } catch (Exception e) {
@@ -191,7 +187,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             refreshData(credentials, accountID, now, conn, null);
@@ -199,18 +195,16 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             return new CredentialsResponse(true, getDataFeedID());
         } catch (Exception e) {
             LogClass.error(e);
-            try {
+
                 conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+
             return new CredentialsResponse(false, e.getMessage(), getDataFeedID());
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
-    public boolean refreshData(Credentials credentials, long accountID, Date now, Connection conn, FeedDefinition parentDefinition) throws Exception {
+    public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         if(credentials == null) {
             if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
                 credentials = new Credentials();

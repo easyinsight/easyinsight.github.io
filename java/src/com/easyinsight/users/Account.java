@@ -53,10 +53,6 @@ public class Account {
     @OneToMany (cascade = CascadeType.ALL)
     private List<User> users = new ArrayList<User>();
 
-    @OneToMany (cascade = CascadeType.ALL)
-    @JoinColumn(name="account_id")
-    private List<SubscriptionLicense> licenses = new ArrayList<SubscriptionLicense>();
-
     @Column(name="activated")
     private boolean activated;
 
@@ -95,12 +91,6 @@ public class Account {
 
     @Column(name="billing_day_of_month")
     private Integer billingDayOfMonth;
-
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinTable(name="account_to_guest_user",
-        joinColumns = @JoinColumn(name="account_id", nullable = false),
-        inverseJoinColumns = @JoinColumn(name="guest_user_id", nullable = false))
-    private List<Consultant> guestUsers = new ArrayList<Consultant>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="account_id")
@@ -156,18 +146,6 @@ public class Account {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
-    }
-
-    public List<SubscriptionLicense> getLicenses() {
-        return licenses;
-    }
-
-    public void setLicenses(List<SubscriptionLicense> licenses) {
-        this.licenses = licenses;
-    }
-
-    public void addLicense(SubscriptionLicense subscriptionLicense) {
-        this.licenses.add(subscriptionLicense);
     }
 
     public boolean isOptInEmail() {
@@ -237,8 +215,6 @@ public class Account {
     public AccountTransferObject toTransferObject() {
         AccountTransferObject transfer = new AccountTransferObject();
         transfer.setAccountID(accountID);
-        List<SubscriptionLicense> subscriptionList = new ArrayList<SubscriptionLicense>(licenses);
-        transfer.setLicenses(subscriptionList);
         //transfer.setUsers(users);
         transfer.setAccountType(accountType);
         transfer.setMaxSize(maxSize);
@@ -253,13 +229,11 @@ public class Account {
     public AccountAdminTO toAdminTO() {
         AccountAdminTO transfer = new AccountAdminTO();
         transfer.setAccountID(accountID);
-        List<SubscriptionLicense> subscriptionList = new ArrayList<SubscriptionLicense>(licenses);
-        transfer.setLicenses(subscriptionList);
         //transfer.setUsers(users);
         transfer.setAccountType(accountType);
         transfer.setMaxSize(maxSize);
         transfer.setName(name);
-        transfer.setMaxUsers(maxUsers);
+        transfer.setMaxUsers(maxUsers);        
         if (groupID != null) {
             transfer.setGroupID(groupID);
         }
@@ -275,13 +249,8 @@ public class Account {
                 }
             }
         }
-        List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
-        for (Consultant consultant : getGuestUsers()) {
-            consultants.add(consultant.toConsultantTO());
-        }
         transfer.setCreationDate(getCreationDate());
         transfer.setLastUserLoginDate(new Date(latestLoginDate));
-        transfer.setConsultants(consultants);
         transfer.setAdminUsers(adminUsers);
         transfer.setAccountState(accountState);
         transfer.setApiEnabled(apiEnabled);
@@ -302,14 +271,6 @@ public class Account {
 
     public void setMaxUsers(int maxUsers) {
         this.maxUsers = maxUsers;
-    }
-
-    public List<Consultant> getGuestUsers() {
-        return guestUsers;
-    }
-
-    public void setGuestUsers(List<Consultant> guestUsers) {
-        this.guestUsers = guestUsers;
     }
 
     public Long getGroupID() {

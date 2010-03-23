@@ -1,12 +1,6 @@
 package com.easyinsight.users;
 
-import org.hibernate.Session;
-
 import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-
-import com.easyinsight.util.RandomTextGenerator;
 
 /**
  * User: James Boe
@@ -16,7 +10,6 @@ import com.easyinsight.util.RandomTextGenerator;
 public class AccountTransferObject {
     private int accountType;
     private long accountID;
-    private List<SubscriptionLicense> licenses = new ArrayList<SubscriptionLicense>();
     private int maxUsers;
     private long maxSize;
     private String name;
@@ -88,18 +81,12 @@ public class AccountTransferObject {
         this.accountID = accountID;
     }
 
-    public List<SubscriptionLicense> getLicenses() {
-        return licenses;
-    }
-
-    public void setLicenses(List<SubscriptionLicense> licenses) {
-        this.licenses = licenses;
-    }
-
     public Account toAccount() {
         Account account = new Account();
+        account.setMaxUsers(maxUsers);
+        account.setMaxSize(maxSize);
+        account.setAccountState(accountState);
         account.setAccountType(accountType);
-        account.setLicenses(licenses);
         account.setAccountID(accountID);
         account.setName(name);
         account.setApiEnabled(apiEnabled);

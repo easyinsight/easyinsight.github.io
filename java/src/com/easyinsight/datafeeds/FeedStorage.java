@@ -688,7 +688,6 @@ public class FeedStorage {
             String feedName = rs.getString(1);
             FeedType feedType = FeedType.valueOf(rs.getInt(2));
             feedDefinition = registry.createDataSource(feedType);
-            String genre = rs.getString(4);
             feedDefinition.setFeedName(feedName);
             feedDefinition.setDataFeedID(identifier);
             boolean publiclyVisible = rs.getBoolean(3);

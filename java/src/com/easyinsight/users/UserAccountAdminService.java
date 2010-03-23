@@ -149,14 +149,35 @@ public class UserAccountAdminService {
                     throw new SecurityException();
                 }
             }
-            user.setAccountAdmin(userTransferObject.isAccountAdmin());
-            user.setAccount(account);
-            user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
-            user.setEmail(userTransferObject.getEmail());
-            user.setInsightCreator(userTransferObject.isInsightCreator());
-            user.setName(userTransferObject.getName());
-            user.setUserName(userTransferObject.getUserName());
-            session.update(account);
+            user.update(userTransferObject);
+            session.update(user);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void updateUsers(List<UserTransferObject> userTransferObject) {
+        SecurityUtil.authorizeAccountAdmin();
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+            Account account = (Account) results.get(0);
+            User user = null;
+            for (User checkingUser : account.getUsers()) {
+                for (UserTransferObject transferObject : userTransferObject) {
+                    if (checkingUser.getUserID() == transferObject.getUserID()) {
+                        checkingUser.update(transferObject);
+                        session.update(checkingUser);
+                    }
+                }
+            }            
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

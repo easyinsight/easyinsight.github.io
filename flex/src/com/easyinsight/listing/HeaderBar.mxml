@@ -17,6 +17,8 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.goals.MyGoals;
         import com.easyinsight.preferences.PreferencesWindow;
+        import com.easyinsight.preferences.UIConfiguration;
+        import com.easyinsight.preferences.UIOption;
         import com.easyinsight.solutions.RevisedSolutionSummary;
         import com.easyinsight.groups.GroupsSummary;
         import com.easyinsight.account.AccountBasePage;
@@ -28,6 +30,8 @@
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
+        import mx.states.RemoveChild;
+        import mx.states.State;
 
         private function showPreferences():void {
             var window:PreferencesWindow = new PreferencesWindow();
@@ -38,11 +42,15 @@
         private function setup():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
-
         }
 
         private function loginEvent(event:LoginEvent):void {
             stackIndex = event.type == LoginEvent.LOGIN ? 1 : 0;
+            if (event.type == LoginEvent.LOGIN) {
+                if (User.getInstance().uiConfiguration != null) {
+                    createState(User.getInstance().uiConfiguration);
+                }
+            }
         }
 
         [Bindable]
@@ -123,6 +131,33 @@
             var listingOption:ListingOption = findNode(targetPage, getChildren());
             dispatchEvent(new ListingChangeEvent(listingOption.perspective, properties));
         }
+
+        private function createState(config:UIConfiguration):void {
+
+            var ops:Array = [];
+            evaluate(apiListingOption, UIConfiguration.SHOW_APIS, config, ops);
+            evaluate(myDataOption, UIConfiguration.SHOW_MY_DATA, config, ops);
+            evaluate(connectionsOption, UIConfiguration.SHOW_CONNECTIONS, config, ops);
+            evaluate(exchangeOption, UIConfiguration.SHOW_EXCHANGE, config, ops);
+            evaluate(groupsOption, UIConfiguration.SHOW_GROUPS, config, ops);
+            evaluate(kpisOption, UIConfiguration.SHOW_KPIS, config, ops);
+            if (ops.length > 0) {
+                var state:State = new State();
+                state.overrides = ops;
+                state.name = "Persona";
+                states = [ state ];
+                currentState = "Persona";
+            }
+        }
+
+        private function evaluate(listingOption:ListingOption, key:String, uiConfig:UIConfiguration, ops:Array):void {
+            var uiOption:UIOption = uiConfig.getConfiguration(key);
+            if (!uiOption.selected) {
+                var removeChild:RemoveChild = new RemoveChild();
+                removeChild.target = listingOption;
+                ops.push(removeChild);
+            }
+        }
 		]]>
     </mx:Script>
     <mx:Image source="{logo}"/>
@@ -135,27 +170,32 @@
         <mx:Image source="{myDataIcon}" id="myDataImage"/>
         <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new RevisedSolutionSummary()}" enableAnalysis="false" displayName="Connections" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new RevisedSolutionSummary()}" enableAnalysis="false" displayName="Connections" listingChange="onListingChange(event)"
+            id="connectionsOption">
         <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
         <mx:Label text="Connections" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Exchange" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Exchange" listingChange="onListingChange(event)"
+            id="exchangeOption">
         <mx:Image source="{catalogIcon}" id="catalogImage"/>
         <mx:Label text="Exchange" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new GroupsSummary()}" enableAnalysis="false" displayName="Groups" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new GroupsSummary()}" enableAnalysis="false" displayName="Groups" listingChange="onListingChange(event)"
+            id="groupsOption">
         <mx:Image source="{groupsIcon}" id="groupsImage"/>
         <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new MyGoals()}" enableAnalysis="false" displayName="Goals" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new MyGoals()}" enableAnalysis="false" displayName="Goals" listingChange="onListingChange(event)"
+            id="kpisOption">
         <mx:Image source="{goalsIcon}" id="goalsImage"/>
         <mx:Label text="KPIs" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new APIPage()}" enableAnalysis="false" displayName="API" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new APIPage()}" enableAnalysis="false" displayName="API" listingChange="onListingChange(event)" id="apiListingOption">
         <mx:Image source="{apiIcon}" id="apiImage"/>
         <mx:Label text="API" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new AccountBasePage()}" enableAnalysis="false" displayName="Accounts" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new AccountBasePage()}" enableAnalysis="false" displayName="Accounts" listingChange="onListingChange(event)"
+            id="accountsOption">
         <mx:Image source="{accountIcon}" id="accountImage"/>
         <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>

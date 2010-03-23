@@ -693,6 +693,7 @@ public class DataStorage {
                 }
                 insertStmt.execute();
             }
+            insertStmt.close();
         } catch (SQLException e) {
             LogClass.error("Failure on persistence where SQL = " + insertSQL + ", database = " + database.getID());
             throw e;

@@ -8,7 +8,7 @@
     <mx:states>
         <mx:State name="notLoggedIn">
             <mx:RemoveChild target="{topBox}"/>
-            <mx:RemoveChild target="{bodyBox}"/>
+            <mx:RemoveChild target="{groupStack}"/>
             <mx:AddChild relativeTo="{coreContent}">
                 <listing:GottaLoginPage/>
             </mx:AddChild>
@@ -68,7 +68,6 @@
                 individualOrHigherAccount = User.getInstance().getAccountType() >= Account.GROUP;
                 groupService.getMemberGroups.send();
                 //groupService.getPublicGroups.send();
-                groupComments.retrieveMessages();
             }
         }
 
@@ -82,6 +81,7 @@
         }
 
         private function gotMemberGroups():void {
+            stackIndex = 1;
             this.myGroups = groupService.getMemberGroups.lastResult as ArrayCollection;
             showMyGroups = (myGroups.length > 0);
         }
@@ -105,43 +105,35 @@
          }*/
         public function cleanup():void {
         }
+
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
+
+        [Bindable]
+        private var stackIndex:int;
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService">
         <mx:method name="getMemberGroups" result="gotMemberGroups()"/>
         <!--<mx:method name="getPublicGroups" result="gotPublicGroups()"/>-->
-    </mx:RemoteObject>
-    <mx:Box width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
-        <mx:VBox width="1000" height="100%" id="coreContent" paddingTop="10" paddingLeft="10" paddingRight="10"
-                 paddingBottom="10" backgroundColor="#FFFFFF" verticalGap="15">
-            <mx:HBox width="100%" id="topBox">
+    </mx:RemoteObject>    
+    <mx:VBox width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
+        <mx:VBox width="1000" height="100%" id="coreContent" backgroundColor="#FFFFFF" paddingTop="10" paddingLeft="10"
+                 paddingRight="10" paddingBottom="10">
+            <mx:HBox width="100%" horizontalAlign="center" id="topBox">
                 <mx:Button icon="@Embed('../../../../assets/users3_add.png')" label="Create a New Group..."
-                           click="createNewGroup()" labelPlacement="bottom" visible="{individualOrHigherAccount}"/>
-                <!--<mx:Button icon="@Embed('../../../../assets/earth_new.png')" label="Join a Public Group..."
-                           click="joinPublicGroup()" labelPlacement="bottom"/>-->
-                <!--<mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>-->
+                           click="createNewGroup()" labelPlacement="bottom" visible="{individualOrHigherAccount}"/>                
             </mx:HBox>
-            <mx:VBox width="100%" id="bodyBox">
-                <mx:HBox width="100%">
-                    <mx:VBox width="300" verticalGap="0">
-                        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-                        <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
-                            <mx:Label fontSize="14" text="My Groups"/>
-                        </mx:Box>
-                        <mx:DataGrid id="myGroupsGrid" dataProvider="{myGroups}" headerStyleName="BlueHeader" width="100%">
-                            <mx:columns>
-                                <util:EIDataGridColumn dataField="name" headerText="Name"/>
-                                <util:EIDataGridColumn dataField="name" width="50" headerText="" sortable="false"
-                                                       itemRenderer="com.easyinsight.groups.MyGroupsControls"/>
-                            </mx:columns>
-                        </mx:DataGrid>
-                    </mx:VBox>
-                    <mx:Spacer width="50"/>
-                    <mx:TextArea width="100%" fontSize="14" borderStyle="none" editable="false" text="Groups provide you with the functionality to collaborate on data problems. You can add data sources, reports, and KPIs to groups. Groups are limited to accounts of the Group level and higher." height="120"/>
-                </mx:HBox>
-                <mx:Spacer height="10"/>
-                <discussion:GroupWideDiscussionPanel width="100%" id="groupComments"/>
-            </mx:VBox>
+            <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" id="groupStack">
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar indeterminate="true" label="Loading available groups..."/>
+                </mx:Box>
+                <mx:Box width="100%" height="100%">
+                    <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.groups.GroupView" dataProvider="{myGroups}" id="solutionGrid"
+                        columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%"/>
+                </mx:Box>
+            </mx:ViewStack>
         </mx:VBox>
-    </mx:Box>
+    </mx:VBox>
 </mx:VBox>

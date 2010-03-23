@@ -1,7 +1,7 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.users.User;
 import com.easyinsight.userupload.*;
 import com.easyinsight.analysis.AnalysisItem;
@@ -9,7 +9,6 @@ import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.FeedCreationResult;
 import com.easyinsight.datafeeds.FeedCreation;
-import com.easyinsight.eventing.EIEvent;
 import com.easyinsight.eventing.AsyncRunningEvent;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.AsyncCompletedEvent;
@@ -18,7 +17,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.hibernate.Session;
 
@@ -84,7 +82,7 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
     @Transient
     private long analysisID;
 
-    protected void execute(Date now, Connection conn) throws Exception {
+    protected void execute(Date now, EIConnection conn) throws Exception {
         UserUploadService.RawUploadData rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
         UploadFormat uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.getUserData());
         AsyncRunningEvent ev = new AsyncRunningEvent();

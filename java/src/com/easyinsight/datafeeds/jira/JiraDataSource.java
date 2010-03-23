@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.jira;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.CredentialsDefinition;
@@ -84,7 +85,7 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         }
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet dataSet = new DataSet();
         try {
             String userName = credentials.getUserName();

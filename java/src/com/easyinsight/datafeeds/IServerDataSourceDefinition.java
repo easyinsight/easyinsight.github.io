@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.dataset.DataSet;
@@ -26,7 +27,7 @@ public interface IServerDataSourceDefinition {
      */
     int getRequiredAccountTier();
 
-    long create(Credentials credentials, Connection conn) throws SQLException, CloneNotSupportedException;
+    long create(Credentials credentials, EIConnection conn) throws SQLException, CloneNotSupportedException;
 
     UploadPolicy getUploadPolicy();
 
@@ -53,7 +54,7 @@ public interface IServerDataSourceDefinition {
      * @param now
      * @return the data set
      */
-    DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition feedDefinition, DataStorage dataStorage);
+    DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition feedDefinition, DataStorage dataStorage, EIConnection conn);
 
     /**
      * Retrieves the analysis items for the data source, defining such traits as dimensions, measures, dates, and so on. Use
@@ -85,7 +86,7 @@ public interface IServerDataSourceDefinition {
 
     CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition);
 
-    boolean refreshData(Credentials credentials, long accountID, Date now, Connection conn, FeedDefinition parentDefinition) throws Exception;
+    boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception;
 
     String getUsername();
 

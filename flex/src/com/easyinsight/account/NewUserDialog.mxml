@@ -5,8 +5,12 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.framework.UserTransferObject;
-			import mx.validators.Validator;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserTransferObject;
+            import com.easyinsight.preferences.Persona;
+
+            import mx.collections.ArrayCollection;
+            import mx.validators.Validator;
 			import mx.managers.PopUpManager;
 			
 			private var validators:Array;
@@ -17,12 +21,12 @@
             private var email:String;
             [Bindable]
             private var fullName:String;
+        [Bindable]
+        private var firstName:String;
+        [Bindable]
+        private var userTitle:String;
             [Bindable]
             private var accountAdmin:Boolean;
-            [Bindable]
-            private var dataSourceCreator:Boolean;
-            [Bindable]
-            private var insightCreator:Boolean;
             private var userID:int;
 
             [Bindable]
@@ -34,8 +38,8 @@
                 this.email = userTransferObject.email;
                 this.fullName = userTransferObject.name;
                 this.accountAdmin = userTransferObject.accountAdmin;
-                this.dataSourceCreator = userTransferObject.dataSourceCreator;
-                this.insightCreator = userTransferObject.insightCreator;
+                this.firstName = userTransferObject.firstName;
+                this.personaID = userTransferObject.personaID;
                 createLabel = "Update User";
             }
 
@@ -56,6 +60,10 @@
 			
 			private function initHandlers():void {
             	validators = [ emailValidator, userNameValidator, fullNameValidator ];
+                if (User.getInstance().getAccountType() >= Account.GROUP) {
+                    showPersonaOption = true;
+                    preferencesService.getPersonas.send();
+                }
             }
             
             private function save():void {
@@ -69,6 +77,13 @@
             		user.email = emailInput.text;
             		user.userName = userNameInput.text;
             		user.name = fullNameInput.text;
+                    user.firstName = firstNameInput.text;
+                    if (showPersonaOption) {
+                        var persona:Object = personaComboBox.selectedItem;
+                        if (persona != Persona.EMPTY_PERSONA) {
+                            user.personaID = persona.personaID;
+                        }
+                    }
                     user.accountAdmin = accountAdminCheckbox.selected;
                     /*user.insightCreator = insightCreatorCheckbox.selected;
                     user.dataSourceCreator = dataSourceCreatorCheckbox.selected;*/
@@ -80,13 +95,34 @@
 			private function cancel():void {
 				PopUpManager.removePopUp(this);
 			}
+
+            [Bindable]
+            private var showPersonaOption:Boolean;
+
+            [Bindable]
+            private var personas:ArrayCollection;
+
+            private function gotPersonas():void {
+                var personas:ArrayCollection = preferencesService.getPersonas.lastResult as ArrayCollection;
+                personas.addItemAt(Persona.EMPTY_PERSONA, 0);
+                this.personas = personas;
+            }
+
+        [Bindable]
+        private var personaID:int;
 		]]>
 	</mx:Script>
+    <mx:RemoteObject destination="preferencesService" id="preferencesService">
+        <mx:method name="getPersonas" result="gotPersonas()"/>
+    </mx:RemoteObject>
 	<mx:Form styleName="TitleWindowContents">
 		<mx:FormItem label="User ID:" direction="horizontal">
 			<mx:TextInput id="userNameInput" text="{userName}"/>
 		</mx:FormItem>
-		<mx:FormItem label="Full Name:" direction="horizontal">
+        <mx:FormItem label="First Name:" direction="horizontal">
+			<mx:TextInput id="firstNameInput" text="{firstName}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Last Name:" direction="horizontal">
 			<mx:TextInput id="fullNameInput" text="{fullName}"/>
 		</mx:FormItem>
 		<mx:FormItem label="Email Address:" direction="horizontal">
@@ -95,22 +131,18 @@
         <mx:FormItem label="Account Administrator">
             <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
         </mx:FormItem>
-        <!--<mx:FormItem label="Data Source Creator">
-            <mx:CheckBox id="dataSourceCreatorCheckbox" selected="{dataSourceCreator}"/>
+        <mx:FormItem label="Persona" visible="{showPersonaOption}">
+            <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
+                    selectedValue="{personaID}"/>
         </mx:FormItem>
-        <mx:FormItem label="Insight Creator">
-            <mx:CheckBox id="insightCreatorCheckbox" selected="{insightCreator}"/>
-        </mx:FormItem>-->
-		<mx:FormItem>
-			<mx:HBox>
-				<mx:Button label="{createLabel}" click="save()"/>
-				<mx:Button label="Cancel" click="cancel()"/>						
-			</mx:HBox>	
-		</mx:FormItem>
-		<mx:FormItem label="">
-			<mx:Text text="" id="failureMessageLabel"/>
-		</mx:FormItem>
-	</mx:Form>
+    </mx:Form>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:Button label="{createLabel}" click="save()"/>
+        <mx:Button label="Cancel" click="cancel()"/>
+    </mx:HBox>
+    <mx:Box width="100%" horizontalAlign="center">
+        <mx:Text text="" id="failureMessageLabel" fontSize="14"/>
+    </mx:Box>
 	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
 	<mx:StringValidator source="{fullNameInput}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
 	<mx:EmailValidator source="{emailInput}" property="text" id="emailValidator"/>

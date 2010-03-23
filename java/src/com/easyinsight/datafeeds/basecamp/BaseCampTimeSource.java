@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.basecamp;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
@@ -10,6 +11,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
@@ -57,7 +59,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
     
 
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
         String url = baseCampCompositeSource.getUrl();
 
@@ -65,13 +67,13 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
 
 
         DataSet ds = new DataSet();
-        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false);
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         if (token == null && credentials.getUserName() != null) {
             token = new Token();
             token.setTokenValue(credentials.getUserName());
             token.setTokenType(TokenStorage.BASECAMP_TOKEN);
             token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();

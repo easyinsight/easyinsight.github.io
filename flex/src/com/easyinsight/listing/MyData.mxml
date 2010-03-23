@@ -30,6 +30,7 @@
         import com.easyinsight.help.HelpWindow;
         import com.easyinsight.help.MyDataHelp;
         import com.easyinsight.outboundnotifications.RefreshEventInfo;
+        import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.reportpackage.PackageEvent;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
@@ -247,6 +248,13 @@
                     currentState = "";
                 }
                 showLoading = true;
+                if (User.getInstance().uiConfiguration != null) {
+                    var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
+                    showComposite = uiConfig.getConfiguration(UIConfiguration.SHOW_COMBINE_SOURCES).selected;
+                    showPackage = uiConfig.getConfiguration(UIConfiguration.SHOW_CREATE_PACKAGE).selected;
+                    showWidget = uiConfig.getConfiguration(UIConfiguration.SHOW_DESKTOP_WIDGET).selected;
+                    showConnections = uiConfig.getConfiguration(UIConfiguration.SHOW_CONNECTIONS).selected;
+                }
                 uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
             }
         }
@@ -411,6 +419,15 @@
 
         [Bindable]
         private var showLoading:Boolean = false;
+
+        [Bindable]
+        private var showComposite:Boolean = true;
+        [Bindable]
+        private var showPackage:Boolean = true;
+        [Bindable]
+        private var showWidget:Boolean = true;
+        [Bindable]
+        private var showConnections:Boolean = true;
 		]]>
 </mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
@@ -427,14 +444,14 @@
 	<mx:VBox id="coreContent" height="100%" width="100%" verticalGap="10">
 		<mx:HBox width="100%" id="uploadBox" verticalAlign="middle"  paddingTop="10" paddingLeft="10" paddingRight="10">
 			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
-				label="Combine Sources" labelPlacement="bottom"/>
+				label="Combine Sources" labelPlacement="bottom" visible="{showComposite}"/>
             <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton" icon="{packageAddIcon}"
-				label="Create Package" labelPlacement="bottom"/>			
+				label="Create Package" labelPlacement="bottom" visible="{showPackage}"/>
             <!--<mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>-->
 			<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
-               label="Desktop Widget" labelPlacement="bottom"/>
+               label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>
             <mx:ProgressBar indeterminate="true" visible="{showLoading}"/>
-            <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" visible="{showConnections}">
                 <mx:Label text="Need to add data?" fontSize="16"/>
                 <mx:Button toolTip="Go to connections..." click="toConnections()" icon="{connectionsIcon}"
                            label="Go to Connections" labelPlacement="bottom"/>

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Arrays;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.users.User;
@@ -67,9 +69,10 @@ public class SecurityUtil {
         if (key == null || secretKey == null) {
             throw new SecurityException();
         }
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.getTransaction().begin();
+            conn.setAutoCommit(false);
             List results = session.createQuery("from User where userKey = ?").setString(0, key).list();
             if (results.size() > 0) {
                 User user = (User) results.get(0);
@@ -80,8 +83,13 @@ public class SecurityUtil {
                 if(!Arrays.asList(Account.TRIAL, Account.ACTIVE).contains(account.getAccountState())) {
                     return new UserServiceResponse(false, "This account is not active. Please log in to re-activate your account.");
                 }
+                if (user.getPersonaID() != null) {
+                    user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
+                }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(), 
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), null, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState());
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), null, user.isAccountAdmin(), user.isDataSourceCreator(),
+                        user.isInsightCreator(), account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
+                        user.getUiSettings());
             } else {
                /* results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
                 if (results.size() > 0) {
@@ -91,12 +99,14 @@ public class SecurityUtil {
                 }*/
                 throw new SecurityException();
             }
-            session.getTransaction().commit();
+            conn.commit();
         } catch (Exception e) {
-            session.getTransaction().rollback();
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             session.close();
+            Database.closeConnection(conn);
         }
         return userServiceResponse;
     }

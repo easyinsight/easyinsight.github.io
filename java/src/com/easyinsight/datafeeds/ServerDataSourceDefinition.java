@@ -1,8 +1,8 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
-import com.easyinsight.users.SubscriptionLicense;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
@@ -20,9 +20,6 @@ import java.sql.SQLException;
 
 import org.jetbrains.annotations.NotNull;
 import org.hibernate.Session;
-import flex.messaging.MessageBroker;
-import flex.messaging.messages.AsyncMessage;
-import flex.messaging.util.UUIDUtils;
 
 /**
  * User: James Boe
@@ -51,11 +48,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return false;
     }
 
-    public long create(Credentials credentials, Connection conn) throws SQLException, CloneNotSupportedException {
+    public long create(Credentials credentials, EIConnection conn) throws SQLException, CloneNotSupportedException {
         DataStorage metadata = null;
         try {
             Map<String, Key> keys = newDataSourceFields(credentials);
-            DataSet dataSet = getDataSet(credentials, keys, new Date(), null, null);
+            DataSet dataSet = getDataSet(credentials, keys, new Date(), null, null, conn);
             setFields(createAnalysisItems(keys, dataSet, credentials, conn));
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
@@ -93,7 +90,6 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
             if (results.size() > 0) {
                 user = (User) results.get(0);
-                user.setLicenses(new ArrayList<SubscriptionLicense>());
             }
             return user;
         } catch (Exception e) {
@@ -132,7 +128,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     }
 
     public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             refreshData(credentials, accountID, now, conn, null);
@@ -140,18 +136,15 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             return new CredentialsResponse(true, getDataFeedID());
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             return new CredentialsResponse(false, e.getMessage(), getDataFeedID());
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
 
-    public boolean refreshData(Credentials credentials, long accountID, Date now, Connection conn, FeedDefinition parentDefinition) throws Exception {
+    public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         DataStorage dataStorage = null;
         try {
             if(credentials == null) {
@@ -164,13 +157,13 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             Map<String, Key> keys = newDataSourceFields(credentials);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             dataStorage.truncate();
-            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition, dataStorage);
+            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition, dataStorage, conn);
             //List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             int version = dataStorage.getVersion();
             //int newVersion = dataStorage.migrate(getFields(), items);
             addData(dataStorage, dataSet);
             dataStorage.commit();
-            notifyOfDataUpdate();
+            //notifyOfDataUpdate();
             return true;
         } catch (Exception e) {
             if (dataStorage != null) {
@@ -184,7 +177,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    private void notifyOfDataUpdate() {
+    /*private void notifyOfDataUpdate() {
         MessageBroker msgBroker = MessageBroker.getMessageBroker(null);
         String clientID = UUIDUtils.createUUID();
         AsyncMessage msg = new AsyncMessage();
@@ -195,7 +188,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         if (msgBroker != null) {
             msgBroker.routeMessageToService(msg, null);
         }
-    }
+    }*/
 
     public String getUsername() {
         return username;

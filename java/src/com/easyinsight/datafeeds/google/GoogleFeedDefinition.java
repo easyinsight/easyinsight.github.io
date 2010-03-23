@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.google;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
@@ -178,7 +179,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet dataSet = new DataSet();
         /*try {
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);

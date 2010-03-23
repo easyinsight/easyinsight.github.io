@@ -1,5 +1,7 @@
 package com.easyinsight.users;
 
+import com.easyinsight.preferences.UISettings;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -25,11 +27,17 @@ public class User {
     @Column(name="name")
     private String name;
 
-    @OneToMany
-    @JoinTable(name="user_to_license_subscription",
-        joinColumns = @JoinColumn(name="user_id"),
-        inverseJoinColumns = @JoinColumn(name="license_subscription_id"))
-    private List<SubscriptionLicense> licenses;
+    @Transient
+    private UISettings uiSettings;
+
+    @Column(name="first_name")
+    private String firstName;
+
+    @Column(name="title")
+    private String title;
+
+    @Column(name="persona_id")
+    private Long personaID;
 
     @Column(name="permissions")
     private int permissions;
@@ -70,9 +78,18 @@ public class User {
         userTransferObject.setUserName(userName);
         userTransferObject.setName(name);
         userTransferObject.setAccountAdmin(accountAdmin);
-        userTransferObject.setDataSourceCreator(dataSourceCreator);
-        userTransferObject.setInsightCreator(insightCreator);
+        userTransferObject.setTitle(title);
+        userTransferObject.setFirstName(firstName);
+        userTransferObject.setPersonaID(personaID != null ? personaID : 0);
         return userTransferObject;
+    }
+
+    public UISettings getUiSettings() {
+        return uiSettings;
+    }
+
+    public void setUiSettings(UISettings uiSettings) {
+        this.uiSettings = uiSettings;
     }
 
     public String getUserKey() {
@@ -89,6 +106,30 @@ public class User {
 
     public void setUserSecretKey(String userSecretKey) {
         this.userSecretKey = userSecretKey;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Long getPersonaID() {
+        return personaID;
+    }
+
+    public void setPersonaID(Long personaID) {
+        this.personaID = personaID;
     }
 
     public Date getLastLoginDate() {
@@ -113,14 +154,6 @@ public class User {
 
     public void setPermissions(int permissions) {
         this.permissions = permissions;
-    }
-
-    public List<SubscriptionLicense> getLicenses() {
-        return licenses;
-    }
-
-    public void setLicenses(List<SubscriptionLicense> licenses) {
-        this.licenses = licenses;
     }
 
     public String getUserName() {
@@ -185,5 +218,16 @@ public class User {
 
     public void setInsightCreator(boolean insightCreator) {
         this.insightCreator = insightCreator;
+    }
+
+    public void update(UserTransferObject transferObject) {
+        setUserName(transferObject.getUserName());
+        setAccountAdmin(transferObject.isAccountAdmin());
+        setEmail(transferObject.getEmail());
+        setFirstName(transferObject.getFirstName());
+        setLastLoginDate(transferObject.getLastLoginDate());
+        setPersonaID(transferObject.getPersonaID() > 0 ? transferObject.getPersonaID() : null);
+        setName(transferObject.getName());
+        setTitle(transferObject.getTitle());        
     }
 }

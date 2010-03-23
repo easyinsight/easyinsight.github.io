@@ -1,5 +1,7 @@
 package com.easyinsight.users;
 
+import com.easyinsight.preferences.UISettings;
+
 /**
  * User: jboe
  * Date: Jan 2, 2008
@@ -22,6 +24,7 @@ public class UserServiceResponse {
     private boolean activated;
     private boolean billingInformationGiven;
     private int accountState;
+    private UISettings uiSettings;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -30,7 +33,8 @@ public class UserServiceResponse {
 
     public UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
                                long spaceAllowed, String email, String userName, String encryptedPassword, boolean accountAdmin,
-                               boolean dataSourceCreator, boolean insightCreator, boolean billingInformationGiven, int accountState) {
+                               boolean dataSourceCreator, boolean insightCreator, boolean billingInformationGiven, int accountState,
+                               UISettings uiSettings) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -45,9 +49,18 @@ public class UserServiceResponse {
         this.insightCreator = insightCreator;
         this.billingInformationGiven = billingInformationGiven;
         this.accountState = accountState;
+        this.uiSettings = uiSettings;
     }
 
     public UserServiceResponse() {
+    }
+
+    public UISettings getUiSettings() {
+        return uiSettings;
+    }
+
+    public void setUiSettings(UISettings uiSettings) {
+        this.uiSettings = uiSettings;
     }
 
     public String getUserName() {

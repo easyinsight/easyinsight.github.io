@@ -35,6 +35,7 @@ public class FeedType {
     public static final FeedType CUSTOM = new FeedType(27);
     public static final FeedType BASECAMP_COMPANY = new FeedType(28);
     public static final FeedType BASECAMP_COMPANY_PROJECT_JOIN = new FeedType(29);
+    public static final FeedType HIGHRISE_CONTACTS = new FeedType(30);
 
     private int type;
 

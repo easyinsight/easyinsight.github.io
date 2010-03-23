@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
@@ -65,7 +66,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, null);
+                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -82,20 +83,20 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_COMPANY;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 
         DataSet ds = new DataSet();
-        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false);
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         if (token == null) {
             token = new Token();
             token.setTokenValue(credentials.getUserName());
             token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
             token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
@@ -104,7 +105,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
            /* EIPageInfo info = new EIPageInfo();
             info.currentPage = 1;
             do {*/
-                Document companies = runRestRequest("/companies.xml", client, builder, url, null);
+                Document companies = runRestRequest("/companies.xml", client, builder, url);
                 Nodes companyNodes = companies.query("/companies/company");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
@@ -121,7 +122,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     String responsiblePartyName = retrieveContactInfo(client, builder, peopleCache, personId, url);
                     row.addValue(OWNER, responsiblePartyName);
 
-                    Document tags = runRestRequest("/companies/"+id+"/tags.xml", client, builder, url, null);
+                    Document tags = runRestRequest("/companies/"+id+"/tags.xml", client, builder, url);
                     Nodes tagNodes = tags.query("/tags/tag");
                     StringBuilder tagBuilder = new StringBuilder();
                     for (int j = 0; j < tagNodes.size(); j++) {

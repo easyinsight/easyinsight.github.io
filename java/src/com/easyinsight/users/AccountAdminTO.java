@@ -13,7 +13,6 @@ import java.util.ArrayList;
 public class AccountAdminTO {
     private int accountType;
     private long accountID;
-    private List<SubscriptionLicense> licenses = new ArrayList<SubscriptionLicense>();
     private int maxUsers;
     private long maxSize;
     private String name;
@@ -21,9 +20,17 @@ public class AccountAdminTO {
     private long groupID;
     private List<UserTransferObject> adminUsers = new ArrayList<UserTransferObject>();
     private boolean apiEnabled;
-    private List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
     private Date creationDate;
     private Date lastUserLoginDate;
+    private long defaultPersonaID;
+
+    public long getDefaultPersonaID() {
+        return defaultPersonaID;
+    }
+
+    public void setDefaultPersonaID(long defaultPersonaID) {
+        this.defaultPersonaID = defaultPersonaID;
+    }
 
     public Date getCreationDate() {
         return creationDate;
@@ -113,35 +120,19 @@ public class AccountAdminTO {
         this.accountID = accountID;
     }
 
-    public List<SubscriptionLicense> getLicenses() {
-        return licenses;
-    }
-
-    public void setLicenses(List<SubscriptionLicense> licenses) {
-        this.licenses = licenses;
-    }
-
     public Account toAccount() {
         Account account = new Account();
         account.setAccountType(accountType);
-        account.setLicenses(licenses);
         account.setAccountID(accountID);
         if (groupID != 0) {
             account.setGroupID(groupID);
         }
         account.setName(name);
+        account.setAccountState(accountState);
         account.setMaxSize(maxSize);
         account.setMaxUsers(maxUsers);
         account.setAccountState(accountState);
         account.setApiEnabled(apiEnabled);
         return account;
-    }
-
-    public List<ConsultantTO> getConsultants() {
-        return consultants;
-    }
-
-    public void setConsultants(List<ConsultantTO> consultants) {
-        this.consultants = consultants;
     }
 }

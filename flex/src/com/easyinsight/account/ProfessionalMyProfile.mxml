@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
          xmlns:account="com.easyinsight.account.*" creationComplete="initProperties()"
-         width="100%" height="100%">
+         width="100%" height="100%" horizontalAlign="center">
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
 
@@ -21,6 +21,10 @@
         [Bindable]
         [Embed(source="../../../../assets/pencil.png")]
         private var editIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
+        private var backgroundImage:Class;
 
         private function initProperties():void {
             this.userName = User.getInstance().userName;
@@ -49,26 +53,29 @@
             PopUpUtil.centerPopUp(window);
         }
         ]]></mx:Script>
-    <mx:HBox width="100%" horizontalAlign="center">
-        <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid"
-                 dropShadowEnabled="true">
-            <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-            <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
-                <mx:Label text="User Profile" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:Button label="Edit Profile..." click="editProfile()"/>
-                <mx:Button label="Change Password..." click="editPassword()"/>
-            </mx:Box>
-            <mx:Form width="100%" backgroundColor="0xF3F2DF">
-                <mx:FormItem label="User Name: " fontFamily="Tahoma" fontWeight="bold">
-                    <mx:TextInput text="{userName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
-                </mx:FormItem>
-                <mx:FormItem label="Full Name: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
-                    <mx:TextInput text="{fullName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
-                </mx:FormItem>
-                <mx:FormItem label="Email Address: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
-                    <mx:TextInput text="{email}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
-                </mx:FormItem>                
-            </mx:Form>
-        </mx:VBox>
-    </mx:HBox>
+    <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+            paddingTop="5"
+            paddingBottom="5">
+        <mx:Label text="My Profile" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+    </mx:Box>
+    <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid"
+             dropShadowEnabled="true">
+        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+        <mx:Box width="100%" backgroundColor="0xBFBFBF" horizontalAlign="center">
+            <mx:Label text="User Profile" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            <mx:Button label="Edit Profile..." click="editProfile()"/>
+            <mx:Button label="Change Password..." click="editPassword()"/>
+        </mx:Box>
+        <mx:Form width="100%" backgroundColor="0xEEEEEE">
+            <mx:FormItem label="User Name: " fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput text="{userName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+            </mx:FormItem>
+            <mx:FormItem label="Full Name: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                <mx:TextInput text="{fullName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+            </mx:FormItem>
+            <mx:FormItem label="Email Address: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                <mx:TextInput text="{email}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:VBox>
 </mx:VBox>

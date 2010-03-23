@@ -61,6 +61,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         Set<FeedType> feedTypes = new HashSet<FeedType>();
         feedTypes.add(FeedType.HIGHRISE_COMPANY);
         feedTypes.add(FeedType.HIGHRISE_DEAL);
+        feedTypes.add(FeedType.HIGHRISE_CONTACTS);
         return feedTypes;
     }
 
@@ -145,7 +146,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
-                HighRiseDealSource.COMPANY_ID));
+                HighRiseDealSource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
+                        HighRiseContactSource.COMPANY_ID));
     }
 
     protected IServerDataSourceDefinition createForFeedType(FeedType feedType) {
@@ -153,6 +156,8 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             return new HighRiseCompanySource();
         } else if (feedType.equals(FeedType.HIGHRISE_DEAL)) {
             return new HighRiseDealSource();
+        } else if (feedType.equals(FeedType.HIGHRISE_CONTACTS)) {
+            return new HighRiseContactSource();
         } else {
             throw new RuntimeException();
         }
@@ -245,5 +250,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     public boolean isLongRefresh() {
         return true;
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new HighRiseComposite1To2(this));
     }
 }

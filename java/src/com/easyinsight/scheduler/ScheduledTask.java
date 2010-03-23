@@ -121,5 +121,5 @@ public abstract class ScheduledTask implements Runnable {
         this.taskGeneratorID = taskGeneratorID;
     }
 
-    protected abstract void execute(Date now, Connection conn) throws Exception;
+    protected abstract void execute(Date now, EIConnection conn) throws Exception;
 }

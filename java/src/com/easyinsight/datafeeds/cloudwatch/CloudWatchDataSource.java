@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.cloudwatch;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -63,7 +64,7 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
         return new CloudWatchFeed();
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
     }
 

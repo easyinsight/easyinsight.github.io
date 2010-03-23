@@ -2,6 +2,7 @@ package com.easyinsight.users;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.salesautomation.SalesEmail;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.security.UserPrincipal;
@@ -17,10 +18,8 @@ import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.outboundnotifications.BuyOurStuffTodo;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -283,21 +282,26 @@ public class UserService implements IUserService {
         long userID = SecurityUtil.getUserID();
         try {
             User user = null;
-            Session session = Database.instance().createSession();
+            EIConnection conn = Database.instance().getConnection();
+            Session session = Database.instance().createSession(conn);
             List results;
             try {
-                session.beginTransaction();
+                conn.setAutoCommit(false);
                 results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
-                session.getTransaction().commit();
+                if (results.size() > 0) {
+                    user = (User) results.get(0);
+                    if (user.getPersonaID() != null) {
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
+                    }
+                }
+                conn.commit();
             } catch (Exception e) {
-                session.getTransaction().rollback();
+                conn.rollback();
                 throw new RuntimeException(e);
             } finally {
+                conn.setAutoCommit(true);
                 session.close();
-            }
-            if (results.size() > 0) {
-                user = (User) results.get(0);
-                user.setLicenses(new ArrayList<SubscriptionLicense>());
+                Database.closeConnection(conn);
             }
             return user;
         } catch (Exception e) {
@@ -370,7 +374,7 @@ public class UserService implements IUserService {
     }
 
     public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password, String sourceURL) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
@@ -421,32 +425,18 @@ public class UserService implements IUserService {
             return account.getAccountID();
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
-            Database.instance().closeConnection(conn);
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
     private User createInitialUser(UserTransferObject userTransferObject, String password, Account account) {
-        User user = new User();
-        user.setAccountAdmin(userTransferObject.isAccountAdmin());
+        User user = userTransferObject.toUser();
         user.setAccount(account);
-        user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
-        user.setEmail(userTransferObject.getEmail());
-        user.setInsightCreator(userTransferObject.isInsightCreator());
-        user.setName(userTransferObject.getName());
-        user.setUserName(userTransferObject.getUserName());
         user.setPassword(PasswordService.getInstance().encrypt(password));
         return user;
     }
@@ -513,102 +503,6 @@ public class UserService implements IUserService {
         }
     }*/
 
-    
-
-    public List<ConsultantTO> getConsultants() {
-        SecurityUtil.authorizeAccountAdmin();
-        List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
-        long accountID = SecurityUtil.getAccountID();
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
-            Account account = (Account) results.get(0);
-            for (Consultant consultant : account.getGuestUsers()) {
-                consultants.add(consultant.toConsultantTO());
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-        return consultants;
-    }
-
-    public UserCreationResponse addConsultant(UserTransferObject userTransferObject) {
-        SecurityUtil.authorizeAccountAdmin();
-        long accountID = SecurityUtil.getAccountID();
-        String message = doesUserExist(userTransferObject.getUserName(), userTransferObject.getEmail());
-        UserCreationResponse userCreationResponse;
-        if (message != null) {
-            userCreationResponse = new UserCreationResponse(message);
-        } else {
-            Session session = Database.instance().createSession();
-            try {
-                session.getTransaction().begin();
-                List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
-                Account account = (Account) results.get(0);
-                User user = userTransferObject.toUser();
-                user.setAccount(account);
-                session.save(user);
-                Consultant consultant = new Consultant();
-                consultant.setUser(user);
-                consultant.setState(Consultant.PENDING_EI_APPROVAL);
-                session.save(consultant);
-                session.getTransaction().commit();
-                userCreationResponse = new UserCreationResponse(user.getUserID());
-            } catch (Exception e) {
-                LogClass.error(e);
-                session.getTransaction().rollback();
-                throw new RuntimeException(e);
-            } finally {
-                session.close();
-            }
-        }
-        return userCreationResponse;
-    }
-
-
-    public void deactivateConsultant(long consultantID) {
-        SecurityUtil.authorizeAccountAdmin();
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from Consultant where guestUserID = ?").setLong(0, consultantID).list();
-            Consultant consultant = (Consultant) results.get(0);
-            consultant.setState(Consultant.DISABLED);
-            session.update(consultant);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
-
-    public void removeConsultant(long consultantID) {
-        SecurityUtil.authorizeAccountAdmin();
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from Consultant where guestUserID = ?").setLong(0, consultantID).list();
-            Consultant consultant = (Consultant) results.get(0);
-            session.delete(consultant);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
-
     public void deleteAccount() {
         long accountID = SecurityUtil.getAccountID();
         Session session = Database.instance().createSession();
@@ -637,7 +531,8 @@ public class UserService implements IUserService {
                 return null;
             UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
-                                user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
+                                user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
+                    user.getUiSettings());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -682,88 +577,99 @@ public class UserService implements IUserService {
     }
 
     public UserServiceResponse authenticateWithEncrypted(String userName, String encryptedPassword) {
+        UserServiceResponse userServiceResponse;
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        List results;
         try {
-            UserServiceResponse userServiceResponse;
-            Session session = Database.instance().createSession();
-            List results;
-            try {
-                session.getTransaction().begin();
-                results = session.createQuery("from User where userName = ?").setString(0, userName).list();
-                if (results.size() > 0) {
-                    User user = (User) results.get(0);
-                    String actualPassword = user.getPassword();
-                    if (encryptedPassword.equals(actualPassword)) {
-                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-                        Account account = (Account) accountResults.get(0);
-                        if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
-                            userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
-                            userServiceResponse.setActivated(account.isActivated());
-                        } else {
-                            userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
-                        }
+            conn.setAutoCommit(false);
+            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            if (results.size() > 0) {
+                User user = (User) results.get(0);
+                String actualPassword = user.getPassword();
+                if (encryptedPassword.equals(actualPassword)) {
+                    List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+                    Account account = (Account) accountResults.get(0);
+                    if (user.getPersonaID() != null) {
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
+                    }
+                    if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
+                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                            user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(),
+                                user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
+                                user.getUiSettings());
+                        userServiceResponse.setActivated(account.isActivated());
                     } else {
-                        userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
+                        userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
                     }
                 } else {
-                    userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
+                    userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                 }
-                session.getTransaction().commit();
-            } finally {
-                session.close();
+            } else {
+                userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
             }
-            return userServiceResponse;
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            throw new RuntimeException(e);
+            conn.rollback();
+            throw new RuntimeException();
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
         }
+        return userServiceResponse;
     }
 
     @NotNull
     public UserServiceResponse authenticate(String userName, String password) {
+
+        UserServiceResponse userServiceResponse;
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        List results;
         try {
-            UserServiceResponse userServiceResponse;
-            Session session = Database.instance().createSession();
-            List results;
-            try {
-                session.getTransaction().begin();
-                results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            conn.setAutoCommit(false);
+            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            if (results.size() > 0) {
+                User user = (User) results.get(0);
+                userServiceResponse = getUser(password, session, user, conn);
+            } else {
+                results = session.createQuery("from User where email = ?").setString(0, userName).list();
                 if (results.size() > 0) {
                     User user = (User) results.get(0);
-                    userServiceResponse = getUser(password, session, user);
+                    userServiceResponse = getUser(password, session, user, conn);
                 } else {
-                    results = session.createQuery("from User where email = ?").setString(0, userName).list();
-                    if (results.size() > 0) {
-                        User user = (User) results.get(0);
-                        userServiceResponse = getUser(password, session, user);
-                    } else {
-                        userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
-                    }
+                    userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
                 }
-                session.getTransaction().commit();
-            } catch (Exception e) {
-                session.getTransaction().rollback();
-                throw e;
-            } finally {
-                session.close();
             }
-            return userServiceResponse;
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
         }
+        return userServiceResponse;
     }
 
-    private UserServiceResponse getUser(String password, Session session, User user) {
+    private UserServiceResponse getUser(String password, Session session, User user, EIConnection conn) throws SQLException {
         UserServiceResponse userServiceResponse;
         String actualPassword = user.getPassword();
         String encryptedPassword = PasswordService.getInstance().encrypt(password);
         if (encryptedPassword.equals(actualPassword)) {
             List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+            if (user.getPersonaID() != null) {
+                user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
+            }
             Account account = (Account) accountResults.get(0);
             if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING  || account.getAccountState() == Account.DELINQUENT) {
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                     user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
+                     user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(),
+                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(), user.getUiSettings());
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);

@@ -208,12 +208,20 @@ public class GoogleAnalyticsFeed extends Feed {
                 urlBuilder.append(ids);
 
                 urlBuilder.append("&dimensions=");
-                Iterator<AnalysisDimension> dimIter = dimensions.iterator();
-                while (dimIter.hasNext()) {
-                    AnalysisDimension analysisDimension = dimIter.next();
-                    urlBuilder.append(analysisDimension.getKey().toKeyString());
-                    if (dimIter.hasNext()) {
-                        urlBuilder.append(",");
+                if (dimensions.size() > 0) {
+                    Iterator<AnalysisDimension> dimIter = dimensions.iterator();
+                    while (dimIter.hasNext()) {
+                        AnalysisDimension analysisDimension = dimIter.next();
+                        if ("title".equals(analysisDimension.getKey().toKeyString())) {
+                            continue;
+                        }
+                        urlBuilder.append(analysisDimension.getKey().toKeyString());
+                        if (dimIter.hasNext()) {
+                            urlBuilder.append(",");
+                        }
+                    }
+                    if (urlBuilder.charAt(urlBuilder.length() - 1) == ',') {
+                        urlBuilder.deleteCharAt(urlBuilder.length() - 1);
                     }
                 }
                 urlBuilder.append("&metrics=");

@@ -52,13 +52,13 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    protected Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
+    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         Document doc;
         try {
-            client.executeMethod(restMethod);
+            client.executeMethod(restMethod);            
             doc = builder.build(restMethod.getResponseBodyAsStream());
             if(pageInfo != null) {
                 pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());

@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.ganalytics;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
@@ -207,7 +208,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return new GoogleAnalyticsFeed();
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
     }
 

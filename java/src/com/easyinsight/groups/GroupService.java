@@ -252,27 +252,27 @@ public class GroupService {
 
             objects.addAll(descriptorMap.values());
             AnalysisStorage analysisStorage = new AnalysisStorage();
-            Map<Long, List<InsightDescriptor>> analysisDefinitions = new HashMap<Long, List<InsightDescriptor>>();
+            Map<Long, Set<InsightDescriptor>> analysisDefinitions = new HashMap<Long, Set<InsightDescriptor>>();
 
 
 
             for (InsightDescriptor analysisDefinition : analysisStorage.getReportsForGroup(groupID)) {
-                List<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
+                Set<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
                 if (defList == null) {
-                    defList = new ArrayList<InsightDescriptor>();
+                    defList = new HashSet<InsightDescriptor>();
                     analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
                 }
                 defList.add(analysisDefinition);
             }
 
             for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
-                List<InsightDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
+                Set<InsightDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
                 if (analysisDefList == null) {
-                    analysisDefList = new ArrayList<InsightDescriptor>();
+                    analysisDefList = new HashSet<InsightDescriptor>();
                 }
-                feedDescriptor.setChildren(analysisDefList);
+                feedDescriptor.setChildren(new ArrayList<InsightDescriptor>(analysisDefList));
             }
-            for (List<InsightDescriptor> defList : analysisDefinitions.values()) {
+            for (Set<InsightDescriptor> defList : analysisDefinitions.values()) {
                 objects.addAll(defList);
             }
             return new MyDataTree(objects, true);

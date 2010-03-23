@@ -1,0 +1,115 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setupNodes()" width="100%" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.collections.HierarchicalData;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
+        private var backgroundImage:Class;
+
+        private var uiConfig:UIConfiguration = new UIConfiguration();
+
+        [Bindable]
+        private var personaName:String;
+
+        [Bindable]
+        private var nodes:ArrayCollection;
+
+        private var _persona:Persona;
+
+        public function set persona(value:Persona):void {
+            _persona = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_persona != null) {
+                personaName = _persona.name;
+                uiConfig = UIConfiguration.fromUISettings(_persona.uiSettings);
+            }
+        }
+
+        private function setupNodes():void {
+            var hierarchicalData:HierarchicalData = new HierarchicalData();
+            uiVisibility = uiConfig.getRoots();
+            hierarchicalData.source = uiVisibility;
+            grid.dataProvider = hierarchicalData;
+        }
+
+        [Bindable]
+        private var uiVisibility:ArrayCollection;
+
+        private function save():void {
+            if (_persona == null) {
+                _persona = new Persona();
+                newPersona = true;
+            }
+            var map:Object = new Object();
+            recurseOptions(uiVisibility, map);
+            var options:ArrayCollection = new ArrayCollection();
+            for each (var setting:UIVisibilitySetting in map) {
+                options.addItem(setting);
+            }
+            _persona.name = personaNameInput.text;
+            var settings:UISettings = new UISettings();
+            settings.visibilitySettings = options;
+            _persona.uiSettings = settings;
+            preferencesService.savePersona.send(_persona);
+        }
+
+        private function recurseOptions(options:ArrayCollection, configMap:Object):void {
+            for each (var option:UIOption in options) {
+                if (option.key != null) {
+                    var visibilitySetting:UIVisibilitySetting = new UIVisibilitySetting();
+                    visibilitySetting.key = option.key;
+                    visibilitySetting.selected = option.selected;
+                    configMap[option.key] = visibilitySetting;
+                }
+                recurseOptions(option.children, configMap);
+            }
+        }
+
+        private var newPersona:Boolean = false;
+
+        private function saved():void {
+            var id:int = preferencesService.savePersona.lastResult as int;
+            _persona.personaID = id;
+            if (newPersona) {
+                dispatchEvent(new PersonaEvent(PersonaEvent.NEW_PERSONA, _persona));
+            } else {
+
+            }
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="preferencesService" id="preferencesService">
+        <mx:method name="savePersona" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+        <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+                paddingTop="5" paddingBottom="5">
+            <mx:Label text="UI Configuration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+        </mx:Box>
+        <mx:Form>
+            <mx:FormItem label="Persona Name:">
+                <mx:TextInput id="personaNameInput" text="{personaName}"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Box borderThickness="1" borderStyle="solid">
+            <mx:AdvancedDataGrid id="grid" width="400" height="300" selectable="false" headerHeight="0">
+                <mx:columns>
+                    <mx:AdvancedDataGridColumn headerText="" dataField="label"/>
+                    <mx:AdvancedDataGridColumn headerText="" dataField="label" itemRenderer="com.easyinsight.preferences.PersonaConfigCheckbox"
+                            sortable="false" width="50"/>
+                </mx:columns>
+            </mx:AdvancedDataGrid>
+        </mx:Box>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

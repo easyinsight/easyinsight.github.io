@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*" width="100%"
-           height="100%" xmlns:account="com.easyinsight.account.*">
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
+        xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*" width="100%"
+        height="100%" xmlns:account="com.easyinsight.account.*">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.User;
+        import com.easyinsight.preferences.PersonaManagement;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -41,23 +43,28 @@
                     // space allocation, user licensing?, ssl configuration, ip range configuration
                     // core user administration...add user, remove user, change user privileges
                     toggleOptions = new ArrayCollection([ new AccountOption("Account Administration", new AccountAdminPage()),
-                        new AccountOption("User Administration", new UserAdministration()),                            
-                        new AccountOption("My Profile", new ProfessionalMyProfile())]);
+                        new AccountOption("User Administration", new UserAdministration()),
+                        new AccountOption("My Profile", new ProfessionalMyProfile()),
+                        new AccountOption("Persona", new PersonaManagement())]);
                     showToggle = true;
                 } else {
                     toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);
                     showToggle = true;
                 }
             }
-            coreBox.addChild(toggleOptions.getItemAt(0).container);
+            for each (var accountOption:AccountOption in toggleOptions) {
+                coreBox.addChild(accountOption.container);
+                accountOption.container.setStyle("hideEffect", leftEffect);
+                accountOption.container.setStyle("showEffect", leftEffect);
+            }
         }
+
+        [Bindable]
+        private var index:int;
 
         private function choseButton(event:ItemClickEvent):void {
             var accountOption:AccountOption = event.item as AccountOption;
-            if (coreBox.getChildren().length > 0) {
-                coreBox.removeAllChildren();
-            }
-            coreBox.addChild(accountOption.container);            
+            this.index = toggleOptions.getItemIndex(accountOption);                        
         }
 
         private function showSecurityStatement():void {
@@ -73,18 +80,21 @@
         }
 		]]>
     </mx:Script>
+    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
     <mx:VBox width="100%" height="100%" paddingTop="15">
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:ToggleButtonBar itemClick="choseButton(event)" dataProvider="{toggleOptions}" visible="{showToggle}"/>
         </mx:HBox>
-        <mx:HBox id="coreBox" width="100%">
-            
-        </mx:HBox>
+        <mx:ViewStack id="coreBox" width="100%" resizeToContent="true" selectedIndex="{index}">
+
+        </mx:ViewStack>
         <mx:Spacer height="30"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:LinkButton textDecoration="underline" label="Security Statement" click="showSecurityStatement()" fontSize="16"/>
+            <mx:LinkButton textDecoration="underline" label="Security Statement" click="showSecurityStatement()"
+                           fontSize="16"/>
             <mx:Spacer width="20"/>
-            <mx:LinkButton textDecoration="underline" label="Terms of Service" click="showTermsOfService()" fontSize="16"/>
+            <mx:LinkButton textDecoration="underline" label="Terms of Service" click="showTermsOfService()"
+                           fontSize="16"/>
         </mx:HBox>
     </mx:VBox>
-</mx:Canvas>
+</mx:Box>

@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.test;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -38,7 +39,7 @@ public class TestAlphaDataSource extends ServerDataSourceDefinition {
         return FeedType.TEST_ALPHA;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet dataSet = new DataSet();
         IRow row1 = dataSet.createRow();
         row1.addValue(keys.get(DIM), "Alpha Row 1");

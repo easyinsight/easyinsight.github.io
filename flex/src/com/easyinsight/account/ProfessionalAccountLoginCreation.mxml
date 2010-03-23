@@ -71,11 +71,10 @@
                 failureMessageLabel.text = "";
                 user = new UserTransferObject();
                 user.userName = userName.text;
+                user.firstName = firstName.text;
                 user.name = fullName.text;
                 user.email = email.text;
                 user.accountAdmin = true;
-                user.insightCreator = true;
-                user.dataSourceCreator = true;
                 _account.name = accountName.text;
                 _account.optInEmail = optInCheckbox.selected;
                 ProgressAlert.alert(this, "Validating the account...", null, creationService.doesUserExist);
@@ -116,7 +115,10 @@
             <mx:FormItem label="Confirm Password:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="confirmPassword" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
-			<mx:FormItem label="Administrator Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+			<mx:FormItem label="Administrator First Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="firstName" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+            <mx:FormItem label="Administrator Last Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
 			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">

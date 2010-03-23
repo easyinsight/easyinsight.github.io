@@ -29,6 +29,16 @@ public class ExcelUploadFormat extends UploadFormat {
 
     private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+    private String createName(String key) {
+        if (key == null) {
+            return "";
+        }
+        if (key.length() > 50) {
+            key = key.substring(0, 50);
+        }
+        return key.trim();
+    }
+
     protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap) {
         try {
             GridData gridData = new GridData();
@@ -72,7 +82,7 @@ public class ExcelUploadFormat extends UploadFormat {
                 }
                 Value[] values = new Value[row.getLastCellNum() - columnModifier];
                 boolean foundAtLeastOneValue = false;
-                Iterator<Cell> cit = (Iterator<Cell>)row.cellIterator();
+                Iterator<Cell> cit = row.cellIterator();
                 if (orientation == HORIZONTAL_HEADERS) {
                     Cell cell = cit.next();
                     if (cell.toString() != null && !"".equals(cell.toString())) {
@@ -106,9 +116,9 @@ public class ExcelUploadFormat extends UploadFormat {
                                     }
                                     Key key;
                                     if (keyMap == null) {
-                                        key = new NamedKey(headerColumn);
+                                        key = new NamedKey(createName(headerColumn));
                                     } else {
-                                        key = keyMap.get(headerColumn);
+                                        key = keyMap.get(createName(headerColumn));
                                     }
                                     dataTypeGuesser.addValue(key, value);
                                     headerValuesObtained.remove(headerColumn);
@@ -129,9 +139,9 @@ public class ExcelUploadFormat extends UploadFormat {
                             }
                             Key key;
                             if (keyMap == null) {
-                                key = new NamedKey(headerColumn);
+                                key = new NamedKey(createName(headerColumn));
                             } else {
-                                key = keyMap.get(headerColumn);
+                                key = keyMap.get(createName(headerColumn));
                             }
                             dataTypeGuesser.addValue(key, value);
                             headerValuesObtained.remove(headerColumn);

@@ -30,7 +30,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         return client;
     }
 
-    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo) throws HighRiseLoginException {
+    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url) throws HighRiseLoginException {
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
@@ -38,9 +38,6 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         try {
             client.executeMethod(restMethod);
             doc = builder.build(restMethod.getResponseBodyAsStream());
-            if(pageInfo != null) {
-                pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
-            }
         }
         catch (nu.xom.ParsingException e) {
                 throw new HighRiseLoginException("Invalid username/password.");

@@ -1,6 +1,7 @@
 package com.easyinsight.framework
 {
-
+import com.easyinsight.preferences.UIConfiguration;
+import com.easyinsight.preferences.UISettings;
 
 import flash.net.SharedObject;
 
@@ -23,13 +24,15 @@ import flash.net.SharedObject;
         public var activated:Boolean;
         public var billingInformationGiven:Boolean;
         public var accountState:int;
+        public var uiConfiguration:UIConfiguration;
 
         public function User() {
 
         }
 		
 		static public function initializeUser(name:String, email:String, accountType:int,
-		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean, userID:int, activated:Boolean, billingInformationGiven:Boolean, accountState:int):void {
+		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean, userID:int, activated:Boolean, billingInformationGiven:Boolean, accountState:int,
+                uiSettings:UISettings):void {
 			_user = new User();
 			_user.name = name;
 			_user.email = email;
@@ -40,6 +43,9 @@ import flash.net.SharedObject;
             _user.activated = activated;
             _user.billingInformationGiven = billingInformationGiven;
             _user.accountState = accountState;
+            if (uiSettings != null) {
+                _user.uiConfiguration = UIConfiguration.fromUISettings(uiSettings);
+            }
             try {
                 sharedObject = SharedObject.getLocal(userID.toString());
             } catch (e:Error) {

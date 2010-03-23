@@ -5,7 +5,6 @@ import com.easyinsight.dataset.ColumnSegment;
 import com.csvreader.CsvReader;
 
 import java.util.*;
-import java.util.regex.Pattern;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
@@ -13,14 +12,23 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-/**
- * Created by IntelliJ IDEA.
+/*
  * User: abaldwin
  * Date: Aug 14, 2009
  * Time: 6:49:22 PM
- * To change this template use File | Settings | File Templates.
  */
 public class CsvFileUploadFormat extends UploadFormat {
+
+    private String createName(String key) {
+        if (key == null) {
+            return "";
+        }
+        if (key.length() > 50) {
+            key = key.substring(0, 50);
+        }
+        return key.trim();
+    }
+
     protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap) {
 
         GridData gridData = new GridData();
@@ -63,9 +71,9 @@ public class CsvFileUploadFormat extends UploadFormat {
                             if (value != null) {
                                 Key key;
                                 if (keyMap == null) {
-                                    key = new NamedKey(headerColumns[headerKeyCounter]);
+                                    key = new NamedKey(createName(headerColumns[headerKeyCounter]));
                                 } else {
-                                    key = keyMap.get(headerColumns[headerKeyCounter]);
+                                    key = keyMap.get(createName(headerColumns[headerKeyCounter]));
                                 }
                                 dataTypeGuesser.addValue(key, value);
                                 headerValuesObtained.remove(headerColumns[headerKeyCounter]);

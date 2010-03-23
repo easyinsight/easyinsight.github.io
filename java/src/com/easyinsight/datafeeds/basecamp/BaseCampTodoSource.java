@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.basecamp;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -11,15 +12,13 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.jetbrains.annotations.NotNull;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Nodes;
-import nu.xom.Node;
 
 import java.util.*;
 import java.text.DateFormat;
@@ -75,20 +74,20 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return FeedType.BASECAMP;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 
         DataSet ds = new DataSet();
-        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false);
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         if (token == null && credentials.getUserName() != null) {
             token = new Token();
             token.setTokenValue(credentials.getUserName());
             token.setTokenType(TokenStorage.BASECAMP_TOKEN);
             token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
@@ -102,10 +101,6 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 String projectName = queryField(curProject, "name/text()");
                 String projectStatus = queryField(curProject, "status/text()");
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
-
-                
-
-
 
                 Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false);
 

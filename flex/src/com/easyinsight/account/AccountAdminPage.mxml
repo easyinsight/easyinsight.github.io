@@ -1,9 +1,12 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%" creationComplete="onCreationComplete()">
     <mx:VBox width="100%" height="100%" horizontalAlign="center">
-        <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid"
-                 dropShadowEnabled="true">
-            <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+        <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+                paddingTop="5"
+                paddingBottom="5">
+            <mx:Label text="Account Administration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+        </mx:Box>
+        <mx:VBox id="accountSettingsBox">            
             <account:AccountInfoDisplay/>
             <mx:Form>
                 <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
@@ -24,6 +27,10 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
+
+        [Bindable]
+        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
+        private var backgroundImage:Class;
 
         [Bindable]
         private var showUpgrade:Boolean;

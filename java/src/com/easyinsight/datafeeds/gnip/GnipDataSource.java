@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.gnip;
 
+import com.easyinsight.database.EIConnection;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 
@@ -78,7 +79,7 @@ public class GnipDataSource extends ServerDataSourceDefinition {
         return result;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet ds = new DataSet();
         List<Exception> exceptions = new LinkedList<Exception>();
         GnipHelper gh = new GnipHelper();

@@ -1,5 +1,7 @@
 package com.easyinsight.users;
 
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.database.Database;
@@ -24,41 +26,48 @@ public class EIAccountManagementService {
 
     @NotNull
     public UserServiceResponse authenticateAdmin(String userName, String password) {
+        UserServiceResponse userServiceResponse;
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        List results;
         try {
-            UserServiceResponse userServiceResponse;
-            Session session = Database.instance().createSession();
-            List results;
-            try {
-                session.getTransaction().begin();
-                results = session.createQuery("from User where userName = ?").setString(0, userName).list();
-                if (results.size() > 0) {
-                    User user = (User) results.get(0);
-                    String actualPassword = user.getPassword();
-                    String encryptedPassword = PasswordService.getInstance().encrypt(password);
-                    if (encryptedPassword.equals(actualPassword)) {
-                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-                        Account account = (Account) accountResults.get(0);
-                        if (account.getAccountType() != Account.ADMINISTRATOR) {
-                            throw new SecurityException();
-                        }
-                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
-                        // FlexContext.getFlexSession().getRemoteCredentials();
-                    } else {
-                        userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
+            conn.setAutoCommit(false);
+            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            if (results.size() > 0) {
+                User user = (User) results.get(0);
+                String actualPassword = user.getPassword();
+                String encryptedPassword = PasswordService.getInstance().encrypt(password);
+                if (encryptedPassword.equals(actualPassword)) {
+                    List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+                    Account account = (Account) accountResults.get(0);
+                    if (account.getAccountType() != Account.ADMINISTRATOR) {
+                        throw new SecurityException();
                     }
+                    if (user.getPersonaID() != null) {
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
+                    }
+                    userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                            user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(),
+                            user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                            user.getAccount().getAccountState(), user.getUiSettings());
+                    // FlexContext.getFlexSession().getRemoteCredentials();
                 } else {
-                    userServiceResponse = new UserServiceResponse(false, "Incorrect user name, please try again.");
+                    userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                 }
-                session.getTransaction().commit();
-            } finally {
-                session.close();
+            } else {
+                userServiceResponse = new UserServiceResponse(false, "Incorrect user name, please try again.");
             }
-            return userServiceResponse;
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
         }
+        return userServiceResponse;
     }
 
     public void eiApproveConsultant(long consultantID) {
@@ -89,7 +98,6 @@ public class EIAccountManagementService {
             Account account = (Account) accountResults.get(0);
             Account updatedAccount = accountTO.toAccount();
             updatedAccount.setUsers(account.getUsers());
-            updatedAccount.setLicenses(account.getLicenses());
             session.update(updatedAccount);
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -131,9 +139,7 @@ public class EIAccountManagementService {
             account = accountTransferObject.toAccount();
             configureNewAccount(account);
             account.setAccountState(Account.ACTIVE);
-            initialUser.setAccountAdmin(true);
-            initialUser.setDataSourceCreator(true);
-            initialUser.setInsightCreator(true);
+            initialUser.setAccountAdmin(true);            
             String password = RandomTextGenerator.generateText(12);
             user = createInitialUser(initialUser, password, account);
             account.addUser(user);
@@ -180,14 +186,8 @@ public class EIAccountManagementService {
     }
 
     private User createInitialUser(UserTransferObject userTransferObject, String password, Account account) {
-        User user = new User();
-        user.setAccountAdmin(userTransferObject.isAccountAdmin());
-        user.setAccount(account);
-        user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
-        user.setEmail(userTransferObject.getEmail());
-        user.setInsightCreator(userTransferObject.isInsightCreator());
-        user.setName(userTransferObject.getName());
-        user.setUserName(userTransferObject.getUserName());
+        User user = userTransferObject.toUser();
+        user.setAccount(account);        
         user.setPassword(PasswordService.getInstance().encrypt(password));
         return user;
     }
@@ -199,18 +199,6 @@ public class EIAccountManagementService {
             session.getTransaction().begin();
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
             Account account = (Account) results.get(0);
-            if (preserveConsultants) {
-                for (Consultant consultant : account.getGuestUsers()) {
-                    consultant.getUser().setAccountAdmin(false);
-                    consultant.getUser().setDataSourceCreator(false);
-                    consultant.getUser().setInsightCreator(false);
-                }
-            } else {
-                for (Consultant consultant : account.getGuestUsers()) {
-                    session.delete(consultant);
-                }
-                account.setGuestUsers(new ArrayList<Consultant>());
-            }
             String password = RandomTextGenerator.generateText(12);
             User user = createInitialUser(adminUser, password, account);
             user.setAccount(account);
@@ -219,13 +207,7 @@ public class EIAccountManagementService {
             account.setAccountState(Account.ACTIVE);
             session.update(account);
             session.getTransaction().commit();
-            if (preserveConsultants && account.getGuestUsers().size() > 0) {
-                Consultant consultant = account.getGuestUsers().get(0);
-                new AccountMemberInvitation().newProAccountWithConsultant(user.getEmail(), user.getUserName(), password, consultant.getUser().getName(),
-                        consultant.getUser().getEmail());
-            } else {
-                new AccountMemberInvitation().newProAccount(user.getEmail(), user.getUserName(), password);
-            }
+            new AccountMemberInvitation().newProAccount(user.getEmail(), user.getUserName(), password);
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();

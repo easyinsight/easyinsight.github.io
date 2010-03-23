@@ -1,5 +1,6 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
@@ -12,7 +13,6 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Column;
 import java.util.List;
 import java.util.Date;
-import java.sql.Connection;
 
 /**
  * User: James Boe
@@ -36,7 +36,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
         this.dataSourceID = dataSourceID;
     }
 
-    protected void execute(Date now, Connection conn) throws Exception {
+    protected void execute(Date now, EIConnection conn) throws Exception {
         try {
             IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
             UserStub dataSourceUser = null;

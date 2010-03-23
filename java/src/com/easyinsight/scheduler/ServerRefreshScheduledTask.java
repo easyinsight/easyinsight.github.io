@@ -1,5 +1,6 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
@@ -11,7 +12,6 @@ import com.easyinsight.eventing.MessageUtils;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Date;
-import java.sql.Connection;
 
 import org.hibernate.Session;
 
@@ -47,7 +47,7 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
         this.dataSourceID = dataSourceID;
     }
 
-    protected void execute(Date now, Connection conn) throws Exception {
+    protected void execute(Date now, EIConnection conn) throws Exception {
         dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
  
         RefreshEventInfo info = new RefreshEventInfo();

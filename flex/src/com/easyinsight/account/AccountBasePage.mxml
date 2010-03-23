@@ -108,8 +108,17 @@
 	<mx:RemoteObject destination="login" id="userService">
 		<mx:method name="retrieveAccount" result="gotAccountInfo()"/>
 	</mx:RemoteObject>
-	<mx:VBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
-         paddingRight="20" paddingTop="20" paddingBottom="20" id="coreContent">
-		<account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)" destinationURL="{_destinationURL}"/>		
-	</mx:VBox>
+    <mx:Canvas width="100%" height="100%" backgroundColor="#000000">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Canvas height="50%" width="100%" backgroundColor="#888888"/>
+            <mx:Canvas height="50%" width="100%" backgroundColor="#000000"/>
+        </mx:VBox>
+        <mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="30" paddingLeft="10" paddingRight="10"
+             paddingBottom="10" horizontalAlign="center">
+            <mx:VBox width="1000" paddingLeft="20"
+                 paddingRight="20" paddingTop="5" paddingBottom="20" id="coreContent" backgroundColor="#FFFFFF">
+                <account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)" destinationURL="{_destinationURL}"/>
+            </mx:VBox>
+        </mx:VBox>
+    </mx:Canvas>
 </mx:VBox>

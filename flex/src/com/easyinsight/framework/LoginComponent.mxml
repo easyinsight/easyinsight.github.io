@@ -179,7 +179,8 @@
                                 case "success":
                                     User.initializeUser(authResult.name, authResult.email,
                                             authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState);
+                                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState,
+                                            authResult.uiSettings);
                                     User.getInstance().password = authResult.encryptedPassword;
                                     User.getInstance().userName = authResult.userName;
                                     dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
@@ -204,7 +205,7 @@
                         ));
 
             } else {
-
+                stackIndex = 0;
                 failureMessage = authResult.failureMessage;
                 authService.isAccountDelinquentOrClosed.send(userName.text);
             }
@@ -214,6 +215,7 @@
         private var passwordStr:String;
 
         public function signon(userNameStr:String, passwordStr:String):void {
+            stackIndex = 1;
             this.userNameStr = userNameStr;
             this.passwordStr = passwordStr;
             authService.authenticate.send(this.userNameStr, this.passwordStr);
@@ -238,33 +240,44 @@
 
         [Bindable]
         private var failureMessage:String = "";
+
+        [Bindable]
+        private var stackIndex:int;
                 ]]>
 	</mx:Script>
-    <mx:VBox id="coreBox">
+    <mx:VBox id="coreBox" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
         <mx:Box id="activationBox" width="100%" horizontalAlign="center" paddingTop="10"/>
-        <mx:Form id="loginForm">
-            <mx:FormItem label="User Name or Email:" direction="horizontal">
-                <mx:TextInput id="userName" tabIndex="1"/>
-                <!--<mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your User Name?"
-                               click="currentState='RemindUserName'"/>-->
-            </mx:FormItem>
-            <mx:FormItem label="Password:" direction="horizontal">
-                <mx:TextInput id="password" displayAsPassword="true" tabIndex="2"/>
-                <mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your Password?"
-                               click="currentState='ResetPassword'"/>
-            </mx:FormItem>
-            <mx:FormItem direction="horizontal">
-                <mx:Button label="Sign In" click="signon(userName.text, password.text)" tabIndex="3"/>
-                <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}" tabIndex="4"/>
-            </mx:FormItem>
-            <mx:FormItem label="" direction="horizontal">
-                <mx:Spacer height="25"/>
-            </mx:FormItem>
-            <mx:FormItem label="Don't have an account yet?" id="noAccount">
-                <mx:Button label="Create Account" click="createNewAccount()"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:Text text="{failureMessage}"/>
+        <mx:ViewStack selectedIndex="{stackIndex}">
+            <mx:Form id="loginForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="User Name or Email:" direction="horizontal">
+                    <mx:TextInput id="userName" tabIndex="1"/>
+                    <!--<mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your User Name?"
+                                   click="currentState='RemindUserName'"/>-->
+                </mx:FormItem>
+                <mx:FormItem label="Password:" direction="horizontal">
+                    <mx:TextInput id="password" displayAsPassword="true" tabIndex="2"/>
+                    <mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your Password?"
+                                   click="currentState='ResetPassword'"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                <mx:ProgressBar label="Connecting..." indeterminate="true"/>
+            </mx:Box>
+        </mx:ViewStack>
+        <mx:Spacer height="10"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Sign In" click="signon(userName.text, password.text)" tabIndex="3"/>
+            <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}" tabIndex="4"/>
+        </mx:HBox>
+        <mx:Spacer height="10"/>
+        <mx:HBox>
+            <mx:Label text="Don't have an account yet?" id="noAccount"/>
+            <mx:Button label="Create Account" click="createNewAccount()"/>
+        </mx:HBox>
+        <mx:Spacer height="10"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Text text="{failureMessage}" fontSize="14"/>
+        </mx:HBox>
     </mx:VBox>
     <mx:RemoteObject id="authService" destination="login">
         <mx:method name="authenticate" result="handleAuthentication()"/>

@@ -82,9 +82,9 @@ public abstract class UploadFormat implements Serializable {
                     }
                     Key key;
                     if (keyMap == null) {
-                        key = new NamedKey(gridData.headerColumns[j]);
+                        key = new NamedKey(createName(gridData.headerColumns[j]));
                     } else {
-                        key = keyMap.get(gridData.headerColumns[j]);
+                        key = keyMap.get(createName(gridData.headerColumns[j]));
                     }
                     if (key != null) {
                         columnSegmentMap.put(key, new ColumnSegment(verticalGridSlice));
@@ -95,9 +95,9 @@ public abstract class UploadFormat implements Serializable {
                     Value[] verticalGridSlice = gridData.grid[j];
                     Key key;
                     if (keyMap == null) {
-                        key = new NamedKey(gridData.headerColumns[j]);
+                        key = new NamedKey(createName(gridData.headerColumns[j]));
                     } else {
-                        key = keyMap.get(gridData.headerColumns[j]);
+                        key = keyMap.get(createName(gridData.headerColumns[j]));
                     }
                     if (key != null) {
                         columnSegmentMap.put(key, new ColumnSegment(verticalGridSlice));
@@ -108,6 +108,16 @@ public abstract class UploadFormat implements Serializable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String createName(String key) {
+        if (key == null) {
+            return "";
+        }
+        if (key.length() > 50) {
+            key = key.substring(0, 50);
+        }
+        return key.trim();
     }
 
     protected abstract GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap);

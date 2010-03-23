@@ -1,5 +1,6 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.PersistableDataSetForm;
@@ -56,7 +57,7 @@ public class FileProcessUpdateScheduledTask extends ScheduledTask {
     }
 
 
-    protected void execute(Date now, Connection conn) throws Exception {
+    protected void execute(Date now, EIConnection conn) throws Exception {
         UserUploadService.RawUploadData rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
         background = true;
         updateData(feedID, update, conn, rawUploadData);

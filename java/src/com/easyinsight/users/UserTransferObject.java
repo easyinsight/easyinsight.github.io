@@ -1,7 +1,6 @@
 package com.easyinsight.users;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * User: James Boe
@@ -14,23 +13,48 @@ public class UserTransferObject {
     private String email;
     private String name;
     private Date lastLoginDate;
-    private List<SubscriptionLicense> licenses;
+
+    private long personaID;
+
+    private String firstName;
+    private String title;
 
     private boolean accountAdmin;
-    private boolean dataSourceCreator;
-    private boolean insightCreator;
 
     public UserTransferObject() {
     }
 
-    public UserTransferObject(String userName, long userID, String email, String name,
-                              List<SubscriptionLicense> licenses) {
+    public UserTransferObject(String userName, long userID, String email, String name, String firstName) {
         this.userName = userName;
         this.userID = userID;
         this.email = email;
         this.name = name;
-        this.licenses = licenses;
-    }        
+        this.firstName = firstName;
+    }
+
+    public long getPersonaID() {
+        return personaID;
+    }
+
+    public void setPersonaID(long personaID) {
+        this.personaID = personaID;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public boolean isAccountAdmin() {
         return accountAdmin;
@@ -46,22 +70,6 @@ public class UserTransferObject {
 
     public void setLastLoginDate(Date lastLoginDate) {
         this.lastLoginDate = lastLoginDate;
-    }
-
-    public boolean isDataSourceCreator() {
-        return dataSourceCreator;
-    }
-
-    public void setDataSourceCreator(boolean dataSourceCreator) {
-        this.dataSourceCreator = dataSourceCreator;
-    }
-
-    public boolean isInsightCreator() {
-        return insightCreator;
-    }
-
-    public void setInsightCreator(boolean insightCreator) {
-        this.insightCreator = insightCreator;
     }
 
     public String getUserName() {
@@ -96,20 +104,14 @@ public class UserTransferObject {
         this.name = name;
     }
 
-    public List<SubscriptionLicense> getLicenses() {
-        return licenses;
-    }
-
-    public void setLicenses(List<SubscriptionLicense> licenses) {
-        this.licenses = licenses;
-    }
-
     public User toUser() {
         User user = new User();
+        user.setUserID(getUserID());
         user.setAccountAdmin(isAccountAdmin());
-        user.setDataSourceCreator(isDataSourceCreator());
         user.setEmail(getEmail());
-        user.setInsightCreator(isInsightCreator());
+        user.setPersonaID(getPersonaID() > 0 ? getPersonaID() : null);
+        user.setFirstName(getFirstName());
+        user.setTitle(getTitle());
         user.setName(getName());
         user.setUserName(getUserName());
         return user;

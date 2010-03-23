@@ -13,6 +13,10 @@
         import mx.collections.ArrayCollection;
 
         [Bindable]
+        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
+        private var backgroundImage:Class;
+
+        [Bindable]
         private var dataSources:ArrayCollection;
         [Bindable]
         private var userName:String;
@@ -65,6 +69,10 @@
             window.y = 10;
         }
         ]]></mx:Script>
+    <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+            paddingTop="5" paddingBottom="5">
+        <mx:Label text="Account Settings" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+    </mx:Box>
     <mx:HBox width="100%" horizontalAlign="center">
         <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid"
                  dropShadowEnabled="true" backgroundColor="0xF3F2DF">

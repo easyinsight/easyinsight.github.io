@@ -1,12 +1,12 @@
 package com.easyinsight.users;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.scheduler.ScheduledTask;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import java.util.Date;
-import java.sql.Connection;
 
 /**
  * User: James Boe
@@ -17,7 +17,7 @@ import java.sql.Connection;
 @Table(name="account_billing_task")
 @PrimaryKeyJoinColumn(name="scheduled_task_id")
 public class AccountBillingTask extends ScheduledTask {
-    protected void execute(Date now, Connection conn) throws Exception {
+    protected void execute(Date now, EIConnection conn) throws Exception {
         // TODO: implement
     }
 }

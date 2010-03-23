@@ -4,11 +4,13 @@ import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.Builder;
@@ -39,18 +41,18 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_COMPANY_PROJECT_JOIN;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
 
         DataSet ds = new DataSet();
-        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false);
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         if (token == null && credentials.getUserName() != null) {
             token = new Token();
             token.setTokenValue(credentials.getUserName());
             token.setTokenType(TokenStorage.BASECAMP_TOKEN);
             token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         if (token == null) {
             throw new RuntimeException();

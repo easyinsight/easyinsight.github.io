@@ -9,6 +9,7 @@ import com.easyinsight.datafeeds.gnip.GnipDataSource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
 import com.easyinsight.datafeeds.highrise.HighRiseCompositeSource;
+import com.easyinsight.datafeeds.highrise.HighRiseContactSource;
 import com.easyinsight.datafeeds.highrise.HighRiseDealSource;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
@@ -60,6 +61,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HIGHRISE_COMPOSITE, HighRiseCompositeSource.class);
         registerType(FeedType.HIGHRISE_COMPANY, HighRiseCompanySource.class);
         registerType(FeedType.HIGHRISE_DEAL, HighRiseDealSource.class);
+        registerType(FeedType.HIGHRISE_CONTACTS, HighRiseContactSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

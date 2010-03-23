@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.wesabe;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.analysis.*;
@@ -61,7 +62,7 @@ public class WesabeTransactionDataSource extends WesabeBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet dataSet = new DataSet();
         try {
             NodeList transactions = getNodes(credentials, "transactions", "txaction");

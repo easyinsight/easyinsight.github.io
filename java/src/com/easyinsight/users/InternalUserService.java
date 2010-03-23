@@ -31,7 +31,7 @@ public class InternalUserService {
             }
             if (results.size() > 0) {
                 user = (User) results.get(0);
-                user.setLicenses(new ArrayList<SubscriptionLicense>());
+
             }
             return user;
         } catch (Exception e) {
@@ -57,7 +57,6 @@ public class InternalUserService {
             }
             if (results.size() > 0) {
                 user = (User) results.get(0);
-                user.setLicenses(new ArrayList<SubscriptionLicense>());
             }
             return user;
         } catch (Exception e) {
