@@ -7,8 +7,6 @@
         private function create():void {
             var user:UserTransferObject = new UserTransferObject();
             user.accountAdmin = true;
-            user.dataSourceCreator = true;
-            user.insightCreator = true;
             user.userName = userNameInput.text;
             user.email = emailInput.text;
             user.name = fullNameInput.text;
