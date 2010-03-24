@@ -128,6 +128,7 @@
                 changeButton.label = "Hide Changes to Filter Field:";
                 currentState = "editorState";
             } else {
+                
                 changeButton.label = "Change the Filter Field:";
                 currentState = "";
             }
