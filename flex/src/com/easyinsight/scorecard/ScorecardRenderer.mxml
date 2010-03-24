@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
          xmlns:scorecard="com.easyinsight.scorecard.*"
-         creationComplete="setupListeners()" width="800">
+         creationComplete="setupListeners()" width="760">
     <mx:Metadata>
         [Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
     </mx:Metadata>
@@ -271,10 +271,10 @@
         <mx:method name="getScorecard" result="gotScorecard()"/>
     </mx:RemoteObject>
     <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%" creationPolicy="all">
-        <mx:Box width="100%" height="250" horizontalAlign="center" verticalAlign="middle">
+        <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:ProgressBar label="Loading the scorecard..." indeterminate="true"/>
         </mx:Box>
-        <mx:VBox width="100%" height="250" horizontalAlign="center" verticalAlign="middle">
+        <mx:VBox width="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:Label text="You haven't defined any KPIs yet for this scorecard." fontSize="16"/>
             <mx:Button label="Create Your First KPI" styleName="blueButton" fontSize="16" click="addKPI()"/>
         </mx:VBox>
@@ -293,7 +293,7 @@
             </mx:HBox>
 
             <scorecard:HackDataGrid dataProvider="{kpis}" rowHeight="40" selectable="false"
-                                    width="800" id="plainGrid">
+                                    width="760" id="plainGrid">
                 <scorecard:columns>
                     <util:EIDataGridColumn headerText="" dataField="name"
                                            itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"/>
@@ -324,7 +324,7 @@
                 </mx:HBox>
             </mx:ViewStack>
         </mx:HBox>
-        <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="800" id="adminGrid">
+        <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="760" id="adminGrid">
             <mx:columns>
                 <util:EIDataGridColumn headerText="" dataField="name"
                                        itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"/>

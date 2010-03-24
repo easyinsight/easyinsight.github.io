@@ -158,7 +158,7 @@ public class ScorecardContextWindow extends VBox {
 
     private function reportClick(event:MouseEvent):void {
         destroy();
-        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportAnalyzeSource(event.currentTarget.data as InsightDescriptor)));
+        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportAnalyzeSource(event.currentTarget.data as InsightDescriptor, kpi.filters)));
     }
 }
 }

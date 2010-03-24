@@ -1,15 +1,30 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="5"
-        paddingLeft="5" paddingRight="5" paddingTop="5">
+        paddingLeft="5" paddingRight="5" paddingTop="5" creationComplete="setup()">
     <mx:Script><![CDATA[
         import com.easyinsight.util.ProgressAlert;
 
         import mx.managers.PopUpManager;
+        import mx.validators.Validator;
 
         [Bindable]
         private var scorecardName:String;
 
         private var _scorecard:Scorecard;
+
+        private var validators:Array;
+
+        private function setup():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+            validators = [ nameValidator ];
+            nameInput.setFocus();
+        }
+
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                save();
+            }
+        }
 
         protected override function commitProperties():void {
             super.commitProperties();
@@ -33,17 +48,27 @@
         }
 
         private function save():void {
-            if (_scorecard == null) {
-                _scorecard = new Scorecard();
-            }
-            _scorecard.name = nameInput.text;
-            if (_groupID == 0) {
-                ProgressAlert.alert(this, "Saving the scorecard...", null, scorecardService.saveScorecardForUser);
-                scorecardService.saveScorecardForUser.send(_scorecard);
+            var results:Array = Validator.validateAll(validators);
+            if (results.length == 0) {
+                if (_scorecard == null) {
+                    _scorecard = new Scorecard();
+                }
+                _scorecard.name = nameInput.text;
+                if (_groupID == 0) {
+                    ProgressAlert.alert(this, "Saving the scorecard...", null, scorecardService.saveScorecardForUser);
+                    scorecardService.saveScorecardForUser.send(_scorecard);
+                } else {
+                    ProgressAlert.alert(this, "Saving the scorecard...", null, scorecardService.saveScorecardForGroup);
+                    scorecardService.saveScorecardForGroup.send(_scorecard, _groupID);
+                }
             } else {
-                ProgressAlert.alert(this, "Saving the scorecard...", null, scorecardService.saveScorecardForGroup);
-                scorecardService.saveScorecardForGroup.send(_scorecard, _groupID);
+                nameInput.setFocus();
+                nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             }
+        }
+
+        private function clearListeners():void {
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
         }
 
         private function saved():void {
@@ -60,6 +85,7 @@
             } else {
                 dispatchEvent(new ScorecardEvent(ScorecardEvent.SCORECARD_UPDATED, descriptor));
             }
+            clearListeners();
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
@@ -67,6 +93,7 @@
         <mx:method name="saveScorecardForUser" result="saved()"/>
         <mx:method name="saveScorecardForGroup" result="saved()"/>
     </mx:RemoteObject>
+    <mx:StringValidator minLength="3" maxLength="25" id="nameValidator" property="text" source="{nameInput}"/>
     <mx:VBox>
         <mx:Form>
             <mx:FormItem label="Scorecard Name:">
@@ -75,7 +102,7 @@
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <mx:Button label="Cancel" click="clearListeners(); PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
 </util:EITitleWindow>

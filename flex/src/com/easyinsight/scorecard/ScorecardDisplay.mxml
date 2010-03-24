@@ -12,6 +12,7 @@
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
+        import mx.effects.Effect;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
 
@@ -103,14 +104,16 @@
             BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
         }
 
-        protected function handleDescriptors(scorecardList:ScorecardList):void {            
+        protected function handleDescriptors(scorecardList:ScorecardList):void {
             if (scorecardList.anyData) {
                 scorecards = scorecardList.scorecardDescriptors;
                 scorecardStack.removeAllChildren();
                 for each (var scorecard:ScorecardDescriptor in scorecards) {
                     var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
-                    /*scorecardRenderer.setStyle("hideEffect", effect);
-                    scorecardRenderer.setStyle("hideEffect", effect);*/
+                    scorecardRenderer.setStyle("hideEffect", rightEffect);
+                    scorecardRenderer.setStyle("showEffect", rightEffect);
+                    //BindingUtils.bindProperty(scorecardRenderer, "hideEffect", this, "activeEffect");
+                    //BindingUtils.bindProperty(scorecardRenderer, "showEffect", this, "activeEffect");
                     configureRenderer(scorecardRenderer);
                     scorecardRenderer.scorecardDescriptor = scorecard;
                     scorecardStack.addChild(scorecardRenderer);
@@ -145,6 +148,15 @@
                 }
             }
             selectedScorecard = event.scorecard;
+            if (i > scorecardIndex) {
+                activeEffect = leftEffect;
+            } else {
+                activeEffect = rightEffect;
+            }
+            for each (var scorecardRenderer:ScorecardRenderer in scorecardStack.getChildren()) {
+                scorecardRenderer.setStyle("hideEffect", activeEffect);
+                scorecardRenderer.setStyle("showEffect", activeEffect);
+            }
             scorecardIndex = i;
         }
 
@@ -162,20 +174,34 @@
         }
 
         protected function deleteScorecard():void {
-            
+
+        }
+
+        private var _activeEffect:Effect = leftEffect;
+
+
+        [Bindable(event="activeEffectChanged")]
+        public function get activeEffect():Effect {
+            return _activeEffect;
+        }
+
+        public function set activeEffect(value:Effect):void {
+            if (_activeEffect == value) return;
+            _activeEffect = value;
+            dispatchEvent(new Event("activeEffectChanged"));
         }
         ]]></mx:Script>
-    <!--<viewStackEffects:Slide id="effect"/>-->
-    <mx:VBox verticalGap="0">
+    <viewStackEffects:Slide id="leftEffect" direction="left"/>
+    <viewStackEffects:Slide id="rightEffect" direction="right"/>
+    <mx:VBox verticalGap="0" width="100%">
         <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
                 paddingTop="5"
                 paddingBottom="5">
             <mx:Label text="Scorecards" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
         </mx:Box>
         <mx:ViewStack resizeToContent="true" selectedIndex="{primaryStackIndex}" width="100%" creationPolicy="all"
-                      borderStyle="inset" borderThickness="1" cornerRadius="15"
-                      paddingTop="15" paddingBottom="15" paddingLeft="15" paddingRight="15">
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                      paddingTop="15" paddingBottom="15">
+            <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle">
                 <mx:ProgressBar label="Loading scorecards..." indeterminate="true"/>
             </mx:Box>
             <mx:VBox horizontalAlign="center" width="100%">
@@ -193,14 +219,16 @@
                         <mx:HRule width="100%"/>
                     </mx:VBox>
                 </mx:ViewStack>
-                <mx:ViewStack resizeToContent="true" id="scorecardStack" selectedIndex="{scorecardIndex}">
+                <mx:Box paddingLeft="15" paddingRight="15">
+                    <mx:ViewStack id="scorecardStack" selectedIndex="{scorecardIndex}" height="350" resizeToContent="true">
 
-                </mx:ViewStack>
+                    </mx:ViewStack>
+                </mx:Box>
             </mx:VBox>
         </mx:ViewStack>
     </mx:VBox>
-    <mx:Spacer width="100%"/>
-    <mx:VBox paddingRight="0" paddingTop="25">
+    <mx:Spacer width="20"/>
+    <mx:VBox paddingRight="10" paddingTop="25">
         <mx:Label text="Scorecard Controls" fontSize="13" fontWeight="bold" paddingRight="0"/>
         <mx:HRule width="100%"/>
         <mx:LinkButton label="Add scorecard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
