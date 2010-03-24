@@ -14,6 +14,7 @@ import flash.events.MouseEvent;
 	import mx.collections.Sort;
 	import mx.containers.HBox;
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
@@ -24,7 +25,6 @@ import mx.events.DropdownEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 
-import org.efflex.mx.viewStackEffects.CubePapervision3D;
 import org.efflex.mx.viewStackEffects.Slide;
 
 public class ComboBoxFilter extends HBox implements IFilter
@@ -101,8 +101,17 @@ public class ComboBoxFilter extends HBox implements IFilter
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
             _analysisItem = event.filterDefinition.field;
-            dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
-			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
+            if (event.filterDefinition != this.filterDefinition) {
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));        
+            } else {
+                viewStack.selectedIndex = 0;
+                dataService = new RemoteObject();
+			    dataService.destination = "data";
+			    dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+                dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+            }
+
+			//
 		}
 
         private function onChange(event:Event):void {
@@ -182,6 +191,8 @@ public class ComboBoxFilter extends HBox implements IFilter
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
 			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 		}
+
+    private var newFilter:Boolean = true;
 		
 		private function filterValueChanged(event:DropdownEvent):void {			
 			var newValue:String = event.currentTarget.selectedLabel;
@@ -200,11 +211,13 @@ public class ComboBoxFilter extends HBox implements IFilter
         }
 		
 		private function gotMetadata(event:ResultEvent):void {
+            
 			var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as 
 				AnalysisDimensionResultMetadata;
 			var strings:ArrayCollection = new ArrayCollection();
 			for each (var value:Value in analysisDimensionResultMetadata.values) {
 				var string:String = String(value.getValue());
+
 				if (!strings.contains(string)) {
 					strings.addItem(string);
 				}
@@ -237,7 +250,12 @@ public class ComboBoxFilter extends HBox implements IFilter
 			    deleteButton.enabled = true;
             }
             viewStack.selectedIndex = 1;
-			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            if (newFilter) {
+			    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+                newFilter = false;
+            } else {
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this, event.bubbles));
+            }
 		}
 		
 		private function deleteSelf(event:MouseEvent):void {
