@@ -143,8 +143,16 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (dataSet.length > 0) {
-                this.dataSet = dataSet;
                 heatMapDefinition = analysisDefinition as HeatMapDefinition;
+                var data:ArrayCollection = new ArrayCollection();
+                for each (var point:Object in dataSet) {
+                    if (point[heatMapDefinition.longitudeItem.qualifiedName()] != 0 ||
+                        point[heatMapDefinition.latitudeItem.qualifiedName()] != 0) {
+                        data.addItem(point);
+                    }
+                }
+                this.dataSet = data;
+
                 if (map.isLoaded()) {
                     prepareMap();
                 }
