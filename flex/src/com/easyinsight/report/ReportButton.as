@@ -36,6 +36,9 @@ public class ReportButton extends Box {
         setStyle("verticalAlign", "middle");
         percentWidth = 100;
         percentHeight = 100;
+        mouseChildren = false;
+        buttonMode = true;
+        useHandCursor = true;
     }
 
     override protected function createChildren():void {

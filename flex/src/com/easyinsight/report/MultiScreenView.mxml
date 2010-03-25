@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
         xmlns:util="com.easyinsight.util.*" width="100%" height="100%" creationComplete="onCreation()"
-         backgroundImage="{background2}" backgroundSize="100%" implements="com.easyinsight.framework.IFullScreenPage">
+         implements="com.easyinsight.framework.IFullScreenPage">
     <mx:Metadata>
         [Event(name="analysisClose", type="com.easyinsight.analysis.AnalysisCloseEvent")]
     </mx:Metadata>
@@ -167,16 +167,15 @@
 
         override public function cleanup():void {
         }]]></mx:Script>
-    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-        <mx:HBox width="100%" id="topBar">
+    <mx:VBox width="100%" height="100%" verticalGap="0">
+        <mx:HBox width="100%" id="topBar" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" backgroundColor="#636363">
             <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
-            <mx:ProgressBar id="progressBar" indeterminate="true" visible="{progressVisible}"/>
             <mx:TileList id="reportsList" width="100%" dataProvider="{_reports}" height="50"
                          itemRenderer="com.easyinsight.report.ReportButton" itemClick="onItemClick(event)" columnWidth="150"
-                    borderStyle="none" backgroundAlpha="0"/>
+                    borderStyle="none" backgroundAlpha="0" selectionColor="#D42525" rollOverColor="#E57171"/>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="verticalBarBox"/>
-        <mx:HRule width="100%"/>
+        <mx:Box width="100%" height="5" backgroundColor="#D42525"/>
         <util:AsyncViewStack width="100%" height="100%" targetDescriptor="{report}" screenRenderer="{factory}"
                 asyncLoadStart="onLoading(event)" asyncLoadSuccess="onLoading(event)" id="viewStack"/>
     </mx:VBox>
