@@ -79,10 +79,10 @@
       String accountInfoString = null;
       switch(account.getAccountType()) {
           case Account.BASIC:
-              accountInfoString = "Individual";
+              accountInfoString = "Basic";
               break;
           case Account.PROFESSIONAL:
-              accountInfoString = "Group";
+              accountInfoString = "Professional";
               break;
           default:
               accountInfoString = "";
