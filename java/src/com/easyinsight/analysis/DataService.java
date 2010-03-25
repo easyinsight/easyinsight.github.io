@@ -293,6 +293,12 @@ public class DataService {
                     dataSet.setLastTime(new Date());
                 }
                 DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+                } finally {
+                    Database.closeConnection(conn);
+                }
                 results.setDataSourceInfo(dataSourceInfo);
                 results.setAttribution(feed.getAttribution());
                 if (resultsCache != null) {
