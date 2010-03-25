@@ -6,7 +6,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.listing.ReportEditorAnalyzeSource;
 import com.easyinsight.pseudocontext.*;
-
+import com.easyinsight.report.MultiReportAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -48,6 +48,10 @@ public class ScorecardContextWindow extends VBox {
             items.push(exchangeItem);
         }
         if (kpi.reports != null && kpi.reports.length > 0) {
+
+            var multiReportItem:PseudoContextItem = new PseudoContextItem("View all reports for this KPI...", multiReports);
+            items.push(multiReportItem);
+
             for each (var report:InsightDescriptor in kpi.reports) {
                 var reportContextItem:PseudoContextItem = new PseudoContextItem(report.name, reportClick, report);
                 items.push(reportContextItem);
@@ -66,6 +70,10 @@ public class ScorecardContextWindow extends VBox {
         setStyle("backgroundAlpha", 1);
     }
 
+    private function multiReports(event:MouseEvent):void {
+        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new MultiReportAnalyzeSource(kpi.coreFeedID, kpi.coreFeedName)));
+        destroy();
+    }
 
     [Bindable(event="contextMenuAvailableChanged")]
     public function get contextMenuAvailable():Boolean {
