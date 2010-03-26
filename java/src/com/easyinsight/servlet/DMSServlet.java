@@ -12,6 +12,8 @@ import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.eventing.*;
 import com.easyinsight.twitter.TwitterTimer;
+import com.easyinsight.scorecard.LongKPIRefreshEvent;
+import com.easyinsight.scorecard.LongKPIRefreshListener;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
@@ -50,6 +52,7 @@ public class DMSServlet extends HttpServlet {
                 EventDispatcher.instance().registerListener(AsyncCreatedEvent.ASYNC_CREATED, new AsyncCreatedListener());
                 EventDispatcher.instance().registerListener(AsyncRunningEvent.ASYNC_RUNNING, new AsyncRunningListener());
                 EventDispatcher.instance().registerListener(AsyncCompletedEvent.ASYNC_COMPLETED, new AsyncCompletedListener());
+                EventDispatcher.instance().registerListener(LongKPIRefreshEvent.LONG_KPI_REFRESH_EVENT, LongKPIRefreshListener.instance());
                 scheduler.start();
             }
             LogClass.info("Started the server.");

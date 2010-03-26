@@ -63,9 +63,9 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         return feedTypes;
     }
 
-    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
+    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials, long userID) {
         String userName = null;
-        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false);
+        Token token = new TokenStorage().getToken(userID, TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false);
         if (token == null) {
             for (CredentialFulfillment credentialFulfillment : existingCredentials) {
                 if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {

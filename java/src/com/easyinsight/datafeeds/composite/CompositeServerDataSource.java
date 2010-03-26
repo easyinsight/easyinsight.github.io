@@ -44,6 +44,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     protected abstract IServerDataSourceDefinition createForFeedType(FeedType feedType);
 
     public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
+        return needsCredentials(existingCredentials, SecurityUtil.getUserID());
+    }
+
+    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials, long userID) {
         if (getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
             Credentials credentials = null;
             for (CredentialFulfillment credentialFulfillment : existingCredentials) {

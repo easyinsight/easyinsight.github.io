@@ -1,21 +1,22 @@
-<%@ page import="java.text.NumberFormat" %>
-<%@ page import="com.easyinsight.users.User" %>
-<%@ page import="com.easyinsight.scorecard.ScorecardService" %>
+<%@ page import="com.easyinsight.datafeeds.CredentialFulfillment" %>
 <%@ page import="com.easyinsight.datafeeds.CredentialRequirement" %>
 <%@ page import="com.easyinsight.datafeeds.CredentialsDefinition" %>
+<%@ page import="com.easyinsight.scorecard.ScorecardService" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardWrapper" %>
-<%@ page import="com.easyinsight.datafeeds.CredentialFulfillment" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.LinkedList" %>
-<%@ page import="com.easyinsight.users.UserNamePWCredentials" %>
+<%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.users.SalesforceCredentials" %>
+<%@ page import="com.easyinsight.users.UserNamePWCredentials" %>
+<%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.LinkedList" %>
+<%@ page import="java.util.List" %>
 <%
     com.easyinsight.scorecard.Scorecard scorecard = null;
+    boolean completeRefresh = false;
     NumberFormat nf = NumberFormat.getPercentInstance();
     nf.setMaximumFractionDigits(2);
-    Long userID = (Long) request.getSession().getAttribute("userID"); 
-
+    Long userID = (Long) request.getSession().getAttribute("userID");
+    SecurityUtil.populateThreadLocal(userID, 0, 0, false);
     String scorecardIDString = request.getParameter("scorecardID");
     ScorecardService service = new com.easyinsight.scorecard.ScorecardService();
     // table shouldn't get rendered without scorecard ID being set
@@ -94,6 +95,7 @@
                     <script type="text/javascript">$("#credentialsDialog").dialog('open');</script>
                 <%
                 } else {
+                    completeRefresh = true;
                 %>
                     <script type="text/javascript">$("#credentialsDialog").dialog("close");</script>
                 <%
@@ -103,13 +105,14 @@
                     <script type="text/javascript">$("#credentialsDialog").dialog("open");</script>
                     <%
                 }
-        } else { %>
-        <script type="text/javascript">$("#credentialsDialog").dialog("close");</script>
-                <%
-                if (scorecardWrapper.isAsyncRefresh()) {
-                // TODO: set up ajax async refresh here
-                    scorecardWrapper.setAsyncRefresh(true);
-                }
+        } else {
+            completeRefresh = true;
+        }
+
+        if(completeRefresh) {
+            %>
+                <script type="text/javascript">$("#credentialsDialog").dialog("close");</script>
+            <%
         }
 
     scorecard = scorecardWrapper.getScorecard();
@@ -133,11 +136,15 @@
                 if(scorecard != null) {
                     boolean alternate = false;
                     for (com.easyinsight.kpi.KPI kpi : scorecard.getKpis()) { %>
-                    <tr <% if(alternate) {%>class="alternate"<% } %>><td>
-                    <%  if(kpi.getIconImage() != null) { %>
+                    <tr <% if(alternate) {%>class="alternate"<% } %>>
+                        <td>
+                        <% if(scorecardWrapper.getAsyncRefreshKpis() != null && scorecardWrapper.getAsyncRefreshKpis().contains(kpi)) { %>
+                            <img src="/images/scorecard/ajax-loader.gif" alt="Loading" />
+                        <% } else if(kpi.getIconImage() != null) { %>
                         <img src="/app/assets/icons/16x16/<%= kpi.getIconImage() %>" alt="KPI Icon" />
-                    <% } %>
-                    </td>
+                    <% } else {
+                        %>&nbsp;<% } %>
+                        </td>
                     <td class="kpiName"><%= kpi.getName() %></td>
                     <td class="value"><%= kpi.getAnalysisMeasure().getFormattingConfiguration().createFormatter().format(kpi.getKpiOutcome().getOutcomeValue()) %></td>
                     <td class="percent">
@@ -160,5 +167,13 @@
             </table>
         <% if(request.getParameter("ajax") == null) { %>
         </div>
-        <script type="text/javascript">$(document).ready(function() {$("#scorecard").html($("#added").html());})</script>
-        <% } %>
+        <script type="text/javascript">
+            $(document).ready(function() {$("#scorecard").html($("#added").html());});
+            <% if(scorecardWrapper.getAsyncRefreshKpis() != null && !scorecardWrapper.getAsyncRefreshKpis().isEmpty()) { %>
+                asyncRefresh = setInterval(checkRefresh, 5000);    
+            <% } %>
+        </script>
+        <% }
+
+        SecurityUtil.clearThreadLocal();
+        %>

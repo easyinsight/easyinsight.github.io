@@ -41,7 +41,10 @@ public class SecurityUtil {
     }
 
     public static boolean isAccountAdmin() {
-        return getSecurityProvider().getUserPrincipal().isAccountAdmin();
+        UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
+        if(userPrincipal == null)
+            userPrincipal = threadLocal.get();
+        return userPrincipal.isAccountAdmin();
     }
 
     public static String getUserName() {
@@ -224,8 +227,13 @@ public class SecurityUtil {
     public static int getAccountTier() {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            SecurityLogger.error("Could not retrieve user principal.");
-            throw new SecurityException();
+            userPrincipal = threadLocal.get();
+            if(userPrincipal == null) {
+                SecurityLogger.error("Could not retrieve user principal.");
+                throw new SecurityException();
+            } else {
+                return userPrincipal.getAccountType();
+            }
         } else {
             return userPrincipal.getAccountType();
         }
@@ -615,5 +623,9 @@ public class SecurityUtil {
                 throw new SecurityException();
             }
         }
+    }
+
+    public static void clearThreadLocal() {
+        threadLocal.remove();
     }
 }

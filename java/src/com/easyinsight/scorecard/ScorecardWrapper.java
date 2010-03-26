@@ -1,6 +1,7 @@
 package com.easyinsight.scorecard;
 
 import com.easyinsight.datafeeds.CredentialRequirement;
+import com.easyinsight.kpi.KPI;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class ScorecardWrapper {
     private Scorecard scorecard;
     private List<CredentialRequirement> credentials;
     private boolean asyncRefresh;
+    private List<KPI> asyncRefreshKpis;
 
     public boolean isAsyncRefresh() {
         return asyncRefresh;
@@ -36,5 +38,13 @@ public class ScorecardWrapper {
 
     public void setCredentials(List<CredentialRequirement> credentials) {
         this.credentials = credentials;
+    }
+
+    public List<KPI> getAsyncRefreshKpis() {
+        return asyncRefreshKpis;
+    }
+
+    public void setAsyncRefreshKpis(List<KPI> asyncRefreshKpis) {
+        this.asyncRefreshKpis = asyncRefreshKpis;
     }
 }

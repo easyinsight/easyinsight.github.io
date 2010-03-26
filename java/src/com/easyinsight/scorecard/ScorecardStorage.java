@@ -4,6 +4,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.eventing.MessageUtils;
+import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIStorage;
 import com.easyinsight.logging.LogClass;
@@ -186,6 +187,7 @@ public class ScorecardStorage {
             new ScorecardService().refreshValuesForList(credentialedShortRefreshKPIs, conn, existingCredentials, false);
             if (credentialedLongRefreshKPIs != null && credentialedLongRefreshKPIs.size() > 0) {
                 scorecardWrapper.setAsyncRefresh(true);
+                scorecardWrapper.setAsyncRefreshKpis(credentialedLongRefreshKPIs);
                 longKPIs(credentialedLongRefreshKPIs, existingCredentials, scorecard.getScorecardID());
             }
         }
@@ -320,6 +322,10 @@ public class ScorecardStorage {
                     info.setType(ScorecardRefreshEvent.DONE);
                     info.setKpis(kpis);
                     info.setUserId(userID);
+                    LongKPIRefreshEvent event = new LongKPIRefreshEvent();
+                    event.setEvent(info);
+                    event.setSendDate(new Date());
+                    EventDispatcher.instance().dispatch(event);
                     MessageUtils.sendMessage("generalNotifications", info);
                 } catch (Exception e) {
                     LogClass.error(e);

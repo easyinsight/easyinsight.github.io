@@ -45,6 +45,12 @@
                 $("#progressbar").progressbar({
 			        value: 100
 		        });
+                $("#progressbar").ajaxStart(function() {
+                    $(this).show();
+                });
+                $("#progressbar").ajaxStop(function() {
+                    $(this).hide();
+                });
                 $("#loginDialog").dialog({bigframe: true,
                     autoOpen: <%= loggedIn ? "false" : "true" %>,
                     modal: true, resizable: false, draggable: false, closeOnEscape: false,
@@ -94,7 +100,6 @@
             function login() {
                 var params = $("form#loginForm").serialize();
                 $("#notice").html("");
-                $("#progressbar").show();
                 $.ajax({data: params,
                     url: 'login.jsp',
                     type: 'post',
@@ -104,7 +109,6 @@
             }
 
             function signout() {
-                $("#progressbar").show();
                 $.ajax({
                     url: 'logout.jsp',
                     type: 'post',
@@ -113,7 +117,6 @@
             }
             
             function loadScorecardList() {
-                $("#progressbar").show();
                 $.ajax({
                     url: 'scorecardList.jsp',
                     type: 'post',
@@ -128,7 +131,6 @@
                 $("#scorecardID").val(scorecardID);
                 $("#credsScorecardID").val(scorecardID);
                 var params = $("form#loginForm").serialize();
-                $("#progressbar").show();
                 $.ajax({
                     data: params,
                     url: 'loadScorecard.jsp',
@@ -139,7 +141,6 @@
 
             function refresh() {
                 var params = $("form#credentialsForm").serialize() + "&refresh=true";
-                $("#progressbar").show();
                 $.ajax({
                     data: params,
                     url: 'loadScorecard.jsp',
@@ -150,7 +151,6 @@
 
             function loadResults(request) {
                 $("#results").html(request)
-                $("#progressbar").hide();
             }
 
             function resetCredentialsDialog() {
@@ -189,6 +189,16 @@
                 }
                 $("#credentialsData div:eq(" + credentialsIndex + ")").show();
                 $("#credentialsData div:not(:eq(" + credentialsIndex + "))").hide();
+            }
+
+            function checkRefresh() {
+                var params = $("form#loginForm").serialize();
+                $.ajax({
+                    data: params,
+                    url: 'ajaxRefresh.jsp',
+                    type: 'post',
+                    success: loadResults
+                })
             }
 
         </script>
