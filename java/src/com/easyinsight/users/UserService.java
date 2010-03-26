@@ -643,6 +643,7 @@ public class UserService implements IUserService {
                     userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
                 }
             }
+            session.flush();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
