@@ -11,6 +11,8 @@
 <%@ page import="com.easyinsight.security.PasswordService" %>
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Formatter" %>
+<%@ page import="com.easyinsight.config.ConfigLoader" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -19,49 +21,54 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-  <%
-      long accountID = 0;
-      Account account = null;
-      User user = null;
-      Session s = Database.instance().createSession();
-      try {
-          if(request.getParameter("username") != null && request.getParameter("password") != null) {
-              String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"));
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<%
+    long accountID = 0;
+    Account account = null;
+    User user = null;
+    Session s = Database.instance().createSession();
+    try {
+        if(request.getParameter("username") != null && request.getParameter("password") != null) {
+            String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"));
 
-              List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
-              if(results.size() != 1)
-                  response.sendRedirect("login.jsp?error=true");
-              user =(User) results.get(0);
-              account = user.getAccount();
-              accountID = account.getAccountID();
-              request.getSession().setAttribute("accountID", accountID);
-          }
-          if(account == null) {
-              if(request.getSession().getAttribute("accountID")== null)
+            List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
+            if(results.size() != 1) {
                 response.sendRedirect("login.jsp?error=true");
-              accountID = (Long) request.getSession().getAttribute("accountID");
-              long userID = (Long) request.getSession().getAttribute("userID");
-              user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-              account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-          }
-      }
-      finally {
-          s.close();
-      }
-      if((account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE)
-              && !user.isAccountAdmin())
-        response.sendRedirect("access.jsp");
+                return;
+            }
+            user =(User) results.get(0);
+            account = user.getAccount();
+            accountID = account.getAccountID();
+            request.getSession().setAttribute("accountID", accountID);
+            request.getSession().setAttribute("userID", user.getUserID());
+        }
+        if(account == null) {
+            if(request.getSession().getAttribute("accountID")== null) {
+                response.sendRedirect("login.jsp?error=true");
+                return;
+            }
+            accountID = (Long) request.getSession().getAttribute("accountID");
+            long userID = (Long) request.getSession().getAttribute("userID");
+            user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+            account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+        }
+    }
+    finally {
+        s.close();
+    }
+    if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
+            && !user.isAccountAdmin())
+      response.sendRedirect("access.jsp");
 
-      String keyID = BillingUtil.getKeyID();
-      String key = BillingUtil.getKey();
-      String orderID = "";
-      String amount = "1.00";
-      String type = "auth";
-      if(account.getAccountState() == Account.DELINQUENT) {
-          amount = String.valueOf(account.monthlyCharge());
-          type = "sale";
-      }
+    String keyID = BillingUtil.getKeyID();
+    String key = BillingUtil.getKey();
+    String orderID = "";
+    String amount = "1.00";
+    String type = "auth";
+    if(account.getAccountState() == Account.DELINQUENT) {
+        amount = String.valueOf(account.monthlyCharge());
+        type = "sale";
+    }
 
       DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
       df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -69,64 +76,82 @@
       request.getSession().setAttribute("billingTime", time);
       String hashString = orderID + "|" + amount + "|" + String.valueOf(accountID) + "|" + time + "|" + key;
       String hash = BillingUtil.MD5Hash(hashString);
+      String accountInfoString = null;
+      switch(account.getAccountType()) {
+          case Account.BASIC:
+              accountInfoString = "Basic";
+              break;
+          case Account.PROFESSIONAL:
+              accountInfoString = "Professional";
+              break;
+          default:
+              accountInfoString = "";
+      }
+      Formatter f = new Formatter();
+      String charge = f.format("%.2f", account.monthlyCharge()).toString();
 
-  %>
+%>
+
 <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
-        <title>Billing</title>
+<title>Easy Insight - Billing</title>
 <!-- InstanceEndEditable -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href="/website.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="/history/history.css" />
-    <link rel="icon" type="image/ico" href="/favicon.ico"/>
-    <script src="/AC_OETags.js" language="javascript"></script>
-    <script src="/history/history.js" language="javascript"></script>
-    <!-- InstanceBeginEditable name="head" -->
-    <script language="javascript" type="text/javascript">
+<!-- InstanceBeginEditable name="head" -->
+        <script language="javascript" type="text/javascript">
         function setCCexp() {
             document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + document.getElementById("ccexpYear").value;
 
         }
     </script>
     <style type="text/css">
-        #centerPage div {
-            width:22.5em;
-            display:inline-block;
-            padding: .25em;
+        #centerPage p {
+            text-indent:0px;
         }
-
+        td:first-child {
+            text-align:right;
+        }
         span {
             color: red;
         }
+
+        .submitButton {
+            height:25px;
+            width:66px;
+            background-image: url('submit.gif');
+        }
+
+        .submitButton:hover{
+            background-image: url('submitSelected.gif');
+        }
+
+        .submitButton:active{
+            background-image: url('submitActive.gif');
+        }
+
     </style>
-    <!-- InstanceEndEditable -->
+<!-- InstanceEndEditable -->
+    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
 </head>
-<body>
-<div id="allPage">
-    <div id="header">
-        <div id="navigationElements">
-            <div id="topLinks" style="width:100%">
-                <a href="/contactus.html">contact us</a><div></div>
-                <a href="http://jamesboe.blogspot.com/">blog</a><div></div>
-                <a href="/index.html">home</a>
-            </div>
-            <div id="mainLinks" style="width:100%">
-                <a href="/company.html">COMPANY</a><div></div>
-                <a href="/consulting.html">CONSULTING</a><div></div>
-                <!--<a href="index.html">COMMUNITY</a><div></div>--->
-                <a href="/solutions.html">SOLUTIONS</a><div></div>
-                <a href="/product.html">PRODUCT</a><div></div>
-                <a href="/index.html">HOME</a>
-            </div>
+<body style="width:100%;text-align:center;margin:0px auto;">
+    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
+    	<div style="width:100%;text-align:left;height:70px;position:relative">
+        	<a href="/index.html"><img src="../images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+            <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+            <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
+
         </div>
-        <div id="logo">
-            <img src="/logo2.PNG" alt="Easy Insight Logo"/>
-        </div>
-    </div>
-    <img src="/redbar.PNG" alt="Red Bar"/>
-    <div id="centerPage">
-        <!-- InstanceBeginEditable name="content" -->
-        <p>Please input your billing information below. Billing is handled through Braintree Payment Solutions (<a href="http://www.braintreepaymentsolutions.com">www.braintreepaymentsolutions.com</a>) - we never receive your credit card information.  Items marked with a <span>*</span> are required.</p>
+	    <!-- InstanceBeginEditable name="submenu" -->
+    	<!-- InstanceEndEditable -->
+        <div id="content">
+		    <!-- InstanceBeginEditable name="content" -->
+            <div style="width:100%;background-color:#FFFFFF">
+                <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Billing</h1></div>
+                <p>Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.</p>
+        <p style="font-size:10px">Items marked with a <span>*</span> are required.</p>
         <% if(request.getParameter("error") != null) { %>
             <p><span>There was an error with your billing information. Please input the correct information below.</span></p>
         <% } %>
@@ -134,7 +159,7 @@
       <input id="ccexp" type="hidden" value="" name="ccexp"/>
       <input id="customer_vault_id" type="hidden" value="<%= accountID %>" name="customer_vault_id" />
       <input id="customer_vault" type="hidden" value="<%= (account.isBillingInformationGiven() != null && account.isBillingInformationGiven()) ? "update_customer" : "add_customer" %>" name="customer_vault" />
-      <input id="redirect" type="hidden" value="https://localhost/app/billing/submit.jsp" name="redirect"/>
+      <input id="redirect" type="hidden" value="<%= ConfigLoader.instance().getRedirectLocation() %>/app/billing/submit.jsp" name="redirect"/>
       <input id="payment" type="hidden" value="creditcard" name="creditcard" />
       <input id="key_id" type="hidden" value="<%= keyID %>" name="key_id"/>
       <input id="orderid" type="hidden" value="<%= orderID %>" name="orderid"/>
@@ -142,16 +167,30 @@
       <input id="time" type="hidden" value="<%= time %>" name="time"/>
       <input id="hash" type="hidden" value="<%= hash %>" name="hash"/>
       <input id="type" type="hidden" value="<%= type %>" name="type" />
-      <div>Company: <input id="company" type="text" value="" name="company" /></div><br />
-      <div>First Name: <input id="firstname" type="text" value="" name="firstname" /><span>*</span></div><div>Last Name: <input id="lastname" type="text" value="" name="lastname" /><span>*</span></div><br />
-      <div>Address 1: <input id="address1" type="text" value="" name="address1" /><span>*</span></div><br />
-      <div>Address 2: <input id="address2" type="text" value="" name="address2" /></div><br />
-      <div>City: <input id="city" type="text" value="" name="city" /><span>*</span> State: <input id="state" type="text" value="" style="width:2.5em" maxlength="2" name="state" /><span>*</span></div><div> Zip Code: <input id="zip" type="text" value="" name="zip" /><span>*</span></div><br />
-      <div>Phone #: <input id="phone" type="text" value="" name="phone" style="width:14.5em" /><span>*</span></div> <br />
-
-      <div>Credit Card Number: <input id="ccnumber" type="text" value="4111111111111111" style="width:16.5em" name="ccnumber"/><span>*</span></div><div>CVV/CVC: <input id="cvv" type="text" value="" name="cvv" style="width:3.5em" /><span>*</span></div><br />
-      <div>
-      Expiration date: <select id="ccexpMonth">
+      <table cellpadding="3"><tbody>
+      <tr>
+            <td>Company:</td><td><input id="company" type="text" value="" name="company" style="width:16.5em" /></td>
+      </tr>
+      <tr>
+          <td>First Name:</td><td><input id="firstname" type="text" value="" name="firstname" style="width:16.5em" /><span>*</span></td>
+          <td>Last Name:</td><td colspan="3"><input id="lastname" type="text" value="" name="lastname" style="width:16.5em" /><span>*</span></td>
+      </tr>
+      <tr>
+          <td>Address 1:</td><td> <input id="address1" type="text" value="" name="address1" style="width:16.5em" /><span>*</span></td>
+      </tr>
+      <tr>
+          <td>Address 2:</td><td><input id="address2" type="text" value="" name="address2" style="width:16.5em" /></td>
+      </tr>
+      <tr>
+          <td>City:</td><td><input id="city" type="text" value="" name="city" style="width:16.5em" /><span>*</span></td><td style="text-align:right">State:</td><td><input id="state" type="text" value="" style="width:2.5em" maxlength="2" name="state" /><span>*</span></td><td style="text-align:right">Zip Code:</td><td> <input id="zip" type="text" value="" name="zip" /><span>*</span></td>
+      </tr>
+      <tr>
+          <td>Phone #:</td> <td><input id="phone" type="text" value="" name="phone" style="width:16.5em" /><span>*</span></td>
+      </tr>
+      <tr>
+          <td>Credit Card Number:</td><td><input id="ccnumber" type="text" style="width:16.5em" name="ccnumber"/><span>*</span></td><td>CVV/CVC:</td> <td><input id="cvv" type="text" value="" name="cvv" style="width:3.5em" /><span>*</span></td>
+      </tr>
+      <tr><td>Expiration date:</td><td><select id="ccexpMonth">
           <option value="01">01 - January</option>
           <option value="02">02 - February</option>
           <option value="03">03 - March</option>
@@ -179,32 +218,33 @@
           <option value="19">19</option>
           <option value="20">20</option>
       </select>
-      <span>*</span>
-      </div> <br />
+      <span>*</span></td></tr>
+      <tr><td colspan="6" style="font-size:14px;text-align:left">You are signing up for the <%= accountInfoString %> account tier, and you will be charged $<%= charge %> USD monthly for your subscription.  <% if(account.getAccountState() == Account.DELINQUENT) { %> Since your account is currently delinquent, the first charge will be applied today. <% } %>  </td></tr>
+      <tr><td colspan="6" style="text-align:center"> <input class="submitButton" type="image" value="" src="transparent.gif" name="commit"/></td></tr>
+      </tbody></table>
 
-      <div><input type="submit" value="Submit" name="commit"/></div>
+
   </form>
-    	<!-- InstanceEndEditable -->
+            </div>
+    		<!-- InstanceEndEditable -->
+<div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+            	<div style="float:right;padding-right:200px;">
+                    <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
+                    <ul>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div style="padding-left:180px;">
+					<span style="font-weight:bold;font-size:12px;">About</span>
+                    <ul>
+                        <li><a href="/company.html">Company Overview</a></li>
+                        <li><a href="/whoweare.html">Who We Are</a></li>
+                        <li><a href="/contactus.html">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+	    </div>
     </div>
-
-    <div id="footer">
-        <div style="width:400px">
-          &copy; 2009 Easy Insight LLC. All rights reserved.
-        </div>
-        <div>
-          <a href="/index.html">Home</a>
-        </div>
-        <div>
-          <a href="/sitemap.html">Site Map</a>
-        </div>
-        <div>
-          <a href="/privacy.html">Privacy Policy</a>
-        </div>
-        <div>
-          <a href="/tos.html">Terms of Service</a>
-        </div>
-    </div>
-
-</div>
 </body>
-</html>
+<!-- InstanceEnd --></html>

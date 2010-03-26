@@ -21,54 +21,54 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-  <%
-      long accountID = 0;
-      Account account = null;
-      User user = null;
-      Session s = Database.instance().createSession();
-      try {
-          if(request.getParameter("username") != null && request.getParameter("password") != null) {
-              String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"));
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<%
+    long accountID = 0;
+    Account account = null;
+    User user = null;
+    Session s = Database.instance().createSession();
+    try {
+        if(request.getParameter("username") != null && request.getParameter("password") != null) {
+            String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"));
 
-              List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
-              if(results.size() != 1) {
-                  response.sendRedirect("login.jsp?error=true");
-                  return;
-              }
-              user =(User) results.get(0);
-              account = user.getAccount();
-              accountID = account.getAccountID();
-              request.getSession().setAttribute("accountID", accountID);
-              request.getSession().setAttribute("userID", user.getUserID());
-          }
-          if(account == null) {
-              if(request.getSession().getAttribute("accountID")== null) {
-                  response.sendRedirect("login.jsp?error=true");
-                  return;
-              }
-              accountID = (Long) request.getSession().getAttribute("accountID");
-              long userID = (Long) request.getSession().getAttribute("userID");
-              user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-              account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-          }
-      }
-      finally {
-          s.close();
-      }
-      if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
-              && !user.isAccountAdmin())
-        response.sendRedirect("access.jsp");
+            List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
+            if(results.size() != 1) {
+                response.sendRedirect("login.jsp?error=true");
+                return;
+            }
+            user =(User) results.get(0);
+            account = user.getAccount();
+            accountID = account.getAccountID();
+            request.getSession().setAttribute("accountID", accountID);
+            request.getSession().setAttribute("userID", user.getUserID());
+        }
+        if(account == null) {
+            if(request.getSession().getAttribute("accountID")== null) {
+                response.sendRedirect("login.jsp?error=true");
+                return;
+            }
+            accountID = (Long) request.getSession().getAttribute("accountID");
+            long userID = (Long) request.getSession().getAttribute("userID");
+            user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+            account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+        }
+    }
+    finally {
+        s.close();
+    }
+    if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
+            && !user.isAccountAdmin())
+      response.sendRedirect("access.jsp");
 
-      String keyID = BillingUtil.getKeyID();
-      String key = BillingUtil.getKey();
-      String orderID = "";
-      String amount = "1.00";
-      String type = "auth";
-      if(account.getAccountState() == Account.DELINQUENT) {
-          amount = String.valueOf(account.monthlyCharge());
-          type = "sale";
-      }
+    String keyID = BillingUtil.getKeyID();
+    String key = BillingUtil.getKey();
+    String orderID = "";
+    String amount = "1.00";
+    String type = "auth";
+    if(account.getAccountState() == Account.DELINQUENT) {
+        amount = String.valueOf(account.monthlyCharge());
+        type = "sale";
+    }
 
       DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
       df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -90,19 +90,15 @@
       Formatter f = new Formatter();
       String charge = f.format("%.2f", account.monthlyCharge()).toString();
 
-  %>
+%>
+
 <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
-        <title>Billing</title>
+<title>Easy Insight - Billing</title>
 <!-- InstanceEndEditable -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href="/website.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="/history/history.css" />
-    <link rel="icon" type="image/ico" href="/favicon.ico"/>
-    <script src="/AC_OETags.js" language="javascript"></script>
-    <script src="/history/history.js" language="javascript"></script>
-    <!-- InstanceBeginEditable name="head" -->
-    <script language="javascript" type="text/javascript">
+<!-- InstanceBeginEditable name="head" -->
+        <script language="javascript" type="text/javascript">
         function setCCexp() {
             document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + document.getElementById("ccexpYear").value;
 
@@ -134,34 +130,26 @@
         }
 
     </style>
-    <!-- InstanceEndEditable -->
+<!-- InstanceEndEditable -->
+    <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
 </head>
-<body>
-<div id="allPage">
-    <div id="header">
-        <div id="navigationElements">
-            <div id="topLinks" style="width:100%">
-                <a href="/contactus.html">contact us</a><div></div>
-                <a href="http://jamesboe.blogspot.com/">blog</a><div></div>
-                <a href="/index.html">home</a>
-            </div>
-            <div id="mainLinks" style="width:100%">
-                <a href="/company.html">COMPANY</a><div></div>
-                <a href="/consulting.html">CONSULTING</a><div></div>
-                <!--<a href="index.html">COMMUNITY</a><div></div>--->
-                <a href="/solutions.html">SOLUTIONS</a><div></div>
-                <a href="/product.html">PRODUCT</a><div></div>
-                <a href="/index.html">HOME</a>
-            </div>
+<body style="width:100%;text-align:center;margin:0px auto;">
+    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
+    	<div style="width:100%;text-align:left;height:70px;position:relative">
+        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+            <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+            <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
         </div>
-        <div id="logo">
-            <img src="/logo2.PNG" alt="Easy Insight Logo"/>
-        </div>
-    </div>
-    <img src="/redbar.PNG" alt="Red Bar"/>
-    <div id="centerPage">
-        <!-- InstanceBeginEditable name="content" -->
-        <p>Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.</p>
+	    <!-- InstanceBeginEditable name="submenu" -->
+    	<!-- InstanceEndEditable -->
+        <div id="content">
+		    <!-- InstanceBeginEditable name="content" -->
+            <div style="width:100%;background-color:#FFFFFF">
+                <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Billing</h1></div>
+                <p>Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.</p>
         <p style="font-size:10px">Items marked with a <span>*</span> are required.</p>
         <% if(request.getParameter("error") != null) { %>
             <p><span>There was an error with your billing information. Please input the correct information below.</span></p>
@@ -236,27 +224,26 @@
 
 
   </form>
-    	<!-- InstanceEndEditable -->
+            </div>
+    		<!-- InstanceEndEditable -->
+<div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+            	<div style="float:right;padding-right:200px;">
+                    <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
+                    <ul>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div style="padding-left:180px;">
+					<span style="font-weight:bold;font-size:12px;">About</span>
+                    <ul>
+                        <li><a href="/company.html">Company Overview</a></li>
+                        <li><a href="/whoweare.html">Who We Are</a></li>
+                        <li><a href="/contactus.html">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+	    </div>
     </div>
-
-    <div id="footer">
-        <div style="width:400px">
-          &copy; 2009 Easy Insight LLC. All rights reserved.
-        </div>
-        <div>
-          <a href="/index.html">Home</a>
-        </div>
-        <div>
-          <a href="/sitemap.html">Site Map</a>
-        </div>
-        <div>
-          <a href="/privacy.html">Privacy Policy</a>
-        </div>
-        <div>
-          <a href="/tos.html">Terms of Service</a>
-        </div>
-    </div>
-
-</div>
 </body>
-</html>
+<!-- InstanceEnd --></html>

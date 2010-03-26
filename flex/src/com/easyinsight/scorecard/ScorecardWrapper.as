@@ -8,6 +8,7 @@ public class ScorecardWrapper {
     public var scorecard:Scorecard;
     public var credentials:ArrayCollection;
     public var asyncRefresh:Boolean;
+    public var asyncRefreshKpis:ArrayCollection;
 
     public function ScorecardWrapper() {
     }
