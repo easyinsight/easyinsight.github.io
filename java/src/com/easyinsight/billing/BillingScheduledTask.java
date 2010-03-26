@@ -5,6 +5,7 @@ import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.database.Database;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountActivityStorage;
+import com.easyinsight.logging.LogClass;
 
 import java.util.Date;
 import java.util.Calendar;
@@ -54,6 +55,7 @@ public class BillingScheduledTask extends ScheduledTask {
     private void billCustomers(Date now, Connection conn) throws SQLException {
         Calendar c = Calendar.getInstance();
         int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
+        LogClass.info("Finding all accounts with day of month on " + dayOfMonth);
         String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR;
 
         if(dayOfMonth == c.getActualMaximum(Calendar.DAY_OF_MONTH)) {
@@ -64,6 +66,7 @@ public class BillingScheduledTask extends ScheduledTask {
         }
         Session s = Database.instance().createSession(conn);
         List results = s.createQuery(queryString).setInteger(0, dayOfMonth).list();
+        LogClass.info("Found " + results.size() + " billing results.");
         AccountActivityStorage as = new AccountActivityStorage();
         for(Object o : results) {
             Account a = (Account) o;
@@ -71,8 +74,10 @@ public class BillingScheduledTask extends ScheduledTask {
                 a.setAccountState(Account.CLOSED);
             else {
                 Date d = as.getTrialTime(a.getAccountID(), conn);
-                if(d == null || d.before(now))
+                if(d == null || d.before(now)) {
+                    LogClass.info("Billing for account: " + a.getAccountID());
                     s.save(a.bill());
+                }
 
             }
             s.save(a);
