@@ -54,6 +54,7 @@ public class BillingScheduledTask extends ScheduledTask {
 
     private void billCustomers(Date now, Connection conn) throws SQLException {
         Calendar c = Calendar.getInstance();
+        c.setTime(now);
         int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
         LogClass.info("Finding all accounts with day of month on " + dayOfMonth);
         String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR;
