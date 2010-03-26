@@ -37,7 +37,7 @@ public class AccountTest extends TestCase {
         }
         session.getTransaction().commit();
         session.close();
-        UserTransferObject initialUser = new UserTransferObject("testprouser", 0, "testprouser99@blah.com", "James Boe", null);
+        UserTransferObject initialUser = new UserTransferObject("testprouser", 0, "testprouser99@blah.com", "Boe", "James");
         AccountTransferObject accountTransferObject = new AccountTransferObject();
         accountTransferObject.setName("Test Pro Account");
         accountTransferObject.setAccountType(Account.PREMIUM);

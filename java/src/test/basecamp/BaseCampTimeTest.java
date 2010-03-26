@@ -1,5 +1,6 @@
 package test.basecamp;
 
+import com.easyinsight.database.EIConnection;
 import junit.framework.TestCase;
 import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampTimeSource;
@@ -38,7 +39,12 @@ public class BaseCampTimeTest extends TestCase {
         c.setUserName("apiuser");
         c.setPassword("@p!user");
 
-        DataSet dataSet = ds.getDataSet(c, ds.newDataSourceFields(c), new Date(), comp, null);
-        dataSet.toString();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            DataSet dataSet = ds.getDataSet(c, ds.newDataSourceFields(c), new Date(), comp, null, conn);
+            dataSet.toString();
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 }
