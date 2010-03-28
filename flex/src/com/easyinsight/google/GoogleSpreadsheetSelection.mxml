@@ -59,7 +59,8 @@
 
         private function retrieveSpreadsheets():void {
             //addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onComplete);
-            dataService.getAvailableGoogleSpreadsheets.send();            
+            dataService.getAvailableGoogleSpreadsheets.send();
+            addEventListener(AnalyzeEvent.ANALYZE, analyze);
         }
 
         private function processSpreadsheets():void {
@@ -69,6 +70,7 @@
             this.googleSpreadsheets = spreadsheets;
             spreadsheetTree.rowCount = spreadsheets.length;
             spreadsheetTree.visible = true;
+            stackIndex = 1;
         }
 
         private function attemptGoogleConnect():void {
@@ -104,7 +106,6 @@
         private function gotURL():void {
             var window:AuthSubNavWindow = new AuthSubNavWindow();
             window.googleURL = tokenService.getAuthSubURL.lastResult as String;
-            window.addEventListener(AnalyzeEvent.ANALYZE, analyze);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -112,6 +113,8 @@
         private function analyze(event:AnalyzeEvent):void {
             dispatchEvent(event);
         }
+
+        private var stackIndex:int = 0;
                 ]]>
 	</mx:Script>
 	<mx:RemoteObject id="dataService" destination="google">
@@ -122,24 +125,22 @@
         <mx:method name="getAuthSubURL" result="gotURL()"/>
     </mx:RemoteObject>
 	<mx:WipeRight id="wipeIn" duration="1000"/>
-	<mx:VBox id="coreContent" width="100%" height="100%">
-		<mx:HBox id="coreHBox" width="100%">
-			<mx:VBox verticalAlign="middle" height="100%">
-				<mx:Spacer/>
-				<mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
-				<mx:Spacer/>
-			</mx:VBox>
-		</mx:HBox>		
-		<mx:AdvancedDataGrid width="100%" height="100%"
-			id="spreadsheetTree" rowHeight="28" fontSize="12" rowCount="5" visible="false" showEffect="{wipeIn}"
-			defaultLeafIcon="{worksheetIcon}" folderOpenIcon="{spreadsheetIcon}" folderClosedIcon="{spreadsheetIcon}">
-            <mx:dataProvider>
-	            <mx:HierarchicalData source="{googleSpreadsheets}"/>
-	        </mx:dataProvider>
-			<mx:columns>
-				<mx:AdvancedDataGridColumn headerText="Name" dataField="title" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-				<mx:AdvancedDataGridColumn id="spFeed" width="80" sortable="false" headerText="" dataField="url" itemRenderer="com.easyinsight.google.SpreadsheetFeedButton"/>
-			</mx:columns>
-		</mx:AdvancedDataGrid>
-	</mx:VBox>
+	<mx:ViewStack id="coreContent" width="100%" height="100%" selectedIndex="{stackIndex}" resizeToContent="true">
+		<mx:HBox id="coreHBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ProgressBar id="progressBar" indeterminate="true" label="Retrieving the available spreadsheets..."/>
+		</mx:HBox>
+        <mx:Box width="100%" height="100%">
+            <mx:AdvancedDataGrid width="100%" height="100%"
+                id="spreadsheetTree" rowHeight="28" fontSize="12" rowCount="5" visible="false" showEffect="{wipeIn}"
+                defaultLeafIcon="{worksheetIcon}" folderOpenIcon="{spreadsheetIcon}" folderClosedIcon="{spreadsheetIcon}">
+                <mx:dataProvider>
+                    <mx:HierarchicalData source="{googleSpreadsheets}"/>
+                </mx:dataProvider>
+                <mx:columns>
+                    <mx:AdvancedDataGridColumn headerText="Name" dataField="title" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:AdvancedDataGridColumn id="spFeed" width="80" sortable="false" headerText="" dataField="url" itemRenderer="com.easyinsight.google.SpreadsheetFeedButton"/>
+                </mx:columns>
+            </mx:AdvancedDataGrid>
+        </mx:Box>
+	</mx:ViewStack>
 </mx:Canvas>
