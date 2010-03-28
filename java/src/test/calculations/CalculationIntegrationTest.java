@@ -418,6 +418,7 @@ public class CalculationIntegrationTest extends TestCase {
     private long createDataFeed(long accountID, UserUploadService userUploadService) {
         String csvText = "Customer,Revenue,Cost Number,Units\n\rAcme,400,100,20\n\r";
         long uploadID = userUploadService.addRawUploadData(accountID, "test.csv", csvText.getBytes());
-        return userUploadService.create(uploadID, "Test Feed").getFeedID();
+        //return userUploadService.create(uploadID, "Test Feed").getFeedID();
+        return uploadID;
     }
 }

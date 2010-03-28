@@ -1,8 +1,10 @@
 package com.easyinsight.scrubbing;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.database.Database;
 
 import javax.persistence.*;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -22,7 +24,7 @@ public class TextReplaceScrub extends DataScrub {
     @Column(name="case_sensitive")
     private boolean caseSensitive;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "analysis_item_id")
     private AnalysisItem analysisItem;
 
@@ -68,5 +70,22 @@ public class TextReplaceScrub extends DataScrub {
 
     public IScrubber createScrubber() {
         return new TextReplaceScrubber(this);
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        setAnalysisItem(replacementMap.get(getAnalysisItem().getAnalysisItemID()));
+    }
+
+    public void beforeSave() {
+        analysisItem.beforeSave();
+    }
+
+    public void afterLoad() {
+        setAnalysisItem((AnalysisItem) Database.deproxy(getAnalysisItem()));
+        analysisItem.afterLoad();
+    }
+
+    public void updateReplacementMap(Map<Long, AnalysisItem> replacementMap) throws CloneNotSupportedException {
+        replacementMap.put(analysisItem.getAnalysisItemID(), analysisItem.clone());
     }
 }

@@ -413,6 +413,12 @@ public class DataStorage {
         return this.version;
     }
 
+    public static void main(String[] args) {
+        NumericValue existingValue = new NumericValue(583978.5840958490);
+        String string = ((Long) ((NumericValue) existingValue).getValue().longValue()).toString();
+        System.out.println(string);
+    }
+
     /**
      * Clears out all data in the data source.
      *
@@ -833,7 +839,7 @@ public class DataStorage {
                 string = stringValue.getValue();
             } else if (value.type() == Value.NUMBER) {
                 NumericValue numericValue = (NumericValue) value;
-                string = String.valueOf(numericValue.toDouble());
+                string = numericValue.toString();
             } else if (value.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) value;
                 string = dateValue.getDate().toString();

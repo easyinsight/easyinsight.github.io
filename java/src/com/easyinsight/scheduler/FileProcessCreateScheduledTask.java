@@ -91,14 +91,12 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
         ev.setFeedID(0);
         ev.setFeedName(name);
         EventDispatcher.instance().dispatch(ev);
-        createFeed(conn,  rawUploadData.getUserData(), uploadFormat);
+        //createFeed(conn,  rawUploadData.getUserData(), uploadFormat);
     }
 
-    public void createFeed(Connection conn, byte[] bytes, UploadFormat uploadFormat) throws Exception {
+    public void createFeed(Connection conn, byte[] bytes, UploadFormat uploadFormat, List<AnalysisItem> fields) throws Exception {
         DataStorage tableDef = null;
         try {
-            UserUploadAnalysis userUploadAnalysis = uploadFormat.analyze(uploadID, bytes);
-            List<AnalysisItem> fields = userUploadAnalysis.getFields();
             PersistableDataSetForm dataSet = UploadAnalysisCache.instance().getDataSet(uploadID);
             if (dataSet == null) {
                 dataSet = uploadFormat.createDataSet(bytes, fields);

@@ -29,8 +29,9 @@ public abstract class UploadFormat implements Serializable {
     public static final int HORIZONTAL_HEADERS = 2;
 
     public UserUploadAnalysis analyze(long uploadID, byte[] data) {
-        IDataTypeGuesser dataTypeGuesser = createDataTypeGuesser(uploadID, data);
+        DataTypeGuesser dataTypeGuesser = createDataTypeGuesser(uploadID, data);
         UserUploadAnalysis userUploadAnalysis = new UserUploadAnalysis(dataTypeGuesser.createFeedItems());
+        userUploadAnalysis.setSampleMap(dataTypeGuesser.getGuessesMap());
         userUploadAnalysis.setSize(data.length);
         UploadAnalysisCache.instance().addUserUploadAnalysis(uploadID, userUploadAnalysis);
         return userUploadAnalysis;
@@ -40,8 +41,8 @@ public abstract class UploadFormat implements Serializable {
         return createInternalDataSet(data, null, fields);
     }
 
-    private IDataTypeGuesser createDataTypeGuesser(long uploadID, byte[] data) {
-        IDataTypeGuesser dataTypeGuesser = new DataTypeGuesser();
+    private DataTypeGuesser createDataTypeGuesser(long uploadID, byte[] data) {
+        DataTypeGuesser dataTypeGuesser = new DataTypeGuesser();
         PersistableDataSetForm dataSet = createInternalDataSet(data, dataTypeGuesser, null);
         UploadAnalysisCache.instance().addDataSet(uploadID, dataSet);
         return dataTypeGuesser;

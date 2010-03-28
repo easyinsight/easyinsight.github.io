@@ -1,5 +1,6 @@
 package com.easyinsight.solutions;
 
+import com.easyinsight.users.Account;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -50,30 +51,34 @@ public class SolutionUploadServlet extends HttpServlet {
 			out = res.getOutputStream();
 			out.print( "<response>" );
 
-            //String userName = req.getParameter("userName");
-            //String password = req.getParameter("password");
+            String userName = req.getParameter("userName");
+            String password = req.getParameter("password");
             long solutionID = Long.parseLong(req.getParameter("solutionID"));
 
-            //long userID = SecurityUtil.authenticate(userName, password);
-
-            // Iterate through the incoming request data
-			while( iter.hasNext() )
-			{
-				// Get the current item in the iteration
-				item = ( FileItem )iter.next();
+            if (SecurityUtil.authenticateToResponse(userName, password).getAccountType() == Account.ADMINISTRATOR) {
 
 
+                //long userID = SecurityUtil.authenticate(userName, password);
 
-                // If the current item is an HTML form field
-				if( !item.isFormField() )
-				{
-                    byte[] bytes = item.get();
+                // Iterate through the incoming request data
+                while( iter.hasNext() )
+                {
+                    // Get the current item in the iteration
+                    item = ( FileItem )iter.next();
 
-                    new SolutionService().addSolutionArchive(bytes, solutionID, item.getName());
 
-                    out.print("<successful/>");
-				}
-			}
+
+                    // If the current item is an HTML form field
+                    if( !item.isFormField() )
+                    {
+                        byte[] bytes = item.get();
+
+                        new SolutionService().addSolutionArchive(bytes, solutionID, item.getName());
+
+                        out.print("<successful/>");
+                    }
+                }
+            }
 
 			// Close off the response XML data and stream
 			out.print( "</response>" );

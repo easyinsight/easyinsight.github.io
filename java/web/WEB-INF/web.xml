@@ -68,6 +68,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ZipUploadServlet</servlet-name>
+        <display-name>ZipUploadServlet</display-name>
+        <servlet-class>com.easyinsight.analysis.ZipUploadServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>SolutionImageServlet</servlet-name>
         <display-name>SolutionImageServlet</display-name>
         <servlet-class>com.easyinsight.solutions.SolutionImageServlet</servlet-class>

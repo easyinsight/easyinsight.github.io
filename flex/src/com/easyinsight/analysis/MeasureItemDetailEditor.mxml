@@ -40,12 +40,16 @@
             return analysisMeasure;
         }
 
+        [Bindable]
+        private var highGood:String;
+
         override public function save(analysisItem:AnalysisItem):void {
             var analysisMeasure:AnalysisMeasure = analysisItem as AnalysisMeasure;
             var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
             if (measureConditionRange != null) {
                 analysisMeasure.measureConditionRange = measureRangeSelection.createMeasureConditionRange();
             }
+            analysisMeasure.highIsGood = highGroup.selectedValue == "yes";
             analysisMeasure.formattingConfiguration = formattingSetup.formattingConfiguration;
         }
 
@@ -55,8 +59,14 @@
                 var analysisMeasure:AnalysisMeasure = val as AnalysisMeasure;
                 measureConditionRange = analysisMeasure.measureConditionRange;
                 formattingConfiguration = analysisMeasure.formattingConfiguration;
+                this.highGood = analysisMeasure.highIsGood ? "yes" : "no";
             }
         }]]></mx:Script>
+    <mx:FormItem label="Are high values good?" direction="horizontal">
+        <mx:RadioButtonGroup id="highGroup" selectedValue="{highGood}"/>
+        <mx:RadioButton group="{highGroup}" label="Yes" value="yes"/>
+        <mx:RadioButton group="{highGroup}" label="No" value="no"/>
+    </mx:FormItem>
     <mx:FormItem label="Formatting: ">
         <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
     </mx:FormItem>

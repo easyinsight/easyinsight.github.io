@@ -61,7 +61,7 @@ public class TagsTest extends TestCase {
     private long createFirstDataFeed(long accountID, UserUploadService userUploadService) throws SQLException {
         String csvText = "Customer,Product,Revenue\nAcme,WidgetX,500\nAcme,WidgetY,200";
         long uploadID = userUploadService.addRawUploadData(accountID, "test.csv", csvText.getBytes());
-        UploadResponse uploadResponse = userUploadService.create(uploadID, "Test Feed");
+        /*UploadResponse uploadResponse = userUploadService.create(uploadID, "Test Feed");
         FeedStorage feedStorage = new FeedStorage();
         FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(uploadResponse.getFeedID());
         TagCloud tagCloud = new TagCloud();
@@ -71,6 +71,7 @@ public class TagsTest extends TestCase {
         tagCloud.setTags(tags);
         feedDefinition.setTags(tags);
         feedStorage.updateDataFeedConfiguration(feedDefinition);
-        return uploadResponse.getFeedID();
+        return uploadResponse.getFeedID();*/
+        return uploadID;
     }
 }

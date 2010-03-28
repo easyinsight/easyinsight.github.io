@@ -1,0 +1,187 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.kpi.ITutorialPanel" width="100%" height="100%" horizontalAlign="center"
+        paddingTop="20">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDateDimension;
+        import com.easyinsight.analysis.AnalysisDimension;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisLatitude;
+        import com.easyinsight.analysis.AnalysisList;
+        import com.easyinsight.analysis.AnalysisLongitude;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.AnalysisZipCode;
+
+
+        [Bindable]
+        private var labeledText:String;
+
+        [Bindable]
+        private var displayName:String;
+
+        [Bindable]
+        private var sampleValue1:String;
+        [Bindable]
+        private var sampleValue2:String;
+        [Bindable]
+        private var sampleValue3:String;
+
+        [Bindable]
+        private var initialGuessText:String;
+
+        private var _info:FieldUploadInfo;
+
+        private var _analysisItem:AnalysisItem;
+
+        public function get analysisItem():AnalysisItem {
+            return _analysisItem;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            var item:AnalysisItem = _info.guessedItem;
+            displayName = item.display;
+            labeledText = "This field was labeled as " + item.display + " in the underlying data.";
+            startType = String(item.getType());
+            if (_info.sampleValues.length > 0) {
+                sampleValue1 = _info.sampleValues.getItemAt(0) as String;
+            }
+            if (_info.sampleValues.length > 1) {
+                sampleValue2 = _info.sampleValues.getItemAt(1) as String;
+            }
+            if (_info.sampleValues.length > 2) {
+                sampleValue3 = _info.sampleValues.getItemAt(2) as String;
+            }
+            var type:String = "";
+            if (item.hasType(AnalysisItemTypes.DATE)) {
+                type = "date";
+            } else if (item.hasType(AnalysisItemTypes.LATITUDE)) {
+                type = "latitude coordinate";
+            } else if (item.hasType(AnalysisItemTypes.LONGITUDE)) {
+                type = "longitude coordinate";
+            } else if (item.hasType(AnalysisItemTypes.LIST)) {
+                type = "tag list";
+            } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                type = "measure";
+            } else if (item.hasType(AnalysisItemTypes.ZIP_CODE)) {
+                type = "zip code";
+            } else {
+                type = "grouping";
+            }
+            initialGuessText = "Our initial guess is that this field is a " + type + ". In case we got that wrong, here are the available types:";
+        }
+
+        private function onTypeChange():void {
+
+        }
+
+        public function saveValues():void {
+            var type:int = int(typeGroup.selectedValue);
+            var item:AnalysisItem;
+            if (type == AnalysisItemTypes.DIMENSION) {
+                item = new AnalysisDimension();
+            } else if (type == AnalysisItemTypes.MEASURE) {
+                item = new AnalysisMeasure();
+            } else if (type == (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)) {
+                item = new AnalysisDateDimension();
+            } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
+                item = new AnalysisList();
+            } else if (type == (AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION)) {
+                item = new AnalysisZipCode();
+            } else if (type == (AnalysisItemTypes.LONGITUDE | AnalysisItemTypes.DIMENSION)) {
+                item = new AnalysisLongitude();
+            } else if (type == (AnalysisItemTypes.LATITUDE | AnalysisItemTypes.DIMENSION)) {
+                item = new AnalysisLatitude();
+            }
+            item.concrete = _analysisItem.concrete;
+            item.key = _analysisItem.key;
+            item.displayName = displayNameInput.text;
+            _analysisItem = item;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        public function gotFocus():void {
+            
+        }
+
+        [Bindable]
+        private var startType:String;
+
+        public function set info(value:FieldUploadInfo):void {
+            _info = value;
+            _analysisItem = value.guessedItem;
+        }]]></mx:Script>
+    <mx:Label text="{labeledText}" fontSize="18"/>
+    <mx:HBox verticalAlign="middle">
+        <mx:Label text="What do you want to call this field?" fontSize="18"/>
+        <mx:TextInput id="displayNameInput" text="{displayName}" fontSize="18"/>
+    </mx:HBox>
+    <mx:HRule width="100%"/>
+    <mx:HBox verticalAlign="middle">
+        <mx:Label text="Here's a sample of the data we found for this field:" fontSize="18"/>
+        <mx:VBox>
+            <mx:Label text="{sampleValue1}" maxWidth="200"/>
+            <mx:Label text="{sampleValue2}" maxWidth="200"/>
+            <mx:Label text="{sampleValue3}" maxWidth="200"/>
+        </mx:VBox>
+    </mx:HBox>
+    <mx:HRule width="100%"/>
+    <mx:TextArea text="{initialGuessText}" fontSize="18" width="700" backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" height="75"/>
+    <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()" selectedValue="{startType}"/>
+    <mx:Grid>
+        <mx:GridRow>
+            <mx:GridItem>
+                <mx:RadioButton label="Grouping" groupName="typeGroup" value="{String(AnalysisItemTypes.DIMENSION)}" fontSize="18"/>
+            </mx:GridItem>
+            <mx:GridItem>
+                <mx:RadioButton label="Measure" groupName="typeGroup" value="{String(AnalysisItemTypes.MEASURE)}" fontSize="18"/>
+            </mx:GridItem>
+            <mx:GridItem>
+                <mx:RadioButton label="Date" groupName="typeGroup" value="{String(AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)}" fontSize="18"/>
+            </mx:GridItem>
+            <mx:GridItem>
+                <mx:RadioButton label="Tag List" groupName="typeGroup" value="{AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
+            </mx:GridItem>
+        </mx:GridRow>
+        <mx:GridRow>
+            <mx:GridItem>
+                <mx:RadioButton label="Longitude" groupName="typeGroup" value="{AnalysisItemTypes.LONGITUDE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
+            </mx:GridItem>
+            <mx:GridItem>
+                <mx:RadioButton label="Latitude" groupName="typeGroup" value="{AnalysisItemTypes.LATITUDE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
+            </mx:GridItem>
+            <mx:GridItem>
+                <mx:RadioButton label="Zip Code" groupName="typeGroup" value="{AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
+            </mx:GridItem>
+        </mx:GridRow>
+    </mx:Grid>
+    <!--<mx:ViewStack>
+        <mx:VBox>
+            <mx:Label text="Groupings provide you with a way to "/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text="What do you want as the default aggregation?"/>
+            
+            <mx:Label text="How do you want to format values?"/>
+            <mx:Label text="Is it good if this value is high?"/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text=""/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text=""/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text=""/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text=""/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Label text=""/>
+        </mx:VBox>
+    </mx:ViewStack>-->
+</mx:VBox>

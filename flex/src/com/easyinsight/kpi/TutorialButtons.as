@@ -26,6 +26,20 @@ public class TutorialButtons extends Canvas {
     private var _nextEnabled:Boolean;
     private var _finishEnabled:Boolean;
 
+    private var _showExpertMode:Boolean = true;
+
+
+    [Bindable(event="showExpertModeChanged")]
+    public function get showExpertMode():Boolean {
+        return _showExpertMode;
+    }
+
+    public function set showExpertMode(value:Boolean):void {
+        if (_showExpertMode == value) return;
+        _showExpertMode = value;
+        dispatchEvent(new Event("showExpertModeChanged"));
+    }
+
     private var _tutorialPanel:ITutorialPanel;
 
     public function set tutorialPanel(value:ITutorialPanel):void {
@@ -68,6 +82,7 @@ public class TutorialButtons extends Canvas {
         expertBox.setStyle("paddingBottom", 8);
         expertBox.setStyle("paddingLeft", 8);
         expertBox.addChild(expertButton);
+        BindingUtils.bindProperty(expertButton, "visible", this, "showExpertMode");
         addChild(expertBox);
         var hbox:HBox = new HBox();
         hbox.percentWidth = 100;

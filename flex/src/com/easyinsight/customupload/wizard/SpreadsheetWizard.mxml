@@ -1,0 +1,131 @@
+<?xml version="1.0" ?>
+<listing:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.*"
+                        xmlns:kpi="com.easyinsight.kpi.*" xmlns:wizard="com.easyinsight.customupload.wizard.*"
+                        xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
+                        width="100%" height="100%" implements="com.easyinsight.framework.IFullScreenPage">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.customupload.UploadResponse;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.kpi.KPITutorialEvent;
+        import com.easyinsight.kpi.TutorialButtons;
+        import com.easyinsight.kpi.TutorialPanel;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+
+        private var _uploadContext:UploadContext;
+
+        private var _fields:ArrayCollection;
+
+        public function set uploadContext(value:UploadContext):void {
+            _uploadContext = value;
+        }
+
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
+
+        private var fieldPanels:ArrayCollection;
+
+        private function next(event:KPITutorialEvent):void {
+            panelIndex++;
+        }
+
+        private function back(event:KPITutorialEvent):void {
+            panelIndex--;
+        }
+
+        [Bindable]
+        private var panelIndex:int;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            fieldPanels = new ArrayCollection();
+            for (var i:int = 0; i < _fields.length; i++) {
+                var field:FieldUploadInfo = _fields.getItemAt(i) as FieldUploadInfo;
+                var tutorialPanel:TutorialPanel = new TutorialPanel();
+                tutorialPanel.percentHeight = 100;
+                tutorialPanel.percentWidth = 100;
+                var panel:SpreadsheetTutorialWindow = new SpreadsheetTutorialWindow();
+                fieldPanels.addItem(panel);
+                panel.info = field;
+                tutorialPanel.addChild(panel);
+                var controls:TutorialButtons = new TutorialButtons();
+                controls.showExpertMode = false;
+                controls.backEnabled = true;
+                controls.addEventListener(KPITutorialEvent.PREVIOUS, back);
+                controls.addEventListener(KPITutorialEvent.NEXT, next);
+                controls.nextEnabled = i < (_fields.length - 1);
+                controls.finishEnabled = true;
+                controls.addEventListener(KPITutorialEvent.FINISH, onFinish);
+                controls.addEventListener(KPITutorialEvent.CANCEL, onCancel);
+                controls.tutorialPanel = panel;
+                tutorialPanel.setStyle("hideEffect", leftEffect);
+                tutorialPanel.setStyle("showEffect", leftEffect);
+                tutorialPanel.addChild(controls);
+                viewStack.addChild(tutorialPanel);
+            }
+        }
+
+        private function onFinish(event:KPITutorialEvent):void {
+            var fields:ArrayCollection = new ArrayCollection();
+            for each (var panel:SpreadsheetTutorialWindow in fieldPanels) {
+                fields.addItem(panel.analysisItem);
+            }
+            ProgressAlert.alert(this, "Creating the data source...", null, uploadService.createDataSource);
+            uploadService.createDataSource.send(dataSourceName, _uploadContext, fields);
+        }
+
+        private function onChange(event:Event):void {
+
+        }
+
+        private var dataSourceName:String = "Blah";
+
+        private function createdDataSource():void {
+            var response:UploadResponse = uploadService.createDataSource.lastResult as UploadResponse;
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID, dataSourceName)));
+        }
+
+        private function onCancel(event:Event):void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+        ]]></mx:Script>
+    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="createDataSource" result="createdDataSource()"/>
+    </mx:RemoteObject>
+    <mx:Canvas width="100%" height="100%">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="0x000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="0xAAAAAA"/>
+        </mx:VBox>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ViewStack selectedIndex="{panelIndex}" change="onChange(event)"
+                          id="viewStack" resizeToContent="true" width="800" height="500" creationPolicy="all"
+                          backgroundColor="0xFFFFFF">
+                <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+                    <wizard:DataSourceNamePanel id="dsNamePanel"/>
+                    <kpi:TutorialButtons tutorialPanel="{dsNamePanel}" backEnabled="false" nextEnabled="true"
+                                         finishEnabled="false"
+                                         showExpertMode="false"
+                                         kpiTutorialNext="dataSourceName = dsNamePanel.dataSourceName; panelIndex++"
+                                         kpiTutorialCancel="onCancel(event)"/>
+                </kpi:TutorialPanel>
+                <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+                    <wizard:SpreadsheetFieldIntro id="explainPanel"/>
+                    <kpi:TutorialButtons tutorialPanel="{explainPanel}" backEnabled="true" nextEnabled="true"
+                                         finishEnabled="true"
+                                         showExpertMode="false"
+                                         kpiTutorialNext="panelIndex++"
+                                         kpiTutorialPrevious="panelIndex--"
+                                         kpiTutorialCancel="onCancel(event)"/>
+                </kpi:TutorialPanel>
+
+            </mx:ViewStack>
+        </mx:Box>
+    </mx:Canvas>
+
+</listing:FullScreenPage>

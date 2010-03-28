@@ -33,6 +33,7 @@
                 } else {
                     analysisItem = new AnalysisMeasure();
                 }
+                analysisItem.concrete = false;
                 var namedKey:NamedKey = new NamedKey();
                 namedKey.name = nameInput.text;
                 analysisItem.key = namedKey;

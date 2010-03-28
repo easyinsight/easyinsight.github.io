@@ -92,19 +92,13 @@ public class DataSet implements Serializable {
         for (IRow row : rows) {
             Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>();
             for (AnalysisDimension dimension : ourDimensions) {
-                Value dimensionValue = row.getValue(dimension.getKey());
-                if (dimensionValue == null || dimensionValue.type() == Value.EMPTY) {
-                    dimensionValue = row.getValue(dimension.createAggregateKey());
-                }
-                compositeDimensionKey.put(dimension.getKey(), dimensionValue);
+                Value dimensionValue = row.getValue(dimension.createAggregateKey());
+                compositeDimensionKey.put(dimension.createAggregateKey(), dimensionValue);
             }
             for (AnalysisItem column : paredDownColumns) {
                 if (column.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
-                    Value value = row.getValue(measure.getKey());
-                    if (value == null || value.type() == Value.EMPTY) {
-                        value = row.getValue(measure.createAggregateKey());
-                    }
+                    Value value = row.getValue(measure.createAggregateKey());
                     if (value != null) {
                         listTransform.groupData(compositeDimensionKey, measure, value, row);
                     }
@@ -112,9 +106,6 @@ public class DataSet implements Serializable {
                     AnalysisDimension analysisDimension = (AnalysisDimension) column;
                     Value transformedValue = compositeDimensionKey.get(analysisDimension.getKey());
                     if (transformedValue == null) {
-                        transformedValue = row.getValue(analysisDimension.getKey());
-                    }
-                    if (transformedValue == null || transformedValue.type() == Value.EMPTY) {
                         transformedValue = row.getValue(analysisDimension.createAggregateKey());
                     }
                     if (transformedValue != null) {

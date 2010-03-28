@@ -88,6 +88,15 @@
                                                 analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="ZipCode">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <analysis:ZipCodeDetailEditor addedToStage="detailEditor = zipCodeEditor"
+                                                id="zipCodeEditor"
+                                                dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                                measureObjects="{measureObjects}"
+                                                analysisItem="{startingAnalysisItem}"/>
+            </mx:AddChild>
+        </mx:State>
         <mx:State name="Date">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:DetailDateEditor addedToStage="detailEditor = dateDetailEditor" id="dateDetailEditor"
@@ -155,8 +164,7 @@
         [Bindable]
         private var hidden:Boolean;
 
-        [Bindable]
-        private var highGood:String;
+
 
         [Bindable]
         private var allItems:ArrayCollection;
@@ -199,8 +207,7 @@
             this.displayName = analysisItem.display;
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
-            this.links = analysisItem.links;
-            this.highGood = analysisItem.highIsGood ? "yes" : "no";
+            this.links = analysisItem.links;            
             this.existingFilters = analysisItem.filters;
         }
 
@@ -267,7 +274,7 @@
         }
 
         protected function getGroupingOptions():ArrayCollection {
-            return new ArrayCollection(["Grouping", "Range", "Date", "Tags", "Latitude", "Longitude"]);
+            return new ArrayCollection(["Grouping", "Range", "Date", "Tags", "Latitude", "Longitude", "Zip Code"]);
         }
 
         protected function getMeasureOptions():ArrayCollection {
@@ -289,8 +296,7 @@
                 analysisItem.displayName = fieldNameInput.text;
                 analysisItem.key = key;
                 analysisItem.hidden = hiddenCheckbox.selected;
-                analysisItem.links = links;
-                analysisItem.highIsGood = highGroup.selectedValue == "yes";
+                analysisItem.links = links;                
                 analysisItem.filters = transformContainer.getFilterDefinitions();
                 detailEditor.save(analysisItem);
                 dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
@@ -351,6 +357,9 @@
                 case "Longitude":
                     currentState = "Longitude";
                     break;
+                case "Zip Code":
+                    currentState = "ZipCode";
+                    break;
             }
         }
 
@@ -403,11 +412,6 @@
                 </mx:FormItem>
                 <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
                     <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Are high values good?" direction="horizontal">
-                    <mx:RadioButtonGroup id="highGroup" selectedValue="{highGood}"/>
-                    <mx:RadioButton group="{highGroup}" label="Yes" value="yes"/>
-                    <mx:RadioButton group="{highGroup}" label="No" value="no"/>
                 </mx:FormItem>
                 <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
                     <mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}"

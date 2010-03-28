@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -17,12 +17,19 @@ import java.util.List;
 @Entity
 @Table(name="data_scrub")
 @Inheritance(strategy=InheritanceType.JOINED)
-public abstract class DataScrub implements Serializable {
+public abstract class DataScrub implements Serializable, Cloneable {
     @Column(name="data_scrub_id")
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     private long dataScrubID;
 
     public DataScrub() {
+    }
+
+    @Override
+    public DataScrub clone() throws CloneNotSupportedException {
+        DataScrub dataScrub = (DataScrub) super.clone();
+        dataScrub.setDataScrubID(0);
+        return dataScrub;
     }
 
     public long getDataScrubID() {
@@ -39,6 +46,22 @@ public abstract class DataScrub implements Serializable {
     }
 
     public void hateHibernate() {
+        
+    }
+
+    public void beforeSave() {
+
+    }
+
+    public void afterLoad() {
+        
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        
+    }
+
+    public void updateReplacementMap(Map<Long, AnalysisItem> replacementMap) throws CloneNotSupportedException {
         
     }
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.kpi.ITutorialPanel" horizontalAlign="center"
+         verticalAlign="middle"
+        creationComplete="validators = [ nameValidator ]" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import mx.validators.Validator;
+
+        private var validators:Array;
+
+        public var dataSourceName:String = "";
+        
+        public function saveValues():void {
+            dataSourceName = dsNameInput.text;
+        }
+
+        public function validate():Boolean {
+            var results:Array = Validator.validateAll(validators);
+            if (results.length > 0) {
+                dsNameInput.setFocus();
+                dsNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        public function gotFocus():void {
+        }]]></mx:Script>
+    <mx:Label text="What do you want to name this data source?" fontSize="20"/>
+    <mx:TextInput id="dsNameInput" fontSize="20" width="400"/>
+    <mx:StringValidator id="nameValidator" minLength="3" maxLength="30" property="text" source="{dsNameInput}"/>
+</mx:VBox>

@@ -17,6 +17,7 @@ package com.easyinsight.analysis
         public static const STEP:int = 8192;
         public static const LATITUDE:int = 16384;
         public static const LONGITUDE:int = 32768;
+        public static const ZIP_CODE:int = 65536;
 
 		public static const YEAR_LEVEL:int = 1;
 		public static const MONTH_LEVEL:int = 2;

@@ -70,7 +70,7 @@ public class ExcelUploadFormat extends UploadFormat {
 
             List<Value[]> gridList = new ArrayList<Value[]>();
 
-            Iterator<Row> rit = (Iterator<Row>)sheet.rowIterator();
+            Iterator<Row> rit = sheet.rowIterator();
             if (orientation == VERTICAL_HEADERS) {
                 rit.next();
             }

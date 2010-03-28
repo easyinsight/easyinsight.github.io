@@ -345,6 +345,15 @@ public class AnalysisDefinition implements Cloneable {
             addedItems.add(clonedItem);
         }
 
+        List<DataScrub> scrubs = new ArrayList<DataScrub>();
+        if (getDataScrubs() != null) {
+            for (DataScrub scrub : getDataScrubs()) {
+                scrubs.add(scrub.clone());
+                scrub.updateReplacementMap(replacementMap);                
+            }
+        }
+        analysisDefinition.setDataScrubs(scrubs);
+
         Collection<AnalysisItem> reportItems = createBlazeDefinition().getAllAnalysisItems();
         for (AnalysisItem baseItem : reportItems) {
             if (replacementMap.get(baseItem.getAnalysisItemID()) == null) {
@@ -391,6 +400,9 @@ public class AnalysisDefinition implements Cloneable {
         }
         for (FilterDefinition filter : filterDefinitions) {
             filter.updateIDs(replacementMap);
+        }
+        for (DataScrub dataScrub : scrubs) {
+            dataScrub.updateIDs(replacementMap);
         }
         analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap, keyMap);
         analysisDefinition.setReportStructure(clonedStructure);
@@ -449,7 +461,7 @@ public class AnalysisDefinition implements Cloneable {
         List<DataScrub> newScrubs = new ArrayList<DataScrub>();
         if (dataScrubs != null) {
             for (DataScrub dataScrub : dataScrubs) {
-                dataScrub.hateHibernate();
+                dataScrub.afterLoad();
                 newScrubs.add(dataScrub);
             }
         }

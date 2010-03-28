@@ -12,6 +12,7 @@
                         <system:HealthInfoDisplay/>
                         <mx:Button label="Thread Dump" click="dumpThreads()"/>
                         <mx:Button label="Create Data Source" click="externalSources()"/>
+                        <mx:Button label="Update Zip Geocodes" click="updateZipCodes()"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Solutions">
                         <solutions:SolutionAdministration width="100%" height="100%"/>
@@ -26,6 +27,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
+        import com.easyinsight.administration.UpdateZipsWindow;
         import com.easyinsight.customupload.UploadExternalSource;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
@@ -37,6 +39,12 @@
         import mx.rpc.AsyncToken;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
+
+        private function updateZipCodes():void {
+            var window:UpdateZipsWindow = new UpdateZipsWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
 
         private function handleAuthentication():void {
             var authResult:UserServiceResponse = authAdminService.authenticateAdmin.lastResult as UserServiceResponse;

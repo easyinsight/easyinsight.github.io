@@ -106,8 +106,6 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
 
-    //private BillingParty billingParty;
-
     public List<AccountCreditCardBillingInfo> getBillingInfo() {
         return billingInfo;
     }
@@ -123,15 +121,7 @@ public class Account {
     public void setApiEnabled(boolean apiEnabled) {
         this.apiEnabled = apiEnabled;
     }
-
-    /*public BillingParty getBillingParty() {
-        return billingParty;
-    }
-
-    public void setBillingParty(BillingParty billingParty) {
-        this.billingParty = billingParty;
-    }*/
-
+    
     public String getName() {
         return name;
     }

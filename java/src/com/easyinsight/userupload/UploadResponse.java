@@ -1,5 +1,7 @@
 package com.easyinsight.userupload;
 
+import java.util.List;
+
 /**
  * User: James Boe
  * Date: Jun 14, 2008
@@ -9,20 +11,27 @@ public class UploadResponse {
     private boolean successful;
     private String failureMessage;
     private long feedID;
-    private long initialAnalysisID;
+    private List<FieldUploadInfo> infos;
 
     public UploadResponse(String failureMessage) {
         this.successful = false;
         this.failureMessage = failureMessage;
     }
 
-    public UploadResponse(long feedID, long initialAnalysisID) {
+    public UploadResponse(long feedID) {
         this.successful = true;
         this.feedID = feedID;
-        this.initialAnalysisID = initialAnalysisID;
     }
 
     public UploadResponse() {
+    }
+
+    public List<FieldUploadInfo> getInfos() {
+        return infos;
+    }
+
+    public void setInfos(List<FieldUploadInfo> infos) {
+        this.infos = infos;
     }
 
     public boolean isSuccessful() {
@@ -47,13 +56,5 @@ public class UploadResponse {
 
     public void setFeedID(long feedID) {
         this.feedID = feedID;
-    }
-
-    public long getInitialAnalysisID() {
-        return initialAnalysisID;
-    }
-
-    public void setInitialAnalysisID(long initialAnalysisID) {
-        this.initialAnalysisID = initialAnalysisID;
     }
 }

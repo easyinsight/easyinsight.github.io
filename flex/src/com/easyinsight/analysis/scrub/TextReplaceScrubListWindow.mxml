@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+        creationComplete="setupListeners()">
 	<mx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;
@@ -14,23 +15,28 @@
 			
 			private var analysisItems:ArrayCollection;
 			private var feedID:int;
+
+            private var report:AnalysisDefinition;
 			
 			public function initState(analysisItems:ArrayCollection, feedID:int):void {
 				this.analysisItems = analysisItems;
 				this.feedID = feedID;
 				this.scrubEditorFactory = new ScrubEditorFactory(analysisItems, feedID);
 			}
+
+            private function setupListeners():void {
+                addEventListener(DataScrubEvent.DELETED_SCRUB, onDelete);
+            }
+
+            private function onDelete(event:DataScrubEvent):void {
+                report.dataScrubs.removeItemAt(report.dataScrubs.getItemIndex(event));
+            }
 			
 			public function set definition(definition:AnalysisDefinition):void {
-				var textScrubs:ArrayCollection = new ArrayCollection();
-				if (definition.dataScrubs != null) {
-					for each (var scrub:DataScrub in definition.dataScrubs) {
-						if (scrub is TextReplaceScrub) {
-							textScrubs.addItem(scrub);
-						}
-					}
-				}
-				this.scrubs = textScrubs;
+                if (definition.dataScrubs == null) {
+                    definition.dataScrubs = new ArrayCollection();
+                }
+				this.scrubs = definition.dataScrubs;				
 			}
 			
 			private function closeWindow():void {

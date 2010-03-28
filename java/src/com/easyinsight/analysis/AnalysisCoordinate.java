@@ -4,12 +4,12 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
+import com.easyinsight.database.Database;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.text.NumberFormat;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -28,6 +28,27 @@ public abstract class AnalysisCoordinate extends AnalysisDimension {
     }
 
     public AnalysisCoordinate() {
+    }
+
+    @OneToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    @JoinColumn(name="analysis_zip_id")
+    private AnalysisZipCode analysisZipCode;
+
+    public AnalysisZipCode getAnalysisZipCode() {
+        return analysisZipCode;
+    }
+
+    public void setAnalysisZipCode(AnalysisZipCode analysisZipCode) {
+        this.analysisZipCode = analysisZipCode;
+    }
+
+    @Override
+    public void afterLoad() {
+        super.afterLoad();
+        if (analysisZipCode != null) {
+            setAnalysisZipCode((AnalysisZipCode) Database.deproxy(getAnalysisZipCode()));
+            analysisZipCode.afterLoad();
+        }
     }
 
     @Column(name="precision_value")
@@ -64,5 +85,14 @@ public abstract class AnalysisCoordinate extends AnalysisDimension {
         String resultString = nf.format(resultValue);
         result = new StringValue(resultString);
         return result;
+    }
+
+    @Override
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
+        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything);
+        if (analysisZipCode != null) {
+            items.add(analysisZipCode);
+        }
+        return items;
     }
 }

@@ -22,10 +22,8 @@
         </mx:State>
     </solutions:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.customupload.UserUpload;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
@@ -40,12 +38,12 @@
                 
         private function install():void {
             var userUpload:UserUpload = UserUpload(PopUpManager.createPopUp(this, UserUpload, true));
-            userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+            userUpload.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete);
             PopUpUtil.centerPopUp(userUpload);
         }
 
-        private function uploadConfigComplete(event:UploadConfigEvent):void {
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID, event.name)));
+        private function uploadConfigComplete(event:AnalyzeEvent):void {
+            dispatchEvent(event);
         }
 ]]></mx:Script>
     <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
@@ -58,11 +56,6 @@
                              borderThickness="0" editable="false" height="170" fontSize="16"
                              text="Have an Excel spreadsheet or a flat file you want to upload? You can get started with Easy Insight in a couple of clicks! If you don't already have an account, you can sign up for a free account with Easy Insight to upload flat files. The full power of enterprise business intelligence is yours for the taking, all delivered with incredible ease of use."/>
                 </mx:Box>
-                <!--<mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:VBox horizontalAlign="center">
-                    <mx:Label text="Looking for tips, tricks, and documentation?" fontSize="16"/>
-                    <mx:LinkButton label="Look at Google Analytics blog posts" fontSize="16" textDecoration="underline" click="navigateToURL(new URLRequest('http://jamesboe.blogspot.com/search/label/Google%20Analytics'), '_blank')"/>
-                </mx:VBox>-->
                 <mx:HRule width="100%" strokeColor="#3370ce"/>
                 <mx:Box id="authBox"/>
                 <mx:VBox id="controlsBox" paddingTop="25" paddingBottom="30">

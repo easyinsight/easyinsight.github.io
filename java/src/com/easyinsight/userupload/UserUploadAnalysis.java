@@ -1,8 +1,12 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.core.Key;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: James Boe
@@ -13,6 +17,7 @@ public class UserUploadAnalysis {
     private boolean successful;
     private String failureMessage;
     private List<AnalysisItem> fields;
+    private Map<Key, Set<String>> sampleMap = new HashMap<Key, Set<String>>();
     private GridMapping gridMapping;
     private long size;
 
@@ -27,6 +32,14 @@ public class UserUploadAnalysis {
     public UserUploadAnalysis(List<AnalysisItem> fields) {
         this.successful = true;
         this.fields = fields;
+    }
+
+    public Map<Key, Set<String>> getSampleMap() {
+        return sampleMap;
+    }
+
+    public void setSampleMap(Map<Key, Set<String>> sampleMap) {
+        this.sampleMap = sampleMap;
     }
 
     public GridMapping getGridMapping() {

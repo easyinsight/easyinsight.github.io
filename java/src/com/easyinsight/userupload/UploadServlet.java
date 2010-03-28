@@ -116,7 +116,7 @@ public class UploadServlet extends HttpServlet
 			LogClass.error(fue);
 		} catch( IOException ioe ) {
 			LogClass.error(ioe);
-		} catch( Exception e ) {
+		} catch( Throwable e ) {
 			LogClass.error(e);
 		}
 	}

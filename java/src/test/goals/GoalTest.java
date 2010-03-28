@@ -36,11 +36,12 @@ public class GoalTest extends TestCase {
         String csvText = "Revenue,When\n500,2009-01-25\n600,2009-01-26";
         UserUploadService userUploadService = new UserUploadService();
         long uploadID = userUploadService.addRawUploadData(userID, "blah.csv", csvText.getBytes());
-        UploadResponse uploadResponse = userUploadService.create(uploadID, "Default Test Data Source");
+        /*UploadResponse uploadResponse = userUploadService.create(uploadID, "Default Test Data Source");
         if (!uploadResponse.isSuccessful()) {
             throw new RuntimeException(uploadResponse.getFailureMessage());
         }
-        return uploadResponse.getFeedID();
+        return uploadResponse.getFeedID();*/
+        throw new UnsupportedOperationException();
     }
 
     private AnalysisItem findAnalysisItem(long dataSourceID, String name) throws SQLException {

@@ -3,6 +3,10 @@
 	creationComplete="doCreationComplete(event)" title="Data Source Creation">
 	<mx:Script>
     <![CDATA[
+        import com.easyinsight.customupload.wizard.FlatFileUploadContext;
+        import com.easyinsight.customupload.wizard.SpreadsheetSetupSource;
+        import com.easyinsight.genredata.AnalyzeEvent;
+
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
         import com.easyinsight.framework.User;
@@ -15,8 +19,6 @@
         [Embed(source="../../../../assets/excelexample.PNG")]
         private var excelImage:Class;
 
-        private var validators:Array;
-
         private var uploadID:Number;
 
         // Called when the "Browse" button is clicked
@@ -27,21 +29,21 @@
         }
 
         private function next():void {
-            var results:Array = Validator.validateAll(validators);
-            if (results.length > 0) {
-                Alert.show("You must enter a data source name of at least three characters.");
-            } else {
+
                 nextButton.enabled = false;
                 finishingSection.visible = true;
-                uploadService.create.send(uploadID, feedName.text);
-            }
-            //dispatchEvent(new UserUploadEvent(UserUploadEvent.USER_UPLOAD_COMPLETE, uploadID));
+                var context:FlatFileUploadContext = new FlatFileUploadContext();
+                context.uploadID = uploadID;
+                uploadService.analyzeUpload.send(context);
+            
         }
 
         private function created():void {
-            var uploadResponse:UploadResponse = uploadService.create.lastResult as UploadResponse;
+            var uploadResponse:UploadResponse = uploadService.analyzeUpload.lastResult as UploadResponse;
             if (uploadResponse.successful) {
-                dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadResponse.feedID, feedName.text));
+                var context:FlatFileUploadContext = new FlatFileUploadContext();
+                context.uploadID = uploadID;
+                dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
                 PopUpManager.removePopUp(this);
             } else {
                 Alert.show(uploadResponse.failureMessage);
@@ -63,7 +65,6 @@
         // Called when the application has completed startup
         public function doCreationComplete( event:Event ):void
         {
-            validators = [ nameValidator ];
             // Listen for when the user has selected a file
             // Listen for when the file upload is complete
             file.addEventListener( Event.SELECT, doSelect );
@@ -78,8 +79,6 @@
         // Called when the user selects a file from disk
         public function doSelect( event:Event ):void
         {
-            // Puts the name of the selected file into the UI
-            txtPhoto.text = file.name;
             uploadButton.enabled = true;
         }
 
@@ -111,15 +110,11 @@
     ]]>
 	</mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
-		<mx:method name="create" result="created()"/>
+		<mx:method name="analyzeUpload" result="created()"/>
 	</mx:RemoteObject>
 	<mx:HBox width="100%" height="100%" id="coreVBox" styleName="TitleWindowContents">
         <mx:Form id="coreForm" paddingRight="0">
-            <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="feedName"/>
-            </mx:FormItem>
             <mx:FormItem label="Select a file to upload:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="txtPhoto" editable="false"/>
                 <mx:Button label="Browse..." click="doBrowse( event )" />
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">
@@ -137,7 +132,7 @@
             </mx:FormItem>
             <mx:FormItem label="" direction="vertical" visible="false" id="finishingSection">
                 <mx:HBox horizontalAlign="center">
-                    <mx:ProgressBar indeterminate="true" label="Creating the data source..."/>
+                    <mx:ProgressBar indeterminate="true" label="Processing the data you uploaded..."/>
                 </mx:HBox>
             </mx:FormItem>
         </mx:Form>
@@ -148,5 +143,4 @@
             <mx:TextArea width="260" height="50" text="You may experience unexpected results if the data does not match that pattern." borderThickness="0" backgroundAlpha="0" editable="false"/>
 	    </mx:VBox>
 	</mx:HBox>
-    <mx:StringValidator id="nameValidator" source="{feedName}" minLength="3" property="text"/>
 </util:EITitleWindow>

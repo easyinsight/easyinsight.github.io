@@ -44,37 +44,6 @@ public class UserUploadService implements IUserUploadService {
     public UserUploadService() {
     }
 
-    public UploadResponse newAirSource(String dataSourceName, String fileName, byte[] fileBytes) {
-        long uploadID = addRawUploadData(SecurityUtil.getUserID(), fileName, fileBytes);
-        EIConnection conn = Database.instance().getConnection();
-        UploadResponse uploadResponse;
-        try {
-            conn.setAutoCommit(false);
-            UploadFormat uploadFormat = new UploadFormatTester().determineFormat(fileBytes);
-            if (uploadFormat == null) {
-                uploadResponse = new UploadResponse("Sorry, we couldn't figure out what type of file you tried to upload. Supported types are Excel 1997-2003 and delimited text files.");
-            } else {
-                FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
-                task.setUploadID(uploadID);
-                task.setName(dataSourceName);
-                task.setStatus(ScheduledTask.SCHEDULED);
-                task.setExecutionDate(new Date());
-                task.setUserID(SecurityUtil.getUserID());
-                task.setAccountID(SecurityUtil.getAccountID());
-                task.createFeed(conn, fileBytes, uploadFormat);
-                uploadResponse = new UploadResponse(task.getFeedID(), task.getAnalysisID());
-            }
-            conn.commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            uploadResponse = new UploadResponse("Something caused an internal error in the processing of the uploaded file.");
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return uploadResponse;
-    }
-
     public List<SolutionInstallInfo> copyDataSource(long dataSourceID, String newName, boolean copyData, boolean includeChildren) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();
@@ -275,59 +244,61 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public UploadResponse create(long uploadID, String name) {
+    // three contexts here
+    // excel/csv upload
+    // google documents
+    // unchecked API
+
+    public UploadResponse analyzeUpload(UploadContext uploadContext) {
         UploadResponse uploadResponse;
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            RawUploadData rawUploadData = retrieveRawData(uploadID, conn);
-            UploadFormat uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.userData);
-            if (uploadFormat == null) {
-                uploadResponse = new UploadResponse("Sorry, we couldn't figure out what type of file you tried to upload. Supported types are Excel 1997-2003 and delimited text files.");
+            
+            String validation = uploadContext.validateUpload(conn);
+
+            if (validation != null) {
+                uploadResponse = new UploadResponse(validation);
             } else {
-                FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
-                task.setUploadID(uploadID);
-                task.setName(name);
-                task.setStatus(ScheduledTask.SCHEDULED);
-                task.setExecutionDate(new Date());
-                task.setUserID(SecurityUtil.getUserID());
-                task.setAccountID(SecurityUtil.getAccountID());
-                /*if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
-                    Scheduler.instance().saveTask(task, conn);
-                    AsyncCreatedEvent e = new AsyncCreatedEvent();
-                    e.setTask(task);
-                    e.setUserID(SecurityUtil.getUserID());
-                    e.setFeedName(name);
-                    e.setFeedID(0);
-                    EventDispatcher.instance().dispatch(e);
-                    uploadResponse = new UploadResponse("Your file has been uploaded and verified, and will be processed shortly.");
+                List<AnalysisItem> fields = uploadContext.guessFields();
+                List<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
+                for (AnalysisItem field : fields) {
+                    FieldUploadInfo fieldUploadInfo = new FieldUploadInfo();
+                    fieldUploadInfo.setGuessedItem(field);
+                    fieldUploadInfo.setSampleValues(uploadContext.getSampleValues(field.getKey()));
+                    fieldInfos.add(fieldUploadInfo);
                 }
-                else {*/
-                task.createFeed(conn, rawUploadData.getUserData(), uploadFormat);
-                uploadResponse = new UploadResponse(task.getFeedID(), task.getAnalysisID());
-                //}
+                uploadResponse = new UploadResponse();
+                uploadResponse.setSuccessful(true);
+                uploadResponse.setInfos(fieldInfos);
             }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        }
+        return uploadResponse;
+    }
+
+    public UploadResponse createDataSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems) {
+        UploadResponse uploadResponse;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn);
+            uploadResponse = new UploadResponse(dataSourceID);
+            conn.commit();
+            return uploadResponse;
         } catch (StorageLimitException se) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             uploadResponse = new UploadResponse("You have reached your account storage limit.");
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             uploadResponse = new UploadResponse("Something caused an internal error in the processing of the uploaded file.");
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
         return uploadResponse;

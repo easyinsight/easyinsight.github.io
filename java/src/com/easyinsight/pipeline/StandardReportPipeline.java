@@ -3,10 +3,7 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
 
-import java.util.Set;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -14,8 +11,47 @@ import java.util.Collection;
  * Time: 9:36:30 AM
  */
 public class StandardReportPipeline extends Pipeline {
+
+    private static class PointPopulation {
+        private AnalysisZipCode analysisZipCode;
+        private AnalysisLongitude analysisLongitude;
+        private AnalysisLatitude analysisLatitude;
+    }
+
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report) {
         List<IComponent> components = new ArrayList<IComponent>();
+
+        components.add(new ReportPreHandleComponent());
+
+        Map<String, PointPopulation> map = new HashMap<String, PointPopulation>();
+        for (AnalysisItem coordinate : items(AnalysisItemTypes.LONGITUDE, allNeededAnalysisItems)) {
+            AnalysisCoordinate analysisCoordinate = (AnalysisCoordinate) coordinate;
+            if (analysisCoordinate.getAnalysisZipCode() != null) {
+                PointPopulation pointPopulation = map.get(analysisCoordinate.getAnalysisZipCode().toDisplay());
+                if (pointPopulation == null) {
+                    pointPopulation = new PointPopulation();
+                    pointPopulation.analysisZipCode = analysisCoordinate.getAnalysisZipCode();
+                    map.put(analysisCoordinate.getAnalysisZipCode().toDisplay(), pointPopulation);
+                }
+                pointPopulation.analysisLongitude = (AnalysisLongitude) analysisCoordinate;
+            }
+        }
+        for (AnalysisItem coordinate : items(AnalysisItemTypes.LATITUDE, allNeededAnalysisItems)) {
+            AnalysisCoordinate analysisCoordinate = (AnalysisCoordinate) coordinate;
+            if (analysisCoordinate.getAnalysisZipCode() != null) {
+                PointPopulation pointPopulation = map.get(analysisCoordinate.getAnalysisZipCode().toDisplay());
+                if (pointPopulation == null) {
+                    pointPopulation = new PointPopulation();
+                    pointPopulation.analysisZipCode = analysisCoordinate.getAnalysisZipCode();
+                    map.put(analysisCoordinate.getAnalysisZipCode().toDisplay(), pointPopulation);
+                }
+                pointPopulation.analysisLatitude = (AnalysisLatitude) analysisCoordinate;
+            }
+        }
+
+        for (PointPopulation pointPopulation : map.values()) {
+            components.add(new CoordinateComponent(pointPopulation.analysisZipCode, pointPopulation.analysisLatitude, pointPopulation.analysisLongitude));
+        }
         
         components.add(new DataScrubComponent());
         components.add(new TagTransformComponent());
@@ -47,6 +83,7 @@ public class StandardReportPipeline extends Pipeline {
 
         for (AnalysisItem step : items(AnalysisItemTypes.STEP, allNeededAnalysisItems)) {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
+            components.add(new StepTransformComponent((AnalysisStep) step));
         }
         boolean temporalAdded = false;
         if (filters != null) {

@@ -419,6 +419,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return null;
     }
 
+    public void tweakReport(DataSet dataSet) {
+    }
+
     public List<IComponent> createComponents() {
         return new ArrayList<IComponent>();
     }

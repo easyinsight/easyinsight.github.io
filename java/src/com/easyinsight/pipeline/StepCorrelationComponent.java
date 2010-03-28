@@ -80,12 +80,21 @@ public class StepCorrelationComponent implements IComponent {
                 while (cal.getTimeInMillis() < endTime) {
                     IRow row = new Row();
                     row.addValues(this.row.getValues());
-                    row.addValue(analysisStep.getKey(), new DateValue(cal.getTime()));
+                    row.addValue(analysisStep.createAggregateKey(), new DateValue(cal.getTime()));
                     row.removeValue(start.createAggregateKey());
                     row.removeValue(end.createAggregateKey());
                     row.removeValue(analysisStep.getCorrelationDimension().createAggregateKey());
                     rows.add(row);
-                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                    if (analysisStep.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
+                        cal.add(Calendar.DAY_OF_YEAR, 1);
+                    } else if (analysisStep.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL) {
+                        cal.add(Calendar.WEEK_OF_YEAR, 1);
+                    } else if (analysisStep.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                        cal.add(Calendar.MONTH, 1);
+                    } else if (analysisStep.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                        cal.add(Calendar.YEAR, 1);
+                    }
+
                 }
             }
             return rows;

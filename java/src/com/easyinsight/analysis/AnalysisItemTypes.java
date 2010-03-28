@@ -22,4 +22,5 @@ public interface AnalysisItemTypes {
     public static final int STEP = 8192;
     public static final int LATITUDE = 16384;
     public static final int LONGITUDE = 32768;
+    public static final int ZIP_CODE = 65536;
 }

@@ -25,64 +25,80 @@ public class DataTypeGuesser implements IDataTypeGuesser {
 
     private Map<Key, AnalysisItem> dataTypeMap = new HashMap<Key, AnalysisItem>();
 
+    private Map<Key, Set<String>> guessesMap = new HashMap<Key, Set<String>>();
+
+    public Map<Key, Set<String>> getGuessesMap() {
+        return guessesMap;
+    }
+
     public void addValue(Key tag, Value value) {
         if (value == null) {
             value = new EmptyValue();
         }
             AnalysisItem newGuess = null;
-            if (value.type() == Value.STRING) {
-                AnalysisItem existingGuess = dataTypeMap.get(tag);
-                if (existingGuess == null) {
-                    StringValue stringValue = (StringValue) value;
-                    String string = stringValue.getValue();
-                    if (string.length() == 4) {
-                        try {
-                            int intValue = Integer.parseInt(string);
-                            if (intValue >= 1980 && intValue <= 2014) {
-                                newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
-                            }
-                        } catch (NumberFormatException e) {
+        Set<String> strings = guessesMap.get(tag);
+        if (strings == null) {
+            strings = new HashSet<String>();
+            guessesMap.put(tag, strings);
+        }
+        if (strings.size() < 3) {
+            if (value.toString() != null && !"".equals(value.toString().trim())) {
+                strings.add(value.toString());
+            }
+        }
+        if (value.type() == Value.STRING) {
+            AnalysisItem existingGuess = dataTypeMap.get(tag);
+            if (existingGuess == null) {
+                StringValue stringValue = (StringValue) value;
+                String string = stringValue.getValue();
+                if (string.length() == 4) {
+                    try {
+                        int intValue = Integer.parseInt(string);
+                        if (intValue >= 1980 && intValue <= 2014) {
+                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                }
+                if (newGuess == null) {
+                    try {
+                        Double.parseDouble(stringValue.getValue());
+                        newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                    } catch (NumberFormatException e) {
+                        SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
+                        if (dateFormat != null) {
+                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, dateFormat.toPattern());
+                        } else {
+                            newGuess = new AnalysisDimension(tag, true);
                         }
                     }
-                    if (newGuess == null) {
-                        try {
-                            Double.parseDouble(stringValue.getValue());
-                            newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
-                        } catch (NumberFormatException e) {
-                            SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
-                            if (dateFormat != null) {
-                                newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, dateFormat.toPattern());
-                            } else {
-                                newGuess = new AnalysisDimension(tag, true);
-                            }
-                        }
-                    }
-                } else {
-                    newGuess = existingGuess;
                 }
             } else {
-                switch (value.type()) {
-                    case Value.DATE:
-                        newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL);
-                        break;
-                    case Value.NUMBER:
-                        NumericValue numericValue = (NumericValue) value;
-                        double doubleValue = numericValue.getValue();
-                        int intValue = (int) doubleValue;
-                        if (doubleValue == intValue && intValue >= 1980 && intValue <= 2014) {
-                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
-                        } else {
-                            newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
-                        }
-                        break;
-                    case Value.STRING:
-                    case Value.EMPTY:
-                    default:
-                        newGuess = new AnalysisDimension(tag, true);
-                        break;
-                }
+                newGuess = existingGuess;
             }
-            dataTypeMap.put(tag, newGuess);
+        } else {
+            switch (value.type()) {
+                case Value.DATE:
+                    newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL);
+                    break;
+                case Value.NUMBER:
+                    NumericValue numericValue = (NumericValue) value;
+                    double doubleValue = numericValue.getValue();
+                    int intValue = (int) doubleValue;
+                    if (doubleValue == intValue && intValue >= 1980 && intValue <= 2014) {
+                        newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
+                    } else {
+                        newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                    }
+                    break;
+                case Value.STRING:
+                case Value.EMPTY:
+                default:
+                    newGuess = new AnalysisDimension(tag, true);
+                    break;
+            }
+        }
+        dataTypeMap.put(tag, newGuess);
 
     }
 

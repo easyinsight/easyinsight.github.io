@@ -358,17 +358,6 @@ public class UserService implements IUserService {
         }
     }
 
-    /*public void addLicenses(long feedID, int numberOfLicenses) {
-        long accountID = SecurityUtil.getAccountID();
-        Account account = getAccount(accountID);
-        for (int i = 0; i < numberOfLicenses; i++) {
-            SubscriptionLicense subscriptionLicense = new SubscriptionLicense();
-            subscriptionLicense.setFeedID(feedID);
-            account.addLicense(subscriptionLicense);
-        }
-        updateAccount(account);
-    } */
-
     public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password) {
         return createAccount(userTransferObject, accountTransferObject, password, null);
     }
@@ -465,44 +454,7 @@ public class UserService implements IUserService {
             account.setMaxSize(10000000);
         }
     }
-
-    /*public Account getAccount(long accountID) {
-        Session session = Database.instance().createSession();
-        try {
-            session.beginTransaction();
-            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
-            Account account = (Account) results.get(0);
-            account.setLicenses(new ArrayList<SubscriptionLicense>(account.getLicenses()));
-            for (User user : account.getUsers()) {
-                List<SubscriptionLicense> userLicenses = new ArrayList<SubscriptionLicense>(user.getLicenses());
-                user.setLicenses(userLicenses);            
-            }
-            session.getTransaction().commit();
-            return account;
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }*/
-
-    /*public void createAccount(Account account) {
-        Session session = Database.instance().createSession();
-        try {
-            session.beginTransaction();
-            session.save(account);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }*/
-
+   
     public void deleteAccount() {
         long accountID = SecurityUtil.getAccountID();
         Session session = Database.instance().createSession();

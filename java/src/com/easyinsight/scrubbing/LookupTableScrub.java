@@ -73,4 +73,12 @@ public class LookupTableScrub extends DataScrub {
             
         }
     }
+
+    public void beforeSave() {
+
+    }
+
+    public void afterLoad() {
+        
+    }
 }

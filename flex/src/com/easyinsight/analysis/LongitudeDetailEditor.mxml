@@ -1,10 +1,31 @@
 <?xml version="1.0" ?>
 <analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
-                                   xmlns:analysis="com.easyinsight.analysis.*">
+                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
 
         [Bindable]
         private var precision:int;
+
+        [Bindable]
+        private var zipCodeBased:Boolean;
+
+        [Bindable]
+        private var zipCodes:ArrayCollection;
+
+        [Bindable]
+        private var selectedZipCode:AnalysisZipCode;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            zipCodes = new ArrayCollection();
+            for each (var item:AnalysisItem in dimensionFields) {
+                if (item.hasType(AnalysisItemTypes.ZIP_CODE)) {
+                    zipCodes.addItem(item);
+                }
+            }
+        }
+
 
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
             return new AnalysisLongitude();
@@ -15,6 +36,8 @@
             if (val is AnalysisLongitude) {
                 var coordinate:AnalysisCoordinate = val as AnalysisCoordinate;
                 precision = coordinate.precision;
+                selectedZipCode = coordinate.analysisZipCode;
+                zipCodeBased = selectedZipCode != null;
             }
         }
 
@@ -22,8 +45,17 @@
             super.save(analysisItem);
             var coordinate:AnalysisCoordinate = analysisItem as AnalysisCoordinate;
             coordinate.precision = int(precisionInput.text);
+            if (zipCodeCheckBox.selected) {
+                coordinate.analysisZipCode = zipCodeCombox.selectedItem as AnalysisZipCode;
+            }
         }]]></mx:Script>
     <mx:FormItem label="Precision:">
         <mx:TextInput id="precisionInput" text="{precision}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Base on Zip Code:" direction="horizontal">
+        <mx:CheckBox id="zipCodeCheckBox" selected="{zipCodeBased}"/>
+        <util:SmartComboBox dataProvider="{zipCodes}" selectedProperty="display" selectedItem="{selectedZipCode}"
+                            enabled="{zipCodeCheckBox.selected}"
+                            id="zipCodeCombox" labelField="display"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>
