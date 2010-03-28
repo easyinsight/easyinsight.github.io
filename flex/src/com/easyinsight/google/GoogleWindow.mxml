@@ -6,6 +6,7 @@
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         private function setup():void {
@@ -13,7 +14,8 @@
         }
 
         private function passThrough(event:Event):void {
-            dispatchEvent(event);
+            //dispatchEvent(event);
+            //Alert.show("at least got the event...");
             PopUpManager.removePopUp(this);
         }
 

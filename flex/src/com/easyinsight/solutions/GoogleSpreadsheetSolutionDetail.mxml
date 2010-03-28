@@ -41,6 +41,7 @@
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -84,6 +85,7 @@
         }
 
         private function passThrough(event:Event):void {
+            //Alert.show("got event at solution level");
             dispatchEvent(event);
         }
 

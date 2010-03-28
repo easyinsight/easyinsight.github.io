@@ -19,12 +19,8 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
-
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var googleSpreadsheets:ArrayCollection = new ArrayCollection();
@@ -54,9 +50,7 @@
         }
 
         private function retrieveSpreadsheets():void {
-            //addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onComplete);
             dataService.getAvailableGoogleSpreadsheets.send();
-            //addEventListener(AnalyzeEvent.ANALYZE, analyze);
         }
 
         private function processSpreadsheets():void {
@@ -67,43 +61,6 @@
             spreadsheetTree.rowCount = spreadsheets.length;
             spreadsheetTree.visible = true;
             stackIndex = 1;
-        }
-
-        private function attemptGoogleConnect():void {
-            ProgressAlert.alert(this, "Attempting to connect to Google...", null, tokenService.isTokenEstablished);
-            tokenService.isTokenEstablished.send(1);
-        }
-
-        private function onKeyUp(event:KeyboardEvent):void {
-            if (event.keyCode == Keyboard.ENTER) {
-                attemptGoogleConnect();
-            }
-        }
-
-        /*private function doubleClicked(event:ListEvent):void {
-         var selectedObject:Object = event.currentTarget.selectedItem;
-         if (selectedObject is Worksheet) {
-         var worksheet:Worksheet = selectedObject as Worksheet;
-         dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(worksheet.feedDescriptor)));
-         }
-         }*/
-
-        private function gotToken():void {
-            var result:Boolean = tokenService.isTokenEstablished.lastResult as Boolean;
-            if (result) {
-                ProgressAlert.alert(this, "Retrieving available spreadsheets...", null, dataService.getAvailableGoogleSpreadsheets);
-                dataService.getAvailableGoogleSpreadsheets.send();
-            } else {
-                ProgressAlert.alert(this, "Generating Google URL...", null, tokenService.getAuthSubURL);
-                tokenService.getAuthSubURL.send(1);
-            }
-        }
-
-        private function gotURL():void {
-            var window:AuthSubNavWindow = new AuthSubNavWindow();
-            window.googleURL = tokenService.getAuthSubURL.lastResult as String;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function analyze(event:AnalyzeEvent):void {
@@ -117,10 +74,6 @@
 	<mx:RemoteObject id="dataService" destination="google">
 		<mx:method name="getAvailableGoogleSpreadsheets" result="processSpreadsheets()"/>
 	</mx:RemoteObject>
-    <mx:RemoteObject id="tokenService" destination="tokenService">
-        <mx:method name="isTokenEstablished" result="gotToken()"/>
-        <mx:method name="getAuthSubURL" result="gotURL()"/>
-    </mx:RemoteObject>
 	<mx:WipeRight id="wipeIn" duration="1000"/>
 	<mx:ViewStack id="coreContent" width="100%" height="100%" selectedIndex="{stackIndex}" resizeToContent="true"
             creationPolicy="all">
