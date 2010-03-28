@@ -60,7 +60,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return false;
     }
 
-    public long create(Credentials credentials, EIConnection conn) throws SQLException, CloneNotSupportedException {
+    public long create(Credentials credentials, EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws SQLException, CloneNotSupportedException {
         setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
         UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         setUploadPolicy(uploadPolicy);

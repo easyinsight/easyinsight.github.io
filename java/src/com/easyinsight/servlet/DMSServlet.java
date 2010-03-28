@@ -32,7 +32,7 @@ public class DMSServlet extends HttpServlet {
 
     public void init(ServletConfig servletConfig) throws ServletException {
         try {
-            LogClass.info("Starting the core Easy Insight server...b");
+            LogClass.info("Starting the core Easy Insight server...");
             if (Database.instance() == null) {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();

@@ -260,7 +260,7 @@ public class UserUploadService implements IUserUploadService {
             if (validation != null) {
                 uploadResponse = new UploadResponse(validation);
             } else {
-                List<AnalysisItem> fields = uploadContext.guessFields();
+                List<AnalysisItem> fields = uploadContext.guessFields(conn);
                 List<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
                 for (AnalysisItem field : fields) {
                     FieldUploadInfo fieldUploadInfo = new FieldUploadInfo();
@@ -866,7 +866,7 @@ public class UserUploadService implements IUserUploadService {
                 credentials = decryptCredentials(credentials);
             }
             IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) feedDefinition;
-            long id = serverDataSourceDefinition.create(credentials, conn);
+            long id = serverDataSourceDefinition.create(credentials, conn, null);
             conn.commit();
             return id;
         } catch (Exception e) {

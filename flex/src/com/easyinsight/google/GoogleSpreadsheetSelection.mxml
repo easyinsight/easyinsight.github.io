@@ -18,7 +18,7 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -82,10 +82,6 @@
             }
         }
 
-        private function cancel():void {
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_CANCEL));
-        }
-
         /*private function doubleClicked(event:ListEvent):void {
          var selectedObject:Object = event.currentTarget.selectedItem;
          if (selectedObject is Worksheet) {
@@ -108,8 +104,13 @@
         private function gotURL():void {
             var window:AuthSubNavWindow = new AuthSubNavWindow();
             window.googleURL = tokenService.getAuthSubURL.lastResult as String;
+            window.addEventListener(AnalyzeEvent.ANALYZE, analyze);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        private function analyze(event:AnalyzeEvent):void {
+            dispatchEvent(event);
         }
                 ]]>
 	</mx:Script>

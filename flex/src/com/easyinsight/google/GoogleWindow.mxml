@@ -1,10 +1,19 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    xmlns:google="com.easyinsight.google.*" width="500" height="500">
+                    xmlns:google="com.easyinsight.google.*" width="500" height="500" creationComplete="setup()">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
 
         import mx.managers.PopUpManager;
+
+        private function setup():void {
+            addEventListener(AnalyzeEvent.ANALYZE, passThrough);
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
 
         private function onFeedCreation(event:UploadConfigEvent):void {
             PopUpManager.removePopUp(this);

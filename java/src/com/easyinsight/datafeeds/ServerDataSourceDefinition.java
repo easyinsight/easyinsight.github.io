@@ -48,12 +48,19 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return false;
     }
 
-    public long create(Credentials credentials, EIConnection conn) throws SQLException, CloneNotSupportedException {
+    public long create(Credentials credentials, EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws SQLException, CloneNotSupportedException {
         DataStorage metadata = null;
         try {
             Map<String, Key> keys = newDataSourceFields(credentials);
             DataSet dataSet = getDataSet(credentials, keys, new Date(), null, null, conn);
-            setFields(createAnalysisItems(keys, dataSet, credentials, conn));
+            if (externalAnalysisItems != null) {
+                /*for (AnalysisItem field : externalAnalysisItems) {
+                    dataSet.refreshKey(field.getKey());
+                }*/
+                setFields(externalAnalysisItems);
+            } else {
+                setFields(createAnalysisItems(keys, dataSet, credentials, conn));
+            }
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
             setUploadPolicy(uploadPolicy);
@@ -176,19 +183,6 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
         }
     }
-
-    /*private void notifyOfDataUpdate() {
-        MessageBroker msgBroker = MessageBroker.getMessageBroker(null);
-        String clientID = UUIDUtils.createUUID();
-        AsyncMessage msg = new AsyncMessage();
-        msg.setDestination("dataUpdates");
-        msg.setHeader(AsyncMessage.SUBTOPIC_HEADER_NAME, String.valueOf(getDataFeedID()));
-        msg.setMessageId(clientID);
-        msg.setTimestamp(System.currentTimeMillis());
-        if (msgBroker != null) {
-            msgBroker.routeMessageToService(msg, null);
-        }
-    }*/
 
     public String getUsername() {
         return username;

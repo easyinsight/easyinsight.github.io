@@ -27,7 +27,7 @@ public interface IServerDataSourceDefinition {
      */
     int getRequiredAccountTier();
 
-    long create(Credentials credentials, EIConnection conn) throws SQLException, CloneNotSupportedException;
+    long create(Credentials credentials, EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws SQLException, CloneNotSupportedException;
 
     UploadPolicy getUploadPolicy();
 

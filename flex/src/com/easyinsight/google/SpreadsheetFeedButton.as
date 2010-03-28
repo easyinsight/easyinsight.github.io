@@ -2,7 +2,10 @@ package com.easyinsight.google
 {
 import com.easyinsight.administration.feed.GoogleFeedDefinition;
 import com.easyinsight.customupload.UploadConfigEvent;
-	import com.easyinsight.framework.Credentials;
+import com.easyinsight.customupload.UploadResponse;
+import com.easyinsight.customupload.wizard.SpreadsheetSetupSource;
+import com.easyinsight.framework.Credentials;
+import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.DataFeedDescriptor;
 
 import com.easyinsight.util.ProgressAlert;
@@ -11,8 +14,9 @@ import flash.events.Event;
 	import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
-import mx.containers.HBox;	
-	import mx.controls.Button;
+import mx.containers.HBox;
+import mx.controls.Alert;
+import mx.controls.Button;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 
@@ -22,9 +26,9 @@ import mx.containers.HBox;
         public static var credentials:Credentials;
 
 		private var _data:Worksheet;
-		private var remoteService:RemoteObject;
 		private var button:Button;
 		private var setButtonProps:Boolean = true;
+        private var uploadService:RemoteObject;
 
         private var _buttonVisible:Boolean = false;
 
@@ -90,26 +94,24 @@ import mx.containers.HBox;
 		}
 		
 		public function subscribe(event:Event):void {
-			//var credentials:Credentials = User.getInstance().getCredentials("google");
-			remoteService = new RemoteObject();
-			remoteService.destination = "userUpload";
-			remoteService.newExternalDataSource.addEventListener(ResultEvent.RESULT, successfulSubscription);
-            var googleDef:GoogleFeedDefinition = new GoogleFeedDefinition();
-            googleDef.feedName = _data.spreadsheet + " - " + _data.title;
-            googleDef.worksheetURL = _data.url;
-            ProgressAlert.alert(this.parent.parent, "Creating data source...", null, remoteService.newExternalDataSource);
-			remoteService.newExternalDataSource.send(googleDef, credentials);
+            var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
+            context.worksheetURL = _data.url;
+            uploadService = new RemoteObject();
+            uploadService.destination = "userUpload";
+            uploadService.analyzeUpload.addEventListener(ResultEvent.RESULT, analyzedStructure);
+            ProgressAlert.alert(this.parent.parent, "Analyzing the spreadsheet...", null, uploadService.analyzeUpload);
+            uploadService.analyzeUpload.send(context);
 		}
-		
-		private function successfulSubscription(event:ResultEvent):void {
-			toolTip = "Analyze";			
-			var id:int = remoteService.newExternalDataSource.lastResult as int;
-            var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-            descriptor.dataFeedID = id;
-            descriptor.name = _data.spreadsheet + " - " + _data.title;
-			_data.feedDescriptor = descriptor;
-			//this.parent.dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
-			dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.dataFeedID, descriptor.name));
-		}
+
+        private function analyzedStructure(event:ResultEvent):void {
+            var uploadResponse:UploadResponse = uploadService.analyzeUpload.lastResult as UploadResponse;
+            if (uploadResponse.successful) {
+                var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
+                context.worksheetURL = _data.url;
+                dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
+            } else {
+                Alert.show(uploadResponse.failureMessage);
+            }
+        }
 	}
 }

@@ -43,7 +43,7 @@ public class FlatFileUploadContext extends UploadContext {
     private Map<Key, Set<String>> sampleMap;
 
     @Override
-    public List<AnalysisItem> guessFields() {
+    public List<AnalysisItem> guessFields(EIConnection conn) throws Exception {
         UserUploadAnalysis userUploadAnalysis = uploadFormat.analyze(uploadID, rawUploadData.userData);
         sampleMap = userUploadAnalysis.getSampleMap();
         return userUploadAnalysis.getFields();
