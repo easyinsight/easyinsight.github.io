@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        xmlns:filters="com.easyinsight.filtering.*" xmlns:range="com.easyinsight.analysis.range.*" width="500"
+        xmlns:filters="com.easyinsight.filtering.*" xmlns:range="com.easyinsight.analysis.range.*" width="550"
         height="400"
         xmlns:analysis="com.easyinsight.analysis.*"
         creationComplete="initStuff()" creationPolicy="all" xmlns:formatter="com.easyinsight.analysis.formatter.*"
@@ -124,13 +124,11 @@
         import com.easyinsight.analysis.options.OptionFactory;
 
         import mx.collections.ArrayCollection;
+        import mx.events.ItemClickEvent;
         import mx.managers.PopUpManager;
 
         [Bindable]
         private var links:ArrayCollection;
-
-        [Bindable]
-        private var aggregationTypeObjects:ArrayCollection;
 
         [Bindable]
         private var measureObjects:ArrayCollection;
@@ -201,15 +199,16 @@
 
         public function set analysisItem(analysisItem:AnalysisItem):void {
             this.startingAnalysisItem = analysisItem;
-            if (aggregationTypeObjects == null) {
-                aggregationTypeObjects = getAggregationTypeObjects();
-            }
             this.displayName = analysisItem.display;
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
-            this.links = analysisItem.links;            
+            this.links = analysisItem.links;
+            linkIndex = (this.links != null && this.links.length > 0) ? 1 : 0;
             this.existingFilters = analysisItem.filters;
         }
+
+        [Bindable]
+        private var linkIndex:int = 0;
 
         private function indexOfType(option:String):int {
             if (getGroupingOptions().contains(option)) {
@@ -225,6 +224,7 @@
         private var commandProcessor:CommandProcessor;
 
         override protected function createChildren():void {
+            super.createChildren();
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
             super.createChildren();
@@ -236,27 +236,20 @@
                 var option:String = OptionFactory.getAnalysisItemOption(startingAnalysisItem);
                 var index:int = indexOfType(option);
                 toggleBar.selectedIndex = index;
-                if (index == 0) {
-                    aggregationTypeObjects = getGroupingOptions();
-                } else if (index == 1) {
-                    aggregationTypeObjects = getMeasureOptions();
-                } else {
-                    aggregationTypeObjects = getComplexOptions();
-                }
-                aggregationBox.selectedIndex = aggregationTypeObjects.getItemIndex(option);
+                prepareAggregationBox(index);
+                aggregationBox.selectedIndex = aggregationBox.dataProvider.getItemIndex(option);
                 aggregationChange(option);
             }
             transformContainer.existingFilters = existingFilters;
         }
 
         private function initStuff():void {
-            if (aggregationTypeObjects == null) {
-                aggregationTypeObjects = getAggregationTypeObjects();
-            }
             focusManager.setFocus(fieldNameInput);
             addEventListener(KeyboardEvent.KEY_UP, keyedComplete);
             addEventListener(LinkMetadataEvent.LINK_EDITED, onLinkUpdate);
             addEventListener(LinkMetadataEvent.LINK_DELETED, onLinkDelete);
+            linkFactory = new ClassFactory(LinkControls);
+            linkFactory.properties = { sourceItem: startingAnalysisItem };
         }
 
         private function onCommand(event:CommandEvent):void {
@@ -363,19 +356,32 @@
             }
         }
 
-        private function toggleClick():void {
-            if (toggleBar.selectedIndex == 0) {
-                aggregationTypeObjects = getGroupingOptions();
-            } else if (toggleBar.selectedIndex == 1) {
-                aggregationTypeObjects = getMeasureOptions();
+        private var aggregationBox:ComboBox;
+
+        [Bindable]
+        private var aggIndex:int;
+
+        private function prepareAggregationBox(index:int):String {
+            if (index == 0) {
+                aggregationBox = groupingAggregationBox;
+            } else if (index == 1) {
+                aggregationBox = measureAggregationBox;
             } else {
-                aggregationTypeObjects = getComplexOptions();
+                aggregationBox = complexAggregationBox;
             }
-            aggregationChange(aggregationTypeObjects.getItemAt(0) as String);
+            aggIndex = index;
+            return aggregationBox.dataProvider.getItemAt(0) as String;
+        }
+
+        private function toggleClick(event:ItemClickEvent):void {
+            var string:String = event.item as String;
+            var index:int = toggleBar.dataProvider.getItemIndex(string);
+            aggregationChange(prepareAggregationBox(index));
         }
 
         private function addLink():void {
             var window:LinkWindow = new LinkWindow();
+            window.sourceItem = startingAnalysisItem;
             window.addEventListener(LinkMetadataEvent.LINK_DEFINED, onLinkSave);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -383,6 +389,7 @@
 
         private function onLinkSave(event:LinkMetadataEvent):void {
             links.addItem(event.link);
+            linkIndex = (this.links != null && this.links.length > 0) ? 1 : 0;
         }
 
         private function onLinkUpdate(event:LinkMetadataEvent):void {
@@ -392,12 +399,16 @@
 
         private function onLinkDelete(event:LinkMetadataEvent):void {
             links.removeItemAt(links.getItemIndex(event.link));
+            linkIndex = (this.links != null && this.links.length > 0) ? 1 : 0;
         }
+
+        [Bindable]
+        private var linkFactory:ClassFactory;
         ]]>
     </mx:Script>
-    <mx:TabNavigator creationPolicy="all" width="100%" height="100%">
+    <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true">
         <mx:VBox label="Item" width="100%" height="100%" horizontalAlign="center">
-            <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick()">
+            <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick(event)">
                 <mx:dataProvider>
                     <mx:Array>
                         <mx:String>Grouping</mx:String>
@@ -414,30 +425,85 @@
                     <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
                 </mx:FormItem>
                 <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
-                    <mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}"
-                                 close="aggregationTypeChanged(event)" rowCount="9"/>
+                    <mx:ViewStack resizeToContent="true" creationPolicy="all" selectedIndex="{aggIndex}">
+                        <mx:Box>
+                            <mx:ComboBox id="groupingAggregationBox"
+                                 close="aggregationTypeChanged(event)" rowCount="7">
+                                <mx:dataProvider>
+                                    <mx:Array>
+                                        <mx:String>Grouping</mx:String>
+                                        <mx:String>Range</mx:String>
+                                        <mx:String>Date</mx:String>
+                                        <mx:String>Tags</mx:String>
+                                        <mx:String>Latitude</mx:String>
+                                        <mx:String>Longitude</mx:String>
+                                        <mx:String>Zip Code</mx:String>
+                                    </mx:Array>
+                                </mx:dataProvider>
+                            </mx:ComboBox>
+                        </mx:Box>
+                        <mx:Box>
+                            <mx:ComboBox id="measureAggregationBox"
+                                 close="aggregationTypeChanged(event)" rowCount="7">
+                                <mx:dataProvider>
+                                    <mx:Array>
+                                        <mx:String>Sum</mx:String>
+                                        <mx:String>Average</mx:String>
+                                        <mx:String>Min</mx:String>
+                                        <mx:String>Max</mx:String>
+                                        <mx:String>Count</mx:String>
+                                        <mx:String>Median</mx:String>
+                                        <mx:String>Variance</mx:String>
+                                    </mx:Array>
+                                </mx:dataProvider>
+                            </mx:ComboBox>
+                        </mx:Box>
+                        <mx:Box>
+                            <mx:ComboBox id="complexAggregationBox"
+                                 close="aggregationTypeChanged(event)" rowCount="9">
+                                <mx:dataProvider>
+                                    <mx:Array>
+                                        <mx:String>Delta</mx:String>
+                                        <mx:String>Last Value</mx:String>
+                                        <mx:String>Percent Change</mx:String>
+                                        <mx:String>Normality</mx:String>
+                                        <mx:String>Step</mx:String>
+                                        <mx:String>Six Sigma</mx:String>
+                                    </mx:Array>
+                                </mx:dataProvider>
+                            </mx:ComboBox>
+                        </mx:Box>
+                    </mx:ViewStack>
+
                 </mx:FormItem>
             </mx:Form>
 
         </mx:VBox>
         <mx:VBox label="Links" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                 paddingTop="5">
-            <mx:Button label="Add Link..." click="addLink()"/>
-            <mx:DataGrid dataProvider="{links}" width="100%">
-                <mx:columns>
-                    <util:EIDataGridColumn headerText="Link Name" dataField="label"/>
-                    <util:EIDataGridColumn headerText="Link Type" dataField="type"/>
-                    <util:EIDataGridColumn headerText="" sortable="false" dataField="label"
-                                           itemRenderer="com.easyinsight.analysis.LinkControls"
-                                           width="100"/>
-                </mx:columns>
-            </mx:DataGrid>
+                 paddingTop="5" horizontalAlign="center">
+            <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0" borderStyle="none" fontSize="14" text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs), as well as links to external URLs."/>
+            <mx:ViewStack selectedIndex="{linkIndex}" width="100%" height="100%">
+                <mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+                    <mx:Label text="You haven't defined any links yet." fontSize="14"/>
+                    <mx:Button label="Create a link" click="addLink()" fontSize="14"/>
+                </mx:VBox>
+                <mx:VBox>
+                    <mx:Button label="Add Link..." click="addLink()"/>
+                    <mx:DataGrid dataProvider="{links}" width="100%" rowHeight="28">
+                        <mx:columns>
+                            <util:EIDataGridColumn headerText="Link Name" dataField="label"/>
+                            <util:EIDataGridColumn headerText="Link Type" dataField="type"/>
+                            <util:EIDataGridColumn headerText="" sortable="false" dataField="label"
+                                                   itemRenderer="{linkFactory}"
+                                                   width="100"/>
+                        </mx:columns>
+                    </mx:DataGrid>
+                </mx:VBox>
+            </mx:ViewStack>
         </mx:VBox>
         <mx:VBox label="Filters" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                 paddingTop="5">
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Label text="Drag Fields Below to Create Filters" fontSize="14"/>
-            </mx:HBox>
+                 paddingTop="5" horizontalAlign="center">
+            <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0" borderStyle="none" fontSize="14" text="You can define filters at the field level by dragging fields from the left hand list into the drop area below. Any filters you define here will only be applied to this field."/>
             <filters:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                         paddingRight="10"
                                         width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"

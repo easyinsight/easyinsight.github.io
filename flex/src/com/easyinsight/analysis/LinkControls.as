@@ -22,10 +22,16 @@ public class LinkControls extends HBox{
 
     private var link:Link;
 
+    private var _sourceItem:AnalysisItem;
+
     public function LinkControls() {
         super();
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
+    }
+
+    public function set sourceItem(value:AnalysisItem):void {
+        _sourceItem = value;
     }
 
     override public function set data(val:Object):void {
@@ -57,6 +63,7 @@ public class LinkControls extends HBox{
     private function onEdit(event:MouseEvent):void {
         var window:LinkWindow = new LinkWindow();
         window.link = link;
+        window.sourceItem = _sourceItem;
         window.addEventListener(LinkMetadataEvent.LINK_EDITED, passThrough);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);

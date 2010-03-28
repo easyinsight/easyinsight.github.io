@@ -43,6 +43,11 @@ public abstract class AnalysisCoordinate extends AnalysisDimension {
     }
 
     @Override
+    public boolean isDerived() {
+        return analysisZipCode != null;
+    }
+
+    @Override
     public void afterLoad() {
         super.afterLoad();
         if (analysisZipCode != null) {

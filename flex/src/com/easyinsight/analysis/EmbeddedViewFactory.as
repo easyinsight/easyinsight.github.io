@@ -1,6 +1,7 @@
 package com.easyinsight.analysis {
 
 import com.easyinsight.analysis.service.EmbeddedDataService;
+import com.easyinsight.analysis.service.ReportRetrievalFault;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.HierarchyOverride;
 import com.easyinsight.report.AbstractViewFactory;
@@ -74,8 +75,12 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
         _dataService.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
-
+        _dataService.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, retrievalFault);
         loadReportRenderer();
+    }
+
+    private function retrievalFault(event:ReportRetrievalFault):void {
+        dispatchEvent(event);
     }
 
     private function dataLoadingEvent(event:DataServiceLoadingEvent):void {

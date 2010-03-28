@@ -44,7 +44,7 @@
                  selected="{useKeyDimensionSelected}"
                  click="useKeyDimensionSelected = useKeyDimension.selected"/>
     <mx:FormItem label="Grouping: " visible="{useKeyDimensionSelected}">
-        <util:AnalysisItemComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"
-                selectedValue="{keyDimension}"/>
+        <util:SmartComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"
+                selectedValue="{keyDimension}" selectedProperty="display"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>

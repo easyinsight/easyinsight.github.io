@@ -1,11 +1,14 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="analysisService.getInsightDescriptors.send()">
+                    creationComplete="analysisService.getInsightDescriptors.send()" width="500" height="400">
     <mx:Script><![CDATA[
         import com.easyinsight.solutions.InsightDescriptor;
 
         import mx.collections.ArrayCollection;
+        import mx.events.ValidationResultEvent;
         import mx.managers.PopUpManager;
+        import mx.validators.ValidationResult;
+        import mx.validators.Validator;
 
         private function gotReports():void {
             this.reports = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
@@ -20,6 +23,8 @@
         }
 
         private var _link:Link;
+
+        private var _sourceItem:AnalysisItem;
 
         [Bindable]
         private var typeValue:String = "URL";
@@ -40,6 +45,14 @@
         [Bindable]
         private var stackIndex:int = 0;
 
+        [Bindable]
+        private var urlSampleText:String;
+
+        public function set sourceItem(value:AnalysisItem):void {
+            _sourceItem = value;
+            urlSampleText = "URL links will connect the report to external URLs. You can use fields to dynamically construct URLs by surrounding the field name with brackets. For example, http://www.google.com?q=["+_sourceItem.key.createString()+"]";
+        }
+
         public function set link(value:Link):void {
             _link = value;
             if (value != null) {
@@ -59,57 +72,94 @@
         }
 
         private function save():void {
-            var firstLink:Link = _link;
-            if (typeGroup.selectedValue == "URL") {
-                var urlLink:URLLink = new URLLink();
-                urlLink.url = urlInput.text;
-                _link = urlLink;
+            var linkResults:Array = Validator.validateAll([ linkNameValidator ]);
+            if (linkResults.length != 0) {
+                labelInput.setFocus();
+                labelInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             } else {
-                var drillThrough:DrillThrough = new DrillThrough();
-                drillThrough.reportID = reportChooser.selectedItem.id;
-                _link = drillThrough;
+                var firstLink:Link = _link;
+                var valid:Boolean = true;
+                if (typeGroup.selectedValue == "URL") {
+                    var results:Array = Validator.validateAll([ urlValidator ]);
+                    if (results.length == 0) {
+                        var urlLink:URLLink = new URLLink();
+                        urlLink.url = urlInput.text;
+                        _link = urlLink;
+                    } else {
+                        valid = false;
+                        urlInput.setFocus();
+                        urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                    }
+                } else {
+                    var drillThrough:DrillThrough = new DrillThrough();
+                    drillThrough.reportID = reportChooser.selectedItem.id;
+                    _link = drillThrough;
+                }
+                if (valid) {
+                    _link.linkID = linkID;
+                    _link.label = labelInput.text;
+                    if (firstLink == null) {
+                        dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DEFINED, _link));
+                    } else {
+                        dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_EDITED, _link, firstLink));
+                    }
+                    PopUpManager.removePopUp(this);
+                }
             }
-            _link.linkID = linkID;
-            _link.label = labelInput.text;
-            if (firstLink == null) {
-                dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DEFINED, _link));
-            } else {
-                dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_EDITED, _link, firstLink));
-            }
-            PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptors" result="gotReports()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-    <mx:RadioButtonGroup id="typeGroup" selectedValue="{typeValue}"/>
-    <mx:HBox>
-        <mx:RadioButton group="{typeGroup}" label="URL" value="URL" click="viewStack.selectedIndex = 0"/>
-        <mx:RadioButton group="{typeGroup}" label="Drillthrough" value="Drillthrough" click="viewStack.selectedIndex = 1"/>
-    </mx:HBox>
-    <mx:HBox>
-        <mx:Label text="Label: " width="100"/>
-        <mx:TextInput id="labelInput" text="{linkLabel}" width="100%"/>
-    </mx:HBox>
-    <mx:ViewStack id="viewStack" width="100%" height="100%" resizeToContent="true" creationPolicy="all"
-            selectedIndex="{stackIndex}">
-        <mx:VBox>
+    <mx:VBox backgroundColor="#FFFFFF" width="100%" height="100%">
+        <mx:RadioButtonGroup id="typeGroup" selectedValue="{typeValue}"/>
+        <mx:VBox width="100%" backgroundColor="#000000" paddingBottom="5" paddingLeft="5" paddingRight="5"
+                 paddingTop="5" height="50%">
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:RadioButton group="{typeGroup}" label="URL" value="URL" click="stackIndex = 0" color="#FFFFFF" fontSize="16"
+                         textRollOverColor="#FFFFFF"/>
+                <mx:RadioButton group="{typeGroup}" label="Drillthrough" value="Drillthrough" click="stackIndex = 1"
+                                color="#FFFFFF" fontSize="16" textRollOverColor="#FFFFFF"/>
+            </mx:HBox>
+            <mx:ViewStack selectedIndex="{stackIndex}" width="100%">
+                <mx:Box width="100%" horizontalAlign="center">
+                    <util:AutoSizeTextArea width="460" editable="false" color="#FFFFFF" selectable="false"
+                                           backgroundAlpha="0" fontSize="14" borderStyle="none"
+                                           text="{urlSampleText}"/>
+                </mx:Box>
+                <mx:Box width="100%" horizontalAlign="center">
+                    <util:AutoSizeTextArea width="460" editable="false" color="#FFFFFF" selectable="false"
+                                           backgroundAlpha="0" fontSize="14" borderStyle="none"
+                                           text="Drillthroughs enable you to connect reports. Any filters in the target report will automatically populate based on this report."/>
+                </mx:Box>
+            </mx:ViewStack>
+        </mx:VBox>
+        <mx:VBox width="100%" height="50%" paddingBottom="5" paddingLeft="40" paddingRight="5" paddingTop="5" verticalAlign="middle">
             <mx:HBox>
-                <mx:Label text="URL: " width="100"/>
-                <mx:TextInput id="urlInput" text="{urlText}" width="100%"/>
+                <mx:Label text="Label: " width="100" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:TextInput id="labelInput" text="{linkLabel}" width="100%"/>
+            </mx:HBox>
+            <mx:ViewStack id="viewStack" resizeToContent="true" creationPolicy="all"
+                          selectedIndex="{stackIndex}">
+                <mx:VBox>
+                    <mx:HBox>
+                        <mx:Label text="URL: " width="100" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:TextInput id="urlInput" text="{urlText}" width="100%"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox>
+                    <mx:HBox>
+                        <mx:Label text="Target Report:" width="100" fontFamily="Tahoma" fontWeight="bold"/>
+                        <util:AnalysisItemCompletionInput id="reportChooser" items="{reports}" labelField="name"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:ViewStack>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button label="Save" click="save()"/>
+                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>
-        <mx:VBox>
-            <mx:HBox>
-                <mx:Label text="Target Report:" width="100"/>
-                <util:AnalysisItemCompletionInput id="reportChooser" items="{reports}" labelField="name"/>
-            </mx:HBox>
-        </mx:VBox>
-    </mx:ViewStack>
-    <mx:HBox>
-        <mx:Button label="Save" click="save()"/>
-        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
-    </mx:HBox>
     </mx:VBox>
+    <mx:StringValidator id="linkNameValidator" property="text" source="{labelInput}" minLength="3" maxLength="50"/>
+    <mx:StringValidator id="urlValidator" property="text" source="{urlInput}" minLength="3" maxLength="50"/>
 </util:EITitleWindow>

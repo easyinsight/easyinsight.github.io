@@ -16,7 +16,6 @@ import com.easyinsight.util.PopUpUtil;
 import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
 import mx.controls.Button;
 import mx.controls.Label;
 import mx.events.FlexEvent;
@@ -26,7 +25,6 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
 
     private var listViewGrouping:ListDropAreaGrouping;
     private var listDefinition:ListDefinition;
-    private var availableFields:ArrayCollection;
 
     [Embed(source="../../../../../assets/table_edit.png")]
     public var tableEditIcon:Class;
@@ -74,7 +72,7 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
 
     private function editList(event:MouseEvent):void {
         var listWindow:ListDefinitionEditWindow = ListDefinitionEditWindow(PopUpManager.createPopUp(this, ListDefinitionEditWindow, true));
-        listWindow.fields = availableFields;
+        listWindow.fields = analysisItems;
         listWindow.listDefinition = listDefinition;
         listWindow.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         PopUpUtil.centerPopUp(listWindow);
@@ -115,10 +113,6 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
     public function createAnalysisDefinition():AnalysisDefinition {
         listDefinition.columns = new ArrayCollection(listViewGrouping.getListColumns());
         return listDefinition;
-    }
-
-    override public function set analysisItems(analysisItems:ArrayCollection):void {
-        availableFields = analysisItems;
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {

@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.kpi.ITutorialPanel" width="100%" height="100%" horizontalAlign="center"
-        paddingTop="20">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" implements="com.easyinsight.kpi.ITutorialPanel"
+         width="100%" height="100%" horizontalAlign="center"
+         paddingTop="20">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AggregationTypes;
         import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisDimension;
         import com.easyinsight.analysis.AnalysisItem;
@@ -11,7 +13,7 @@
         import com.easyinsight.analysis.AnalysisLongitude;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.AnalysisZipCode;
-
+        import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
         [Bindable]
         private var labeledText:String;
@@ -55,6 +57,7 @@
             var type:String = "";
             if (item.hasType(AnalysisItemTypes.DATE)) {
                 type = "date";
+                selectedDateLevel = AnalysisDateDimension(item).dateLevel;
             } else if (item.hasType(AnalysisItemTypes.LATITUDE)) {
                 type = "latitude coordinate";
             } else if (item.hasType(AnalysisItemTypes.LONGITUDE)) {
@@ -63,16 +66,40 @@
                 type = "tag list";
             } else if (item.hasType(AnalysisItemTypes.MEASURE)) {
                 type = "measure";
+                selectedAggregation = AnalysisMeasure(item).aggregation;
+                selectedFormatting = AnalysisMeasure(item).formattingConfiguration.formattingType;
             } else if (item.hasType(AnalysisItemTypes.ZIP_CODE)) {
                 type = "zip code";
             } else {
                 type = "grouping";
             }
+            determineStackIndex();
             initialGuessText = "Our initial guess is that this field is a " + type + ". In case we got that wrong, here are the available types:";
         }
 
-        private function onTypeChange():void {
+        private function determineStackIndex():void {
+            var type:int = int(startType);
+            if (type == AnalysisItemTypes.DIMENSION) {
+                stackIndex = 0;
+            } else if (type == AnalysisItemTypes.MEASURE) {
+                stackIndex = 1;
+            } else if (type == (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)) {
+                stackIndex = 2;
+            } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
+                stackIndex = 3;
+            } else if (type == (AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION)) {
+                stackIndex = 4;
+            } else if (type == (AnalysisItemTypes.LONGITUDE | AnalysisItemTypes.DIMENSION)) {
+                stackIndex = 5;
+            } else if (type == (AnalysisItemTypes.LATITUDE | AnalysisItemTypes.DIMENSION)) {
+                stackIndex = 6;
+            }
+        }
 
+        private function onTypeChange():void {
+            var type:int = int(typeGroup.selectedValue);
+            startType = String(type);
+            determineStackIndex();
         }
 
         public function saveValues():void {
@@ -82,6 +109,7 @@
                 item = new AnalysisDimension();
             } else if (type == AnalysisItemTypes.MEASURE) {
                 item = new AnalysisMeasure();
+                AnalysisMeasure(item).aggregation = aggregationBox.selectedItem.data;
             } else if (type == (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisDateDimension();
             } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
@@ -104,11 +132,23 @@
         }
 
         public function gotFocus():void {
-            
+
         }
 
         [Bindable]
         private var startType:String;
+
+        [Bindable]
+        private var selectedAggregation:int;
+
+        [Bindable]
+        private var selectedDateLevel:int;
+
+        [Bindable]
+        private var selectedFormatting:int;
+
+        [Bindable]
+        private var stackIndex:int;
 
         public function set info(value:FieldUploadInfo):void {
             _info = value;
@@ -129,59 +169,101 @@
         </mx:VBox>
     </mx:HBox>
     <mx:HRule width="100%"/>
-    <mx:TextArea text="{initialGuessText}" fontSize="18" width="700" backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" height="75"/>
+    <mx:TextArea text="{initialGuessText}" fontSize="18" width="700" backgroundAlpha="0" borderStyle="none"
+                 editable="false" selectable="false" height="60"/>
     <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()" selectedValue="{startType}"/>
     <mx:Grid>
         <mx:GridRow>
             <mx:GridItem>
-                <mx:RadioButton label="Grouping" groupName="typeGroup" value="{String(AnalysisItemTypes.DIMENSION)}" fontSize="18"/>
+                <mx:RadioButton label="Grouping" groupName="typeGroup" value="{String(AnalysisItemTypes.DIMENSION)}"
+                                fontSize="18"/>
             </mx:GridItem>
             <mx:GridItem>
-                <mx:RadioButton label="Measure" groupName="typeGroup" value="{String(AnalysisItemTypes.MEASURE)}" fontSize="18"/>
+                <mx:RadioButton label="Measure" groupName="typeGroup" value="{String(AnalysisItemTypes.MEASURE)}"
+                                fontSize="18"/>
             </mx:GridItem>
             <mx:GridItem>
-                <mx:RadioButton label="Date" groupName="typeGroup" value="{String(AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)}" fontSize="18"/>
+                <mx:RadioButton label="Date" groupName="typeGroup"
+                                value="{String(AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)}" fontSize="18"/>
             </mx:GridItem>
             <mx:GridItem>
-                <mx:RadioButton label="Tag List" groupName="typeGroup" value="{AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
+                <mx:RadioButton label="Tag List" groupName="typeGroup"
+                                value="{AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
             </mx:GridItem>
         </mx:GridRow>
         <mx:GridRow>
             <mx:GridItem>
-                <mx:RadioButton label="Longitude" groupName="typeGroup" value="{AnalysisItemTypes.LONGITUDE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
+                <mx:RadioButton label="Longitude" groupName="typeGroup"
+                                value="{AnalysisItemTypes.LONGITUDE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
             </mx:GridItem>
             <mx:GridItem>
-                <mx:RadioButton label="Latitude" groupName="typeGroup" value="{AnalysisItemTypes.LATITUDE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
+                <mx:RadioButton label="Latitude" groupName="typeGroup"
+                                value="{AnalysisItemTypes.LATITUDE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
             </mx:GridItem>
             <mx:GridItem>
-                <mx:RadioButton label="Zip Code" groupName="typeGroup" value="{AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
+                <mx:RadioButton label="Zip Code" groupName="typeGroup"
+                                value="{AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION}" fontSize="18"/>
             </mx:GridItem>
         </mx:GridRow>
     </mx:Grid>
-    <!--<mx:ViewStack>
+    <mx:HRule width="100%"/>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
         <mx:VBox>
-            <mx:Label text="Groupings provide you with a way to "/>
+
         </mx:VBox>
         <mx:VBox>
-            <mx:Label text="What do you want as the default aggregation?"/>
-            
-            <mx:Label text="How do you want to format values?"/>
-            <mx:Label text="Is it good if this value is high?"/>
+            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="What do you want as the default aggregation?" fontWeight="normal" fontSize="18" fontFamily="Lucida Grande">
+                    <util:SmartComboBox id="aggregationBox" labelField="label" selectedProperty="data" selectedValue="{selectedAggregation}"
+                             fontWeight="normal" fontSize="18" fontFamily="Lucida Grande">
+                        <util:dataProvider>
+                            <mx:Array>
+                                <mx:Object data="{AggregationTypes.SUM}" label="Sum"/>
+                                <mx:Object data="{AggregationTypes.AVERAGE}" label="Average"/>
+                                <mx:Object data="{AggregationTypes.MAX}" label="Max"/>
+                            </mx:Array>
+                        </util:dataProvider>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="How do you want to format values?" fontWeight="normal" fontSize="18" fontFamily="Lucida Grande">
+                    <util:SmartComboBox id="formatBox" labelField="label" selectedProperty="data" selectedValue="{selectedFormatting}"
+                             fontWeight="normal" fontSize="18" fontFamily="Lucida Grande">
+                        <util:dataProvider>
+                            <mx:Array>
+                                <mx:Object data="{FormattingConfiguration.NUMBER}" label="Number"/>
+                                <mx:Object data="{FormattingConfiguration.CURRENCY}" label="Currency"/>
+                                <mx:Object data="{FormattingConfiguration.PERCENTAGE}" label="Percentage"/>
+                            </mx:Array>
+                        </util:dataProvider>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+            </mx:Form>
         </mx:VBox>
         <mx:VBox>
-            <mx:Label text=""/>
+            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="What unit of time should this date default to?" fontWeight="normal" fontSize="18" fontFamily="Lucida Grande">
+                    <util:SmartComboBox id="dateLevelBox" labelField="label" selectedProperty="data" selectedValue="{selectedDateLevel}"
+                             fontWeight="normal" fontSize="18" fontFamily="Lucida Grande">
+                        <util:dataProvider>
+                            <mx:Array>
+                                <mx:Object data="{AnalysisItemTypes.YEAR_LEVEL}" label="Year"/>
+                                <mx:Object data="{AnalysisItemTypes.MONTH_LEVEL}" label="Month"/>
+                                <mx:Object data="{AnalysisItemTypes.WEEK_LEVEL}" label="Week"/>
+                                <mx:Object data="{AnalysisItemTypes.DAY_LEVEL}" label="Day"/>
+                            </mx:Array>
+                        </util:dataProvider>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+            </mx:Form>
         </mx:VBox>
         <mx:VBox>
-            <mx:Label text=""/>
+
         </mx:VBox>
         <mx:VBox>
-            <mx:Label text=""/>
         </mx:VBox>
         <mx:VBox>
-            <mx:Label text=""/>
         </mx:VBox>
         <mx:VBox>
-            <mx:Label text=""/>
         </mx:VBox>
-    </mx:ViewStack>-->
+    </mx:ViewStack>
 </mx:VBox>

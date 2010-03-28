@@ -11,5 +11,9 @@ public class ReportRetrievalFault extends Event{
         super(RETRIEVAL_FAULT, true);
         this.message = message;
     }
+
+    override public function clone():Event {
+        return new ReportRetrievalFault(message);
+    }
 }
 }

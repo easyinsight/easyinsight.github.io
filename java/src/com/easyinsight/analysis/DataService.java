@@ -270,6 +270,12 @@ public class DataService {
                     }
                 }
                 Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
+                Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+                for (AnalysisItem analysisItem : analysisItems) {
+                    if (!analysisItem.isDerived()) {
+                        validQueryItems.add(analysisItem);
+                    }
+                }
                 Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
                 boolean aggregateQuery = true;
                 for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
@@ -278,7 +284,7 @@ public class DataService {
                     }
                 }
                 insightRequestMetadata.setAggregateQuery(aggregateQuery);
-                DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false);
+                DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
                 Pipeline pipeline = new StandardReportPipeline();
                 pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
                 // todo: fix
@@ -388,7 +394,7 @@ public class DataService {
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
-                if (!analysisItem.isDerived() && analysisItem.isConcrete()) {
+                if (!analysisItem.isDerived()) {
                     validQueryItems.add(analysisItem);
                 }
             }

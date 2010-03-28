@@ -2,7 +2,7 @@
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
                             xmlns:filtering="com.easyinsight.filtering.*"
                             xmlns:datasources="com.easyinsight.datasources.*"
-                            xmlns:analysis="com.easyinsight.analysis.*"
+                            xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
                             width="100%" height="100%"
                             creationComplete="onCreation()"
                             implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.framework.IFullScreenPage">
@@ -21,6 +21,7 @@
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.RefreshReportSourceWindow;
+        import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -369,6 +370,7 @@
         private var loading:Boolean = false;
 
         private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
+            if (event.type == DataServiceLoadingEvent.LOADING_STARTED) overlayIndex = 1;
             loading = event.type == DataServiceLoadingEvent.LOADING_STARTED;
         }
 
@@ -439,6 +441,7 @@
                     BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
                     loading = false;
                 }
+                overlayIndex = 0;
                 receivedData = true;
                 dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
                 retrievedDataOnce = true;
@@ -674,14 +677,27 @@
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
             viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
+            viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
+            ;
 
             if (!_embedded) {
                 loading = true;
             }
 
             // if filters were passed in
-
+            overlayIndex = 1;
             viewFactory.retrieveData(false);
+        }
+
+        [Bindable]
+        private var overlayIndex:int;
+
+        [Bindable]
+        private var failureMessage:String;
+
+        private function onRetrievalFault(event:ReportRetrievalFault):void {
+            failureMessage = event.message;
+            overlayIndex = 2;
         }
 
         private var _showAddBar:Boolean = false;
@@ -705,18 +721,20 @@
 
         ]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0">
-        <mx:HBox id="buttonBar" visible="{receivedData}" width="100%" paddingBottom="0">
+        <mx:HBox id="buttonBar" width="100%" paddingBottom="0">
             <mx:Image source="{logo}" id="logoImage"
-                          click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
+                      click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
             <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10">
-                <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton" paddingTop="10"/>
+                <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"
+                           paddingTop="10"/>
                 <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
                            id="fullScreenButton" paddingTop="10"/>
                 <mx:Button label="Refresh" click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
                            id="refreshButton" paddingTop="10"/>
                 <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
                            id="bookmarkButton" paddingTop="10"/>
-                <mx:Button label="Export Report" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom"
+                <mx:Button label="Export Report" icon="{exportToExcelIcon}" click="exportExcel()"
+                           labelPlacement="bottom"
                            id="exportButton" paddingTop="10"/>
                 <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()"
                            labelPlacement="bottom" id="editReportButton" paddingTop="10"/>
@@ -726,8 +744,9 @@
             <mx:HBox backgroundAlpha="0" backgroundColor="#FFFFFF">
                 <mx:VRule visible="{showingFilters}" strokeColor="#AAAAAA" height="86"/>
                 <mx:VBox paddingTop="10" paddingBottom="10" id="filterBox">
-                    <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
-                       labelPlacement="bottom" id="adjustFiltersbutton" paddingTop="10"/>
+                    <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()"
+                               visible="{showFilters}"
+                               labelPlacement="bottom" id="adjustFiltersbutton" paddingTop="10"/>
                 </mx:VBox>
                 <mx:VRule visible="{showingFilters}" strokeColor="#AAAAAA" height="86"/>
             </mx:HBox>
@@ -768,19 +787,36 @@
             <mx:VBox width="100%" height="100%">
                 <mx:ViewStack width="100%" id="transformBox" resizeToContent="true" creationPolicy="all">
                     <mx:Box/>
-                    <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid" borderThickness="1"
-                                              existingFilters="{filterDefinitions}"
-                                              width="100%" paddingLeft="10"
-                                              paddingTop="10" paddingBottom="10"
-                                              paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA" backgroundColor="#FFFFFF"/>
+                    <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
+                                                  borderThickness="1"
+                                                  existingFilters="{filterDefinitions}"
+                                                  width="100%" paddingLeft="10"
+                                                  paddingTop="10" paddingBottom="10"
+                                                  paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
+                                                  backgroundColor="#FFFFFF"/>
                 </mx:ViewStack>
                 <mx:HBox width="100%" id="addReportBox" horizontalAlign="center" verticalAlign="middle"/>
                 <mx:Canvas width="100%" height="100%">
                     <mx:Canvas width="100%" height="100%" id="reportBox"/>
-                    <mx:Box width="100%" height="100%" id="loadingLayer" visible="{loading}" horizontalAlign="center" verticalAlign="middle">
-                        <mx:ProgressBar indeterminate="true" label="Loading the report..." visible="true"/>
-                    </mx:Box>
+                    <mx:ViewStack width="100%" height="100%" selectedIndex="{overlayIndex}">
+                        <mx:Box/>
+                        <mx:Box width="100%" height="100%" id="loadingLayer" visible="{loading}"
+                                horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+                            <mx:ProgressBar indeterminate="true" label="Loading the report..." visible="true" fontSize="20"/>
+                        </mx:Box>
+                        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
+                                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+                            <mx:Box paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+                                backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+                                cornerRadius="10">
+                                <util:AutoSizeTextArea text="We're sorry, but something went wrong in retrieving data for this report. We've logged the error on our servers and our engineers will fix it as soon as possible." visible="true" fontSize="18" width="400"
+                                    editable="false" backgroundAlpha="0"/>
+                            </mx:Box>
+                        </mx:Box>
+                    </mx:ViewStack>
                 </mx:Canvas>
+
+
             </mx:VBox>
         </mx:HBox>
     </mx:VBox>

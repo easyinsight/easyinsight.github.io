@@ -86,7 +86,9 @@ public class WSListDefinition extends WSAnalysisDefinition {
         if (listLimitsMetadata != null) {
             int count = dataSet.getRows().size();
             limitsResults = new LimitsResults(count >= listLimitsMetadata.getNumber(), count, listLimitsMetadata.getNumber());
-            dataSet.sort(listLimitsMetadata.getAnalysisItem(), listLimitsMetadata.isTop());
+            if (listLimitsMetadata.getAnalysisItem() != null) {
+                dataSet.sort(listLimitsMetadata.getAnalysisItem(), listLimitsMetadata.isTop());    
+            }
             dataSet.subset(listLimitsMetadata.getNumber());
         } else {
             limitsResults = super.applyLimits(dataSet);
@@ -95,7 +97,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
     }
 
     public List<AnalysisItem> getLimitFields() {
-        if (listLimitsMetadata != null) {
+        if (listLimitsMetadata != null && listLimitsMetadata.getAnalysisItem() != null) {
             return Arrays.asList(listLimitsMetadata.getAnalysisItem());
         } else {
             return super.getLimitFields();
