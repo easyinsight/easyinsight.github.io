@@ -77,9 +77,14 @@
                 authorize();
             } else {
                 var uploadExternal:GoogleWindow = GoogleWindow(PopUpManager.createPopUp(this, GoogleWindow, true));
+                uploadExternal.addEventListener(AnalyzeEvent.ANALYZE, passThrough);
                 uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
                 PopUpUtil.centerPopUp(uploadExternal);
             }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
         }
 
         private function gotRequirements():void {

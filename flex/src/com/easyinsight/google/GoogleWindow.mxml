@@ -14,6 +14,7 @@
 
         private function passThrough(event:Event):void {
             dispatchEvent(event);
+            PopUpManager.removePopUp(this);
         }
 
         private function onFeedCreation(event:UploadConfigEvent):void {
