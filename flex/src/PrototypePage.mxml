@@ -72,6 +72,12 @@
                 <prototype:GoogleAnalytics navigation="currentState=event.state"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="Basecamp">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:Basecamp navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
         <mx:State name="WebAnalytics">
             <mx:RemoveChild target="{frontPage}"/>
             <mx:AddChild relativeTo="{core}">

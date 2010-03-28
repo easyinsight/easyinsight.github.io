@@ -1,0 +1,163 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+         xmlns:solutions="com.easyinsight.solutions.*" xmlns:twitter="com.easyinsight.twitter.*"
+         width="100%" height="100%" paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0"
+         verticalGap="0" backgroundColor="#818285" horizontalAlign="center">
+    <mx:Metadata>
+        [Event(name="navigation", type="prototype.PrototypeEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+
+        [Bindable]
+        [Embed(source="../../assets/logo2.PNG")]
+        private var logo:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/film.png")]
+        private var film:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/message.png")]
+        private var message:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/mouse.png")]
+        private var mouse:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/ReverseGray.jpg")]
+        private var banner:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/Google Analytics Logo.gif")]
+        private var gaLogo:Class;
+
+        [Bindable]
+        private var startButtonText:String = "Get Started Now!";
+        ]]></mx:Script>
+    <mx:VBox width="1000" height="100%" verticalGap="0">
+        <mx:HBox width="100%" styleName="Cell" height="70">
+            <mx:Box height="100%" width="2" backgroundColor="#DDDDDD"/>
+            <mx:Box width="300" verticalAlign="middle" height="100%" horizontalAlign="center">
+                <mx:Image source="{logo}" click="dispatchEvent(new PrototypeEvent(''))"/>
+            </mx:Box>
+            <mx:VBox width="100%" height="100%" paddingRight="15">
+                <mx:HBox horizontalAlign="right" width="100%" height="50%" paddingTop="5">
+                    <mx:Button label="Sign In" styleName="redButton"/>
+                    <mx:Button label="Sign Up for Free Account" styleName="redButton"/>
+                </mx:HBox>
+                <mx:Spacer height="100%"/>
+                <mx:HBox width="100%" styleName="HeaderLink" height="50%" paddingBottom="5">
+                    <mx:Label text="PRODUCT"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="DATA" color="#cc0033"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="BLOG"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="CUSTOMERS"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="PARTNERS"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="COMPANY"/>
+                </mx:HBox>
+            </mx:VBox>
+            <mx:Box height="100%" width="2" backgroundColor="#DDDDDD"/>
+        </mx:HBox>
+        <mx:Canvas width="1000" backgroundColor="#FFFFFF" height="100%">
+            <mx:Canvas x="700" backgroundColor="#DDDDDD" height="100%" width="300"/>
+            <mx:VBox width="100%" verticalGap="0">
+                <mx:HBox width="100%" horizontalGap="0">
+                    <mx:VBox styleName="Cell" horizontalAlign="center" width="700" verticalGap="0">
+                        <mx:HBox verticalAlign="middle" horizontalAlign="center"
+                                 width="100%" backgroundImage="{banner}" backgroundSize="100%" height="60">
+                            <mx:Label text="Why Use Easy Insight with Google Analytics?" fontFamily="Tahoma"
+                                      fontSize="24"
+                                      color="#FFFFFF"/>
+                        </mx:HBox>
+                        <mx:VBox width="100%" height="100%"  paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5">
+                        <mx:TextArea
+                            text="Want to take your web analytics to the next level? You can get started with Easy Insight in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation. The full power of enterprise business intelligence is yours for the taking, all delivered with incredible ease of use."
+                            styleName="PageContent" editable="false"
+                            selectable="false" width="100%" height="80"/>
+                        <mx:HBox width="100%" height="100%">
+                            <mx:VBox height="100%" width="2" backgroundColor="#DDDDDD"/>
+                            <mx:VBox width="100%" height="100%">
+
+                                <mx:HBox width="100%" horizontalAlign="center">
+                                    <mx:Image source="../assets/GA2.png" maxWidth="200" maxHeight="120"/>
+                                    <mx:VBox width="100%">
+                                        <mx:Label text="Easy Data Exploration" styleName="Header"/>
+                                        <mx:TextArea
+                            text="The combination of Easy Insight and Google Analytics give you the ability to easily apply sophisticated analytics to your website data. Drag and drop report creation lets you quickly find build up the views you want. You can easily slice and dice data through Easy Insight's robust filtering capabilities, finding meaningful insights within your visitor traffic, your advertising efforts, and everything else offered by Google Analytics. You can take advantage of reports built by other users in the community to quickly find whole new angles on your web data."
+                            styleName="PageContent" editable="false"
+                            selectable="false" width="100%" height="150"/>
+                                    </mx:VBox>
+                                </mx:HBox>
+
+                                <mx:HBox width="100%">
+                                    <mx:VBox width="100%">
+                                        <mx:Label text="Combined Insight" styleName="Header"/>
+                                        <mx:TextArea
+                            text="Getting a full picture of your web presence takes more than looking at who's visited your site--Easy Insight gives you the ability to visualize that full picture by letting you extend your reports with data from other sources. Have application data powering the rest of your website, like internal information about users? Use the Easy Insight database solution to make queries against that relational data and combine that data with your web traffic data to build out that full picture."
+                            styleName="PageContent" editable="false"
+                            selectable="false" width="100%" height="120"/>
+                                    </mx:VBox>
+                                    <mx:Image source="../assets/GA4.png" maxWidth="200" maxHeight="120"/>
+                                </mx:HBox>
+
+                                <mx:HBox width="100%">
+                                    <mx:Image source="../assets/GA1.png" maxWidth="200" maxHeight="120"/>
+                                    <mx:VBox width="100%">
+                                        <mx:Label text="Improve your Sales and Marketing Strategy" styleName="Header"/>
+                                        <mx:TextArea
+                            text="Plot out your sales and marketing strategy in Easy Insight through KPI trees. These trees enable you to define high level goals like 'Increase paying conversion rate', then map those goals into progressively more and more granular objectives. You can tie these objectives to your data from Google Analytics, your CRM tool of choice, and whatever else may be needed, and create a full view of your sales and marketing activity, helping to guide successful campaigns. Make sure that you're applying the lessons from your insights correctly, to drive continuous business improvement towards more deals, more revenue, and more success!"
+                            styleName="PageContent" editable="false"
+                            selectable="false" width="100%" height="160"/>
+                                    </mx:VBox>
+
+                                </mx:HBox>
+                            </mx:VBox>
+                            </mx:HBox>
+                            </mx:VBox>
+                    </mx:VBox>
+                    <mx:VBox horizontalAlign="center" width="100%" paddingTop="10">
+                        <mx:VBox width="280" backgroundColor="#786e78" borderStyle="solid" cornerRadius="15"
+                                 paddingLeft="5"
+                                 paddingRight="5"
+                                 paddingTop="5" paddingBottom="5" height="220" verticalAlign="middle"
+                                 buttonMode="true" borderColor="#786e78" borderThickness="2"
+                                 horizontalAlign="center">
+                            <mx:Label text="Next Steps" fontSize="16" color="#FFFFFF"/>
+                            <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle"
+                                    backgroundColor="#FFFFFF"
+                                    borderStyle="solid" borderColor="#FFFFFF" borderThickness="1"
+                                    cornerRadius="5">
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:TextArea text="Looking for tips, tricks, and documentation?" fontSize="14" borderStyle="none" editable="false"
+                                            width="100%" textAlign="center"/>
+                                    <mx:LinkButton label="Look at Google Analytics blog posts" fontSize="12"
+                                               textDecoration="underline"
+                                               click="navigateToURL(new URLRequest('http://jamesboe.blogspot.com/search/label/Google%20Analytics'), '_blank')"/>
+                                </mx:VBox>
+                            <mx:HRule width="100%" strokeColor="#3370ce"/>
+                            <mx:Box id="authBox"/>
+                            <mx:VBox id="controlsBox">
+                                <mx:Button label="Get Started Now!" fontSize="18" styleName="blueButton"
+                                           id="installButton"/>
+                            </mx:VBox>
+                            </mx:VBox>
+                        </mx:VBox>
+                        <mx:Box width="280" backgroundColor="#FFFFFF" borderStyle="solid" cornerRadius="15"
+                                paddingLeft="5"
+                                paddingRight="5"
+                                paddingTop="5" paddingBottom="5" verticalAlign="middle"
+                                buttonMode="true" borderColor="#D42525" borderThickness="2">
+                            <twitter:TwitterDisplay person="easyinsight"/>
+                        </mx:Box>
+                    </mx:VBox>
+                </mx:HBox>
+
+            </mx:VBox>
+        </mx:Canvas>
+    </mx:VBox>
+</mx:VBox>
