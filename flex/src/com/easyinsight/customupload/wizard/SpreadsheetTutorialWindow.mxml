@@ -114,7 +114,7 @@
             _info = value;
             _analysisItem = value.guessedItem;
         }]]></mx:Script>
-    <mx:Label text="{labeledText}" fontSize="18"/>
+    <mx:Label text="{labeledText}" fontSize="18" maxWidth="750"/>
     <mx:HBox verticalAlign="middle">
         <mx:Label text="What do you want to call this field?" fontSize="18"/>
         <mx:TextInput id="displayNameInput" text="{displayName}" fontSize="18"/>

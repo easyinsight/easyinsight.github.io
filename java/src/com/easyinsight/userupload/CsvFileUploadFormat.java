@@ -64,7 +64,7 @@ public class CsvFileUploadFormat extends UploadFormat {
                 columnSegment.setValues(convertedValues);
                 grid.add(convertedValues);
 
-                if (dataTypeGuesser != null && !gotValue) {
+                if (dataTypeGuesser != null) {
                     for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
                         if (headerKeyCounter < values.length) {
                             Value value = convertedValues[headerKeyCounter];
@@ -77,9 +77,6 @@ public class CsvFileUploadFormat extends UploadFormat {
                                 }
                                 dataTypeGuesser.addValue(key, value);
                                 headerValuesObtained.remove(headerColumns[headerKeyCounter]);
-                                if (headerValuesObtained.isEmpty()) {
-                                    gotValue = true;
-                                }
                             }
                         }
                     }

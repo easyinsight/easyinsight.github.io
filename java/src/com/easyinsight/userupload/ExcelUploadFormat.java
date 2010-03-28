@@ -105,7 +105,7 @@ public class ExcelUploadFormat extends UploadFormat {
                 //grid[row.getRowNum() - rowModifier] = values;
 
                 if (orientation == VERTICAL_HEADERS) {
-                    if (dataTypeGuesser != null && !gotValue) {
+                    if (dataTypeGuesser != null) {
                         for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
                             if (headerKeyCounter < values.length) {
                                 Value value = values[headerKeyCounter];
