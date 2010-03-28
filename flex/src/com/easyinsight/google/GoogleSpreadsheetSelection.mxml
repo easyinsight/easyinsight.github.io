@@ -125,7 +125,8 @@
         <mx:method name="getAuthSubURL" result="gotURL()"/>
     </mx:RemoteObject>
 	<mx:WipeRight id="wipeIn" duration="1000"/>
-	<mx:ViewStack id="coreContent" width="100%" height="100%" selectedIndex="{stackIndex}" resizeToContent="true">
+	<mx:ViewStack id="coreContent" width="100%" height="100%" selectedIndex="{stackIndex}" resizeToContent="true"
+            creationPolicy="all">
 		<mx:HBox id="coreHBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:ProgressBar id="progressBar" indeterminate="true" label="Retrieving the available spreadsheets..."/>
 		</mx:HBox>
