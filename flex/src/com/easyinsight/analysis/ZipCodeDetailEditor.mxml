@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*">
+    <mx:Script><![CDATA[
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new AnalysisZipCode();
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;            
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+        }]]></mx:Script>
+</analysis:AnalysisItemDetailEditor>

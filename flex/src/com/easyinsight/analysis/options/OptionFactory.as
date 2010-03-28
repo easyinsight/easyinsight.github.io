@@ -53,6 +53,8 @@ package com.easyinsight.analysis.options
                     option = OptionTypeNames.LATITUDE;
                 } else if (analysisItem.hasType(AnalysisItemTypes.LONGITUDE)) {
                     option = OptionTypeNames.LONGITUDE;
+                } else if (analysisItem.hasType(AnalysisItemTypes.ZIP_CODE)) {
+                    option = OptionTypeNames.ZIP_CODE;
 				} else {
 					option = OptionTypeNames.GROUPING;
 				}
