@@ -53,14 +53,10 @@
             }
         }
 
-        private function passThrough(event:Event):void {
-            dispatchEvent(event);
-        }
-
         private function retrieveSpreadsheets():void {
             //addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onComplete);
             dataService.getAvailableGoogleSpreadsheets.send();
-            addEventListener(AnalyzeEvent.ANALYZE, analyze);
+            //addEventListener(AnalyzeEvent.ANALYZE, analyze);
         }
 
         private function processSpreadsheets():void {
