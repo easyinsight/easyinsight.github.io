@@ -114,6 +114,7 @@
             dispatchEvent(event);
         }
 
+        [Bindable]
         private var stackIndex:int = 0;
                 ]]>
 	</mx:Script>
@@ -132,7 +133,7 @@
 		</mx:HBox>
         <mx:Box width="100%" height="100%">
             <mx:AdvancedDataGrid width="100%" height="100%"
-                id="spreadsheetTree" rowHeight="28" fontSize="12" rowCount="5" visible="false" showEffect="{wipeIn}"
+                id="spreadsheetTree" rowHeight="28" fontSize="12" rowCount="5" showEffect="{wipeIn}"
                 defaultLeafIcon="{worksheetIcon}" folderOpenIcon="{spreadsheetIcon}" folderClosedIcon="{spreadsheetIcon}">
                 <mx:dataProvider>
                     <mx:HierarchicalData source="{googleSpreadsheets}"/>
