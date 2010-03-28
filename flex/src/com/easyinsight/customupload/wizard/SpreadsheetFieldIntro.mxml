@@ -16,5 +16,5 @@
 
         public function gotFocus():void {
         }]]></mx:Script>
-    <mx:Text fontSize="20" text="The next step is to validate that Easy Insight correctlyt&#13;interpreted the various fields in your data. Yout&#13;can hit Finish at any point to skip this stept&#13;and go directly to your data."/>
+    <mx:Text fontSize="20" text="The next step is to validate that Easy Insight correctly&#13;interpreted the various fields in your data. You can&#13;hit Finish at any point to skip this step and go&#13;directly to your data."/>
 </mx:VBox>
