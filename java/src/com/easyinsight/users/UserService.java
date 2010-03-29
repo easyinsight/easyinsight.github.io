@@ -375,7 +375,8 @@ public class UserService implements IUserService {
             session.save(account);
             user.setAccount(account);
             session.update(user);
-            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE) {
+            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE ||
+                    account.getAccountType() == Account.BASIC) {
                 Group group = new Group();
                 group.setName(account.getName());
                 group.setPubliclyVisible(false);

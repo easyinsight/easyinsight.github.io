@@ -1,6 +1,7 @@
 package com.easyinsight.groups;
 
 import com.easyinsight.analysis.AnalysisStorage;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.goals.GoalTreeNode;
 import com.easyinsight.security.*;
@@ -15,6 +16,8 @@ import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.userupload.MyDataTree;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -27,6 +30,28 @@ import java.sql.SQLException;
 public class GroupService {
 
     private GroupStorage groupStorage = new GroupStorage();
+
+    public boolean canCreateGroup() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            if (SecurityUtil.getAccountTier() == Account.BASIC) {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP_ID FROM COMMUNITY_GROUP, GROUP_TO_USER_JOIN, USER " +
+                        "WHERE USER.ACCOUNT_ID = ? AND USER.USER_ID = GROUP_TO_USER_JOIN.USER_ID AND " +
+                        "GROUP_TO_USER_JOIN.group_id = COMMUNITY_GROUP.COMMUNITY_GROUP_ID");
+                queryStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = queryStmt.executeQuery();
+                return !rs.next();
+            } else if (SecurityUtil.getAccountTier() >= Account.PROFESSIONAL && SecurityUtil.isAccountAdmin()) {
+                return true;
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return false;
+    }
 
     public GroupResponse openGroupIfPossible(long groupID) {
         GroupResponse groupResponse;

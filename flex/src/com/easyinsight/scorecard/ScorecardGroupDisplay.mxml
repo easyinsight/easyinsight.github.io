@@ -5,7 +5,7 @@
 
         import mx.events.CloseEvent;
         import mx.controls.Alert;
-
+        
         private var _groupID:int;
 
         public function set groupID(value:int):void {
@@ -18,6 +18,10 @@
 
         private function gotDescriptors():void {
             handleDescriptors(scorecardService.getScorecardDescriptorsForGroup.lastResult as ScorecardList);
+        }
+
+        override protected function anyDataCase():Boolean {
+            return false;
         }
 
         override protected function configureRenderer(scorecardRenderer:ScorecardRenderer):void {

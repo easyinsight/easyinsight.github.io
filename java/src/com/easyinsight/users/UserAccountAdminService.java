@@ -267,6 +267,14 @@ public class UserAccountAdminService {
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
+            } else if (user != null && account.getAccountType() == Account.BASIC) {
+                try {
+                    if (account.getGroupID() != null) {
+                        new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
             }
         }
         return userCreationResponse;

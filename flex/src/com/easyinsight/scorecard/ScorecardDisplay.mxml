@@ -104,8 +104,12 @@
             BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
         }
 
+        protected function anyDataCase():Boolean {
+            return true;
+        }
+
         protected function handleDescriptors(scorecardList:ScorecardList):void {
-            if (scorecardList.anyData) {
+            if (!anyDataCase() || scorecardList.anyData) {
                 scorecards = scorecardList.scorecardDescriptors;
                 scorecardStack.removeAllChildren();
                 for each (var scorecard:ScorecardDescriptor in scorecards) {
