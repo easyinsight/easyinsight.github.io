@@ -61,6 +61,7 @@
                 failureMessageLabel.text = "";
                 user = new UserTransferObject();
                 user.userName = userName.text;
+                user.firstName = firstName.text;
                 user.name = fullName.text;
                 user.email = email.text;
                 user.accountAdmin = true;
@@ -90,7 +91,10 @@
             <mx:FormItem label="Confirm Password:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="confirmPassword" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
-			<mx:FormItem label="Your Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+            <mx:FormItem label="First Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="firstName" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+			<mx:FormItem label="Last Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
 			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">

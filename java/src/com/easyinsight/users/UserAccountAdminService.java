@@ -229,7 +229,7 @@ public class UserAccountAdminService {
                 session.beginTransaction();
                 List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
                 account = (Account) results.get(0);
-                int maxUsers = getMaxUsers(account.getAccountType());
+                int maxUsers = account.getMaxUsers();
                 int currentUsers = account.getUsers().size();
                 if (currentUsers >= maxUsers) {
                     userCreationResponse = new UserCreationResponse("You are at the maximum number of users for your account.");
@@ -440,35 +440,8 @@ public class UserAccountAdminService {
         }
     }
 
-    private int getMaxUsers(int accountType) {
-        int maxUsers;
-        if (accountType == Account.ENTERPRISE) {
-            maxUsers = 1000;
-
-        } else if (accountType == Account.PREMIUM) {
-            maxUsers = 1000;
-
-        } else if (accountType == Account.BASIC) {
-            maxUsers = 1;
-
-        } else if (accountType == Account.PERSONAL) {
-            maxUsers = 1;
-
-        } else if (accountType == Account.PROFESSIONAL) {
-
-            maxUsers = 50;
-        } else if (accountType == Account.ADMINISTRATOR) {
-
-            maxUsers = 50;
-        } else {
-            throw new RuntimeException();
-        }
-        return maxUsers;
-    }
-
     public AccountStats getAccountStats() {
         long accountID = SecurityUtil.getAccountID();
-        int accountType = SecurityUtil.getAccountTier();
         long usedSize = 0;
         long maxSize = 0;
         int currentUsers = 0;
@@ -496,26 +469,13 @@ public class UserAccountAdminService {
             ResultSet apiRS = apiTodayStmt.executeQuery();
             if (apiRS.next()) {
                 usedAPI = apiRS.getLong(1);
-            }            
-            if (accountType == Account.ENTERPRISE) {
-                maxUsers = 1000;
-                maxSize = Account.ENTERPRISE_MAX;
-            } else if (accountType == Account.PREMIUM) {
-                maxUsers = 1000;
-                maxSize = Account.PROFESSIONAL_MAX;
-            } else if (accountType == Account.BASIC) {
-                maxUsers = 1;
-                maxSize = Account.INDIVIDUAL_MAX;
-            } else if (accountType == Account.PERSONAL) {
-                maxUsers = 1;
-                maxSize = Account.FREE_MAX;
-            } else if (accountType == Account.PROFESSIONAL) {
-                maxSize = Account.GROUP_MAX;
-                maxUsers = 50;
-            } else if (accountType == Account.ADMINISTRATOR) {
-                maxSize = Account.ADMINISTRATOR_MAX;
-                maxUsers = 50;
             }
+            PreparedStatement statsStmt = conn.prepareStatement("SELECT max_users, max_size FROM account where account_id = ?");
+            statsStmt.setLong(1, accountID);
+            ResultSet statRS = statsStmt.executeQuery();
+            statRS.next();
+            maxUsers = statRS.getInt(1);
+            maxSize = statRS.getLong(2);            
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

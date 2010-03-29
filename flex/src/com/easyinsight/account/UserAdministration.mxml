@@ -162,7 +162,9 @@
                             <mx:columns>
                                 <mx:DataGridColumn dataField="userName" headerText="User Name"
                                                    headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                                <mx:DataGridColumn dataField="name" headerText="Full Name"
+                                <mx:DataGridColumn dataField="firstName" headerText="First Name"
+                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                <mx:DataGridColumn dataField="name" headerText="Last Name"
                                                    headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                                 <mx:DataGridColumn dataField="userName" width="100" headerText=""
                                                    itemRenderer="{userButtonFactory}"/>
@@ -174,7 +176,9 @@
                             <mx:columns>
                                 <mx:DataGridColumn dataField="userName" headerText="User Name"
                                                    headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                                <mx:DataGridColumn dataField="name" headerText="Full Name"
+                                <mx:DataGridColumn dataField="firstName" headerText="First Name"
+                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                <mx:DataGridColumn dataField="name" headerText="Last Name"
                                                    headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                                 <mx:DataGridColumn dataField="userName" width="150" headerText=""
                                                    itemRenderer="{personaFactory}"/>

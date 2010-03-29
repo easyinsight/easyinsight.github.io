@@ -443,16 +443,16 @@ public class UserService implements IUserService {
             account.setMaxSize(1000000000);
         } else if (account.getAccountType() == Account.PREMIUM) {
             account.setMaxUsers(50);
-            account.setMaxSize(200000000);
+            account.setMaxSize(500000000);
         } else if (account.getAccountType() == Account.BASIC) {
-            account.setMaxUsers(1);
-            account.setMaxSize(20000000);
+            account.setMaxUsers(5);
+            account.setMaxSize(100000000);
         } else if (account.getAccountType() == Account.PERSONAL) {
             account.setMaxUsers(1);
             account.setMaxSize(1000000);
         } else if (account.getAccountType() == Account.PROFESSIONAL) {
-            account.setMaxUsers(10);
-            account.setMaxSize(10000000);
+            account.setMaxUsers(50);
+            account.setMaxSize(500000000);
         }
     }
    
