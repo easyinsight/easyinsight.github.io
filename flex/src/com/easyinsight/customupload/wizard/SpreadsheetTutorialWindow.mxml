@@ -113,6 +113,9 @@
                 AnalysisMeasure(item).formattingConfiguration.formattingType = formatBox.selectedItem.data;
             } else if (type == (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisDateDimension();
+                if (_info.guessedItem.hasType(AnalysisItemTypes.DATE)) {
+                    AnalysisDateDimension(item).customDateFormat = AnalysisDateDimension(_info.guessedItem).customDateFormat;
+                }
                 AnalysisDateDimension(item).dateLevel = dateLevelBox.selectedItem.data;
             } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisList();
