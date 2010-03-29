@@ -596,15 +596,19 @@
                     reportSharingTab.updateReport();
                     var valid:Boolean = results.length == 0;
                     if (valid) {
-                        dataView.updateExportMetadata();
-                        var ba:ByteArray = null;
-                        if (analysisDefinition.solutionVisible) {
-                            var bd:BitmapData = new BitmapData(dataView.getCoreView().width, dataView.getCoreView().height);
-                            bd.draw(dataView.getCoreView());
-                            ba = PNGEnc.encode(bd);
+                        if (dataView.isDataValid()) {
+                            dataView.updateExportMetadata();
+                            var ba:ByteArray = null;
+                            if (analysisDefinition.solutionVisible) {
+                                var bd:BitmapData = new BitmapData(dataView.getCoreView().width, dataView.getCoreView().height);
+                                bd.draw(dataView.getCoreView());
+                                ba = PNGEnc.encode(bd);
+                            }
+                            ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
+                            analysisService.saveAnalysisDefinition(analysisDefinition, ba);
+                        } else {
+                            Alert.show("You need to configure the fields of this report before you can saving.");
                         }
-                        ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
-                        analysisService.saveAnalysisDefinition(analysisDefinition, ba);
                     } else {
                         tabNavigator.selectedIndex = 0;
                     }

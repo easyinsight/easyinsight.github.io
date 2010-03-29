@@ -214,7 +214,9 @@ public class DataViewFactory extends VBox implements IRetrievable {
         }
     }
 
-    
+    public function isDataValid():Boolean {
+        return _controlBar.isDataValid();
+    }
 
     private function gotData(event:DataServiceEvent):void {
         dispatchEvent(event);
