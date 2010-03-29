@@ -7,7 +7,7 @@ public class AmericasMapEmbeddedController implements IEmbeddedReportController 
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "AmericasMapModule.swf";
+        factory.reportRenderer = "AmericasModule.swf";
         //factory.newDefinition = MapDefinition;
         return factory;
     }
