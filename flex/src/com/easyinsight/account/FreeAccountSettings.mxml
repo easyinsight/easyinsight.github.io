@@ -24,6 +24,8 @@
         private var fullName:String;
         [Bindable]
         private var email:String;
+        [Bindable]
+        private var firstName:String;
 
         [Bindable]
         [Embed(source="../../../../assets/pencil.png")]
@@ -32,6 +34,7 @@
         private function initProperties():void {
             this.userName = User.getInstance().userName;
             this.fullName = User.getInstance().getName();
+            this.firstName = User.getInstance().firstName;
             this.email = User.getInstance().getEmail();
         }
 
@@ -40,6 +43,7 @@
             editor.userNameText = userName;
             editor.fullNameText = fullName;
             editor.emailText = email;
+            editor.firstNameText = firstName;
             editor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onProfileEdit);
             PopUpManager.addPopUp(editor, this, true);
             PopUpUtil.centerPopUp(editor);

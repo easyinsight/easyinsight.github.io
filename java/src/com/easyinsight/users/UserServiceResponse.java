@@ -25,6 +25,7 @@ public class UserServiceResponse {
     private boolean billingInformationGiven;
     private int accountState;
     private UISettings uiSettings;
+    private String firstName;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -34,7 +35,7 @@ public class UserServiceResponse {
     public UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
                                long spaceAllowed, String email, String userName, String encryptedPassword, boolean accountAdmin,
                                boolean dataSourceCreator, boolean insightCreator, boolean billingInformationGiven, int accountState,
-                               UISettings uiSettings) {
+                               UISettings uiSettings, String firstName) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -50,6 +51,15 @@ public class UserServiceResponse {
         this.billingInformationGiven = billingInformationGiven;
         this.accountState = accountState;
         this.uiSettings = uiSettings;
+        this.firstName = firstName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstname) {
+        this.firstName = firstname;
     }
 
     public UserServiceResponse() {

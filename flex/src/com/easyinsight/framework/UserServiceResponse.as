@@ -23,6 +23,7 @@ import com.easyinsight.preferences.UISettings;
         public var billingInformationGiven:Boolean;
         public var accountState:int;
         public var uiSettings:UISettings;
+        public var firstName:String;
 		
 		public function UserServiceResponse()
 			{

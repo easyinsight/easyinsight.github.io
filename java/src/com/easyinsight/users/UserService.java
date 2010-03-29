@@ -310,7 +310,7 @@ public class UserService implements IUserService {
         }
     }    
 
-    public void updateUserLabels(String userName, String fullName, String email) {
+    public void updateUserLabels(String userName, String fullName, String email, String firstName) {
         User user = retrieveUser();
         if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
             throw new SecurityException();
@@ -321,6 +321,7 @@ public class UserService implements IUserService {
         user.setUserName(userName);
         user.setName(fullName);
         user.setEmail(email);
+        user.setFirstName(firstName);
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
@@ -485,7 +486,7 @@ public class UserService implements IUserService {
             UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                                 user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                    user.getUiSettings());
+                    user.getUiSettings(), user.getFirstName());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -550,7 +551,7 @@ public class UserService implements IUserService {
                         userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(),
                                 user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                                user.getUiSettings());
+                                user.getUiSettings(), user.getFirstName());
                         userServiceResponse.setActivated(account.isActivated());
                     } else {
                         userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
@@ -623,7 +624,7 @@ public class UserService implements IUserService {
             if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING  || account.getAccountState() == Account.DELINQUENT) {
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                      user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(),
-                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(), user.getUiSettings());
+                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName());
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);

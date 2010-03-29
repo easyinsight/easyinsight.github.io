@@ -17,6 +17,9 @@
         private var _fullNameText:String;
 
         [Bindable]
+        private var _firstNameText:String;
+
+        [Bindable]
         private var _emailText:String;
 
         [Bindable]
@@ -37,6 +40,10 @@
             _emailText = val;
         }
 
+        public function set firstNameText(value:String):void {
+            _firstNameText = value;
+        }
+
         private function initHandlers():void {
             validators = [ emailValidator, userNameValidator, fullNameValidator ];
         }
@@ -48,12 +55,12 @@
             } else {
                 failureMessageLabel.text = "";
                 ProgressAlert.alert(this, "Updating your profile...", null, creationService.updateUserLabels);
-                creationService.updateUserLabels.send(userName.text, fullName.text, email.text);
+                creationService.updateUserLabels.send(userName.text, fullName.text, email.text, firstName.text);
             }
         }
 
         private function savedUser():void {
-            User.getInstance().updateLabels(userName.text, fullName.text, email.text);
+            User.getInstance().updateLabels(userName.text, fullName.text, email.text, firstName.text);
             dispatchEvent(new RefreshAccountEvent());
             PopUpManager.removePopUp(this);
         }
@@ -65,7 +72,10 @@
 			<mx:FormItem label="User ID:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="userName" text="{_userNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
-			<mx:FormItem label="Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+            <mx:FormItem label="First Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="firstName" text="{_firstNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+			<mx:FormItem label="Last Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="fullName" text="{_fullNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
 			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">

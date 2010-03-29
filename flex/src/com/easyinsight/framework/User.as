@@ -25,6 +25,7 @@ import flash.net.SharedObject;
         public var billingInformationGiven:Boolean;
         public var accountState:int;
         public var uiConfiguration:UIConfiguration;
+        public var firstName:String;
 
         public function User() {
 
@@ -32,10 +33,11 @@ import flash.net.SharedObject;
 		
 		static public function initializeUser(name:String, email:String, accountType:int,
 		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean, userID:int, activated:Boolean, billingInformationGiven:Boolean, accountState:int,
-                uiSettings:UISettings):void {
+                uiSettings:UISettings, firstName:String):void {
 			_user = new User();
 			_user.name = name;
 			_user.email = email;
+            _user.firstName = firstName;
             _user.accountAdmin = accountAdmin;
 			_user.spaceAllowed = spaceAllowed;
 			_user.accountType = accountType;
@@ -53,10 +55,11 @@ import flash.net.SharedObject;
             }
 		}
 
-        public function updateLabels(userName:String, fullName:String, email:String):void {
+        public function updateLabels(userName:String, fullName:String, email:String, firstName:String):void {
             this.email = email;
             this.userName = userName;
             this.name = fullName;
+            this.firstName = firstName;
         }
 
         public function resync(userTransferObject:UserTransferObject):void {
