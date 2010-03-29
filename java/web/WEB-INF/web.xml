@@ -132,6 +132,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>ZipUploadServlet</servlet-name>
+        <url-pattern>/ZipUploadServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>SolutionImageServlet</servlet-name>
         <url-pattern>/SolutionImageServlet</url-pattern>
     </servlet-mapping>

@@ -5,16 +5,11 @@ import com.easyinsight.FullScreenPage;
 import com.easyinsight.framework.DataService;
 
 import mx.managers.BrowserManager;
-import mx.rpc.remoting.RemoteObject;
-	
+
 	public class DescriptorAnalyzeSource implements AnalyzeSource
 	{
         private var dataFeedID:int;
         private var name:String;
-		private var feedService:RemoteObject;
-		private var preview:Boolean;
-		private var loginRequired:Boolean;
-		
 		public function DescriptorAnalyzeSource(dataFeedID:int, name:String)
 		{
 			this.dataFeedID = dataFeedID;

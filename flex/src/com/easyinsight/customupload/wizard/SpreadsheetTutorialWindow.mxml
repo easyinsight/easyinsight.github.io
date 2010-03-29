@@ -110,8 +110,10 @@
             } else if (type == AnalysisItemTypes.MEASURE) {
                 item = new AnalysisMeasure();
                 AnalysisMeasure(item).aggregation = aggregationBox.selectedItem.data;
+                AnalysisMeasure(item).formattingConfiguration.formattingType = formatBox.selectedItem.data;
             } else if (type == (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisDateDimension();
+                AnalysisDateDimension(item).dateLevel = dateLevelBox.selectedItem.data;
             } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisList();
             } else if (type == (AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION)) {
