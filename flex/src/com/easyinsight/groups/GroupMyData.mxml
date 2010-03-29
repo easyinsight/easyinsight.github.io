@@ -36,12 +36,7 @@
         private function gotFeedAnalysisTree():void {
 
             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
-            var myDataTree:MyDataTree = groupService.getFeedAnalysisTree.lastResult as MyDataTree;
-            if (myDataTree.objects.length == 0) {
-                currentState = "noData";
-            } else {
-                currentState = "";
-            }
+            var myDataTree:MyDataTree = groupService.getFeedAnalysisTree.lastResult as MyDataTree;            
             sourceTreeData = myDataTree.objects;
             displayTreeData = new ArrayCollection(sourceTreeData.toArray());
             var hierarchicalData:HierarchicalData = new HierarchicalData();

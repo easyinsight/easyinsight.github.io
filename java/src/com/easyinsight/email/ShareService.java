@@ -53,28 +53,32 @@ public class ShareService {
             String analysisInClause = createInClause(analysisIDSet);
 
             Set<UserStub> userStubs = new HashSet<UserStub>();
-            String usersFromFeeds = MessageFormat.format(USERS_FROM_FEEDS, feedInClause);
-            ResultSet userFeedRS = findUsersStmt.executeQuery(usersFromFeeds);
-            while (userFeedRS.next()) {
-                UserStub userStub = new UserStub(userFeedRS.getLong(1), userFeedRS.getString(2), userFeedRS.getString(3),
-                        userFeedRS.getString(4), userFeedRS.getLong(5));
-                userStubs.add(userStub);
+            if (feedIDSet.size() > 0) {
+                String usersFromFeeds = MessageFormat.format(USERS_FROM_FEEDS, feedInClause);
+                ResultSet userFeedRS = findUsersStmt.executeQuery(usersFromFeeds);
+                while (userFeedRS.next()) {
+                    UserStub userStub = new UserStub(userFeedRS.getLong(1), userFeedRS.getString(2), userFeedRS.getString(3),
+                            userFeedRS.getString(4), userFeedRS.getLong(5));
+                    userStubs.add(userStub);
+                }
             }
 
-            String usersFromAnalysis = MessageFormat.format(USERS_FROM_ANALYSIS, analysisInClause);
-            ResultSet userAnalysisRS = findUsersStmt.executeQuery(usersFromAnalysis);
-            while (userAnalysisRS.next()) {
-                UserStub userStub = new UserStub(userAnalysisRS.getLong(1), userAnalysisRS.getString(2), userAnalysisRS.getString(3),
-                        userAnalysisRS.getString(4), userFeedRS.getLong(5));
-                userStubs.add(userStub);
+            if (analysisIDSet.size() > 0) {
+                String usersFromAnalysis = MessageFormat.format(USERS_FROM_ANALYSIS, analysisInClause);
+                ResultSet userAnalysisRS = findUsersStmt.executeQuery(usersFromAnalysis);
+                while (userAnalysisRS.next()) {
+                    UserStub userStub = new UserStub(userAnalysisRS.getLong(1), userAnalysisRS.getString(2), userAnalysisRS.getString(3),
+                            userAnalysisRS.getString(4), userAnalysisRS.getLong(5));
+                    userStubs.add(userStub);
+                }
             }
-
+            
             PreparedStatement usersStmt = conn.prepareStatement(USERS_IN_ACCOUNT);
             usersStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet userAccountRS = usersStmt.executeQuery();
             while (userAccountRS.next()) {
                 UserStub userStub = new UserStub(userAccountRS.getLong(1), userAccountRS.getString(2), userAccountRS.getString(3),
-                        userAccountRS.getString(4), userFeedRS.getLong(5));
+                        userAccountRS.getString(4), userAccountRS.getLong(5));
                 userStubs.add(userStub);
             }
 
@@ -87,7 +91,7 @@ public class ShareService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
