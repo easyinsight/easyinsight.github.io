@@ -21,6 +21,7 @@ import java.util.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.math.BigInteger;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -34,29 +35,30 @@ public class MarketoApiTest extends TestCase {
     
     public void testMarketo() {
         try {
+            DatatypeFactory fac = DatatypeFactory.newInstance();
             MktMktowsApiService service = new MktMktowsApiService();
             MktowsPort port = service.getMktowsApiSoapPort();
             List<Header> headers = (List<Header>) ((BindingProvider)port).getRequestContext().get(Header.HEADER_LIST);
             AuthenticationHeaderInfo header = new AuthenticationHeaderInfo();
-            String userID = "";
-            String key = "";
+            String userID = "impactstreet1_014261584BA9744F1173B4";
+            String key = "675731691623111344BBAA99774455011112CD322F47";
             header.setMktowsUserId(userID);
             GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
             cal.setTime(new Date());
-            XMLGregorianCalendar timestamp = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+            XMLGregorianCalendar timestamp = fac.newXMLGregorianCalendar(cal);
             header.setRequestTimestamp(timestamp.toXMLFormat());
-            SecretKeySpec signingKey = new SecretKeySpec(new BigInteger(key, 16).toByteArray(), HMAC_SHA1_ALGORITHM);
+            SecretKeySpec signingKey = new SecretKeySpec(key.getBytes("UTF-8"), HMAC_SHA1_ALGORITHM);
 
             // get an hmac_sha1 Mac instance and initialize with the signing key
             Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM);
             mac.init(signingKey);
 
             // compute the hmac on input data bytes
-            byte[] rawHmac = mac.doFinal((timestamp.toXMLFormat() + userID).getBytes());
+            byte[] rawHmac = mac.doFinal((timestamp.toXMLFormat() + userID).getBytes("UTF-8"));
 
             // base64-encode the hmac
 
-            header.setRequestSignature(new String(Base64.encodeBase64(rawHmac)).toLowerCase());
+            header.setRequestSignature(getHexString(rawHmac).toLowerCase());
             QName name = new QName("http://www.marketo.com/mktows/", "AuthenticationHeader");
             Header authHeader = new Header(name, header, new JAXBDataBinding(AuthenticationHeaderInfo.class));
             if(headers == null)
@@ -67,7 +69,7 @@ public class MarketoApiTest extends TestCase {
             ParamsGetMultipleLeads params = new ParamsGetMultipleLeads();
             cal = (GregorianCalendar) GregorianCalendar.getInstance();
             cal.set(2010, 0, 1);
-            timestamp = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+            timestamp = fac.newXMLGregorianCalendar(cal);
             params.setLastUpdatedAt(timestamp);
             SuccessGetMultipleLeads result = port.getMultipleLeads(params);
             } catch (DatatypeConfigurationException e) {
@@ -78,6 +80,16 @@ public class MarketoApiTest extends TestCase {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (JAXBException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
+    public static String getHexString(byte[] b) {
+          String result = "";
+          for (int i=0; i < b.length; i++) {
+            result +=
+                  Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
+          }
+          return result;
+        }
 }
