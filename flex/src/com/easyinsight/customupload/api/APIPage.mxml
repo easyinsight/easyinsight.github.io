@@ -47,7 +47,7 @@
 
         private function apiInformation():void {
             var window:APIUserAdmin = new APIUserAdmin();
-            window.addEventListener(APIUpdateEvent.API_UPDATE, onAPIUpdate);
+            window.addEventListener(APIUpdateEvent.API_UPDATE, onAPIUpdate, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

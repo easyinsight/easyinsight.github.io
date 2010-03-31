@@ -176,7 +176,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
                 var configWindow:ConfigureDataSource = new ConfigureDataSource();
                 configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
                 configWindow.onlyDataSource = configuredSources == 1;
-                configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured);
+                configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
                 PopUpManager.addPopUp(configWindow, this, true);
                 PopUpUtil.centerPopUp(configWindow);
             }

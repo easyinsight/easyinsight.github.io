@@ -54,7 +54,7 @@
             var methodEditWindow:MethodEditWindow = new MethodEditWindow();
             methodEditWindow.configuredMethod = event.configuredMethod;
             methodEditWindow.fields = fields;
-            methodEditWindow.addEventListener(MethodDefinitionEvent.METHOD_EDITED, onMethodEdit);
+            methodEditWindow.addEventListener(MethodDefinitionEvent.METHOD_EDITED, onMethodEdit, false, 0, true);
             PopUpManager.addPopUp(methodEditWindow, this, true);
             PopUpUtil.centerPopUp(methodEditWindow);
         }

@@ -82,7 +82,7 @@ public class RollingRangeFilter extends HBox implements IFilter
     private function edit(event:MouseEvent):void {
         var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
         window.detailClass = DateRangeDetailEditor;
-        window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
+        window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
         window.analysisItems = _analysisItems;
         window.filterDefinition = rollingFilter;
         PopUpManager.addPopUp(window, this, true);

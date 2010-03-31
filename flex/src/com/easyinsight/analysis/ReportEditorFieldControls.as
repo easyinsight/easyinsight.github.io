@@ -149,7 +149,7 @@ public class ReportEditorFieldControls extends HBox
 			analysisItemEditor.editorClass = AnalysisItemEditor; 			
 			analysisItemEditor.analysisItem = analysisItemWrapper.analysisItem;
 			analysisItemEditor.analysisItems = this._analysisItems;
-			analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, analysisItemEdited);
+			analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, analysisItemEdited, false, 0, true);
 			PopUpManager.addPopUp(analysisItemEditor, this.parent);
 			PopUpUtil.centerPopUp(analysisItemEditor);
         }

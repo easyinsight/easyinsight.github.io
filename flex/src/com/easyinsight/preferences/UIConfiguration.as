@@ -23,7 +23,7 @@ public class UIConfiguration {
 
     public var configMap:Object = new Object();
 
-
+    public var ownScorecard:Boolean = false;
 
     public function UIConfiguration() {
     }
@@ -38,6 +38,7 @@ public class UIConfiguration {
                 option.selected = visibilitySetting.selected;
             }
         }
+        uiConfiguration.ownScorecard = settings.useCustomScorecard;
         return uiConfiguration;
     }
 

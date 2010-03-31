@@ -51,7 +51,7 @@
             factory = new ClassFactory(List);
             factory.properties = { iconField: "icon" };
             focusManager.setFocus(searchInput);
-            stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+            stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, false, 0, true);
             searchInput.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
             if (descriptors == null) {
                 feedService.getDescriptors.send();

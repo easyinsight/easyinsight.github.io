@@ -104,8 +104,8 @@ public class ScorecardContextWindow extends VBox {
 
 
     private function onCreationComplete(event:FlexEvent):void {
-        stage.addEventListener(MouseEvent.CLICK, onStageClick);
-        stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+        stage.addEventListener(MouseEvent.CLICK, onStageClick, false, 0, true);
+        stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp, false, 0, true);
     }
 
     private function onKeyUp(event:KeyboardEvent):void {

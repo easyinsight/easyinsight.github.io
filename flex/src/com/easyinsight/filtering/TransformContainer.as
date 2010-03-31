@@ -274,7 +274,7 @@ public class TransformContainer extends HBox
             var window:DateFilterWindow = new DateFilterWindow();
             window.feedID = _feedID;
             window.item = analysisItem;
-            window.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection);
+            window.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             window.x = event.localX - (event.dragSource.dataForFormat("localX") as Number);
             window.y = event.localY - (event.dragSource.dataForFormat("localY") as Number);
@@ -285,7 +285,7 @@ public class TransformContainer extends HBox
             var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
             dimWindow.item = analysisItem;
             dimWindow.feedID = _feedID;
-            dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection);
+            dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
             PopUpManager.addPopUp(dimWindow, this, true);
             dimWindow.x = event.localX - (event.dragSource.dataForFormat("localX") as Number);
             dimWindow.y = event.localY - (event.dragSource.dataForFormat("localY") as Number);

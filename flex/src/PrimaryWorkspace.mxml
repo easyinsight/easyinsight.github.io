@@ -266,10 +266,10 @@
         }
 
         private function addListeners(eventDispatcher:EventDispatcher):void {
-            eventDispatcher.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);            
-            eventDispatcher.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-            eventDispatcher.addEventListener(NavigationEvent.NAVIGATION, navigation);
-            eventDispatcher.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+            eventDispatcher.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze, false, 0, true);
+            eventDispatcher.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed, false, 0, true);
+            eventDispatcher.addEventListener(NavigationEvent.NAVIGATION, navigation, false, 0, true);
+            eventDispatcher.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective, false, 0, true);
         }
 
         private function doAnalyze(analyzeSource:AnalyzeSource):void {
@@ -292,6 +292,7 @@
             removeListeners(dataAnalysis);
             fullScreenPage.cleanup();
             currentState = "";
+            fullScreenPage = null;
             dataAnalysis = null;
             if (event.targetPerspective != null) {
                 headerBar.explicitChange(event.targetPerspective, event.properties);
@@ -341,11 +342,11 @@
             doAnalyze(analyzeSource);
         }
 
-        private function moduleLoaded(event:FullScreenModuleEvent):void {
+        /*private function moduleLoaded(event:FullScreenModuleEvent):void {
             dataAnalysis = event.val;
             dataAnalysis.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
             currentState = "Analysis";
-        }
+        }*/
 
         private function sessionCheck():void {
             var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
@@ -396,8 +397,6 @@
                 <framework:LeftApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)" messageListener="{messageListener}"/>
                 <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0"
                          paddingRight="0">
-                    <!--<intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
-                                       navigation="navigation(event)"/>-->
                 </mx:HBox>
                 <framework:RightApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)" messageListener="{messageListener}"/>
             </mx:HBox>

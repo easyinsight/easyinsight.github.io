@@ -252,6 +252,25 @@ public class GroupStorage {
         return descriptors;
     }
 
+    public List<GroupDescriptor> getGroupsForAccount(long accountID) throws SQLException {
+        List<GroupDescriptor> descriptors = new ArrayList<GroupDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, COMMUNITY_GROUP.NAME, COMMUNITY_GROUP.DESCRIPTION FROM COMMUNITY_GROUP, GROUP_TO_USER_JOIN, USER WHERE " +
+                    "USER.ACCOUNT_ID = ? AND GROUP_TO_USER_JOIN.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID AND GROUP_TO_USER_JOIN.BINDING_TYPE = ? AND " +
+                    "GROUP_TO_USER_JOIN.USER_ID = USER.USER_ID");
+            queryStmt.setLong(1, accountID);
+            queryStmt.setInt(2, Roles.OWNER);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                descriptors.add(new GroupDescriptor(rs.getString(2), rs.getLong(1), 0, rs.getString(3)));
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return descriptors;
+    }
+
     public void addUserToGroup(long userID, long groupID, int userRole) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {

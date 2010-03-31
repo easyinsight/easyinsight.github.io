@@ -134,7 +134,7 @@
             var secondNode:GraphFeedNode = state.nodeCount[1];
             manualJoinWindow.sourceFeedID = firstNode.feedID;
             manualJoinWindow.targetFeedID = secondNode.feedID;
-            manualJoinWindow.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected);
+            manualJoinWindow.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
             PopUpManager.addPopUp(manualJoinWindow, this, true);
             PopUpUtil.centerPopUp(manualJoinWindow);
         }

@@ -77,7 +77,7 @@ public class SolutionGridActionRenderer extends HBox{
         if (dataSources.length == 0) {
             var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
             window.solution = exchangeItem.solutionID;
-            window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+            window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         } else if (dataSources.length == 1) {

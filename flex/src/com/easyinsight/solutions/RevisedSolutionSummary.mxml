@@ -142,7 +142,7 @@
 
         private function lesson1():void {
             var window:ScreencastWindow = new ScreencastWindow();
-            window.screencastSource = "../assets/Quick Solution/Quick Solution.mp4";
+            window.screencastSource = "../doc1.mov";
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
         }

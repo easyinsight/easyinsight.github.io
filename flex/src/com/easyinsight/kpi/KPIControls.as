@@ -67,7 +67,7 @@ public class KPIControls extends HBox {
         var kpiWindow:KPIWindow = new KPIWindow();
         kpiWindow.scorecardID = 0;
         kpiWindow.kpi = copy;
-        kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI);
+        kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI, false, 0, true);
         PopUpManager.addPopUp(kpiWindow, this, true);
         PopUpUtil.centerPopUp(kpiWindow);
     }
@@ -76,7 +76,7 @@ public class KPIControls extends HBox {
         var kpiWindow:KPIWindow = new KPIWindow();
         kpiWindow.scorecardID = 0;
         kpiWindow.kpi = kpi;
-        kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI);
+        kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI, false, 0, true);
         PopUpManager.addPopUp(kpiWindow, this, true);
         PopUpUtil.centerPopUp(kpiWindow);
     }

@@ -33,7 +33,7 @@ public class EITitleWindow extends TitleWindow{
     private function onCreation(event:FlexEvent):void {
         windowCount++;
         eiStage = stage;
-        stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+        stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
     }
 
     private function onKey(event:KeyboardEvent):void {

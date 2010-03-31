@@ -91,7 +91,7 @@ public class ComboBoxFilter extends HBox implements IFilter
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.feedID = _feedID;
             window.detailClass = ComboBoxFilterWindow;
-			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
+			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;
 			PopUpManager.addPopUp(window, this, true);

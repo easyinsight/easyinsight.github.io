@@ -107,8 +107,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
         super.createChildren();
 
         _dataService = new _reportDataService();
-        _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
-        _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+        _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent, false, 0, true);
+        _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent, false, 0, true);
         _dataService.addEventListener(DataServiceEvent.DATA_RETURNED, gotData);
         BindingUtils.bindProperty(_dataService, "obfuscate", this, "obfuscate");
 
@@ -116,8 +116,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _controlBar["id"] = "_controlBar";
         _controlBar.analysisItems = _availableFields;
         _controlBar.dataSourceID = _dataSourceID;
-        _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest);
-        _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar);
+        _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest, false, 0, true);
+        _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar, false, 0, true);
         _controlBar.analysisDefinition = _analysisDefinition;
         addChild(_controlBar as DisplayObject);
 
@@ -228,8 +228,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private function loadReportRenderer():void {
         moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + _reportRendererModule);
-        moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
-        moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
+        moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler, false, 0, true);
+        moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler, false, 0, true);
         _loadingDisplay = new LoadingModuleDisplay();
         _loadingDisplay.moduleInfo = moduleInfo;
         reportCanvas.addChild(_loadingDisplay);
@@ -242,11 +242,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
         //moduleInfo = null;
         if (_reportRenderer != null) {
-            _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
-            _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
-            _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
-            _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
-            _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded, false, 0, true);
+            _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
+            _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer, false, 0, true);
+            _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
+            _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
             _dataService.preserveValues = _reportRenderer.preserveValues();
             if (_loadingDisplay != null) {
                 reportCanvas.removeChild(_loadingDisplay);

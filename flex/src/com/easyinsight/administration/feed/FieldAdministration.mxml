@@ -187,7 +187,7 @@
 
         private function addGrouping():void {
             var window:NewFieldWindow = new NewFieldWindow();
-            window.addEventListener(NewFieldEvent.NEW_FIELD, gotGroupingName);
+            window.addEventListener(NewFieldEvent.NEW_FIELD, gotGroupingName, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -211,7 +211,7 @@
 
         private function addMeasure():void {
             var window:NewFieldWindow = new NewFieldWindow();
-            window.addEventListener(NewFieldEvent.NEW_FIELD, gotMeasureName);
+            window.addEventListener(NewFieldEvent.NEW_FIELD, gotMeasureName, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -235,7 +235,7 @@
 
         private function addDate():void {
             var window:NewFieldWindow = new NewFieldWindow();
-            window.addEventListener(NewFieldEvent.NEW_FIELD, gotDateName);
+            window.addEventListener(NewFieldEvent.NEW_FIELD, gotDateName, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

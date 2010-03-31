@@ -54,7 +54,7 @@
             if (workspace.compositeFeedID == 0) {
                 saveWindow.compositeFeedNodes = compositeFeedNodes;
                 saveWindow.compositeFeedConnections = compositeFeedConnections;
-                saveWindow.addEventListener(CompositeFeedSaveEvent.COMPOSITE_FEED_SAVE, createdFeed);
+                saveWindow.addEventListener(CompositeFeedSaveEvent.COMPOSITE_FEED_SAVE, createdFeed, false, 0, true);
                 PopUpManager.addPopUp(saveWindow, this, true);
                 PopUpUtil.centerPopUp(saveWindow);
             } else {

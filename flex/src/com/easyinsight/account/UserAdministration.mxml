@@ -71,7 +71,7 @@
 
         private function addGuestUser():void {
             var window:AddGuestUserWindow = new AddGuestUserWindow();
-            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
+            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

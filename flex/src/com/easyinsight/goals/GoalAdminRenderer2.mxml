@@ -133,9 +133,9 @@
                 var window:GoalTreeDropWindow = new GoalTreeDropWindow();
                 window.goalTreeNode = goalTreeNode;
                 window.goalTreeDescriptor = goalTreeDescriptor;
-                window.addEventListener(OrganizationChartRefreshEvent.ORG_CHART_REFRESH, passThrough);
-                window.addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, passThrough);
-                window.addEventListener(SubTreeInstallEvent.SUB_TREE_INSTALL, subTreeInstall);
+                window.addEventListener(OrganizationChartRefreshEvent.ORG_CHART_REFRESH, passThrough, false, 0, true);
+                window.addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, passThrough, false, 0, true);
+                window.addEventListener(SubTreeInstallEvent.SUB_TREE_INSTALL, subTreeInstall, false, 0, true);
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else if (obj is KPI) {

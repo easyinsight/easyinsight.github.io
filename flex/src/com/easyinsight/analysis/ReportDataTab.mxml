@@ -113,7 +113,7 @@
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = CalculationWindow;
             window.dataSourceID = _dataService.dataFeedID;
-            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
         }
@@ -136,7 +136,7 @@
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = HierarchyWindow;
             window.analysisItems = wrappers;
-            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
         }

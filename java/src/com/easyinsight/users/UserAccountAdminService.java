@@ -500,7 +500,11 @@ public class UserAccountAdminService {
             session.getTransaction().begin();
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
             Account account = (Account) results.get(0);
-            account.setApiEnabled(accountSettings.isApiEnabled());            
+            account.setApiEnabled(accountSettings.isApiEnabled());
+            account.setGroupID(accountSettings.getGroupID() > 0 ? accountSettings.getGroupID() : null);
+            account.setMarketplaceEnabled(accountSettings.isMarketplace());
+            account.setPublicDataEnabled(accountSettings.isPublicData());
+            account.setReportSharingEnabled(accountSettings.isReportSharing());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -522,6 +526,10 @@ public class UserAccountAdminService {
             Account account = (Account) results.get(0);
             accountSettings = new AccountSettings();
             accountSettings.setApiEnabled(account.isApiEnabled());
+            accountSettings.setGroupID(account.getGroupID() != null ? account.getGroupID() : 0);
+            accountSettings.setMarketplace(account.isMarketplaceEnabled());
+            accountSettings.setPublicData(account.isPublicDataEnabled());
+            accountSettings.setReportSharing(account.isReportSharingEnabled());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

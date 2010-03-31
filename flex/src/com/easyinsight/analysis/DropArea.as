@@ -132,7 +132,7 @@ public class DropArea extends HBox
         analysisItemEditor.analysisItem = this.analysisItem;
         PopUpManager.addPopUp(analysisItemEditor, this);
         PopUpUtil.centerPopUp(analysisItemEditor);
-        analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
+        analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
     }
 
     private function itemEdited(event:AnalysisItemEditEvent):void {

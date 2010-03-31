@@ -98,7 +98,7 @@
         private function addReport():void {
             var window:AddReportToPackageWindow = new AddReportToPackageWindow();
             window.dataSourceID = singleSourceCheckbox.selected ? dataSourceComboBox.selectedItem.dataFeedID : 0;
-            window.addEventListener(PackageReportEvent.ADD_REPORT, onReportAdd);
+            window.addEventListener(PackageReportEvent.ADD_REPORT, onReportAdd, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

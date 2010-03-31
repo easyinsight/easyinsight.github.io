@@ -42,7 +42,7 @@ public class AccountActions extends HBox{
     private function onEdit(event:MouseEvent):void {
         var window:AdminEditAccountWindow = new AdminEditAccountWindow();
         window.accountAdminTO = account;
-        window.addEventListener(RefreshAccountsListEvent.REFRESH_ACCOUNTS_LIST, onChange);
+        window.addEventListener(RefreshAccountsListEvent.REFRESH_ACCOUNTS_LIST, onChange, false, 0, true);
         PopUpManager.addPopUp(window, this.parent.parent, true);
         PopUpUtil.centerPopUp(window);
     }

@@ -54,7 +54,7 @@ public class ZipUploadServlet extends HttpServlet {
             String userName = req.getParameter("userName");
             String password = req.getParameter("password");
 
-            //if (SecurityUtil.authenticateToResponse(userName, password).getAccountType() == Account.ADMINISTRATOR) {
+            if (SecurityUtil.authenticateToResponse(userName, password).getAccountType() == Account.ADMINISTRATOR) {
 
             // Iterate through the incoming request data
 			while( iter.hasNext() )
@@ -101,7 +101,7 @@ public class ZipUploadServlet extends HttpServlet {
                     // Return an XML node with the field name and value
 				}
 			}
-            //}
+            }
 
 			// Close off the response XML data and stream
 			out.print( "</response>" );

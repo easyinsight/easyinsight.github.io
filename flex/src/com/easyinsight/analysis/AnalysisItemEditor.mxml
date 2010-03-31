@@ -382,7 +382,7 @@
         private function addLink():void {
             var window:LinkWindow = new LinkWindow();
             window.sourceItem = startingAnalysisItem;
-            window.addEventListener(LinkMetadataEvent.LINK_DEFINED, onLinkSave);
+            window.addEventListener(LinkMetadataEvent.LINK_DEFINED, onLinkSave, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

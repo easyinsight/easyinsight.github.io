@@ -7,8 +7,44 @@ package com.easyinsight.users;
  */
 public class AccountSettings {
     private boolean apiEnabled;
+    private boolean publicData;
+    private boolean marketplace;
+    private boolean reportSharing;
+    private long groupID;
 
     public AccountSettings() {
+    }
+
+    public boolean isPublicData() {
+        return publicData;
+    }
+
+    public void setPublicData(boolean publicData) {
+        this.publicData = publicData;
+    }
+
+    public boolean isMarketplace() {
+        return marketplace;
+    }
+
+    public void setMarketplace(boolean marketplace) {
+        this.marketplace = marketplace;
+    }
+
+    public boolean isReportSharing() {
+        return reportSharing;
+    }
+
+    public void setReportSharing(boolean reportSharing) {
+        this.reportSharing = reportSharing;
+    }
+
+    public long getGroupID() {
+        return groupID;
+    }
+
+    public void setGroupID(long groupID) {
+        this.groupID = groupID;
     }
 
     public boolean isApiEnabled() {

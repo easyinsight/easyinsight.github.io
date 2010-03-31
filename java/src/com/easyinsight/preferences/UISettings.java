@@ -9,6 +9,15 @@ import java.util.List;
  */
 public class UISettings {
     private List<UIVisibilitySetting> visibilitySettings;
+    private boolean useCustomScorecard = false;
+
+    public boolean isUseCustomScorecard() {
+        return useCustomScorecard;
+    }
+
+    public void setUseCustomScorecard(boolean useCustomScorecard) {
+        this.useCustomScorecard = useCustomScorecard;
+    }
 
     public List<UIVisibilitySetting> getVisibilitySettings() {
         return visibilitySettings;

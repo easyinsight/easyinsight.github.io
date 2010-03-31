@@ -15,7 +15,7 @@
         private var validators:Array;
 
         private function setup():void {
-            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
             validators = [ nameValidator ];
             nameInput.setFocus();
         }

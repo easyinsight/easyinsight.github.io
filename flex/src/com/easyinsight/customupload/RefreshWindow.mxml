@@ -27,7 +27,7 @@
         }
 
         private function setupListeners():void {
-            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
         }
 
         private var _dataSourceClass:Class;

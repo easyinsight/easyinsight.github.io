@@ -9,7 +9,7 @@
 
         private function upgradeAccount():void {
             var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
-            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
+            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

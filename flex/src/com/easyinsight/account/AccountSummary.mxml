@@ -21,10 +21,13 @@
         private var toggleOptions:ArrayCollection;
 
         public function set account(account:Account):void {
-            this._account = account;
-            if (account == null) {
-            } else {
-                this.accountName = User.getInstance().userName;
+            if (_account != account) {
+                this._account = account;
+                if (account == null) {
+                } else {
+                    this.accountName = User.getInstance().userName;
+                }
+                invalidateProperties();
             }
         }
 

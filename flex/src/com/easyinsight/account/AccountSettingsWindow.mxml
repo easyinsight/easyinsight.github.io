@@ -1,6 +1,10 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="userService.getAccountAPISettings.send()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+                    creationComplete="userService.getAccountSettings.send(); groupService.getAccountGroups.send()">
     <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -8,12 +12,47 @@
 
         private var settings:AccountAPISettings;
 
+        [Bindable]
+        private var publicDataEnabled:Boolean;
+
+        [Bindable]
+        private var marketplaceEnabled:Boolean;
+
+        [Bindable]
+        private var sharingEnabled:Boolean;
+
+        [Bindable]
+        private var availableGroups:ArrayCollection;
+
+        [Bindable]
+        private var groupID:int;
+
         private function gotSettings():void {
-            settings.
+            var accountSettings:AccountSettings = userService.getAccountSettings.lastResult as AccountSettings;
+            apiEnabled = accountSettings.apiEnabled;
+            publicDataEnabled = accountSettings.publicData;
+            marketplaceEnabled = accountSettings.marketplace;
+            sharingEnabled = accountSettings.reportSharing;
+            groupID = accountSettings.groupID;
         }
 
         private function save():void {
+            var accountSettings:AccountSettings = new AccountSettings();
+            accountSettings.apiEnabled = apiEnabledCheckbox.selected;
+            accountSettings.marketplace = marketplaceCheckbox.selected;
+            accountSettings.publicData = publicDataCheckbox.selected;
+            accountSettings.reportSharing = sharingCheckbox.selected;
+            accountSettings.groupID = groupBox.selectedItem.groupID;
+            ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
+            userService.saveAccountSettings.send(accountSettings);
+        }
 
+        private function saved():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function gotGroups():void {
+            availableGroups = groupService.getAccountGroups.lastResult as ArrayCollection;
         }
 
         private function cancel():void {
@@ -21,13 +60,29 @@
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
-        <mx:method name="getAccountAPISettings" result="gotSettings()"/>
-        <mx:method name="saveAccountAPISettings"/>
+        <mx:method name="getAccountSettings" result="gotSettings()"/>
+        <mx:method name="saveAccountSettings" result="saved()"/>
     </mx:RemoteObject>
-    <mx:VBox>
-        <mx:Form>
+    <mx:RemoteObject destination="groupService" id="groupService">
+        <mx:method name="getAccountGroups" result="gotGroups()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="API Enabled:">
                 <mx:CheckBox id="apiEnabledCheckbox" selected="{apiEnabled}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Default Group for Users:">
+                <util:SmartComboBox dataProvider="{availableGroups}" labelField="name" selectedValue="{groupID}" selectedProperty="groupID"
+                        id="groupBox"/>
+            </mx:FormItem>
+            <mx:FormItem label="Public Data Source and Report Sharing Enabled:">
+                <mx:CheckBox id="publicDataCheckbox" selected="{publicDataEnabled}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Marketplace Data Source and Reporting Sharing Enabled:">
+                <mx:CheckBox id="marketplaceCheckbox" selected="{marketplaceEnabled}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Report Sharing Outside of Account Enabled:">
+                <mx:CheckBox id="sharingCheckbox" selected="{sharingEnabled}"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

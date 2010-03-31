@@ -11,7 +11,7 @@
                     private function login():void {
                         var displayObject:DisplayObject = Application.application as DisplayObject;
                         var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(displayObject, LoginDialog, true));
-                        loginDialog.addEventListener(LoginEvent.LOGIN, loggedIn);
+                        loginDialog.addEventListener(LoginEvent.LOGIN, loggedIn, false, 0, true);
                         PopUpUtil.centerPopUp(loginDialog);
                     }
 

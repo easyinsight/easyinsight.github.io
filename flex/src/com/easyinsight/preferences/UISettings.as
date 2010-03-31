@@ -5,6 +5,7 @@ import mx.collections.ArrayCollection;
 public class UISettings {
 
     public var visibilitySettings:ArrayCollection;
+    public var useCustomScorecard:Boolean;
 
     public function UISettings() {
     }

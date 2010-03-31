@@ -197,7 +197,7 @@ public class GroupAdminMyDataIconControls extends HBox
         var window:CopyDataSourceWindow = new CopyDataSourceWindow();
         window.dataSourceDescriptor = obj as DataFeedDescriptor;
         PopUpManager.addPopUp(window, this.parent.parent.parent, true);
-        window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
+        window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent, false, 0, true);
         PopUpUtil.centerPopUp(window);
     }
 
@@ -261,7 +261,7 @@ public class GroupAdminMyDataIconControls extends HBox
         if (config) {
             var refreshWindow:RefreshWindow = new RefreshWindow();
             refreshWindow.dataSourceID = descriptor.dataFeedID;
-            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured);
+            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured, false, 0, true);
             PopUpManager.addPopUp(refreshWindow, this, true);
             PopUpUtil.centerPopUp(refreshWindow);
         } else {
@@ -288,7 +288,7 @@ public class GroupAdminMyDataIconControls extends HBox
         if (!credentialsResponse.successful) {
             var refreshWindow:RefreshWindow = new RefreshWindow();
             refreshWindow.dataSourceID = credentialsResponse.dataSourceID;
-            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured);
+            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured, false, 0, true);
             PopUpManager.addPopUp(refreshWindow, this, true);
             PopUpUtil.centerPopUp(refreshWindow);
         } else {

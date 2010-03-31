@@ -456,7 +456,7 @@
             addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
-            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             addEventListener(DataDetailEvent.DATA_DETAIL, toDetails);

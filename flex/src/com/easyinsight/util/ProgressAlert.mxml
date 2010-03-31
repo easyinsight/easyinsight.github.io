@@ -43,7 +43,7 @@
         }
 
         private function setupListeners():void {
-            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
         }
 
         private var _progressText:String;
@@ -82,8 +82,8 @@
 
         public function set operations(val:ArrayCollection):void {
             for each (var operation:Operation in val) {
-                operation.addEventListener(ResultEvent.RESULT, onResult);
-                operation.addEventListener(FaultEvent.FAULT, onFault);
+                operation.addEventListener(ResultEvent.RESULT, onResult, false, 0, true);
+                operation.addEventListener(FaultEvent.FAULT, onFault, false, 0, true);
             }
             _operations = val;
         }

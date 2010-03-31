@@ -52,7 +52,7 @@ import mx.controls.Label;
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.feedID = _feedID;
-			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
+			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
             window.detailClass = MultiValueFilterWindow;
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;			

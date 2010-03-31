@@ -86,6 +86,15 @@ public class Account {
     @Column(name="billing_information_given")
     private Boolean billingInformationGiven;
 
+    @Column(name="marketplace_enabled")
+    private boolean marketplaceEnabled;
+
+    @Column(name="public_data_enabled")
+    private boolean publicDataEnabled;
+
+    @Column(name="report_share_enabled")
+    private boolean reportSharingEnabled;
+
     @Column(name="creation_date")
     private Date creationDate;
 
@@ -105,6 +114,30 @@ public class Account {
 
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public boolean isMarketplaceEnabled() {
+        return marketplaceEnabled;
+    }
+
+    public void setMarketplaceEnabled(boolean marketplaceEnabled) {
+        this.marketplaceEnabled = marketplaceEnabled;
+    }
+
+    public boolean isPublicDataEnabled() {
+        return publicDataEnabled;
+    }
+
+    public void setPublicDataEnabled(boolean publicDataEnabled) {
+        this.publicDataEnabled = publicDataEnabled;
+    }
+
+    public boolean isReportSharingEnabled() {
+        return reportSharingEnabled;
+    }
+
+    public void setReportSharingEnabled(boolean reportSharingEnabled) {
+        this.reportSharingEnabled = reportSharingEnabled;
+    }
 
     public List<AccountCreditCardBillingInfo> getBillingInfo() {
         return billingInfo;

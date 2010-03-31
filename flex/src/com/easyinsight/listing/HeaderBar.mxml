@@ -12,8 +12,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.NewFreeUserWelcome;
-        import com.easyinsight.framework.LoginEvent;
-        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.LoginEvent;        
         import com.easyinsight.framework.User;
         import com.easyinsight.goals.MyGoals;
         import com.easyinsight.preferences.PreferencesWindow;
@@ -27,8 +26,7 @@
         import com.easyinsight.intro.IntroPanel;
 
         import com.easyinsight.util.PopUpUtil;
-
-        import mx.controls.Alert;
+        
         import mx.managers.PopUpManager;
         import mx.states.RemoveChild;
         import mx.states.State;
@@ -158,48 +156,67 @@
                 ops.push(removeChild);
             }
         }
+
+        [Bindable]
+        private var introPanel:Class = IntroPanel;
+        [Bindable]
+        private var myData:Class = MyData;
+        [Bindable]
+        private var connections:Class = RevisedSolutionSummary;
+        [Bindable]
+        private var exchange:Class = GenreDataProvider;
+        [Bindable]
+        private var groupsSummary:Class = GroupsSummary;
+        [Bindable]
+        private var myGoals:Class = MyGoals;
+        [Bindable]
+        private var apiPage:Class = APIPage;
+        [Bindable]
+        private var accountBase:Class = AccountBasePage;
+        [Bindable]
+        private var help:Class = NewFreeUserWelcome;
 		]]>
     </mx:Script>
     <mx:Image source="{logo}"/>
     <mx:Spacer width="10"/>
-    <listing:ListingOption perspective="{new IntroPanel()}" enableAnalysis="false" displayName="Home" listingChange="onListingChange(event)" width="50">
+    <listing:ListingOption perspectiveClass="{introPanel}" displayName="Home" listingChange="onListingChange(event)" width="50">
         <mx:Image source="{homeIcon}" id="homeImage"/>
         <mx:Label text="Home" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new MyData()}" enableAnalysis="false" displayName="My Data" listingChange="onListingChange(event)" id="myDataOption">
+    <listing:ListingOption perspectiveClass="{myData}" displayName="My Data" listingChange="onListingChange(event)" id="myDataOption">
         <mx:Image source="{myDataIcon}" id="myDataImage"/>
         <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new RevisedSolutionSummary()}" enableAnalysis="false" displayName="Connections" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{connections}" displayName="Connections" listingChange="onListingChange(event)"
             id="connectionsOption">
         <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
         <mx:Label text="Connections" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Exchange" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{exchange}" displayName="Exchange" listingChange="onListingChange(event)"
             id="exchangeOption">
         <mx:Image source="{catalogIcon}" id="catalogImage"/>
         <mx:Label text="Exchange" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new GroupsSummary()}" enableAnalysis="false" displayName="Groups" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{groupsSummary}" displayName="Groups" listingChange="onListingChange(event)"
             id="groupsOption">
         <mx:Image source="{groupsIcon}" id="groupsImage"/>
         <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new MyGoals()}" enableAnalysis="false" displayName="Goals" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{myGoals}" displayName="Goals" listingChange="onListingChange(event)"
             id="kpisOption">
         <mx:Image source="{goalsIcon}" id="goalsImage"/>
         <mx:Label text="KPIs" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new APIPage()}" enableAnalysis="false" displayName="API" listingChange="onListingChange(event)" id="apiListingOption">
+    <listing:ListingOption perspectiveClass="{apiPage}" displayName="API" listingChange="onListingChange(event)" id="apiListingOption">
         <mx:Image source="{apiIcon}" id="apiImage"/>
         <mx:Label text="API" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new AccountBasePage()}" enableAnalysis="false" displayName="Accounts" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{accountBase}" displayName="Accounts" listingChange="onListingChange(event)"
             id="accountsOption">
         <mx:Image source="{accountIcon}" id="accountImage"/>
         <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new NewFreeUserWelcome()}" enableAnalysis="false" displayName="Help" listingChange="onListingChange(event)">
+    <listing:ListingOption perspectiveClass="{help}" displayName="Help" listingChange="onListingChange(event)">
         <mx:Image source="{helpIcon}" id="helpImage"/>
         <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>

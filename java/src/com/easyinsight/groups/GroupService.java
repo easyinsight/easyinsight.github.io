@@ -460,4 +460,14 @@ public class GroupService {
             throw new RuntimeException(e);
         }
     }
+
+    public List<GroupDescriptor> getAccountGroups() {
+        long accountID = SecurityUtil.getAccountID();
+        try {
+            return groupStorage.getGroupsForAccount(accountID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 }

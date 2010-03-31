@@ -1,24 +1,16 @@
 package com.easyinsight.listing
 {
+
 import mx.containers.VBox;
 import flash.events.MouseEvent;
-import mx.controls.Image;
 	import mx.collections.ArrayCollection;
 
 [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
 	public class ListingOption extends VBox
 	{
-		public static const MY_ANALYSES:String = "MyAnalyses";
-		public static const MY_SUBSCRIPTIONS:String = "MySubscriptions";
-		public static const CATALOG:String = "Catalog";
-		public static const UPLOADS:String = "MyUploads";
-
-        private var image:Image;
-		
 		public var _displayName:String;
+        public var _perspectiveClass:Class;
 		public var _perspective:IPerspective;
-		public var _enableAnalysis:Boolean;
-		public var _iconClass:Class;
 		[Bindable]
 		public var children:ArrayCollection;
 		
@@ -33,7 +25,15 @@ import mx.controls.Image;
             buttonMode = true;
 		}
 
-        private function listingChange(event:MouseEvent):void {
+
+    protected override function commitProperties():void {
+        super.commitProperties();
+        if (_perspective == null && _perspectiveClass != null) {
+            _perspective = new _perspectiveClass();
+        }
+    }
+
+    private function listingChange(event:MouseEvent):void {
             dispatchEvent(new ListingChangeEvent(perspective));
         }
 
@@ -48,27 +48,18 @@ import mx.controls.Image;
         public function set displayName(val:String):void {
             _displayName = val;
         }
-        public function set perspective(val:IPerspective):void {
-            _perspective = val;
-        }
-        public function set enableAnalysis(val:Boolean):void {
-            _enableAnalysis = val;
-        }
-        public function set iconClass(val:Class):void {
-            _iconClass = val;
-        }
 
-        public function get displayName():String {
+
+    public function set perspectiveClass(value:Class):void {
+        _perspectiveClass = value;
+        invalidateProperties();
+    }
+
+    public function get displayName():String {
             return _displayName;
         }
         public function get perspective():IPerspective {
             return _perspective;
-        }
-        public function get enableAnalysis():Boolean {
-            return _enableAnalysis;
-        }
-        public function get iconClass():Class {
-            return _iconClass;
         }
         /*override protected function createChildren():void {
             super.createChildren();

@@ -47,7 +47,7 @@ import mx.containers.HBox;
         private function onEdit(event:MouseEvent):void {
             var userProfileEditor:NewUserDialog = new NewUserDialog();
             userProfileEditor.user = user;
-            userProfileEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
+            userProfileEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
             PopUpManager.addPopUp(userProfileEditor, parentWindow, true);
             PopUpUtil.centerPopUp(userProfileEditor);
         }

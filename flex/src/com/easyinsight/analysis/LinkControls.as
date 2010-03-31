@@ -64,7 +64,7 @@ public class LinkControls extends HBox{
         var window:LinkWindow = new LinkWindow();
         window.link = link;
         window.sourceItem = _sourceItem;
-        window.addEventListener(LinkMetadataEvent.LINK_EDITED, passThrough);
+        window.addEventListener(LinkMetadataEvent.LINK_EDITED, passThrough, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);
     }

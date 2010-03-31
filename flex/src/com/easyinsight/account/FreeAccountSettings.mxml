@@ -44,7 +44,7 @@
             editor.fullNameText = fullName;
             editor.emailText = email;
             editor.firstNameText = firstName;
-            editor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onProfileEdit);
+            editor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onProfileEdit, false, 0, true);
             PopUpManager.addPopUp(editor, this, true);
             PopUpUtil.centerPopUp(editor);
         }

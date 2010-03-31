@@ -276,7 +276,7 @@
                         return 1;
                     } else {
                         return -1;
-                    }    
+                    }
                 }
 
                 if (value1.toSortValue().type() == Value.EMPTY && value2.toSortValue().type() == Value.EMPTY) {
@@ -335,15 +335,13 @@
                 }
                 var strCopy1:String = String(value1.toSortValue().getValue());
                 var strCopy2:String = String(value2.toSortValue().getValue());
-                return ObjectUtil.stringCompare(strCopy1, strCopy2, true);                
+                return ObjectUtil.stringCompare(strCopy1, strCopy2, true);
                 //return Number(value1.getValue()) - Number(value2.getValue());
             };
         }
 
         private function globalListeners():void {
-            if (stage != null) {
-                stage.addEventListener(KeyboardEvent.KEY_DOWN, stageKeyDown);
-            }
+            addEventListener(KeyboardEvent.KEY_DOWN, stageKeyDown);
         }
 
         private function stageKeyDown(event:KeyboardEvent):void {
@@ -446,9 +444,9 @@
             for (var i:int = 0; i < listDef.columns.length; i++) {
                 var item:AnalysisItem = listDef.columns.getItemAt(i) as AnalysisItem;
                 var column:AdvancedDataGridColumn = dataGrid.columns[i + (listDef.showLineNumbers ? 1 : 0)];
-                var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);                
+                var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
                 if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
-                    
+
                     if (sortInfo.descending) {
                         item.sort = 2;
                     } else {

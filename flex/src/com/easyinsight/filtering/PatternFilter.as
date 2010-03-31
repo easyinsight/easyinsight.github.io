@@ -48,7 +48,7 @@ import mx.controls.Label;
 		public function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.feedID = _feedID;
-			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
+			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
             window.detailClass = PatternFilterWindow;
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;			

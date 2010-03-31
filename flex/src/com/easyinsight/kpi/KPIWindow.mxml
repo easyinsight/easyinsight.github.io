@@ -142,7 +142,7 @@
             analysisItemEditor.analysisItem = this.analysisMeasure;
             PopUpManager.addPopUp(analysisItemEditor, this, true);
             PopUpUtil.centerPopUp(analysisItemEditor);
-            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
+            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
         }
 
         private static const NONE:AnalysisItem = new AnalysisItem();

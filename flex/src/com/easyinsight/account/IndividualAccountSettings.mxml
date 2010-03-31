@@ -43,7 +43,7 @@
             window.userNameText = userName;
             window.fullNameText = fullName;
             window.firstNameText = firstName;
-            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
+            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -56,7 +56,7 @@
 
         private function upgradeAccount():void {
             var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
-            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
+            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
             window.y = 10;
@@ -71,6 +71,12 @@
         private function onRefresh(event:RefreshAccountEvent):void {
             event.currentTarget.removeEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
             dispatchEvent(event);
+        }
+
+        private function editAccountSettings():void {
+            var accountSettingsWindow:AccountSettingsWindow = new AccountSettingsWindow();
+            PopUpManager.addPopUp(accountSettingsWindow, this, true);
+            PopUpUtil.centerPopUp(accountSettingsWindow);
         }
         ]]></mx:Script>
     <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
@@ -91,6 +97,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
                     <account:AvailableSpace/>
+                </mx:FormItem>
+                <mx:FormItem label="Account Settings: " fontFamily="Tahoma" fontWeight="bold">
+                    <mx:Button label="Edit Account Settings..." click="editAccountSettings()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
                     <mx:Button label="Upgrade Account..." click="upgradeAccount()"/>

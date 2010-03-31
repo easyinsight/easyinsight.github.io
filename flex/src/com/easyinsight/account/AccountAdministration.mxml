@@ -13,7 +13,7 @@
 
         private function newAccount():void {
             var window:NewAccountWindow = new NewAccountWindow();
-            window.addEventListener(RefreshAccountsListEvent.REFRESH_ACCOUNTS_LIST, refreshData);
+            window.addEventListener(RefreshAccountsListEvent.REFRESH_ACCOUNTS_LIST, refreshData, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
