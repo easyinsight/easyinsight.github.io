@@ -10,6 +10,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.HistoryRun;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.userupload.UserUploadService;
 
@@ -27,41 +28,44 @@ public class ScorecardService {
 
     private ScorecardStorage scorecardStorage = new ScorecardStorage();
 
-    public ScorecardList getScorecardDescriptors() {
-        long userID = SecurityUtil.getUserID();
-        return getScorecardDescriptors(userID);
-    }
+    public long determineInitialDisplay() {
+        // process here ->
+        // is the user explicitly stated to use their own scorecard?
+        // if yes, we just return that
+        // if no, is there a default group for the user...
+        //      if pro or higher account, is there a default group for the persona?
+        //      otherwise, is there a default account group?
+        //          if yes, is there a scorecard set up on that default group?
 
-    public ScorecardList getScorecardDescriptors(long userID) {
-        List<ScorecardDescriptor> scorecards = new ArrayList<ScorecardDescriptor>();
-
+        int accountType = SecurityUtil.getAccountTier();
+        if (accountType == Account.PERSONAL) {
+            return 0;
+        }
+        long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name from " +
-                    "scorecard where scorecard.user_id = ?");
-            queryStmt.setLong(1, userID);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT GROUP_ID FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            queryStmt.setLong(1, accountID);
             ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long scorecardID = rs.getLong(1);
-                String scorecardName = rs.getString(2);
-                ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
-                scorecardDescriptor.setId(scorecardID);
-                scorecardDescriptor.setName(scorecardName);
-                scorecards.add(scorecardDescriptor);
-            }
+            rs.next();
+            long groupID = rs.getLong(1);
+            if (rs.wasNull()) {
 
+                // No group assigned
+                return 0;
+            }
+            return groupID;
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+    }
 
-        boolean hasData = true;
-        if (scorecards.isEmpty()) {
-            hasData = (new UserUploadService().getFeedAnalysisTree(true, true).getObjects().size() > 0);
-        }
-        return new ScorecardList(scorecards, hasData);        
+    public ScorecardList getScorecardDescriptors() {
+        long userID = SecurityUtil.getUserID();
+        return new ScorecardInternalService().getScorecardDescriptors(userID);
     }
 
     public ScorecardList getScorecardDescriptorsForGroup(long groupID) {
@@ -95,16 +99,6 @@ public class ScorecardService {
             hasData = (new UserUploadService().getFeedAnalysisTree(true, true).getObjects().size() > 0);
         }
         return new ScorecardList(scorecards, hasData);
-    }
-
-    public ScorecardWrapper getScorecard(long scorecardID, long userID, List<CredentialFulfillment> credentials, boolean forceRefresh) {
-        SecurityUtil.authorizeScorecard(scorecardID, userID);
-        try {
-            return scorecardStorage.getScorecard(scorecardID, credentials, forceRefresh);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
     }
 
     public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) {

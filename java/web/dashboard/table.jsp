@@ -1,7 +1,7 @@
 <%@ page import="com.easyinsight.datafeeds.CredentialFulfillment" %>
 <%@ page import="com.easyinsight.datafeeds.CredentialRequirement" %>
 <%@ page import="com.easyinsight.datafeeds.CredentialsDefinition" %>
-<%@ page import="com.easyinsight.scorecard.ScorecardService" %>
+<%@ page import="com.easyinsight.scorecard.ScorecardInternalService" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardWrapper" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.users.SalesforceCredentials" %>
@@ -18,7 +18,7 @@
     Long userID = (Long) request.getSession().getAttribute("userID");
     SecurityUtil.populateThreadLocal(userID, 0, 0, false);
     String scorecardIDString = request.getParameter("scorecardID");
-    ScorecardService service = new com.easyinsight.scorecard.ScorecardService();
+    ScorecardInternalService service = new com.easyinsight.scorecard.ScorecardInternalService();
     // table shouldn't get rendered without scorecard ID being set
     long scorecardID = Long.parseLong(scorecardIDString);
     boolean refresh = false;

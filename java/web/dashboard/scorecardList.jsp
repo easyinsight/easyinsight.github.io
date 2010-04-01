@@ -1,11 +1,11 @@
-<%@ page import="com.easyinsight.scorecard.ScorecardService" %>
+<%@ page import="com.easyinsight.scorecard.ScorecardInternalService" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardDescriptor" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.UUID" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardList" %>
 <%
     Long userID = (Long) request.getSession().getAttribute("userID");
-    ScorecardService service = new com.easyinsight.scorecard.ScorecardService();
+    ScorecardInternalService service = new com.easyinsight.scorecard.ScorecardInternalService();
     ScorecardList scorecards =  service.getScorecardDescriptors(userID);
 %>
 <% // TODO: If there's one scorecard, don't do this
