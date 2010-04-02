@@ -18,6 +18,15 @@ public class Group {
     private String description;
     private List<Tag> tags;
     private List<GroupUser> groupUsers = new ArrayList<GroupUser>();
+    private String urlKey;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public List<GroupUser> getGroupUsers() {
         return groupUsers;

@@ -7,7 +7,7 @@
         import mx.controls.Alert;
 
         override protected function retrieveScorecards():void {
-            scorecardService.getScorecardDescriptors.send();
+            scorecardService.getScorecardDescriptors.send(true);
         }
 
         private function gotDescriptors():void {

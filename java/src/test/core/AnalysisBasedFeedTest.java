@@ -35,7 +35,7 @@ public class AnalysisBasedFeedTest extends TestCase {
         long dataFeedID = TestUtil.createDefaultTestDataSource(userID);
         long analysisID = createListDefinition(dataFeedID);
         AnalysisBasedFeedDefinition analysisBasedFeedDefinition = new AnalysisBasedFeedDefinition();
-        analysisBasedFeedDefinition.setAnalysisDefinitionID(analysisID);
+        analysisBasedFeedDefinition.setReportID(analysisID);
         analysisBasedFeedDefinition.setFeedName("Derived Feed");        
         analysisBasedFeedDefinition.setUploadPolicy(new UploadPolicy());
         long analysisFeedID = userUploadService.createAnalysisBasedFeed(analysisBasedFeedDefinition);

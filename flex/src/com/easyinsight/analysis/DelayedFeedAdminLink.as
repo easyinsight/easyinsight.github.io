@@ -4,7 +4,7 @@ package com.easyinsight.analysis
 	import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.DescriptorAnalyzeSource;
-
+import com.easyinsight.listing.FeedAdminAnalyzeSource;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
@@ -17,12 +17,12 @@ import flash.display.DisplayObject;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 
-	public class DelayedFeedLink extends EventDispatcher
+	public class DelayedFeedAdminLink extends EventDispatcher
 	{
 		private var feedID:String;
 		private var feedService:RemoteObject;
 		
-		public function DelayedFeedLink(feedID:String)
+		public function DelayedFeedAdminLink(feedID:String)
 		{
 			this.feedID = feedID;
 			this.feedService = new RemoteObject();
@@ -42,7 +42,7 @@ import flash.display.DisplayObject;
 		private function gotFeed(event:ResultEvent):void {
         	var feedResponse:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
         	if (feedResponse.status == FeedResponse.SUCCESS) {
-        		dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedResponse.feedDescriptor.dataFeedID, feedResponse.feedDescriptor.name)));
+        		dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(feedResponse.feedDescriptor.dataFeedID)));
             } else if (feedResponse.status == FeedResponse.NEED_LOGIN) {
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedFeed);

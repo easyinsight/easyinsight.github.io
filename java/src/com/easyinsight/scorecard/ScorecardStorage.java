@@ -209,7 +209,6 @@ public class ScorecardStorage {
         final long accountID = SecurityUtil.getAccountID();
         final int accountType = SecurityUtil.getAccountTier();
         final boolean accountAdmin = SecurityUtil.isAccountAdmin();
-        //FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
 
         final Set<Long> dataSourceIDs = new HashSet<Long>();
         dataSourceIDs.add(dataSourceID);

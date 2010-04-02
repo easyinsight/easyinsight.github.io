@@ -18,9 +18,9 @@ import flash.display.DisplayObject;
 	public class DelayedDeepLink extends EventDispatcher
 	{
 		private var analysisService:RemoteObject;
-		private var analysisID:int;
+		private var analysisID:String;
 		
-		public function DelayedDeepLink(analysisID:int)
+		public function DelayedDeepLink(analysisID:String)
 		{
 			this.analysisID = analysisID;
 			this.analysisService = new RemoteObject();

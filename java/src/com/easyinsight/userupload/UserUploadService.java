@@ -422,7 +422,7 @@ public class UserUploadService implements IUserUploadService {
 
     public long createAnalysisBasedFeed(AnalysisBasedFeedDefinition definition) {
         long userID = SecurityUtil.getUserID();
-        SecurityUtil.authorizeInsight(definition.getAnalysisDefinitionID());
+        SecurityUtil.authorizeInsight(definition.getReportID());
         try {
             long feedID = feedStorage.addFeedDefinitionData(definition);
             new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);

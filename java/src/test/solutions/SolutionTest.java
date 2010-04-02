@@ -64,7 +64,7 @@ public class SolutionTest extends TestCase {
         hierarchyItem.setHierarchyLevels(Arrays.asList(regionLevel, customerLevel));
         hierarchyItem.setKey(new NamedKey("Hierarchy"));
         feedDefinition.setFields(Arrays.asList(customer, amount, region, range, list, startDate, endDate, step));
-        new FeedService().updateFeedDefinition(feedDefinition, null, null);
+        new FeedService().updateFeedDefinition(feedDefinition, null);
         ValidatingPublishService validatingPublishService = new ValidatingPublishService() {
 
             protected String getUserName() {
@@ -138,7 +138,7 @@ public class SolutionTest extends TestCase {
         responsibility.setHierarchyLevels(Arrays.asList(respPartyLevel, todoLevel));
         ds = (BaseCampCompositeSource) new FeedService().getFeedDefinition(sourceId);
         ds.getFields().add(responsibility);
-        new FeedService().updateFeedDefinition(ds, "", null);
+        new FeedService().updateFeedDefinition(ds, "");
         ds = (BaseCampCompositeSource) new FeedService().getFeedDefinition(sourceId);
         WSTreeMapDefinition treeMap = new WSTreeMapDefinition();
         treeMap.setDataFeedID(sourceId);

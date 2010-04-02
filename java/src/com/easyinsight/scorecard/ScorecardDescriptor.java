@@ -9,6 +9,16 @@ import com.easyinsight.core.EIDescriptor;
  */
 public class ScorecardDescriptor extends EIDescriptor {
 
+    private long groupID;
+
+    public long getGroupID() {
+        return groupID;
+    }
+
+    public void setGroupID(long groupID) {
+        this.groupID = groupID;
+    }
+
     @Override
     public int getType() {
         return EIDescriptor.SCORECARD;

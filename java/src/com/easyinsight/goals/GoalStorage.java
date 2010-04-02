@@ -15,6 +15,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -211,10 +212,14 @@ public class GoalStorage {
         if (goalTree.getRootNode() == null) {
             throw new RuntimeException("You must have a root node on a goal tree.");
         }
-        PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION, goal_tree_icon) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        if (goalTree.getUrlKey() == null) {
+            goalTree.setUrlKey(RandomTextGenerator.generateText(20));
+        }
+        PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION, goal_tree_icon, URL_KEY) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertTreeStmt.setString(1, goalTree.getName());
         insertTreeStmt.setString(2, goalTree.getDescription());
         insertTreeStmt.setString(3, goalTree.getIconImage());
+        insertTreeStmt.setString(4, goalTree.getUrlKey());
         insertTreeStmt.execute();
         long treeID = Database.instance().getAutoGenKey(insertTreeStmt);
         goalTree.setGoalTreeID(treeID);
@@ -489,7 +494,7 @@ public class GoalStorage {
 
     public GoalTree retrieveGoalTree(long goalTreeID, EIConnection conn) throws Exception {
         GoalTree goalTree = null;
-        PreparedStatement retrieveGoalTreeStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, ROOT_NODE, GOAL_TREE_ICON FROM GOAL_TREE WHERE GOAL_TREE_ID = ?");
+        PreparedStatement retrieveGoalTreeStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, ROOT_NODE, GOAL_TREE_ICON, URL_KEY FROM GOAL_TREE WHERE GOAL_TREE_ID = ?");
         retrieveGoalTreeStmt.setLong(1, goalTreeID);
         ResultSet rs = retrieveGoalTreeStmt.executeQuery();
         if (rs.next()) {
@@ -497,6 +502,7 @@ public class GoalStorage {
             String description = rs.getString(2);
             long rootNodeID = rs.getLong(3);
             String iconPath = rs.getString(4);
+            String urlKey = rs.getString(5);
             GoalTreeNode rootNode = retrieveNode(rootNodeID, conn);
             goalTree = new GoalTree();
             goalTree.setName(name);
@@ -504,6 +510,7 @@ public class GoalStorage {
             goalTree.setGoalTreeID(goalTreeID);
             goalTree.setRootNode(rootNode);
             goalTree.setIconImage(iconPath);
+            goalTree.setUrlKey(urlKey);
             populateUsers(goalTree, conn);
         }
         return goalTree;

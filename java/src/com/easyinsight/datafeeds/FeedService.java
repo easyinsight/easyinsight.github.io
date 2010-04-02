@@ -4,8 +4,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.userupload.UserUploadInternalService;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
@@ -15,15 +13,12 @@ import com.easyinsight.security.SecurityException;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.DataSourceDescriptor;
-import com.easyinsight.scheduler.DataSourceTaskGenerator;
 import com.easyinsight.goals.GoalTreeDescriptor;
-import com.easyinsight.PasswordStorage;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.notifications.UserToDataSourceNotification;
 import com.easyinsight.notifications.NotificationBase;
 import com.easyinsight.notifications.DataSourceToGroupNotification;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.TodoCompletedEvent;
@@ -82,10 +77,16 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<InsightDescriptor> getReportsForDataSource(long dataSourceID) {
+    public MultiReportInfo getReportsForDataSource(long dataSourceID) {
         List<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
-        Connection conn = Database.instance().getConnection();
+        String apiKey;
+        EIConnection conn = Database.instance().getConnection();
         try {
+            PreparedStatement keyStmt = conn.prepareStatement("SELECT DATA_FEED.API_KEY FROM DATA_FEED WHERE DATA_FEED.data_feed_id = ?");
+            keyStmt.setLong(1, dataSourceID);
+            ResultSet keyRS = keyStmt.executeQuery();
+            keyRS.next();
+            apiKey = keyRS.getString(1);
             PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, REPORT_TYPE FROM ANALYSIS WHERE data_feed_id = ? and root_definition = ?");
             queryStmt.setLong(1, dataSourceID);
             queryStmt.setBoolean(2, false);
@@ -93,8 +94,10 @@ public class FeedService implements IDataFeedService {
             while (reportRS.next()) {
                 descriptors.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), dataSourceID, reportRS.getInt(3)));
             }
+            queryStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
+            throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
@@ -107,7 +110,7 @@ public class FeedService implements IDataFeedService {
                 // ignore
             }
         }
-        return validDescriptors;
+        return new MultiReportInfo(apiKey, validDescriptors);
     }
 
     public List<CredentialRequirement> launchAsyncRefresh(long dataSourceID, List<CredentialFulfillment> credentials) {
@@ -186,11 +189,11 @@ public class FeedService implements IDataFeedService {
         return descriptorList;
     }
 
-    public FeedResponse openFeedIfPossible(long feedID) {
+    public FeedResponse openFeedIfPossible(String urlKey) {
         FeedResponse feedResponse;
         try {
             try {
-                SecurityUtil.authorizeFeedAccess(feedID);
+                long feedID = SecurityUtil.authorizeFeedAccess(urlKey);
                 //long userID = SecurityUtil.getUserID();
                 FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(feedID);
                 feedResponse = new FeedResponse(FeedResponse.SUCCESS, feedDescriptor);
@@ -479,59 +482,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn) throws Exception {
-        updateFeedDefinition(feedDefinition, conn, false);
-    }
-
-    public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn, boolean systemUpdate) throws Exception {
-        DataStorage metadata = null;
-        try {
-            FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID(), conn, false);
-            if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL) {
-                List<AnalysisItem> existingFields = existingFeed.getFields();
-                if (systemUpdate) {
-                    metadata = DataStorage.writeConnection(feedDefinition, conn, 0, systemUpdate);
-                } else {
-                    metadata = DataStorage.writeConnection(feedDefinition, conn, SecurityUtil.getAccountID(), systemUpdate);
-                }
-                feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-                int version = metadata.migrate(existingFields, feedDefinition.getFields());
-                feedStorage.updateVersion(feedDefinition, version, conn);
-                metadata.commit();
-            } else {
-                feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-            }
-            /*Session session = Database.instance().createSession(conn);
-            try {
-                if (newTaskGen) {
-                    DataSourceTaskGenerator generator = new DataSourceTaskGenerator();
-                    generator.setStartTaskDate(new Date());
-                    generator.setDataSourceID(feedDefinition.getDataFeedID());
-                    generator.setTaskInterval((int) feedDefinition.getRefreshDataInterval());
-                    session.save(generator);
-                }
-                notifyNewOwners(feedDefinition, existingFeed, session);
-                notifyNewViewers(feedDefinition, existingFeed, session);
-                session.flush();
-            } finally {
-                session.close();
-            }*/
-
-            updateComposites(feedDefinition, conn);
-
-        } catch (Exception e) {
-            if (metadata != null) {
-                metadata.rollback();
-            }
-            throw e;
-        } finally {
-            if (metadata != null) {
-                metadata.closeConnection();
-            }
-        }
-    }
-
-    public void updateFeedDefinition(FeedDefinition feedDefinition, String tagString, WSAnalysisDefinition baseDefinition) {
+    public void updateFeedDefinition(FeedDefinition feedDefinition, String tagString) {
         SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -584,7 +535,7 @@ public class FeedService implements IDataFeedService {
                         insertStatement.execute();
                 }
             }*/
-            updateFeedDefinition(feedDefinition, conn);
+            new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
             FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
             conn.commit();
         } catch (Exception e) {
@@ -610,18 +561,7 @@ public class FeedService implements IDataFeedService {
         }).start();*/
     }
 
-    private void updateComposites(FeedDefinition feedDefinition, Connection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT COMPOSITE_FEED.data_feed_id FROM COMPOSITE_NODE, COMPOSITE_FEED WHERE COMPOSITE_NODE.DATA_FEED_ID = ? AND " +
-                "COMPOSITE_NODE.composite_feed_id = COMPOSITE_FEED.composite_feed_id");
-        stmt.setLong(1, feedDefinition.getDataFeedID());        
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            long parentDataSourceID = rs.getLong(1);
-            CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedStorage.getFeedDefinitionData(parentDataSourceID, conn);
-            compositeFeedDefinition.populateFields(conn);
-            feedStorage.updateDataFeedConfiguration(compositeFeedDefinition, conn);
-        }
-    }
+
 
     private void notifyNewViewers(FeedDefinition feedDefinition, FeedDefinition existingFeed, Session session) throws SQLException {
         List<FeedConsumer> viewers = new ArrayList<FeedConsumer>(feedDefinition.getUploadPolicy().getViewers());
@@ -682,8 +622,4 @@ public class FeedService implements IDataFeedService {
             throw new RuntimeException(e);
         }
     }
-
-    private static class ContainedInfo {
-        Set<AnalysisItem> feedItems = new HashSet<AnalysisItem>();
-    }    
 }

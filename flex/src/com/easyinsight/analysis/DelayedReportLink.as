@@ -20,9 +20,9 @@ import flash.display.DisplayObject;
 	public class DelayedReportLink extends EventDispatcher
 	{
 		private var analysisService:RemoteObject;
-		private var analysisID:int;
+		private var analysisID:String;
 		
-		public function DelayedReportLink(analysisID:int)
+		public function DelayedReportLink(analysisID:String)
 		{
 			this.analysisID = analysisID;
 			this.analysisService = new RemoteObject();

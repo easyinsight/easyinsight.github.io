@@ -12,9 +12,10 @@ import java.util.List;
 public class ReportPackageService {
     private ReportPackageStorage reportPackageStorage = new ReportPackageStorage();
 
-    public long saveReportPackage(ReportPackage reportPackage) {
+    public ReportPackage saveReportPackage(ReportPackage reportPackage) {
         try {
-            return reportPackageStorage.saveReportPackage(reportPackage);
+            reportPackageStorage.saveReportPackage(reportPackage);
+            return reportPackage;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -30,9 +31,9 @@ public class ReportPackageService {
         }
     }
 
-    public ReportPackageResponse openPackageIfPossible(long packageID) {
+    public ReportPackageResponse openPackageIfPossible(String urlKey) {
         try {
-            return reportPackageStorage.openPackageIfPossible(packageID);
+            return reportPackageStorage.openPackageIfPossible(urlKey);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

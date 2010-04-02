@@ -116,7 +116,6 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
             FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), uploadPolicy);
             tableDef = result.getTableDefinitionMetadata();
             feedID = result.getFeedID();
-            analysisID = feedDefinition.getAnalysisDefinitionID();
             tableDef.commit();
             conn.commit();
 
@@ -131,14 +130,6 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
             if(tableDef != null)
                 tableDef.closeConnection();
         }
-    }
-
-    public long getAnalysisID() {
-        return analysisID;
-    }
-
-    public void setAnalysisID(long analysisID) {
-        this.analysisID = analysisID;
     }
 
     public long getFeedID() {

@@ -8,9 +8,9 @@ package com.easyinsight.goals
 	public class DelayedGoalLink extends EventDispatcher
 	{
 		private var goalService:RemoteObject;
-		private var goalTreeID:int;
+		private var goalTreeID:String;
 		
-		public function DelayedGoalLink(goalTreeID:int)
+		public function DelayedGoalLink(goalTreeID:String)
 		{
 			this.goalTreeID = goalTreeID;
 			this.goalService = new RemoteObject();
@@ -23,9 +23,9 @@ package com.easyinsight.goals
 		}
 
         private function gotGoalTree(event:ResultEvent):void {
-            var result:Boolean = goalService.canAccessGoalTree.lastResult as Boolean;
-            if (result) {                                 
-                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTreeID)));
+            var result:int = goalService.canAccessGoalTree.lastResult as int;
+            if (result > 0) {
+                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(result)));
             }
         }
 	}

@@ -340,12 +340,12 @@
 
             if (analysisDefinition == null || analysisDefinition.analysisID == 0) {
                 var fragmentObject:Object = new Object();
-                fragmentObject.feedID = String(dataService.dataFeedID);
+                fragmentObject.feedID = String(feedMetadata.urlKey);
                 var fragmentString:String = URLUtil.objectToString(fragmentObject);
                 BrowserManager.getInstance().setFragment(fragmentString);
             } else {
                 var feedFragmentObject:Object = new Object();
-                feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
+                feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                 BrowserManager.getInstance().setFragment(feedFragmentString);
             }
@@ -622,7 +622,7 @@
             var savedDef:AnalysisDefinition = analysisService.saveAnalysisDefinition.lastResult as AnalysisDefinition;
             AnalysisUtil.updateReport(analysisDefinition, savedDef);
             var feedFragmentObject:Object = new Object();
-            feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
+            feedFragmentObject.analysisID = String(savedDef.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             reportSaveable = true;
@@ -648,7 +648,7 @@
             //title = event.title;
             reportMetadataTab.updateName(event.title);
             var feedFragmentObject:Object = new Object();
-            feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
+            feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             BrowserManager.getInstance().setTitle("Easy Insight - " + event.title);
@@ -757,6 +757,7 @@
             canSubscribeToInsight = userCapabilities.analysisRole > 3;
             canAddFeedToGroup = userCapabilities.groupMember;
             canAddInsightToGroup = userCapabilities.groupMember;
+            canMultiViewAnalysis = userCapabilities.reportingAvailable;
         }
 
         private function subscribedToFeed():void {

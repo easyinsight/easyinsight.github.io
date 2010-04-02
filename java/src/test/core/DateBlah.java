@@ -38,7 +38,7 @@ public class DateBlah {
         feedDefinition.setFields(Arrays.asList(countMeasure, date, grouping));
         feedDefinition.setPubliclyVisible(true);
         feedDefinition.setMarketplaceVisible(true);
-        new FeedService().updateFeedDefinition(feedDefinition, null, null);
+        new FeedService().updateFeedDefinition(feedDefinition, null);
         ValidatingPublishService validatingPublishService = new ValidatingPublishService() {
 
             protected String getUserName() {

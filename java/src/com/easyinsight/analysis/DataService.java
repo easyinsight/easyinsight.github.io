@@ -94,6 +94,7 @@ public class DataService {
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
             feedMetadata.setOriginSolution(feed.getOriginSolution());
+            feedMetadata.setUrlKey(feed.getUrlKey());
             feedMetadata.setDataSourceInfo(feed.getDataSourceInfo());
             EIConnection conn = Database.instance().getConnection();
             try {

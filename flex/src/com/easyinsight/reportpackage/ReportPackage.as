@@ -19,6 +19,7 @@ public class ReportPackage {
     public var temporaryPackage:Boolean;
     public var administrators:ArrayCollection = new ArrayCollection();
     public var consumers:ArrayCollection = new ArrayCollection();
+    public var urlKey:String;
 
     public function ReportPackage() {
     }

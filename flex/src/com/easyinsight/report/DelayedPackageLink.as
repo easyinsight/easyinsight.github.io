@@ -18,10 +18,10 @@ import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
 public class DelayedPackageLink extends EventDispatcher {
-    private var packageID:int;
+    private var packageID:String;
     private var packageService:RemoteObject;
 
-    public function DelayedPackageLink(packageID:int)
+    public function DelayedPackageLink(packageID:String)
     {
         this.packageID = packageID;
         this.packageService = new RemoteObject();

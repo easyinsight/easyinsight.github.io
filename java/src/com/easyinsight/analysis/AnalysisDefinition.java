@@ -71,8 +71,8 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "policy")
     private int analysisPolicy;
 
-    @Column(name = "genre")
-    private String genre;
+    @Column(name = "url_key")
+    private String urlKey;
 
     @Column(name = "create_date")
     private Date dateCreated;
@@ -234,12 +234,12 @@ public class AnalysisDefinition implements Cloneable {
         this.ratingAverage = ratingAverage;
     }
 
-    public String getGenre() {
-        return genre;
+    public String getUrlKey() {
+        return urlKey;
     }
 
-    public void setGenre(String genre) {
-        this.genre = genre;
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
     }
 
     public List<Tag> getTags() {
@@ -325,6 +325,7 @@ public class AnalysisDefinition implements Cloneable {
     public AnalysisDefinition clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(keyMap, allFields));
+        analysisDefinition.setUrlKey(null);
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
@@ -471,6 +472,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setDateCreated(getDateCreated());
         analysisDefinition.setDateUpdated(getDateUpdated());
         analysisDefinition.setDataScrubs(newScrubs);
+        analysisDefinition.setUrlKey(urlKey);
         analysisDefinition.setTagCloud(new ArrayList<Tag>(getTags()));
         analysisDefinition.setMarketplaceVisible(marketplaceVisible);
         analysisDefinition.setPubliclyVisible(publiclyVisible);

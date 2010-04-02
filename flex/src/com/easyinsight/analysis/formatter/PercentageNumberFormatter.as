@@ -37,7 +37,7 @@ public class PercentageNumberFormatter extends NumberFormatter{
         if (value is String)
             value = dataFormatter.parseNumberString(String(value));
 
-        if (value === null || isNaN(Number(value)))
+        if (value === null || isNaN(Number(value)) || !isFinite(Number(value)))
         {
             error = defaultInvalidValueError;
             return "";

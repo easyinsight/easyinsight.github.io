@@ -42,8 +42,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private int ratingCount;
     private double ratingAverage;
     private String ratingSource;
-    private boolean dataPersisted;
-    private long analysisDefinitionID;
+    private boolean dataPersisted;    
     private Collection<Tag> tags = new HashSet<Tag>();
     private String ownerName;
     private String attribution;
@@ -196,15 +195,7 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void setDynamicServiceDefinitionID(long dynamicServiceDefinitionID) {
         this.dynamicServiceDefinitionID = dynamicServiceDefinitionID;
-    }
-
-    public long getAnalysisDefinitionID() {
-        return analysisDefinitionID;
-    }
-
-    public void setAnalysisDefinitionID(long analysisDefinitionID) {
-        this.analysisDefinitionID = analysisDefinitionID;
-    }
+    }    
 
     public String getOwnerName() {
         return ownerName;
@@ -395,6 +386,7 @@ public class FeedDefinition implements Cloneable, Serializable {
                 }
             });
         feed.setFieldHierarchy(feedNodes);
+        feed.setUrlKey(getApiKey());
         feed.setFields(clones);
         feed.setName(getFeedName());
         feed.setVisible(isVisible());

@@ -59,11 +59,7 @@
         }
 
         override protected function setupBrowser():void {
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.packageID = String(_packageID);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
-            BrowserManager.getInstance().setTitle("Easy Insight - Reports");
+
         }
 
         [Bindable]
@@ -82,6 +78,11 @@
 
         private function gotPackage():void {
             var reportPackage:ReportPackage = packageService.getReportPackage.lastResult as ReportPackage;
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.packageID = reportPackage.urlKey;
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - Reports");
             this.reports = reportPackage.reports;
         }
 

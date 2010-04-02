@@ -174,10 +174,6 @@
         }        
 
         public function gotFocus():void {
-            var fragmentObject:Object = new Object();
-            fragmentObject.groupID = String(groupID);
-            var fragmentString:String = URLUtil.objectToString(fragmentObject);
-            BrowserManager.getInstance().setFragment(fragmentString);
             ProgressAlert.alert(this, "Retrieving group data...", null, groupService.getGroup, groupService.getGroupMessages);
             groupService.getGroup.send(groupID);
             groupService.getGroupMessages.send(groupID, null, null);            
@@ -190,6 +186,11 @@
 
         private function gotGroupDetails():void {
             var group:Group = groupService.getGroup.lastResult as Group;
+
+            var fragmentObject:Object = new Object();
+            fragmentObject.groupID = String(group.urlKey);
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
 
             groupName = group.name;
             BrowserManager.getInstance().setTitle("Easy Insight - " + group.name);

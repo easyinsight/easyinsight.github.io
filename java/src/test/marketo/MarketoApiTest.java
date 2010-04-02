@@ -70,8 +70,30 @@ public class MarketoApiTest extends TestCase {
             cal = (GregorianCalendar) GregorianCalendar.getInstance();
             cal.set(2010, 0, 1);
             timestamp = fac.newXMLGregorianCalendar(cal);
-            params.setLastUpdatedAt(timestamp);
-            SuccessGetMultipleLeads result = port.getMultipleLeads(params);
+            /*params.setLastUpdatedAt(timestamp);
+            SuccessGetMultipleLeads leads = port.getMultipleLeads(params);
+            JAXBElement<ArrayOfLeadRecord> elements = leads.getResult().getLeadRecordList();
+            List<LeadRecord> records = elements.getValue().getLeadRecord();
+            for (LeadRecord leadRecord : records) {
+                JAXBElement<String> element = leadRecord.getEmail();
+                String email = element.getValue();
+                System.out.println(email);
+                JAXBElement<ArrayOfAttribute> attributes = leadRecord.getLeadAttributeList();
+                ArrayOfAttribute array = attributes.getValue();
+                List<Attribute> attributeList = array.getAttribute();
+                for (Attribute attribute : attributeList) {
+                    System.out.println("\t" + attribute.getAttrName() + "\t" + attribute.getAttrValue());
+                }
+            }*/
+            ParamsGetCampaignsForSource campaignParams = new ParamsGetCampaignsForSource();
+            campaignParams.setSource(ReqCampSourceType.MKTOWS);
+            SuccessGetCampaignsForSource campaigns = port.getCampaignsForSource(campaignParams);
+            List<CampaignRecord> campaignRecords = campaigns.getResult().getCampaignRecordList().getValue().getCampaignRecord();
+            for (CampaignRecord campaignRecord : campaignRecords) {
+                String campaignName = campaignRecord.getName();
+                System.out.println(campaignName);
+
+            }
             } catch (DatatypeConfigurationException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (InvalidKeyException e) {

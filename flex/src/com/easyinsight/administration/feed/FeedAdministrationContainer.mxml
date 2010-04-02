@@ -33,7 +33,6 @@
 
         import mx.collections.ArrayCollection;
 
-        import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.customupload.UploadPolicy;
 
 
@@ -50,8 +49,6 @@
         private var feedAttribution:String;
         [Bindable]
         private var feedOwnerName:String;
-        [Bindable]
-        private var analysisDefinition:AnalysisDefinition;
         private var feedType:int;
         [Bindable]
         private var feedDefinition:FeedDefinitionData;
@@ -140,7 +137,7 @@
             this.usernameInputText = feedDefinition.username;
 
             var fragmentObject:Object = new Object();
-            fragmentObject.feedID = String(feedDefinition.dataFeedID);
+            fragmentObject.feedAdminID = String(feedDefinition.apiKey);
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
             haveFeed = true;
@@ -181,7 +178,7 @@
                     feedAdminDetail.updateDataSource(feedDefinition);
                 }
                 ProgressAlert.alert(this, "Updating data source...", "Updated data source!", feedService.updateFeedDefinition);
-                feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text, analysisDefinition);
+                feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text);
                 this.unsavedChanges = false;
             }
         }

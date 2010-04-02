@@ -36,6 +36,7 @@ package com.easyinsight.analysis
         public static const HEATMAP:int = 27;
 
 		public var dataFeedID:int;
+        public var urlKey:String;
 		public var name:String;
 		public var analysisID:int;
 		public var filterDefinitions:ArrayCollection;

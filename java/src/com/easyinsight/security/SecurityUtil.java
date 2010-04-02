@@ -437,6 +437,25 @@ public class SecurityUtil {
         }
     }
 
+    private static long getKPITreeForKey(String urlKey) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE_ID FROM GOAL_TREE WHERE URL_KEY = ?");
+            queryStmt.setString(1, urlKey);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                return rs.getLong(1);
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     private static int getRoleForGoalTree(long userID, long goalTreeID) {
         Connection conn = Database.instance().getConnection();
         try {
@@ -500,6 +519,42 @@ public class SecurityUtil {
         }
     }
 
+    public static long authorizePackage(String urlKey) {
+        boolean publiclyVisible = false;
+        long packageID;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, REPORT_PACKAGE_ID FROM REPORT_PACKAGE WHERE REPORT_PACKAGE.URL_KEY = ?");
+            authorizeStmt.setString(1, urlKey);
+            ResultSet rs = authorizeStmt.executeQuery();
+            if (rs.next()) {
+                publiclyVisible = rs.getBoolean(1);
+                packageID = rs.getLong(2);
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        if (publiclyVisible) {
+            // we're okay
+        } else {
+            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+            if (userPrincipal == null) {
+                throw new SecurityException();
+            }
+            int role = getPackageRole(userPrincipal.getUserID(), packageID);
+            if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
+                throw new SecurityException();
+            }
+        }
+        return packageID;
+    }
+
     public static void authorizeInsight(long insightID) {
         boolean publiclyVisible = false;
         boolean feedVisibility = false;
@@ -541,6 +596,50 @@ public class SecurityUtil {
         }
     }
 
+    public static long authorizeInsight(String urlKey) {
+        boolean publiclyVisible = false;
+        boolean feedVisibility = false;
+        long dataFeedID = 0;
+        long reportID;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, FEED_VISIBILITY, DATA_FEED_ID, ANALYSIS_ID FROM ANALYSIS WHERE URL_KEY = ?");
+            authorizeStmt.setString(1, urlKey);
+            ResultSet rs = authorizeStmt.executeQuery();
+            if (rs.next()) {
+                publiclyVisible = rs.getBoolean(1);
+                feedVisibility = rs.getBoolean(2);
+                dataFeedID = rs.getLong(3);
+                reportID = rs.getLong(4);
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        if (publiclyVisible) {
+            // we're okay
+        } else if (feedVisibility) {
+            authorizeFeedAccess(dataFeedID);
+        } else {
+            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+            if (userPrincipal == null) {
+                Thread.dumpStack();
+                throw new SecurityException();
+            }
+            int role = getInsightRole(userPrincipal.getUserID(), reportID);
+            if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
+                Thread.dumpStack();
+                throw new SecurityException();
+            }
+        }
+        return reportID;
+    }
+
     public static void authorizeGoalTree(long goalTreeID, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
@@ -550,6 +649,19 @@ public class SecurityUtil {
         if (role > requiredRole) {
             throw new SecurityException();
         }
+    }
+
+    public static long authorizeGoalTree(String urlKey, int requiredRole) {
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            throw new SecurityException();
+        }
+        long kpiTreeID = getKPITreeForKey(urlKey);
+        int role = getRoleForGoalTree(userPrincipal.getUserID(), kpiTreeID);
+        if (role > requiredRole) {
+            throw new SecurityException();
+        }
+        return kpiTreeID;
     }
 
     public static void authorizeGoalTreeSolutionInstall(long goalTreeID) {
@@ -623,6 +735,40 @@ public class SecurityUtil {
                 throw new SecurityException();
             }
         }
+    }
+
+    public static long authorizeFeedAccess(String urlKey) {
+        // retrieve feed policy
+        boolean publiclyVisible = false;
+        long dataFeed;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT DATA_FEED_ID, PUBLICLY_VISIBLE FROM DATA_FEED WHERE DATA_FEED.API_KEY = ?");
+            authorizeStmt.setString(1, urlKey);
+            ResultSet rs = authorizeStmt.executeQuery();
+            if (rs.next()) {
+                dataFeed = rs.getLong(1);
+                publiclyVisible = rs.getBoolean(2);
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        if (!publiclyVisible) {
+            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+            if (userPrincipal == null) {
+                throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+            }
+            int role = getRole(userPrincipal.getUserID(), dataFeed);
+            if (role > Roles.SUBSCRIBER) {
+                throw new SecurityException();
+            }
+        }
+        return dataFeed;
     }
 
     public static void clearThreadLocal() {

@@ -19,6 +19,19 @@
         [Bindable]
         private var primaryStackIndex:int = 0;
 
+        private var _groupIncluded:Boolean;
+
+        [Bindable(event="groupIncludedChanged")]
+        public function get groupIncluded():Boolean {
+            return _groupIncluded;
+        }
+
+        public function set groupIncluded(value:Boolean):void {
+            if (_groupIncluded == value) return;
+            _groupIncluded = value;
+            dispatchEvent(new Event("groupIncludedChanged"));
+        }
+
         [Bindable]
         private var controlsIndex:int = 0;
 
@@ -119,6 +132,7 @@
                     //BindingUtils.bindProperty(scorecardRenderer, "hideEffect", this, "activeEffect");
                     //BindingUtils.bindProperty(scorecardRenderer, "showEffect", this, "activeEffect");
                     configureRenderer(scorecardRenderer);
+                    scorecardRenderer.groupID = scorecard.groupID;
                     scorecardRenderer.scorecardDescriptor = scorecard;
                     scorecardStack.addChild(scorecardRenderer);
                 }
@@ -233,6 +247,7 @@
     </mx:VBox>
     <mx:Spacer width="20"/>
     <mx:VBox paddingRight="10" paddingTop="25">
+        <!--<mx:CheckBox label="Include Groups" id="includeGroupsCheckbox"/>-->
         <mx:Label text="Scorecard Controls" fontSize="13" fontWeight="bold" paddingRight="0"/>
         <mx:HRule width="100%"/>
         <mx:LinkButton label="Add scorecard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"

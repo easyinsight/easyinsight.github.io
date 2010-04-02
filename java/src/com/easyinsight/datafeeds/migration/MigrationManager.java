@@ -53,7 +53,7 @@ public class MigrationManager {
                                 }
                             }
                             try {
-                                new FeedService().updateFeedDefinition(migrateSource, conn, true);
+                                new DataSourceInternalService().updateFeedDefinition(migrateSource, conn, true);
                             } catch (Exception e) {
                                 LogClass.error("While saving data source " + migrateSource.getDataFeedID());
                                 throw e;

@@ -19,10 +19,10 @@ import flash.display.DisplayObject;
 
 	public class DelayedGroupLink extends EventDispatcher
 	{
-		private var groupID:int;
+		private var groupID:String;
 		private var groupService:RemoteObject;
 		
-		public function DelayedGroupLink(groupID:int)
+		public function DelayedGroupLink(groupID:String)
 		{
 			this.groupID = groupID;
 			this.groupService = new RemoteObject();
@@ -43,7 +43,7 @@ import flash.display.DisplayObject;
         	var groupResponse:GroupResponse = groupService.openGroupIfPossible.lastResult as GroupResponse;
         	if (groupResponse.status == GroupResponse.SUCCESS) {
                 var groupDetail:GroupDetail = new GroupDetail();
-                groupDetail.groupID = groupID;
+                groupDetail.groupID = groupResponse.groupID;
                 User.getEventNotifier().dispatchEvent(new NavigationEvent(null, groupDetail));
             } else if (groupResponse.status == GroupResponse.NEED_LOGIN) {
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));

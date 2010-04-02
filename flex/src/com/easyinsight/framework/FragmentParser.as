@@ -1,6 +1,7 @@
 package com.easyinsight.framework {
 import com.easyinsight.analysis.DelayedAPIKeyLink;
 import com.easyinsight.analysis.DelayedDeepLink;
+import com.easyinsight.analysis.DelayedFeedAdminLink;
 import com.easyinsight.analysis.DelayedFeedLink;
 import com.easyinsight.analysis.DelayedReportLink;
 import com.easyinsight.genredata.AnalyzeEvent;
@@ -20,12 +21,17 @@ public class FragmentParser {
     public function FragmentParser() {
         parsers = [
             new FragmentTester("analysisID", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
-                var deepAnalysisLink:DelayedDeepLink = new DelayedDeepLink(Number(key));
+                var deepAnalysisLink:DelayedDeepLink = new DelayedDeepLink(key);
                 deepAnalysisLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 deepAnalysisLink.execute();
             }),
             new FragmentTester("feedID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(Number(key));
+                var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(key);
+                deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                deepFeedLink.execute();
+            }),
+            new FragmentTester("feedAdminID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var deepFeedLink:DelayedFeedAdminLink = new DelayedFeedAdminLink(key);
                 deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 deepFeedLink.execute();
             }),
@@ -35,7 +41,7 @@ public class FragmentParser {
                 deepAPILink.execute();
             }),
             new FragmentTester("groupID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var groupLink:DelayedGroupLink = new DelayedGroupLink(Number(key));
+                var groupLink:DelayedGroupLink = new DelayedGroupLink(key);
                 groupLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 groupLink.execute();
             }),
@@ -43,7 +49,7 @@ public class FragmentParser {
                 workspace.internalAnalyze(new AnalyzeEvent(new StaticReportSource(Number(key))));
             }),
             new FragmentTester("goalTreeID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var goalLink:DelayedGoalLink = new DelayedGoalLink(Number(key));
+                var goalLink:DelayedGoalLink = new DelayedGoalLink(key);
                 goalLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 goalLink.execute();
             }),
@@ -57,22 +63,22 @@ public class FragmentParser {
                 solutionLink.execute();
             }),
             new FragmentTester("multiReportID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var multiReportLink:DelayedMultiReportLink = new DelayedMultiReportLink(Number(key));
+                var multiReportLink:DelayedMultiReportLink = new DelayedMultiReportLink(key);
                 multiReportLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 multiReportLink.execute();
             }),
             new FragmentTester("packageID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var delayedPackageLink:DelayedPackageLink = new DelayedPackageLink(Number(key));
+                var delayedPackageLink:DelayedPackageLink = new DelayedPackageLink(key);
                 delayedPackageLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedPackageLink.execute();
             }),
             new FragmentTester("reportID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var deepReportLink:DelayedReportLink = new DelayedReportLink(Number(key));
+                var deepReportLink:DelayedReportLink = new DelayedReportLink(key);
                 deepReportLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 deepReportLink.execute();
             }),
             new FragmentTester("goalTreeAdminID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(Number(key));
+                var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(key);
                 delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedGoalAdminLink.execute();
             }),

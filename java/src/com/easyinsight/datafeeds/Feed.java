@@ -30,7 +30,16 @@ public abstract class Feed implements Serializable {
     private String filterExampleMessage;
     private int type;
     private long originSolution;
+    private String urlKey;
     private Map<String, String> properties;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public String getFilterExampleMessage() {
         return filterExampleMessage;

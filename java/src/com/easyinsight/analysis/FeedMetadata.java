@@ -16,6 +16,7 @@ import java.util.HashSet;
  */
 public class FeedMetadata implements Serializable {
     private AnalysisItem[] fields;
+    private String urlKey;
     private List<FeedNode> fieldHierarchy;
     private long dataFeedID;
     private String dataSourceName;
@@ -26,6 +27,14 @@ public class FeedMetadata implements Serializable {
     private DataSourceInfo dataSourceInfo;
     private Set<CredentialRequirement> credentials = new HashSet<CredentialRequirement>();
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public DataSourceInfo getDataSourceInfo() {
         return dataSourceInfo;

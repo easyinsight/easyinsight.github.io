@@ -5,10 +5,10 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.email.UserStub;
-import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
+import com.easyinsight.util.RandomTextGenerator;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -41,9 +41,11 @@ public class ReportPackageStorage {
     }
 
     public long saveReportPackage(ReportPackage reportPackage, EIConnection conn) throws SQLException {
-        long userID = SecurityUtil.getUserID();
         if (reportPackage.getReportPackageID() > 0) {
             SecurityUtil.authorizePackage(reportPackage.getReportPackageID());
+        }
+        if (reportPackage.getUrlKey() == null) {
+            reportPackage.setUrlKey(RandomTextGenerator.generateText(20));
         }
         if (reportPackage.getDateCreated() == null) {
             reportPackage.setDateCreated(new java.util.Date());
@@ -51,7 +53,8 @@ public class ReportPackageStorage {
         long reportPackageID;
             if (reportPackage.getReportPackageID() == 0) {
                 PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO REPORT_PACKAGE (PACKAGE_NAME, CONNECTION_VISIBLE," +
-                        "PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, DATA_SOURCE_ID, DATE_CREATED, AUTHOR_NAME, DESCRIPTION, LIMITED_SOURCE, TEMPORARY_PACKAGE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, DATA_SOURCE_ID, DATE_CREATED, AUTHOR_NAME, DESCRIPTION, LIMITED_SOURCE, TEMPORARY_PACKAGE, URL_KEY) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
                 insertStmt.setString(1, reportPackage.getName());
                 insertStmt.setBoolean(2, reportPackage.isConnectionVisible());
@@ -67,13 +70,14 @@ public class ReportPackageStorage {
                 insertStmt.setString(8, reportPackage.getDescription());
                 insertStmt.setBoolean(9, reportPackage.isSingleDataSource());
                 insertStmt.setBoolean(10, reportPackage.isTemporaryPackage());
+                insertStmt.setString(11, reportPackage.getUrlKey());
                 insertStmt.execute();
                 reportPackageID = Database.instance().getAutoGenKey(insertStmt);
                 reportPackage.setReportPackageID(reportPackageID);
             } else {
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE REPORT_PACKAGE SET PACKAGE_NAME = ?, CONNECTION_VISIBLE = ?," +
                         "PUBLICLY_VISIBLE = ?, MARKETPLACE_VISIBLE = ?, DATA_SOURCE_ID = ?, DATE_CREATED = ?, AUTHOR_NAME = ?, DESCRIPTION = ?," +
-                        "LIMITED_SOURCE = ?, TEMPORARY_PACKAGE = ? WHERE REPORT_PACKAGE_ID = ?");
+                        "LIMITED_SOURCE = ?, TEMPORARY_PACKAGE = ?, URL_KEY = ? WHERE REPORT_PACKAGE_ID = ?");
                 updateStmt.setString(1, reportPackage.getName());
                 updateStmt.setBoolean(2, reportPackage.isConnectionVisible());
                 updateStmt.setBoolean(3, reportPackage.isPubliclyVisible());
@@ -88,7 +92,8 @@ public class ReportPackageStorage {
                 updateStmt.setString(8, reportPackage.getDescription());
                 updateStmt.setBoolean(9, reportPackage.isSingleDataSource());
                 updateStmt.setBoolean(10, reportPackage.isTemporaryPackage());
-                updateStmt.setLong(11, reportPackage.getReportPackageID());
+                updateStmt.setString(11, reportPackage.getUrlKey());
+                updateStmt.setLong(12, reportPackage.getReportPackageID());
                 updateStmt.executeUpdate();
                 reportPackageID = reportPackage.getReportPackageID();
             }
@@ -128,7 +133,7 @@ public class ReportPackageStorage {
         ReportPackage reportPackage = null;        
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT PACKAGE_NAME, CONNECTION_VISIBLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE," +
-                    "DATA_SOURCE_ID, DATE_CREATED, AUTHOR_NAME, DESCRIPTION, LIMITED_SOURCE, TEMPORARY_PACKAGE FROM " +
+                    "DATA_SOURCE_ID, DATE_CREATED, AUTHOR_NAME, DESCRIPTION, LIMITED_SOURCE, TEMPORARY_PACKAGE, URL_KEY FROM " +
                     "REPORT_PACKAGE WHERE REPORT_PACKAGE_ID = ?");
             queryStmt.setLong(1, packageID);
             ResultSet rs = queryStmt.executeQuery();
@@ -144,6 +149,7 @@ public class ReportPackageStorage {
                 String description = rs.getString(8);
                 boolean limitedSource = rs.getBoolean(9);
                 boolean temporaryPackage = rs.getBoolean(10);
+                String urlKey = rs.getString(11);
                 PreparedStatement getReportsStmt = conn.prepareStatement("SELECT REPORT_ID, TITLE, REPORT_TYPE, DATA_FEED_ID FROM REPORT_PACKAGE_TO_REPORT, ANALYSIS WHERE " +
                         "REPORT_PACKAGE_TO_REPORT.REPORT_ID = ANALYSIS.ANALYSIS_ID AND REPORT_PACKAGE_TO_REPORT.REPORT_PACKAGE_ID = ? ORDER BY REPORT_ORDER ASC");
                 getReportsStmt.setLong(1, packageID);
@@ -165,17 +171,18 @@ public class ReportPackageStorage {
                 reportPackage.setSingleDataSource(limitedSource);
                 reportPackage.setTemporaryPackage(temporaryPackage);
                 reportPackage.setReports(reports);
+                reportPackage.setUrlKey(urlKey);
                 populateUsers(reportPackage, conn);
             }
 
         return reportPackage;
     }
 
-    public ReportPackageResponse openPackageIfPossible(long packageID) {
+    public ReportPackageResponse openPackageIfPossible(String urlKey) {
         ReportPackageResponse feedResponse;
         try {
             try {
-                SecurityUtil.authorizePackage(packageID);
+                long packageID = SecurityUtil.authorizePackage(urlKey);
                 //long userID = SecurityUtil.getUserID();
                 ReportPackageDescriptor reportPackageDescriptor = getDescriptor(packageID);
                 feedResponse = new ReportPackageResponse(ReportPackageResponse.SUCCESS, reportPackageDescriptor);

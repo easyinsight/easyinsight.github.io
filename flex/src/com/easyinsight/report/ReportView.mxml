@@ -435,7 +435,7 @@
                 // lastDataTime = dateFormatter.format(event.lastDataTime);
                 if (!_embedded && _updateURL) {
                     var feedFragmentObject:Object = new Object();
-                    feedFragmentObject.reportID = String(_reportID);
+                    feedFragmentObject.reportID = report.urlKey;
                     var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                     BrowserManager.getInstance().setFragment(feedFragmentString);
                     BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);

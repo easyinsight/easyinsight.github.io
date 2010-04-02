@@ -28,12 +28,11 @@ public class GoalService {
     private GoalStorage goalStorage = new GoalStorage();
     private GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
 
-    public boolean canAccessGoalTree(long goalTreeID) {
+    public long canAccessGoalTree(String urlKey) {
         try {
-            SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
-            return true;
+            return SecurityUtil.authorizeGoalTree(urlKey, Roles.SUBSCRIBER);
         } catch (SecurityException e) {
-            return false;
+            return 0;
         }
     }                                                                
 

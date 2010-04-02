@@ -92,12 +92,6 @@
         }
 
         private function onCreation():void {
-            if (_goalTreeID != 0) {
-                var feedFragmentObject:Object = new Object();
-                feedFragmentObject.goalTreeAdminID = String(_goalTreeID);
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
-            }
             addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, onNewSolution);
             addEventListener(GoalTreeChangedEvent.GOAL_TREE_CHANGED, onTreeChanged);
             validators = [ nameValidator ];
@@ -119,6 +113,12 @@
                 userStub.name = User.getInstance().userName;
                 _goalTree.administrators.addItem(userStub);
                 rootNode = _goalTree.rootNode;
+                if (_goalTreeID == 0) {
+                    var feedFragmentObject:Object = new Object();
+                    feedFragmentObject.newGoalTree = "true";
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                }
             } else {
                 saved = true;
                 ProgressAlert.alert(this, "Retrieving goal tree...", null, goalService.getGoalTree);
@@ -130,6 +130,12 @@
             _goalTree = goalService.getGoalTree.lastResult as GoalTree;
             rootNode = _goalTree.rootNode;
             goalTreeName = _goalTree.name;
+
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.goalTreeAdminID = String(_goalTree.urlKey);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+
             goalTreeDescription = _goalTree.description;
             if (_goalTree.iconImage != null) {
                 iconName = _goalTree.iconImage;

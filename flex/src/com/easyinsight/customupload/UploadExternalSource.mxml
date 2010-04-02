@@ -49,6 +49,7 @@
                                     <mx:String>Highrise</mx:String>
                                     <mx:String>Custom</mx:String>
                                     <mx:String>Twitter</mx:String>
+                                    <mx:String>Marketo</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
                         </mx:dataProvider>
@@ -102,6 +103,10 @@
                                 userConfigCancel="cancel(event)"/>
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.TwitterDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)" />
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.MarketoDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)" />
                     </mx:ViewStack>

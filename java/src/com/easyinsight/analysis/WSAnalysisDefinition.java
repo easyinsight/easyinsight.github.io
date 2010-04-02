@@ -49,6 +49,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private String name;
     private String authorName;
+    private String urlKey;
     private long analysisID;
     private long dataFeedID;
     private int reportType;
@@ -67,7 +68,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private Date dateCreated;
     private Date dateUpdated;
     private String description;
-    private boolean temporaryReport;    
+    private boolean temporaryReport;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public boolean isTemporaryReport() {
         return temporaryReport;

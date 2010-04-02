@@ -14,6 +14,8 @@ public class GoalTree implements Cloneable {
 
     private GoalTreeNode rootNode;
 
+    private String urlKey;
+
     private String name;
 
     private String description;
@@ -33,6 +35,14 @@ public class GoalTree implements Cloneable {
     private String iconImage;
 
     private GoalTreeMilestone defaultMilestone;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public GoalTreeMilestone getDefaultMilestone() {
         return defaultMilestone;
@@ -129,6 +139,7 @@ public class GoalTree implements Cloneable {
         goalTree.setGoalTreeID(0);
         goalTree.setAdministrators(new ArrayList<FeedConsumer>());
         goalTree.setConsumers(new ArrayList<FeedConsumer>());
+        goalTree.setUrlKey(null);
         return goalTree;
     }
 }

@@ -27,6 +27,15 @@ public class ReportPackage implements Cloneable {
     private Date dateCreated;
     private long dataSourceID;
     private boolean temporaryPackage;
+    private String urlKey;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public List<FeedConsumer> getAdministrators() {
         return administrators;
@@ -96,6 +105,7 @@ public class ReportPackage implements Cloneable {
     public ReportPackage clone() throws CloneNotSupportedException {
         ReportPackage reportPackage =  (ReportPackage) super.clone();
         reportPackage.setReportPackageID(0);
+        reportPackage.setUrlKey(null);
         return reportPackage;
     }
 

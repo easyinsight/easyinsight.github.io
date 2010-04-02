@@ -131,7 +131,7 @@
 
         private function onMessage(event:ScorecardMessageEvent):void {
             var scorecardEvent:ScorecardAsyncEvent = event.scorecardAsyncEvent;
-            if (scorecardEvent.scorecardID == _scorecard.scorecardID) {
+            if (scorecardEvent != null && scorecardEvent.scorecardID == _scorecard.scorecardID) {
                 if (scorecardEvent.type == ScorecardAsyncEvent.NAME_UPDATE) {
                     asyncMessage = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
                 } else {

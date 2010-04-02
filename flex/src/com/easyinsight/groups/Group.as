@@ -13,6 +13,7 @@ package com.easyinsight.groups
 		public var description:String;
 		public var tags:ArrayCollection;
         public var groupUsers:ArrayCollection;
+        public var urlKey:String;
 		
 		public function Group()
 		{

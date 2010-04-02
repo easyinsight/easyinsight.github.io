@@ -19,10 +19,10 @@ import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
 public class DelayedMultiReportLink extends EventDispatcher {
-    private var feedID:int;
+    private var feedID:String;
     private var feedService:RemoteObject;
 
-    public function DelayedMultiReportLink(feedID:int)
+    public function DelayedMultiReportLink(feedID:String)
     {
         this.feedID = feedID;
         this.feedService = new RemoteObject();

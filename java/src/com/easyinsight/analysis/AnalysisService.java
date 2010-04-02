@@ -5,8 +5,6 @@ import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.reportpackage.ReportPackage;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.reportpackage.ReportPackageResponse;
@@ -158,7 +156,7 @@ public class AnalysisService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptorList;
     }
@@ -166,7 +164,6 @@ public class AnalysisService {
     public String validateCalculation(String calculationString, long dataSourceID) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
         String validationString = null;
-        CalculationTreeNode node = null;
         try {
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
             CalculationTreeNode tree;
@@ -302,7 +299,7 @@ public class AnalysisService {
                 LogClass.error(e);
             }
             session.close();
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -386,11 +383,11 @@ public class AnalysisService {
         }
     }
 
-    public InsightResponse openAnalysisIfPossible(long analysisID) {
+    public InsightResponse openAnalysisIfPossible(String urlKey) {
         InsightResponse insightResponse;
         try {
             try {
-                SecurityUtil.authorizeInsight(analysisID);
+                long analysisID = SecurityUtil.authorizeInsight(urlKey);
                 addAnalysisView(analysisID);
                 //AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
                 Connection conn = Database.instance().getConnection();
@@ -451,7 +448,7 @@ public class AnalysisService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return new UserCapabilities(Integer.MAX_VALUE, feedRole, groupMember, hasReports);
     }
@@ -476,7 +473,7 @@ public class AnalysisService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return userCapabilities;
     }
@@ -501,9 +498,9 @@ public class AnalysisService {
         }
     }
 
-    public ReportPackageResponse openPackageIfPossible(long packageID) {
+    public ReportPackageResponse openPackageIfPossible(String urlKey) {
         try {
-            return reportPackageStorage.openPackageIfPossible(packageID);
+            return reportPackageStorage.openPackageIfPossible(urlKey);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -10,14 +10,6 @@
         import mx.utils.URLUtil;
 
 
-        override protected function setupBrowser():void {
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.multiReportID = String(_dataSourceID);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
-            BrowserManager.getInstance().setTitle("Easy Insight - Reports");
-        }
-
         [Bindable]
         [Embed(source="../../../../assets/document_out_x32.png")]
         private var closeIcon:Class;
@@ -28,7 +20,13 @@
         }
 
         private function gotReports():void {
-            this.reports = feedService.getReportsForDataSource.lastResult as ArrayCollection;
+            var info:MultiReportInfo = feedService.getReportsForDataSource.lastResult as MultiReportInfo;
+            this.reports = info.reports;
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.multiReportID = String(info.dataSourceKey);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - Reports");
         }
 
         private function close():void {

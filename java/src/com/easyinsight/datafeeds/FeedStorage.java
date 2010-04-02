@@ -61,50 +61,46 @@ public class FeedStorage {
         PreparedStatement insertDataFeedStmt;
         insertDataFeedStmt = conn.prepareStatement("INSERT INTO DATA_FEED (FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, FEED_SIZE, " +
                 "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
-                "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE, " +
+                "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
                 "REFRESH_INTERVAL, CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
-        insertDataFeedStmt.setString(1, feedDefinition.getFeedName());
-        insertDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
-        insertDataFeedStmt.setBoolean(3, feedDefinition.getUploadPolicy().isPubliclyVisible());
-        insertDataFeedStmt.setLong(4, feedDefinition.getSize());
+        int i = 1;
+        insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
+        insertDataFeedStmt.setInt(i++, feedDefinition.getFeedType().getType());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.getUploadPolicy().isPubliclyVisible());
+        insertDataFeedStmt.setLong(i++, feedDefinition.getSize());
         if (feedDefinition.getDateCreated() == null) {
             feedDefinition.setDateCreated(new Date());
         }
         if (feedDefinition.getDateUpdated() == null) {
             feedDefinition.setDateUpdated(new Date());
         }
-        insertDataFeedStmt.setDate(5, new java.sql.Date(feedDefinition.getDateCreated().getTime()));
-        insertDataFeedStmt.setDate(6, new java.sql.Date(feedDefinition.getDateUpdated().getTime()));
-        insertDataFeedStmt.setInt(7, feedDefinition.getViewCount());
-        insertDataFeedStmt.setInt(8, feedDefinition.getRatingCount());
-        insertDataFeedStmt.setDouble(9, feedDefinition.getRatingAverage());
-        insertDataFeedStmt.setString(10, feedDefinition.getDescription());
-        insertDataFeedStmt.setString(11, feedDefinition.getAttribution());
-        insertDataFeedStmt.setString(12, feedDefinition.getOwnerName());
+        insertDataFeedStmt.setDate(i++, new java.sql.Date(feedDefinition.getDateCreated().getTime()));
+        insertDataFeedStmt.setDate(i++, new java.sql.Date(feedDefinition.getDateUpdated().getTime()));
+        insertDataFeedStmt.setInt(i++, feedDefinition.getViewCount());
+        insertDataFeedStmt.setInt(i++, feedDefinition.getRatingCount());
+        insertDataFeedStmt.setDouble(i++, feedDefinition.getRatingAverage());
+        insertDataFeedStmt.setString(i++, feedDefinition.getDescription());
+        insertDataFeedStmt.setString(i++, feedDefinition.getAttribution());
+        insertDataFeedStmt.setString(i++, feedDefinition.getOwnerName());
         if (feedDefinition.getDynamicServiceDefinitionID() > 0)
-            insertDataFeedStmt.setLong(13, feedDefinition.getDynamicServiceDefinitionID());
+            insertDataFeedStmt.setLong(i++, feedDefinition.getDynamicServiceDefinitionID());
         else
-            insertDataFeedStmt.setNull(13, Types.BIGINT);
-        if (feedDefinition.getAnalysisDefinitionID() > 0) {
-            insertDataFeedStmt.setLong(14, feedDefinition.getAnalysisDefinitionID());
-        } else {
-            insertDataFeedStmt.setNull(14, Types.BIGINT);
-        }
-        insertDataFeedStmt.setBoolean(15, feedDefinition.getUploadPolicy().isMarketplaceVisible());
-        insertDataFeedStmt.setString(16, feedDefinition.getApiKey());
-        insertDataFeedStmt.setBoolean(17, feedDefinition.isUncheckedAPIUsingBasicAuth());
-        insertDataFeedStmt.setBoolean(18, feedDefinition.isUncheckedAPIEnabled());
-        insertDataFeedStmt.setBoolean(19, feedDefinition.isValidatedAPIUsingBasicAuth());
-        insertDataFeedStmt.setBoolean(20, feedDefinition.isValidatedAPIEnabled());
-        insertDataFeedStmt.setBoolean(21, feedDefinition.isInheritAccountAPISettings());
-        insertDataFeedStmt.setLong(22, feedDefinition.getRefreshDataInterval());
-        insertDataFeedStmt.setInt(23, 1);
-        insertDataFeedStmt.setBoolean(24, feedDefinition.isVisible());
-        insertDataFeedStmt.setLong(25, feedDefinition.getParentSourceID());
-        insertDataFeedStmt.setInt(26, feedDefinition.getVersion());
+            insertDataFeedStmt.setNull(i++, Types.BIGINT);
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.getUploadPolicy().isMarketplaceVisible());
+        insertDataFeedStmt.setString(i++, feedDefinition.getApiKey());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isUncheckedAPIUsingBasicAuth());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isUncheckedAPIEnabled());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isValidatedAPIUsingBasicAuth());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isValidatedAPIEnabled());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isInheritAccountAPISettings());
+        insertDataFeedStmt.setLong(i++, feedDefinition.getRefreshDataInterval());
+        insertDataFeedStmt.setInt(i++, 1);
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isVisible());
+        insertDataFeedStmt.setLong(i++, feedDefinition.getParentSourceID());
+        insertDataFeedStmt.setInt(i, feedDefinition.getVersion());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -607,7 +603,7 @@ public class FeedStorage {
             LogClass.error(e);
         }
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
-                "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
+                "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
@@ -615,7 +611,6 @@ public class FeedStorage {
         updateDataFeedStmt.setInt(i++, feedDefinition.getFeedType().getType());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.getUploadPolicy().isPubliclyVisible());
         updateDataFeedStmt.setLong(i++, feedDefinition.getSize());
-        updateDataFeedStmt.setLong(i++, feedDefinition.getAnalysisDefinitionID());
         updateDataFeedStmt.setString(i++, feedDefinition.getDescription());
         updateDataFeedStmt.setString(i++, feedDefinition.getAttribution());
         updateDataFeedStmt.setString(i++, feedDefinition.getOwnerName());
@@ -676,33 +671,33 @@ public class FeedStorage {
         }
 
         LogClass.debug("Cache miss for data source definition id: " + identifier);
-        PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
-                "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
-                "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled," +
+        PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, CREATE_DATE," +
+                "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE," +
+                "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, validated_api_enabled," +
                 "REFRESH_INTERVAL, VISIBLE, PARENT_SOURCE_ID " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
         ResultSet rs = queryFeedStmt.executeQuery();
         if (rs.next()) {
-            String feedName = rs.getString(1);
-            FeedType feedType = FeedType.valueOf(rs.getInt(2));
+            int i = 1;
+            String feedName = rs.getString(i++);
+            FeedType feedType = FeedType.valueOf(rs.getInt(i++));
             feedDefinition = registry.createDataSource(feedType);
             feedDefinition.setFeedName(feedName);
             feedDefinition.setDataFeedID(identifier);
-            boolean publiclyVisible = rs.getBoolean(3);
-            boolean marketplaceVisible = rs.getBoolean(16);
+            boolean publiclyVisible = rs.getBoolean(i++);
+            boolean marketplaceVisible = rs.getBoolean(i++);
             feedDefinition.setUploadPolicy(createUploadPolicy(conn, identifier, publiclyVisible, marketplaceVisible));
-            Date createDate = new Date(rs.getDate(5).getTime());
-            Date updateDate = new Date(rs.getDate(6).getTime());
-            int views = rs.getInt(7);
-            int ratingCount = rs.getInt(8);
-            double ratingAverage = rs.getDouble(9);
-            long feedSize = rs.getLong(10);
-            long analysisDefinitionID = rs.getLong(11);
-            String attribution = rs.getString(12);
-            String description = rs.getString(13);
-            String ownerName = rs.getString(14);
+            Date createDate = new Date(rs.getDate(i++).getTime());
+            Date updateDate = new Date(rs.getDate(i++).getTime());
+            int views = rs.getInt(i++);
+            int ratingCount = rs.getInt(i++);
+            double ratingAverage = rs.getDouble(i++);
+            long feedSize = rs.getLong(i++);
+            String attribution = rs.getString(i++);
+            String description = rs.getString(i++);
+            String ownerName = rs.getString(i++);
             feedDefinition.setSize(feedSize);
             feedDefinition.setDateCreated(createDate);
             feedDefinition.setDateUpdated(updateDate);
@@ -712,17 +707,16 @@ public class FeedStorage {
             if (!feedType.equals(FeedType.ANALYSIS_BASED)) {
                 retrieveFields(feedDefinition, conn);
             }
-            feedDefinition.setAnalysisDefinitionID(analysisDefinitionID);
             feedDefinition.setAttribution(attribution);
             feedDefinition.setDescription(description);
             feedDefinition.setOwnerName(ownerName);
-            feedDefinition.setDynamicServiceDefinitionID(rs.getLong(15));
-            feedDefinition.setApiKey(rs.getString(17));
-            feedDefinition.setUncheckedAPIEnabled(rs.getBoolean(18));
-            feedDefinition.setValidatedAPIEnabled(rs.getBoolean(19));
-            feedDefinition.setRefreshDataInterval(rs.getLong(20));
-            feedDefinition.setVisible(rs.getBoolean(21));
-            long parentSourceID = rs.getLong(22);
+            feedDefinition.setDynamicServiceDefinitionID(rs.getLong(i++));
+            feedDefinition.setApiKey(rs.getString(i++));
+            feedDefinition.setUncheckedAPIEnabled(rs.getBoolean(i++));
+            feedDefinition.setValidatedAPIEnabled(rs.getBoolean(i++));
+            feedDefinition.setRefreshDataInterval(rs.getLong(i++));
+            feedDefinition.setVisible(rs.getBoolean(i++));
+            long parentSourceID = rs.getLong(i);
             if (!rs.wasNull()) {
                 feedDefinition.setParentSourceID(parentSourceID);
             }
@@ -776,7 +770,7 @@ public class FeedStorage {
         long userID = SecurityUtil.getUserID(false);
         try {
             if (userID == 0) {
-                StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, ANALYSIS_ID " +
+                StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE " +
                         "FROM DATA_FEED WHERE " +
                         "DATA_FEED_ID = ?");
                 PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
@@ -805,7 +799,7 @@ public class FeedStorage {
                 }
                 queryStmt.close();
             } else {
-                StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, ANALYSIS_ID " +
+                StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE " +
                         "FROM DATA_FEED LEFT JOIN UPLOAD_POLICY_USERS ON DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = ?" +
                         " WHERE DATA_FEED.DATA_FEED_ID = ?");
                 PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
@@ -849,7 +843,7 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
                     "DATA_FEED.PARENT_SOURCE_ID, UPLOAD_POLICY_GROUPS.GROUP_ID " +
                     " FROM (upload_policy_groups, group_to_user_join, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
                     "upload_policy_groups.group_id = group_to_user_join.group_id AND GROUP_TO_USER_JOIN.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID");
@@ -863,17 +857,17 @@ public class FeedStorage {
                 String feedName = rs.getString(2);
                 long feedSize = rs.getLong(3);
                 int feedType = rs.getInt(4);
-                String ownerName = rs.getString(6);
-                String description = rs.getString(7);
-                String attribution = rs.getString(8);
-                int userRole = rs.getInt(9);
-                Timestamp lastTime = rs.getTimestamp(12);
+                String ownerName = rs.getString(5);
+                String description = rs.getString(6);
+                String attribution = rs.getString(7);
+                int userRole = rs.getInt(8);
+                Timestamp lastTime = rs.getTimestamp(11);
                 Date lastDataTime = null;
-                boolean hasSavedCredentials = rs.getString(13) != null;
+                boolean hasSavedCredentials = rs.getString(12) != null;
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                Long parentSourceID = rs.getLong(14);
+                Long parentSourceID = rs.getLong(13);
                 if (!rs.wasNull() && parentSourceID > 0) {
                     Long size = sizeMap.get(parentSourceID);
                     if (size == null) {
@@ -883,7 +877,7 @@ public class FeedStorage {
                     }
                     lastDateMap.put(parentSourceID, lastDataTime);
                 } else {
-                    long groupID = rs.getLong(15);
+                    long groupID = rs.getLong(14);
                     FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
                     feedDescriptor.setGroupSourceID(groupID);
                     feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
@@ -911,7 +905,7 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
                     "DATA_FEED.PARENT_SOURCE_ID " +
                     " FROM (upload_policy_groups, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
                     "upload_policy_groups.group_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID");
@@ -925,17 +919,17 @@ public class FeedStorage {
                 String feedName = rs.getString(2);
                 long feedSize = rs.getLong(3);
                 int feedType = rs.getInt(4);
-                String ownerName = rs.getString(6);
-                String description = rs.getString(7);
-                String attribution = rs.getString(8);
-                int userRole = rs.getInt(9);
-                Timestamp lastTime = rs.getTimestamp(12);
+                String ownerName = rs.getString(5);
+                String description = rs.getString(6);
+                String attribution = rs.getString(7);
+                int userRole = rs.getInt(8);
+                Timestamp lastTime = rs.getTimestamp(9);
                 Date lastDataTime = null;
-                boolean hasSavedCredentials = rs.getString(13) != null;
+                boolean hasSavedCredentials = rs.getString(12) != null;
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                Long parentSourceID = rs.getLong(14);
+                Long parentSourceID = rs.getLong(13);
                 if (!rs.wasNull() && parentSourceID > 0) {
                     Long size = sizeMap.get(parentSourceID);
                     if (size == null) {
@@ -972,7 +966,7 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
                     "DATA_FEED.PARENT_SOURCE_ID, VISIBLE " +
                     " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
                     "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
@@ -986,18 +980,18 @@ public class FeedStorage {
                 String feedName = rs.getString(2);
                 long feedSize = rs.getLong(3);
                 int feedType = rs.getInt(4);
-                String ownerName = rs.getString(6);
-                String description = rs.getString(7);
-                String attribution = rs.getString(8);
-                int userRole = rs.getInt(9);
-                Timestamp lastTime = rs.getTimestamp(12);
+                String ownerName = rs.getString(5);
+                String description = rs.getString(6);
+                String attribution = rs.getString(7);
+                int userRole = rs.getInt(8);
+                Timestamp lastTime = rs.getTimestamp(11);
                 Date lastDataTime = null;
-                boolean hasSavedCredentials = rs.getString(13) != null;
+                boolean hasSavedCredentials = rs.getString(12) != null;
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                Long parentSourceID = rs.getLong(14);
-                boolean visible = rs.getBoolean(15);
+                Long parentSourceID = rs.getLong(13);
+                boolean visible = rs.getBoolean(14);
                 if (!rs.wasNull() && parentSourceID > 0) {
                     Long size = sizeMap.get(parentSourceID);
                     if (size == null) {

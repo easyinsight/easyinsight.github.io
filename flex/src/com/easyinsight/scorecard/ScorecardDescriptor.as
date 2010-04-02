@@ -4,6 +4,9 @@ import com.easyinsight.quicksearch.EIDescriptor;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.scorecard.ScorecardDescriptor")]
 public class ScorecardDescriptor extends EIDescriptor {
+
+    public var groupID:int;
+
     public function ScorecardDescriptor() {
         super();
     }

@@ -85,10 +85,6 @@
         private function setup():void {
             addEventListener(ModelessWindowEvent.WINDOW_REMOVED, onWindowRemove);
             addEventListener(ModelessWindowEvent.WINDOW_ADDED, onWindowAdd);
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.goalTreeID = String(_goalTreeID);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
             ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.getGoalTree);
             goalService.getGoalTree.send(_goalTreeID);
         }
@@ -129,6 +125,10 @@
 
         private function gotTree():void {
             goalTree = goalService.getGoalTree.lastResult as GoalTree;
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.goalTreeID = String(goalTree.urlKey);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
             for each (var user:FeedConsumer in goalTree.administrators) {
                 if (user is UserStub) {
                     var userStub:UserStub = user as UserStub;

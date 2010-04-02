@@ -157,13 +157,16 @@ public class DataSourceCopyUtils {
         }
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID, accountID));
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
-        if (feedDefinition.getAnalysisDefinitionID() > 0) {
-            AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn, result.getKeyReplacementMap(), clonedFeedDefinition.getFields());
-            if (clonedRootInsight != null) {
-                clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
-                analysisStorage.saveAnalysis(clonedRootInsight, conn);
-                clonedFeedDefinition.setAnalysisDefinitionID(clonedRootInsight.getAnalysisID());
-            }
+        if (feedDefinition.getFeedType().equals(FeedType.ANALYSIS_BASED)) {
+            // TODO: repair, we don't use atm
+            /*if (feedDefinition.getAnalysisDefinitionID() > 0) {
+                AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn, result.getKeyReplacementMap(), clonedFeedDefinition.getFields());
+                if (clonedRootInsight != null) {
+                    clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
+                    analysisStorage.saveAnalysis(clonedRootInsight, conn);
+                    clonedFeedDefinition.setAnalysisDefinitionID(clonedRootInsight.getAnalysisID());
+                }
+            }*/
         }
         if (clonedFeedDefinition.getDynamicServiceDefinitionID() > 0) {
             cloneAPIs(conn, feedDefinition, clonedFeedDefinition);

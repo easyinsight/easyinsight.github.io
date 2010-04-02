@@ -14,6 +14,7 @@ import java.sql.SQLException;
 
 
 import com.easyinsight.scrubbing.DataScrub;
+import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 import org.hibernate.Query;
 
@@ -159,6 +160,9 @@ public class AnalysisStorage {
     public void saveAnalysis(AnalysisDefinition analysisDefinition, Session session) {
         if (analysisDefinition.getAnalysisID() != null && analysisDefinition.getAnalysisID() == 0) {
             analysisDefinition.setAnalysisID(null);
+        }
+        if (analysisDefinition.getUrlKey() == null) {
+            analysisDefinition.setUrlKey(RandomTextGenerator.generateText(20));
         }
         if (analysisDefinition.getDateCreated() == null) {
             analysisDefinition.setDateCreated(new Date());

@@ -77,7 +77,7 @@ public class CopyTest extends TestCase {
         UserUploadService uploadService = new UserUploadService();
 
         AnalysisBasedFeedDefinition abfd = new AnalysisBasedFeedDefinition();
-        abfd.setAnalysisDefinitionID(reportID);
+        abfd.setReportID(reportID);
         abfd.setFeedName("Derived Data Source");
         uploadService.createAnalysisBasedFeed(abfd);
 

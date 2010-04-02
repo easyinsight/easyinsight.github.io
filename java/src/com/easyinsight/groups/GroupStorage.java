@@ -88,7 +88,7 @@ public class GroupStorage {
         Group group = null;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, PUBLICLY_JOINABLE, PUBLICLY_VISIBLE FROM " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, PUBLICLY_JOINABLE, PUBLICLY_VISIBLE, URL_KEY FROM " +
                     "COMMUNITY_GROUP WHERE COMMUNITY_GROUP_ID = ?");
             queryStmt.setLong(1, groupID);
             ResultSet rs = queryStmt.executeQuery();

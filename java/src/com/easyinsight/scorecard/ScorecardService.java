@@ -63,9 +63,9 @@ public class ScorecardService {
         }
     }
 
-    public ScorecardList getScorecardDescriptors() {
+    public ScorecardList getScorecardDescriptors(boolean includeGroups) {
         long userID = SecurityUtil.getUserID();
-        return new ScorecardInternalService().getScorecardDescriptors(userID);
+        return new ScorecardInternalService().getScorecardDescriptors(userID, includeGroups);
     }
 
     public ScorecardList getScorecardDescriptorsForGroup(long groupID) {
@@ -82,6 +82,7 @@ public class ScorecardService {
                 long scorecardID = rs.getLong(1);
                 String scorecardName = rs.getString(2);
                 ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
+                scorecardDescriptor.setGroupID(groupID);
                 scorecardDescriptor.setId(scorecardID);
                 scorecardDescriptor.setName(scorecardName);
                 scorecards.add(scorecardDescriptor);

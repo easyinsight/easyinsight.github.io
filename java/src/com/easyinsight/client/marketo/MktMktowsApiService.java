@@ -25,7 +25,7 @@ import javax.xml.ws.WebServiceFeature;
  */
 
 @WebServiceClient(name = "MktMktowsApiService", 
-                  wsdlLocation = "file:/C:/Users/abaldwin/Documents/EasyInsight/code/java/src/com/easyinsight/client/marketo/1_2.wsdl",
+                  wsdlLocation = "https://na-d.marketo.com/soap/mktows/1_2?WSDL",
                   targetNamespace = "http://www.marketo.com/mktows/") 
 public class MktMktowsApiService extends Service {
 
@@ -35,7 +35,7 @@ public class MktMktowsApiService extends Service {
     static {
         URL url = null;
         try {
-            url = new URL("file:/C:/Users/abaldwin/Documents/EasyInsight/code/java/src/com/easyinsight/client/marketo/1_2.wsdl");
+            url = new URL("https://na-d.marketo.com/soap/mktows/1_2?WSDL");
         } catch (MalformedURLException e) {
             System.err.println("Can not initialize the default wsdl from file:/C:/Users/abaldwin/Documents/EasyInsight/code/java/src/com/easyinsight/client/marketo/1_2.wsdl");
             // e.printStackTrace();

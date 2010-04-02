@@ -10,6 +10,7 @@ import mx.collections.ArrayCollection;
 	{
 		public var fields:Array;	
 		public var dataFeedID:int;
+        public var urlKey:String;
         public var version:int;
         public var dataSourceName:String;
         public var dataSourceAdmin:Boolean;

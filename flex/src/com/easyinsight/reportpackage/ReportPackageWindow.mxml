@@ -90,7 +90,9 @@
         }
 
         private function saved():void {
-            _reportPackage.reportPackageID = packageService.saveReportPackage.lastResult as int;
+            var savePackage:ReportPackage = packageService.saveReportPackage.lastResult as ReportPackage;
+            _reportPackage.reportPackageID = savePackage.reportPackageID;
+            _reportPackage.urlKey = savePackage.urlKey;
             dispatchEvent(new PackageEvent(PackageEvent.PACKAGE_ADDED, _reportPackage))
             PopUpManager.removePopUp(this);
         }
