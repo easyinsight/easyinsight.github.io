@@ -18,8 +18,9 @@ public class SalesEmail implements Runnable {
             "New account created:\r\n\r\n" +
             "Account Type: {0}\r\n" +
             "User Name: {1}\r\n" +
-            "Full Name: {2}\r\n" +
-            "Email Address: {3}";
+            "First Name: {2}\r\n" +
+            "Last Name: {3}\r\n" +
+            "Email Address: {4}";
 
     private Account account;
     private User user;
@@ -42,7 +43,7 @@ public class SalesEmail implements Runnable {
         } else {
             accountType = "Enterprise";
         }
-        String body = MessageFormat.format(newAccountNotification, accountType, user.getUserName(), user.getName(), user.getEmail());
+        String body = MessageFormat.format(newAccountNotification, accountType, user.getUserName(), user.getFirstName(), user.getName(), user.getEmail());
         String subject = "New " + accountType + " Account Created";
         try {
             new AuthSMTPConnection().sendSSLMessage("sales@easy-insight.com", subject, body, "donotreply@easy-insight.com");
