@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.google;
 
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
@@ -43,7 +44,11 @@ public class GoogleDataProvider {
     private String getToken() {
         Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
         if (tokenObject == null) {
-            throw new RuntimeException("Token access revoked?");
+            if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
+                return null;
+            } else {
+                throw new RuntimeException("Token access revoked?");
+            }
         }
         return tokenObject.getTokenValue();
     }

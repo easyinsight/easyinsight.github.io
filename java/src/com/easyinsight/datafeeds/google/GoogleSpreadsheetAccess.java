@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.google;
 
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Utility;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -24,7 +25,13 @@ public class GoogleSpreadsheetAccess {
         SpreadsheetService spreadsheetService = cacheSpreadsheetServices.get(token);
         if (spreadsheetService == null) {
             spreadsheetService = new SpreadsheetService("easyinsight-eidocs-1");
-            spreadsheetService.setAuthSubToken(token, Utility.getPrivateKey());
+            if (token == null) {
+                if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
+                    spreadsheetService.setUserCredentials(ConfigLoader.instance().getGoogleUserName(), ConfigLoader.instance().getGooglePassword());
+                }
+            } else {
+                spreadsheetService.setAuthSubToken(token, Utility.getPrivateKey());
+            }
             cacheSpreadsheetServices.put(token, spreadsheetService);
         }
         return spreadsheetService;
