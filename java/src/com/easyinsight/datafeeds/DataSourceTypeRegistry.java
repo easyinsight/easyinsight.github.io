@@ -61,8 +61,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HIGHRISE_DEAL, HighRiseDealSource.class);
         registerType(FeedType.HIGHRISE_CONTACTS, HighRiseContactSource.class);
         registerType(FeedType.MARKETO, MarketoDataSource.class);
-        registerType(FeedType.HIGHRISE_CASES, HighRiseCaseSource.class);
-        registerType(FeedType.HIGHRISE_TASKS, HighRiseTaskSource.class);
+        //registerType(FeedType.HIGHRISE_CASES, HighRiseCaseSource.class);
+        //registerType(FeedType.HIGHRISE_TASKS, HighRiseTaskSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
