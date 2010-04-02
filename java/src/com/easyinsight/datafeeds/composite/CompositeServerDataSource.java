@@ -37,12 +37,14 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return Account.BASIC;
     }
 
+    protected IServerDataSourceDefinition createForFeedType(FeedType feedType) {
+        return (IServerDataSourceDefinition) new DataSourceTypeRegistry().createDataSource(feedType);
+    }
+
     protected abstract Set<FeedType> getFeedTypes();
 
     protected abstract Collection<ChildConnection> getChildConnections();
-
-    protected abstract IServerDataSourceDefinition createForFeedType(FeedType feedType);
-
+    
     public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
         return needsCredentials(existingCredentials, SecurityUtil.getUserID());
     }
