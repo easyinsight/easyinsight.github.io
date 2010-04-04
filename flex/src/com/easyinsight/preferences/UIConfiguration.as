@@ -24,6 +24,9 @@ public class UIConfiguration {
     public var configMap:Object = new Object();
 
     public var ownScorecard:Boolean = false;
+    public var marketplaceEnabled:Boolean = true;
+    public var publicDataEnabled:Boolean = true;
+    public var reportSharingEnabled:Boolean = true;
 
     public function UIConfiguration() {
     }
@@ -39,6 +42,9 @@ public class UIConfiguration {
             }
         }
         uiConfiguration.ownScorecard = settings.useCustomScorecard;
+        uiConfiguration.marketplaceEnabled = settings.marketplace;
+        uiConfiguration.publicDataEnabled = settings.publicSharing;
+        uiConfiguration.reportSharingEnabled = settings.reportSharing;
         return uiConfiguration;
     }
 

@@ -53,11 +53,11 @@ public class GroupService {
         return false;
     }
 
-    public GroupResponse openGroupIfPossible(long groupID) {
+    public GroupResponse openGroupIfPossible(String groupKey) {
         GroupResponse groupResponse;
         try {
             try {
-                SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+                long groupID = SecurityUtil.authorizeGroupByKey(groupKey, Roles.SUBSCRIBER);
                 groupResponse = new GroupResponse(GroupResponse.SUCCESS, groupID);
             } catch (com.easyinsight.security.SecurityException e) {
                 if (e.getReason() == SecurityException.LOGIN_REQUIRED)
@@ -72,7 +72,7 @@ public class GroupService {
         return groupResponse;
     }
 
-    public long addGroup(Group group) {
+    public Group addGroup(Group group) {
         SecurityUtil.authorizeAccountTier(Account.BASIC);
         long userID = SecurityUtil.getUserID();
         try {

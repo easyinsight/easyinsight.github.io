@@ -1,5 +1,6 @@
 package com.easyinsight.groups;
 
+import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -54,12 +55,13 @@ public class GroupStorage {
 
     public long addGroup(Group group, long userID, Connection conn) throws SQLException {
         PreparedStatement insertGroupStmt = conn.prepareStatement("INSERT INTO COMMUNITY_GROUP " +
-                    "(NAME, DESCRIPTION, PUBLICLY_JOINABLE, PUBLICLY_VISIBLE)" +
-                    "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "(NAME, DESCRIPTION, PUBLICLY_JOINABLE, PUBLICLY_VISIBLE, URL_KEY)" +
+                    "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertGroupStmt.setString(1, group.getName());
         insertGroupStmt.setString(2, group.getDescription());
         insertGroupStmt.setBoolean(3, group.isPubliclyJoinable());
         insertGroupStmt.setBoolean(4, group.isPubliclyVisible());
+        insertGroupStmt.setString(5, group.getUrlKey());
         insertGroupStmt.execute();
         long groupID = Database.instance().getAutoGenKey(insertGroupStmt);
         addUserToGroup(userID, groupID, GroupToUserBinding.OWNER, conn);
@@ -67,13 +69,15 @@ public class GroupStorage {
         return groupID;
     }
 
-    public long addGroup(Group group, long userID) {
+    public Group addGroup(Group group, long userID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            group.setUrlKey(RandomTextGenerator.generateText(20));
             long groupID = addGroup(group, userID, conn);
+            group.setGroupID(groupID);
             conn.commit();
-            return groupID;
+            return group;
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -97,12 +101,14 @@ public class GroupStorage {
                 String description = rs.getString(2);
                 boolean publiclyJoinable = rs.getBoolean(3);
                 boolean publiclyVisible = rs.getBoolean(4);
+                String urlKey = rs.getString(5);
                 group = new Group();
                 group.setName(name);
                 group.setGroupID(groupID);
                 group.setDescription(description);
                 group.setPubliclyJoinable(publiclyJoinable);
                 group.setPubliclyVisible(publiclyVisible);
+                group.setUrlKey(urlKey);
                 group.setTags(new ArrayList<Tag>(getTags(groupID, conn)));
             }
         } finally {
@@ -326,7 +332,7 @@ public class GroupStorage {
                 analysisIDs.add(new InsightDescriptor(analysisID, title, dataSourceID, reportType));
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return analysisIDs;
     }
@@ -343,7 +349,7 @@ public class GroupStorage {
                 goalTrees.add(new GoalTreeDescriptor(rs.getLong(1), rs.getString(2), Roles.SHARER, rs.getString(3)));
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return goalTrees;
     }
@@ -369,7 +375,7 @@ public class GroupStorage {
             addActivationStmt.execute();
             return activationString; 
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -381,7 +387,7 @@ public class GroupStorage {
             deleteStmt.setLong(2, groupID);
             deleteStmt.executeUpdate();
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -393,7 +399,7 @@ public class GroupStorage {
             deleteStmt.setLong(2, groupID);
             deleteStmt.executeUpdate();
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -405,7 +411,7 @@ public class GroupStorage {
             deleteStmt.setLong(2, groupID);
             deleteStmt.executeUpdate();
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -417,7 +423,7 @@ public class GroupStorage {
             deleteStmt.setLong(2, groupID);
             deleteStmt.executeUpdate();
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -512,7 +518,7 @@ public class GroupStorage {
                 insertFeedStmt.execute();
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -532,7 +538,7 @@ public class GroupStorage {
                 insertFeedStmt.execute();
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -569,7 +575,7 @@ public class GroupStorage {
                 descriptors.add(feedDescriptor);
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptors; 
     }
@@ -636,7 +642,7 @@ public class GroupStorage {
                 groupComments.add(groupAuditMessage);
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return groupComments;
     }

@@ -10,6 +10,33 @@ import java.util.List;
 public class UISettings {
     private List<UIVisibilitySetting> visibilitySettings;
     private boolean useCustomScorecard = false;
+    private boolean reportSharing = true;
+    private boolean marketplace = true;
+    private boolean publicSharing = true;
+
+    public boolean isReportSharing() {
+        return reportSharing;
+    }
+
+    public void setReportSharing(boolean reportSharing) {
+        this.reportSharing = reportSharing;
+    }
+
+    public boolean isMarketplace() {
+        return marketplace;
+    }
+
+    public void setMarketplace(boolean marketplace) {
+        this.marketplace = marketplace;
+    }
+
+    public boolean isPublicSharing() {
+        return publicSharing;
+    }
+
+    public void setPublicSharing(boolean publicSharing) {
+        this.publicSharing = publicSharing;
+    }
 
     public boolean isUseCustomScorecard() {
         return useCustomScorecard;

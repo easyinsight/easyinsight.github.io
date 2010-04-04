@@ -108,6 +108,9 @@
             dispatchEvent(new Event("configurationModeChanged"));
         }
 
+        [Bindable]
+        private var infoLabel:String;
+
         private function gotScorecard():void {
             var scorecardWrapper:ScorecardWrapper = scorecardService.getScorecard.lastResult as ScorecardWrapper;
             _scorecard = scorecardWrapper.scorecard;
@@ -122,6 +125,11 @@
             } else {
                 refreshIndex = 0;
             }
+            if (_groupID > 0) {
+                infoLabel = "This scorecard is part of a group.";
+            } else {
+                infoLabel = "This is one of your personal scorecards.";
+            }
             kpis = _scorecard.kpis;
             kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
             controlFactory = new KPIControlFactory(_scorecard.scorecardID, _groupID);
@@ -131,7 +139,7 @@
 
         private function onMessage(event:ScorecardMessageEvent):void {
             var scorecardEvent:ScorecardAsyncEvent = event.scorecardAsyncEvent;
-            if (scorecardEvent != null && scorecardEvent.scorecardID == _scorecard.scorecardID) {
+            if (_scorecard != null && scorecardEvent.scorecardID == _scorecard.scorecardID) {
                 if (scorecardEvent.type == ScorecardAsyncEvent.NAME_UPDATE) {
                     asyncMessage = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
                 } else {
@@ -310,6 +318,9 @@
                                            sortable="false"/>
                 </scorecard:columns>
             </scorecard:HackDataGrid>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label text="Click on KPI names to dive deeper into the data." fontSize="10"/>
+            </mx:HBox>
         </mx:VBox>
     <mx:VBox width="100%">
         <mx:HBox width="100%" verticalAlign="middle">            
@@ -338,6 +349,9 @@
                                        itemRenderer="{controlFactory}" width="150"/>
             </mx:columns>
         </mx:DataGrid>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="Click on KPI names to dive deeper into the data." fontSize="10"/>
+        </mx:HBox>
     </mx:VBox>
         <mx:Box width="100%" height="250" horizontalAlign="center" verticalAlign="middle">
             <mx:ProgressBar label="Refreshing the scorecard..." indeterminate="true"/>

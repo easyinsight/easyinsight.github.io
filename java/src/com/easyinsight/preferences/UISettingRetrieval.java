@@ -1,6 +1,7 @@
 package com.easyinsight.preferences;
 
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.users.Account;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +15,7 @@ import java.util.List;
  * Time: 2:46:54 PM
  */
 public class UISettingRetrieval {
-    public static UISettings getUISettings(long personaID, EIConnection conn) throws SQLException {
+    public static UISettings getUISettings(long personaID, EIConnection conn, Account account) throws SQLException {
         PreparedStatement visibilitySettingsStmt = conn.prepareStatement("SELECT CONFIG_ELEMENT, VISIBLE FROM " +
                 "ui_visibility_setting where persona_id = ?");
         visibilitySettingsStmt.setLong(1, personaID);
@@ -30,6 +31,9 @@ public class UISettingRetrieval {
         }
         UISettings uiSettings = new UISettings();
         uiSettings.setVisibilitySettings(settings);
+        uiSettings.setMarketplace(account.isMarketplaceEnabled());
+        uiSettings.setPublicSharing(account.isPublicDataEnabled());
+        uiSettings.setReportSharing(account.isReportSharingEnabled());
         return uiSettings;
     }
 }

@@ -87,9 +87,12 @@ public class FeedService implements IDataFeedService {
             ResultSet keyRS = keyStmt.executeQuery();
             keyRS.next();
             apiKey = keyRS.getString(1);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, REPORT_TYPE FROM ANALYSIS WHERE data_feed_id = ? and root_definition = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, REPORT_TYPE FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+                    "data_feed_id = ? and root_definition = ? AND " +
+                    "USER_TO_ANALYSIS.analysis_id = ANALYSIS.analysis_id AND USER_TO_ANALYSIS.user_id = ?");
             queryStmt.setLong(1, dataSourceID);
             queryStmt.setBoolean(2, false);
+            queryStmt.setLong(3, SecurityUtil.getUserID());
             ResultSet reportRS = queryStmt.executeQuery();
             while (reportRS.next()) {
                 descriptors.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), dataSourceID, reportRS.getInt(3)));

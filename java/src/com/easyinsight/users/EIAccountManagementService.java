@@ -44,7 +44,7 @@ public class EIAccountManagementService {
                         throw new SecurityException();
                     }
                     if (user.getPersonaID() != null) {
-                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                     }
                     userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(),

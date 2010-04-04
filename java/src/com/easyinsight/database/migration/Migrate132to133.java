@@ -57,6 +57,28 @@ public class Migrate132to133 implements Migration {
                 kpiTreeKeyStmt.setLong(2, kpiTreeID);
                 kpiTreeKeyStmt.executeUpdate();
             }
+
+            PreparedStatement dataSourceKeyStmt = conn.prepareStatement("UPDATE DATA_FEED SET API_KEY = ? WHERE DATA_FEED_ID = ?");
+            PreparedStatement findDSStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE " +
+                    "API_KEY IS NULL");
+            ResultSet dsRS = findDSStmt.executeQuery();
+            while (dsRS.next()) {
+                long reportID = dsRS.getLong(1);
+                dataSourceKeyStmt.setString(1, RandomTextGenerator.generateText(20));
+                dataSourceKeyStmt.setLong(2, reportID);
+                dataSourceKeyStmt.executeUpdate();
+            }
+
+            PreparedStatement groupStmt = conn.prepareStatement("UPDATE COMMUNITY_GROUP SET URL_KEY = ? WHERE COMMUNITY_GROUP_ID = ?");
+            PreparedStatement findGroupStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP_ID FROM COMMUNITY_GROUP WHERE " +
+                    "URL_KEY IS NULL");
+            ResultSet groupRS = findGroupStmt.executeQuery();
+            while (groupRS.next()) {
+                long groupID = groupRS.getLong(1);
+                groupStmt.setString(1, RandomTextGenerator.generateText(20));
+                groupStmt.setLong(2, groupID);
+                groupStmt.executeUpdate();
+            }
             conn.commit();
         } catch (SQLException e) {
             LogClass.error(e);

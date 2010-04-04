@@ -87,7 +87,7 @@ public class SecurityUtil {
                     return new UserServiceResponse(false, "This account is not active. Please log in to re-activate your account.");
                 }
                 if (user.getPersonaID() != null) {
-                    user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
+                    user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                 }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(), 
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), null, user.isAccountAdmin(), user.isDataSourceCreator(),
@@ -704,6 +704,35 @@ public class SecurityUtil {
         if (role > requiredRole) {
             throw new SecurityException();
         }
+    }
+
+    public static long authorizeGroupByKey(String urlKey, int requiredRole) {
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            throw new SecurityException();
+        }
+        long groupID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement idStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP_ID FROM COMMUNITY_GROUP WHERE URL_KEY = ?");
+            idStmt.setString(1, urlKey);
+            ResultSet rs = idStmt.executeQuery();
+            if (rs.next()) {
+                groupID = rs.getLong(1);
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        int role = getRoleForGroup(userPrincipal.getUserID(), groupID);
+        if (role > requiredRole) {
+            throw new SecurityException();
+        }
+        return groupID;
     }
 
     public static void authorizeFeedAccess(long dataFeed) {

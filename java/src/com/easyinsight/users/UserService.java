@@ -291,7 +291,7 @@ public class UserService implements IUserService {
                 if (results.size() > 0) {
                     user = (User) results.get(0);
                     if (user.getPersonaID() != null) {
-                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, user.getAccount()));
                     }
                 }
                 conn.commit();
@@ -544,14 +544,16 @@ public class UserService implements IUserService {
                 if (encryptedPassword.equals(actualPassword)) {
                     List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                     Account account = (Account) accountResults.get(0);
-                    if (user.getPersonaID() != null) {
-                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
-                    }
+
                     if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
+                        if (user.getPersonaID() != null) {
+                            user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+                        }
                         userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(),
                                 user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName());
+
                         userServiceResponse.setActivated(account.isActivated());
                     } else {
                         userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
@@ -617,11 +619,11 @@ public class UserService implements IUserService {
         String encryptedPassword = PasswordService.getInstance().encrypt(password);
         if (encryptedPassword.equals(actualPassword)) {
             List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-            if (user.getPersonaID() != null) {
-                user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn));
-            }
             Account account = (Account) accountResults.get(0);
             if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING  || account.getAccountState() == Account.DELINQUENT) {
+                if (user.getPersonaID() != null) {
+                    user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+                }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                      user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(),
                         (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName());

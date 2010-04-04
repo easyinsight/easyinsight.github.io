@@ -8,8 +8,16 @@
 			private var validators:Array;
 			
 			private function onCreationComplete():void {
-				validators = [ nameValidator ];				
+				validators = [ nameValidator ];
+                stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
+                nameInput.setFocus();
 			}
+
+            private function onKey(event:KeyboardEvent):void {
+                if (event.keyCode == Keyboard.ENTER) {
+                    createGroup();
+                }
+            }
 			
 			private function createGroup():void {
 				var results:Array = Validator.validateAll(validators);
@@ -17,10 +25,13 @@
 					var group:Group = new Group();
 					group.name = nameInput.text;
 					group.description = descriptionInput.text;
-					group.publiclyVisible = anyoneCanView.selected;
-					group.publiclyJoinable = anyoneCanJoin.selected;
+					/*group.publiclyVisible = anyoneCanView.selected;
+					group.publiclyJoinable = anyoneCanJoin.selected;*/
 					groupService.addGroup.send(group);
-				}
+				} else {
+                    nameInput.setFocus();
+                    nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                }
 			}
 			
 			private function cancel():void {
@@ -28,8 +39,8 @@
 			}
 			
 			private function addedGroup():void {
-				var groupID:int = groupService.addGroup.lastResult as int;
-				dispatchEvent(new GroupSelectedEvent(groupID));
+				var group:Group = groupService.addGroup.lastResult as Group;
+				dispatchEvent(new GroupSelectedEvent(group.groupID));
 				PopUpManager.removePopUp(this);
 			}
 		]]>
@@ -44,12 +55,12 @@
 		<mx:FormItem label="Group Description: ">
 			<mx:TextArea id="descriptionInput"/>
 		</mx:FormItem>
-		<mx:FormItem label="Anyone Can View This Group: ">
+		<!--<mx:FormItem label="Anyone Can View This Group: ">
 			<mx:CheckBox id="anyoneCanView"/>
 		</mx:FormItem>
 		<mx:FormItem label="Anyone Can Join This Group: ">
 			<mx:CheckBox id="anyoneCanJoin"/>
-		</mx:FormItem>
+		</mx:FormItem>-->
 		<mx:FormItem label="" direction="horizontal">
 			<mx:Button label="Create!" click="createGroup()"/>
 			<mx:Button label="Cancel" click="cancel()"/>

@@ -923,7 +923,7 @@ public class FeedStorage {
                 String description = rs.getString(6);
                 String attribution = rs.getString(7);
                 int userRole = rs.getInt(8);
-                Timestamp lastTime = rs.getTimestamp(9);
+                Timestamp lastTime = rs.getTimestamp(11);
                 Date lastDataTime = null;
                 boolean hasSavedCredentials = rs.getString(12) != null;
                 if (lastTime != null) {
