@@ -15,7 +15,7 @@ public class ReportEditorTutorial extends TutorialFramework {
 
     override protected function createNotes():ArrayCollection {
         var notes:ArrayCollection = new ArrayCollection();
-        notes.addItem(new SetNoteProperty("reportEditor", "enabled", false));
+        //notes.addItem(new SetNoteProperty("reportEditor", "enabled", false));
         notes.addItem(new ScreenNoteAnchor("This is the report editor, where you can create a wide variety of reports and slice and dice your way through data.", "center", 90));
         notes.addItem(new NoteAnchor("Measure", "You can see the list of fields available to you for building reports in this list down the left hand side of the report editor.", false));
         notes.addItem(new NoteAnchor("_controlBar", "These are the drop areas. You can construct a report by dragging fields from the left into these drop areas."));
@@ -39,10 +39,10 @@ public class ReportEditorTutorial extends TutorialFramework {
         var controlBarAnchor:NoteAnchor = new NoteAnchor("controlBar", "The control bar provides you with buttons to save reports, navigate to other views of the data source, and share the report with others.");
         controlBarAnchor.preferredTailPosition = "top";
         notes.addItem(controlBarAnchor);
-        notes.addItem(new SetNoteProperty("reportEditor", "enabled", true));
+        //notes.addItem(new SetNoteProperty("reportEditor", "enabled", true));
         notes.addItem(new ScreenNoteAnchor("Go ahead and try creating your own reports. Once you're ready to move on to the next step of the tutorial, just click the next step button.", "center", 120));
         notes.addItem(new ScreenNoteAnchor("I'm ready to move on to the next step of the tutorial.", "upperright", 80));
-        notes.addItem(new SetNoteProperty("coreVBox", "enabled", false));
+        //notes.addItem(new SetNoteProperty("coreVBox", "enabled", false));
         notes.addItem(new ActionTutorialElement(new NavigationEvent("My Data")));
         notes.addItem(new ScreenNoteAnchor("The My Data page is where you'll find a list of your data sources and reports. You can access the report editor from here, as well as opening any reports you may have created.", "center", 150));
         notes.addItem(new ActionTutorialElement(new NavigationEvent("Exchange")));

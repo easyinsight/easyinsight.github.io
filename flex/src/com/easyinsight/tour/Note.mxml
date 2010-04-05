@@ -53,6 +53,6 @@
     <mx:HBox width="100%" horizontalAlign="center" id="controlsBox">
         <!--<mx:LinkButton label="Previous Tip" textDecoration="underline" id="previousButton" click="dispatchEvent(new NoteEvent(NoteEvent.PREVIOUS_NOTE, this))" fontSize="14"/>-->
         <mx:Button label="Next" id="nextButton" click="dispatchEvent(new NoteEvent(NoteEvent.NEXT_NOTE, this))" fontSize="14"/>
+        <mx:LinkButton label="Leave Tutorial" textDecoration="underline" click="dispatchEvent(new NoteEvent(NoteEvent.CLOSE_NOTE, this))" fontSize="12"/>
     </mx:HBox>
-<!--    <mx:LinkButton label="Close" textDecoration="underline" click="dispatchEvent(new NoteEvent(NoteEvent.CLOSE_NOTE, this))" fontSize="12"/>-->
 </mx:VBox>

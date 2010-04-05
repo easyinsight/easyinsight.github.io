@@ -183,7 +183,7 @@
                                  editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
                                  color="#FFFFFF"/>
                     <mx:HBox>
-                        <mx:Button label="Next" fontSize="24" click="scorecardService.getScorecardDescriptors.send(); backIndex = 0"/>
+                        <mx:Button label="Next" fontSize="24" click="scorecardService.getScorecardDescriptors.send(false); backIndex = 0"/>
                     </mx:HBox>
                 </mx:VBox>
                 <mx:VBox width="100%" horizontalAlign="center" data="1">

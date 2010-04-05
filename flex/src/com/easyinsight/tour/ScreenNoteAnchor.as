@@ -13,6 +13,7 @@ public class ScreenNoteAnchor extends TutorialElement {
     private var position:String;
     private var textHeight:int;
     private var buttonText:String = "Next";
+    private var note:FloatingScreenNote;
 
     public function ScreenNoteAnchor(text:String, position:String, height:int, buttonText:String = "Next") {
         super();
@@ -25,9 +26,9 @@ public class ScreenNoteAnchor extends TutorialElement {
     override public function staysOnScreen():Boolean {
         return true;
     }
-
+    
     override public function forwardExecute():void {
-        var note:FloatingScreenNote = new FloatingScreenNote();
+        note = new FloatingScreenNote();
         note.text = text;
         note.textHeight = textHeight;
         note.buttonText = buttonText;
@@ -39,6 +40,7 @@ public class ScreenNoteAnchor extends TutorialElement {
             note.y = 0;
         }
         note.addEventListener(NoteEvent.NEXT_NOTE, passThrough);
+        note.addEventListener(NoteEvent.CLOSE_NOTE, passThrough);
     }
 
     private function passThrough(event:Event):void {

@@ -407,7 +407,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void reportSave(Session session) {
-
+        beforeSave();
     }
 
     public FeedNode toFeedNode() {

@@ -70,6 +70,7 @@
 
         private var _contextMenuAvailable:Boolean = true;
 
+        [Bindable]
         private var _tutorialMode:Boolean = false;
 
 
@@ -318,7 +319,7 @@
                                            sortable="false"/>
                 </scorecard:columns>
             </scorecard:HackDataGrid>
-            <mx:HBox width="100%" horizontalAlign="center">
+            <mx:HBox width="100%" horizontalAlign="center" visible="{!_tutorialMode}">
                 <mx:Label text="Click on KPI names to dive deeper into the data." fontSize="10"/>
             </mx:HBox>
         </mx:VBox>
@@ -349,7 +350,7 @@
                                        itemRenderer="{controlFactory}" width="150"/>
             </mx:columns>
         </mx:DataGrid>
-        <mx:HBox width="100%" horizontalAlign="center">
+        <mx:HBox width="100%" horizontalAlign="center" visible="{!_tutorialMode}">
             <mx:Label text="Click on KPI names to dive deeper into the data." fontSize="10"/>
         </mx:HBox>
     </mx:VBox>

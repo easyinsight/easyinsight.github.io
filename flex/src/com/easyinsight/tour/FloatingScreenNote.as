@@ -3,6 +3,7 @@ import flash.events.MouseEvent;
 
 import mx.containers.VBox;
 import mx.controls.Button;
+import mx.controls.LinkButton;
 import mx.controls.TextArea;
 import mx.managers.PopUpManager;
 
@@ -45,6 +46,11 @@ public class FloatingScreenNote extends VBox {
         nextButton.label = "Next";
         nextButton.setStyle("fontSize", 16);
         nextButton.addEventListener(MouseEvent.CLICK, nextNote);
+        killButton = new LinkButton();
+        killButton.label = "Leave Tutorial";
+        killButton.setStyle("fontSize", 12);
+        killButton.setStyle("textDecoration", "underline");
+        killButton.addEventListener(MouseEvent.CLICK, closeNote);
     }
 
     protected override function commitProperties():void {
@@ -53,8 +59,14 @@ public class FloatingScreenNote extends VBox {
         nextButton.label = _buttonText;
     }
 
+    private function closeNote(event:MouseEvent):void {
+        PopUpManager.removePopUp(this);
+        dispatchEvent(new NoteEvent(NoteEvent.CLOSE_NOTE, null));
+    }
+
     private var textArea:TextArea;
     private var nextButton:Button;
+    private var killButton:LinkButton;
 
     private var _text:String;
 
@@ -67,6 +79,7 @@ public class FloatingScreenNote extends VBox {
         super.createChildren();
         addChild(textArea);
         addChild(nextButton);
+        addChild(killButton);
     }
 
     public function set text(value:String):void {
