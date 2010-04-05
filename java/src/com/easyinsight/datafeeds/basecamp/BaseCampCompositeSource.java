@@ -242,7 +242,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         FilterValueDefinition closedFilter = new FilterValueDefinition();
         closedFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
         closedFilter.setInclusive(true);
-        closedFilter.setFilteredValues(Arrays.asList((Object) "false"));
+        closedFilter.setFilteredValues(Arrays.asList((Object) "true"));
         kpis.add(KPIUtil.createKPIForDateFilter("Todo Items Closed in the Last Seven Days", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName("Todo - Count"),
                 (AnalysisDimension) findAnalysisItem(BaseCampTodoSource.COMPLETEDDATE), MaterializedRollingFilterDefinition.WEEK,
                 Arrays.asList((FilterDefinition) closedFilter), KPI.GOOD, 7));
