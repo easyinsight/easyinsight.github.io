@@ -1,9 +1,6 @@
 package com.easyinsight.analysis;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Column;
+import javax.persistence.*;
 import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -19,6 +16,21 @@ import java.sql.SQLException;
 public class FilterDateRangeDefinition extends FilterDefinition {
     @Column(name="low_value")
     private Date startDate;
+
+    @Column(name="bounding_start_date")
+    private Date boundingStartDate;
+
+    @OneToOne
+    @JoinColumn(name="start_dimension")
+    private AnalysisDateDimension startDateDimension;
+
+    @Column(name="bounding_end_date")
+    private Date boundingEndDate;
+
+    @OneToOne
+    @JoinColumn(name="end_dimension")
+    private AnalysisDateDimension endDateDimension;
+
     @Column(name="high_value")
     private Date endDate;
     @Column(name="sliding")

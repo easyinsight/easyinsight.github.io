@@ -15,6 +15,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
 import com.easyinsight.calculations.Resolver;
+import com.easyinsight.etl.ETLService;
 import org.hibernate.Session;
 
 /**
@@ -34,6 +35,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     @Column(name="concrete")
     private boolean concrete = true;
+
+    @Column(name="lookup_table_id")
+    private Long lookupTableID;
 
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="analysis_item_id")
@@ -91,6 +95,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public Long getLookupTableID() {
+        return lookupTableID;
+    }
+
+    public void setLookupTableID(Long lookupTableID) {
+        this.lookupTableID = lookupTableID;
     }
 
     public String qualifiedName() {
@@ -300,6 +312,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                 items.add(filterDefinition.getField());
             }
         }
+        if (getLookupTableID() != null && getLookupTableID() > 0) {
+            items.add(new ETLService().getLookupTable(getLookupTableID()).getSourceField());
+        }
         return items;
     }
 
@@ -356,6 +371,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public void beforeSave() {
         for (FilterDefinition filterDefinition : getFilters()) {
             filterDefinition.beforeSave();
+        }
+        if (lookupTableID != null && lookupTableID == 0) {
+            lookupTableID = null;
         }
     }
 

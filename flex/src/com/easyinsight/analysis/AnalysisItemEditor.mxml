@@ -283,6 +283,7 @@
                 var existingType:int = startingAnalysisItem.getType();
                 var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
                 analysisItem.concrete = startingAnalysisItem.concrete;
+                analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
                 if (analysisItem.getType() == existingType) {
                     analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
                 }

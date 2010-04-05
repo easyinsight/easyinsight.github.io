@@ -1,0 +1,130 @@
+<?xml version="1.0" ?>
+<easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                            implements="com.easyinsight.framework.IFullScreenPage" width="100%" height="100%"
+        horizontalAlign="center" backgroundColor="#000000">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;        
+
+        private var _lookupTable:LookupTable;
+        private var _lookupTableID:int;
+
+        public function set lookupTableID(value:int):void {
+            _lookupTableID = value;
+        }
+        
+        protected override function commitProperties():void {
+            super.commitProperties();
+            ProgressAlert.alert(this, "Retrieving details...", null, etlService.getLookupTable);
+            etlService.getLookupTable.send(_lookupTableID);
+        }
+
+        private var sourceItem:AnalysisItem;
+
+        private var targetItem:AnalysisItem;
+
+        private var lookupMap:Object;
+
+        private function gotLookupTable():void {
+            _lookupTable = etlService.getLookupTable.lastResult as LookupTable;
+            sourceItem = _lookupTable.sourceField;
+            targetItem = _lookupTable.targetField;
+            rowType = _lookupTable.targetField.hasType(AnalysisItemTypes.DATE) ? "date" : "grouping";
+            tableName = _lookupTable.name;
+            sourceFieldName = sourceItem.display;
+            targetFieldName = targetItem.display;
+            lookupMap = new Object();
+            for each (var pair:LookupPair in _lookupTable.lookupPairs) {
+                lookupMap[String(pair.sourceValue.getValue())] = pair;
+            }
+            for each (var lookupPair:LookupPair in _lookupTable.lookupPairs) {
+                var row:LookupTableRow = new LookupTableRow();
+                row.mode = rowType;
+                row.pair = lookupPair;
+                lookupTableBox.addChild(row);
+                editors.addItem(row);
+            }
+            dataService.getAnalysisItemMetadata.send(_lookupTable.dataSourceID, _lookupTable.sourceField, CredentialsCache.getCache().createCredentials(), 0);
+        }
+
+        private var rowType:String;
+
+        private function updated():void {
+
+        }
+
+        [Bindable]
+        private var tableName:String;
+        [Bindable]
+        private var sourceFieldName:String;
+        [Bindable]
+        private var targetFieldName:String;
+
+        private function gotMetadata():void {
+
+            // okay, so lookup tables should be intrinsic parts of the data source 
+
+            var results:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisDimensionResultMetadata;
+            for each (var result:Value in results.values) {
+                var pair:LookupPair = lookupMap[String(result.getValue())];
+                if (pair == null) {
+                    pair = new LookupPair();
+                    pair.sourceValue = result;
+                    lookupMap[(String(result.getValue()))] = pair;
+                    var row:LookupTableRow = new LookupTableRow();
+                    row.pair = pair;
+                    row.mode = rowType;
+                    lookupTableBox.addChild(row);
+                    editors.addItem(row);
+                }
+            }
+        }
+
+        private function cancel():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
+        private var editors:ArrayCollection = new ArrayCollection();
+
+        private function save():void {
+            var pairs:ArrayCollection = new ArrayCollection();
+            for each (var row:LookupTableRow in editors) {
+                pairs.addItem(row.save());
+            }
+            _lookupTable.lookupPairs = pairs;
+            ProgressAlert.alert(this, "Saving...", null, etlService.updateLookupTable);
+            etlService.updateLookupTable.send(_lookupTable);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="etlService" id="etlService">
+        <mx:method name="getLookupTable" result="gotLookupTable()"/>                           
+        <mx:method name="updateLookupTable" result="updated()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="data" id="dataService">
+        <mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>
+    </mx:RemoteObject>
+    <mx:VBox width="1000" height="100%" horizontalAlign="center" paddingTop="5" backgroundColor="#FFFFFF">
+        <mx:HBox width="100%" paddingLeft="15">
+            <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
+                       toolTip="Close"/>
+            <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+                           toolTip="Save"/>
+		</mx:HBox>
+        <mx:HBox>
+            <mx:Label text="Lookup Table Name: " fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Label text="{tableName}"/>
+            <mx:Label text="Source Field" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Label text="{sourceFieldName}"/>
+            <mx:Label text="Target Field" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Label text="{targetFieldName}"/>
+        </mx:HBox>
+        <mx:VBox id="lookupTableBox" width="650"/>
+    </mx:VBox>
+</easyinsight:FullScreenPage>

@@ -1,7 +1,7 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
+import com.easyinsight.etl.ETLService;
 
 import java.util.*;
 
@@ -52,7 +52,13 @@ public class StandardReportPipeline extends Pipeline {
         for (PointPopulation pointPopulation : map.values()) {
             components.add(new CoordinateComponent(pointPopulation.analysisZipCode, pointPopulation.analysisLatitude, pointPopulation.analysisLongitude));
         }
-        
+
+        for (AnalysisItem analysisItem : items(AnalysisItemTypes.DIMENSION, allNeededAnalysisItems)) {
+            if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
+                components.add(new LookupTableComponent(new ETLService().getLookupTable(analysisItem.getLookupTableID())));
+            }
+        }
+
         components.add(new DataScrubComponent());
         components.add(new TagTransformComponent());
 

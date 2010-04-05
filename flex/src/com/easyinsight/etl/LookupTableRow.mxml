@@ -1,0 +1,83 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.DateValue;
+        import com.easyinsight.analysis.StringValue;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.scrub.LookupTablePair;
+
+        import mx.binding.utils.BindingUtils;
+        import mx.controls.DateField;
+        import mx.controls.TextInput;
+
+        private var _pair:LookupPair;
+
+        [Bindable]
+        private var sourceText:String;
+
+        private var _targetValue:Value;
+
+
+
+        public function set targetValue(value:Value):void {
+            _targetValue = value;
+
+        }
+
+        private var targetText:String;
+
+        private var targetDate:Date;
+
+        private var _mode:String;
+
+        [Inspectable(category="General", defaultValue="grouping", enumeration="grouping,date")]
+        public function set mode(value:String):void {
+            _mode = value;
+        }
+
+        protected override function createChildren():void {
+            super.createChildren();
+            if (_mode == "grouping") {
+                textInput = new TextInput();
+                textInput.text = targetText;
+                addChild(textInput);
+            } else if (_mode == "date") {
+                dateField = new DateField();
+                dateField.selectedDate = targetDate;
+                addChild(dateField);
+            }
+        }
+
+        private var textInput:TextInput;
+        private var dateField:DateField;
+
+        public function save():LookupPair {
+            var pair:LookupPair = new LookupPair();
+            var sourceValue:StringValue = new StringValue();
+            sourceValue.value = sourceInput.text;
+            pair.sourceValue = sourceValue;
+            if (_mode == "grouping") {
+                var targetValue:StringValue = new StringValue();
+                targetValue.value = textInput.text;
+                pair.targetValue = targetValue;
+            } else if (_mode == "date") {
+                var dateValue:DateValue = new DateValue();
+                dateValue.date = dateField.selectedDate;
+                pair.targetValue = dateValue;
+            }
+            return pair;
+        }
+
+        public function set pair(value:LookupPair):void {
+            _pair = value;
+            sourceText = String(_pair.sourceValue.getValue());
+            if (_pair.targetValue != null) {
+                if (_pair.targetValue is StringValue) {
+                    targetText = StringValue(_pair.targetValue).value;
+                } else if (_pair.targetValue is DateValue) {
+                    targetDate = DateValue(_pair.targetValue).date;
+                }
+            }
+        }]]></mx:Script>
+    <mx:Label text="{sourceText}" width="300" id="sourceInput"/>
+</mx:HBox>

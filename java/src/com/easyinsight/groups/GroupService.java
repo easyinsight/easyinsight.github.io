@@ -1,6 +1,7 @@
 package com.easyinsight.groups;
 
 import com.easyinsight.analysis.AnalysisStorage;
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.goals.GoalTreeNode;
@@ -277,27 +278,27 @@ public class GroupService {
 
             objects.addAll(descriptorMap.values());
             AnalysisStorage analysisStorage = new AnalysisStorage();
-            Map<Long, Set<InsightDescriptor>> analysisDefinitions = new HashMap<Long, Set<InsightDescriptor>>();
+            Map<Long, Set<EIDescriptor>> analysisDefinitions = new HashMap<Long, Set<EIDescriptor>>();
 
 
 
             for (InsightDescriptor analysisDefinition : analysisStorage.getReportsForGroup(groupID)) {
-                Set<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
+                Set<EIDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
                 if (defList == null) {
-                    defList = new HashSet<InsightDescriptor>();
+                    defList = new HashSet<EIDescriptor>();
                     analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
                 }
                 defList.add(analysisDefinition);
             }
 
             for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
-                Set<InsightDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
+                Set<EIDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
                 if (analysisDefList == null) {
-                    analysisDefList = new HashSet<InsightDescriptor>();
+                    analysisDefList = new HashSet<EIDescriptor>();
                 }
-                feedDescriptor.setChildren(new ArrayList<InsightDescriptor>(analysisDefList));
+                feedDescriptor.setChildren(new ArrayList<EIDescriptor>(analysisDefList));
             }
-            for (Set<InsightDescriptor> defList : analysisDefinitions.values()) {
+            for (Set<EIDescriptor> defList : analysisDefinitions.values()) {
                 objects.addAll(defList);
             }
             return new MyDataTree(objects, true);

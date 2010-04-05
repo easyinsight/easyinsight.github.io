@@ -5,6 +5,8 @@ import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.customupload.RefreshWindow;
 import com.easyinsight.customupload.UploadConfigEvent;
+import com.easyinsight.etl.LookupTableDescriptor;
+import com.easyinsight.etl.LookupTableSource;
 import com.easyinsight.framework.Credentials;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.User;
@@ -264,6 +266,8 @@ public class MyDataIconControls extends HBox
         } else if (obj is ReportPackageDescriptor) {
             var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
             dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor)));
+        } else if (obj is LookupTableDescriptor) {
+            dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(obj).id)));
         }
     }
 
@@ -395,6 +399,10 @@ public class MyDataIconControls extends HBox
             refreshVisible = false;
             adminVisible = true;
             adminTooltip = "Edit the package definition...";
+            copyVisible = false;
+        } else if (value is LookupTableDescriptor) {
+            refreshVisible = false;
+            adminVisible = false;
             copyVisible = false;
         }
     }

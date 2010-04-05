@@ -1,6 +1,9 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.etl.ETLService;
+import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.reportpackage.ReportPackageStorage;
 import com.easyinsight.storage.DataStorage;
@@ -85,19 +88,21 @@ public class UserUploadService implements IUserUploadService {
             }
             objects.addAll(descriptorMap.values());
             AnalysisStorage analysisStorage = new AnalysisStorage();
-            Map<Long, List<InsightDescriptor>> analysisDefinitions = new HashMap<Long, List<InsightDescriptor>>();
+            Map<Long, List<EIDescriptor>> analysisDefinitions = new HashMap<Long, List<EIDescriptor>>();
             List<InsightDescriptor> groupReports = null;
             if (includeGroups) {
                 groupReports = analysisStorage.getReportsForGroups(userID);
             }
 
+
+
             for (InsightDescriptor analysisDefinition : analysisStorage.getInsightDescriptors(userID)) {
                 if (includeGroups) {
                     groupReports.remove(analysisDefinition);
                 }
-                List<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
+                List<EIDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
                 if (defList == null) {
-                    defList = new ArrayList<InsightDescriptor>();
+                    defList = new ArrayList<EIDescriptor>();
                     analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
                 }
                 defList.add(analysisDefinition);
@@ -105,9 +110,9 @@ public class UserUploadService implements IUserUploadService {
 
             if (includeGroups) {
                 for (InsightDescriptor analysisDefinition : groupReports) {
-                    List<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
+                    List<EIDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
                     if (defList == null) {
-                        defList = new ArrayList<InsightDescriptor>();
+                        defList = new ArrayList<EIDescriptor>();
                         analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
                     }
                     defList.add(analysisDefinition);
@@ -115,13 +120,17 @@ public class UserUploadService implements IUserUploadService {
             }
 
             for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
-                List<InsightDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
+                List<EIDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
                 if (analysisDefList == null) {
-                    analysisDefList = new ArrayList<InsightDescriptor>();
+                    analysisDefList = new ArrayList<EIDescriptor>();
                 }
                 feedDescriptor.setChildren(analysisDefList);
             }
-            for (List<InsightDescriptor> defList : analysisDefinitions.values()) {
+            for (LookupTableDescriptor lookupTableDescriptor : new ETLService().getLookupTableDescriptors()) {
+                FeedDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());
+                feedDescriptor.getChildren().add(lookupTableDescriptor);
+            }
+            for (List<EIDescriptor> defList : analysisDefinitions.values()) {
                 objects.addAll(defList);
             }
             if (objects.isEmpty() && firstCall && !includeGroups) {

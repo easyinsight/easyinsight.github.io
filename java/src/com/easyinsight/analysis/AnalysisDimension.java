@@ -55,8 +55,7 @@ public class AnalysisDimension extends AnalysisItem {
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
-        List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(this);
+        List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything);        
         /*if (getVirtualDimension() != null) {
             analysisItems.add(getVirtualDimension().getBaseDimension());
         } else {

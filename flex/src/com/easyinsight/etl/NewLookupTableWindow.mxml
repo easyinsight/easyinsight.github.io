@@ -1,0 +1,169 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="feedService.searchForSubscribedFeeds.send()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.AnalysisDateDimension;
+        import com.easyinsight.analysis.AnalysisDimension;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;        
+        import com.easyinsight.analysis.NamedKey;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        [Bindable]
+        private var availableFields:ArrayCollection;
+
+        private function save():void {
+            if (!(dataSourceBox.selectedItem is DataFeedDescriptor)) {
+                Alert.show("You need to select a data source.");
+                return;
+            }
+            if (!(sourceFieldBox.selectedItem is AnalysisItem)) {
+                Alert.show("You need to select a field.");
+                return;
+            }
+            var results1:Array = Validator.validateAll([ lookupTableValidator ]);
+            if (results1.length > 0) {
+                nameInput.setFocus();
+                nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var results2:Array = Validator.validateAll([ destinationValidator ]);
+            if (results2.length > 0) {
+                destinationFieldInput.setFocus();
+                destinationFieldInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var lookupTable:LookupTable = new LookupTable();
+            lookupTable.name = nameInput.text;
+            lookupTable.dataSourceID = dataSourceBox.selectedItem.dataFeedID;
+            lookupTable.sourceField = sourceFieldBox.selectedItem as AnalysisItem;
+            var targetField:AnalysisDimension = new AnalysisDimension();
+            if (destinationGroup.selectedValue == "grouping") {
+                targetField = new AnalysisDimension();
+                AnalysisDateDimension(targetField).dateLevel = AnalysisItemTypes.DAY_LEVEL;
+            } else if (destinationGroup.selectedValue == "date") {
+                targetField = new AnalysisDateDimension();
+            }
+            targetField.concrete = false;
+            var key:NamedKey = new NamedKey();
+            key.name = destinationFieldInput.text;
+            targetField.key = key;
+            lookupTable.targetField = targetField;
+            ProgressAlert.alert(this, "Saving lookup table and opening editor...", null, etlService.saveNewLookupTable);
+            etlService.saveNewLookupTable.send(lookupTable);
+        }
+
+        private function gotDataSources():void {
+            var dataSources:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true)];
+            dataSources.sort = sort;
+            dataSources.refresh();
+            var empty:Object = new Object();
+            empty.name = "[ Select a Data Source ]";
+            dataSources.addItemAt(empty, 0);
+            this.dataSources = dataSources;
+            dataSourceIndex = 1;
+        }
+
+        private function onDSChange():void {
+            fieldIndex = 1;
+            feedService.getFeedDefinition.send(dataSourceBox.selectedItem.dataFeedID);
+        }
+
+        private function gotFields():void {
+            var feedMetadata:FeedDefinitionData = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            var fields:ArrayCollection = feedMetadata.fields;
+            var availableFields:ArrayCollection = new ArrayCollection();
+            for each (var item:AnalysisItem in fields) {
+                if (item.getType() == AnalysisItemTypes.DIMENSION) {
+                    availableFields.addItem(item);
+                }
+            }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("display", true) ];
+            availableFields.sort = sort;
+            availableFields.refresh();
+            var empty:Object = new Object();
+            empty.display = "[ Select a Field ]";
+            availableFields.addItemAt(empty, 0);
+            this.availableFields = availableFields;
+            fieldIndex = 2;
+        }
+
+        [Bindable]
+        private var dataSourceIndex:int = 0;
+
+        [Bindable]
+        private var fieldIndex:int = 0;
+
+        private function saved():void {
+            var id:int = etlService.saveNewLookupTable.lastResult as int;
+            dispatchEvent(new AnalyzeEvent(new LookupTableSource(id)));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
+        <mx:method name="getFeedDefinition" result="gotFields()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="etlService" id="etlService">
+        <mx:method name="saveNewLookupTable" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="Name:">
+                <mx:TextInput id="nameInput"/>
+            </mx:FormItem>
+            <mx:FormItem label="Data Source:">
+                <mx:ViewStack resizeToContent="true" selectedIndex="{dataSourceIndex}">
+                    <mx:Box>
+                        <mx:ProgressBar labelPlacement="right" label="Loading available data sources..." indeterminate="true"/>
+                    </mx:Box>
+                    <mx:Box>
+                        <mx:ComboBox id="dataSourceBox" dataProvider="{dataSources}" labelField="name"
+                            change="onDSChange()"/>
+                    </mx:Box>
+                </mx:ViewStack>
+            </mx:FormItem>
+            <mx:FormItem label="Source Field:">
+                <mx:ViewStack resizeToContent="true" selectedIndex="{fieldIndex}">
+                    <mx:Box/>
+                    <mx:Box>
+                        <mx:ProgressBar labelPlacement="right" label="Loading available fields..." indeterminate="true"/>
+                    </mx:Box>
+                    <mx:Box>
+                        <mx:ComboBox id="sourceFieldBox" dataProvider="{availableFields}" labelField="display"/>
+                    </mx:Box>
+                </mx:ViewStack>
+            </mx:FormItem>
+            <mx:FormItem label="Destination Field:">
+                <mx:TextInput id="destinationFieldInput"/>
+            </mx:FormItem>
+            <mx:FormItem label="Destination Type:">
+                <mx:RadioButtonGroup id="destinationGroup"/>
+                <mx:RadioButton label="Grouping" value="grouping" groupName="destinationGroup" selected="true"/>
+                <mx:RadioButton label="Date" value="date" groupName="destinationGroup"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:StringValidator id="lookupTableValidator" source="{nameInput}" minLength="3" maxLength="50" property="text"/>
+    <mx:StringValidator id="destinationValidator" source="{destinationFieldInput}" minLength="3" maxLength="50" property="text"/>
+</util:EITitleWindow>

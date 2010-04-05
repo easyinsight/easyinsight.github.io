@@ -395,7 +395,7 @@ public class DataService {
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
-                if (!analysisItem.isDerived()) {
+                if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
                     validQueryItems.add(analysisItem);
                 }
             }

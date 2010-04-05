@@ -21,6 +21,9 @@
 	<mx:Script>
 		<![CDATA[        
         import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.etl.LookupTableDescriptor;
+        import com.easyinsight.etl.LookupTableSource;
+        import com.easyinsight.etl.NewLookupTableWindow;
         import com.easyinsight.framework.AsyncInfoEvent;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.LoginEvent;
@@ -93,7 +96,13 @@
         [Embed(source="../../../../assets/package_add.png")]
         public var packageAddIcon:Class;
 
-        
+        [Bindable]
+        [Embed(source="../../../../assets/tablesx48.png")]
+        public var tablesAddIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/tables.png")]
+        public var tablesIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/application_enterprise.png")]
@@ -177,14 +186,25 @@
             } else if (uploadGrid.selectedItem is ReportPackageDescriptor) {
                 Alert.show("Are you sure you want to delete this package? You will not be able to undo this operation.", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertPackageListener, null, Alert.CANCEL);
+            } else if (uploadGrid.selectedItem is LookupTableDescriptor) {
+                Alert.show("Are you sure you want to delete this lookup table? You will not be able to undo this operation.", "Alert",
+                        Alert.OK | Alert.CANCEL, this, alertLookupListener, null, Alert.CANCEL);
             }
         }
 
         private function alertFeedListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 var feedDescriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
-                ProgressAlert.alert(this, "Deleting data source...", "Deleted data souce!", uploadService.deleteUserUpload);
+                ProgressAlert.alert(this, "Deleting data source...", "Deleted data soucre!", uploadService.deleteUserUpload);
                 uploadService.deleteUserUpload.send(feedDescriptor.dataFeedID);
+            }
+        }
+
+        private function alertLookupListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                var feedDescriptor:LookupTableDescriptor = uploadGrid.selectedItem as LookupTableDescriptor;
+                ProgressAlert.alert(this, "Deleting lookup table...", "Deleted lookup table!", etlService.deleteLookupTable);
+                etlService.deleteLookupTable.send(feedDescriptor.id);
             }
         }
 
@@ -197,6 +217,12 @@
         }
 
         private function deletedPackage():void {
+            ProgressAlert.alert(this, "Refreshing...", null, uploadService.getFeedAnalysisTree);
+            showLoading = true;
+            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+        }
+
+        private function deletedLookupTable():void {
             ProgressAlert.alert(this, "Refreshing...", null, uploadService.getFeedAnalysisTree);
             showLoading = true;
             uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
@@ -228,6 +254,8 @@
                 var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
                 analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name);
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
+            } else if (selectedObject is LookupTableDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
             } else {
                 analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
@@ -318,6 +346,8 @@
              return crosstabIcon;
              } else if (item is ReportPackageDescriptor) {
                 return packageIcon;
+            } else if (item is LookupTableDescriptor) {
+                return tablesIcon;
             }
             return null;
         }
@@ -329,6 +359,8 @@
              return crosstabIcon;
              } else if (item is ReportPackageDescriptor) {
                 return packageIcon;
+            } else if (item is LookupTableDescriptor) {
+                return tablesIcon;
             }
             return null;
         }
@@ -428,6 +460,17 @@
         private var showWidget:Boolean = true;
         [Bindable]
         private var showConnections:Boolean = true;
+
+        private function createLookupTable():void {
+            var window:NewLookupTableWindow = new NewLookupTableWindow();
+            window.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAnalyze(event:AnalyzeEvent):void {
+            dispatchEvent(event);
+        }
 		]]>
 </mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
@@ -440,6 +483,9 @@
     <mx:RemoteObject id="packageService" destination="reportPackageService">
 		<mx:method name="deleteReportPackage" result="deletedPackage()"/>
 	</mx:RemoteObject>
+    <mx:RemoteObject id="etlService" destination="etlService">
+		<mx:method name="deleteLookupTable" result="deletedLookupTable()"/>
+	</mx:RemoteObject>
 
 	<mx:VBox id="coreContent" height="100%" width="100%" verticalGap="10">
 		<mx:HBox width="100%" id="uploadBox" verticalAlign="middle"  paddingTop="10" paddingLeft="10" paddingRight="10">
@@ -450,6 +496,8 @@
             <!--<mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>-->
 			<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
                label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>
+            <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton" icon="{tablesAddIcon}"
+               label="Lookup Table" labelPlacement="bottom"/>
             <mx:ProgressBar indeterminate="true" visible="{showLoading}"/>
             <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" visible="{showConnections}">
                 <mx:Label text="Need to add data?" fontSize="16"/>

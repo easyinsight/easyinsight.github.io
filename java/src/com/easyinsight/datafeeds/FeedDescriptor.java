@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.core.InsightDescriptor;
 
@@ -19,7 +20,7 @@ public class FeedDescriptor {
     //private UploadPolicy policy;
     private long size;
     private int feedType;
-    private List<InsightDescriptor> children;
+    private List<EIDescriptor> children;
     private String tagString;
     private String ownerName;
     private String description;
@@ -109,11 +110,11 @@ public class FeedDescriptor {
         this.role = role;
     }
 
-    public List<InsightDescriptor> getChildren() {
+    public List<EIDescriptor> getChildren() {
         return children;
     }
 
-    public void setChildren(List<InsightDescriptor> children) {
+    public void setChildren(List<EIDescriptor> children) {
         this.children = children;
     }
 

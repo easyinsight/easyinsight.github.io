@@ -94,11 +94,5 @@
     <mx:Button id="textListButton" toolTip="Edit Text Replaces..."
                icon="@Embed(source='../../../../assets/document_edit.png')"
                click="editTextReplaceScrubs()"/>
-    <mx:Button id="lookupTableScrubButton" toolTip="Lookup Table"
-               icon="@Embed(source='../../../../assets/tables_add.png')"
-               click="newLookupTableScrub()"/>
-    <mx:Button id="lookupListButton" toolTip="Edit Lookup Tables..."
-               icon="@Embed(source='../../../../assets/tables_edit.png')"
-               click="editLookupTableScrubs()"/>
     
 </mx:HBox>
