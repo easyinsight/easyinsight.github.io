@@ -1,0 +1,1 @@
+create index feed_fpm_idx1 on feed_persistence_metadata (version);
