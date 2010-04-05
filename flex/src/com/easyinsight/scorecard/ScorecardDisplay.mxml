@@ -92,7 +92,7 @@
             var newIndex:int = scorecards.getItemIndex(event.scorecard);
             var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
             BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
-            scorecardRenderer.addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent) {
+            scorecardRenderer.addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
                 scorecardIndex = newIndex;                
             });
             scorecardRenderer.scorecardDescriptor = event.scorecard;
