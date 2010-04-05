@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="feedService.searchForSubscribedFeeds.send()">
+        creationComplete="feedService.searchForSubscribedFeeds.send()" title="New Lookup Table">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisDateDimension;
