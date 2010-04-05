@@ -112,7 +112,7 @@ public class CloudWatchFeed extends Feed {
                     } else if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
                         analysisDateDimension = (AnalysisDateDimension) rollingFilterDefinition.getField();
-                        endDate = new Date();
+                        endDate = insightRequestMetadata.getNow();
                         startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition.getInterval(), endDate));
                     }
                 }
