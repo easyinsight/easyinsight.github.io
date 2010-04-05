@@ -38,6 +38,7 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
     public void reportSave(Session session) {
         super.reportSave(session);
         if (analysisDimension.getAnalysisItemID() == 0) {
+            analysisDimension.reportSave(session);
             session.save(analysisDimension);
         }
     }

@@ -152,6 +152,7 @@ public class AnalysisDimension extends AnalysisItem {
     public void reportSave(Session session) {
         super.reportSave(session);
         if (keyDimension != null && keyDimension.getAnalysisItemID() == 0) {
+            keyDimension.reportSave(session);
             session.save(keyDimension);
         }
     }

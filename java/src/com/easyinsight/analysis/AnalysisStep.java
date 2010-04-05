@@ -125,12 +125,15 @@ public class AnalysisStep extends AnalysisDateDimension {
     public void reportSave(Session session) {
         super.reportSave(session);
         if (startDate.getAnalysisItemID() == 0) {
+            startDate.reportSave(session);
             session.save(startDate);
         }
         if (endDate.getAnalysisItemID() == 0) {
+            endDate.reportSave(session);
             session.save(endDate);
         }
         if (correlationDimension.getAnalysisItemID() == 0) {
+            correlationDimension.reportSave(session);
             session.save(correlationDimension);
         }
     }

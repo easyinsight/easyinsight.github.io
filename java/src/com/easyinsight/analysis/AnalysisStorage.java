@@ -170,6 +170,7 @@ public class AnalysisStorage {
         analysisDefinition.setDateUpdated(new Date());
         if (analysisDefinition.getFilterDefinitions() != null) {
             for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                filter.getField().reportSave(session);
                 if (filter instanceof FilterValueDefinition) {
                     FilterValueDefinition valueFilter = (FilterValueDefinition) filter;
                     for (PersistableValue persistableValue : valueFilter.getPersistedValues()) {
@@ -192,7 +193,6 @@ public class AnalysisStorage {
         }
         if (analysisDefinition.getReportStructure() != null) {
             for (AnalysisItem analysisItem : analysisDefinition.getReportStructure().values()) {
-                analysisItem.beforeSave();
                 analysisItem.reportSave(session);
                 if (analysisItem.getKey().getKeyID() == 0) {
                     session.save(analysisItem.getKey());

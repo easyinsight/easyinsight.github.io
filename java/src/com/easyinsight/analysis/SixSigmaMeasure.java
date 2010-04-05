@@ -164,9 +164,11 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     public void reportSave(Session session) {
         super.reportSave(session);
         if (totalDefectsMeasure.getAnalysisItemID() == 0) {
+            totalDefectsMeasure.reportSave(session);
             session.save(totalDefectsMeasure);
         }
         if (totalOpportunitiesMeasure.getAnalysisItemID() == 0) {
+            totalOpportunitiesMeasure.reportSave(session);
             session.save(totalOpportunitiesMeasure);
         }
     }
