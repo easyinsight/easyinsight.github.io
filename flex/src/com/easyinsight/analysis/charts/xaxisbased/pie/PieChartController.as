@@ -17,7 +17,7 @@ public class PieChartController implements IReportController {
     public function createDataView():DataViewFactory {
         var factory:DataViewFactory = new DataViewFactory();
         factory.reportDataService = ListDataService;
-        factory.reportControlBar = XAxisControlBar;
+        factory.reportControlBar = PieControlBar;
         factory.reportRenderer = "PieChartModule.swf";
         factory.newDefinition = PieChartDefinition;
         return factory;
