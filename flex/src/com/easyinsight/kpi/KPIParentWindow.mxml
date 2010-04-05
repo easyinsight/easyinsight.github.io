@@ -8,13 +8,20 @@
 
         [Bindable]
         private var _scorecardID:int;
-        [Bindable]
+
         private var _groupID:int;
         [Bindable]
         private var _kpi:KPI;
 
+        [Bindable(event="groupIDChanged")]
+        public function get groupID():int {
+            return _groupID;
+        }
+
         public function set groupID(value:int):void {
+            if (_groupID == value) return;
             _groupID = value;
+            dispatchEvent(new Event("groupIDChanged"));
         }
 
         private function determineEditor():void {
@@ -68,9 +75,9 @@
         <mx:Box/>
         <kpi:KPIWizard kpi="{_kpi}" scorecardID="{_scorecardID}" kpiAdded="onKPIEvent(event)" kpiEdited="onKPIEvent(event)"
                expertMode="toExpertMode()" width="100%" height="100%" kpiCancel="PopUpManager.removePopUp(this)"
-                groupID="{_groupID}"/>
+                groupID="{groupID}"/>
         <kpi:KPIWindow kpi="{_kpi}" scorecardID="{_scorecardID}" kpiAdded="onKPIEvent(event)" kpiEdited="onKPIEvent(event)"
                 wizardMode="toWizardMode()" width="100%" height="100%" kpiCancel="PopUpManager.removePopUp(this)"
-                groupID="{_groupID}"/>
+                groupID="{groupID}"/>
     </mx:ViewStack>
 </util:EITitleWindow>

@@ -335,7 +335,7 @@ public class ScorecardStorage {
         thread.start();
     }
 
-    private List<KPI> pareKPIs(List<KPI> kpiList, List<CredentialFulfillment> existingCredentials, List<CredentialRequirement> credentialRequirements) throws SQLException {
+    public List<KPI> pareKPIs(List<KPI> kpiList, List<CredentialFulfillment> existingCredentials, List<CredentialRequirement> credentialRequirements) throws SQLException {
         List<KPI> credentialedKPIs = new ArrayList<KPI>();
         Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
         for (KPI kpi : kpiList) {
@@ -358,7 +358,7 @@ public class ScorecardStorage {
         return credentialedKPIs;
     }
 
-    private boolean needsUpdate(KPI kpi, EIConnection conn) throws SQLException {
+    public boolean needsUpdate(KPI kpi, EIConnection conn) throws SQLException {
         long threshold;
         long kpiTime = 0;
         if (isLongRefresh(kpi, conn)) {
@@ -393,7 +393,7 @@ public class ScorecardStorage {
         return (kpiTime < time);
     }
 
-    private boolean isLongRefresh(KPI kpi, EIConnection conn) throws SQLException {
+    public boolean isLongRefresh(KPI kpi, EIConnection conn) throws SQLException {
         long dataSourceID = kpi.getCoreFeedID();
         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
         return feedDefinition.isLongRefresh();

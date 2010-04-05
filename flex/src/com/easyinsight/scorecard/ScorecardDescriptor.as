@@ -6,6 +6,8 @@ import com.easyinsight.quicksearch.EIDescriptor;
 public class ScorecardDescriptor extends EIDescriptor {
 
     public var groupID:int;
+    public var groupRole:int;
+    public var groupName:String;
 
     public function ScorecardDescriptor() {
         super();

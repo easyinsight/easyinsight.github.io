@@ -3,10 +3,15 @@ package com.easyinsight.goals;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.analysis.*;
+import com.easyinsight.datafeeds.*;
+import com.easyinsight.eventing.EventDispatcher;
+import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;
-import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIStorage;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.scorecard.*;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.core.InsightDescriptor;
@@ -15,6 +20,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+import com.easyinsight.users.Credentials;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +31,119 @@ import org.jetbrains.annotations.Nullable;
  * Time: 3:07:00 PM
  */
 public class GoalStorage {
+
+     public KPITreeWrapper updateKPITree(List<KPI> kpis, long kpiTreeID, EIConnection conn, List<CredentialFulfillment> existingCredentials, boolean forceRefresh) throws Exception {
+        List<KPI> longRefreshKPIs = new ArrayList<KPI>();
+        List<KPI> shortRefreshKPIs = new ArrayList<KPI>();
+        ScorecardStorage scorecardStorage = new ScorecardStorage(); 
+        for (KPI kpi : kpis) {
+            if (forceRefresh || scorecardStorage.needsUpdate(kpi, conn)) {
+                if (scorecardStorage.isLongRefresh(kpi, conn)) {
+                    longRefreshKPIs.add(kpi);
+                } else {
+                    shortRefreshKPIs.add(kpi);
+                }
+            }
+        }
+        List<CredentialRequirement> credentialRequirements = new ArrayList<CredentialRequirement>();
+
+        List<KPI> credentialedLongRefreshKPIs = scorecardStorage.pareKPIs(longRefreshKPIs, existingCredentials, credentialRequirements);
+        List<KPI> credentialedShortRefreshKPIs = scorecardStorage.pareKPIs(shortRefreshKPIs, existingCredentials, credentialRequirements);
+
+        KPITreeWrapper scorecardWrapper = new KPITreeWrapper();
+
+        if (credentialRequirements.isEmpty()) {
+            new ScorecardService().refreshValuesForList(credentialedShortRefreshKPIs, conn, existingCredentials, false);
+            if (credentialedLongRefreshKPIs != null && credentialedLongRefreshKPIs.size() > 0) {
+                scorecardWrapper.setAsyncRefresh(true);
+                //scorecardWrapper.setAsyncRefreshKpis(credentialedLongRefreshKPIs);
+                longKPIs(credentialedLongRefreshKPIs, existingCredentials, kpiTreeID);
+            }
+        }
+
+        scorecardWrapper.setCredentials(credentialRequirements);
+        return scorecardWrapper;
+    }
+
+    private void longKPIs(final List<KPI> kpiList, final List<CredentialFulfillment> credentialsList, final long kpiTreeID) {
+        final Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
+        for (KPI kpi : kpiList) {
+            List<KPI> kpis = kpiMap.get(kpi.getCoreFeedID());
+            if (kpis == null) {
+                kpis = new ArrayList<KPI>();
+                kpiMap.put(kpi.getCoreFeedID(), kpis);
+            }
+            kpis.add(kpi);
+        }
+        final long userID = SecurityUtil.getUserID();
+        final long accountID = SecurityUtil.getAccountID();
+        final int accountType = SecurityUtil.getAccountTier();
+        final boolean accountAdmin = SecurityUtil.isAccountAdmin();
+
+        Thread thread = new Thread(new Runnable() {
+
+            public void run() {
+                SecurityUtil.populateThreadLocal(userID, accountID, accountType, accountAdmin);
+                try {
+                    for (Long dataSourceID : kpiMap.keySet()) {
+                        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                        Credentials credentials = null;
+                        for (CredentialFulfillment fulfillment : credentialsList) {
+                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                                credentials = fulfillment.getCredentials();
+                            }
+                        }
+                        if (credentials != null && credentials.isEncrypted()) {
+                            credentials = credentials.decryptCredentials();
+                        }
+                        KPITreeRefreshEvent info = new KPITreeRefreshEvent();
+                        info.setKpiTreeID(kpiTreeID);
+                        info.setDataSourceName(feedDefinition.getFeedName());
+                        info.setType(ScorecardRefreshEvent.DATA_SOURCE_NAME);
+                        info.setUserId(userID);
+                        MessageUtils.sendMessage("generalNotifications", info);
+                        dataSource.refreshData(credentials, accountID, new Date(), null);
+                    }
+                    List<KPI> kpis;
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        conn.setAutoCommit(false);
+                        new ScorecardService().refreshValuesForList(kpiList, conn, credentialsList, false);
+                        PreparedStatement getKPIStmt = conn.prepareStatement("SELECT GOAL_TREE_NODE.KPI_ID FROM GOAL_TREE_NODE WHERE " +
+                                "GOAL_TREE_NODE.goal_tree_id = ?");
+                        getKPIStmt.setLong(1, kpiTreeID);
+
+                        kpis = new ArrayList<KPI>();
+                        ResultSet kpiRS = getKPIStmt.executeQuery();
+                        while (kpiRS.next()) {
+                            long kpiID = kpiRS.getLong(1);
+                            if (!kpiRS.wasNull()) {
+                                kpis.add(new KPIStorage().getKPI(kpiID, conn));
+                            }
+                        }
+                        conn.commit();
+                    } catch (Exception e) {
+                        conn.rollback();
+                        throw new RuntimeException(e);
+                    } finally {
+                        conn.setAutoCommit(true);
+                        Database.closeConnection(conn);
+                    }
+                    KPITreeRefreshEvent info = new KPITreeRefreshEvent();
+                    info.setKpiTreeID(kpiTreeID);
+                    info.setType(ScorecardRefreshEvent.DONE);
+                    info.setKpis(kpis);
+                    info.setUserId(userID);                    
+                    MessageUtils.sendMessage("generalNotifications", info);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
 
     public void deleteMilestone(long milestoneID) throws SQLException {
         Connection conn = Database.instance().getConnection();

@@ -305,7 +305,7 @@
                                     width="760" id="plainGrid">
                 <scorecard:columns>
                     <util:EIDataGridColumn headerText="" dataField="name"
-                                           itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"/>
+                                           itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50" sortable="false"/>
                     <util:EIDataGridColumn headerText="KPI Name" dataField="name"
                                            itemRenderer="{kpiNameFactory}"/>
                     <util:EIDataGridColumn headerText="Latest Value" dataField="name"
@@ -339,7 +339,7 @@
         <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="760" id="adminGrid">
             <mx:columns>
                 <util:EIDataGridColumn headerText="" dataField="name"
-                                       itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"/>
+                                       itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50" sortable="false"/>
                 <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
                 <util:EIDataGridColumn headerText="Latest Value" dataField="name"
                                        itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
@@ -351,7 +351,7 @@
             </mx:columns>
         </mx:DataGrid>
         <mx:HBox width="100%" horizontalAlign="center" visible="{!_tutorialMode}">
-            <mx:Label text="Click on KPI names to dive deeper into the data." fontSize="10"/>
+            <mx:Label text="Click on KPI names to dive into the data." fontSize="10"/>
         </mx:HBox>
     </mx:VBox>
         <mx:Box width="100%" height="250" horizontalAlign="center" verticalAlign="middle">

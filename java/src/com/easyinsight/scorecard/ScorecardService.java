@@ -74,17 +74,24 @@ public class ScorecardService {
 
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name from " +
-                    "scorecard where scorecard.group_id = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, GROUP_TO_USER_JOIN.binding_type," +
+                    "COMMUNITY_GROUP.name from " +
+                    "scorecard, GROUP_TO_USER_JOIN, community_group where scorecard.group_id = ? AND scorecard.group_id = GROUP_TO_USER_JOIN.group_id AND " +
+                    "GROUP_TO_USER_JOIN.user_id = ? AND SCORECARD.GROUP_ID = COMMUNITY_GROUP.community_group_id");
             queryStmt.setLong(1, groupID);
+            queryStmt.setLong(2, SecurityUtil.getUserID());
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long scorecardID = rs.getLong(1);
                 String scorecardName = rs.getString(2);
+                int role = rs.getInt(3);
+                String groupName = rs.getString(4);
                 ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
                 scorecardDescriptor.setGroupID(groupID);
                 scorecardDescriptor.setId(scorecardID);
                 scorecardDescriptor.setName(scorecardName);
+                scorecardDescriptor.setGroupRole(role);
+                scorecardDescriptor.setGroupName(groupName);
                 scorecards.add(scorecardDescriptor);
             }
 

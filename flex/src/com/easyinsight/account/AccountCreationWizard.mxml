@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*" top="0">
-	<mx:Metadata>
-		[Event(name="accountCreated", type="com.easyinsight.account.AccountWizardResultEvent")]
-	</mx:Metadata>
-	<mx:states>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*"
+         top="0">
+    <mx:Metadata>
+        [Event(name="accountCreated", type="com.easyinsight.account.AccountWizardResultEvent")]
+    </mx:Metadata>
+    <mx:states>
         <mx:State name="ContactUs">
-			<mx:RemoveChild target="{initialContent}"/>
-			<mx:AddChild relativeTo="{coreContent}">
-				<account:TypeContactUs previousPage="onPreviousPage(event)"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="UserInfo">
-			<mx:RemoveChild target="{initialContent}"/>			
-			<mx:AddChild relativeTo="{coreContent}">
-				<account:LoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)" account="{account}"/>
-			</mx:AddChild>
-		</mx:State>
+            <mx:RemoveChild target="{initialContent}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <account:TypeContactUs previousPage="onPreviousPage(event)"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="UserInfo">
+            <mx:RemoveChild target="{initialContent}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <account:LoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)"
+                                       account="{account}"/>
+            </mx:AddChild>
+        </mx:State>
         <mx:State name="ProAccountUserInfo">
-			<mx:RemoveChild target="{initialContent}"/>
-			<mx:AddChild relativeTo="{coreContent}">
-				<account:ProfessionalAccountLoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)" account="{account}"/>
-			</mx:AddChild>
-		</mx:State>
+            <mx:RemoveChild target="{initialContent}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <account:ProfessionalAccountLoginCreation userDefined="postUserInfo(event)"
+                                                          previousPage="onPreviousPage(event)" account="{account}"/>
+            </mx:AddChild>
+        </mx:State>
 
-	</mx:states>
-	<mx:Script>
+    </mx:states>
+    <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginComponent;
         import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.UserTransferObject;
         import com.easyinsight.framework.User;
 
@@ -35,6 +39,7 @@
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -58,6 +63,28 @@
                 this.currentState = "UserInfo";
             } else {
                 this.currentState = "ProAccountUserInfo";
+            }
+        }
+
+        private var _requiredTier:int;
+
+
+        public function set requiredTier(value:int):void {
+            _requiredTier = value;
+        }
+
+        private var _connectionName:String;
+
+        public function set connectionName(value:String):void {
+            _connectionName = value;
+        }
+
+        public function gotFocus():void {            
+            if (_requiredTier >= Account.INDIVIDUAL) {
+                recommendationText = "Recommended for you, enables reporting on " + _connectionName + ".";
+                accountIndex = 2;
+            } else {
+                accountIndex = 1;
             }
         }
 
@@ -92,7 +119,10 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             }
-            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);            
+            if (_destinationURL != null) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent(_destinationURL));
+            }
+            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
         }
 
         private function createdAccount():void {
@@ -116,15 +146,21 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        [Bindable]
+        private var recommendationText:String;
+
         public function set accountType(value:int):void {
             _accountType = value;
         }
 
         private var _accountType:int;
+
+        [Bindable]
+        private var accountIndex:int;
 		]]>
 	</mx:Script>
-	<mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">
-		<mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
+    <mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">
+        <mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
             <mx:HBox verticalAlign="middle">
                 <mx:Label text="30 day free trial" fontSize="24" fontWeight="bold"/>
             </mx:HBox>
@@ -136,96 +172,243 @@
                         click="PopUpManager.createPopUp(this, DetailedComparisonWindow)"/>
             </mx:HBox>-->
             <mx:Spacer height="15"/>
-            <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2">
-                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10" id="personalBox">
-                    <mx:Label text="PERSONAL" fontSize="20" fontWeight="bold"/>
-                    <mx:Text selectable="false" text="Enhance your spreadsheets&#13;and explore public data" color="#3A3A3A"/>
-                    <mx:Label text="Not a cent!" color="#D42525" fontWeight="bold" fontSize="14"/>
-                    <mx:Button label="Sign Up Now" click="signup(Account.FREE)" styleName="blueButton" fontSize="16"/>
-                    <mx:HRule width="100%"/>
-                    <mx:VBox width="100%">
-                        <mx:Text selectable="false" text="Upload Excel spreadsheets or&#13;import Google documents"/>
-                        <mx:Text selectable="false" text="Easily create lists, charts,&#13;crosstabs, maps and more&#13;through the ad hoc builder"/>
-                        <mx:Text selectable="false" text="Browse public data sets&#13;added by other users and&#13;build your own reports"/>
-                        <mx:Text selectable="false" text="One user"/>
-                        <mx:Text selectable="false" text="1 MB of storage"/>
+            <mx:ViewStack width="100%" resizeToContent="true" selectedIndex="{accountIndex}">
+                <mx:Box/>
+                <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2">
+                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                             backgroundColor="#FFFFFF"
+                             width="180" paddingTop="5" paddingBottom="10">
+                        <mx:Label text="PERSONAL" fontSize="20" fontWeight="bold"/>
+                        <mx:Text selectable="false" text="Enhance your spreadsheets&#13;and explore public data"
+                                 color="#3A3A3A"/>
+                        <mx:Label text="Not a cent!" color="#D42525" fontWeight="bold" fontSize="14"/>
+                        <mx:Button label="Sign Up Now" click="signup(Account.FREE)" styleName="blueButton"
+                                   fontSize="16"/>
+                        <mx:HRule width="100%"/>
+                        <mx:VBox width="100%">
+                            <mx:Text selectable="false"
+                                     text="Upload Excel spreadsheets or&#13;import Google documents"/>
+                            <mx:Text selectable="false"
+                                     text="Easily create lists, charts,&#13;crosstabs, maps and more&#13;through the ad hoc builder"/>
+                            <mx:Text selectable="false"
+                                     text="Browse public data sets&#13;added by other users and&#13;build your own reports"/>
+                            <mx:Text selectable="false" text="One user"/>
+                            <mx:Text selectable="false" text="1 MB of storage"/>
+                        </mx:VBox>
                     </mx:VBox>
-                </mx:VBox>
-                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10" id="basicBox">
-                    <mx:Label text="BASIC" fontSize="20" fontWeight="bold"/>
-                    <mx:Text selectable="false" text="Get started with full&#13;business intelligence power" color="#3A3A3A"/>
-                    <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                    <mx:Button label="30 Day Free Trial" click="signup(Account.INDIVIDUAL)" styleName="blueButton" fontSize="16"/>
-                    <mx:HRule width="100%"/>
-                    <mx:VBox width="100%">
-                        <mx:Text selectable="false" text="Includes everything in&#13;PERSONAL, plus..." fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Connect to Google Analytics,&#13;Salesforce, Basecamp, and&#13;other SaaS solutions"/>
-                        <mx:Text selectable="false" text="Establish connections to &#13;databases and existing&#13;data warehouses"/>
-                        <mx:Text selectable="false" text="Use the API to publish your&#13;own custom data"/>
-                        <mx:Text selectable="false" text="5 users"/>
-                        <mx:Text selectable="false" text="100 MB of storage"/>
+                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                             backgroundColor="#FFFFFF"
+                             width="180" paddingTop="5" paddingBottom="10">
+                        <mx:Label text="BASIC" fontSize="20" fontWeight="bold"/>
+                        <mx:Text selectable="false" text="Get started with full&#13;business intelligence power"
+                                 color="#3A3A3A"/>
+                        <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+                        <mx:Button label="30 Day Free Trial" click="signup(Account.INDIVIDUAL)" styleName="blueButton"
+                                   fontSize="16"/>
+                        <mx:HRule width="100%"/>
+                        <mx:VBox width="100%">
+                            <mx:Text selectable="false" text="Includes everything in&#13;PERSONAL, plus..."
+                                     fontWeight="bold"/>
+                            <mx:Text selectable="false"
+                                     text="Connect to Google Analytics,&#13;Salesforce, Basecamp, and&#13;other SaaS solutions"/>
+                            <mx:Text selectable="false"
+                                     text="Establish connections to &#13;databases and existing&#13;data warehouses"/>
+                            <mx:Text selectable="false" text="Use the API to publish your&#13;own custom data"/>
+                            <mx:Text selectable="false" text="5 users"/>
+                            <mx:Text selectable="false" text="100 MB of storage"/>
+                        </mx:VBox>
                     </mx:VBox>
-                </mx:VBox>
-                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10" id="professionalBox">
-                    <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
-                    <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight" color="#3A3A3A"/>
-                    <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                    <mx:Button label="30 Day Free Trial" click="signup(Account.GROUP)" styleName="blueButton" fontSize="16"/>
-                    <mx:HRule width="100%"/>
-                    <mx:VBox width="100%">
-                        <mx:Text selectable="false" text="Includes everything in&#13;BASIC, plus..." fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Build visibility across&#13;all the business silos&#13;from accounting to R&amp;D&#13;to sales and marketing"/>
-                        <mx:Text selectable="false" text="Data level security to&#13;ensure your users see only&#13;what they should see"/>
-                        <mx:Text selectable="false" text="50 users"/>
-                        <mx:Text selectable="false" text="500 MB of storage"/>
+                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                             backgroundColor="#FFFFFF"
+                             width="180" paddingTop="5" paddingBottom="10">
+                        <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
+                        <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight"
+                                 color="#3A3A3A"/>
+                        <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+                        <mx:Button label="30 Day Free Trial" click="signup(Account.GROUP)" styleName="blueButton"
+                                   fontSize="16"/>
+                        <mx:HRule width="100%"/>
+                        <mx:VBox width="100%">
+                            <mx:Text selectable="false" text="Includes everything in&#13;BASIC, plus..."
+                                     fontWeight="bold"/>
+                            <mx:Text selectable="false"
+                                     text="Build visibility across&#13;all the business silos&#13;from accounting to R&amp;D&#13;to sales and marketing"/>
+                            <mx:Text selectable="false"
+                                     text="Data level security to&#13;ensure your users see only&#13;what they should see"/>
+                            <mx:Text selectable="false" text="50 users"/>
+                            <mx:Text selectable="false" text="500 MB of storage"/>
+                        </mx:VBox>
                     </mx:VBox>
-                </mx:VBox>
 
-                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10" id="premiumBox">
-                    <mx:Label text="PREMIUM" fontSize="20" fontWeight="bold"/>
-                    <mx:Text selectable="false" text="Customize and integrate&#13;BI for your unique needs" color="#3A3A3A"/>
-                    <mx:Label text="$1500/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                    <mx:Button label="Contact us" click="contactUs()" styleName="blueButton" fontSize="16"/>
-                    <mx:HRule width="100%"/>
-                    <mx:VBox width="100%">
-                        <mx:Text selectable="false" text="Includes everything in&#13;PREMIUM, plus..." fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Higher data volume limits&#13;allow you to use trickle feed&#13;ETL and achieve real time&#13;business intelligence"/>
-                        <mx:Text selectable="false" text="Customizable look and feel&#13;to match company standards&#13;and make the application&#13;seamless with the rest of&#13;your organization"/>
-                        <mx:Text selectable="false" text="Unlimited users"/>
-                        <mx:Text selectable="false" text="10 GB of storage"/>
+                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                             backgroundColor="#FFFFFF"
+                             width="180" paddingTop="5" paddingBottom="10">
+                        <mx:Label text="PREMIUM" fontSize="20" fontWeight="bold"/>
+                        <mx:Text selectable="false" text="Customize and integrate&#13;BI for your unique needs"
+                                 color="#3A3A3A"/>
+                        <mx:Label text="$1500/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+                        <mx:Button label="Contact us" click="contactUs()" styleName="blueButton" fontSize="16"/>
+                        <mx:HRule width="100%"/>
+                        <mx:VBox width="100%">
+                            <mx:Text selectable="false" text="Includes everything in&#13;PREMIUM, plus..."
+                                     fontWeight="bold"/>
+                            <mx:Text selectable="false"
+                                     text="Higher data volume limits&#13;allow you to use trickle feed&#13;ETL and achieve real time&#13;business intelligence"/>
+                            <mx:Text selectable="false"
+                                     text="Customizable look and feel&#13;to match company standards&#13;and make the application&#13;seamless with the rest of&#13;your organization"/>
+                            <mx:Text selectable="false" text="Unlimited users"/>
+                            <mx:Text selectable="false" text="10 GB of storage"/>
+                        </mx:VBox>
                     </mx:VBox>
-                </mx:VBox>
-                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10" id="enterpriseBox">
-                    <mx:Label text="ENTERPRISE" fontSize="20" fontWeight="bold"/>
-                    <mx:Text selectable="false" text="Unlimited power to drive&#13;your business to the top" color="#3A3A3A"/>
-                    <mx:Label text="Talk to us" color="#D42525" fontWeight="bold" fontSize="14"/>
-                    <mx:Button label="Contact us" click="contactUs()" styleName="blueButton" fontSize="16"/>
-                    <mx:HRule width="100%"/>
-                    <mx:VBox width="100%">
-                        <mx:Text selectable="false" text="Includes everything in&#13;PROFESSIONAL, plus..." fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Dedicated resources to&#13;ensure optimal round the&#13;clock performance"/>
-                        <mx:Text selectable="false" text="24/7 support"/>
-                        <mx:Text selectable="false" text="Unlimited users"/>
-                        <mx:Text selectable="false" text="Terabytes of storage"/>
+                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                             backgroundColor="#FFFFFF"
+                             width="180" paddingTop="5" paddingBottom="10">
+                        <mx:Label text="ENTERPRISE" fontSize="20" fontWeight="bold"/>
+                        <mx:Text selectable="false" text="Unlimited power to drive&#13;your business to the top"
+                                 color="#3A3A3A"/>
+                        <mx:Label text="Talk to us" color="#D42525" fontWeight="bold" fontSize="14"/>
+                        <mx:Button label="Contact us" click="contactUs()" styleName="blueButton" fontSize="16"/>
+                        <mx:HRule width="100%"/>
+                        <mx:VBox width="100%">
+                            <mx:Text selectable="false" text="Includes everything in&#13;PROFESSIONAL, plus..."
+                                     fontWeight="bold"/>
+                            <mx:Text selectable="false"
+                                     text="Dedicated resources to&#13;ensure optimal round the&#13;clock performance"/>
+                            <mx:Text selectable="false" text="24/7 support"/>
+                            <mx:Text selectable="false" text="Unlimited users"/>
+                            <mx:Text selectable="false" text="Terabytes of storage"/>
+                        </mx:VBox>
                     </mx:VBox>
-                </mx:VBox>
 
-            </mx:HBox>
+                </mx:HBox>
+                <mx:VBox width="100%">
+                    <mx:HBox>
+                        <mx:Spacer width="180"/>
+                        <mx:Box>
+                            <mx:Label text="{recommendationText}" fontSize="14"/>
+                        </mx:Box>
+                    </mx:HBox>
+                    <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2">
+                        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                                 backgroundColor="#DFDFDF"
+                                 width="180" paddingTop="5" paddingBottom="10">
+                            <mx:Label text="PERSONAL" fontSize="20" fontWeight="bold"/>
+                            <mx:Text selectable="false" text="Enhance your spreadsheets&#13;and explore public data"
+                                     color="#3A3A3A"/>
+                            <mx:Label text="Not a cent!" color="#D42525" fontWeight="bold" fontSize="14"/>
+                            <mx:Button label="Sign Up Now" click="signup(Account.FREE)" styleName="blueButton"
+                                       fontSize="16"/>
+                            <mx:HRule width="100%"/>
+                            <mx:VBox width="100%">
+                                <mx:Text selectable="false"
+                                         text="Upload Excel spreadsheets or&#13;import Google documents"/>
+                                <mx:Text selectable="false"
+                                         text="Easily create lists, charts,&#13;crosstabs, maps and more&#13;through the ad hoc builder"/>
+                                <mx:Text selectable="false"
+                                         text="Browse public data sets&#13;added by other users and&#13;build your own reports"/>
+                                <mx:Text selectable="false" text="One user"/>
+                                <mx:Text selectable="false" text="1 MB of storage"/>
+                            </mx:VBox>
+                        </mx:VBox>
+                        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                                 backgroundColor="#FFFFFF"
+                                 width="180" paddingTop="5" paddingBottom="10">
+                            <mx:Label text="BASIC" fontSize="20" fontWeight="bold"/>
+                            <mx:Text selectable="false" text="Get started with full&#13;business intelligence power"
+                                     color="#3A3A3A"/>
+                            <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+                            <mx:Button label="30 Day Free Trial" click="signup(Account.INDIVIDUAL)"
+                                       styleName="blueButton" fontSize="16"/>
+                            <mx:HRule width="100%"/>
+                            <mx:VBox width="100%">
+                                <mx:Text selectable="false" text="Includes everything in&#13;PERSONAL, plus..."
+                                         fontWeight="bold"/>
+                                <mx:Text selectable="false"
+                                         text="Connect to Google Analytics,&#13;Salesforce, Basecamp, and&#13;other SaaS solutions"/>
+                                <mx:Text selectable="false"
+                                         text="Establish connections to &#13;databases and existing&#13;data warehouses"/>
+                                <mx:Text selectable="false" text="Use the API to publish your&#13;own custom data"/>
+                                <mx:Text selectable="false" text="5 users"/>
+                                <mx:Text selectable="false" text="100 MB of storage"/>
+                            </mx:VBox>
+                        </mx:VBox>
+                        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                                 backgroundColor="#FFFFFF"
+                                 width="180" paddingTop="5" paddingBottom="10">
+                            <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
+                            <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight"
+                                     color="#3A3A3A"/>
+                            <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+                            <mx:Button label="30 Day Free Trial" click="signup(Account.GROUP)" styleName="blueButton"
+                                       fontSize="16"/>
+                            <mx:HRule width="100%"/>
+                            <mx:VBox width="100%">
+                                <mx:Text selectable="false" text="Includes everything in&#13;BASIC, plus..."
+                                         fontWeight="bold"/>
+                                <mx:Text selectable="false"
+                                         text="Build visibility across&#13;all the business silos&#13;from accounting to R&amp;D&#13;to sales and marketing"/>
+                                <mx:Text selectable="false"
+                                         text="Data level security to&#13;ensure your users see only&#13;what they should see"/>
+                                <mx:Text selectable="false" text="50 users"/>
+                                <mx:Text selectable="false" text="500 MB of storage"/>
+                            </mx:VBox>
+                        </mx:VBox>
+
+                        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                                 backgroundColor="#DFDFDF"
+                                 width="180" paddingTop="5" paddingBottom="10">
+                            <mx:Label text="PREMIUM" fontSize="20" fontWeight="bold"/>
+                            <mx:Text selectable="false" text="Customize and integrate&#13;BI for your unique needs"
+                                     color="#3A3A3A"/>
+                            <mx:Label text="$1500/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+                            <mx:Button label="Contact us" click="contactUs()" styleName="blueButton" fontSize="16"/>
+                            <mx:HRule width="100%"/>
+                            <mx:VBox width="100%">
+                                <mx:Text selectable="false" text="Includes everything in&#13;PREMIUM, plus..."
+                                         fontWeight="bold"/>
+                                <mx:Text selectable="false"
+                                         text="Higher data volume limits&#13;allow you to use trickle feed&#13;ETL and achieve real time&#13;business intelligence"/>
+                                <mx:Text selectable="false"
+                                         text="Customizable look and feel&#13;to match company standards&#13;and make the application&#13;seamless with the rest of&#13;your organization"/>
+                                <mx:Text selectable="false" text="Unlimited users"/>
+                                <mx:Text selectable="false" text="10 GB of storage"/>
+                            </mx:VBox>
+                        </mx:VBox>
+                        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                                 backgroundColor="#DFDFDF"
+                                 width="180" paddingTop="5" paddingBottom="10">
+                            <mx:Label text="ENTERPRISE" fontSize="20" fontWeight="bold"/>
+                            <mx:Text selectable="false" text="Unlimited power to drive&#13;your business to the top"
+                                     color="#3A3A3A"/>
+                            <mx:Label text="Talk to us" color="#D42525" fontWeight="bold" fontSize="14"/>
+                            <mx:Button label="Contact us" click="contactUs()" styleName="blueButton" fontSize="16"/>
+                            <mx:HRule width="100%"/>
+                            <mx:VBox width="100%">
+                                <mx:Text selectable="false" text="Includes everything in&#13;PROFESSIONAL, plus..."
+                                         fontWeight="bold"/>
+                                <mx:Text selectable="false"
+                                         text="Dedicated resources to&#13;ensure optimal round the&#13;clock performance"/>
+                                <mx:Text selectable="false" text="24/7 support"/>
+                                <mx:Text selectable="false" text="Unlimited users"/>
+                                <mx:Text selectable="false" text="Terabytes of storage"/>
+                            </mx:VBox>
+                        </mx:VBox>
+
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:ViewStack>
             <mx:Spacer height="20"/>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:LinkButton textDecoration="underline" label="Security Statement" click="showSecurityStatement()" fontSize="16"/>
+                <mx:LinkButton textDecoration="underline" label="Security Statement" click="showSecurityStatement()"
+                               fontSize="16"/>
                 <mx:Spacer width="20"/>
-                <mx:LinkButton textDecoration="underline" label="Terms of Service" click="showTermsOfService()" fontSize="16"/>
+                <mx:LinkButton textDecoration="underline" label="Terms of Service" click="showTermsOfService()"
+                               fontSize="16"/>
             </mx:HBox>
-		</mx:VBox>
-	</mx:VBox>
-	<mx:RemoteObject id="creationService" destination="login">
-		<mx:method name="createAccount" result="createdAccount()"/>
-		<!--<mx:method name="authenticate" result="gotUserInfo()"/>-->
-	</mx:RemoteObject>
+        </mx:VBox>
+    </mx:VBox>
+    <mx:RemoteObject id="creationService" destination="login">
+        <mx:method name="createAccount" result="createdAccount()"/>
+        <!--<mx:method name="authenticate" result="gotUserInfo()"/>-->
+    </mx:RemoteObject>
 </mx:VBox>

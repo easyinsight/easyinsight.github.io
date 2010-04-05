@@ -27,13 +27,42 @@
 
         private var _requiredTier:int;
 
+        private var _targetName:String;
 
-        public function set requiredTier(value:int):void {
-            _requiredTier = value;
+        private var _connectionName:String;
+
+
+        [Bindable(event="destinationURLChanged")]
+        public function get destinationURL():String {
+            return _destinationURL;
         }
 
         public function set destinationURL(value:String):void {
+            if (_destinationURL == value) return;
             _destinationURL = value;
+            dispatchEvent(new Event("destinationURLChanged"));
+        }
+
+        [Bindable(event="requiredTierChanged")]
+        public function get requiredTier():int {
+            return _requiredTier;
+        }
+
+        public function set requiredTier(value:int):void {
+            if (_requiredTier == value) return;
+            _requiredTier = value;
+            dispatchEvent(new Event("requiredTierChanged"));
+        }
+
+        [Bindable(event="connectionNameChanged")]
+        public function get connectionName():String {
+            return _connectionName;
+        }
+
+        public function set connectionName(value:String):void {
+            if (_connectionName == value) return;
+            _connectionName = value;
+            dispatchEvent(new Event("connectionNameChanged"));
         }
 
         private function onLogin(event:LoginEvent):void {
@@ -72,6 +101,7 @@
                 }
             } else {
                 currentState = "";
+                accountWizard.gotFocus();
             }
         }
 
@@ -123,7 +153,8 @@
              paddingBottom="10" horizontalAlign="center">
             <mx:VBox width="1000" paddingLeft="20"
                  paddingRight="20" paddingTop="5" paddingBottom="20" id="coreContent" backgroundColor="#FFFFFF">
-                <account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)" destinationURL="{_destinationURL}"/>
+                <account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)" destinationURL="{destinationURL}"
+                        requiredTier="{requiredTier}" connectionName="{connectionName}"/>
             </mx:VBox>
         </mx:VBox>
     </mx:Canvas>

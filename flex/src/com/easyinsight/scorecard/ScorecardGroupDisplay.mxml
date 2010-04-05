@@ -16,6 +16,10 @@
             scorecardService.getScorecardDescriptorsForGroup.send(_groupID);
         }
 
+        override protected function createGroupText(selectedScorecard:ScorecardDescriptor):String {
+            return "";
+        }
+
         private function gotDescriptors():void {
             handleDescriptors(scorecardService.getScorecardDescriptorsForGroup.lastResult as ScorecardList);
         }

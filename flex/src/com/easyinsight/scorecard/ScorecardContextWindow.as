@@ -3,11 +3,15 @@ package com.easyinsight.scorecard {
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.goals.GoalDataAnalyzeSource;
+import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.listing.ReportEditorAnalyzeSource;
 import com.easyinsight.pseudocontext.*;
 import com.easyinsight.report.MultiReportAnalyzeSource;
+import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.Event;
@@ -55,6 +59,18 @@ public class ScorecardContextWindow extends VBox {
             for each (var report:InsightDescriptor in kpi.reports) {
                 var reportContextItem:PseudoContextItem = new PseudoContextItem(report.name, reportClick, report);
                 items.push(reportContextItem);
+            }
+        }
+        if (kpi.packages != null && kpi.packages.length > 0) {
+            for each (var reportPackage:ReportPackageDescriptor in kpi.packages) {
+                var packageItem:PseudoContextItem = new PseudoContextItem(reportPackage.name, packageClick, reportPackage);
+                items.push(packageItem);
+            }
+        }
+        if (kpi.kpiTrees != null && kpi.kpiTrees.length > 0) {
+            for each (var kpiTree:GoalTreeDescriptor in kpi.kpiTrees) {
+                var kpiTreeItem:PseudoContextItem = new PseudoContextItem(kpiTree.name, kpiTreeClick, kpiTree);
+                items.push(kpiTreeItem);
             }
         }
 
@@ -167,6 +183,16 @@ public class ScorecardContextWindow extends VBox {
     private function reportClick(event:MouseEvent):void {
         destroy();
         passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportAnalyzeSource(event.currentTarget.data as InsightDescriptor, kpi.filters)));
+    }
+
+    private function packageClick(event:MouseEvent):void {
+        destroy();
+        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new PackageAnalyzeSource(event.currentTarget.data as ReportPackageDescriptor)));
+    }
+
+    private function kpiTreeClick(event:MouseEvent):void {
+        destroy();
+        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new GoalDataAnalyzeSource(GoalTreeDescriptor(event.currentTarget.data).id)));
     }
 }
 }

@@ -37,18 +37,23 @@ public class ScorecardInternalService {
                 scorecards.add(scorecardDescriptor);
             }
             if (includeGroups) {
-                PreparedStatement groupStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, scorecard.group_id from " +
-                        "scorecard, group_to_user_join where scorecard.group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ?");
+                PreparedStatement groupStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, scorecard.group_id, " +
+                        "group_to_user_join.binding_type, COMMUNITY_GROUP.name from " +
+                        "scorecard, group_to_user_join, community_group where scorecard.group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ? AND " +
+                        "SCORECARD.group_id = COMMUNITY_GROUP.community_group_id");
                 groupStmt.setLong(1, userID);
                 ResultSet groupRS = groupStmt.executeQuery();
                 while (groupRS.next()) {
                     long scorecardID = groupRS.getLong(1);
                     String scorecardName = groupRS.getString(2);
                     long groupID = groupRS.getLong(3);
+                    int role = groupRS.getInt(4);
                     ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
                     scorecardDescriptor.setId(scorecardID);
                     scorecardDescriptor.setName(scorecardName);
                     scorecardDescriptor.setGroupID(groupID);
+                    scorecardDescriptor.setGroupRole(role);
+                    scorecardDescriptor.setGroupName(groupRS.getString(5));
                     scorecards.add(scorecardDescriptor);
                 }
             }

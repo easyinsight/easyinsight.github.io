@@ -34,6 +34,8 @@ public class KPI extends EventDispatcher {
     public var temporary:Boolean;
 
     public var reports:ArrayCollection;
+    public var packages:ArrayCollection;
+    public var kpiTrees:ArrayCollection;
 
     public var connectionVisible:Boolean;
 

@@ -12,6 +12,7 @@
         import com.easyinsight.administration.feed.FeedConsumer;
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -85,8 +86,8 @@
         private function setup():void {
             addEventListener(ModelessWindowEvent.WINDOW_REMOVED, onWindowRemove);
             addEventListener(ModelessWindowEvent.WINDOW_ADDED, onWindowAdd);
-            ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.getGoalTree);
-            goalService.getGoalTree.send(_goalTreeID);
+            ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.getGoalDataTree);
+            goalService.getGoalDataTree.send(_goalTreeID, CredentialsCache.getCache().createCredentials());
         }
 
 
@@ -124,7 +125,8 @@
         }
 
         private function gotTree():void {
-            goalTree = goalService.getGoalTree.lastResult as GoalTree;
+            var kpiTreeWrapper:KPITreeWrapper = goalService.getGoalDataTree.lastResult as KPITreeWrapper;
+            goalTree = kpiTreeWrapper.goalTree;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.goalTreeID = String(goalTree.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
@@ -224,7 +226,7 @@
             }
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
-        <mx:method name="getGoalTree" result="gotTree()"/>
+        <mx:method name="getGoalDataTree" result="gotTree()"/>
     </mx:RemoteObject>
     <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
         <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" label="Back" labelPlacement="bottom"/>

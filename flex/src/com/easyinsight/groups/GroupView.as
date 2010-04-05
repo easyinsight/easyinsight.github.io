@@ -1,6 +1,7 @@
 package com.easyinsight.groups {
 import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.framework.User;
+import com.easyinsight.util.AutoSizeTextArea;
 
 import flash.events.Event;
 
@@ -9,20 +10,25 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.containers.VBox;
 import mx.controls.Label;
+import mx.controls.TextArea;
 
 public class GroupView extends VBox{
 
     private var group:GroupDescriptor;
     private var _titleText:String;
-    private var titleLabel:Label;
+    private var titleLabel:TextArea;
     private var box:VBox;
 
     private var backgroundColor:uint = 0xFFFFFF;
 
     public function GroupView() {
         super();
-        titleLabel = new Label();
+        titleLabel = new TextArea();
         titleLabel.setStyle("fontSize", 16);
+        titleLabel.setStyle("backgroundAlpha", 0);
+        titleLabel.editable = false;
+        titleLabel.selectable = false;
+        titleLabel.setStyle("borderStyle", "none");
         BindingUtils.bindProperty(titleLabel, "text", this, "titleText");
         setStyle("paddingLeft", 10);
         setStyle("paddingRight", 10);

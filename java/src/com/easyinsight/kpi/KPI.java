@@ -2,6 +2,8 @@ package com.easyinsight.kpi;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,8 @@ public class KPI implements Cloneable {
     private KPIOutcome kpiOutcome;
 
     private List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
+    private List<ReportPackageDescriptor> packages = new ArrayList<ReportPackageDescriptor>();
+    private List<GoalTreeDescriptor> kpiTrees = new ArrayList<GoalTreeDescriptor>();
 
     private List<KPIUser> kpiUsers = new ArrayList<KPIUser>();
 
@@ -106,6 +110,22 @@ public class KPI implements Cloneable {
 
     public void setDayWindow(int dayWindow) {
         this.dayWindow = dayWindow;
+    }
+
+    public List<ReportPackageDescriptor> getPackages() {
+        return packages;
+    }
+
+    public void setPackages(List<ReportPackageDescriptor> packages) {
+        this.packages = packages;
+    }
+
+    public List<GoalTreeDescriptor> getKpiTrees() {
+        return kpiTrees;
+    }
+
+    public void setKpiTrees(List<GoalTreeDescriptor> kpiTrees) {
+        this.kpiTrees = kpiTrees;
     }
 
     public double getThreshold() {

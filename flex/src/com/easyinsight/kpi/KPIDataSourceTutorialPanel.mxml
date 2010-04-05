@@ -30,7 +30,7 @@
                 dataSource = new DataFeedDescriptor();
                 dataSource.dataFeedID = kpiData.dataSourceID;
                 dataSource.name = kpiData.dataSourceName;
-            }
+            }            
             if (_groupID == 0) {
                 dataProvider.searchForSubscribedFeeds.send();
             } else {

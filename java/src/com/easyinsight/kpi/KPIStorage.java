@@ -8,7 +8,11 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.groups.GroupDescriptor;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
+import com.easyinsight.security.Roles;
+import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
 import java.sql.*;
@@ -165,6 +169,8 @@ public class KPIStorage {
         kpi.setProblemConditions(getProblemFilters(kpiID, conn));
         kpi.setTemporary(temporary);
         kpi.setReports(getReports(dataFeedID, conn));
+        kpi.setPackages(getPackages(dataFeedID, conn));
+        kpi.setKpiTrees(getKPITrees(dataFeedID, conn));
         kpi.setDayWindow(dayWindow);
         kpi.setThreshold(threshold);
         kpi.setDateDimension(date);
@@ -191,6 +197,38 @@ public class KPIStorage {
             String reportName = rs.getString(2);
             int reportType = rs.getInt(3);
             reports.add(new InsightDescriptor(reportID, reportName, dataFeedID, reportType));
+        }
+        queryStmt.close();
+        return reports;
+    }
+
+    private List<ReportPackageDescriptor> getPackages(long dataFeedID, EIConnection conn) throws SQLException {
+        List<ReportPackageDescriptor> packages = new ArrayList<ReportPackageDescriptor>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.report_package_id, report_package.package_name FROM REPORT_PACKAGE, REPORT_PACKAGE_TO_REPORT, ANALYSIS WHERE " +
+                "REPORT_PACKAGE.report_package_id = report_package_to_report.report_id AND report_package_to_report.report_id = analysis.analysis_id AND " +
+                "ANALYSIS.data_feed_id = ? AND ANALYSIS.temporary_report = ?");
+        queryStmt.setLong(1, dataFeedID);
+        queryStmt.setBoolean(2, false);
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            long packageID = rs.getLong(1);
+            String packageName = rs.getString(2);
+            packages.add(new ReportPackageDescriptor(packageName, packageID));
+        }
+        queryStmt.close();
+        return packages;
+    }
+
+    private List<GoalTreeDescriptor> getKPITrees(long dataSourceID, EIConnection conn) throws SQLException {
+        List<GoalTreeDescriptor> reports = new ArrayList<GoalTreeDescriptor>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.goal_tree_id, GOAL_TREE.name FROM GOAL_TREE, GOAL_TREE_NODE, KPI WHERE GOAL_TREE.goal_tree_id = GOAL_TREE_NODE.goal_tree_id AND " +
+                "GOAL_TREE_NODE.kpi_id = KPI.KPI_ID AND KPI.data_feed_id = ?");
+        queryStmt.setLong(1, dataSourceID);
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            long kpiTreeID = rs.getLong(1);
+            String kpiTreeName = rs.getString(2);
+            reports.add(new GoalTreeDescriptor(kpiTreeID, kpiTreeName, 0, null));
         }
         queryStmt.close();
         return reports;

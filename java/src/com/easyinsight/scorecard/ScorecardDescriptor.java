@@ -10,6 +10,24 @@ import com.easyinsight.core.EIDescriptor;
 public class ScorecardDescriptor extends EIDescriptor {
 
     private long groupID;
+    private int groupRole;
+    private String groupName;
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public int getGroupRole() {
+        return groupRole;
+    }
+
+    public void setGroupRole(int groupRole) {
+        this.groupRole = groupRole;
+    }
 
     public long getGroupID() {
         return groupID;

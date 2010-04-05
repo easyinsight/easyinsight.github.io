@@ -356,6 +356,27 @@ public class GoalService {
         }
     }
 
+    public KPITreeWrapper getGoalDataTree(long goalTreeID, List<CredentialFulfillment> credentialsList) {
+        SecurityUtil.authorizeGoalTreeSolutionInstall(goalTreeID);
+        KPITreeWrapper kpiTreeWrapper;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            List<KPI> kpis = new ArrayList<KPI>(GoalUtil.getKPIs(goalTreeID, false, conn));
+            kpiTreeWrapper = goalStorage.updateKPITree(kpis, goalTreeID, conn, credentialsList, false);
+            kpiTreeWrapper.setGoalTree(goalStorage.retrieveGoalTree(goalTreeID, conn));
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return kpiTreeWrapper;
+    }
+
     public List<GoalTreeDescriptor> getGoalTrees() {
         try {
             return goalStorage.getTreesForUser(SecurityUtil.getUserID());
