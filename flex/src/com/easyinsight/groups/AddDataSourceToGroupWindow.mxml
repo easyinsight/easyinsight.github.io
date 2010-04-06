@@ -3,7 +3,9 @@
 	creationComplete="feedService.searchForSubscribedFeeds.send()">
 	<mx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.managers.PopUpManager;
 			import com.easyinsight.listing.DataFeedDescriptor;
 			import mx.collections.ArrayCollection;
 			[Bindable]
@@ -17,7 +19,12 @@
             }
 
 			private function gotFeeds():void {
-				descriptors = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+				var descriptors:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+                var sort:Sort = new Sort();
+                sort.fields = [ new SortField("name", true) ];
+                descriptors.sort = sort;
+                descriptors.refresh();
+                this.descriptors = descriptors;
 			}
 
 			private function chose():void {
@@ -43,7 +50,7 @@
 	</mx:RemoteObject>
 	<mx:Form styleName="TitleWindowContents">
 		<mx:FormItem label="Choose a Data Source:">
-			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>
+			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name" rowCount="10"/>
 		</mx:FormItem>
 		<mx:FormItem label="" direction="horizontal">
 			<mx:Button label="OK" click="chose()"/>

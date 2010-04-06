@@ -220,7 +220,7 @@ public class KPIStorage {
     }
 
     private List<GoalTreeDescriptor> getKPITrees(long dataSourceID, EIConnection conn) throws SQLException {
-        List<GoalTreeDescriptor> reports = new ArrayList<GoalTreeDescriptor>();
+        Map<Long, GoalTreeDescriptor> reportMap = new HashMap<Long, GoalTreeDescriptor>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.goal_tree_id, GOAL_TREE.name FROM GOAL_TREE, GOAL_TREE_NODE, KPI WHERE GOAL_TREE.goal_tree_id = GOAL_TREE_NODE.goal_tree_id AND " +
                 "GOAL_TREE_NODE.kpi_id = KPI.KPI_ID AND KPI.data_feed_id = ?");
         queryStmt.setLong(1, dataSourceID);
@@ -228,10 +228,10 @@ public class KPIStorage {
         while (rs.next()) {
             long kpiTreeID = rs.getLong(1);
             String kpiTreeName = rs.getString(2);
-            reports.add(new GoalTreeDescriptor(kpiTreeID, kpiTreeName, 0, null));
+            reportMap.put(kpiTreeID, new GoalTreeDescriptor(kpiTreeID, kpiTreeName, 0, null));
         }
         queryStmt.close();
-        return reports;
+        return new ArrayList<GoalTreeDescriptor>(reportMap.values());
     }
 
     public void saveKPIOutcome(long kpiID, Double newValue, Double oldValue, Date evaluationDate, int outcomeValue,
