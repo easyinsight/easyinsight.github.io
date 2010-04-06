@@ -50,7 +50,9 @@
 
         private function video1():void {
             var window:ScreencastWindow = new ScreencastWindow();
-            window.screencastSource = "http://eivideo.s3.amazonaws.com/basecamp1.mp4";
+            window.width = 926;
+            window.height = 484;
+            window.screencastSource = "http://eivideo.s3.amazonaws.com/BasecampWhy.mov";
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -108,21 +110,7 @@
             <mx:HBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15"
                      borderStyle="solid"
                      paddingTop="5" paddingBottom="5" horizontalAlign="center" verticalAlign="middle" paddingLeft="5" paddingRight="5">
-                <mx:VBox borderStyle="solid" cornerRadius="10"
-                             backgroundColor="0xFFFFFF" verticalAlign="middle" paddingLeft="10" paddingRight="10" paddingTop="10"
-                            paddingBottom="10" horizontalAlign="center">
-                        <mx:Image source="../assets/logos/film.png" click="video1()"
-                                  useHandCursor="true" buttonMode="true"/>
-                        <mx:LinkButton label="Video Intro" fontSize="14" click="video1()" textDecoration="underline"/>
-                    </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center">
-                <mx:HBox width="100%" horizontalAlign="center">
-                    <mx:Label text="Installation Instructions" fontSize="16"/>
-                </mx:HBox>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" selectable="false"
-                             borderThickness="0" editable="false" height="140" fontSize="12" width="100%"
-                             text="First, if not already enabled, you need to enable API access of your Basecamp account. Once that's done, click the button to the left to install the Basecamp solution into your account. After installing the data source, you'll be prompted for your Basecamp URL and credentials. Once you hit Create with a valid URL and credentials, Easy Insight will pull over key aggregate data from your Basecamp installation through the API. This process may take a little time, depending on the size of your installation."/>
-                </mx:VBox>
+                <mx:Image source="../assets/BasecampWhy.jpg" click="video1()" buttonMode="true" useHandCursor="true"/>
             </mx:HBox>
             <mx:Spacer height="100%"/>
             <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15"

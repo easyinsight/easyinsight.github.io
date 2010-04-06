@@ -57,7 +57,9 @@
 
         private function basecamp():void {
             var window:ScreencastWindow = new ScreencastWindow();
-            window.screencastSource = "http://eivideo.s3.amazonaws.com/basecamp1.mp4";
+            window.width = 926;
+            window.height = 484;
+            window.screencastSource = "http://eivideo.s3.amazonaws.com/BasecampWhy.mov";
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

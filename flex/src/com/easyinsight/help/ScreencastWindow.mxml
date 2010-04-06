@@ -85,12 +85,7 @@
         }
 		]]>
 	</mx:Script>
-	<mx:VBox id="coreBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF">
-        <mx:HBox width="100%">
-            <mx:Spacer width="100%"/>
-            <mx:Button label="Close" click="closeVideo()" styleName="blueButton"/>
-            <mx:Spacer width="100%"/>
-        </mx:HBox>
+	<mx:Canvas id="coreBox" width="100%" height="100%" backgroundColor="#FFFFFF">
         <mx:ViewStack resizeToContent="true" creationPolicy="all" selectedIndex="{videoIndex}">
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
                 <mx:ProgressBar label="Loading the video..." indeterminate="true" width="500" height="350"/>
@@ -99,17 +94,25 @@
                 <mx:VideoDisplay id="videoViewer" ready="videoIndex = 1"/>
             </mx:Box>
         </mx:ViewStack>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button icon="{beginningIcon}" click="firstFrame()" toolTip="Go to Beginning"/>
-            <mx:Button icon="{playOrPauseIcon}" click="play()" toolTip="Play"/>
-            <mx:Button icon="{endIcon}" click="lastFrame()" toolTip="Go to End"/>
-        </mx:HBox>
-        <!--<mx:HSlider thumbCount="1" value="{videoViewer.playheadTime}" minimum="0" maximum="{videoViewer.totalTime}" width="80%" thumbDrag="onThumbRelease(event)"/>-->
-        <mx:HBox width="100%">
-            <mx:Spacer width="100%"/>
-            <mx:Button label="Close" click="closeVideo()" styleName="blueButton"/>
-            <mx:Spacer width="100%"/>
-        </mx:HBox>
-	</mx:VBox>
+        <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="5" paddingBottom="5">
+            <mx:HBox width="100%">
+                <mx:Spacer width="100%"/>
+                <mx:Button label="Close" click="closeVideo()" styleName="blueButton"/>
+                <mx:Spacer width="100%"/>
+            </mx:HBox>
+            <mx:Spacer height="100%"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button icon="{beginningIcon}" click="firstFrame()" toolTip="Go to Beginning"/>
+                <mx:Button icon="{playOrPauseIcon}" click="play()" toolTip="Play"/>
+                <mx:Button icon="{endIcon}" click="lastFrame()" toolTip="Go to End"/>
+            </mx:HBox>
+            <!--<mx:HSlider thumbCount="1" value="{videoViewer.playheadTime}" minimum="0" maximum="{videoViewer.totalTime}" width="80%" thumbDrag="onThumbRelease(event)"/>-->
+            <mx:HBox width="100%">
+                <mx:Spacer width="100%"/>
+                <mx:Button label="Close" click="closeVideo()" styleName="blueButton"/>
+                <mx:Spacer width="100%"/>
+            </mx:HBox>
+        </mx:VBox>
+	</mx:Canvas>
 	
 </util:EITitleWindow>
