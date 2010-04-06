@@ -19,17 +19,17 @@ public class DrillThroughExecutor extends EventDispatcher {
     public function DrillThroughExecutor(reportID:int, filters:ArrayCollection) {
         analysisService = new RemoteObject();
         analysisService.destination = "analysisDefinition";
-        analysisService.openAnalysisIfPossible.addEventListener(ResultEvent.RESULT, onResult);
+        analysisService.openAnalysisIfPossibleByID.addEventListener(ResultEvent.RESULT, onResult);
         this.reportID = reportID;
         this.filters = filters;
     }
 
     public function send():void {
-        analysisService.openAnalysisIfPossible.send(reportID);
+        analysisService.openAnalysisIfPossibleByID.send(reportID);
     }
 
     private function onResult(event:ResultEvent):void {
-        var result:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
+        var result:InsightResponse = analysisService.openAnalysisIfPossibleByID.lastResult as InsightResponse;
         if (result.insightDescriptor != null) {
             if (editor) {
                 //dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(result.insightDescriptor)));

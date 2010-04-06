@@ -415,6 +415,38 @@ public class AnalysisService {
         return insightResponse;
     }
 
+    public InsightResponse openAnalysisIfPossibleByID(long analysisID) {
+        InsightResponse insightResponse;
+        try {
+            try {
+                SecurityUtil.authorizeInsight(analysisID);
+                addAnalysisView(analysisID);
+                //AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
+                Connection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                    queryStmt.setLong(1, analysisID);
+                    ResultSet rs = queryStmt.executeQuery();
+                    rs.next();
+                    insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
+                            rs.getLong(2), rs.getInt(3)));
+                } finally {
+                    Database.closeConnection(conn);
+                }
+
+            } catch (SecurityException e) {
+                if (e.getReason() == InsightResponse.NEED_LOGIN)
+                    insightResponse = new InsightResponse(InsightResponse.NEED_LOGIN, null);
+                else
+                    insightResponse = new InsightResponse(InsightResponse.REJECTED, null);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            return null;
+        }
+        return insightResponse;
+    }
+
     public UserCapabilities getUserCapabilitiesForFeed(long feedID) {
         if (SecurityUtil.getUserID(false) == 0) {
             return new UserCapabilities(Roles.NONE, Roles.NONE, false, false);
