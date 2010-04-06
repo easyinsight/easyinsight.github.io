@@ -283,7 +283,7 @@
                 </mx:ViewStack>
                 <mx:Box paddingLeft="15" paddingRight="15">
                     <mx:ViewStack id="scorecardStack" selectedIndex="{scorecardIndex}" height="350"
-                                  resizeToContent="true" creationPolicy="all">
+                                  resizeToContent="true">
 
                     </mx:ViewStack>
                 </mx:Box>
