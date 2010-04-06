@@ -186,6 +186,7 @@ public class AnalysisStorage {
         }
         if (analysisDefinition.getAddedItems() != null) {
             for (AnalysisItem analysisItem : analysisDefinition.getAddedItems()) {
+                analysisItem.reportSave(session);
                 if (analysisItem.getKey().getKeyID() == 0) {
                     session.save(analysisItem.getKey());
                 }
