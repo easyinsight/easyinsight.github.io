@@ -13,6 +13,7 @@
         import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.datasources.JiraDataSource;
+        import com.easyinsight.datasources.MarketoDataSource;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
@@ -243,6 +244,7 @@
             var wesabe:WesabeDataSource;
             var cloudwatch:CloudWatchDataSource;
             var googleDoc:GoogleFeedDefinition;
+            var marketoSource:MarketoDataSource;
         }
 
         [Bindable]
