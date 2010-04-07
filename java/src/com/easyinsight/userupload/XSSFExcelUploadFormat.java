@@ -1,24 +1,30 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.core.*;
+import com.easyinsight.core.StringValue;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.logging.LogClass;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
-
-import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.jetbrains.annotations.NotNull;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * User: James Boe
@@ -26,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
  * Time: 6:46:52 PM
  */
 @SuppressWarnings({"unchecked"})
-public class ExcelUploadFormat extends UploadFormat {
+public class XSSFExcelUploadFormat extends UploadFormat {
 
     private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -45,8 +51,8 @@ public class ExcelUploadFormat extends UploadFormat {
             GridData gridData = new GridData();
 
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
-            HSSFWorkbook wb = new HSSFWorkbook(bais);
-            HSSFSheet sheet = wb.getSheetAt(0);
+            XSSFWorkbook wb = new XSSFWorkbook(bais);
+            XSSFSheet sheet = wb.getSheetAt(0);
 
 
 
@@ -168,10 +174,10 @@ public class ExcelUploadFormat extends UploadFormat {
         }
     }
 
-    private int findHeaderDirection(HSSFSheet sheet) {
+    private int findHeaderDirection(XSSFSheet sheet) {
         boolean topRowIsDates = false;
         Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
-        HSSFRow row = sheet.getRow(0);
+        XSSFRow row = sheet.getRow(0);
         for (Iterator<Cell> cit = row.cellIterator(); cit.hasNext(); ) {
             Cell cell = cit.next();
             Matcher matcher = pattern.matcher(cell.toString());
@@ -196,20 +202,20 @@ public class ExcelUploadFormat extends UploadFormat {
     private static Value getCellValue(Cell cell) {
         Value obj;
         switch (cell.getCellType()) {
-            case HSSFCell.CELL_TYPE_BLANK:
+            case XSSFCell.CELL_TYPE_BLANK:
                 obj = new EmptyValue();
                 break;
-            case HSSFCell.CELL_TYPE_BOOLEAN:
+            case XSSFCell.CELL_TYPE_BOOLEAN:
                 obj = new StringValue(String.valueOf(cell.getBooleanCellValue()));
                 break;
-            case HSSFCell.CELL_TYPE_NUMERIC:                                                
-                if (HSSFDateUtil.isCellDateFormatted(cell)) {
+            case XSSFCell.CELL_TYPE_NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
                     obj = new DateValue(cell.getDateCellValue());
                 } else {
                     obj = new NumericValue(cell.getNumericCellValue());
                 }
                 break;
-            case HSSFCell.CELL_TYPE_STRING:
+            case XSSFCell.CELL_TYPE_STRING:
                 String value = cell.getRichStringCellValue().getString();
                 Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
                 Matcher matcher = pattern.matcher(value);
@@ -226,16 +232,16 @@ public class ExcelUploadFormat extends UploadFormat {
                     obj = new StringValue(value.trim());
                 }
                 break;
-            case HSSFCell.CELL_TYPE_FORMULA:
+            case XSSFCell.CELL_TYPE_FORMULA:
             default:
                 obj = new EmptyValue();
         }
         return obj;
     }
 
-    private String[] getHeaderColumns(HSSFSheet sheet, int alignment) {
+    private String[] getHeaderColumns(XSSFSheet sheet, int alignment) {
         if (alignment == VERTICAL_HEADERS) {
-            HSSFRow row = sheet.getRow(0);
+            XSSFRow row = sheet.getRow(0);
             List<String> rowList = new ArrayList<String>();
             for (Iterator<Cell> cit = row.cellIterator(); cit.hasNext(); ) {
                 Cell cell = cit.next();

@@ -32,7 +32,11 @@ public class FlatFileUploadContext extends UploadContext {
     @Override
     public String validateUpload(EIConnection conn) throws SQLException {
         rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
-        uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.userData);
+        try {
+            uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.userData);
+        } catch (InvalidFormatException e) {
+            return e.getMessage();
+        }
         if (uploadFormat == null) {
             return "Sorry, we couldn't figure out what type of file you tried to upload. Supported types are Excel 1997-2008 and delimited text files.";
         } else {

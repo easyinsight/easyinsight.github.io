@@ -8,6 +8,7 @@
         import com.easyinsight.customupload.CsvFileUploadFormat;
         import com.easyinsight.customupload.ExcelUploadFormat;
         import com.easyinsight.customupload.FlatFileUploadFormat;
+        import com.easyinsight.customupload.XSSFExcelUploadFormat;
         import com.easyinsight.datasources.BaseCampDataSource;
         import com.easyinsight.datasources.CloudWatchDataSource;
         import com.easyinsight.datasources.HighRiseDataSource;
@@ -234,6 +235,7 @@
 
         private function blah():void {
             var excelUploadFormat:ExcelUploadFormat;
+            var xssfExcelUploadFormat:XSSFExcelUploadFormat;
             var flatFileUploadFormat:FlatFileUploadFormat;
             var csvFileUploadFormat:CsvFileUploadFormat;
             var basecamp:BaseCampDataSource;

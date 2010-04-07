@@ -1,13 +1,18 @@
 package com.easyinsight.userupload;
 
+import org.apache.poi.hssf.OldExcelFormatException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 
 import com.csvreader.CsvReader;
+import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * User: James Boe
@@ -19,7 +24,7 @@ public class UploadFormatTester {
     private static String patterns[] = new String [] { ",", "|", "\t", " "};
     private static String escapedPatterns[] = new String [] { ",", "\\|", "\t", " "};
 
-    public UploadFormat determineFormat(byte[] data) {
+    public UploadFormat determineFormat(byte[] data) throws InvalidFormatException {
         UploadFormat uploadFormat;
         uploadFormat = isExcel(data);
         if (uploadFormat == null) {
@@ -31,7 +36,7 @@ public class UploadFormatTester {
         return uploadFormat;
     }
 
-    private UploadFormat isExcel(byte[] data) {
+    private UploadFormat isExcel(byte[] data) throws InvalidFormatException {
         UploadFormat uploadFormat;
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
@@ -39,6 +44,19 @@ public class UploadFormatTester {
             HSSFSheet sheet = wb.getSheetAt(0);
             sheet.getTopRow();
             uploadFormat = new ExcelUploadFormat();
+        } catch (OldExcelFormatException oefe) {
+            throw new InvalidFormatException("It looks like you tried to upload an Excel format earlier than 1997. Easy Insight does not support these older formats.");
+        } catch (OfficeXmlFileException oxfe) {
+            /*try {
+                ByteArrayInputStream bais = new ByteArrayInputStream(data);
+                XSSFWorkbook wb = new XSSFWorkbook(bais);
+                XSSFSheet sheet = wb.getSheetAt(0);
+                sheet.getTopRow();
+                uploadFormat = new XSSFExcelUploadFormat();
+            } catch (IOException e) {
+                uploadFormat = null;
+            }*/
+            throw new InvalidFormatException("It looks like you tried to upload an .xlsx file. We're working on supporting this format, but for the time being, please save the file as 1997-2008 format and try again.");
         } catch (Exception e) {
             uploadFormat = null;
         }

@@ -5,9 +5,9 @@
         import com.easyinsight.solutions.InsightDescriptor;
 
         import mx.collections.ArrayCollection;
-        import mx.events.ValidationResultEvent;
+
         import mx.managers.PopUpManager;
-        import mx.validators.ValidationResult;
+        
         import mx.validators.Validator;
 
         private function gotReports():void {
@@ -123,14 +123,15 @@
             </mx:HBox>
             <mx:ViewStack selectedIndex="{stackIndex}" width="100%">
                 <mx:Box width="100%" horizontalAlign="center">
-                    <util:AutoSizeTextArea width="460" editable="false" color="#FFFFFF" selectable="false"
+                    <mx:TextArea width="460" editable="false" color="#FFFFFF" selectable="false"
                                            backgroundAlpha="0" fontSize="14" borderStyle="none"
-                                           text="{urlSampleText}"/>
+                                           text="{urlSampleText}" height="80"/>
                 </mx:Box>
                 <mx:Box width="100%" horizontalAlign="center">
-                    <util:AutoSizeTextArea width="460" editable="false" color="#FFFFFF" selectable="false"
+                    <mx:TextArea width="460" editable="false" color="#FFFFFF" selectable="false"
                                            backgroundAlpha="0" fontSize="14" borderStyle="none"
-                                           text="Drillthroughs enable you to connect reports. Any filters in the target report will automatically populate based on this report."/>
+                                           text="Drillthroughs enable you to connect reports. Any filters in the target report will automatically populate based on this report."
+                            height="60"/>
                 </mx:Box>
             </mx:ViewStack>
         </mx:VBox>

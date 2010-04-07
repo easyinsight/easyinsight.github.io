@@ -141,6 +141,9 @@
         private var _previewMode:Boolean = false;
 
         [Bindable]
+        private var saveAsEnabled:Boolean;
+
+        [Bindable]
         private var admin:Boolean;
 
         public var filterOverrides:ArrayCollection = null;
@@ -351,13 +354,16 @@
             }
 
             if (analysisDefinition == null) {
+                saveAsEnabled = false;
                 newAnalysis();
                 for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
                     transformContainer.addFilterDefinition(filter);
                 }
 
+
             } else {
                 //this.title = analysisDefinition.name;
+                saveAsEnabled = !_previewMode;
                 var controllerClass:Class = ControllerLookup.controllerForType(analysisDefinition.type);
                 var controller:IReportController = new controllerClass();
                 loadController(controller);
@@ -627,6 +633,7 @@
             BrowserManager.getInstance().setFragment(feedFragmentString);
             reportSaveable = true;
             this.analysisChanged = false;
+            saveAsEnabled = true;
         }
 
         private function saveAs():void {
@@ -919,7 +926,7 @@
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                        toolTip="Save" enabled="{!_previewMode}"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
-                       toolTip="Save As" enabled="{!_previewMode}"/>
+                       toolTip="Save As" enabled="{saveAsEnabled}"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
                        icon="@Embed(source='../../../assets/table.png')" click="newReport()"/>

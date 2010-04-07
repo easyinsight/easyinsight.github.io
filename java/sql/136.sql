@@ -1,0 +1,1 @@
+alter table excel_upload_format add excel_model integer not null default 1;
