@@ -150,8 +150,11 @@ public class SecurityUtil {
     public static void authorizeAccountTier(int requiredTier) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            SecurityLogger.error("Could not retrieve user principal.");
-            throw new SecurityException();
+            userPrincipal = threadLocal.get();
+            if(userPrincipal == null) {
+                SecurityLogger.error("Could not retrieve user principal.");
+                throw new SecurityException();
+            }
         } else {
             if (userPrincipal.getAccountType() < requiredTier) {
                 SecurityLogger.error("User " + userPrincipal.getUserName() + " could not access tier - " + requiredTier + "; their tier is " + userPrincipal.getAccountType());
@@ -510,7 +513,10 @@ public class SecurityUtil {
         } else {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
-                throw new SecurityException();
+                userPrincipal = threadLocal.get();
+                if(userPrincipal == null) {
+                    throw new SecurityException();
+                }
             }
             int role = getPackageRole(userPrincipal.getUserID(), packageID);
             if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
@@ -545,7 +551,10 @@ public class SecurityUtil {
         } else {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
-                throw new SecurityException();
+                userPrincipal = threadLocal.get();
+                if(userPrincipal == null) {
+                    throw new SecurityException();
+                }
             }
             int role = getPackageRole(userPrincipal.getUserID(), packageID);
             if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
@@ -585,8 +594,11 @@ public class SecurityUtil {
         } else {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
-                Thread.dumpStack();
-                throw new SecurityException();
+                userPrincipal = threadLocal.get();
+                if(userPrincipal == null) {
+                    Thread.dumpStack();
+                    throw new SecurityException();
+                }
             }
             int role = getInsightRole(userPrincipal.getUserID(), insightID);
             if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
@@ -628,8 +640,11 @@ public class SecurityUtil {
         } else {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
-                Thread.dumpStack();
-                throw new SecurityException();
+                userPrincipal = threadLocal.get();
+                if(userPrincipal == null) {
+                    Thread.dumpStack();
+                    throw new SecurityException();
+                }
             }
             int role = getInsightRole(userPrincipal.getUserID(), reportID);
             if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
@@ -643,7 +658,10 @@ public class SecurityUtil {
     public static void authorizeGoalTree(long goalTreeID, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            throw new SecurityException();
+            userPrincipal = threadLocal.get();
+            if(userPrincipal == null) {
+                throw new SecurityException();
+            }
         }
         int role = getRoleForGoalTree(userPrincipal.getUserID(), goalTreeID);
         if (role > requiredRole) {
@@ -654,7 +672,10 @@ public class SecurityUtil {
     public static long authorizeGoalTree(String urlKey, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            throw new SecurityException();
+            userPrincipal = threadLocal.get();
+            if(userPrincipal == null) {
+                throw new SecurityException();
+            }
         }
         long kpiTreeID = getKPITreeForKey(urlKey);
         int role = getRoleForGoalTree(userPrincipal.getUserID(), kpiTreeID);
@@ -667,7 +688,10 @@ public class SecurityUtil {
     public static void authorizeGoalTreeSolutionInstall(long goalTreeID) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            throw new SecurityException();
+            userPrincipal = threadLocal.get();
+            if(userPrincipal == null) {
+                throw new SecurityException();
+            }
         }
         int role = getRoleForGoalTree(userPrincipal.getUserID(), goalTreeID);
         boolean valid = false;
@@ -709,7 +733,10 @@ public class SecurityUtil {
     public static long authorizeGroupByKey(String urlKey, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            throw new SecurityException();
+            userPrincipal = threadLocal.get();
+            if(userPrincipal == null) {
+                throw new SecurityException();
+            }
         }
         long groupID;
         EIConnection conn = Database.instance().getConnection();
@@ -757,7 +784,10 @@ public class SecurityUtil {
         if (!publiclyVisible) {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
-                throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+                userPrincipal = threadLocal.get();
+                if(userPrincipal == null) {
+                    throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+                }
             }
             int role = getRole(userPrincipal.getUserID(), dataFeed);
             if (role > Roles.SUBSCRIBER) {
@@ -790,7 +820,10 @@ public class SecurityUtil {
         if (!publiclyVisible) {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
-                throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+                userPrincipal = threadLocal.get();
+                if(userPrincipal == null) {
+                    throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+                }
             }
             int role = getRole(userPrincipal.getUserID(), dataFeed);
             if (role > Roles.SUBSCRIBER) {
