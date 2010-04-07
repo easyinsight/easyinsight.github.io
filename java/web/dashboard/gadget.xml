@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
     <ModulePrefs title="Easy Insight Scorecard" height="320" width="320"
-        author="Easy Insight" author_email="support@easy-insight.com" description="Easy Insight Scorecard Gadget">
+        author="Easy Insight" author_email="support@easy-insight.com" description="Easy Insight Scorecard Gadget"
+        screenshot="http://www.easy-insight.com/images/gadget_screenshot.jpg" thumbnail="http://www.easy-insight.com/images/gadget_thumbnail.jpg">
       <Require feature="setprefs"/>
     </ModulePrefs>
     <UserPref name="scorecardID" datatype="hidden" urlparam="scorecardID" />

@@ -6,7 +6,7 @@
 <%
     Long userID = (Long) request.getSession().getAttribute("userID");
     ScorecardInternalService service = new com.easyinsight.scorecard.ScorecardInternalService();
-    ScorecardList scorecards =  service.getScorecardDescriptors(userID);
+    ScorecardList scorecards =  service.getScorecardDescriptors(userID, true);
 %>
 <% // TODO: If there's one scorecard, don't do this
 %>
