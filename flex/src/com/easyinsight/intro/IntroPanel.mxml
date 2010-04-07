@@ -51,7 +51,9 @@
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, onLogout);
             if (currentState == "loggedIn") {
-                loggedInHome.gotFocus();
+                if (loggedInHome != null) {
+                    loggedInHome.gotFocus();
+                }
             }
             if (User.getInstance() == null) {
                 currentState = "";

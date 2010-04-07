@@ -3,6 +3,7 @@ import com.easyinsight.LoginDialog;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
+import mx.controls.Alert;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -27,13 +28,17 @@ public class AccountActivator {
     }
 
     private function activated(event:ResultEvent):void {
-        var targetURL:String = accountService.activateAccount.lastResult as String;
-        var loginDialog:LoginDialog = new LoginDialog();
-        loginDialog.targetURL = targetURL;
-        loginDialog.showActivation = true;
-        PopUpManager.addPopUp(loginDialog, workspace, true);
-        PopUpUtil.centerPopUp(loginDialog);
-        User.getEventNotifier().addEventListener(LoginEvent.LOGIN, workspace.onLogin);        
+        if (User.getInstance() != null) {
+            Alert.show("Your account is now activated!");
+        } else {
+            var targetURL:String = accountService.activateAccount.lastResult as String;
+            var loginDialog:LoginDialog = new LoginDialog();
+            loginDialog.targetURL = targetURL;
+            loginDialog.showActivation = true;
+            PopUpManager.addPopUp(loginDialog, workspace, true);
+            PopUpUtil.centerPopUp(loginDialog);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, workspace.onLogin);
+        }
     }
 }
 }
