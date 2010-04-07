@@ -346,8 +346,6 @@ public class Account {
             setAccountState(Account.ACTIVE);
         // the indirection here is to support invoice billingSystem later
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
-//        billingSystem.setUsername("testapi");
-//        billingSystem.setPassword("password1");
         billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
         billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
         Map<String, String> params = billingSystem.billAccount(this.getAccountID(), this.monthlyCharge());

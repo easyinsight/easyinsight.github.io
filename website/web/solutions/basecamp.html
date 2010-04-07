@@ -8,13 +8,14 @@
 
 <!-- InstanceBeginEditable name="head" -->
 <!-- InstanceEndEditable -->
-
-    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
-    <script type="text/javascript" src="/js/prototype.js"></script>
-    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
     <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.swfobject1-0-9.js"></script>
+    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
     <script type="text/javascript" src="/js/twitter.js"></script>
-    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
+    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
@@ -33,9 +34,9 @@
                 	<div class="top"><span></span></div>
                     <div class="content" style="padding-bottom:12px"><span style="padding-bottom:12px;"></span>
                     	<div style="width:100%;color:#FFFFFF;padding:0px 0px 12px 0px;margin:0px;text-align:center">Next Steps</div>
-                        <div class="box whitebox" style="position:relative;left:5px;width:240px;height:158px;z-index:1">
+                        <div class="box whitebox" style="position:relative;left:5px;width:240px;height:158px;z-index:.5">
                         	<div class="top" style="z-index:1"><span></span></div>
-                            <div id="nextSteps" class="content"><span style="z-index:-1"></span><!-- InstanceBeginEditable name="nextStepsText" -->
+                            <div id="nextSteps" class="content"><span style="z-index:.25"></span><!-- InstanceBeginEditable name="nextStepsText" -->
                             <p>Looking for tips, tricks, and documentation?</p>
                             <p><a href="http://jamesboe.blogspot.com/search/label/Basecamp">Look at Basecamp blog posts</a></p>
                             <div style="z-index:1;width:100%;height:1px;width:100%;background-color:#786E78;margin-left:-12px;;padding-right:12px;"></div>
@@ -67,13 +68,13 @@
 			  <img src="../images/TodosGraph.png" style="float:left;padding:10px;" alt="Line Graph of Open Todos for Milestone over time" />
               <h2>Visualize Your Project Management</h2>
               <p style="height:150px;"><a href="http://www.basecamphq.com">Basecamp</a> allows you to manage your project through a simple, clean interface. With Easy Insight, you can now take the information stored in Basecamp and create meaningful reports on it. How many tasks are completed on a weekly basis? What is the velocity of new tasks vs. tasks completed? Are you on track to completing all the tasks for a milestone? Visualizations in Easy Insight will make answers to questions such as these clear.</p>
-              <img src="../images/BasecampRates.png" style="float:right;padding:70px 10px 30px;" alt="Grid of Person, Rate, Hours, Total Billed for a time period" />
+              <a href="http://www.youtube.com/watch?v=3SFUMRl15Wk" class="vidbox" rel="vidbox"><img style="float:right;padding:30px 10px" src="/images/BasecampWhy.jpg" alt="Basecamp Screencast" /></a>
               <h2>View Your Billing Status</h2>
               <p>When your projects involve consulting, it helps to see how much money is being billed. Combining the Basecamp data source with a spreadsheet of billing rates for a project will let you quickly see how much money has been billed over a period of a project, showing if the project is on budget or not. You can view which contractors are costing you the most money, or which clients are giving you the best ROI in seconds - all with the most recent data from Basecamp.</p>
               <img src="../images/BasecampGoalTree.png" style="float:left;padding:10px;" alt="Picture of Engineering Goal Tree, possibly pared down to basecamp"/>
               <h2>Project Visibility</h2>
               <p>Basecamp information is useful on its own, but to get the most out of the information you can combine it with data from other tools. Using the KPI tree tools, you can create goals to minimize new defects and maximize the number of people reporting defects.  By adding data sources to the rest of the KPI tree, you can easily pinpoint when problems occur in your process and make efforts to improve them, wherever the data may reside.</p>
-              <p style="padding-top:20px;padding-bottom:2px;margin:2spx;" class="disclaimer">Basecamp and 37signals are registered trademarks of 37signals, LLC.</p>
+              <p style="padding-top:20px;padding-bottom:2px;margin:2px;" class="disclaimer">Basecamp and 37signals are registered trademarks of 37signals, LLC.</p>
               <p style="padding-top:2px;margin:2px;" class="disclaimer">Easy Insight is in no way affiliated with 37signals nor Basecamp.</p>
 			  <!-- InstanceEndEditable --> 
            </div>
@@ -98,7 +99,6 @@
             </div>
 	    </div>
     </div>
-	<script type="text/javascript" src="/js/lightbox.js"></script>
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
