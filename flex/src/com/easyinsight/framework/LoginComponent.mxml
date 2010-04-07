@@ -246,9 +246,11 @@
                 ]]>
 	</mx:Script>
     <mx:VBox id="coreBox" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
+
         <mx:Box id="activationBox" width="100%" horizontalAlign="center" paddingTop="10"/>
+        <mx:VBox id="loginForm" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
         <mx:ViewStack selectedIndex="{stackIndex}">
-            <mx:Form id="loginForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
                 <mx:FormItem label="User Name or Email:" direction="horizontal">
                     <mx:TextInput id="userName" tabIndex="1"/>
                     <!--<mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your User Name?"
@@ -274,6 +276,7 @@
             <mx:Label text="Don't have an account yet?" id="noAccount"/>
             <mx:Button label="Create Account" click="createNewAccount()"/>
         </mx:HBox>
+        </mx:VBox>
         <mx:Spacer height="10"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Text text="{failureMessage}" fontSize="14"/>
