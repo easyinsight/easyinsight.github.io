@@ -18,9 +18,9 @@
     boolean completeRefresh = false;
     NumberFormat nf = NumberFormat.getPercentInstance();
     nf.setMaximumFractionDigits(2);
+    Long userID = (Long) request.getSession().getAttribute("userID");
     Session hibernateSession = Database.instance().createSession();
     try {
-        Long userID = (Long) request.getSession().getAttribute("userID");
         User u = (User)hibernateSession.get(User.class, userID);
         SecurityUtil.populateThreadLocal(userID, u.getAccount().getAccountID(), u.getAccount().getAccountType(), false);
     } finally {
