@@ -230,7 +230,7 @@
             <span id="refresh"><button class="ui-state-default ui-corner-all" type="button" onclick="refresh();">Refresh</button></span><span id="showScorecardList"><button class="ui-state-default ui-corner-all" type="button" onclick="loadScorecardList();">Scorecards</button></span> <span id="signout"><button class="ui-state-default ui-corner-all" type="button" onclick="signout();">Sign Out</button></span>
         </div>
         <div id="scorecard">
-            <% if(loggedIn && request.getParameter("scorecardID") != null) { %>
+            <% if(loggedIn && request.getParameter("scorecardID") != null && !request.getParameter("scorecardID").isEmpty()) { %>
                 <jsp:include page="table.jsp">
                     <jsp:param name="ajax" value="false" />
                 </jsp:include>
