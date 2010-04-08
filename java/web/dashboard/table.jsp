@@ -10,13 +10,22 @@
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.LinkedList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="org.hibernate.Session" %>
+<%@ page import="com.easyinsight.users.User" %>
 <%
     com.easyinsight.scorecard.Scorecard scorecard = null;
     boolean completeRefresh = false;
     NumberFormat nf = NumberFormat.getPercentInstance();
     nf.setMaximumFractionDigits(2);
-    Long userID = (Long) request.getSession().getAttribute("userID");
-    SecurityUtil.populateThreadLocal(userID, 0, 0, false);
+    Session hibernateSession = Database.instance().createSession();
+    try {
+        Long userID = (Long) request.getSession().getAttribute("userID");
+        User u = (User)hibernateSession.get(User.class, userID);
+        SecurityUtil.populateThreadLocal(userID, u.getAccount().getAccountID(), u.getAccount().getAccountType(), false);
+    } finally {
+        hibernateSession.close();
+    }
     String scorecardIDString = request.getParameter("scorecardID");
     ScorecardInternalService service = new com.easyinsight.scorecard.ScorecardInternalService();
     // table shouldn't get rendered without scorecard ID being set
