@@ -14,6 +14,7 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.users.User" %>
 <%
+    try {
     com.easyinsight.scorecard.Scorecard scorecard = null;
     boolean completeRefresh = false;
     NumberFormat nf = NumberFormat.getPercentInstance();
@@ -183,6 +184,8 @@
             <% } %>
         </script>
         <% }
-
-        SecurityUtil.clearThreadLocal();
+        }
+        finally {
+            SecurityUtil.clearThreadLocal();
+        }
         %>
