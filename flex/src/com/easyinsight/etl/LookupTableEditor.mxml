@@ -102,6 +102,9 @@
             ProgressAlert.alert(this, "Saving...", null, etlService.updateLookupTable);
             etlService.updateLookupTable.send(_lookupTable);
         }
+
+        [Bindable]
+        private var stackIndex:int = 0;
         ]]></mx:Script>
     <mx:RemoteObject destination="etlService" id="etlService">
         <mx:method name="getLookupTable" result="gotLookupTable()"/>                           
@@ -116,15 +119,44 @@
                        toolTip="Close"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
                            toolTip="Save"/>
+            <!--<mx:Spacer width="100%"/>
+            <mx:ToggleButtonBar id="toggleBar">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Lookup Table Properties</mx:String>
+                            <mx:String>Additional Fields</mx:String>
+                            <mx:String>Filters</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ToggleButtonBar>
+            <mx:Spacer width="100%"/>-->
 		</mx:HBox>
-        <mx:HBox>
-            <mx:Label text="Lookup Table Name: " fontFamily="Tahoma" fontWeight="bold"/>
-            <mx:Label text="{tableName}"/>
-            <mx:Label text="Source Field" fontFamily="Tahoma" fontWeight="bold"/>
-            <mx:Label text="{sourceFieldName}"/>
-            <mx:Label text="Target Field" fontFamily="Tahoma" fontWeight="bold"/>
-            <mx:Label text="{targetFieldName}"/>
-        </mx:HBox>
+        <!--<mx:ViewStack width="100%" selectedIndex="{toggleBar.selectedIndex}" resizeToContent="true">-->
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label text="Lookup Table Name: " fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="{tableName}"/>
+                <mx:Label text="Source Field" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="{sourceFieldName}"/>
+                <mx:Label text="Target Field" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:Label text="{targetFieldName}"/>
+            </mx:HBox>
+            <!--<mx:HBox>
+                <mx:Label text="Fill in additional fields content"/>
+            </mx:HBox>
+            <mx:HBox width="100%">
+                
+            </mx:HBox>
+        </mx:ViewStack>-->
+
+
+        <!--
+            drag in additional fields
+            filter container
+            
+        -->
+        <mx:HRule width="100%"/>
         <mx:VBox id="lookupTableBox" width="650"/>
     </mx:VBox>
 </easyinsight:FullScreenPage>

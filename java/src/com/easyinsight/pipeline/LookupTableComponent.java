@@ -1,5 +1,6 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.EmptyValue;
@@ -8,7 +9,9 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,7 +40,21 @@ public class LookupTableComponent implements IComponent {
             }
             row.addValue(lookupTable.getTargetField().createAggregateKey(), targetValue);
         }
+        List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems());
+        boolean itemFound = findItem(lookupTable.getSourceField(), allRequestedAnalysisItems);
+        if (!itemFound) {
+            pipelineData.getReportItems().remove(lookupTable.getSourceField());
+        }        
         return dataSet;
+    }
+
+    private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems) {
+        int found = 0;
+        for (AnalysisItem item : allRequestedAnalysisItems) {
+            List<AnalysisItem> items = item.getAnalysisItems(allRequestedAnalysisItems, new ArrayList<AnalysisItem>(), false);
+            found += items.contains(field) ? 1 : 0;
+        }
+        return found > 1;
     }
 
     public void decorate(DataResults listDataResults) {

@@ -214,7 +214,7 @@
                 </mx:Box>
                 <mx:Box width="100%" height="100%">
                     <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-                        columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%"/>
+                        columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%" verticalScrollPolicy="off"/>
                 </mx:Box>
             </mx:ViewStack>
         </mx:VBox>

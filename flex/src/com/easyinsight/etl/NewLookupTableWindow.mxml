@@ -53,9 +53,9 @@
             var targetField:AnalysisDimension = new AnalysisDimension();
             if (destinationGroup.selectedValue == "grouping") {
                 targetField = new AnalysisDimension();
-                AnalysisDateDimension(targetField).dateLevel = AnalysisItemTypes.DAY_LEVEL;
             } else if (destinationGroup.selectedValue == "date") {
                 targetField = new AnalysisDateDimension();
+                                AnalysisDateDimension(targetField).dateLevel = AnalysisItemTypes.DAY_LEVEL;
             }
             targetField.concrete = false;
             var key:NamedKey = new NamedKey();

@@ -320,7 +320,7 @@
                 </scorecard:columns>
             </scorecard:HackDataGrid>
             <mx:HBox width="100%" horizontalAlign="center" visible="{!_tutorialMode}">
-                <mx:Label text="Click on KPI names to dive deeper into the data." fontSize="10"/>
+                <mx:Label text="Click on KPI names to dive into the data." fontSize="10"/>
             </mx:HBox>
         </mx:VBox>
     <mx:VBox width="100%">

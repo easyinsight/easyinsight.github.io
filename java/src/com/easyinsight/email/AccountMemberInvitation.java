@@ -14,10 +14,10 @@ import java.io.UnsupportedEncodingException;
 public class AccountMemberInvitation {
 
     private static String groupInviteText =
-            "You have been added as a member of an account administered by {0} on Easy Insight. " +
+            "You have been added as a member of an account administered by {0} {1} on Easy Insight. " +
             "Your login information is the following:\r\n\r\n"+
-            "User Name: {1}\r\n" +
-            "Password: {2}\r\n\r\n" +
+            "User Name: {2}\r\n" +
+            "Password: {3}\r\n\r\n" +
             "You can access Easy Insight at http://www.easy-insight.com/app/#page=welcome\r\n" +
             "Once there and logged in, you can change your password through Account - Change my Password.";
 
@@ -121,8 +121,8 @@ public class AccountMemberInvitation {
         }
     }
 
-    public void sendAccountEmail(String to, String accountOwner, String userName, String password) {
-        String body = MessageFormat.format(groupInviteText, accountOwner, userName, password);
+    public void sendAccountEmail(String to, String adminFirstName, String accountOwner, String userName, String password) {
+        String body = MessageFormat.format(groupInviteText, adminFirstName, accountOwner, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
             new AuthSMTPConnection().sendSSLMessage(to, subject, body, accountOwner);

@@ -238,6 +238,7 @@ public class UserAccountAdminService {
                     user = userTransferObject.toUser();
                     user.setAccount(account);
                     final String password = RandomTextGenerator.generateText(12);
+                    final String adminFirstName = admin.getFirstName();
                     final String adminName = admin.getName();
                     final String userEmail = user.getEmail();
                     final String userName = user.getUserName();
@@ -248,7 +249,7 @@ public class UserAccountAdminService {
                     session.getTransaction().commit();
                     new Thread(new Runnable() {
                         public void run() {
-                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminName, userName, password);
+                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password);
                         }
                     }).start();
                     userCreationResponse = new UserCreationResponse(user.getUserID());
