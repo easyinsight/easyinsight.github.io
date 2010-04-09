@@ -208,9 +208,9 @@
                     },
                     function(action, el, pos) {
                         var loc = window.location
-                        loc.pathname = "/app"
                         loc.hash = action
-                       window.location = loc;
+                        loc.pathname = "/app/"
+                        window.location = loc;
                     });
                 <% } %>
             });
