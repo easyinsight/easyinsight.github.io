@@ -126,7 +126,7 @@ public class UserUploadService implements IUserUploadService {
                 }
                 feedDescriptor.setChildren(analysisDefList);
             }
-            for (LookupTableDescriptor lookupTableDescriptor : new ETLService().getLookupTableDescriptors()) {
+            for (LookupTableDescriptor lookupTableDescriptor : new FeedService().getLookupTableDescriptors()) {
                 FeedDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());
                 feedDescriptor.getChildren().add(lookupTableDescriptor);
             }

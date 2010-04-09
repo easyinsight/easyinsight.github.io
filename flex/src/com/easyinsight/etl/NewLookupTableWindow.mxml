@@ -120,7 +120,7 @@
         <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
         <mx:method name="getFeedDefinition" result="gotFields()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject destination="etlService" id="etlService">
+    <mx:RemoteObject destination="feeds" id="etlService">
         <mx:method name="saveNewLookupTable" result="saved()"/>
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">

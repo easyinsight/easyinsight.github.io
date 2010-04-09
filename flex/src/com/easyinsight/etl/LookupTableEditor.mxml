@@ -106,7 +106,7 @@
         [Bindable]
         private var stackIndex:int = 0;
         ]]></mx:Script>
-    <mx:RemoteObject destination="etlService" id="etlService">
+    <mx:RemoteObject destination="feeds" id="etlService">
         <mx:method name="getLookupTable" result="gotLookupTable()"/>                           
         <mx:method name="updateLookupTable" result="updated()"/>
     </mx:RemoteObject>

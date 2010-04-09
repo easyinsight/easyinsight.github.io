@@ -1,6 +1,7 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.etl.ETLService;
 
 import java.util.*;
@@ -55,7 +56,7 @@ public class StandardReportPipeline extends Pipeline {
 
         for (AnalysisItem analysisItem : items(AnalysisItemTypes.DIMENSION, allNeededAnalysisItems)) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
-                components.add(new LookupTableComponent(new ETLService().getLookupTable(analysisItem.getLookupTableID())));
+                components.add(new LookupTableComponent(new FeedService().getLookupTable(analysisItem.getLookupTableID())));
             }
         }
 

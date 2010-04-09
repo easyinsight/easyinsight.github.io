@@ -279,22 +279,26 @@
         }
 
         public function save(dataSourceID:int):AnalysisItem {
-            if (detailEditor.validate()) {
-                var existingType:int = startingAnalysisItem.getType();
-                var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
-                analysisItem.concrete = startingAnalysisItem.concrete;
-                analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
-                if (analysisItem.getType() == existingType) {
-                    analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
+            if (detailEditor != null) {
+                if (detailEditor.validate()) {
+                    var existingType:int = startingAnalysisItem.getType();
+                    var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
+                    analysisItem.concrete = startingAnalysisItem.concrete;
+                    analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
+                    if (analysisItem.getType() == existingType) {
+                        analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
+                    }
+                    analysisItem.displayName = fieldNameInput.text;
+                    analysisItem.key = key;
+                    analysisItem.hidden = hiddenCheckbox.selected;
+                    analysisItem.links = links;
+                    analysisItem.filters = transformContainer.getFilterDefinitions();
+                    detailEditor.save(analysisItem);
+                    dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
+                    return analysisItem;
+                } else {
+                    return null;
                 }
-                analysisItem.displayName = fieldNameInput.text;
-                analysisItem.key = key;
-                analysisItem.hidden = hiddenCheckbox.selected;
-                analysisItem.links = links;                
-                analysisItem.filters = transformContainer.getFilterDefinitions();
-                detailEditor.save(analysisItem);
-                dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
-                return analysisItem;
             } else {
                 return null;
             }

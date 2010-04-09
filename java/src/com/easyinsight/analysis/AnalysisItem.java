@@ -11,6 +11,7 @@ import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
+import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
@@ -313,7 +314,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             }
         }
         if (getLookupTableID() != null && getLookupTableID() > 0) {
-            items.add(new ETLService().getLookupTable(getLookupTableID()).getSourceField());
+            items.add(new FeedService().getLookupTable(getLookupTableID()).getSourceField());
         }
         return items;
     }

@@ -12,10 +12,19 @@ import java.util.List;
 public class LookupTable {
     private String name;
     private long dataSourceID;
+    private String urlKey;
     private long lookupTableID;
     private AnalysisItem sourceField;
     private AnalysisItem targetField;
     private List<LookupPair> lookupPairs;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public AnalysisItem getTargetField() {
         return targetField;
