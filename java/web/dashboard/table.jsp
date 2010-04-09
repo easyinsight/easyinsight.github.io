@@ -180,19 +180,19 @@
             </table>
             <% for (com.easyinsight.kpi.KPI kpi : scorecard.getKpis()) { %>
                 <ul id="kpi_<%= kpi.getKpiID() %>_menu" class="contextMenu">
-                    <li><a href="~/app/#feedID=<%= kpi.getCoreFeedUrlKey() %>">Analyze this KPI...</a></li>
+                    <li><a href="#feedID=<%= kpi.getCoreFeedUrlKey() %>">Analyze this KPI...</a></li>
                     <% if(kpi.getConnectionID() > 0) { %>
-                        <li class="separator"><a href="~/app/#page=exchange&view=1&display=0&subTopicID=<%= kpi.getConnectionID()%>">Find reports for this KPI...</a></li>
+                        <li class="separator"><a href="#page=exchange&view=1&display=0&subTopicID=<%= kpi.getConnectionID()%>">Find reports for this KPI...</a></li>
                     <% } %>
-                    <li class="separator"><a href="~/app/#multiReportID=<%= kpi.getCoreFeedUrlKey() %>">View all reports for this KPI...</a></li>
+                    <li class="separator"><a href="#multiReportID=<%= kpi.getCoreFeedUrlKey() %>">View all reports for this KPI...</a></li>
                     <% for(InsightDescriptor report :kpi.getReports()) {%>
-                        <li class="separator"><a href="~/app/#reportID=<%= report.getUrlKey() %>"><%= report.getName() %></a> </li>
+                        <li class="separator"><a href="#reportID=<%= report.getUrlKey() %>"><%= report.getName() %></a> </li>
                     <% } %>
                     <% for(GoalTreeDescriptor goalTree: kpi.getKpiTrees()) { %>
-                        <li class="separator"><a href="~/app/#goalTreeID=<%= goalTree.getUrlKey() %>"><%= goalTree.getName() %></a> </li>
+                        <li class="separator"><a href="#goalTreeID=<%= goalTree.getUrlKey() %>"><%= goalTree.getName() %></a> </li>
                     <% } %>
                     <% for(ReportPackageDescriptor reportPackage : kpi.getPackages()) { %>
-                        <li class="separator"><a href="~/app/#packageID=<%=reportPackage.getUrlKey()%>"><%=reportPackage.getName()%></a></li>
+                        <li class="separator"><a href="#packageID=<%=reportPackage.getUrlKey()%>"><%=reportPackage.getName()%></a></li>
                     <% } %>
                 </ul>
             <% } %>
@@ -207,7 +207,10 @@
                         menu: 'kpi_<%= kpi.getKpiID() %>_menu'
                     },
                     function(action, el, pos) {
-                       window.location.href = action;
+                        var loc = window.location
+                        loc.pathname = "/app"
+                        loc.hash = action
+                       window.location = loc;
                     });
                 <% } %>
             });
