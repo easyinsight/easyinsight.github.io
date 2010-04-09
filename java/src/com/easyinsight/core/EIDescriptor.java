@@ -17,6 +17,7 @@ public abstract class EIDescriptor {
     public static final int LOOKUP_TABLE = 10;
 
     private String name;
+    private String urlKey;
     private long id;
 
     public abstract int getType();
@@ -45,6 +46,12 @@ public abstract class EIDescriptor {
         this.id = id;
     }
 
+    protected EIDescriptor(String name, long id, String urlKey) {
+        this.name = name;
+        this.id = id;
+        this.urlKey = urlKey;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,5 +70,13 @@ public abstract class EIDescriptor {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (int) (id ^ (id >>> 32));
         return result;
+    }
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
     }
 }

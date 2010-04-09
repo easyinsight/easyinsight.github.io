@@ -360,8 +360,9 @@ public class SolutionService {
             for (AnalysisDefinition copiedReport : reportList) {
                 new AnalysisStorage().saveAnalysis(copiedReport, session);
                 session.flush();
+                // TODO: Add urlKey
                 newReports.add(new InsightDescriptor(copiedReport.getAnalysisID(), copiedReport.getTitle(), copiedReport.getDataFeedID(),
-                        copiedReport.getReportType()));
+                        copiedReport.getReportType(),null));
             }
             for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
                 copiedReport.updateReportIDs(reportReplacementMap);
@@ -433,8 +434,9 @@ public class SolutionService {
             }
 
             AnalysisDefinition copiedBaseReport = reportReplacementMap.get(reportID);
+            // TODO: Add urlKey
             InsightDescriptor insightDescriptor = new InsightDescriptor(copiedBaseReport.getAnalysisID(), copiedBaseReport.getTitle(),
-                    copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType());
+                    copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType(),null);
 
             conn.commit();
             session.close();
@@ -488,8 +490,9 @@ public class SolutionService {
         clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
         clonedReport.setTemporaryReport(true);
         new AnalysisStorage().saveAnalysis(clonedReport, session);
+        // TODO: Add urlKey
         return new InsightDescriptor(clonedReport.getAnalysisID(), clonedReport.getTitle(),
-                clonedReport.getDataFeedID(), clonedReport.getReportType());
+                clonedReport.getDataFeedID(), clonedReport.getReportType(),null);
     }
 
     public List<SolutionReportExchangeItem> getSolutionReports() {
@@ -653,7 +656,8 @@ public class SolutionService {
                 while (insightRS.next()) {
                     long insightID = insightRS.getLong(1);
                     String insightName = insightRS.getString(2);
-                    insightDescriptors.add(new InsightDescriptor(insightID, insightName, insightRS.getLong(3), insightRS.getInt(4)));
+                    // TODO: Add urlKey
+                    insightDescriptors.add(new InsightDescriptor(insightID, insightName, insightRS.getLong(3), insightRS.getInt(4),null));
                 }
             }
             PreparedStatement getGoalsStmt = conn.prepareStatement("SELECT goal_tree.goal_tree_id, goal_tree.name, goal_tree.goal_tree_icon FROM solution, goal_tree " +
@@ -663,7 +667,8 @@ public class SolutionService {
             while (goalRS.next()) {
                 long goalID = goalRS.getLong(1);
                 String goalName = goalRS.getString(2);
-                GoalTreeDescriptor goalTreeDescriptor = new GoalTreeDescriptor(goalID, goalName, 0, goalRS.getString(3));
+                // TODO: add urlKey
+                GoalTreeDescriptor goalTreeDescriptor = new GoalTreeDescriptor(goalID, goalName, 0, goalRS.getString(3), null);
                 goalTreeDescriptors.add(goalTreeDescriptor);
             }
         } catch (Exception e) {

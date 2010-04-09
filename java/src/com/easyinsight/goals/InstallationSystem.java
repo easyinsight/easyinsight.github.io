@@ -98,8 +98,9 @@ public class InstallationSystem {
         duplicateGoalDataSources(goalTree, solutionID);
         installDataSourcesAndReports(clonedTree);
         goalStorage.addGoalTree(clonedTree, conn);
+        // TODO: add urlKey
         allSolutions.add(new SolutionInstallInfo(goalTree.getGoalTreeID(), new GoalTreeDescriptor(clonedTree.getGoalTreeID(), clonedTree.getName(), Roles.OWNER,
-                clonedTree.getIconImage()), null, false));        
+                clonedTree.getIconImage(), null), null, false));
         return clonedTree.getGoalTreeID();
     }
 

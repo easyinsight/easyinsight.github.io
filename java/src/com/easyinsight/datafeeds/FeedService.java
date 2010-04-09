@@ -95,7 +95,8 @@ public class FeedService implements IDataFeedService {
             queryStmt.setBoolean(4, false);
             ResultSet reportRS = queryStmt.executeQuery();
             while (reportRS.next()) {
-                descriptors.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), dataSourceID, reportRS.getInt(3)));
+                // TODO: Add urlKey
+                descriptors.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), dataSourceID, reportRS.getInt(3),null));
             }
             queryStmt.close();
         } catch (SQLException e) {
@@ -144,16 +145,18 @@ public class FeedService implements IDataFeedService {
             getInsightsStmt.setBoolean(3, false);
             ResultSet reportRS = getInsightsStmt.executeQuery();
             while (reportRS.next()) {
-                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4)));
+                // TODO: Add urlKey
+                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4),null));
             }
             PreparedStatement getGoalTreeStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name, USER_TO_GOAL_TREE.user_role, GOAL_TREE.goal_tree_icon FROM GOAL_TREE, USER_TO_GOAL_TREE " +
                     "WHERE GOAL_TREE.goal_tree_id = user_to_goal_tree.goal_tree_id and user_to_goal_tree.user_id = ?");
             getGoalTreeStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet goalTreeRS = getGoalTreeStmt.executeQuery();
             while (goalTreeRS.next()) {
-                descriptorList.add(new GoalTreeDescriptor(goalTreeRS.getLong(1), goalTreeRS.getString(2), goalTreeRS.getInt(3), goalTreeRS.getString(4)));
+                // TODO: Add urlKey
+                descriptorList.add(new GoalTreeDescriptor(goalTreeRS.getLong(1), goalTreeRS.getString(2), goalTreeRS.getInt(3), goalTreeRS.getString(4), null));
             }
-            PreparedStatement getPackageStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.package_name, REPORT_PACKAGE.report_package_id FROM REPORT_PACKAGE, user_to_report_package WHERE " +
+            PreparedStatement getPackageStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.package_name, REPORT_PACKAGE.report_package_id, REPORT_PACKAGE.url_key FROM REPORT_PACKAGE, user_to_report_package WHERE " +
                     "user_to_report_package.user_id = ? AND report_package.report_package_id = user_to_report_package.report_package_id AND REPORT_PACKAGE.TEMPORARY_PACKAGE = ?");
             getPackageStmt.setLong(1, SecurityUtil.getUserID());
             getPackageStmt.setBoolean(2, false);
@@ -161,7 +164,8 @@ public class FeedService implements IDataFeedService {
             while (packageRS.next()) {
                 String packageName = packageRS.getString(1);
                 long packageID = packageRS.getLong(2);
-                descriptorList.add(new ReportPackageDescriptor(packageName, packageID));
+                String urlKey = packageRS.getString(3);
+                descriptorList.add(new ReportPackageDescriptor(packageName, packageID, urlKey));
             }
             Map<String, Integer> countMap = new HashMap<String, Integer>();
             Set<String> dupeNames = new HashSet<String>();

@@ -329,7 +329,8 @@ public class GroupStorage {
                 String title = rs.getString(2);
                 long dataSourceID = rs.getLong(3);
                 int reportType = rs.getInt(4);
-                analysisIDs.add(new InsightDescriptor(analysisID, title, dataSourceID, reportType));
+                // TODO: Add urlKey
+                analysisIDs.add(new InsightDescriptor(analysisID, title, dataSourceID, reportType,null));
             }
         } finally {
             Database.closeConnection(conn);
@@ -346,7 +347,8 @@ public class GroupStorage {
             queryStmt.setLong(1, groupID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                goalTrees.add(new GoalTreeDescriptor(rs.getLong(1), rs.getString(2), Roles.SHARER, rs.getString(3)));
+                // TODO: add urlKey
+                goalTrees.add(new GoalTreeDescriptor(rs.getLong(1), rs.getString(2), Roles.SHARER, rs.getString(3), null));
             }
         } finally {
             Database.closeConnection(conn);

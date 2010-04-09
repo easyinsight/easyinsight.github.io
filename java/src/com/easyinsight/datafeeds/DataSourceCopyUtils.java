@@ -66,8 +66,9 @@ public class DataSourceCopyUtils {
                 clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
                 clonedInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
                 analysisStorage.saveAnalysis(clonedInsight, conn);
+                // TODO: Add urlKey
                 InsightDescriptor insightDescriptor = new InsightDescriptor(clonedInsight.getAnalysisID(), clonedInsight.getTitle(),
-                        clonedInsight.getDataFeedID(), clonedInsight.getReportType());
+                        clonedInsight.getDataFeedID(), clonedInsight.getReportType(), null);
                 infos.add(new SolutionInstallInfo(insight.getAnalysisID(), insightDescriptor, null, false));
                 List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
                 for (FeedDefinition insightFeed : insightFeeds) {

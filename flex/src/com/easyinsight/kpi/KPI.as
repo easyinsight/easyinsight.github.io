@@ -14,6 +14,7 @@ public class KPI extends EventDispatcher {
     public var kpiID:int;
     public var coreFeedID:int;
     public var coreFeedName:String;
+    public var coreFeedUrlKey:String;
     public var analysisMeasure:AnalysisMeasure;
     public var dateDimension:AnalysisDateDimension;
 

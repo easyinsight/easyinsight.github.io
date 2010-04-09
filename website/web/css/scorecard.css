@@ -129,3 +129,11 @@
 .ui-progressbar-value {
     background-image: url(images/pbar-ani.gif) !important;
 }
+
+.contextMenu {
+    width: 240px !important;
+}
+
+.contextMenu a {
+    height:auto !important;
+}

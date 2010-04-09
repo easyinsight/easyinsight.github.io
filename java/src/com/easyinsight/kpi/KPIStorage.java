@@ -115,7 +115,7 @@ public class KPIStorage {
     public KPI getKPI(long kpiID, EIConnection conn) throws Exception {
         PreparedStatement getKPIStmt = conn.prepareStatement("SELECT KPI.KPI_ID, ANALYSIS_MEASURE_ID, KPI.DATA_FEED_ID, KPI.DESCRIPTION," +
                 "ICON_IMAGE, KPI_NAME, DATA_FEED.feed_name, KPI.goal_defined, KPI.goal_value, KPI.high_is_good, KPI.temporary, KPI.DAY_WINDOW, KPI.THRESHOLD," +
-                "KPI.DATE_DIMENSION_ID FROM KPI, DATA_FEED WHERE kpi.kpi_id = ? AND data_feed.data_feed_id = kpi.data_feed_id");
+                "DATA_FEED.api_key, KPI.DATE_DIMENSION_ID FROM KPI, DATA_FEED WHERE kpi.kpi_id = ? AND data_feed.data_feed_id = kpi.data_feed_id");
         getKPIStmt.setLong(1, kpiID);
         KPI kpi = null;
         ResultSet kpiRS = getKPIStmt.executeQuery();
@@ -141,7 +141,8 @@ public class KPIStorage {
         boolean temporary = kpiRS.getBoolean(11);
         int dayWindow = kpiRS.getInt(12);
         double threshold = kpiRS.getDouble(13);
-        long dateDimensionID = kpiRS.getLong(14);
+        String urlString = kpiRS.getString(14);
+        long dateDimensionID = kpiRS.getLong(15);
         boolean dateDefined = !kpiRS.wasNull();
         Session session = Database.instance().createSession(conn);
         List measures = session.createQuery("from AnalysisMeasure where analysisItemID = ?").setLong(0, measureID).list();
@@ -175,6 +176,7 @@ public class KPIStorage {
         kpi.setThreshold(threshold);
         kpi.setDateDimension(date);
         kpi.setKpiUsers(getKPIUsers(kpiID, conn));
+        kpi.setCoreFeedUrlKey(urlString);
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_ID FROM SOLUTION_INSTALL WHERE INSTALLED_DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, dataFeedID);
         ResultSet solutionRS = queryStmt.executeQuery();
@@ -187,7 +189,7 @@ public class KPIStorage {
 
     private List<InsightDescriptor> getReports(long dataFeedID, EIConnection conn) throws SQLException {
         List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, REPORT_TYPE FROM ANALYSIS WHERE DATA_FEED_ID = ? AND " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, REPORT_TYPE, URL_KEY FROM ANALYSIS WHERE DATA_FEED_ID = ? AND " +
                 "ANALYSIS.temporary_report = ?");
         queryStmt.setLong(1, dataFeedID);
         queryStmt.setBoolean(2, false);
@@ -196,7 +198,8 @@ public class KPIStorage {
             long reportID = rs.getLong(1);
             String reportName = rs.getString(2);
             int reportType = rs.getInt(3);
-            reports.add(new InsightDescriptor(reportID, reportName, dataFeedID, reportType));
+            String urlKey = rs.getString(4);
+            reports.add(new InsightDescriptor(reportID, reportName, dataFeedID, reportType, urlKey));
         }
         queryStmt.close();
         return reports;
@@ -204,7 +207,7 @@ public class KPIStorage {
 
     private List<ReportPackageDescriptor> getPackages(long dataFeedID, EIConnection conn) throws SQLException {
         List<ReportPackageDescriptor> packages = new ArrayList<ReportPackageDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.report_package_id, report_package.package_name FROM REPORT_PACKAGE, REPORT_PACKAGE_TO_REPORT, ANALYSIS WHERE " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.report_package_id, report_package.package_name, report_package.url_key FROM REPORT_PACKAGE, REPORT_PACKAGE_TO_REPORT, ANALYSIS WHERE " +
                 "REPORT_PACKAGE.report_package_id = report_package_to_report.report_id AND report_package_to_report.report_id = analysis.analysis_id AND " +
                 "ANALYSIS.data_feed_id = ? AND ANALYSIS.temporary_report = ?");
         queryStmt.setLong(1, dataFeedID);
@@ -213,7 +216,8 @@ public class KPIStorage {
         while (rs.next()) {
             long packageID = rs.getLong(1);
             String packageName = rs.getString(2);
-            packages.add(new ReportPackageDescriptor(packageName, packageID));
+            String urlKey = rs.getString(3);
+            packages.add(new ReportPackageDescriptor(packageName, packageID, urlKey));
         }
         queryStmt.close();
         return packages;
@@ -221,14 +225,15 @@ public class KPIStorage {
 
     private List<GoalTreeDescriptor> getKPITrees(long dataSourceID, EIConnection conn) throws SQLException {
         Map<Long, GoalTreeDescriptor> reportMap = new HashMap<Long, GoalTreeDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.goal_tree_id, GOAL_TREE.name FROM GOAL_TREE, GOAL_TREE_NODE, KPI WHERE GOAL_TREE.goal_tree_id = GOAL_TREE_NODE.goal_tree_id AND " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.goal_tree_id, GOAL_TREE.name, GOAL_TREE.url_key FROM GOAL_TREE, GOAL_TREE_NODE, KPI WHERE GOAL_TREE.goal_tree_id = GOAL_TREE_NODE.goal_tree_id AND " +
                 "GOAL_TREE_NODE.kpi_id = KPI.KPI_ID AND KPI.data_feed_id = ?");
         queryStmt.setLong(1, dataSourceID);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
             long kpiTreeID = rs.getLong(1);
             String kpiTreeName = rs.getString(2);
-            reportMap.put(kpiTreeID, new GoalTreeDescriptor(kpiTreeID, kpiTreeName, 0, null));
+            String urlKey = rs.getString(3);
+            reportMap.put(kpiTreeID, new GoalTreeDescriptor(kpiTreeID, kpiTreeName, 0, null, urlKey));
         }
         queryStmt.close();
         return new ArrayList<GoalTreeDescriptor>(reportMap.values());

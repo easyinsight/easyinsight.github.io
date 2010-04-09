@@ -19,8 +19,8 @@ public class GoalTreeDescriptor extends EIDescriptor {
     public GoalTreeDescriptor() {
     }
 
-    public GoalTreeDescriptor(long id, String name, int role, String iconName) {
-        super(name, id);
+    public GoalTreeDescriptor(long id, String name, int role, String iconName, String urlKey) {
+        super(name, id, urlKey);
         this.role = role;
         this.iconName = iconName;
     }

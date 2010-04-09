@@ -18,8 +18,8 @@ public class InsightDescriptor extends EIDescriptor {
     public InsightDescriptor() {
     }
 
-    public InsightDescriptor(long id, String name, long dataFeedID, int reportType) {
-        super(name, id);
+    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey) {
+        super(name, id, urlKey);
         this.dataFeedID = dataFeedID;
         this.reportType = reportType;
     }

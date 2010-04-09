@@ -23,6 +23,7 @@ public class KPI implements Cloneable {
 
     private long coreFeedID;
     private String coreFeedName;
+    private String coreFeedUrlKey;
     private AnalysisMeasure analysisMeasure;
     private AnalysisDateDimension dateDimension;
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
@@ -310,5 +311,13 @@ public class KPI implements Cloneable {
             default:
                 return "bullet_square_grey.png";
         }
+    }
+
+    public String getCoreFeedUrlKey() {
+        return coreFeedUrlKey;
+    }
+
+    public void setCoreFeedUrlKey(String coreFeedUrlKey) {
+        this.coreFeedUrlKey = coreFeedUrlKey;
     }
 }

@@ -238,7 +238,8 @@ public class AnalysisStorage {
             queryStmt.setBoolean(3, false);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));
+                // TODO: Add urlKey
+                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), null));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -261,7 +262,8 @@ public class AnalysisStorage {
             queryStmt.setLong(4, reportID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));
+                // TODO: Add urlKey
+                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), null));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -332,7 +334,8 @@ public class AnalysisStorage {
                 long analysisID = analysisRS.getLong(1);
                 String title = analysisRS.getString(2);
                 long dataSourceID = analysisRS.getLong(3);
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
+                // TODO: Add urlKey
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4), null));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -379,7 +382,8 @@ public class AnalysisStorage {
                 long analysisID = analysisRS.getLong(1);
                 String title = analysisRS.getString(2);
                 long dataSourceID = analysisRS.getLong(3);
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
+                // TODO: Add urlKey
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4), null));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -426,7 +430,8 @@ public class AnalysisStorage {
                 long analysisID = analysisRS.getLong(1);
                 String title = analysisRS.getString(2);
                 long dataSourceID = analysisRS.getLong(3);
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
+                // TODO: Add urlKey
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4), null));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -507,7 +512,8 @@ public class AnalysisStorage {
             Iterator iter = query.iterate();
             while (iter.hasNext()) {
                 AnalysisDefinition analysisDefinition = (AnalysisDefinition) iter.next();
-                analysisList.add(new InsightDescriptor(analysisDefinition.getAnalysisID(), analysisDefinition.getTitle(), analysisDefinition.getDataFeedID(), analysisDefinition.getReportType()));
+                // TODO: Add urlKey
+                analysisList.add(new InsightDescriptor(analysisDefinition.getAnalysisID(), analysisDefinition.getTitle(), analysisDefinition.getDataFeedID(), analysisDefinition.getReportType(), null));
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -594,7 +600,8 @@ public class AnalysisStorage {
             queryStmt.setLong(1, userID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));    
+                // TODO: Add urlKey
+                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), null));
             }
         } finally {
             Database.closeConnection(conn);
@@ -612,7 +619,8 @@ public class AnalysisStorage {
             queryStmt.setLong(1, groupID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));
+                // TODO: Add urlKey
+                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), null));
             }
             PreparedStatement dsShareStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type " +
                     "from analysis, data_feed, upload_policy_groups where " +
@@ -622,7 +630,8 @@ public class AnalysisStorage {
             dsShareStmt.setLong(2, groupID);
             ResultSet shareRS = dsShareStmt.executeQuery();
             while (shareRS.next()) {
-                reports.add(new InsightDescriptor(shareRS.getLong(1), shareRS.getString(2), shareRS.getLong(3), shareRS.getInt(4)));
+                // TODO: Add urlKey
+                reports.add(new InsightDescriptor(shareRS.getLong(1), shareRS.getString(2), shareRS.getLong(3), shareRS.getInt(4), null));
             }
         } finally {
             Database.closeConnection(conn);

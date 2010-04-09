@@ -150,7 +150,8 @@ public class AnalysisService {
             getInsightsStmt.setBoolean(2, false);
             ResultSet reportRS = getInsightsStmt.executeQuery();
             while (reportRS.next()) {
-                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4)));
+                // TODO: Add urlKey
+                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4), null));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -396,8 +397,9 @@ public class AnalysisService {
                     queryStmt.setLong(1, analysisID);
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
+                    // TODO: Add urlKey
                     insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
-                            rs.getLong(2), rs.getInt(3)));
+                            rs.getLong(2), rs.getInt(3), null));
                 } finally {
                     Database.closeConnection(conn);
                 }
@@ -428,8 +430,9 @@ public class AnalysisService {
                     queryStmt.setLong(1, analysisID);
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
+                    // TODO: Add urlKey
                     insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
-                            rs.getLong(2), rs.getInt(3)));
+                            rs.getLong(2), rs.getInt(3), null));
                 } finally {
                     Database.closeConnection(conn);
                 }

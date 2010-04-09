@@ -301,7 +301,8 @@ public class GoalStorage {
                 String name = rs.getString(1);
                 long treeID = rs.getLong(2);
                 int role = rs.getInt(3);
-                descriptors.add(new GoalTreeDescriptor(treeID, name, role, rs.getString(4)));
+                // TODO: add urlKey
+                descriptors.add(new GoalTreeDescriptor(treeID, name, role, rs.getString(4), null));
             }
         } finally {
             Database.closeConnection(conn);
@@ -486,7 +487,8 @@ public class GoalStorage {
         while (rs.next()) {
             long insightID = rs.getLong(1);
             String name = rs.getString(2);
-            InsightDescriptor goalInsight = new InsightDescriptor(insightID, name, rs.getLong(3), rs.getInt(4));
+            // TODO: Add urlKey
+            InsightDescriptor goalInsight = new InsightDescriptor(insightID, name, rs.getLong(3), rs.getInt(4), null);
             insights.add(goalInsight);
         }
         return insights;
@@ -850,7 +852,8 @@ public class GoalStorage {
             List<GoalTreeDescriptor> descriptors = new ArrayList<GoalTreeDescriptor>();
             ResultSet subTreeRS = queryStmt.executeQuery();
             while (subTreeRS.next()) {
-                descriptors.add(new GoalTreeDescriptor(subTreeRS.getLong(1), subTreeRS.getString(2), subTreeRS.getInt(3), subTreeRS.getString(4)));
+                // TODO: add urlKey
+                descriptors.add(new GoalTreeDescriptor(subTreeRS.getLong(1), subTreeRS.getString(2), subTreeRS.getInt(3), subTreeRS.getString(4), null));
             }
             goalTree.setSubTreeParents(descriptors);
             queryStmt.close();

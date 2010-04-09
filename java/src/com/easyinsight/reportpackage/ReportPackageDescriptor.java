@@ -9,8 +9,8 @@ import com.easyinsight.core.EIDescriptor;
  */
 public class ReportPackageDescriptor extends EIDescriptor {
 
-    public ReportPackageDescriptor(String name, long id) {
-        super(name, id);
+    public ReportPackageDescriptor(String name, long id, String urlKey) {
+        super(name, id, urlKey);
     }
 
     public ReportPackageDescriptor() {

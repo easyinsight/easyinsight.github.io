@@ -156,7 +156,8 @@ public class ReportPackageStorage {
                 ResultSet reportRS = getReportsStmt.executeQuery();
                 List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
                 while (reportRS.next()) {
-                    reports.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(4), reportRS.getInt(3)));
+                    // TODO: Add urlKey
+                    reports.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(4), reportRS.getInt(3), null));
                 }
                 reportPackage = new ReportPackage();
                 reportPackage.setReportPackageID(packageID);

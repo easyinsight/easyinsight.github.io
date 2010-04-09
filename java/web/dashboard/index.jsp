@@ -25,10 +25,13 @@
 <html>
     <head>
         <title>Easy Insight Scorecard - <%= scorecard != null ? scorecard.getName() : "Unknown" %></title>
-        <link type="text/css" href="/css/scorecard.css" rel="stylesheet" media="screen" />
+        <meta name = "viewport" content = "width = device-width" />
+        <link type="text/css" href="/css/jquery.contextMenu.css" rel="stylesheet" media="screen" />
         <link type="text/css" href="/css/jquery-ui.css" rel="stylesheet" media="screen" />
+        <link type="text/css" href="/css/scorecard.css" rel="stylesheet" media="screen" />
         <script type="text/javascript" src="/js/jquery.min.js"></script>
         <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.contextMenu.js"></script>
         <%
             String googleLibs = request.getParameter("libs");
             if(googleLibs != null && !googleLibs.isEmpty() && !"null".equals(googleLibs)) {
