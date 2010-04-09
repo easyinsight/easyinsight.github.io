@@ -24,7 +24,7 @@
         </mx:Box>
         <mx:HBox verticalAlign="middle" horizontalAlign="center" height="50%" width="100%" backgroundColor="#FFFFFF">
             <mx:Label text="Number of Days: " fontSize="18"/>
-            <mx:NumericStepper id="stepper" value="{dayValue}" fontSize="18"/>
+            <mx:NumericStepper id="stepper" value="{dayValue}" fontSize="18" maximum="500"/>
         </mx:HBox>
     </mx:VBox>
 </kpi:KPITutorialPanel>
