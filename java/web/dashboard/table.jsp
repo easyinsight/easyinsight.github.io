@@ -227,7 +227,10 @@
                         menu: 'kpi_<%= kpi.getKpiID() %>_menu'
                     },
                     function(action, el, pos) {
-                       alert(action);
+                       var loc = window.location
+                        loc.hash = action
+                        loc.pathname = "/app/"
+                        window.location = loc;
                     });
                 <% } %> });
             </script>
