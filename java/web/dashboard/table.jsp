@@ -210,7 +210,7 @@
                         var loc = window.location
                         loc.hash = action
                         loc.pathname = "/app/"
-                        window.location = loc;
+                        window.top.location = loc;
                     });
                 <% } %>
             });
