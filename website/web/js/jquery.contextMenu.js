@@ -12,6 +12,8 @@
 // This plugin is dual-licensed under the GNU General Public License
 //   and the MIT License and is copyright A Beautiful Site, LLC.
 //
+
+// MODIFIED to allow for right click menus to use links - Alan Baldwin
 if(jQuery)( function() {
 	$.extend($.fn, {
 		
@@ -112,8 +114,12 @@ if(jQuery)( function() {
 								$(document).unbind('click').unbind('keypress');
 								$(".contextMenu").hide();
 								// Callback
-								if( callback ) callback( $(this).attr('href').substr(1), $(srcElement), {x: x - offset.left, y: y - offset.top, docX: x, docY: y} );
-								return false;
+								if( callback ) {
+                                    callback( $(this).attr('href').substr(1), $(srcElement), {x: x - offset.left, y: y - offset.top, docX: x, docY: y} );
+								    return false;
+                                } else {
+                                    return true;
+                                }
 							});
 							
 							// Hide bindings
