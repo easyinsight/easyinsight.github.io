@@ -97,8 +97,6 @@
                         loadScorecard(scorecardID);
                    <% } %>
                     }
-                } else {
-                    alert("_IG_Prefs could not be found.");
                 }
             });
 
