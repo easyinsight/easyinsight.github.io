@@ -97,6 +97,8 @@
                         loadScorecard(scorecardID);
                    <% } %>
                     }
+                } else {
+                    alert("_IG_Prefs could not be found.");
                 }
             });
 
@@ -128,7 +130,7 @@
             }
             function loadScorecard(scorecardID) {
                 $("#scorecardList").dialog("close");
-                if(typeof(prefs) == typeof(Function) && typeof(prefs.set) == typeof(Function)) {
+                if(typeof(prefs) != "undefined" && typeof(prefs.set) == typeof(Function)) {
                     prefs.set("scorecardID", scorecardID)
                 }
                 $("#scorecardID").val(scorecardID);
