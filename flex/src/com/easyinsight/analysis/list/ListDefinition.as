@@ -22,7 +22,12 @@ import mx.collections.ArrayCollection;
 		}
 
         override public function populate(fields:ArrayCollection):void {
-            columns = fields;
+            columns = new ArrayCollection();
+            for each (var field:AnalysisItem in fields) {
+                if (field != null) {
+                    columns.addItem(field);
+                }
+            }            
         }
 
 
