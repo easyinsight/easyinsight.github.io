@@ -561,7 +561,7 @@
                                                   analysisItems="{allFields}"
                                                   showLabel="true"
                                                   paddingBottom="5" paddingLeft="5" paddingRight="5"
-                                                  paddingTop="5" transformAdded="onTransformAdd(event)"/>
+                                                  paddingTop="5"/>
                 </mx:Canvas>
             </mx:HDividedBox>
         </mx:VBox>

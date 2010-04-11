@@ -40,6 +40,13 @@ import mx.controls.Label;
 			_analysisItem = analysisItem;
 			_feedID = feedID;
 		}
+
+        private var _loadingFromReport:Boolean = false;
+
+
+    public function set loadingFromReport(value:Boolean):void {
+        _loadingFromReport = value;
+    }
 		
 		public function set analysisItems(analysisItems:ArrayCollection):void {
 			_analysisItems = analysisItems;
@@ -108,7 +115,11 @@ import mx.controls.Label;
                 }
                 addChild(deleteButton);
             }
-            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            if (_loadingFromReport) {
+                _loadingFromReport = false;
+            } else {
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            }
 		}
 		
 		private function deleteSelf(event:MouseEvent):void {

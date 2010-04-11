@@ -169,8 +169,8 @@ public class AnalysisStorage {
         }
         analysisDefinition.setDateUpdated(new Date());
         if (analysisDefinition.getFilterDefinitions() != null) {
-            for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
-                filter.getField().reportSave(session);
+            for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {                
+                filter.beforeSave(session);
                 if (filter instanceof FilterValueDefinition) {
                     FilterValueDefinition valueFilter = (FilterValueDefinition) filter;
                     for (PersistableValue persistableValue : valueFilter.getPersistedValues()) {

@@ -5,16 +5,16 @@ package com.easyinsight.analysis
 	public class SavedAnalysisEvent extends Event
 	{
 		public static const SAVED_ANALYSIS:String = "viewSaved";
-		public var title:String;
+		public var report:AnalysisDefinition;
 		
-		public function SavedAnalysisEvent(title:String)
+		public function SavedAnalysisEvent(report:AnalysisDefinition)
 		{
 			super(SAVED_ANALYSIS);
-			this.title = title;
+			this.report = report;
 		}
 		
 		override public function clone():Event {
-			return new SavedAnalysisEvent(this.title);
+			return new SavedAnalysisEvent(report);
 		}
 	}
 }

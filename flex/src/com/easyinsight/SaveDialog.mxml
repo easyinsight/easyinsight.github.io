@@ -41,7 +41,7 @@
         private function saved():void {
             var savedDef:AnalysisDefinition = analysisService.saveAs.lastResult as AnalysisDefinition;
             AnalysisUtil.updateReport(analysisDefinition, savedDef);
-            dispatchEvent(new SavedAnalysisEvent(analysisName.text));
+            dispatchEvent(new SavedAnalysisEvent(savedDef));
             PopUpManager.removePopUp(this);
         }
                 ]]>

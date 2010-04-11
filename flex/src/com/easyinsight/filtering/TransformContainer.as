@@ -14,7 +14,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.containers.Tile;
 import mx.controls.AdvancedDataGrid;
-import mx.controls.Alert;
 import mx.controls.DataGrid;
 import mx.controls.List;
 import mx.controls.ToolTip;
@@ -23,7 +22,6 @@ import mx.managers.DragManager;
 import mx.managers.PopUpManager;
 import mx.managers.ToolTipManager;
 
-[Event(name="transformAdded", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
 [Event(name="updatedTransforms", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
 
 public class TransformContainer extends HBox
@@ -64,12 +62,16 @@ public class TransformContainer extends HBox
 
     public function set existingFilters(value:ArrayCollection):void {
         if (!blah && value != null) {
-
+            loadingFromReport = true;
             blah = true;
             _filterDefinitions = value;
             for each (var filterDefinition:FilterDefinition in _filterDefinitions) {
-                addFilterDefinition(filterDefinition);
+                var filter:IFilter = addFilterDefinition(filterDefinition);
+                filterMap[filter.filterDefinition.field.qualifiedName()] = filter;
+                filterDefinitions.addItem(filter.filterDefinition);
+                filter.analysisItems = _analysisItems;
             }
+            loadingFromReport = false;
         }
     }
 
@@ -158,10 +160,16 @@ public class TransformContainer extends HBox
         }
     }
 
+    private var _loadingFromReport:Boolean = false;
 
-    public function addFilterDefinition(filterDefinition:FilterDefinition):void {
+    public function set loadingFromReport(value:Boolean):void {
+        _loadingFromReport = value;
+    }
+
+    public function addFilterDefinition(filterDefinition:FilterDefinition):IFilter {
         var filter:IFilter = createFilter(filterDefinition);
         commandFilterAdd(filter);
+        return filter;
     }
 
     private var _preparedFilters:ArrayCollection;
@@ -326,6 +334,7 @@ public class TransformContainer extends HBox
             noFilters = false;
         }
         filter.filterEditable = _filterEditable;
+        filter.loadingFromReport = _loadingFromReport;
         filter.showLabel = _showLabel;
         filter.addEventListener(FilterUpdatedEvent.FILTER_ADDED, filterAdded);
         filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
@@ -333,6 +342,9 @@ public class TransformContainer extends HBox
         filterTile.addChild(filter as DisplayObject);
         filterTile.invalidateSize();
         this.invalidateSize();
+        if (_loadingFromReport) {
+            addFilter(filter);
+        }
     }
 
     public function commandFilterAdd2(filter:IFilter):void {

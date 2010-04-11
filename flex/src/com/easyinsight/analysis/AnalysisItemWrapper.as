@@ -1,9 +1,9 @@
 package com.easyinsight.analysis
 {
+import flash.events.Event;
 import flash.events.EventDispatcher;
 
 import mx.collections.ArrayCollection;
-import mx.events.FlexEvent;
 
 public class AnalysisItemWrapper extends EventDispatcher
 	{
@@ -13,7 +13,7 @@ public class AnalysisItemWrapper extends EventDispatcher
 		
 		public function AnalysisItemWrapper(feedNode:FeedNode)	{
 			this._feedNode = feedNode;
-			this._displayName = feedNode.display;
+			displayName = feedNode.display;
             _children = new ArrayCollection();
             for each (var child:FeedNode in feedNode.children) {
                 _children.addItem(new AnalysisItemWrapper(child));
@@ -56,24 +56,25 @@ public class AnalysisItemWrapper extends EventDispatcher
         return false;
     }
 
-        public function get keyName():String {
-            if (_feedNode is AnalysisItemNode) {
-                var analysisItemNode:AnalysisItemNode = _feedNode as AnalysisItemNode;
-                return analysisItemNode.analysisItem.key.createString();
-            }
-            return null;
+    public function get keyName():String {
+        if (_feedNode is AnalysisItemNode) {
+            var analysisItemNode:AnalysisItemNode = _feedNode as AnalysisItemNode;
+            return analysisItemNode.analysisItem.key.createString();
         }
-		
-		[Bindable]
-		public function set displayName(displayName:String):void {
-			this._displayName = displayName;
-            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-		}
+        return null;
+    }
 
-		public function get displayName():String {
-			return this._displayName;
-		}
 
+    [Bindable(event="displayNameChanged")]
+    public function get displayName():String {
+        return _displayName;
+    }
+
+    public function set displayName(value:String):void {
+        if (_displayName == value) return;
+        _displayName = value;
+        dispatchEvent(new Event("displayNameChanged"));
+    }
 
     public function get feedNode():FeedNode {
         return _feedNode;

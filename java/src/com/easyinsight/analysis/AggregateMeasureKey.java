@@ -9,10 +9,16 @@ import com.easyinsight.core.Key;
  */
 public class AggregateMeasureKey extends AggregateKey {
     private int aggregation;
+    private String displayName;
 
-    public AggregateMeasureKey(Key key, int type, int aggregation) {
+    public AggregateMeasureKey(Key key, int type, int aggregation, String displayName) {
         super(key, type);
         this.aggregation = aggregation;
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public int getAggregation() {
@@ -32,6 +38,7 @@ public class AggregateMeasureKey extends AggregateKey {
         AggregateMeasureKey that = (AggregateMeasureKey) o;
 
         if (aggregation != that.aggregation) return false;
+        if (displayName != null ? !displayName.equals(that.displayName) : that.displayName != null) return false;
 
         return true;
     }
@@ -40,6 +47,7 @@ public class AggregateMeasureKey extends AggregateKey {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + aggregation;
+        result = 31 * result + (displayName != null ? displayName.hashCode() : 0);
         return result;
     }
 }

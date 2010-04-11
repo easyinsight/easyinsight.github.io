@@ -12,11 +12,9 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
 import com.easyinsight.datafeeds.FeedService;
-import com.easyinsight.dataset.DataSet;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
 import com.easyinsight.calculations.Resolver;
-import com.easyinsight.etl.ETLService;
 import org.hibernate.Session;
 
 /**
@@ -270,6 +268,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
         List<FilterDefinition> clonedFilters = new ArrayList<FilterDefinition>();
         for (FilterDefinition filterDefinition : getFilters()) {
+            //filterDefinition.afterLoad();
             clonedFilters.add(filterDefinition.clone());
         }
         clonedItem.setFilters(clonedFilters);
@@ -277,18 +276,24 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return clonedItem;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AnalysisItem)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         AnalysisItem that = (AnalysisItem) o;
 
-        return key.equals(that.key);
+        if (displayName != null ? !displayName.equals(that.displayName) : that.displayName != null) return false;
+        if (key != null ? !key.equals(that.key) : that.key != null) return false;
 
+        return true;
     }
 
+    @Override
     public int hashCode() {
-        return key.hashCode();
+        int result = key != null ? key.hashCode() : 0;
+        result = 31 * result + (displayName != null ? displayName.hashCode() : 0);
+        return result;
     }
 
     public boolean isDerived() {
@@ -370,9 +375,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void beforeSave() {
-        for (FilterDefinition filterDefinition : getFilters()) {
-            filterDefinition.beforeSave();
-        }
         if (lookupTableID != null && lookupTableID == 0) {
             lookupTableID = null;
         }
@@ -409,6 +411,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void reportSave(Session session) {
         beforeSave();
+        for (FilterDefinition filterDefinition : getFilters()) {
+            filterDefinition.getField().reportSave(session);
+        }
+        for (FilterDefinition filterDefinition : getFilters()) {
+            filterDefinition.beforeSave(session);
+        }
     }
 
     public FeedNode toFeedNode() {

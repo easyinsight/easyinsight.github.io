@@ -40,6 +40,13 @@ import mx.rpc.events.ResultEvent;
 		private var analysisItem:AnalysisItem;
 		private var _filterDefinition:FilterDateRangeDefinition;
 		private var _analysisItems:ArrayCollection;
+
+        private var _loadingFromReport:Boolean = false;
+
+
+    public function set loadingFromReport(value:Boolean):void {
+        _loadingFromReport = value;
+    }
 		
 		[Bindable]
         [Embed(source="../../../../assets/navigate_cross.png")]
@@ -159,8 +166,13 @@ import mx.rpc.events.ResultEvent;
                 addChild(deleteButton);
             }
 			
-			
-			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));			
+
+            if (_loadingFromReport) {
+                _loadingFromReport = false;
+
+            } else {
+			    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            }
 		}
 		
 		public function set analysisItems(analysisItems:ArrayCollection):void {

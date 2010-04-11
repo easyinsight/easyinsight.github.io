@@ -11,8 +11,6 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
-import com.easyinsight.security.Roles;
-import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
 import java.sql.*;
@@ -432,7 +430,7 @@ public class KPIStorage {
             PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO KPI_TO_FILTER (KPI_ID, FILTER_ID) VALUES (?, ?)");
             for (FilterDefinition filterDefinition : kpi.getFilters()) {
                 filterDefinition.getField().reportSave(session);
-                filterDefinition.beforeSave();
+                filterDefinition.beforeSave(session);
                 session.saveOrUpdate(filterDefinition);
                 session.flush();
                 saveFiltersStmt.setLong(1, kpi.getKpiID());
@@ -525,7 +523,7 @@ public class KPIStorage {
         try {
             PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO KPI_TO_PROBLEM_FILTER (KPI_ID, FILTER_ID) VALUES (?, ?)");
             for (FilterDefinition filterDefinition : kpi.getProblemConditions()) {
-                filterDefinition.beforeSave();
+                filterDefinition.beforeSave(session);
                 session.saveOrUpdate(filterDefinition);
                 session.flush();
                 saveFiltersStmt.setLong(1, kpi.getKpiID());

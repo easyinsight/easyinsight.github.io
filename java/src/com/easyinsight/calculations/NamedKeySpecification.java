@@ -21,7 +21,7 @@ public class NamedKeySpecification implements KeySpecification {
     @Nullable
     public AnalysisItem findAnalysisItem(List<AnalysisItem> currentItems) {
         for (AnalysisItem item : currentItems) {
-            if (item.getKey().toKeyString().equals(key) && item.hasType(AnalysisItemTypes.MEASURE)) {
+            if ((item.getKey().toKeyString().equals(key) || (item.getDisplayName() != null && item.getDisplayName().equals(key))) && item.hasType(AnalysisItemTypes.MEASURE)) {
                 return item;
             }
         }

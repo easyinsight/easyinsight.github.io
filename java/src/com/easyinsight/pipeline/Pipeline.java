@@ -18,7 +18,7 @@ public abstract class Pipeline {
     private ResultsBridge resultsBridge = new ListResultsBridge();
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
-        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata, report.getAddedItems());
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
         components = generatePipelineCommands(allNeededAnalysisItems, report.getAllAnalysisItems(), report.retrieveFilterDefinitions(), report);
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
@@ -28,18 +28,25 @@ public abstract class Pipeline {
 
     protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report);
          
-    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> additionalFields) {
+    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
+
+        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(dataSource.getFields());
+        if (report.getAddedItems() != null) {
+            allFields.addAll(report.getAddedItems());
+        }
+
         List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(report.getAllAnalysisItems());
+
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                allNeededAnalysisItems.addAll(filterDefinition.getField().getAnalysisItems(dataSource.getFields(), allRequestedAnalysisItems, false));
+                allNeededAnalysisItems.addAll(filterDefinition.getField().getAnalysisItems(allFields, allRequestedAnalysisItems, false));
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                allNeededAnalysisItems.addAll(item.getAnalysisItems(dataSource.getFields(), allRequestedAnalysisItems, false));
-                allNeededAnalysisItems.addAll(item.addLinkItems(dataSource.getFields(), allRequestedAnalysisItems));
+                allNeededAnalysisItems.addAll(item.getAnalysisItems(allFields, allRequestedAnalysisItems, false));
+                allNeededAnalysisItems.addAll(item.addLinkItems(allFields, allRequestedAnalysisItems));
                 if (item.isVirtual()) {
                     allNeededAnalysisItems.add(item);
                 }
@@ -51,13 +58,13 @@ public abstract class Pipeline {
         // have to bubble that up to visibility
         // that's what we're sort of defining as Key right now, but without the appropriate unique constraint
 
-        List<AnalysisItem> masterFieldList = new ArrayList<AnalysisItem>(dataSource.getFields());
+        /*List<AnalysisItem> masterFieldList = new ArrayList<AnalysisItem>(dataSource.getFields());
         if (additionalFields != null) {
             masterFieldList.addAll(additionalFields);
-        }
+        }*/
         
 
-        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, dataSource.getFields(), dataSource.getProperties());
+        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties());
         return allNeededAnalysisItems;
     }
 

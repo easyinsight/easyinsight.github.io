@@ -22,7 +22,7 @@ package com.easyinsight.analysis
 		}
 		
 		override protected function getQualifiedSuffix():String {
-			return getType() + ":" + aggregation;
+			return getType() + ":" + aggregation + ":" + display;
 		}
 		
 		override public function getType():int {

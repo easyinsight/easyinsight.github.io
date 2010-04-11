@@ -19,7 +19,7 @@ public class MeasureFilterPipelineCleanupComponent implements IComponent {
         for (AnalysisItem analysisItem : new ArrayList<AnalysisItem>(pipelineData.getReportItems())) {
             if (analysisItem.getFilters().size() > 0) {
                 for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
-                    boolean itemFound = findItem(filterDefinition.getField(), allRequestedAnalysisItems);
+                    boolean itemFound = findItem(filterDefinition.getField(), allRequestedAnalysisItems, pipelineData.getAllItems());
                     if (!itemFound) {
                         pipelineData.getReportItems().remove(filterDefinition.getField());
                     }
@@ -29,10 +29,10 @@ public class MeasureFilterPipelineCleanupComponent implements IComponent {
         return dataSet;
     }
 
-    private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems) {
+    private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allFields) {
         int found = 0;
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allRequestedAnalysisItems, new ArrayList<AnalysisItem>(), false);
+            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false);
             found += items.contains(field) ? 1 : 0;
         }
         return found > 1;

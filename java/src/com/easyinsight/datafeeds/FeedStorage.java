@@ -369,7 +369,6 @@ public class FeedStorage {
                     }
                 }
                 for (AnalysisItem analysisItem : analysisItems) {
-                    analysisItem.beforeSave();
                     analysisItem.reportSave(session);
                     if (analysisItem.getAnalysisItemID() == 0) {
                         session.save(analysisItem);
@@ -401,7 +400,7 @@ public class FeedStorage {
                 insertLinkStmt.execute();
             }
             insertLinkStmt.close();
-            PreparedStatement virtualLinkStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_VIRTUAL_DIMENSION (DATA_SOURCE_ID, VIRTUAL_DIMENSION_ID) " +
+            /*PreparedStatement virtualLinkStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_VIRTUAL_DIMENSION (DATA_SOURCE_ID, VIRTUAL_DIMENSION_ID) " +
                     "VALUES (?, ?)");
             if (virtualDimensions != null) {
                 for (VirtualDimension virtualDimension : virtualDimensions) {
@@ -410,7 +409,7 @@ public class FeedStorage {
                     virtualLinkStmt.execute();
                 }
             }
-            virtualLinkStmt.close();
+            virtualLinkStmt.close();*/
         }
     }
 

@@ -40,6 +40,13 @@ public class LastValueFilter extends HBox implements IFilter {
 			_analysisItems = analysisItems;
 		}
 
+    private var _loadingFromReport:Boolean = false;
+
+
+    public function set loadingFromReport(value:Boolean):void {
+        _loadingFromReport = value;
+    }
+
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.feedID = _feedID;
@@ -99,7 +106,11 @@ public class LastValueFilter extends HBox implements IFilter {
                 }
                 addChild(deleteButton);
             }
-            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            if (_loadingFromReport) {
+                _loadingFromReport = false;
+            } else {
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            }
 		}
 
 

@@ -21,7 +21,7 @@ import mx.formatters.Formatter;
 		public var sort:int = 0;
 		public var displayName:String;
         public var width:int = 0;
-        public var concrete:Boolean;
+        public var concrete:Boolean;        
         //public var virtualDimension:VirtualDimension;
         public var links:ArrayCollection = new ArrayCollection();
         public var highIsGood:Boolean = true;

@@ -11,6 +11,7 @@ import com.easyinsight.core.Key;
 public class AggregateKey extends NamedKey {
     private int type;
     private Key key;
+    private int columnIdentifier;
 
     public AggregateKey(Key key, int type) {
         super(key.toKeyString());

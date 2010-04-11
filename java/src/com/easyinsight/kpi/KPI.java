@@ -176,7 +176,7 @@ public class KPI implements Cloneable {
             clonedKPI.setKpiOutcome(null);
             List<FilterDefinition> copyFilters = new ArrayList<FilterDefinition>();
             for (FilterDefinition filter : filters) {
-                filter.beforeSave();
+                //filter.beforeSave(session);
                 FilterDefinition clonedFilter = filter.clone();
                 clonedFilter.setField(clonedFilter.getField().clone());
                 copyFilters.add(clonedFilter);

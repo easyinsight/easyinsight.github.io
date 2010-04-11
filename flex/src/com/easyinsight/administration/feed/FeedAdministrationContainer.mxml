@@ -88,8 +88,16 @@
             feedService.getFeedDefinition.send(_feedID);
         }
 
-        public function set feedID(feedID:int):void {
-            this._feedID = feedID;
+
+        [Bindable(event="feedIDChanged")]
+        public function get feedID():int {
+            return _feedID;
+        }
+
+        public function set feedID(value:int):void {
+            if (_feedID == value) return;
+            _feedID = value;
+            dispatchEvent(new Event("feedIDChanged"));
         }
 
         override protected function createChildren():void {
@@ -309,7 +317,7 @@
 				</mx:VBox>
 			</mx:HBox>
             <mx:Box label="Fields">
-                <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration"/>
+                <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}"/>
             </mx:Box>            
 			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
 

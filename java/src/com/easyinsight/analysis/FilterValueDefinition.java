@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.util.*;
@@ -62,14 +63,41 @@ public class FilterValueDefinition extends FilterDefinition {
     public FilterDefinition clone() throws CloneNotSupportedException {
         FilterValueDefinition filter = (FilterValueDefinition) super.clone();
         Set<PersistableValue> values = new HashSet<PersistableValue>();
-        for (PersistableValue value : persistedValues) {
-            values.add(value.clone());
+        if (persistedValues == null) {
+            Set<Value> valueSet = new HashSet<Value>();
+            for (Object valueObject : filteredValues) {
+                Value value;
+                if (valueObject instanceof Value) {
+                    value = (Value) valueObject;
+                } else if (valueObject instanceof String) {
+                    value = new StringValue((String) valueObject);
+                } else if (valueObject instanceof Number) {
+                    value = new NumericValue((Number) valueObject);
+                } else if (valueObject instanceof Date) {
+                    value = new DateValue((Date) valueObject);
+                } else {
+                    throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+                }
+                valueSet.add(value);
+            }
+            Set<PersistableValue> filterDefinitionValues = PersistableValueFactory.fromValue(valueSet);
+            filter.setPersistedValues(filterDefinitionValues);
+        } else {
+            for (PersistableValue value : persistedValues) {
+                values.add(value.clone());
+            }
+            filter.setPersistedValues(values);
         }
-        filter.setPersistedValues(values);
+        List<Object> transferValues = new ArrayList<Object>();        
+        for (PersistableValue filterDefinitionValue : filter.getPersistedValues()) {
+            transferValues.add(filterDefinitionValue.toValue());
+        }
+        filter.setFilteredValues(transferValues);
         return filter;
     }
 
-    public void beforeSave() {
+    public void beforeSave(Session session) {
+        super.beforeSave(session);
         Set<Value> valueSet = new HashSet<Value>();
         for (Object valueObject : filteredValues) {
             Value value;

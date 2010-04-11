@@ -1,19 +1,17 @@
 package com.easyinsight.analysis
 {
+import com.easyinsight.AnalysisItemDeleteEvent;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
-	import flash.geom.Point;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
-	import mx.controls.Button;
-import mx.core.Application;
+import mx.controls.Alert;
+import mx.controls.Button;
 import mx.managers.PopUpManager;
-
-    import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
 
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -26,6 +24,7 @@ public class ReportEditorFieldControls extends HBox
 		private var button:Button;
 		private var editButton:Button;
 		private var deleteButton:Button;
+    private var _dataSourceID:int;
 
         private var analysisService:RemoteObject;
 
@@ -47,6 +46,11 @@ public class ReportEditorFieldControls extends HBox
     [Bindable(event="showCopyChanged")]
     public function get showCopy():Boolean {
         return _showCopy;
+    }
+
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
     }
 
     public function set showCopy(value:Boolean):void {
@@ -137,7 +141,7 @@ public class ReportEditorFieldControls extends HBox
 		}
 
         private function deleteItem(event:MouseEvent):void {
-            dispatchEvent(new DeleteAnalysisItemEvent(analysisItemWrapper));
+            dispatchEvent(new AnalysisItemDeleteEvent(analysisItemWrapper));
         }
 
         public function set analysisItems(value:ArrayCollection):void {
@@ -145,9 +149,19 @@ public class ReportEditorFieldControls extends HBox
         }
 
         private function editItem(event:MouseEvent):void {
+            var editor:Class;
+            var analysisItem:AnalysisItem = analysisItemWrapper.analysisItem;
+            if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                editor = HierarchyWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                editor = CalculationWindow;
+            } else {
+                editor = AnalysisItemEditor;
+            }
 			var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-			analysisItemEditor.editorClass = AnalysisItemEditor; 			
+			analysisItemEditor.editorClass = editor; 			
 			analysisItemEditor.analysisItem = analysisItemWrapper.analysisItem;
+            analysisItemEditor.dataSourceID = _dataSourceID;
 			analysisItemEditor.analysisItems = this._analysisItems;
 			analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, analysisItemEdited, false, 0, true);
 			PopUpManager.addPopUp(analysisItemEditor, this.parent);
@@ -155,9 +169,11 @@ public class ReportEditorFieldControls extends HBox
         }
 		
 		private function analysisItemEdited(event:AnalysisItemEditEvent):void {
+            var existingItem:AnalysisItem = this.analysisItemWrapper.analysisItem;
 			this.analysisItemWrapper.analysisItem = event.analysisItem;
 			this.analysisItemWrapper.displayName = event.analysisItem.displayName;
-			this.displayName = event.analysisItem.displayName;			 
+			this.displayName = event.analysisItem.displayName;
+            dispatchEvent(new AddedItemUpdateEvent(AddedItemUpdateEvent.UPDATE, existingItem, this.analysisItemWrapper, event.analysisItem));
 		}
 		
 		[Bindable]

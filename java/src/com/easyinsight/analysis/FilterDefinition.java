@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -17,7 +18,7 @@ import java.util.Map;
 @Table(name="filter")
 @Inheritance(strategy= InheritanceType.JOINED)
 public abstract class FilterDefinition implements Serializable, Cloneable {
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem field;
     @Column(name="apply_before_aggregation")
@@ -101,8 +102,16 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         setField(replacementMap.get(field.getAnalysisItemID()));
     }
 
-    public void beforeSave() {
-
+    public void beforeSave(Session session) {
+        getField().reportSave(session);
+        if (getField().getKey().getKeyID() == 0) {
+            session.save(getField().getKey());
+        }
+        if (getField().getAnalysisItemID() == 0) {
+            session.save(getField());
+        } else {
+            session.merge(getField());
+        }
     }
 
     public void afterLoad() {

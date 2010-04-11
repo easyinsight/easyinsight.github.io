@@ -193,8 +193,15 @@ public class ComboBoxFilter extends HBox implements IFilter
 		}
 
     private var newFilter:Boolean = true;
-		
-		private function filterValueChanged(event:DropdownEvent):void {			
+
+    private var _loadingFromReport:Boolean = false;
+
+
+    public function set loadingFromReport(value:Boolean):void {
+        _loadingFromReport = value;
+    }
+
+    private function filterValueChanged(event:DropdownEvent):void {
 			var newValue:String = event.currentTarget.selectedLabel;
 			
 			var selectedValue:String = _filterDefinition.filteredValues.getItemAt(0) as String;
@@ -250,11 +257,15 @@ public class ComboBoxFilter extends HBox implements IFilter
 			    deleteButton.enabled = true;
             }
             viewStack.selectedIndex = 1;
-            if (newFilter) {
-			    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
-                newFilter = false;
+            if (!_loadingFromReport) {
+                if (newFilter) {
+                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+                    newFilter = false;
+                } else {
+                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this, event.bubbles));
+                }
             } else {
-                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this, event.bubbles));
+                loadingFromReport = false;
             }
 		}
 		

@@ -342,7 +342,7 @@ public class DataStorage {
                 }
             }
             DataSet existing = null;
-            Map<Key, KeyMetadata> keyMetadatas = null;
+            Map<Key, KeyMetadata> keyMetadatas;
             if (migrateData) {
                 if (previousKeys.isEmpty()) {
                     existing = new DataSet();
@@ -354,6 +354,7 @@ public class DataStorage {
                             continue;
                         }
                         Key key = analysisItem.createAggregateKey(false);
+                        System.out.println(key.toKeyString() + " - " + analysisItem.getKey().toBaseKey().getKeyID());
                         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
@@ -503,6 +504,7 @@ public class DataStorage {
         PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
+        System.out.println(queryBuilder.toString());
         ResultSet dataRS = queryStmt.executeQuery();
         processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery);
         dataSet.setLastTime(metadata.getLastData());

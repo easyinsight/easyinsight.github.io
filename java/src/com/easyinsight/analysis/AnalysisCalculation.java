@@ -92,7 +92,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.add(analysisItem);
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything));
             }
         }
         

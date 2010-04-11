@@ -3,6 +3,7 @@
            xmlns:analysis="com.easyinsight.analysis.*"
            creationComplete="setupListeners()" height="100%" width="100%">
     <mx:Script><![CDATA[
+        import com.easyinsight.AnalysisItemDeleteEvent;
         import com.easyinsight.analysis.AnalysisCalculation;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -39,6 +40,13 @@
 
         private var _allFields:ArrayCollection = new ArrayCollection();
 
+        private var _dataSourceID:int;
+
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
         private var selectedWrapper:AnalysisItemWrapper;
         private var openEditor:IAnalysisItemEditor;
 
@@ -61,6 +69,7 @@
             if (selectedWrapper != null) {
                 selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
                 selectedWrapper.displayName = selectedWrapper.analysisItem.display;
+                
                 selectedWrapper.invalidateItem();
             }
             selectedWrapper = wrapper;
@@ -80,6 +89,7 @@
             } else {
                 editor = new AnalysisItemEditor();
             }
+            editor.dataSourceID = _dataSourceID;
             openEditor = editor;
             BindingUtils.bindProperty(editor, "analysisItems", this, "allFields");
             editor.analysisItem = wrapper.analysisItem;
@@ -100,18 +110,18 @@
         }
 
         private function setupListeners():void {
-            addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onDelete);
+            addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onDelete);
             addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
         }
 
-        private function onDelete(event:DeleteAnalysisItemEvent):void {
-            var index:int = coreFields.getItemIndex(event.analysisItemWrapper);
+        private function onDelete(event:AnalysisItemDeleteEvent):void {
+            var index:int = coreFields.getItemIndex(event.analysisItem);
             if (index == -1) {
-                derivedFields.removeItemAt(derivedFields.getItemIndex(event.analysisItemWrapper));
+                derivedFields.removeItemAt(derivedFields.getItemIndex(event.analysisItem));
             } else {
-                coreFields.removeItemAt(coreFields.getItemIndex(event.analysisItemWrapper));
+                coreFields.removeItemAt(coreFields.getItemIndex(event.analysisItem));
             }
-            allFields.removeItemAt(allFields.getItemIndex(event.analysisItemWrapper));
+            allFields.removeItemAt(allFields.getItemIndex(event.analysisItem));
         }
 
         [Bindable]

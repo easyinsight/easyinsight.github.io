@@ -65,6 +65,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
             setStyle("paddingBottom", 0);*/
 		}
 
+    private var _loadingFromReport:Boolean = false;
+
+
+    public function set loadingFromReport(value:Boolean):void {
+        _loadingFromReport = value;
+    }
 
     [Bindable(event="lowValueStringChanged")]
     public function get lowValueString():String {
@@ -242,7 +248,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 }
             }
 
+        if (_loadingFromReport) {
+                _loadingFromReport = false;
+
+            } else {
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+        }
     }
 
     /*private function gotMetadata(event:ResultEvent):void {

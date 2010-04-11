@@ -27,7 +27,8 @@ public class VariableNode extends CalculationTreeNode {
             s = s.substring(1, s.length() - 1);
         variableKey = new NamedKeySpecification(s);
         for (AnalysisItem item : allItems) {
-            if (item.getKey().toKeyString().equals(s) && item.hasType(AnalysisItemTypes.MEASURE)) {
+            if ((item.getKey().toKeyString().equals(s) && item.hasType(AnalysisItemTypes.MEASURE)) ||
+                    item.getDisplayName() != null && item.getDisplayName().equals(s)) {
                 analysisItem = item;
             }
         }

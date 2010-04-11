@@ -164,7 +164,7 @@ public class AnalysisService {
 
     public String validateCalculation(String calculationString, long dataSourceID) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
-        String validationString = null;
+        /*String validationString = null;
         try {
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
             CalculationTreeNode tree;
@@ -191,7 +191,8 @@ public class AnalysisService {
             validationString = e.getMessage();
         }
 
-        return validationString;
+        return validationString;*/
+        return null;
     }
 
     public void addAnalysisView(long analysisID) {

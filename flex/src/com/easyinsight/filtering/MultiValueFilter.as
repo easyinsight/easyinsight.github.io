@@ -29,7 +29,14 @@ import mx.controls.Label;
 		private var editButton:Button;
 		private var labelText:Label;
 		private var dataService:RemoteObject;		
-		private var _analysisItems:ArrayCollection; 
+		private var _analysisItems:ArrayCollection;
+
+        private var _loadingFromReport:Boolean = false;
+
+
+    public function set loadingFromReport(value:Boolean):void {
+        _loadingFromReport = value;
+    }
 		
 		[Bindable]
         [Embed(source="../../../../assets/navigate_cross.png")]
@@ -146,7 +153,13 @@ import mx.controls.Label;
             if (deleteButton != null) {
 			    deleteButton.enabled = true;
             }
-			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            if (_loadingFromReport) {
+                _loadingFromReport = false;
+
+            } else {
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            }
+
 		}
 		
 		public function toInclusive(filterValues:ArrayCollection):void {

@@ -8,6 +8,7 @@ import mx.core.UIComponent;
 public class ReportEditorFieldControlsFactory extends UIComponent implements IFactory {
 
     private var _fields:ArrayCollection;
+    private var _dataSourceID:int;
 
     public function ReportEditorFieldControlsFactory() {
     }
@@ -23,9 +24,14 @@ public class ReportEditorFieldControlsFactory extends UIComponent implements IFa
         dispatchEvent(new Event("fieldsChanged"));
     }
 
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
+    }
+
     public function newInstance():* {
         var controls:ReportEditorFieldControls = new ReportEditorFieldControls();
         controls.analysisItems = fields;
+        controls.dataSourceID = _dataSourceID;
         return controls;
     }
 }

@@ -37,7 +37,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
-        import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
+        import com.easyinsight.analysis.AddedItemUpdateEvent;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
         import com.easyinsight.analysis.AnalysisItemNode;
@@ -177,6 +177,9 @@
 
         [Bindable]
         private var dataSourceName:String;
+
+        [Bindable]
+        private var dataSourceID:int;
 
         [Bindable]
         private var _reportID:int;
@@ -320,7 +323,7 @@
                 setState();
             }
 
-
+            dataSourceID = feedMetadata.dataFeedID;
             this.feedMetadata = feedMetadata;
             dataSourceInfo = feedMetadata.dataSourceInfo;
             this.originSolution = feedMetadata.originSolution;
@@ -458,10 +461,10 @@
             loading = true;
             commandProcessor = new CommandProcessor();
             addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
+            addEventListener(AddedItemUpdateEvent.UPDATE, onFieldUpdate);
             addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
-            addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
-            addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
+            addEventListener(CommandEvent.COMMAND, onCommand);
             stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
@@ -554,10 +557,12 @@
 
         private function createFilterBoxes(filters:Array):void {
             if (filters != null) {
+                transformContainer.loadingFromReport = true;
                 for (var i:int = 0; i < filters.length; i++) {
                     var filterDefinition:FilterDefinition = filters[i];
                     transformContainer.addFilterDefinition(filterDefinition);
                 }
+                transformContainer.loadingFromReport = false;
             }
         }
 
@@ -653,12 +658,12 @@
 
         private function savedAnalysis(event:SavedAnalysisEvent):void {
             //title = event.title;
-            reportMetadataTab.updateName(event.title);
+            reportMetadataTab.updateName(event.report.name);
             var feedFragmentObject:Object = new Object();
-            feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
+            feedFragmentObject.analysisID = String(event.report.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
-            BrowserManager.getInstance().setTitle("Easy Insight - " + event.title);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
             this.analysisChanged = false;
         }
 
@@ -686,7 +691,6 @@
             if (stage != null)
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
-            removeEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             reportMetadataTab.cleanup();
@@ -735,15 +739,6 @@
             canMultiViewAnalysis = userCapabilities.reportingAvailable;
         }
 
-        private function onFieldDelete(event:DeleteAnalysisItemEvent):void {
-            for each (var analysisItemWrapper:AnalysisItemWrapper in availableFields) {
-                if (analysisItemWrapper == event.analysisItemWrapper) {
-                    availableFields.removeItemAt(availableFields.getItemIndex(analysisItemWrapper));
-                    break;
-                }
-            }
-        }
-
         private function onCopy(event:AnalysisItemCopyEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
             var node:AnalysisItemNode = new AnalysisItemNode();
@@ -755,6 +750,13 @@
                 analysisDefinition.addedItems = new ArrayCollection();
             }
             analysisDefinition.addedItems.addItem(event.analysisItem);
+        }
+
+        private function onFieldUpdate(event:AddedItemUpdateEvent):void {
+            availableFields.removeItemAt(availableFields.getItemIndex(event.wrapper));
+            availableFields.addItem(event.wrapper);            
+            analysisDefinition.addedItems.removeItemAt(analysisDefinition.addedItems.getItemIndex(event.previousItem));
+            analysisDefinition.addedItems.addItem(event.newItem);
         }
 
         private function gotUserCapabilitiesForInsight():void {
@@ -873,7 +875,7 @@
             if (wrapperIndex != -1) {
                 wrappers.removeItemAt(wrapperIndex);
             }
-            var availableFieldIndex:int = availableFields.getItemIndex(event.analysisItem.analysisItem);
+            var availableFieldIndex:int = availableFields.getItemIndex(event.analysisItem);
             if (availableFieldIndex != -1) {
                 availableFields.removeItemAt(availableFieldIndex);
             }
@@ -914,7 +916,7 @@
         <mx:method name="getAllData" result="gotDetailData()"/>
         <mx:method name="getCredentialRequirements" result="gotCredentialRequirements()"/>
     </mx:RemoteObject>
-    <analysis:ReportEditorFieldControlsFactory fields="{wrappers}" id="controlsFactory"/>
+    <analysis:ReportEditorFieldControlsFactory fields="{wrappers}" id="controlsFactory" dataSourceID="{dataSourceID}"/>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275">
         <mx:HBox verticalAlign="middle" id="controlBar">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
@@ -948,8 +950,7 @@
                     wrappers="{wrappers}" availableFields="{availableFields}"
                     dataView="{dataView}" analysisItemCreated="sortFields()" reportSizing="onReportSizing(event)" analysisItemEdit="sortFields()"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
-                                          paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters (F3)"
-                                          icon="@Embed(source='../../../assets/funnel.png')"
+                                          paddingRight="10" label="Filters (F3)" icon="@Embed(source='../../../assets/funnel.png')"
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
                                           feedID="{dataService.dataFeedID}"
                                           analysisItems="{wrappers}">

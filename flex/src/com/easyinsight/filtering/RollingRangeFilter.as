@@ -58,6 +58,13 @@ public class RollingRangeFilter extends HBox implements IFilter
         rangeOptions.addItem(new RangeOption("Last Day of Data", RollingDateRangeFilterDefinition.LAST_DAY));
     }
 
+    private var _loadingFromReport:Boolean = false;
+
+
+    public function set loadingFromReport(value:Boolean):void {
+        _loadingFromReport = value;
+    }
+
     public function set filterDefinition(filterDefinition:FilterDefinition):void
     {
         this.rollingFilter = filterDefinition as RollingDateRangeFilterDefinition;
@@ -135,7 +142,11 @@ public class RollingRangeFilter extends HBox implements IFilter
                 rollingFilter = new RollingDateRangeFilterDefinition();
                 rollingFilter.field = _analysisItem;
             }
-            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            if (_loadingFromReport) {
+                _loadingFromReport = false;
+            } else {
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+            }
         }
         addChild(comboBox);
         if (_filterEditable) {

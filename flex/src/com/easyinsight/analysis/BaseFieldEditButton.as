@@ -1,6 +1,8 @@
 package com.easyinsight.analysis
 {
-	import flash.events.MouseEvent;
+import com.easyinsight.AnalysisItemDeleteEvent;
+
+import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -8,8 +10,6 @@ package com.easyinsight.analysis
 	import mx.controls.Button;
 import mx.core.Application;
 import mx.managers.PopUpManager;
-
-    import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
 
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -96,7 +96,7 @@ public class BaseFieldEditButton extends HBox
 		}
 
         private function deleteItem(event:MouseEvent):void {
-            dispatchEvent(new DeleteAnalysisItemEvent(analysisItemWrapper));
+            dispatchEvent(new AnalysisItemDeleteEvent(analysisItemWrapper));
         }
 		
 		private function editItem(event:MouseEvent):void {

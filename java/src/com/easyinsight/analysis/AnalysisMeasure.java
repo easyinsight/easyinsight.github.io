@@ -59,7 +59,8 @@ public class AnalysisMeasure extends AnalysisItem {
 
     @Override
     public AggregateKey createAggregateKey() {
-        return new AggregateMeasureKey(getKey(), getType(), aggregation);
+        // in case of filters, how do we do this...        
+        return new AggregateMeasureKey(getKey(), getType(), aggregation, toDisplay());
     }
 
     public AggregateKey createAggregateKey(boolean measure) {

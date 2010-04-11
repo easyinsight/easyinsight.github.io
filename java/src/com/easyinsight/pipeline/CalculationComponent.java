@@ -21,7 +21,7 @@ public class CalculationComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         for (IRow row : dataSet.getRows()) {
-            Value value = analysisCalculation.calculate(row, pipelineData.getReportItems());
+            Value value = analysisCalculation.calculate(row, pipelineData.getAllItems());
             row.addValue(analysisCalculation.createAggregateKey(), value);
         }
         pipelineData.getReportItems().add(analysisCalculation);
