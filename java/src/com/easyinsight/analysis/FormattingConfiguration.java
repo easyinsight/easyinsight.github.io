@@ -2,9 +2,10 @@ package com.easyinsight.analysis;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Formatter;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
 
 /**
  * User: James Boe
@@ -52,7 +53,7 @@ public class FormattingConfiguration implements Serializable, Cloneable {
                 nf = NumberFormat.getCurrencyInstance();
                 break;
             case PERCENTAGE:
-                nf = NumberFormat.getPercentInstance();
+                nf = new PercentNumberFormat();
                 break;
             default:
                 nf = new DecimalFormat();
@@ -79,5 +80,22 @@ public class FormattingConfiguration implements Serializable, Cloneable {
 
     public void setTextUom(String textUom) {
         this.textUom = textUom;
+    }
+
+    class PercentNumberFormat extends NumberFormat {
+
+        private NumberFormat format = NumberFormat.getPercentInstance();
+
+        public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+            return format.format(number/100.0, toAppendTo, pos).append("%");
+        }
+
+        public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+            return format.format(number/100.0, toAppendTo, pos).append("%");
+        }
+
+        public Number parse(String source, ParsePosition parsePosition) {
+            return format.parse(source, parsePosition).doubleValue() * 100.0;
+        }
     }
 }
