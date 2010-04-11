@@ -7,7 +7,6 @@ import com.easyinsight.core.StringValue;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -54,8 +53,8 @@ public class AnalysisDimension extends AnalysisItem {
         this.summary = summary;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
-        List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything);        
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters) {
+        List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters);        
         /*if (getVirtualDimension() != null) {
             analysisItems.add(getVirtualDimension().getBaseDimension());
         } else {

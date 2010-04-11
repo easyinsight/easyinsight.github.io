@@ -32,10 +32,10 @@ public class MeasureFilterPipelineCleanupComponent implements IComponent {
     private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allFields) {
         int found = 0;
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false);
+            List<AnalysisItem> items = item.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), false, false);
             found += items.contains(field) ? 1 : 0;
         }
-        return found > 1;
+        return found > 0;
     }
 
     public void decorate(DataResults listDataResults) {

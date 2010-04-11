@@ -66,10 +66,10 @@ public class TransformContainer extends HBox
             blah = true;
             _filterDefinitions = value;
             for each (var filterDefinition:FilterDefinition in _filterDefinitions) {
-                var filter:IFilter = addFilterDefinition(filterDefinition);
-                filterMap[filter.filterDefinition.field.qualifiedName()] = filter;
+                addFilterDefinition(filterDefinition);
+                /*filterMap[filter.filterDefinition.field.qualifiedName()] = filter;
                 filterDefinitions.addItem(filter.filterDefinition);
-                filter.analysisItems = _analysisItems;
+                filter.analysisItems = _analysisItems;*/
             }
             loadingFromReport = false;
         }

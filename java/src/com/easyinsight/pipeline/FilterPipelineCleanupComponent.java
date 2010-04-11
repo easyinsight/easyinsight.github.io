@@ -39,7 +39,7 @@ public class FilterPipelineCleanupComponent implements IComponent {
     private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allItems) {
         boolean found = false;
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allItems, allRequestedAnalysisItems, false);
+            List<AnalysisItem> items = item.getAnalysisItems(allItems, allRequestedAnalysisItems, false, true);
             found = items.contains(field);
             if (found) {
                 break;

@@ -51,7 +51,7 @@ public class LookupTableComponent implements IComponent {
     private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems) {
         int found = 0;
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allRequestedAnalysisItems, new ArrayList<AnalysisItem>(), false);
+            List<AnalysisItem> items = item.getAnalysisItems(allRequestedAnalysisItems, new ArrayList<AnalysisItem>(), false, true);
             found += items.contains(field) ? 1 : 0;
         }
         return found > 1;

@@ -310,10 +310,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
-        if (getFilters().size() > 0) {
+        if (includeFilters && getFilters().size() > 0) {
             for (FilterDefinition filterDefinition : getFilters()) {
                 items.add(filterDefinition.getField());
             }

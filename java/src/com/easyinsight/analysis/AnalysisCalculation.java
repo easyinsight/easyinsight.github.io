@@ -1,10 +1,8 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.EmptyValue;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
@@ -59,7 +57,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return super.getType() | AnalysisItemTypes.CALCULATION;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
@@ -92,7 +90,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters));
             }
         }
         
