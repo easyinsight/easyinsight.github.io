@@ -20,23 +20,23 @@ public class BaseCamp1To2 extends DataSourceMigration {
     }
 
     public void migrate(Map<String, Key> keys, EIConnection conn) {
-        AnalysisDimension startTodoDim = (AnalysisDimension) findAnalysisItem(BaseCampDataSource.TODOLISTNAME);
+        AnalysisDimension startTodoDim = (AnalysisDimension) findAnalysisItem(BaseCampTodoSource.TODOLISTNAME);
         if (startTodoDim != null) {
-            AnalysisDimension todoDimension = new AnalysisDimension(startTodoDim.getKey(), BaseCampDataSource.TODOLISTNAME);
+            AnalysisDimension todoDimension = new AnalysisDimension(startTodoDim.getKey(), BaseCampTodoSource.TODOLISTNAME);
             URLLink todoLink = new URLLink();
             todoLink.setLabel("View Todo List in Basecamp");
-            todoLink.setUrl("[basecamp.url]/projects/["+BaseCampDataSource.PROJECTID+"]/todo_lists/["+BaseCampDataSource.TODOLISTID+"]");
+            todoLink.setUrl("[basecamp.url]/projects/["+BaseCampTodoSource.PROJECTID+"]/todo_lists/["+BaseCampTodoSource.TODOLISTID+"]");
             todoDimension.setLinks(Arrays.asList((Link) todoLink));
-            migrateAnalysisItemByDisplay(BaseCampDataSource.TODOLISTNAME, todoDimension);
+            migrateAnalysisItemByDisplay(BaseCampTodoSource.TODOLISTNAME, todoDimension);
         }
-        AnalysisDimension startProjectDim = (AnalysisDimension) findAnalysisItem("Todo - " + BaseCampDataSource.PROJECTNAME);
+        AnalysisDimension startProjectDim = (AnalysisDimension) findAnalysisItem("Todo - " + BaseCampTodoSource.PROJECTNAME);
         if (startProjectDim != null) {
-            AnalysisDimension projectDimension = new AnalysisDimension(startProjectDim.getKey(), "Todo - " + BaseCampDataSource.PROJECTNAME);
+            AnalysisDimension projectDimension = new AnalysisDimension(startProjectDim.getKey(), "Todo - " + BaseCampTodoSource.PROJECTNAME);
             URLLink projectLink = new URLLink();
             projectLink.setLabel("View Project in Basecamp");
-            projectLink.setUrl("[basecamp.url]/projects/["+BaseCampDataSource.PROJECTID+"]");
+            projectLink.setUrl("[basecamp.url]/projects/["+BaseCampTodoSource.PROJECTID+"]");
             projectDimension.setLinks(Arrays.asList((Link) projectLink));
-            migrateAnalysisItemByDisplay("Todo - " + BaseCampDataSource.PROJECTNAME, projectDimension);
+            migrateAnalysisItemByDisplay("Todo - " + BaseCampTodoSource.PROJECTNAME, projectDimension);
         }
         /*AnalysisDimension contentDimension = new AnalysisDimension("Todo Item", true);
         migrateAnalysisItem(BaseCampDataSource.CONTENT, contentDimension);*/
