@@ -221,8 +221,7 @@
                     $("#kpi_<%= kpi.getKpiID() %>").contextMenu({
                         menu: 'kpi_<%= kpi.getKpiID() %>_menu'
                     },
-                    null
-                    });
+                    null);
                 <% } %> });
             </script>
         <%
