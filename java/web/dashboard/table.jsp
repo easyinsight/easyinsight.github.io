@@ -221,11 +221,7 @@
                     $("#kpi_<%= kpi.getKpiID() %>").contextMenu({
                         menu: 'kpi_<%= kpi.getKpiID() %>_menu'
                     },
-                    function(action, el, pos) {
-                       var loc = window.location
-                        loc.hash = action
-                        loc.pathname = "/app/"
-                        window.location = loc;
+                    null
                     });
                 <% } %> });
             </script>
