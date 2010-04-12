@@ -88,40 +88,44 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
 
                 EIPageInfo info = new EIPageInfo();
                 info.currentPage = 1;
-                do {
-                    try {
-                        Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false);
-                        Nodes todoListNodes = todoLists.query("/time-entries/time-entry");
-                        for(int j = 0;j < todoListNodes.size();j++) {
-                            Node todoListNode = todoListNodes.get(j);
-                            String personID = queryField(todoListNode, "person-id/text()");
-                            String timeHours = queryField(todoListNode, "hours/text()");
-                            String timeDescription = queryField(todoListNode, "description/text()");
-                            String todoItemID = queryField(todoListNode, "todo-item-id/text()");
-                            String personName = retrieveContactInfo(client, builder, peopleCache, personID, url);
-                            Date date = deadlineFormat.parse(queryField(todoListNode, "date/text()"));
+                if (info.MaxPages > 0) {
+                    do {
+                        try {
+                            Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false);
+                            Nodes todoListNodes = todoLists.query("/time-entries/time-entry");
+                            for(int j = 0;j < todoListNodes.size();j++) {
+                                Node todoListNode = todoListNodes.get(j);
+                                String personID = queryField(todoListNode, "person-id/text()");
+                                String timeHours = queryField(todoListNode, "hours/text()");
+                                String timeDescription = queryField(todoListNode, "description/text()");
+                                String todoItemID = queryField(todoListNode, "todo-item-id/text()");
+                                String personName = retrieveContactInfo(client, builder, peopleCache, personID, url);
+                                Date date = deadlineFormat.parse(queryField(todoListNode, "date/text()"));
 
-                            IRow row = ds.createRow();
-                            row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
-                            row.addValue(keys.get(PROJECTNAME), projectName);
-                            row.addValue(keys.get(PERSONNAME), personName);
-                            row.addValue(keys.get(PERSONID), personID);
-                            row.addValue(keys.get(HOURS), new NumericValue(Double.parseDouble(timeHours)));
-                            row.addValue(keys.get(DESCRIPTION), timeDescription);
-                            row.addValue(keys.get(TODOID), todoItemID);
-                            row.addValue(keys.get(DATE), new DateValue(date));
-                            row.addValue(keys.get(COUNT), new NumericValue(1));
+                                IRow row = ds.createRow();
+                                row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
+                                row.addValue(keys.get(PROJECTNAME), projectName);
+                                row.addValue(keys.get(PERSONNAME), personName);
+                                row.addValue(keys.get(PERSONID), personID);
+                                row.addValue(keys.get(HOURS), new NumericValue(Double.parseDouble(timeHours)));
+                                row.addValue(keys.get(DESCRIPTION), timeDescription);
+                                row.addValue(keys.get(TODOID), todoItemID);
+                                row.addValue(keys.get(DATE), new DateValue(date));
+                                row.addValue(keys.get(COUNT), new NumericValue(1));
+                            }
+                            if (dataStorage != null) {
+                                dataStorage.insertData(ds);
+                                ds = new DataSet();
+                            }
+                        } catch (Exception e) {
+                            LogClass.error("Error " + e.getMessage() + " while retrieving page " + info.currentPage + " of "+ info.MaxPages);
+                            LogClass.error(e);
                         }
-                        if (dataStorage != null) {
-                            dataStorage.insertData(ds);
-                            ds = new DataSet();
-                        }
-                    } catch (Exception e) {
-                        LogClass.error("Error " + e.getMessage() + " while retrieving page " + info.currentPage + " of "+ info.MaxPages);
-                        LogClass.error(e);
-                    }
-                } while(info.currentPage++ < info.MaxPages);
+                    } while(info.currentPage++ < info.MaxPages);
+                }
             }
+        } catch (BaseCampDataException bcde) {
+            return ds;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

@@ -201,9 +201,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             return new CredentialsResponse(true, getDataFeedID());
         } catch (Exception e) {
             LogClass.error(e);
-
-                conn.rollback();
-
+            conn.rollback();
             return new CredentialsResponse(false, e.getMessage(), getDataFeedID());
         } finally {
             conn.setAutoCommit(true);

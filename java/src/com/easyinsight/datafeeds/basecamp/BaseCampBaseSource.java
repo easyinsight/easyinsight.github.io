@@ -58,8 +58,15 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
         restMethod.setRequestHeader("Content-Type", "application/xml");
         Document doc;
         try {
-            client.executeMethod(restMethod);            
+            client.executeMethod(restMethod);
+            //System.out.println(restMethod.getResponseBodyAsString());
             doc = builder.build(restMethod.getResponseBodyAsStream());
+            String rootValue = doc.getRootElement().getValue();
+            if ("The API is not available to this account".equals(rootValue)) {
+                throw new BaseCampDataException("You need to enable API access to your Basecamp account--you can do this under Account (Upgrade/Invoice), Basecamp API in the Basecamp user interface.");
+            }
+            //Thread.dumpStack();
+            //System.out.println(doc.getRootElement().getValue());
             if(pageInfo != null) {
                 pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
             }
@@ -75,8 +82,9 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                     throw e;
                 }
             }
-        }
-        catch (Throwable e) {
+        } catch (BaseCampLoginException ble) {
+            throw ble;
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
         return doc;
