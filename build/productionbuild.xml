@@ -314,7 +314,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, compileYahooWidget, compileYahooGoals, modules1, modules2, modules3, modules4, modules5">
+    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, modules1, modules2, modules3, modules4, modules5">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -345,10 +345,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/PrimaryWorkspace.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PrimaryWorkspace"
-                sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="optimized.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="PrimaryWorkspace"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="compileIntro">
@@ -370,10 +367,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/IntroApplication.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="IntroApplication"
-                sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="intro.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="IntroApplication"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>    
 
     <target name="compileEmbeddedInsight">
@@ -395,10 +389,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/EmbeddedInsight.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="EmbeddedInsight"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="embedded.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="IntroApplication"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
 
     </target>
 
@@ -421,10 +412,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/YahooWidgetReport.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetReport"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="yahoo.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetReport"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="compileYahooGoals">
@@ -446,10 +434,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/YahooWidgetGoals.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetGoals"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="yahoo-goals.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetGoals"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="compileAdmin">
@@ -505,10 +490,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/ListModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="ListModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="list.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="ListModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.columnchart">
@@ -530,10 +512,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/ColumnChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="ColumnChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="column.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="ColumnChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.column3dchart">
@@ -555,10 +534,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/Column3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Column3DChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="column3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Column3DChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.piechart">
@@ -580,10 +556,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/PieChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PieChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="pie.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="PieChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.pie3dchart">
@@ -605,10 +578,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/Pie3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Pie3DChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="pie3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Pie3DChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.barchart">
@@ -630,10 +600,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/BarChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="BarChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="bar.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="BarChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.bar3dchart">
@@ -655,10 +622,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/Bar3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Bar3DChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="bar3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Bar3DChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.areachart">
@@ -680,10 +644,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/AreaChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="AreaChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="area.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="AreaChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.area3dchart">
@@ -705,10 +666,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/Area3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Area3DChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="area3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Area3DChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.linechart">
@@ -730,10 +688,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/LineChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="LineChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="line.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="LineChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.line3dchart">
@@ -755,10 +710,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/Line3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Line3DChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="line3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Line3DChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.bubblechart">
@@ -780,10 +732,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/BubbleChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="BubbleChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="bubble.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="BubbleChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.timeline">
@@ -805,10 +754,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/BubbleChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="BubbleChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="timeline.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="BubbleChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.plotchart">
@@ -830,10 +776,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/PlotChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PlotChartModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="plot.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="PlotChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.map">
@@ -855,10 +798,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/MapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="MapModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="map.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="MapModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.usmap">
@@ -1006,10 +946,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/CrosstabModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="CrosstabModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="crosstab.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="CrosstabModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.gauge">
@@ -1031,10 +968,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/GaugeModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="GaugeModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="gauge.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="GaugeModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.treemap">
@@ -1056,10 +990,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/TreeMapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="treemap.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.heatmap">
@@ -1081,10 +1012,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/TreeMapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="treemap.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+
     </target>
 
     <target name="module.tree">
@@ -1106,10 +1034,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/TreeModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeModule"
-            sizeAPIKey="${size.api.key}"/>
-        <SWFAnalysis linkReportPath="tree.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+        
     </target>
 
     <target name="upload">
