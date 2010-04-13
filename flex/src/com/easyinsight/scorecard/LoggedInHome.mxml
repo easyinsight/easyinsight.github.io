@@ -13,9 +13,10 @@
     <mx:Script><![CDATA[
 
         public function gotFocus():void {
-            if (currentState == "noData") {
+            /*if (currentState == "noData") {
                 scorecardDisplay.gotFocus();
-            }
+            }*/
+            scorecardDisplay.gotFocus();
         }
 
         public function cleanup():void {
