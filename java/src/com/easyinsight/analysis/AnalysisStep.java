@@ -124,17 +124,23 @@ public class AnalysisStep extends AnalysisDateDimension {
     @Override
     public void reportSave(Session session) {
         super.reportSave(session);
-        if (startDate.getAnalysisItemID() == 0) {
+        if (startDate != null) {
             startDate.reportSave(session);
-            session.save(startDate);
+            if (startDate.getAnalysisItemID() == 0) {
+                session.save(startDate);
+            }
         }
-        if (endDate.getAnalysisItemID() == 0) {
+        if (endDate != null) {
             endDate.reportSave(session);
-            session.save(endDate);
+            if (endDate.getAnalysisItemID() == 0) {
+                session.save(endDate);
+            }
         }
-        if (correlationDimension.getAnalysisItemID() == 0) {
+        if (correlationDimension != null) {
             correlationDimension.reportSave(session);
-            session.save(correlationDimension);
+            if (correlationDimension.getAnalysisItemID() == 0) {
+                session.save(correlationDimension);
+            }
         }
     }
 }
