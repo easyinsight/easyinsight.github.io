@@ -17,7 +17,7 @@ import java.util.*;
  * Date: Oct 30, 2009
  * Time: 4:00:43 PM
  */
-public class DataSourceMigration {
+public abstract class DataSourceMigration {
 
     private FeedDefinition dataSource;
 
@@ -93,15 +93,9 @@ public class DataSourceMigration {
         dataSource.getFields().add(analysisItem);
     }
 
-    public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
-        
-    }
+    public abstract void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException;
 
-    public int fromVersion() {
-        return 2;
-    }
+    public abstract int fromVersion();
 
-    public int toVersion() {
-        return 3;
-    }
+    public abstract int toVersion();
 }

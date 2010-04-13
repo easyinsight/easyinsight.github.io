@@ -27,4 +27,14 @@ public class HighRiseComposite1To2 extends DataSourceMigration {
         addConnection(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
                 HighRiseContactSource.COMPANY_ID), conn);
     }
+
+    @Override
+    public int fromVersion() {
+        return 1;
+    }
+
+    @Override
+    public int toVersion() {
+        return 2;
+    }
 }

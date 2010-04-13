@@ -37,4 +37,14 @@ public class BaseCamp2To3 extends DataSourceMigration {
             contentDim.setDisplayName(BaseCampTodoSource.TODO_ITEM_NAME);
         }
     }
+
+    @Override
+    public int fromVersion() {
+        return 2;
+    }
+
+    @Override
+    public int toVersion() {
+        return 3;
+    }
 }
