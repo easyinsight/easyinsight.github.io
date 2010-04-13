@@ -199,6 +199,10 @@
                 var seriesData:Object = new Object();
                 for (var i:int = 0; i < dataSet.length; i++) {
                     var object:Object = dataSet.getItemAt(i);
+                    if (object[lineChartDef.xaxis.qualifiedName()] == null ||
+                            object[lineChartDef.xaxis.qualifiedName()] == "") {
+                        continue;
+                    }
                     var dimensionValue:String = object[lineChartDef.yaxis.qualifiedName()];
                     if (dimensionValue == null || dimensionValue == "") {
                         dimensionValue = "[ No Value ]";

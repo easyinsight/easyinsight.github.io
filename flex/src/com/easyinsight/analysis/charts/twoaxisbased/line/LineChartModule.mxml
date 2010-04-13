@@ -26,6 +26,7 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -82,7 +83,7 @@
         }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
-
+            try {
             var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
 
             this.chartData = new ArrayCollection(dataSet.toArray());
@@ -150,10 +151,10 @@
                             break;
                     }
                     dateAxis.displayName = dateDimension.display;
-                    if (additionalProperties["xAxisMinimum"] != null) {
+                    if (additionalProperties != null && additionalProperties["xAxisMinimum"] != null) {
                         dateAxis.minimum = additionalProperties["xAxisMinimum"];
                     }
-                    if (additionalProperties["xAxisMaximum"] != null) {
+                    if (additionalProperties != null && additionalProperties["xAxisMaximum"] != null) {
                         dateAxis.maximum = additionalProperties["xAxisMaximum"];
                     }                    
                     xAxis = dateAxis;
@@ -174,6 +175,10 @@
                 var seriesData:Object = new Object();
                 for (var i:int = 0; i < dataSet.length; i++) {
                     var object:Object = dataSet.getItemAt(i);
+                    if (object[lineChartDef.xaxis.qualifiedName()] == null ||
+                            object[lineChartDef.xaxis.qualifiedName()] == "") {
+                        continue;
+                    }
                     var dimensionValue:String = object[lineChartDef.yaxis.qualifiedName()];
                     if (dimensionValue == null || dimensionValue == "") {
                         dimensionValue = "[ No Value ]";
@@ -212,6 +217,9 @@
 
             legend.dataProvider = lineChart;
             legend.direction = "vertical";
+            } catch (e:Error) {
+                Alert.show(e.message);
+            }
         }
 
 
