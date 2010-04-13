@@ -138,9 +138,9 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             measureGrouping.addAnalysisItem(analysisItem);
         } else if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
-            yAxisGrouping.addAnalysisItem(analysisItem);
-        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
             xAxisGrouping.addAnalysisItem(analysisItem);
+        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            yAxisGrouping.addAnalysisItem(analysisItem);
         }
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }

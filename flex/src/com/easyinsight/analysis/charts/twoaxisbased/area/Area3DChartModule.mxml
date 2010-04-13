@@ -172,6 +172,12 @@
                             break;
                     }
                     dateAxis.displayName = dateDimension.display;
+                    if (additionalProperties["xAxisMinimum"] != null) {
+                        dateAxis.minimum = additionalProperties["xAxisMinimum"];
+                    }
+                    if (additionalProperties["xAxisMaximum"] != null) {
+                        dateAxis.maximum = additionalProperties["xAxisMaximum"];
+                    }
                     xAxis = dateAxis;
                 } else {
                     var categoryAxis:CategoryAxis = new CategoryAxis();
