@@ -203,7 +203,7 @@ import mx.rpc.events.ResultEvent;
 				_filterDefinition.startDate = dateMetadata.earliestDate;
 				_filterDefinition.endDate = dateMetadata.latestDate;
 				_filterDefinition.field = analysisItem;
-                _filterDefinition.applyBeforeAggregation = false;
+                //_filterDefinition.applyBeforeAggregation = false;
                 _filterDefinition.sliding = true;
 			} else {
                 if (_filterDefinition.sliding && _filterDefinition.startDate != null && _filterDefinition.endDate != null) {
