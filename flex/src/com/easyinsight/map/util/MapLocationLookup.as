@@ -110,9 +110,9 @@ public class MapLocationLookup
 			worldAliasMap["COTE D'IVOIRE"] = "CIV";
 			worldAliasMap["CÔTE D'IVOIRE"] ="CIV";
 			worldAliasMap["CAMEROON"] = "CMR";
-			worldAliasMap["CONGO, DEMOCRATIC REPUBLIC OF THE"] = "COD";
-			worldAliasMap["DEMOCRATIC REPUBLIC OF THE CONGO"] = "COD";
-			worldAliasMap["CONGO| DEMOCRATIC REPUBLIC OF THE"] = "COD";
+			worldAliasMap["CONGO, DEMOCRATIC REPUBLIC OF THE"] = "ZAR"; // ISO is COD but map appears not to support it
+			worldAliasMap["DEMOCRATIC REPUBLIC OF THE CONGO"] = "ZAR";
+			worldAliasMap["CONGO| DEMOCRATIC REPUBLIC OF THE"] = "ZAR";
 			worldAliasMap["CONGO, REPUBLIC OF THE"] = "COG";
 			worldAliasMap["CONGO| REPUBLIC OF THE"] = "COG";
 			worldAliasMap["REPUBLIC OF THE CONGO"] = "COG"
