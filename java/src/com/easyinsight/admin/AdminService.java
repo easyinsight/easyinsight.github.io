@@ -20,6 +20,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.users.Account;
 import flex.management.runtime.messaging.client.FlexClientManagerControlMBean;
 
 /**
@@ -32,6 +34,7 @@ public class AdminService {
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
 
     public void threadDump() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(true, true);
         for (ThreadInfo threadInfo : threadInfos) {
@@ -39,7 +42,62 @@ public class AdminService {
         }
     }
 
+    private void cleanOrphanKeys(EIConnection conn) throws SQLException {
+        PreparedStatement query = conn.prepareStatement("select report_structure_id, analysis.analysis_id, analysis_item.analysis_item_id from report_structure left join analysis on report_structure.analysis_id = analysis.analysis_id left join analysis_item on report_structure.analysis_item_id = analysis_item.analysis_item_id and (analysis.analysis_id is null or analysis_item.analysis_item_id is null)");
+        PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM ITEM_KEY WHERE ITEM_KEY_ID = ?");
+        ResultSet rs = query.executeQuery();
+        while (rs.next()) {
+            long id = rs.getLong(1);
+            nukeStmt.setLong(1, id);
+            nukeStmt.executeUpdate();
+        }
+    }
+
+    private void cleanOrphanItems(EIConnection conn) throws SQLException {
+        PreparedStatement query = conn.prepareStatement("select report_structure_id, analysis.analysis_id, analysis_item.analysis_item_id " +
+                    "from report_structure left join analysis on report_structure.analysis_id = analysis.analysis_id left join analysis_item on " +
+                    "report_structure.analysis_item_id = analysis_item.analysis_item_id and analysis.analysis_id is null and " +
+                    "analysis_item.analysis_item_id is null");
+        PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM REPORT_STRUCTURE WHERE REPORT_STRUCTURE_ID = ?");
+        ResultSet rs = query.executeQuery();
+        while (rs.next()) {
+            long id = rs.getLong(1);
+            nukeStmt.setLong(1, id);
+            nukeStmt.executeUpdate();
+        }
+    }
+
+    private void cleanRawUploads(EIConnection conn) throws SQLException {
+        PreparedStatement cleanStmt = conn.prepareStatement("TRUNCATE USER_UPLOAD");
+        cleanStmt.execute();
+    }
+
+    public void clearOrphanData() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            cleanOrphanItems(conn);
+            cleanOrphanKeys(conn);
+            cleanRawUploads(conn);
+            conn.commit();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void main(String[] args) {
+        Database.initialize();
+        new AdminService().clearOrphanData();
+    }
+
     public String generateSitemap() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         StringBuilder sitemapBuilder = new StringBuilder();
         sitemapBuilder.append("<?xml version='1.0' encoding='UTF-8'?>\n" +
                 "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"\n" +
@@ -96,45 +154,7 @@ public class AdminService {
     public static final String CLIENT_COUNT = "Client Count";
 
     public HealthInfo getHealthInfo() {
-        try {
-            HealthInfo healthInfo = new HealthInfo();
-            healthInfo.setActiveDBConnections(Database.instance().getActiveConnections());
-            healthInfo.setIdleDBConnections(Database.instance().getIdleConnections());
-            Runtime runtime = Runtime.getRuntime();
-            long maxMemory = runtime.maxMemory();
-            long totalAllocatedMemory = runtime.totalMemory();
-            long freeUnallocated = maxMemory - totalAllocatedMemory;
-            long freeMemory = runtime.freeMemory() + freeUnallocated;
-            healthInfo.setFreeMemory(freeMemory);
-            long currentMemory = maxMemory - freeMemory;
-            healthInfo.setCurrentMemory(currentMemory);
-            healthInfo.setMaxMemory(maxMemory);
-            healthInfo.setServer(InetAddress.getLocalHost().getHostAddress());
-            ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-            healthInfo.setThreadCount(threadMXBean.getThreadCount());
-            healthInfo.setSystemLoadAverage(ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage());
-            healthInfo.setCompilationTime(ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
-            for (GarbageCollectorMXBean garbageBean : ManagementFactory.getGarbageCollectorMXBeans()) { 
-                if ("Copy".equals(garbageBean.getName())) {
-                    healthInfo.setMinorCollectionCount(garbageBean.getCollectionCount());
-                    healthInfo.setMinorCollectionTime(garbageBean.getCollectionTime());
-                } else {
-                    healthInfo.setMajorCollectionCount(garbageBean.getCollectionCount());
-                    healthInfo.setMajorCollectionTime(garbageBean.getCollectionTime());
-                }
-            }
-            MBeanServer platformServer = ManagementFactory.getPlatformMBeanServer();
-            try {
-                FlexClientManagerControlMBean mb = JMX.newMBeanProxy(platformServer, new ObjectName("flex.runtime.app:type=MessageBroker.FlexClientManager,MessageBroker=MessageBroker1,id=FlexClientManager"),
-                        FlexClientManagerControlMBean.class);
-                healthInfo.setClientCount(mb.getFlexClientCount());
-            } catch (Exception e) {
-                LogClass.error(e);
-            }
-            return healthInfo;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        return new AdminProcessor().getHealthInfo();
     }
 }

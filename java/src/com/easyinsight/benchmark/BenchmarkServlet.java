@@ -1,5 +1,6 @@
 package com.easyinsight.benchmark;
 
+import com.easyinsight.admin.AdminProcessor;
 import com.easyinsight.admin.AdminService;
 import com.easyinsight.logging.LogClass;
 
@@ -28,7 +29,7 @@ public class BenchmarkServlet extends HttpServlet {
             @Override
             public void run() {
                 try {
-                    BenchmarkManager.internalMeasurement(new AdminService().getHealthInfo());
+                    BenchmarkManager.internalMeasurement(new AdminProcessor().getHealthInfo());
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
