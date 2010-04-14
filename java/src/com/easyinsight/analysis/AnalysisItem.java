@@ -32,6 +32,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @JoinColumn(name="item_key_id")
     private Key key;
 
+    @Transient
+    private transient boolean loaded;
+
     @Column(name="concrete")
     private boolean concrete = true;
 
@@ -390,12 +393,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                 transform.toRemote();
             }
         }*/
-      
-            for (FilterDefinition filterDefinition : getFilters()) {
-                filterDefinition.afterLoad();
-            }
+        if (!loaded) {
+                for (FilterDefinition filterDefinition : getFilters()) {
+                    filterDefinition.afterLoad();
+                }
 
-        setLinks(new ArrayList<Link>(getLinks()));        
+            setLinks(new ArrayList<Link>(getLinks()));
+            loaded = true;
+        }
     }
 
     public String toKeySQL() {
