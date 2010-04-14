@@ -88,7 +88,6 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
 
                 EIPageInfo info = new EIPageInfo();
                 info.currentPage = 1;
-                if (info.MaxPages > 0) {
                     do {
                         try {
                             Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false);
@@ -122,7 +121,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                             LogClass.error(e);
                         }
                     } while(info.currentPage++ < info.MaxPages);
-                }
+                
             }
         } catch (BaseCampDataException bcde) {
             return ds;
