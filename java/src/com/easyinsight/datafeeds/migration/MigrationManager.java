@@ -54,14 +54,13 @@ public class MigrationManager {
                             }
                             try {
                                 new DataSourceInternalService().updateFeedDefinition(migrateSource, conn, true);
-                            } catch (Exception e) {
-                                LogClass.error("While saving data source " + migrateSource.getDataFeedID());
-                                throw e;
+                            } catch (Throwable e) {
+                                LogClass.error("While saving data source " + migrateSource.getDataFeedID());                                
                             }
                         }
                     }
                     conn.commit();
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     LogClass.error(e);
                     conn.rollback();
                 } finally {
