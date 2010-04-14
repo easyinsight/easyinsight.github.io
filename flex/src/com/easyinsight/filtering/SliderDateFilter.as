@@ -11,9 +11,12 @@ import com.easyinsight.util.ProgressAlert;
 import flash.events.Event;
 import flash.events.MouseEvent;
 	import flash.geom.Point;
-	
-	import mx.collections.ArrayCollection;
-	import mx.containers.HBox;
+
+import mx.binding.utils.BindingUtils;
+import mx.collections.ArrayCollection;
+import mx.containers.Box;
+import mx.containers.HBox;
+import mx.containers.ViewStack;
 import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
@@ -77,6 +80,58 @@ import mx.rpc.events.ResultEvent;
             
         }
 
+        private var _leftLabel:String;
+
+        private var _rightLabel:String;
+
+        private var _leftIndex:int;
+
+        private var _rightIndex:int;
+
+
+        [Bindable(event="leftLabelChanged")]
+        public function get leftLabel():String {
+            return _leftLabel;
+        }
+
+        public function set leftLabel(value:String):void {
+            if (_leftLabel == value) return;
+            _leftLabel = value;
+            dispatchEvent(new Event("leftLabelChanged"));
+        }
+
+        [Bindable(event="rightLabelChanged")]
+        public function get rightLabel():String {
+            return _rightLabel;
+        }
+
+        public function set rightLabel(value:String):void {
+            if (_rightLabel == value) return;
+            _rightLabel = value;
+            dispatchEvent(new Event("rightLabelChanged"));
+        }
+
+        [Bindable(event="leftIndexChanged")]
+        public function get leftIndex():int {
+            return _leftIndex;
+        }
+
+        public function set leftIndex(value:int):void {
+            if (_leftIndex == value) return;
+            _leftIndex = value;
+            dispatchEvent(new Event("leftIndexChanged"));
+        }
+
+        [Bindable(event="rightIndexChanged")]
+        public function get rightIndex():int {
+            return _rightIndex;
+        }
+
+        public function set rightIndex(value:int):void {
+            if (_rightIndex == value) return;
+            _rightIndex = value;
+            dispatchEvent(new Event("rightIndexChanged"));
+        }
 
         private function onChange(event:Event):void {
             var checkbox:CheckBox = event.currentTarget as CheckBox;
@@ -105,11 +160,11 @@ import mx.rpc.events.ResultEvent;
 			highField.selectedDate = dateMetadata.latestDate;
 			highField.addEventListener(CalendarLayoutChangeEvent.CHANGE, highDateChange);
             //if (!_filterEditable) {
-                var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;;
-                checkbox.toolTip = "Click to disable this filter.";
-                checkbox.addEventListener(Event.CHANGE, onChange);
-                addChild(checkbox);
+            var checkbox:CheckBox = new CheckBox();
+            checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;;
+            checkbox.toolTip = "Click to disable this filter.";
+            checkbox.addEventListener(Event.CHANGE, onChange);
+            addChild(checkbox);
             //}
             if (_showLabel) {
                 var label:Label = new Label();
@@ -118,14 +173,37 @@ import mx.rpc.events.ResultEvent;
             } else {
                 toolTip = analysisItem.display;
             }
-			addChild(lowField);
+            var leftSideStack:ViewStack = new ViewStack();
+            BindingUtils.bindProperty(leftSideStack, "selectedIndex", this, "leftIndex");
+            leftSideStack.resizeToContent = true;
+            var leftFieldBox:Box = new Box();
+            leftFieldBox.addChild(lowField);
+            leftSideStack.addChild(leftFieldBox);
+            var leftLabel:Label = new Label();
+            BindingUtils.bindProperty(leftLabel, "text", this, "leftLabel");
+            var leftBox:Box = new Box();
+            leftBox.addChild(leftLabel);
+            leftSideStack.addChild(leftBox);
+            var rightSideStack:ViewStack = new ViewStack();
+            BindingUtils.bindProperty(rightSideStack, "selectedIndex", this, "rightIndex");
+            rightSideStack.resizeToContent = true;
+            var rightFieldBox:Box = new Box();
+            rightFieldBox.addChild(highField);
+            rightSideStack.addChild(rightFieldBox);
+            var rightLabel:Label = new Label();
+            BindingUtils.bindProperty(rightLabel, "text", this, "rightLabel");
+            var rightBox:Box = new Box();
+            rightBox.addChild(rightLabel);
+            rightSideStack.addChild(rightBox);
+			addChild(leftSideStack);
 			addChild(hslider);
-			addChild(highField);
+			addChild(rightSideStack);
 			if (_filterDefinition == null) {
 				_filterDefinition = new FilterDateRangeDefinition();
 				_filterDefinition.startDate = dateMetadata.earliestDate;
 				_filterDefinition.endDate = dateMetadata.latestDate;
 				_filterDefinition.field = analysisItem;
+                _filterDefinition.applyBeforeAggregation = false;
                 _filterDefinition.sliding = true;
 			} else {
                 if (_filterDefinition.sliding && _filterDefinition.startDate != null && _filterDefinition.endDate != null) {
@@ -140,6 +218,18 @@ import mx.rpc.events.ResultEvent;
 				if (_filterDefinition.endDate == null) {
 					_filterDefinition.endDate = dateMetadata.latestDate;
 				}
+                if (_filterDefinition.startDateDimension != null) {
+                    leftIndex = 1;
+                    this.leftLabel = _filterDefinition.startDateDimension.display;
+                } else {
+                    leftIndex = 0;
+                }
+                if (_filterDefinition.endDateDimension != null) {
+                    rightIndex = 1;
+                    this.rightLabel = _filterDefinition.endDateDimension.display;
+                } else {
+                    rightIndex = 0;
+                }
 				highField.selectedDate = _filterDefinition.endDate;
 				var newLowVal:int = ((lowField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
 				var newHighVal:int = ((highField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
@@ -191,6 +281,21 @@ import mx.rpc.events.ResultEvent;
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
+            if (event.filterDefinition is FilterDateRangeDefinition) {
+                var filter:FilterDateRangeDefinition = event.filterDefinition as FilterDateRangeDefinition;
+                if (filter.startDateDimension != null) {
+                    leftIndex = 1;
+                    this.leftLabel = filter.startDateDimension.display;
+                } else {
+                    leftIndex = 0;
+                }
+                if (filter.endDateDimension != null) {
+                    rightIndex = 1;
+                    this.rightLabel = filter.endDateDimension.display;
+                } else {
+                    rightIndex = 0;
+                }
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
 		}
 		

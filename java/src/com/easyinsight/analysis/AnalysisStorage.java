@@ -208,7 +208,7 @@ public class AnalysisStorage {
         if (analysisDefinition.getAnalysisID() == null)
             session.save(analysisDefinition);
         else
-            session.merge(analysisDefinition);        
+            session.update(analysisDefinition);
         session.flush();
     }
 
@@ -236,6 +236,7 @@ public class AnalysisStorage {
             queryStmt.setLong(1, userID);
             queryStmt.setBoolean(2, false);
             queryStmt.setBoolean(3, false);
+            
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 // TODO: Add urlKey
@@ -502,13 +503,8 @@ public class AnalysisStorage {
         try {
             session.beginTransaction();
             Query query;
-            if (genre == null) {
-                query = session.createQuery("from AnalysisDefinition as analysisDefinition where analysisDefinition.analysisPolicy = ? order by dateCreated desc").
+            query = session.createQuery("from AnalysisDefinition as analysisDefinition where analysisDefinition.analysisPolicy = ? order by dateCreated desc").
                     setInteger(0, AnalysisPolicy.PUBLIC);
-            } else {
-                query = session.createQuery("from AnalysisDefinition as analysisDefinition where analysisDefinition.analysisPolicy = ? and " +
-                        "analysisDefinition.genre = ? order by dateCreated desc ").setInteger(0, AnalysisPolicy.PUBLIC).setString(1, genre);
-            }
             Iterator iter = query.iterate();
             while (iter.hasNext()) {
                 AnalysisDefinition analysisDefinition = (AnalysisDefinition) iter.next();

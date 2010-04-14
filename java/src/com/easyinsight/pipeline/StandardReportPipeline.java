@@ -22,7 +22,7 @@ public class StandardReportPipeline extends Pipeline {
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report) {
         List<IComponent> components = new ArrayList<IComponent>();
 
-        components.add(new ReportPreHandleComponent());
+        //components.add(new ReportPreHandleComponent());
 
         Map<String, PointPopulation> map = new HashMap<String, PointPopulation>();
         for (AnalysisItem coordinate : items(AnalysisItemTypes.LONGITUDE, allNeededAnalysisItems)) {
@@ -75,11 +75,19 @@ public class StandardReportPipeline extends Pipeline {
 
         // then join them back together
 
+
+
         components.add(new FilterComponent(true));
         components.add(new FilterPipelineCleanupComponent(true));
 
         components.add(new MeasureFilterComponent());
         components.add(new MeasureFilterPipelineCleanupComponent());
+
+        if (report.getFilterDefinitions() != null) {
+            for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
+                components.addAll(filterDefinition.createComponents());       
+            }
+        }
 
         for (AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, reportItems)) {
             AnalysisCalculation calculation = (AnalysisCalculation) calc;

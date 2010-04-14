@@ -20,6 +20,8 @@ public abstract class MaterializedFilterDefinition {
         return key;
     }
 
+
+
     public abstract boolean allows(Value value);
 
     public boolean requiresDataEarly() {

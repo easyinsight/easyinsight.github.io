@@ -10,14 +10,19 @@ import flash.display.DisplayObject;
 
 import flash.geom.Point;
 
+import flexlib.containers.FlowBox;
+
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.containers.Tile;
+
 import mx.controls.AdvancedDataGrid;
+import mx.controls.Alert;
 import mx.controls.DataGrid;
 import mx.controls.List;
 import mx.controls.ToolTip;
+import mx.core.UIComponent;
 import mx.events.DragEvent;
+import mx.events.FlexEvent;
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
 import mx.managers.ToolTipManager;
@@ -28,7 +33,7 @@ public class TransformContainer extends HBox
 {
     private var filterMap:Object = new Object();
     private var filterDefinitions:ArrayCollection = new ArrayCollection();
-    private var filterTile:Tile;
+    private var filterTile:FlowBox;
     private var _feedID:int;
     private var noFilters:Boolean = true;
     // private var dropHereBox:VBox;
@@ -49,6 +54,49 @@ public class TransformContainer extends HBox
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
     }
 
+    protected function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
+    {
+        // resize the FlowBox manually, as the internal calculation doesn't work
+
+        var fb:FlowBox = event.target as FlowBox;
+
+        if (fb != null)
+        {
+            if (fb.numChildren > 0)
+            {
+                // default the needed height to the top view metric
+
+                var maxBottom:int = fb.viewMetrics.top;
+
+                // Iterate over the children of the FlowBox to find the bottom-most bottom, so
+                // we can determine how big / small we can make the FlowBox.
+                // If it's a UIComponent, include it if the includeInLayout property is true.
+                // If it's not a UIComponent, include it if the visible property is true.
+
+                for (var idx:int = 0; idx < fb.numChildren; idx++)
+                {
+                    var displayObject:DisplayObject = fb.getChildAt(idx);
+
+                    if ((displayObject is UIComponent && (displayObject as
+                                                          UIComponent).includeInLayout) ||
+                        (!(displayObject is UIComponent) && displayObject.visible))
+                    {
+                        var thisBottom:int = fb.getChildAt(idx).y + fb.getChildAt(idx).height;
+
+                        if (thisBottom > maxBottom)
+                            maxBottom = thisBottom;
+                    }
+                }
+
+                fb.height = maxBottom + fb.viewMetrics.bottom +
+                            fb.getStyle("paddingBottom") + 1;
+            }
+            else
+            {
+                fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
+            }
+        }
+    }
 
     public function set showLabel(value:Boolean):void {
         _showLabel = value;
@@ -144,7 +192,9 @@ public class TransformContainer extends HBox
     override protected function createChildren():void {
         super.createChildren();
         if (filterTile == null) {
-            filterTile = new Tile();
+            filterTile = new FlowBox();
+            filterTile.setStyle("horizontalGap", 20);
+            filterTile.addEventListener(FlexEvent.UPDATE_COMPLETE, adapterFlowBoxUpdateCompleteHandler);
             filterTile.percentWidth = 100;
             filterTile.percentHeight = 100;
         }
@@ -284,8 +334,11 @@ public class TransformContainer extends HBox
             window.item = analysisItem;
             window.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
-            window.x = event.localX - (event.dragSource.dataForFormat("localX") as Number);
-            window.y = event.localY - (event.dragSource.dataForFormat("localY") as Number);
+            //Alert.show(event.localX + " - " + event.localY);
+            var x:int = event.stageX - 220;
+            x = Math.max(x, 30);
+            window.x = x;
+            window.y = event.stageY - 35;
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem);
             initializeFilter(sliderMeasureFilter);
@@ -295,8 +348,8 @@ public class TransformContainer extends HBox
             dimWindow.feedID = _feedID;
             dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
             PopUpManager.addPopUp(dimWindow, this, true);
-            dimWindow.x = event.localX - (event.dragSource.dataForFormat("localX") as Number);
-            dimWindow.y = event.localY - (event.dragSource.dataForFormat("localY") as Number);
+            dimWindow.x = Math.max(event.stageX - 220, 30);;
+            dimWindow.y = event.stageY - 35;
         }
     }
 
@@ -340,8 +393,6 @@ public class TransformContainer extends HBox
         filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
         filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);
         filterTile.addChild(filter as DisplayObject);
-        filterTile.invalidateSize();
-        this.invalidateSize();
         if (_loadingFromReport) {
             addFilter(filter);
         }

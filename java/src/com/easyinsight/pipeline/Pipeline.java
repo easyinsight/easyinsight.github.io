@@ -40,7 +40,7 @@ public abstract class Pipeline {
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                allNeededAnalysisItems.addAll(filterDefinition.getField().getAnalysisItems(allFields, allRequestedAnalysisItems, false, true));
+                allNeededAnalysisItems.addAll(filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true));
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {

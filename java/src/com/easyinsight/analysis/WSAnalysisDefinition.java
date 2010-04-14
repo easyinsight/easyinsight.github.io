@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.core.Key;
@@ -284,7 +285,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         if (retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems, false, true);
+                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allItems, analysisItems, false, true);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID() != 0) {
                         columnSet.add(item.getKey());
@@ -336,22 +337,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         if (retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems, false, true);
-                for (AnalysisItem item : items) {
-                    //if (item.getAnalysisItemID() != 0) {
-                    if (!columnSet.contains(item)) {
-                            columnSet.add(item);
-                    }
-                    //}
-                }
-                //columnSet.add(filterDefinition.getField().getKey());
+                columnSet.addAll(filterDefinition.getAnalysisItems(allItems, analysisItems, false, true));                
             }
         }
-        /*if (getDataScrubs() != null) {
-            for (DataScrub dataScrub : getDataScrubs()) {
-                columnSet.addAll(dataScrub.createNeededKeys(analysisItems));
-            }
-        }*/
         for (AnalysisItem analysisItem : getLimitFields()) {
             if (!columnSet.contains(analysisItem)) {
                 columnSet.add(analysisItem);
@@ -381,7 +369,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
     @Nullable
     protected AnalysisItem firstItem(String key, Map<String, AnalysisItem> structure) {
         String compositeKey = key + "-" + 0;
-        return structure.get(compositeKey);
+        AnalysisItem analysisItem = structure.get(compositeKey);
+        if (analysisItem != null) {
+            analysisItem = (AnalysisItem) Database.deproxy(analysisItem);
+        }
+        return analysisItem;
     }
 
     protected List<AnalysisItem> items(String key, Map<String, AnalysisItem> structure) {

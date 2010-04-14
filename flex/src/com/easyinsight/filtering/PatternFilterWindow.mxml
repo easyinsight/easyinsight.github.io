@@ -18,6 +18,12 @@
         [Bindable]
         private var patternText:String;
 
+        private var _fields:ArrayCollection;
+
+    public function set fields(value:ArrayCollection):void {
+        _fields = value;
+    }
+
         public function set filterValueDefinition(filterValueDefinition:FilterDefinition):void {
             this._filterValueDefinition = filterValueDefinition;
             if (filterValueDefinition is FilterPatternDefinition) {

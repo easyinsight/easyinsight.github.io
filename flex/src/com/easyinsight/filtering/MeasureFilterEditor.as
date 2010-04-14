@@ -1,8 +1,9 @@
 package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisItem;
-	
-	import mx.containers.HBox;
+
+import mx.collections.ArrayCollection;
+import mx.containers.HBox;
 	import mx.controls.Text;
 	import mx.controls.TextInput;
 
@@ -20,6 +21,12 @@ package com.easyinsight.filtering
 		public function set filterDefinition(filterDefinition:FilterDefinition):void {
 			this._filterDefinition = filterDefinition as FilterRangeDefinition;	
 		}
+
+        private var _fields:ArrayCollection;
+
+    public function set fields(value:ArrayCollection):void {
+        _fields = value;
+    }
 		
 		override protected function createChildren():void {
 			super.createChildren();

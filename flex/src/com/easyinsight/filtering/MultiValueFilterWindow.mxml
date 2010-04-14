@@ -30,6 +30,12 @@
             BindingUtils.bindProperty(this, "keyword", availableSearch, "text");
         }
 
+        private var _fields:ArrayCollection;
+
+    public function set fields(value:ArrayCollection):void {
+        _fields = value;
+    }
+
         public function set filterValueDefinition(filterValueDefinition:FilterValueDefinition):void {
             this._filterValueDefinition = filterValueDefinition;
         }

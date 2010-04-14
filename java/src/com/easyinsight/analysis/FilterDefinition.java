@@ -1,13 +1,14 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.pipeline.IComponent;
 import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -79,6 +80,10 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         this.applyBeforeAggregation = applyBeforeAggregation;
     }
 
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters) {
+        return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters);
+    }
+
     public abstract MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata);
 
     public abstract String toQuerySQL(String tableName);
@@ -110,12 +115,16 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         if (getField().getAnalysisItemID() == 0) {
             session.save(getField());
         } else {
-            session.merge(getField());
+            session.update(getField());
         }
     }
 
     public void afterLoad() {
         setField((AnalysisItem) Database.deproxy(getField()));
         getField().afterLoad();
+    }
+
+    public List<IComponent> createComponents() {
+        return new ArrayList<IComponent>();
     }
 }

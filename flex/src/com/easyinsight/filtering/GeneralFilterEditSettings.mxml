@@ -72,6 +72,7 @@
             if (_detailClass != null) {
                 if (filterDetailEditor == null) {
                     filterDetailEditor = new _detailClass();
+                    filterDetailEditor.fields = _analysisItems;
                     filterDetailEditor.filterDefinition = _filterDefinition;
                     filterDetailEditor.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
                     filterDetailEditor.feedID = _feedID;

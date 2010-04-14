@@ -4,7 +4,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;

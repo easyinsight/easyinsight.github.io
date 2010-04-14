@@ -328,12 +328,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setUrlKey(null);
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
-        List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
-        for (FilterDefinition persistableFilterDefinition : this.filterDefinitions) {
-            filterDefinitions.add(persistableFilterDefinition.clone());
-            replacementMap.put(persistableFilterDefinition.getField().getAnalysisItemID(), persistableFilterDefinition.getField().clone());
-        }
-        analysisDefinition.setFilterDefinitions(filterDefinitions);
+
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem analysisItem : addedItems) {
             AnalysisItem clonedItem;
@@ -369,6 +364,18 @@ public class AnalysisDefinition implements Cloneable {
                 }
             }
         }
+        List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
+        for (FilterDefinition persistableFilterDefinition : this.filterDefinitions) {
+            filterDefinitions.add(persistableFilterDefinition.clone());
+            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true);
+            for (AnalysisItem item : filterItems) {
+                if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                    AnalysisItem clonedItem = item.clone();
+                    replacementMap.put(item.getAnalysisItemID(), clonedItem);
+                }
+            }
+        }
+        analysisDefinition.setFilterDefinitions(filterDefinitions);
 
         Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
         for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {
