@@ -62,7 +62,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         HealthInfo healthInfo = new AdminService().getHealthInfo();
         DataSet dataSet = new DataSet();
-        IRow row = dataSet.createRow();
+        /*IRow row = dataSet.createRow();
         row.addValue(keys.get(DATE), new DateValue(new Date()));
         row.addValue(keys.get(MAX_MEMORY), healthInfo.getMaxMemory());
         row.addValue(keys.get(TOTAL_MEMORY), healthInfo.getCurrentMemory() + healthInfo.getFreeMemory());
@@ -77,7 +77,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
         row.addValue(keys.get(MAJOR_COLLECTION_COUNT), healthInfo.getMajorCollectionCount());
         row.addValue(keys.get(MAJOR_COLLECTION_TIME), healthInfo.getMajorCollectionTime());
         row.addValue(keys.get(CLIENT_COUNT), healthInfo.getClientCount());
-        row.addValue(keys.get(SERVER), healthInfo.getServer());
+        row.addValue(keys.get(SERVER), healthInfo.getServer());*/
         return dataSet;
     }
 
