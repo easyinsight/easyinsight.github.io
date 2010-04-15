@@ -270,7 +270,11 @@ public class DataService {
                         }
                     }
                 }
-                Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
+                List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
+                if (analysisDefinition.getAddedItems() != null) {
+                    allFields.addAll(analysisDefinition.getAddedItems());
+                }
+                Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
                 Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
                 for (AnalysisItem analysisItem : analysisItems) {
                     if (!analysisItem.isDerived()) {
