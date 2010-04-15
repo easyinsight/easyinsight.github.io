@@ -42,7 +42,7 @@ public class AdminService {
         }
     }
 
-    private void cleanOrphanKeys(EIConnection conn) throws SQLException {
+    /*private void cleanOrphanKeys(EIConnection conn) throws SQLException {
         PreparedStatement query = conn.prepareStatement("select report_structure_id, analysis.analysis_id, analysis_item.analysis_item_id from report_structure left join analysis on report_structure.analysis_id = analysis.analysis_id left join analysis_item on report_structure.analysis_item_id = analysis_item.analysis_item_id and (analysis.analysis_id is null or analysis_item.analysis_item_id is null)");
         PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM ITEM_KEY WHERE ITEM_KEY_ID = ?");
         ResultSet rs = query.executeQuery();
@@ -51,7 +51,7 @@ public class AdminService {
             nukeStmt.setLong(1, id);
             nukeStmt.executeUpdate();
         }
-    }
+    }*/
 
     private void cleanOrphanItems(EIConnection conn) throws SQLException {
         PreparedStatement query = conn.prepareStatement("select report_structure_id, analysis.analysis_id, analysis_item.analysis_item_id " +
@@ -78,7 +78,7 @@ public class AdminService {
         try {
             conn.setAutoCommit(false);
             cleanOrphanItems(conn);
-            cleanOrphanKeys(conn);
+            //cleanOrphanKeys(conn);
             cleanRawUploads(conn);
             conn.commit();
         } catch (SQLException e) {
