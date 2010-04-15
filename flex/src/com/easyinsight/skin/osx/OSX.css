@@ -132,6 +132,14 @@ Button {
    fontWeight: normal;
 }
 
+.toggleButton {
+    fillColors: #555555, #ffffff, #555555, #ffffff;
+}
+
+ToggleButtonBar {
+   buttonStyleName: toggleButton;
+}
+
 .blueButton { 
    cornerRadius: 12;
    highlightAlphas: 0.79, 0.2;

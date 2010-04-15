@@ -15,6 +15,7 @@
         import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.datasources.JiraDataSource;
         import com.easyinsight.datasources.MarketoDataSource;
+        import com.easyinsight.datasources.PivotalTrackerBaseSource;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
@@ -255,6 +256,7 @@
             var cloudwatch:CloudWatchDataSource;
             var googleDoc:GoogleFeedDefinition;
             var marketoSource:MarketoDataSource;
+            var pivotal:PivotalTrackerBaseSource;
         }
 
         [Bindable]

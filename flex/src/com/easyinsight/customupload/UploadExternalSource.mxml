@@ -50,6 +50,7 @@
                                     <mx:String>Custom</mx:String>
                                     <mx:String>Twitter</mx:String>
                                     <mx:String>Marketo</mx:String>
+                                    <mx:String>Pivotal Tracker</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
                         </mx:dataProvider>
@@ -107,6 +108,10 @@
                                 userConfigCancel="cancel(event)" />
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.MarketoDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)" />
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.PivotalTrackerDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)" />
                     </mx:ViewStack>

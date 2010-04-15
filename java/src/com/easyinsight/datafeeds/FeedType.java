@@ -39,6 +39,7 @@ public class FeedType {
     public static final FeedType MARKETO = new FeedType(31);
     public static final FeedType HIGHRISE_CASES = new FeedType(32);
     public static final FeedType HIGHRISE_TASKS = new FeedType(33);
+    public static final FeedType PIVOTAL_TRACKER = new FeedType(34);
 
     private int type;
 

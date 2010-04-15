@@ -3,7 +3,7 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
-
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.framework.CredentialsCache;
 
 import com.easyinsight.util.ProgressAlert;
@@ -203,7 +203,9 @@ import mx.rpc.events.ResultEvent;
 				_filterDefinition.startDate = dateMetadata.earliestDate;
 				_filterDefinition.endDate = dateMetadata.latestDate;
 				_filterDefinition.field = analysisItem;
-                //_filterDefinition.applyBeforeAggregation = false;
+                if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
+                    _filterDefinition.applyBeforeAggregation = false;    
+                }
                 _filterDefinition.sliding = true;
 			} else {
                 if (_filterDefinition.sliding && _filterDefinition.startDate != null && _filterDefinition.endDate != null) {

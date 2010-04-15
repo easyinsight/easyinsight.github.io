@@ -26,6 +26,7 @@ package com.easyinsight.listing
         public static const HIGHRISE:int = 23;
         public static const TWITTER:int = 26;
         public static const MARKETO:int = 31;
+        public static const PIVOTAL_TRACKER:int = 34;
 
 		public static const OWNER:int = 1;
 		public static const SUBSCRIBER:int = 3;

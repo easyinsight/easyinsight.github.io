@@ -5,6 +5,7 @@ import com.easyinsight.database.EIConnection;
 
 import java.sql.*;
 
+import com.easyinsight.datafeeds.FeedType;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -17,6 +18,7 @@ public class TokenStorage {
     public static final int GOOGLE_ANALYTICS_TOKEN = 13;
     public static final int BASECAMP_TOKEN = 18;
     public static final int HIGHRISE_TOKEN = 23;
+    public static final int PIVOTAL_TRACKER_TOKEN = FeedType.PIVOTAL_TRACKER.getType();
 
     public void saveToken(Token token, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
