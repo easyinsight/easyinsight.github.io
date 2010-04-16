@@ -87,11 +87,11 @@ public class FormattingConfiguration implements Serializable, Cloneable {
         private NumberFormat format = NumberFormat.getPercentInstance();
 
         public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
-            return format.format(number/100.0, toAppendTo, pos).append("%");
+            return format.format(number/100.0, toAppendTo, pos);
         }
 
         public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
-            return format.format(number/100.0, toAppendTo, pos).append("%");
+            return format.format(number/100.0, toAppendTo, pos);
         }
 
         public Number parse(String source, ParsePosition parsePosition) {

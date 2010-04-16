@@ -37,7 +37,7 @@ public class BillingScheduledTask extends ScheduledTask {
     }
 
     private void expireTrials(Date now, Connection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_TYPE != ? AND BILLING_INFORMATION_GIVEN != TRUE AND ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
+        PreparedStatement stmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_TYPE != ? AND (BILLING_INFORMATION_GIVEN IS NULL OR BILLING_INFORMATION_GIVEN = FALSE) AND ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
         stmt.setInt(1, Account.DELINQUENT);
         stmt.setInt(2, Account.PERSONAL);
         stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
