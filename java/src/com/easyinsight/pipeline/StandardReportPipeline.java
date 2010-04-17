@@ -54,7 +54,7 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new CoordinateComponent(pointPopulation.analysisZipCode, pointPopulation.analysisLatitude, pointPopulation.analysisLongitude));
         }
 
-        for (AnalysisItem analysisItem : items(AnalysisItemTypes.DIMENSION, allNeededAnalysisItems)) {
+        for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 components.add(new LookupTableComponent(new FeedService().getLookupTable(analysisItem.getLookupTableID())));
             }

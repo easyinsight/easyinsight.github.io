@@ -4,9 +4,6 @@
                      paddingRight="10" width="100%" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.scrub.DataScrubEvent;
-        import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
-
-        import com.easyinsight.analysis.scrub.LookupTableScrubWindow;
         import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
         import com.easyinsight.analysis.scrub.TextReplaceScrubWindow;
         import com.easyinsight.util.PopUpUtil;
@@ -45,25 +42,10 @@
             PopUpUtil.centerPopUp(textWindow);
         }
 
-        private function newLookupTableScrub():void {
-            var lookupWindow:LookupTableScrubWindow = LookupTableScrubWindow(PopUpManager.createPopUp(this, LookupTableScrubWindow, false));
-            lookupWindow.availableFields = _analysisItems;
-            lookupWindow.feedID = _dataSourceID;
-            lookupWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
-            PopUpUtil.centerPopUp(lookupWindow);
-        }
+
 
         private function editTextReplaceScrubs():void {
             var scrubListWindow:TextReplaceScrubListWindow = TextReplaceScrubListWindow(PopUpManager.createPopUp(this, TextReplaceScrubListWindow, false));
-            scrubListWindow.definition = _analysisDefinition;
-            scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
-            scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
-            scrubListWindow.initState(_analysisItems, _dataSourceID);
-            PopUpUtil.centerPopUp(scrubListWindow);
-        }
-
-        private function editLookupTableScrubs():void {
-            var scrubListWindow:LookupTableScrubListWindow = LookupTableScrubListWindow(PopUpManager.createPopUp(this, LookupTableScrubListWindow, false));
             scrubListWindow.definition = _analysisDefinition;
             scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
             scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);

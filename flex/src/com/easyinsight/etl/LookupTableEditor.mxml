@@ -36,7 +36,13 @@
             _lookupTable = etlService.getLookupTable.lastResult as LookupTable;
             sourceItem = _lookupTable.sourceField;
             targetItem = _lookupTable.targetField;
-            rowType = _lookupTable.targetField.hasType(AnalysisItemTypes.DATE) ? "date" : "grouping";
+            if (_lookupTable.targetField.hasType(AnalysisItemTypes.DATE)) {
+                rowType = "date";
+            } else if (_lookupTable.targetField.hasType(AnalysisItemTypes.MEASURE)) {
+                rowType = "measure";
+            } else {
+                rowType = "grouping";
+            }
             tableName = _lookupTable.name;
             sourceFieldName = sourceItem.display;
             targetFieldName = targetItem.display;

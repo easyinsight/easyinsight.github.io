@@ -33,7 +33,7 @@ public class DataSourceCopyUtils {
 
     public static List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID,
                                                         FeedDefinition feedDefinition, boolean includeChildren, String newDataSourceName,
-                                                        long solutionID, long accountID) throws CloneNotSupportedException, SQLException {
+                                                        long solutionID, long accountID, String userName) throws CloneNotSupportedException, SQLException {
         FeedStorage feedStorage = new FeedStorage();
         AnalysisStorage analysisStorage = new AnalysisStorage();
         List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
@@ -41,7 +41,7 @@ public class DataSourceCopyUtils {
         // result here needs to have the core keys
         // 
 
-        DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID);
+        DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID, userName);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
         if (newDataSourceName != null) {
             clonedFeedDefinition.setFeedName(newDataSourceName);
@@ -72,7 +72,7 @@ public class DataSourceCopyUtils {
                 infos.add(new SolutionInstallInfo(insight.getAnalysisID(), insightDescriptor, null, false));
                 List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
                 for (FeedDefinition insightFeed : insightFeeds) {
-                    infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed, true, null, solutionID, accountID));
+                    infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed, true, null, solutionID, accountID, userName));
                 }
             }
         }
@@ -146,9 +146,8 @@ public class DataSourceCopyUtils {
     }
 
     public static DataSourceCloneResult cloneFeed(long userID, Connection conn, FeedDefinition feedDefinition,
-                                                  boolean installingFromConnection, long accountID) throws CloneNotSupportedException, SQLException {
+                                                  boolean installingFromConnection, long accountID, String userName) throws CloneNotSupportedException, SQLException {
         FeedStorage feedStorage = new FeedStorage();
-        AnalysisStorage analysisStorage = new AnalysisStorage();
         DataSourceCloneResult result = feedDefinition.cloneDataSource(conn);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
         if (installingFromConnection) {
@@ -157,6 +156,7 @@ public class DataSourceCopyUtils {
             }
         }
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID, accountID));
+        clonedFeedDefinition.setOwnerName(userName);
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
         if (feedDefinition.getFeedType().equals(FeedType.ANALYSIS_BASED)) {
             // TODO: repair, we don't use atm

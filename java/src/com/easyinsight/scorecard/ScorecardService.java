@@ -110,6 +110,7 @@ public class ScorecardService {
     }
 
     public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) {
+        System.out.println("retrieving " + scorecardID);
         SecurityUtil.authorizeScorecard(scorecardID);
         try {
             return scorecardStorage.getScorecard(scorecardID, credentials, forceRefresh);

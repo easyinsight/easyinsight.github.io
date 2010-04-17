@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private var _scorecards:ArrayCollection;
+
+        [Bindable(event="scorecardsChanged")]
+        public function get scorecards():ArrayCollection {
+            return _scorecards;
+        }
+
+        public function set scorecards(value:ArrayCollection):void {
+            if (_scorecards == value) return;
+            _scorecards = value;
+            dispatchEvent(new Event("scorecardsChanged"));
+        }]]>
+    </mx:Script>
+    <mx:VBox>
+        <mx:List dataProvider="{scorecards}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true"
+            labelField="name"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save"/>
+            <mx:Button label="Cancel"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

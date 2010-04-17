@@ -38,6 +38,10 @@
         protected override function commitProperties():void {
             super.commitProperties();
 
+
+        }
+
+        public function retrieveData():void {
             forcedRefresh = false;
             if (!_tutorialMode) {
                 if (_scorecard == null) {

@@ -78,11 +78,12 @@ public class GoalStorage {
         final long accountID = SecurityUtil.getAccountID();
         final int accountType = SecurityUtil.getAccountTier();
         final boolean accountAdmin = SecurityUtil.isAccountAdmin();
+        final String userName = SecurityUtil.getUserName();
 
         Thread thread = new Thread(new Runnable() {
 
             public void run() {
-                SecurityUtil.populateThreadLocal(userID, accountID, accountType, accountAdmin);
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin);
                 try {
                     for (Long dataSourceID : kpiMap.keySet()) {
                         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);

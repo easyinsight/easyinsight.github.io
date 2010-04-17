@@ -12,7 +12,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
-import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 
 import java.sql.PreparedStatement;

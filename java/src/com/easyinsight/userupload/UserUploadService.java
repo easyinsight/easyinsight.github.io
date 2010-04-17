@@ -2,7 +2,6 @@ package com.easyinsight.userupload;
 
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.etl.ETLService;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.reportpackage.ReportPackageStorage;
@@ -54,7 +53,7 @@ public class UserUploadService implements IUserUploadService {
             conn.setAutoCommit(false);
             FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSourceID, conn);
             List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, includeChildren, newName, 0,
-                    SecurityUtil.getAccountID());
+                    SecurityUtil.getAccountID(), SecurityUtil.getUserName());
             conn.commit();
             return results;
         } catch (Exception e) {

@@ -6,7 +6,8 @@
         import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisDimension;
         import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.analysis.AnalysisItemTypes;        
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.NamedKey;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
@@ -24,6 +25,18 @@
 
         [Bindable]
         private var availableFields:ArrayCollection;
+
+        private var _selectedDataSource:DataFeedDescriptor;
+
+        public function set selectedDataSource(value:DataFeedDescriptor):void {
+            _selectedDataSource = value;
+            if (_selectedDataSource != null) {
+                dataSourceID = _selectedDataSource.dataFeedID;
+            }
+        }
+
+        [Bindable]
+        private var dataSourceID:int;
 
         private function save():void {
             if (!(dataSourceBox.selectedItem is DataFeedDescriptor)) {
@@ -50,12 +63,14 @@
             lookupTable.name = nameInput.text;
             lookupTable.dataSourceID = dataSourceBox.selectedItem.dataFeedID;
             lookupTable.sourceField = sourceFieldBox.selectedItem as AnalysisItem;
-            var targetField:AnalysisDimension = new AnalysisDimension();
+            var targetField:AnalysisItem = new AnalysisItem();
             if (destinationGroup.selectedValue == "grouping") {
                 targetField = new AnalysisDimension();
             } else if (destinationGroup.selectedValue == "date") {
                 targetField = new AnalysisDateDimension();
-                                AnalysisDateDimension(targetField).dateLevel = AnalysisItemTypes.DAY_LEVEL;
+                AnalysisDateDimension(targetField).dateLevel = AnalysisItemTypes.DAY_LEVEL;
+            } else if (destinationGroup.selectedValue == "measure") {
+                targetField = new AnalysisMeasure();
             }
             targetField.concrete = false;
             var key:NamedKey = new NamedKey();
@@ -77,6 +92,13 @@
             dataSources.addItemAt(empty, 0);
             this.dataSources = dataSources;
             dataSourceIndex = 1;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (dataSourceID > 0) {
+                feedService.getFeedDefinition.send(dataSourceID);
+            }
         }
 
         private function onDSChange():void {
@@ -134,8 +156,8 @@
                         <mx:ProgressBar labelPlacement="right" label="Loading available data sources..." indeterminate="true"/>
                     </mx:Box>
                     <mx:Box>
-                        <mx:ComboBox id="dataSourceBox" dataProvider="{dataSources}" labelField="name"
-                            change="onDSChange()"/>
+                        <util:SmartComboBox id="dataSourceBox" dataProvider="{dataSources}" labelField="name"
+                            change="onDSChange()" selectedProperty="dataFeedID" selectedValue="{dataSourceID}"/>
                     </mx:Box>
                 </mx:ViewStack>
             </mx:FormItem>
@@ -157,6 +179,7 @@
                 <mx:RadioButtonGroup id="destinationGroup"/>
                 <mx:RadioButton label="Grouping" value="grouping" groupName="destinationGroup" selected="true"/>
                 <mx:RadioButton label="Date" value="date" groupName="destinationGroup"/>
+                <mx:RadioButton label="Measure" value="measure" groupName="destinationGroup"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

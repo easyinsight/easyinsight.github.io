@@ -92,14 +92,6 @@ public class ReportEditorFieldControls extends HBox
 		}
 		
 		override protected function createChildren():void {
-			if (button == null) {
-				button = new Button();
-				button.setStyle("icon", copyIcon);
-				button.toolTip = "Copy...";
-                BindingUtils.bindProperty(button, "visible", this, "showCopy");
-                button.addEventListener(MouseEvent.CLICK, copy);
-			}
-            addChild(button);
             if (editButton == null) {
 				editButton = new Button();
 				editButton.setStyle("icon", editIcon);
@@ -108,6 +100,15 @@ public class ReportEditorFieldControls extends HBox
                 editButton.addEventListener(MouseEvent.CLICK, editItem);
 			}
             addChild(editButton);
+			if (button == null) {
+				button = new Button();
+				button.setStyle("icon", copyIcon);
+				button.toolTip = "Copy...";
+                BindingUtils.bindProperty(button, "visible", this, "showCopy");
+                button.addEventListener(MouseEvent.CLICK, copy);
+			}
+            addChild(button);
+
             if (deleteButton == null) {
                 deleteButton = new Button();
                 deleteButton.setStyle("icon", deleteIcon);

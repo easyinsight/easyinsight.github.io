@@ -299,7 +299,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         List<CompositeFeedNode> newChildren = new ArrayList<CompositeFeedNode>();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition, false, SecurityUtil.getAccountID());
+            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition, false, SecurityUtil.getAccountID(), SecurityUtil.getUserName());
             FeedDefinition clonedDefinition = result.getFeedDefinition();
             DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
             new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);

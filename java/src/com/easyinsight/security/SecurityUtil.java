@@ -28,8 +28,8 @@ public class SecurityUtil {
     private static ISecurityProvider securityProvider;
     private static ThreadLocal<UserPrincipal> threadLocal = new ThreadLocal<UserPrincipal>();
 
-    public static void populateThreadLocal(long userID, long accountID, int accountType, boolean accountAdmin) {
-        threadLocal.set(new UserPrincipal(null, accountID, userID, accountType, accountAdmin));
+    public static void populateThreadLocal(String userName, long userID, long accountID, int accountType, boolean accountAdmin) {
+        threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin));
     }
 
     public static void setSecurityProvider(ISecurityProvider securityProvider) {

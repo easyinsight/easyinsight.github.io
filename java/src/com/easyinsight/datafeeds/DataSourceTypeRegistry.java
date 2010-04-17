@@ -8,10 +8,10 @@ import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.datafeeds.gnip.GnipDataSource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.highrise.*;
-import com.easyinsight.datafeeds.jira.JiraDataSource;
 import com.easyinsight.datafeeds.marketo.MarketoDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
+import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
@@ -63,6 +63,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HIGHRISE_CONTACTS, HighRiseContactSource.class);
         registerType(FeedType.MARKETO, MarketoDataSource.class);
         registerType(FeedType.PIVOTAL_TRACKER, PivotalTrackerBaseSource.class);
+        registerType(FeedType.SENDGRID, SendGridDataSource.class);
         //registerType(FeedType.HIGHRISE_CASES, HighRiseCaseSource.class);
         //registerType(FeedType.HIGHRISE_TASKS, HighRiseTaskSource.class);
     }

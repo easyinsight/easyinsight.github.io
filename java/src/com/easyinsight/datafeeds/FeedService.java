@@ -704,7 +704,7 @@ public class FeedService implements IDataFeedService {
                 lookupTable.setSourceField(sourceItem);
                 lookupTable.setTargetField(targetItem);
                 lookupTable.setLookupTableID(lookupTableID);
-                PreparedStatement getPairsStmt = conn.prepareStatement("SELECT SOURCE_VALUE, TARGET_VALUE, target_date_value FROM " +
+                PreparedStatement getPairsStmt = conn.prepareStatement("SELECT SOURCE_VALUE, TARGET_VALUE, target_date_value, target_measure FROM " +
                         "LOOKUP_PAIR WHERE LOOKUP_TABLE_ID = ?");
                 getPairsStmt.setLong(1, lookupTableID);
                 ResultSet pairsRS = getPairsStmt.executeQuery();
@@ -718,6 +718,13 @@ public class FeedService implements IDataFeedService {
                             value = new EmptyValue();
                         } else {
                             value = new DateValue(new java.sql.Date(targetDate.getTime()));
+                        }
+                    } else if (targetItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        double number = pairsRS.getDouble(4);
+                        if (pairsRS.wasNull()) {
+                            value = new EmptyValue();
+                        } else {
+                            value = new NumericValue(number);
                         }
                     } else {
                         String targetValue = pairsRS.getString(2);
@@ -799,6 +806,20 @@ public class FeedService implements IDataFeedService {
                     insertStmt.setNull(3, Types.TIMESTAMP);
                 } else {
                     insertStmt.setTimestamp(3, new java.sql.Timestamp(dateValue.getDate().getTime()));
+                }
+                insertStmt.execute();
+            }
+        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO LOOKUP_PAIR (LOOKUP_TABLE_ID," +
+                    "SOURCE_VALUE, TARGET_MEASURE) VALUES (?, ?, ?)");
+            for (LookupPair lookupPair : pairs) {
+                insertStmt.setLong(1, id);
+                insertStmt.setString(2, lookupPair.getSourceValue().toString());
+                NumericValue numericValue = (NumericValue) lookupPair.getTargetValue();
+                if (numericValue.getValue() == null) {
+                    insertStmt.setNull(3, Types.DOUBLE);    
+                } else {
+                    insertStmt.setDouble(3, numericValue.getValue());
                 }
                 insertStmt.execute();
             }

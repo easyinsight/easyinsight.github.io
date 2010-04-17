@@ -96,6 +96,7 @@
                 scorecardIndex = newIndex;                
             });
             scorecardRenderer.scorecardDescriptor = event.scorecard;
+            scorecardRenderer.retrieveData();
             scorecardStack.addChild(scorecardRenderer);
             if (tabsIndex == 0) {
                 tabsIndex = 1;
@@ -146,7 +147,7 @@
             }
             return text;
         }
-
+        
         protected function handleDescriptors(scorecardList:ScorecardList):void {
             if (!anyDataCase() || scorecardList.anyData) {
                 scorecards = scorecardList.scorecardDescriptors;
@@ -165,6 +166,8 @@
 
                 if (scorecards.length > 0) {
                     selectedScorecard = scorecards.getItemAt(0) as ScorecardDescriptor;
+                    var renderer:ScorecardRenderer = scorecardStack.getChildAt(0) as ScorecardRenderer;
+                    renderer.retrieveData();
                     if (selectedScorecard.groupID > 0 && selectedScorecard.groupRole > 2) {
                         sideBarControlsIndex = 1;
                     } else {
@@ -213,6 +216,8 @@
                 scorecardRenderer.setStyle("hideEffect", activeEffect);
                 scorecardRenderer.setStyle("showEffect", activeEffect);
             }
+            var renderer:ScorecardRenderer = scorecardStack.getChildAt(i) as ScorecardRenderer;
+            renderer.retrieveData();
             scorecardIndex = i;
         }
 

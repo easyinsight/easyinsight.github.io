@@ -42,6 +42,7 @@ public class InstallationSystem {
     private List<AuthorizationRequirement> authRequirements = new ArrayList<AuthorizationRequirement>();
     private EIConnection conn;
     private long userID;
+    private String userName;
     private long accountID;
     private GoalStorage goalStorage = new GoalStorage();
     private FeedStorage feedStorage = new FeedStorage();
@@ -50,6 +51,7 @@ public class InstallationSystem {
     public InstallationSystem(EIConnection conn) {
         this.conn = conn;
         this.userID = SecurityUtil.getUserID();
+        this.userName = SecurityUtil.getUserName();
         this.accountID = SecurityUtil.getAccountID();
     }
 
@@ -68,7 +70,7 @@ public class InstallationSystem {
         }
     }
 
-    public void installUserTree(GoalTree goalTree, List<Integer> inlineSolutionIDs) throws Exception, CloneNotSupportedException {
+    public void installUserTree(GoalTree goalTree, List<Integer> inlineSolutionIDs) throws Exception {
 
         for (Integer solutionID : inlineSolutionIDs) {
             Solution solution = solutionService.getSolution(solutionID, conn);
@@ -197,7 +199,7 @@ public class InstallationSystem {
         visitor.visit(goalTree.getRootNode());
         for (Long dataSourceID : dataSourceIDs) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID, conn, false);
-            allSolutions.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null, solutionID, accountID));
+            allSolutions.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null, solutionID, accountID, userName));
         }
 
         for (SolutionInstallInfo solutionInstallInfo : allSolutions) {
@@ -239,7 +241,7 @@ public class InstallationSystem {
         while (rs.next()) {
             long feedID = rs.getLong(1);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
-            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, false, null, solutionID, accountID));
+            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, false, null, solutionID, accountID, userName));
         }
         return descriptors;
     }

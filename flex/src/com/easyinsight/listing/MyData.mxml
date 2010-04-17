@@ -464,6 +464,13 @@
         private function createLookupTable():void {
             var window:NewLookupTableWindow = new NewLookupTableWindow();
             window.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+            if (uploadGrid.selectedItems != null && uploadGrid.selectedItems.length > 0) {
+                var obj:Object = uploadGrid.selectedItems[0];
+                if (obj is DataFeedDescriptor) {
+                    var desc:DataFeedDescriptor = obj as DataFeedDescriptor;
+                    window.selectedDataSource = desc;
+                }
+            }
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

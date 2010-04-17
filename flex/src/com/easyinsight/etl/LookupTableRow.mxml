@@ -2,11 +2,10 @@
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.DateValue;
+        import com.easyinsight.analysis.NumericValue;
         import com.easyinsight.analysis.StringValue;
         import com.easyinsight.analysis.Value;
-        import com.easyinsight.analysis.scrub.LookupTablePair;
 
-        import mx.binding.utils.BindingUtils;
         import mx.controls.DateField;
         import mx.controls.TextInput;
 
@@ -25,8 +24,11 @@
         }
 
         private var targetText:String;
+        private var targetNumber:String;
 
         private var targetDate:Date;
+
+        private var numberInput:TextInput;
 
         private var _mode:String;
 
@@ -45,6 +47,10 @@
                 dateField = new DateField();
                 dateField.selectedDate = targetDate;
                 addChild(dateField);
+            } else if (_mode == "measure") {
+                numberInput = new TextInput();
+                numberInput.text = targetText;
+                addChild(numberInput);
             }
         }
 
@@ -64,6 +70,10 @@
                 var dateValue:DateValue = new DateValue();
                 dateValue.date = dateField.selectedDate;
                 pair.targetValue = dateValue;
+            } else if (_mode == "measure") {
+                var numValue:NumericValue = new NumericValue();
+                numValue.value = int(numberInput.text);
+                pair.targetValue = numValue;
             }
             return pair;
         }
@@ -76,6 +86,8 @@
                     targetText = StringValue(_pair.targetValue).value;
                 } else if (_pair.targetValue is DateValue) {
                     targetDate = DateValue(_pair.targetValue).date;
+                } else if (_pair.targetValue is NumericValue) {
+                    targetNumber = String(NumericValue(_pair.targetValue).value);
                 }
             }
         }]]></mx:Script>
