@@ -34,7 +34,7 @@ import java.security.SignatureException;
  */
 public class AppInstanceTask extends Task {
 
-    protected static final String APP_AMI = "ami-7aad4b13";
+    protected static final String APP_AMI = "ami-3935db50";
     protected static final String STAGING_AMI = "ami-e7a1418e";
 
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";

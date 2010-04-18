@@ -21,11 +21,13 @@ import java.net.URLConnection;
  */
 public class AppWatchdog {
 
+    public static final String[] SHUTDOWN_CMD = {"/opt/tomcat/bin/catalina-easyinsight.sh", "stop"};
+    public static final String[] STARTUP_CMD = {"/opt/tomcat/bin/catalina-easyinsight.sh", "start"};
+
 
     public void restart() {
         try {
-            String[] cmd = {"/bin/sh", "-c", "./shutdown.sh" };
-            Runtime.getRuntime().exec(cmd);
+            StreamLogger.logProcess(Runtime.getRuntime().exec(SHUTDOWN_CMD), "shutdown");
             boolean shutdownSuccessful = false;
             int retryCount = 0;
             while (!shutdownSuccessful && retryCount < 10) {
@@ -41,7 +43,7 @@ public class AppWatchdog {
                     shutdownSuccessful = true;
                 }
             }
-            Runtime.getRuntime().exec("./startup.sh");
+            StreamLogger.logProcess(Runtime.getRuntime().exec(STARTUP_CMD), "startup");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,8 +51,8 @@ public class AppWatchdog {
 
     public void shutdown() {
         try {
-            String[] cmd = {"/bin/sh", "-c", "./shutdown.sh" };
-            Runtime.getRuntime().exec(cmd);
+            System.out.println("Running shutdown...");
+            StreamLogger.logProcess(Runtime.getRuntime().exec(SHUTDOWN_CMD), "shutdown");
             // need to verify...
             boolean shutdownSuccessful = false;
             int retryCount = 0;
@@ -74,8 +76,8 @@ public class AppWatchdog {
 
     public void start() {
         try {
-            String[] cmd = {"/bin/sh", "-c", "./startup.sh" };
-            Runtime.getRuntime().exec(cmd);
+            System.out.println("Running Startup....");
+            StreamLogger.logProcess(Runtime.getRuntime().exec(STARTUP_CMD), "startup");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -101,7 +103,7 @@ public class AppWatchdog {
             while ((ze = zin.getNextEntry()) != null) {
                 System.out.println("Unzipping " + ze.getName());
                 if (ze.isDirectory()) {
-                    File directory = new File("../webapps/app/" + ze.getName());
+                    File directory = new File("/opt/tomcat/webapps/app/" + ze.getName());
                     if (!directory.exists()) {
                         if (!directory.mkdir()) {
                             throw new RuntimeException("couldn't create directory " + directory.getAbsolutePath());
@@ -109,7 +111,7 @@ public class AppWatchdog {
                     }
                 } else {
                     byte[] buffer = new byte[8192];
-                    FileOutputStream fout = new FileOutputStream("../webapps/app/" + ze.getName());
+                    FileOutputStream fout = new FileOutputStream("/opt/tomcat/webapps/app/" + ze.getName());
                     BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
                     int nBytes;
                     while ((nBytes = zin.read(buffer)) != -1) {
@@ -124,8 +126,8 @@ public class AppWatchdog {
                 zin.closeEntry();
             }
             zin.close();
-            copyFile("eiconfig.properties", "../webapps/app/WEB-INF/classes/eiconfig.properties");
-            copyFile("cache.ccf", "../webapps/app/WEB-INF/classes/cache.ccf");
+            copyFile("eiconfig.properties", "/opt/tomcat/webapps/app/WEB-INF/classes/eiconfig.properties");
+            copyFile("cache.ccf", "/opt/tomcat/webapps/app/WEB-INF/classes/cache.ccf");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -146,8 +148,8 @@ public class AppWatchdog {
     }
 
     public static void main(String[] args) throws IOException {
-File file = new File("eiconfig.properties");
-            File target = new File("../webapps/DMS/WEB-INF/classes/eiconfig.properties");
+            File file = new File("eiconfig.properties");
+            File target = new File("/opt/tomcat/webapps/DMS/WEB-INF/classes/eiconfig.properties");
             target.delete();
             FileReader reader = new FileReader(file);
             FileWriter writer = new FileWriter(target);
