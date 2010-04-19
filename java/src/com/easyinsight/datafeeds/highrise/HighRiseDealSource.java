@@ -142,6 +142,10 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
             token.setUserID(SecurityUtil.getUserID());
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
+        } else if (token != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
+                !credentials.getUserName().equals(token.getTokenValue())) {
+            token.setTokenValue(credentials.getUserName());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();

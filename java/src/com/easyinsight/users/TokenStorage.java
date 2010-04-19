@@ -134,13 +134,17 @@ public class TokenStorage {
         Token token = null;
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement dataSourceTokenStmt = conn.prepareStatement("SELECT token_value FROM TOKEN where data_source_id = ?");
+            PreparedStatement dataSourceTokenStmt = conn.prepareStatement("SELECT token_value, user_id FROM TOKEN where data_source_id = ?");
             dataSourceTokenStmt.setLong(1, dataSourceID);
             ResultSet dsRS = dataSourceTokenStmt.executeQuery();
             if (dsRS.next()) {
                 token = new Token();
                 token.setTokenType(type);
                 token.setTokenValue(dsRS.getString(1));
+                long tokenUserID = dsRS.getLong(2);
+                if (!dsRS.wasNull()) {
+                    token.setUserID(tokenUserID);
+                }
             } else {
                 if (queryFromType) {
                     PreparedStatement queryStmt = conn.prepareStatement("SELECT token_value FROM TOKEN where user_id = ? AND token_type = ?");

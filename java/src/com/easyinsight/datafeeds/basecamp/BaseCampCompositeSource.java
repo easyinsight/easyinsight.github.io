@@ -66,13 +66,21 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     public boolean needsCredentials(List<CredentialFulfillment> existingCredentials, long userID) {
         String userName = null;
         Token token = new TokenStorage().getToken(userID, TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false);
-        if (token == null) {
-            for (CredentialFulfillment credentialFulfillment : existingCredentials) {
-                if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
-                    userName = credentialFulfillment.getCredentials().getUserName();
-                }
+        CredentialFulfillment ourFulfillment = null;
+        for (CredentialFulfillment credentialFulfillment : existingCredentials) {
+            if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
+                ourFulfillment = credentialFulfillment;
             }
-        } else {
+        }
+        if (token == null && ourFulfillment != null) {
+            userName = ourFulfillment.getCredentials().getUserName();
+        } else if (token != null && ourFulfillment != null) {
+            com.easyinsight.users.Credentials credentials = ourFulfillment.getCredentials();
+            if (credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
+                !credentials.getUserName().equals(token.getTokenValue())) {
+                token.setTokenValue(credentials.getUserName());
+                new TokenStorage().saveToken(token, getDataFeedID());
+            }
             userName = token.getTokenValue();
         }
         if (userName == null) {
