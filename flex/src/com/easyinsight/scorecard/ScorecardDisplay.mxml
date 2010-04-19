@@ -147,7 +147,45 @@
             }
             return text;
         }
-        
+
+        private function onReorder(event:ScorecardReorderEvent):void {
+            var rendererMap:Object = new Object();
+            for (var i:int = 0; i < event.scorecards.length; i++) {
+                var scorecardDescriptor:ScorecardDescriptor = event.scorecards.getItemAt(i) as ScorecardDescriptor;
+                var existingIndex:int = scorecards.getItemIndex(scorecardDescriptor);
+                rendererMap[i] = scorecardStack.getChildAt(existingIndex);
+            }
+            scorecardStack.removeAllChildren();
+            scorecards = event.scorecards;
+            for (var j:int = 0; j < event.scorecards.length; j++) {
+                var renderer:ScorecardRenderer = rendererMap[j];
+                scorecardStack.addChild(renderer);
+            }
+            selectedScorecard = scorecards.getItemAt(0) as ScorecardDescriptor;
+            renderer = scorecardStack.getChildAt(0) as ScorecardRenderer;
+            renderer.retrieveData();
+            if (selectedScorecard.groupID > 0 && selectedScorecard.groupRole > 2) {
+                sideBarControlsIndex = 1;
+            } else {
+                sideBarControlsIndex = 0;
+            }
+            groupText = createGroupText(selectedScorecard);
+            primaryStackIndex = 2;
+            if (scorecards.length > 1) {
+                tabsIndex = 1;
+            } else {
+                tabsIndex = 0;
+            }
+        }
+
+        private function reorderScorecards():void {
+            var window:ReorderScorecardWindow = new ReorderScorecardWindow();
+            window.scorecards = new ArrayCollection(scorecards.toArray());
+            window.addEventListener(ScorecardReorderEvent.SCORECARD_REORDER, onReorder, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         protected function handleDescriptors(scorecardList:ScorecardList):void {
             if (!anyDataCase() || scorecardList.anyData) {
                 scorecards = scorecardList.scorecardDescriptors;
@@ -226,6 +264,19 @@
             retrieveScorecards();
         }
 
+        private function onKPIMove(event:MoveKPIEvent):void {
+            var sourceIndex:int = scorecards.getItemIndex(event.sourceScorecard);
+            var targetIndex:int = scorecards.getItemIndex(event.destinationScorecard);
+            var sourceRenderer:ScorecardRenderer = scorecardStack.getChildAt(sourceIndex) as ScorecardRenderer;
+            var targetRenderer:ScorecardRenderer = scorecardStack.getChildAt(targetIndex) as ScorecardRenderer;
+            if (sourceRenderer.kpis != null) {
+                sourceRenderer.kpis.removeItemAt(sourceRenderer.kpis.getItemIndex(event.kpi));
+            }
+            if (targetRenderer.kpis != null) {
+                targetRenderer.kpis.addItem(event.kpi);
+            }
+        }
+
         [Bindable]
         private var groupText:String = "";
 
@@ -282,7 +333,8 @@
                     <mx:VBox width="100%">
                         <scorecard:ScorecardTabsRenderer scorecards="{scorecards}"
                                                          scorecardFocus="changeScorecard(event)"
-                                                         scorecard="{selectedScorecard}"/>
+                                                         scorecard="{selectedScorecard}"
+                                kpiMove="onKPIMove(event)"/>
                         <mx:HRule width="100%"/>
                     </mx:VBox>
                 </mx:ViewStack>
@@ -312,6 +364,8 @@
                            click="configureMode()"/>
             <mx:LinkButton label="Refresh data..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
                            click="refreshData()"/>
+            <mx:LinkButton label="Reorder scorecards..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                           click="reorderScorecards()"/>
             <mx:HRule width="100%" visible="{groupText != ''}"/>
             <util:AutoSizeTextArea editable="false" selectable="false" backgroundAlpha="0" borderStyle="none"
                                    text="{groupText}" fontSize="12" color="#333333" width="150"/>

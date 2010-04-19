@@ -1,9 +1,26 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
 
         private var _scorecards:ArrayCollection;
+
+        private function savedOrdering():void {
+            dispatchEvent(new ScorecardReorderEvent(scorecards));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function save():void {
+            ProgressAlert.alert(this, "Saving scorecard ordering...", null, scorecardService.saveScorecardOrdering);
+            scorecardService.saveScorecardOrdering.send(scorecards);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
 
         [Bindable(event="scorecardsChanged")]
         public function get scorecards():ArrayCollection {
@@ -16,12 +33,15 @@
             dispatchEvent(new Event("scorecardsChanged"));
         }]]>
     </mx:Script>
+    <mx:RemoteObject id="scorecardService" destination="scorecardService">
+        <mx:method name="saveScorecardOrdering" result="savedOrdering()"/>
+    </mx:RemoteObject>
     <mx:VBox>
         <mx:List dataProvider="{scorecards}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true"
             labelField="name"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Save"/>
-            <mx:Button label="Cancel"/>
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
 </util:EITitleWindow>

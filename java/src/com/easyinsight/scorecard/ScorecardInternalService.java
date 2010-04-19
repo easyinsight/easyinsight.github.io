@@ -11,6 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -57,6 +59,25 @@ public class ScorecardInternalService {
                     scorecards.add(scorecardDescriptor);
                 }
             }
+            PreparedStatement orderQueryStmt = conn.prepareStatement("SELECT SCORECARD_ORDER, SCORECARD_ID FROM USER_SCORECARD_ORDERING " +
+                    "WHERE USER_ID = ?");
+            orderQueryStmt.setLong(1, userID);
+            ResultSet orderRS = orderQueryStmt.executeQuery();
+            while (orderRS.next()) {
+                int order = orderRS.getInt(1);
+                long id = orderRS.getLong(2);
+                for (ScorecardDescriptor scorecardDescriptor : scorecards) {
+                    if (scorecardDescriptor.getId() == id) {
+                        scorecardDescriptor.setOrder(order);
+                    }
+                }
+            }
+            Collections.sort(scorecards, new Comparator<ScorecardDescriptor>() {
+
+                public int compare(ScorecardDescriptor scorecardDescriptor, ScorecardDescriptor scorecardDescriptor1) {
+                    return scorecardDescriptor.getOrder().compareTo(scorecardDescriptor1.getOrder());
+                }
+            });
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

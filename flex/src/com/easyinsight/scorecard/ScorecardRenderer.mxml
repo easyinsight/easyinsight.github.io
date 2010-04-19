@@ -62,7 +62,7 @@
         private var configurationIndex:int = 0;
 
         [Bindable]
-        private var kpis:ArrayCollection;
+        public var kpis:ArrayCollection;
 
         private var _configurationMode:Boolean;
 

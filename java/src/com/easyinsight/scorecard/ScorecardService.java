@@ -28,6 +28,33 @@ public class ScorecardService {
 
     private ScorecardStorage scorecardStorage = new ScorecardStorage();
 
+    public void saveScorecardOrdering(List<ScorecardDescriptor> descriptors) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SCORECARD_ORDERING WHERE USER_ID = ?");
+            clearStmt.setLong(1, SecurityUtil.getUserID());
+            clearStmt.executeUpdate();
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_SCORECARD_ORDERING (USER_ID, SCORECARD_ID, SCORECARD_ORDER) " +
+                    "VALUES (?, ?, ?)");
+            for (int i = 0; i < descriptors.size(); i++) {
+                ScorecardDescriptor scorecardDescriptor = descriptors.get(i);
+                insertStmt.setLong(1, SecurityUtil.getUserID());
+                insertStmt.setLong(2, scorecardDescriptor.getId());
+                insertStmt.setInt(3, i);
+                insertStmt.execute();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public long determineInitialDisplay() {
         // process here ->
         // is the user explicitly stated to use their own scorecard?

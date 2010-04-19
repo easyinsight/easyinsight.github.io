@@ -15,6 +15,7 @@ import mx.events.FlexEvent;
 import mx.rpc.remoting.RemoteObject;
 
 [Event(name="scorecardFocus", type="com.easyinsight.scorecard.ScorecardEvent")]
+[Event(name="kpiMove", type="com.easyinsight.scorecard.MoveKPIEvent")]
 public class ScorecardTabsRenderer extends FlowBox {
 
     private var _scorecards:ArrayCollection;
@@ -149,8 +150,10 @@ public class ScorecardTabsRenderer extends FlowBox {
         }
         //selectedScorecard.kpis.removeItemAt(selectedScorecard.kpis.getItemIndex(event.kpi));
         //event.destinationScorecard.kpis.addItem(event.kpi);
+        event.sourceScorecard = selectedScorecard;
         scorecardService.removeKPIFromScorecard.send(event.kpi.kpiID, selectedScorecard.id);
         scorecardService.addKPIToScorecard.send(event.kpi, event.destinationScorecard.id, CredentialsCache.getCache().createCredentials());
+        dispatchEvent(event);
     }
 
     private function onClick(event:MouseEvent):void {

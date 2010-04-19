@@ -12,6 +12,15 @@ public class ScorecardDescriptor extends EIDescriptor {
     private long groupID;
     private int groupRole;
     private String groupName;
+    private Integer order = Integer.MAX_VALUE;
+
+    public Integer getOrder() {
+        return order;
+    }
+
+    public void setOrder(Integer order) {
+        this.order = order;
+    }
 
     public String getGroupName() {
         return groupName;
