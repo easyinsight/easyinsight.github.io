@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Easy Insight</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
+</head>
+<body style="width:100%;text-align:center;margin:0px auto;">
+    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
+    	<div style="width:100%;text-align:left;height:70px;position:relative">
+        	<a href="/index.html"><img src="../images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+            <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+            <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
+
+        </div>
+	    <!-- InstanceBeginEditable name="submenu" -->
+    	<!-- InstanceEndEditable -->        
+        <div id="content">
+		    <!-- InstanceBeginEditable name="content" -->
+            <div style="width:100%;background-color:#FFFFFF">
+                <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Core Concepts</h1></div>
+                <h2>Table of Contents</h2>
+                <ul>
+                    <li>Core Concepts</li>
+                    <ul>
+                        <li><a href="coreconcepts.html#connections">Connections</a></li>
+                        <li><a href="coreconcepts.html#dataSources">Data Sources</a></li>
+                        <li><a href="coreconcepts.html#reports">Reports</a></li>
+                        <li><a href="coreconcepts.html#fields">Fields</a></li>  
+                    </ul>
+                </ul>
+                <h2><a name="connections"/>Connections</h2>
+                <p>You connect data into Easy Insight through Connections. There are a few primary types of connections:</p>
+                <ul>
+                    <li>Connecting to other Software as a Service (SaaS) systems</li>
+                        <ul>
+                            <li>Basecamp, Highrise, Google Analytics, Salesforce</li>
+                        </ul>
+                    <li>Uploading a file to Easy Insight</li>
+                        <ul>
+                            <li>Excel Spreadsheets, CSV Files</li>
+                        </ul>
+                    <li>Client application publishing data into Easy Insight</li>
+                        <ul>
+                            <li>MySQL, SQL Server, Oracle clients</li>
+                        </ul>
+                </ul>
+                <p>
+                    You establish these connections through the Connections page in the application at <a href="https://www.easy-insight.com/app/#page=connections">https://www.easy-insight.com/app/#page=connections</a>. For connections to other SaaS systems, you'll typically be asked to enter some form of configuration and credential information--for example, with Basecamp, you're asked for the location and API token of the Basecamp instance. Wherever possible, Easy Insight follows the optimal security processes for the target SaaS system. Other systems following security models along the lines of AuthSub or OAuth may redirect you to the connection website to grant Easy Insight access to your account.
+                </p>
+                <p>
+                    Based on the nature of the target SaaS system, the behavior of the connection may vary slightly. For some systems, there is no good way for Easy Insight to query subsets of information. In these systems, Easy Insight will synchronize key subsets of data from the target system into the internal data warehouse kept within the Easy Insight servers. Examples of this scenario are Basecamp and Highrise. For other systems, Easy Insight maintains a completely live connection to the target environment and avoids that synchronization process. Examples of this scenario are Google Analytics and Salesforce. 
+                </p>
+                <p>
+                    For flat files and client applications, the data will always fit into the first scenario--if you upload a spreadsheet, the data from that spreadsheet is stored in the internal Easy Insight data warehouse. 
+                </p>
+                <p>
+                    Once you define a connection, the result is a Data Source. Data sources are available to you under the My Data page for future reference. 
+                </p>
+                <h2><a name="dataSources"/>Data Sources</h2>
+                <p>You'll typically be working with either data sources or reports in the course of day to day operations with Easy Insight.</p>
+                <h2><a name="reports"/>Reports</h2>
+                <p>A report</p>
+                <h2><a name="fields"/>Fields</h2>
+
+            </div>
+    		<!-- InstanceEndEditable -->
+<div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+            	<div style="float:right;padding-right:200px;">
+                    <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
+                    <ul>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div style="padding-left:180px;">
+					<span style="font-weight:bold;font-size:12px;">About</span>
+                    <ul>
+                        <li><a href="/company.html">Company Overview</a></li>
+                        <li><a href="/whoweare.html">Who We Are</a></li>
+                        <li><a href="/contactus.html">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+	    </div>
+    </div>
+	<script type="text/javascript" src="/js/lightbox.js"></script>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-8316271-1");
+pageTracker._trackPageview();
+</script>
+</body>
+<!-- InstanceEnd --></html>
