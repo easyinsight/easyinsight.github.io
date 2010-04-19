@@ -111,7 +111,7 @@
         td:first-child {
             text-align:right;
         }
-        span {
+        span.error {
             color: red;
         }
 
@@ -132,9 +132,6 @@
     </style>
 <!-- InstanceEndEditable -->
     <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
-    <script type="text/javascript" src="/js/prototype.js"></script>
-    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
-    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
@@ -150,9 +147,9 @@
             <div style="width:100%;background-color:#FFFFFF">
                 <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Billing</h1></div>
                 <p>Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.</p>
-        <p style="font-size:10px">Items marked with a <span>*</span> are required.</p>
+        <p style="font-size:10px">Items marked with a <span class="error">*</span> are required.</p>
         <% if(request.getParameter("error") != null) { %>
-            <p><span>There was an error with your billing information. Please input the correct information below.</span></p>
+            <p><span class="error">There was an error with your billing information. Please input the correct information below.</span></p>
         <% } %>
   <form method="post" action="https://secure.braintreepaymentgateway.com/api/transact.php" onsubmit="setCCexp()">
       <input id="ccexp" type="hidden" value="" name="ccexp"/>
@@ -171,23 +168,23 @@
             <td>Company:</td><td><input id="company" type="text" value="" name="company" style="width:16.5em" /></td>
       </tr>
       <tr>
-          <td>First Name:</td><td><input id="firstname" type="text" value="" name="firstname" style="width:16.5em" /><span>*</span></td>
-          <td>Last Name:</td><td colspan="3"><input id="lastname" type="text" value="" name="lastname" style="width:16.5em" /><span>*</span></td>
+          <td>First Name:</td><td><input id="firstname" type="text" value="" name="firstname" style="width:16.5em" /><span class="error">*</span></td>
+          <td>Last Name:</td><td colspan="3"><input id="lastname" type="text" value="" name="lastname" style="width:16.5em" /><span class="error">*</span></td>
       </tr>
       <tr>
-          <td>Address 1:</td><td> <input id="address1" type="text" value="" name="address1" style="width:16.5em" /><span>*</span></td>
+          <td>Address 1:</td><td> <input id="address1" type="text" value="" name="address1" style="width:16.5em" /><span class="error">*</span></td>
       </tr>
       <tr>
           <td>Address 2:</td><td><input id="address2" type="text" value="" name="address2" style="width:16.5em" /></td>
       </tr>
       <tr>
-          <td>City:</td><td><input id="city" type="text" value="" name="city" style="width:16.5em" /><span>*</span></td><td style="text-align:right">State:</td><td><input id="state" type="text" value="" style="width:2.5em" maxlength="2" name="state" /><span>*</span></td><td style="text-align:right">Zip Code:</td><td> <input id="zip" type="text" value="" name="zip" /><span>*</span></td>
+          <td>City:</td><td><input id="city" type="text" value="" name="city" style="width:16.5em" /><span class="error">*</span></td><td style="text-align:right">State:</td><td><input id="state" type="text" value="" style="width:2.5em" maxlength="2" name="state" /><span class="error">*</span></td><td style="text-align:right">Zip Code:</td><td> <input id="zip" type="text" value="" name="zip" /><span class="error">*</span></td>
       </tr>
       <tr>
-          <td>Phone #:</td> <td><input id="phone" type="text" value="" name="phone" style="width:16.5em" /><span>*</span></td>
+          <td>Phone #:</td> <td><input id="phone" type="text" value="" name="phone" style="width:16.5em" /><span class="error">*</span></td>
       </tr>
       <tr>
-          <td>Credit Card Number:</td><td><input id="ccnumber" type="text" style="width:16.5em" name="ccnumber"/><span>*</span></td><td>CVV/CVC:</td> <td><input id="cvv" type="text" value="" name="cvv" style="width:3.5em" /><span>*</span></td>
+          <td>Credit Card Number:</td><td><input id="ccnumber" type="text" style="width:16.5em" name="ccnumber"/><span class="error">*</span></td><td>CVV/CVC:</td> <td><input id="cvv" type="text" value="" name="cvv" style="width:3.5em" /><span class="error">*</span></td>
       </tr>
       <tr><td>Expiration date:</td><td><select id="ccexpMonth">
           <option value="01">01 - January</option>
@@ -217,7 +214,7 @@
           <option value="19">19</option>
           <option value="20">20</option>
       </select>
-      <span>*</span></td></tr>
+      <span class="error">*</span></td></tr>
       <tr><td colspan="6" style="font-size:14px;text-align:left">You are signing up for the <%= accountInfoString %> account tier, and you will be charged $<%= charge %> USD monthly for your subscription.  <% if(account.getAccountState() == Account.DELINQUENT) { %> Since your account is currently delinquent, the first charge will be applied today. <% } %>  </td></tr>
       <tr><td colspan="6" style="text-align:center"> <input class="submitButton" type="image" value="" src="transparent.gif" name="commit"/></td></tr>
       </tbody></table>

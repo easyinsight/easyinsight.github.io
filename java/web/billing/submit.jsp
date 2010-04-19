@@ -109,64 +109,40 @@
             <title>Easy Insight - Billing Complete</title>
 <!-- InstanceEndEditable -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href="/website.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="/history/history.css" />
-    <link rel="icon" type="image/ico" href="/favicon.ico"/>
-    <script src="/AC_OETags.js" language="javascript"></script>
-    <script src="/history/history.js" language="javascript"></script>
-    <!-- InstanceBeginEditable name="head" -->
-    <!-- InstanceEndEditable -->
+    <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
 </head>
-<body>
-<div id="allPage">
-    <div id="header">
-        <div id="navigationElements">
-            <div id="topLinks" style="width:100%">
-                <a href="/contactus.html">contact us</a><div></div>
-                <a href="http://jamesboe.blogspot.com/">blog</a><div></div>
-                <a href="/index.html">home</a>
-            </div>
-            <div id="mainLinks" style="width:100%">
-                <a href="/company.html">COMPANY</a><div></div>
-                <a href="/consulting.html">CONSULTING</a><div></div>
-                <!--<a href="index.html">COMMUNITY</a><div></div>-->
-                <a href="/solutions.html">SOLUTIONS</a><div></div>
-                <a href="/product.html">PRODUCT</a><div></div>
-                <a href="/index.html">HOME</a>
-            </div>
+<body style="width:100%;text-align:center;margin:0px auto;">
+    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
+    	<div style="width:100%;text-align:left;height:70px;position:relative">
+        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+            <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+            <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
         </div>
-        <div id="logo">
-            <img src="/logo2.PNG" alt="Easy Insight Logo"/>
-        </div>
-    </div>
-    <img src="/redbar.PNG" alt="Red Bar"/>
-    <div id="centerPage">
+        <div id="content">
         <!-- InstanceBeginEditable name="content" -->
+            <div style="width:100%;background-color:#FFFFFF">
         <p> You have successfully set up your billing account. You will not be billed until your free trial has expired. </p>
         <p><a href="/app/#page=account">Go Back</a></p>
-
+                </div>
         <!-- InstanceEndEditable -->
-    </div>
-
-    <div id="footer">
-        <div style="width:400px">
-          &copy; 2009 Easy Insight LLC. All rights reserved.
+    <div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+        <div style="float:right;padding-right:200px;">
+            <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
+            <ul>
+                <li><a href="/terms.html">Terms of Service</a></li>
+                <li><a href="/privacy.html">Privacy Policy</a></li>
+            </ul>
         </div>
-        <div>
-          <a href="/index.html">Home</a>
-        </div>
-        <div>
-          <a href="/sitemap.html">Site Map</a>
-        </div>
-        <div>
-          <a href="/privacy.html">Privacy Policy</a>
-        </div>
-        <div>
-          <a href="/tos.html">Terms of Service</a>
+        <div style="padding-left:180px;">
+            <span style="font-weight:bold;font-size:12px;">About</span>
+            <ul>
+                <li><a href="/company.html">Company Overview</a></li>
+                <li><a href="/whoweare.html">Who We Are</a></li>
+                <li><a href="/contactus.html">Contact Us</a></li>
+            </ul>
         </div>
     </div>
-
+            </div>
 </div>
-
     </body>
 </html>
