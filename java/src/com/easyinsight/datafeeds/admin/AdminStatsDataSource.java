@@ -60,7 +60,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
     }
 
     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
-        HealthInfo healthInfo = new AdminService().getHealthInfo();
+        //HealthInfo healthInfo = new AdminService().getHealthInfo();
         DataSet dataSet = new DataSet();
         /*IRow row = dataSet.createRow();
         row.addValue(keys.get(DATE), new DateValue(new Date()));
