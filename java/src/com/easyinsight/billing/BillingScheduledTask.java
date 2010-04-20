@@ -31,7 +31,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 @PrimaryKeyJoinColumn(name="scheduled_task_id")
 public class BillingScheduledTask extends ScheduledTask {
     protected void execute(Date now, EIConnection conn) throws Exception {
-//        expireTrials(now, conn);
+        expireTrials(now, conn);
         billCustomers(now, conn);
 
     }
