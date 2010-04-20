@@ -1,12 +1,13 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" width="100%" creationComplete="initHandlers()"
-        paddingLeft="15"
-		paddingTop="15" paddingBottom="15" paddingRight="15">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" horizontalAlign="center"
+         width="100%" creationComplete="initHandlers()"
+         paddingLeft="15"
+         paddingTop="15" paddingBottom="15" paddingRight="15">
     <mx:Metadata>
-		[Event(name="userDefined", type="com.easyinsight.account.UserDefinitionEvent")]
-		[Event(name="previousPage", type="com.easyinsight.account.PreviousPageEvent")]
-	</mx:Metadata>
-	<mx:Script>
+        [Event(name="userDefined", type="com.easyinsight.account.UserDefinitionEvent")]
+        [Event(name="previousPage", type="com.easyinsight.account.PreviousPageEvent")]
+    </mx:Metadata>
+    <mx:Script>
 		<![CDATA[
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -20,11 +21,11 @@
         private var _account:Account;
         private var validators:Array;
 
-            private function showTerms():void {
-                var window:TermsOfService = new TermsOfService();
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            }
+        private function showTerms():void {
+            var window:TermsOfService = new TermsOfService();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
 
         public function set account(val:Account):void {
             _account = val;
@@ -67,7 +68,7 @@
                 failureMessageLabel.text = "Your passwords do not match.";
             } else if (!tosCheckbox.selected) {
                 failureMessageLabel.text = "You must accept the terms of service.";
-            } else {                                                                                         
+            } else {
                 failureMessageLabel.text = "";
                 user = new UserTransferObject();
                 user.userName = userName.text;
@@ -78,7 +79,7 @@
                 _account.name = accountName.text;
                 _account.optInEmail = optInCheckbox.selected;
                 ProgressAlert.alert(this, "Validating the account...", null, creationService.doesUserExist);
-                creationService.doesUserExist.send(userName.text, email.text);
+                creationService.doesUserExist.send(userName.text, email.text, accountName.text);
             }
         }
 
@@ -86,7 +87,7 @@
             dispatchEvent(new PreviousPageEvent());
         }
         ]]>
-	</mx:Script>
+    </mx:Script>
 
     <mx:VBox verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
         <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
@@ -106,48 +107,56 @@
             <mx:Label text="Administrator User Profile: " fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
         </mx:Box>
         <mx:Form width="100%" backgroundColor="0xDCDBD0">
-			<mx:FormItem label="User Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="userName" fontFamily="Lucida Grande" fontWeight="normal"/>
-			</mx:FormItem>
-			<mx:FormItem label="Password:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="password" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal"/>
-			</mx:FormItem>
+            <mx:FormItem label="User Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="userName" fontFamily="Lucida Grande" fontWeight="normal"/>
+            </mx:FormItem>
+            <mx:FormItem label="Password:" direction="vertical" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="password" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal"/>
+                <account:PasswordStrengthMeter target="{password}" trackHeight="10"/>
+            </mx:FormItem>
             <mx:FormItem label="Confirm Password:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="confirmPassword" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal"/>
-			</mx:FormItem>
-			<mx:FormItem label="Administrator First Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="firstName" fontFamily="Lucida Grande" fontWeight="normal"/>
-			</mx:FormItem>
+                <mx:TextInput id="confirmPassword" displayAsPassword="true" fontFamily="Lucida Grande"
+                              fontWeight="normal"/>
+            </mx:FormItem>
+            <mx:FormItem label="Administrator First Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="firstName" fontFamily="Lucida Grande" fontWeight="normal"/>
+            </mx:FormItem>
             <mx:FormItem label="Administrator Last Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal"/>
-			</mx:FormItem>
-			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal"/>
-			</mx:FormItem>
+                <mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal"/>
+            </mx:FormItem>
+            <mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal"/>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <mx:TextArea
+                        text="An Easy Insight representative will contact you after signup to help answer any questions you may have as you use the service."
+                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false"
+                        fontFamily="Tahoma" fontWeight="bold" height="50" width="350"/>
+            </mx:FormItem>
             <mx:FormItem label="Send Me Occasional Updates About Easy Insight" direction="horizontal">
-                <mx:CheckBox id="optInCheckbox"/>
+                <mx:CheckBox id="optInCheckbox" selected="true"/>
             </mx:FormItem>
             <mx:FormItem label="I Accept the Terms of Service" direction="horizontal">
                 <mx:CheckBox id="tosCheckbox"/>
                 <mx:LinkButton label="View Terms of Service" click="showTerms()" textDecoration="underline"/>
             </mx:FormItem>
-			<mx:FormItem>
-				<mx:HBox>
+            <mx:FormItem>
+                <mx:HBox>
                     <mx:Button label="Create" click="createAccount()"/>
-					<mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline"/>
-				</mx:HBox>
-			</mx:FormItem>
-			<mx:FormItem label="">
-				<mx:Text text="" id="failureMessageLabel"/>
-			</mx:FormItem>
-		</mx:Form>
-	</mx:VBox>
-	<mx:StringValidator source="{userName}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
-	<mx:StringValidator source="{password}" property="text" id="passwordValidator" minLength="8" maxLength="20"/>
-	<mx:StringValidator source="{fullName}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
-	<mx:EmailValidator source="{email}" property="text" id="emailValidator"/>
-	<mx:RemoteObject id="creationService" destination="accountAdmin">
-		<mx:method name="doesUserExist" result="validatedUser()"/>
-		<mx:method name="doesAccountExist" result="validatedAccount()"/>
-	</mx:RemoteObject>
+                    <mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline"/>
+                </mx:HBox>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <mx:Text text="" id="failureMessageLabel"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:VBox>
+    <mx:StringValidator source="{userName}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
+    <mx:StringValidator source="{password}" property="text" id="passwordValidator" minLength="8" maxLength="20"/>
+    <mx:StringValidator source="{fullName}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
+    <mx:EmailValidator source="{email}" property="text" id="emailValidator"/>
+    <mx:RemoteObject id="creationService" destination="accountAdmin">
+        <mx:method name="doesUserExist" result="validatedUser()"/>
+        <mx:method name="doesAccountExist" result="validatedAccount()"/>
+    </mx:RemoteObject>
 </mx:VBox>

@@ -237,7 +237,7 @@ public class UserService implements IUserService {
 
 
     @Nullable
-    public String doesUserExist(String userName, String email) {
+    public String doesUserExist(String userName, String email, String accountName) {
         Session session = Database.instance().createSession();
         String message = null;
         List results;
@@ -250,6 +250,11 @@ public class UserService implements IUserService {
                 results = session.createQuery("from User where email = ?").setString(0, email).list();
                 if (results.size() > 0) {
                     message = "That email address is already used.";
+                } else {
+                    results = session.createQuery("from Account where name = ?").setString(0, accountName).list();
+                    if (results.size() > 0) {
+                        message = "That company name is already used.";
+                    }
                 }
             }
             session.getTransaction().commit();
