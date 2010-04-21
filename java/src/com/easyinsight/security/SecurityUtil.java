@@ -48,7 +48,10 @@ public class SecurityUtil {
     }
 
     public static String getUserName() {
-        return getSecurityProvider().getUserPrincipal().getUserName();
+        UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
+        if(userPrincipal == null)
+            userPrincipal = threadLocal.get();
+        return userPrincipal.getUserName();
     }
 
     public static void authorizeAccountAdmin() {
