@@ -23,8 +23,8 @@ public class BaseCampTodo3To4 extends DataSourceMigration {
 
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
-        //addAnalysisItem(new AnalysisDateDimension(new NamedKey(BaseCampTodoSource.MILESTONE_COMPLETED_ON), true, AnalysisDateDimension.DAY_LEVEL));
-        //addAnalysisItem(new AnalysisDimension(new NamedKey(BaseCampTodoSource.MILESTONE_OWNER), true));
+        addAnalysisItem(new AnalysisDateDimension(new NamedKey(BaseCampTodoSource.MILESTONE_COMPLETED_ON), true, AnalysisDateDimension.DAY_LEVEL));
+        addAnalysisItem(new AnalysisDimension(new NamedKey(BaseCampTodoSource.MILESTONE_OWNER), true));
     }
 
     @Override
