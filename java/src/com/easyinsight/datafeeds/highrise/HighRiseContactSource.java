@@ -99,7 +99,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
             token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
             token.setUserID(SecurityUtil.getUserID());
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        } else if (token != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
+        } else if (token != null && credentials != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
                 !credentials.getUserName().equals(token.getTokenValue())) {
             token.setTokenValue(credentials.getUserName());
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
