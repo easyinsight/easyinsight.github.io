@@ -84,6 +84,8 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 new TokenStorage().saveToken(token, getDataFeedID());
             }
             userName = token.getTokenValue();
+        } else if (token != null) {
+            userName = token.getTokenValue();
         }
         if (userName == null) {
             return true;

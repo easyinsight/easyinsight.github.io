@@ -74,6 +74,12 @@ public class WSListDefinition extends WSAnalysisDefinition {
     }
 
     public void createReportStructure(Map<String, AnalysisItem> structure) {
+        Collections.sort(getColumns(), new Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+            }
+        });
         addItems("", getColumns(), structure);
     }
 

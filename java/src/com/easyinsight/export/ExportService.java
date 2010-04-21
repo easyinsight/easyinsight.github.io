@@ -30,10 +30,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -163,6 +160,12 @@ public class ExportService {
         HSSFRow headerRow = sheet.createRow(0);
         Map<AnalysisItem, Short> positionMap = new HashMap<AnalysisItem, Short>();
         List<AnalysisItem> items = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems());
+        Collections.sort(items, new Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+            }
+        });
         for (short i = 0; i < items.size(); i++) {
             AnalysisItem analysisItem = items.get(i);
             positionMap.put(analysisItem, i);

@@ -32,7 +32,7 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.controls.AdvancedDataGrid;
-        import mx.controls.Alert;
+        
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
         import mx.events.AdvancedDataGridEvent;
@@ -443,7 +443,10 @@
         public function updateExportMetadata():void {
             for (var i:int = 0; i < listDef.columns.length; i++) {
                 var item:AnalysisItem = listDef.columns.getItemAt(i) as AnalysisItem;
-                var column:AdvancedDataGridColumn = dataGrid.columns[i + (listDef.showLineNumbers ? 1 : 0)];
+                var columnIndex:int = findColumnIndex(item.qualifiedName());
+                item.itemPosition = columnIndex;
+                var column:AdvancedDataGridColumn = dataGrid.columns[columnIndex];
+
                 var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
                 if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
 
@@ -456,6 +459,16 @@
                     item.sort = 0;
                 }
             }
+        }
+
+        private function findColumnIndex(qualifiedName:String):int {
+            for (var i:int = 0; i < dataGrid.columns.length; i++) {
+                var column:AdvancedDataGridColumn = dataGrid.columns[i];
+                if (column.dataField == qualifiedName) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         public function preserveValues():Boolean {

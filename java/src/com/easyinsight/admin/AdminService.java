@@ -6,15 +6,9 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.outboundnotifications.BroadcastInfo;
 import com.easyinsight.eventing.MessageUtils;
 
-import javax.management.ObjectName;
-import javax.management.MBeanServer;
-import javax.management.JMX;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.management.ThreadInfo;
-import java.lang.management.GarbageCollectorMXBean;
-import java.net.InetAddress;
-import java.net.URLEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,7 +16,6 @@ import java.text.MessageFormat;
 
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
-import flex.management.runtime.messaging.client.FlexClientManagerControlMBean;
 
 /**
  * User: James Boe
@@ -67,6 +60,56 @@ public class AdminService {
         }
     }
 
+    private void cleanOrphanHierarchies(EIConnection conn) throws SQLException {
+        PreparedStatement query = conn.prepareStatement("select analysis_hierarchy_item.analysis_hierarchy_item_id " +
+                    "from analysis_hierarchy_item left join hierarchy_level on analysis_hierarchy_item.hierarchy_level_id = hierarchy_level.hierarchy_level_id where " +
+                    "analysis_hierarchy_item.hierarchy_level_id is null");
+        PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM ANALYSIS_HIERARCHY_ITEM WHERE ANALYSIS_HIERARCHY_ITEM_ID = ?");
+        ResultSet rs = query.executeQuery();
+        while (rs.next()) {
+            long id = rs.getLong(1);
+            nukeStmt.setLong(1, id);
+            nukeStmt.executeUpdate();
+        }
+    }
+
+    private void clearOrphanUploadPolicies(EIConnection conn) throws SQLException {
+        PreparedStatement query = conn.prepareStatement("select upload_policy_users.upload_policy_users_id from upload_policy_users " +
+                "left join data_feed on upload_policy_users.feed_id = data_feed.data_feed_id where data_feed.data_feed_id is null");
+        PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM UPLOAD_POLICY_USERS WHERE UPLOAD_POLICY_USERS_ID = ?");
+        ResultSet rs = query.executeQuery();
+        while (rs.next()) {
+            long id = rs.getLong(1);
+            nukeStmt.setLong(1, id);
+            nukeStmt.executeUpdate();
+        }
+    }
+
+    private void clearOrphanStepStmt(EIConnection conn) throws SQLException {
+        PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM ANALYSIS_STEP WHERE ANALYSIS_STEP_ID = ?");
+        PreparedStatement query1 = conn.prepareStatement("SELECT ANALYSIS_STEP.analysis_step_id FROM ANALYSIS_STEP LEFT JOIN ANALYSIS_ITEM ON " +
+                "ANALYSIS_STEP.correlation_dimension_id = ANALYSIS_ITEM.ANALYSIS_ITEM_ID WHERE ANALYSIS_ITEM.ANALYSIS_ITEM_ID iS NULL");
+        ResultSet rs1 = query1.executeQuery();
+        while (rs1.next()) {
+            nukeStmt.setLong(1, rs1.getLong(1));
+            nukeStmt.executeUpdate();
+        }
+        PreparedStatement query2 = conn.prepareStatement("SELECT ANALYSIS_STEP.analysis_step_id FROM ANALYSIS_STEP LEFT JOIN ANALYSIS_ITEM ON " +
+                "ANALYSIS_STEP.start_date_dimension_id = ANALYSIS_ITEM.ANALYSIS_ITEM_ID WHERE ANALYSIS_ITEM.ANALYSIS_ITEM_ID iS NULL");
+        ResultSet rs2 = query2.executeQuery();
+        while (rs2.next()) {
+            nukeStmt.setLong(1, rs2.getLong(1));
+            nukeStmt.executeUpdate();
+        }
+        PreparedStatement query3 = conn.prepareStatement("SELECT ANALYSIS_STEP.analysis_step_id FROM ANALYSIS_STEP LEFT JOIN ANALYSIS_ITEM ON " +
+                "ANALYSIS_STEP.end_date_dimension_id = ANALYSIS_ITEM.ANALYSIS_ITEM_ID WHERE ANALYSIS_ITEM.ANALYSIS_ITEM_ID iS NULL");
+        ResultSet rs3 = query3.executeQuery();
+        while (rs3.next()) {
+            nukeStmt.setLong(1, rs3.getLong(1));
+            nukeStmt.executeUpdate();
+        }
+    }
+
     private void cleanRawUploads(EIConnection conn) throws SQLException {
         PreparedStatement cleanStmt = conn.prepareStatement("TRUNCATE USER_UPLOAD");
         cleanStmt.execute();
@@ -78,6 +121,9 @@ public class AdminService {
         try {
             conn.setAutoCommit(false);
             cleanOrphanItems(conn);
+            cleanOrphanHierarchies(conn);
+            clearOrphanUploadPolicies(conn);
+            clearOrphanStepStmt(conn);
             //cleanOrphanKeys(conn);
             cleanRawUploads(conn);
             conn.commit();

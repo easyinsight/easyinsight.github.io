@@ -386,6 +386,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
             if (value == null) {
                 found = false;
             } else {
+                value = (AnalysisItem) Database.deproxy(value);
                 items.add(value);
             }
             i++;
