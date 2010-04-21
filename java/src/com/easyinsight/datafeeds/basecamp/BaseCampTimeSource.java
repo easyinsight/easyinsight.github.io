@@ -77,6 +77,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
         } else if (token != null && credentials != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
                 !credentials.getUserName().equals(token.getTokenValue())) {
             token.setTokenValue(credentials.getUserName());
+            token.setUserID(SecurityUtil.getUserID());
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
