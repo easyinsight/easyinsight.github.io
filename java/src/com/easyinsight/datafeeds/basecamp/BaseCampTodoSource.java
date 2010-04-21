@@ -217,8 +217,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
                             row.addValue(keys.get(COUNT), new NumericValue(1));
                         }
-                    } catch (Exception e) {
-                        LogClass.error(e);
+                    } catch (Exception e) {                        
                         LogClass.debug("Orphan data for todo list " + todoListId);
                     }
                 }
