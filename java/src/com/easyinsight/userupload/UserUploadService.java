@@ -56,7 +56,7 @@ public class UserUploadService implements IUserUploadService {
                     SecurityUtil.getAccountID(), SecurityUtil.getUserName());
             conn.commit();
             return results;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
             throw new RuntimeException(e);
@@ -137,7 +137,7 @@ public class UserUploadService implements IUserUploadService {
                 return new MyDataTree(objects, true);
             }
             return new MyDataTree(objects, includeGroups);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -148,7 +148,7 @@ public class UserUploadService implements IUserUploadService {
         try {
             //SecurityUtil.authorizeFeed(dataFeedID, Roles.OWNER);
             return getFeedDefinition(dataFeedID);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -157,7 +157,7 @@ public class UserUploadService implements IUserUploadService {
     public static FeedDefinition getFeedDefinition(long dataFeedID) {
         try {
             return feedStorage.getFeedDefinitionData(dataFeedID);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -167,7 +167,7 @@ public class UserUploadService implements IUserUploadService {
         try {
             SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.OWNER);
             feedStorage.updateDataFeedConfiguration(feedDefinition);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -228,7 +228,7 @@ public class UserUploadService implements IUserUploadService {
             tableDef.commit();
             conn.commit();
             return result.getFeedID();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             if (tableDef != null) {
                 tableDef.rollback();
@@ -281,7 +281,7 @@ public class UserUploadService implements IUserUploadService {
                 uploadResponse.setInfos(fieldInfos);
             }
             conn.commit();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
             throw new RuntimeException(e);
@@ -301,7 +301,7 @@ public class UserUploadService implements IUserUploadService {
         } catch (StorageLimitException se) {
             conn.rollback();
             uploadResponse = new UploadResponse("You have reached your account storage limit.");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
             uploadResponse = new UploadResponse("Something caused an internal error in the processing of the uploaded file.");
@@ -400,7 +400,7 @@ public class UserUploadService implements IUserUploadService {
                 throw new SecurityException();
             }
             conn.commit();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             try {
                 conn.rollback();
@@ -422,7 +422,7 @@ public class UserUploadService implements IUserUploadService {
         long userID = SecurityUtil.getUserID();
         try {
             return feedStorage.searchForSubscribedFeeds(userID);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -435,7 +435,7 @@ public class UserUploadService implements IUserUploadService {
             long feedID = feedStorage.addFeedDefinitionData(definition);
             new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);
             return feedID;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -446,7 +446,7 @@ public class UserUploadService implements IUserUploadService {
         long userID = SecurityUtil.getUserID();
         try {
             new UserUploadInternalService().createUserFeedLink(userID, dataFeedID, Roles.SUBSCRIBER);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -486,7 +486,7 @@ public class UserUploadService implements IUserUploadService {
         try {
             FeedDefinition feedDefinition = getDataFeedConfiguration(feedID);
             return feedDefinition.getCredentialsDefinition();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -523,7 +523,7 @@ public class UserUploadService implements IUserUploadService {
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (synchronous) {
                     credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
-                    if (!feedDefinition.isVisible()) {
+                    if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
                         feedDefinition.setVisible(true);
                         feedStorage.updateDataFeedConfiguration(feedDefinition);
                     }
@@ -548,7 +548,7 @@ public class UserUploadService implements IUserUploadService {
                 credentialsResponse = new CredentialsResponse(true, feedID);
             }
             return credentialsResponse;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -583,7 +583,7 @@ public class UserUploadService implements IUserUploadService {
             else
                 task.updateData(feedID, update, conn, rawUploadData);
             conn.commit();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             try {
                 conn.rollback();
@@ -608,7 +608,7 @@ public class UserUploadService implements IUserUploadService {
                 userID = null;    
             }
             return new PNGExportOperation().write(bytes, userID);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -618,7 +618,7 @@ public class UserUploadService implements IUserUploadService {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             return feedStorage.getFeedDescriptor(feedID);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -641,7 +641,7 @@ public class UserUploadService implements IUserUploadService {
                 credentialsResponse = new CredentialsResponse(false, failureMessage, feedDefinition.getDataFeedID());
             }
             return credentialsResponse;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -651,7 +651,7 @@ public class UserUploadService implements IUserUploadService {
         try {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(id);
             return validateCredentials(feedDefinition, credentials, needsEncryption);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -711,7 +711,7 @@ public class UserUploadService implements IUserUploadService {
                 }
                 session.flush();
                 conn.commit();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 conn.rollback();
                 throw new RuntimeException(e);
             } finally {
@@ -720,7 +720,7 @@ public class UserUploadService implements IUserUploadService {
             }
             return translatedResults;
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -848,7 +848,7 @@ public class UserUploadService implements IUserUploadService {
 
                 session.flush();
                 conn.commit();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 conn.rollback();
                 throw new RuntimeException(e);
             } finally {
@@ -856,7 +856,7 @@ public class UserUploadService implements IUserUploadService {
                 conn.close();
             }
             return translatedResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -877,7 +877,7 @@ public class UserUploadService implements IUserUploadService {
             long id = serverDataSourceDefinition.create(credentials, conn, null);
             conn.commit();
             return id;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);            
             conn.rollback();
             throw new RuntimeException(e);
@@ -900,7 +900,7 @@ public class UserUploadService implements IUserUploadService {
                 session.beginTransaction();
                 results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
                 session.getTransaction().commit();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 session.getTransaction().rollback();
                 throw new RuntimeException(e);
             } finally {
@@ -910,7 +910,7 @@ public class UserUploadService implements IUserUploadService {
                 user = (User) results.get(0);                
             }
             return user;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
