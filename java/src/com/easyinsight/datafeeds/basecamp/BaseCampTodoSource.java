@@ -221,11 +221,19 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                         LogClass.debug("Orphan data for todo list " + todoListId);
                     }
                 }
+                if (dataStorage != null) {
+                    dataStorage.insertData(ds);
+                    ds = new DataSet();
+                }
             }
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        return ds;
+        if (dataStorage == null) {
+            return ds;
+        } else {
+            return null;
+        }
     }
 
     @NotNull
