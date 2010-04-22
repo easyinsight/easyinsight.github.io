@@ -62,7 +62,7 @@
                         </mx:VBox>
                     </mx:HBox>
                     <mx:HBox width="100%" paddingLeft="30" paddingRight="30">
-                        <mx:TextArea editable="false"  text="You can start by importing KPI trees from solutions or by clicking Create New KPI Tree... above. From there, you can customize the tree, altering template goals to match your specific scenarios, drag in additional trees to rapidly build out a tree, and associating relevant data sources and reports to goals."
+                        <mx:TextArea editable="false"  text="You can start by importing KPI trees from solutions or by clicking Add KPI Tree... above. From there, you can customize the tree, altering template goals to match your specific scenarios, dragging in additional trees to rapidly build out a tree, and associating relevant data sources and reports to goals."
                             width="100%" borderStyle="none" fontSize="14" height="60"/>
                     </mx:HBox>
                 </mx:VBox>
