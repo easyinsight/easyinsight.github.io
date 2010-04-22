@@ -134,11 +134,17 @@ public class SendGridFeed extends Feed {
                 Nodes categories = doc.query("/categories/category");
                 List<NameValuePair> pairs = Arrays.asList(new NameValuePair("api_user", credentials.getUserName()),
                     new NameValuePair("api_key", credentials.getPassword()), new NameValuePair("start_date", startDateString), new NameValuePair("end_date", endDateString));
+                pairs = new ArrayList<NameValuePair>(pairs);
                 for (int i = 0; i < categories.size(); i++) {
                     Node categoryNode = categories.get(i);
                     String category = categoryNode.getValue();
-                    IRow row = dataSet.createRow();
-                    row.addValue(keys.get(SendGridDataSource.CATEGORY), category);
+
+
+                    if (analysisItems.size() <= 2) {
+                        IRow row = dataSet.createRow();
+                        row.addValue(keys.get(SendGridDataSource.CATEGORY), category);
+                        row.addValue(keys.get(SendGridDataSource.DATE), new Date());
+                    }
                     pairs.add(new NameValuePair("category[]", category));
                 }
 
@@ -160,6 +166,7 @@ public class SendGridFeed extends Feed {
                 statsDocs = new Builder().build(getMethod.getResponseBodyAsStream());
             }
             if (statsDocs != null) {
+                dataSet = new DataSet();
                 Nodes days = statsDocs.query("/stats/day");
                 for (int i = 0; i < days.size(); i++) {
                     IRow row = dataSet.createRow();
@@ -167,27 +174,27 @@ public class SendGridFeed extends Feed {
                     String dateString = dayNode.query("date/text()").get(0).getValue();
                     Date date = outboundDateFormat.parse(dateString);
                     row.addValue(keys.get(SendGridDataSource.DATE), new DateValue(date));
-                    int requests = Integer.parseInt(dayNode.query("requests/text()").get(0).getValue());
+                    int requests = getValue(dayNode, "requests/text()");
                     row.addValue(keys.get(SendGridDataSource.REQUESTS), requests);
-                    int delivered = Integer.parseInt(dayNode.query("delivered/text()").get(0).getValue());
+                    int delivered = getValue(dayNode, "delivered/text()");
                     row.addValue(keys.get(SendGridDataSource.DELIVERED), delivered);
-                    int bounces = Integer.parseInt(dayNode.query("bounces/text()").get(0).getValue());
+                    int bounces = getValue(dayNode, "bounces/text()");
                     row.addValue(keys.get(SendGridDataSource.BOUNCES), bounces);
-                    int repeat_bounces = Integer.parseInt(dayNode.query("repeat_bounces/text()").get(0).getValue());
-                    row.addValue(keys.get(SendGridDataSource.REPEAT_BOUNCES), repeat_bounces);
-                    int unsubscribes = Integer.parseInt(dayNode.query("unsubscribes/text()").get(0).getValue());
+                    int repeatBounces = getValue(dayNode, "repeat_bounces/text()");
+                    row.addValue(keys.get(SendGridDataSource.REPEAT_BOUNCES), repeatBounces);
+                    int unsubscribes = getValue(dayNode, "unsubscribes/text()");
                     row.addValue(keys.get(SendGridDataSource.UNSUBSCRIBES), unsubscribes);
-                    int repeat_unsubscribes = Integer.parseInt(dayNode.query("repeat_unsubscribes/text()").get(0).getValue());
-                    row.addValue(keys.get(SendGridDataSource.REPEAT_UNSUBSCRIBES), repeat_unsubscribes);
-                    int clicks = Integer.parseInt(dayNode.query("clicks/text()").get(0).getValue());
+                    int repeatUnsubscribes = getValue(dayNode, "repeat_unsubscribes/text()");
+                    row.addValue(keys.get(SendGridDataSource.REPEAT_UNSUBSCRIBES), repeatUnsubscribes);
+                    int clicks = getValue(dayNode, "clicks/text()");
                     row.addValue(keys.get(SendGridDataSource.CLICKS), clicks);
-                    int opens = Integer.parseInt(dayNode.query("opens/text()").get(0).getValue());
+                    int opens = getValue(dayNode, "opens/text()");
                     row.addValue(keys.get(SendGridDataSource.OPENS), opens);
-                    int spamReports = Integer.parseInt(dayNode.query("spamreports/text()").get(0).getValue());
+                    int spamReports = getValue(dayNode, "spamreports/text()");
                     row.addValue(keys.get(SendGridDataSource.SPAM_REPORTS), spamReports);
-                    int repeatSpamReports = Integer.parseInt(dayNode.query("repeat_spamreports/text()").get(0).getValue());
+                    int repeatSpamReports = getValue(dayNode, "repeat_spamreports/text()");
                     row.addValue(keys.get(SendGridDataSource.REPEAT_SPAM_REPORTS), repeatSpamReports);
-                    int invalidEmails = Integer.parseInt(dayNode.query("invalid_email/text()").get(0).getValue());
+                    int invalidEmails = getValue(dayNode, "invalid_email/text()");
                     row.addValue(keys.get(SendGridDataSource.INVALID_EMAILS), invalidEmails);
                     Nodes categoryNodes = dayNode.query("category/text()");
                     if (categoryNodes.size() > 0) {
@@ -199,6 +206,16 @@ public class SendGridFeed extends Feed {
             return dataSet;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private int getValue(Node node, String name) {
+        Nodes nodes = node.query(name);
+        if (nodes.size() > 0) {
+            Node child = nodes.get(0);
+            return Integer.parseInt(child.getValue());
+        } else {
+            return 0;
         }
     }
 
