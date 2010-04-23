@@ -19,12 +19,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
+
 /**
  * User: jamesboe
  * Date: Jan 18, 2010
  * Time: 3:46:36 PM
  */
 public class ScorecardService {
+
+    private static JCS cache = getCache("scorecardQueue");
+
+    private static JCS getCache(String cacheName) {
+
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
+
 
     private ScorecardStorage scorecardStorage = new ScorecardStorage();
 
@@ -439,5 +455,14 @@ public class ScorecardService {
                     kpiValue.getPercentChange(), kpiValue.isDirectional(), conn);
         }
         return kpis;
+    }
+
+    public void storeScorecardForGoogle(long scorecardID) {
+        try {
+            cache.put(SecurityUtil.getUserID(), scorecardID);
+        } catch (CacheException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 }

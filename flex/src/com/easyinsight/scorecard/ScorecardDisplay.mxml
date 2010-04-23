@@ -16,6 +16,15 @@
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        private function redirectToGoogle(ev:ResultEvent):void {
+            flash.net.navigateToURL(new URLRequest("http://www.google.com/ig/adde?moduleurl=http://hosting.gmodules.com/ig/gadgets/file/107893811811246228172/scorecard-gadget.xml"));
+        }
+
+        private function addToGoogle():void {
+            scorecardService.storeScorecardForGoogle.send(selectedScorecard.id);
+        }
 
         [Bindable]
         private var primaryStackIndex:int = 0;
@@ -47,6 +56,7 @@
         private function onCreationComplete():void {
             primaryStackIndex = 0;
             retrieveScorecards();
+            scorecardService.storeScorecardForGoogle.addEventListener(ResultEvent.RESULT,  redirectToGoogle);
         }
 
         [Bindable]
@@ -309,6 +319,9 @@
             dispatchEvent(new Event("activeEffectChanged"));
         }
         ]]></mx:Script>
+    <mx:RemoteObject destination="scorecardService" id="scorecardService">
+        <mx:method name="storeScorecardForGoogle" />
+    </mx:RemoteObject>
     <viewStackEffects:Slide id="leftEffect" direction="left"/>
     <viewStackEffects:Slide id="rightEffect" direction="right"/>
     <mx:VBox verticalGap="0" width="100%">
@@ -366,6 +379,8 @@
                            click="refreshData()"/>
             <mx:LinkButton label="Reorder scorecards..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
                            click="reorderScorecards()"/>
+            <mx:LinkButton label="Add to iGoogle..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                           click="addToGoogle()" />
             <mx:HRule width="100%" visible="{groupText != ''}"/>
             <util:AutoSizeTextArea editable="false" selectable="false" backgroundAlpha="0" borderStyle="none"
                                    text="{groupText}" fontSize="12" color="#333333" width="150"/>

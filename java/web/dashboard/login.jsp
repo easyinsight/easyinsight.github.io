@@ -4,8 +4,12 @@
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
+<%@ page import="org.apache.jcs.JCS" %>
+<%@ page import="org.apache.jcs.access.exception.CacheException" %>
+<%@ page import="com.easyinsight.logging.LogClass" %>
 <%
     boolean success = false;
+    long userID = 0;
     Session s = Database.instance().createSession();
     try {
         if(request.getParameter("login") != null && request.getParameter("password") != null) {
@@ -20,6 +24,7 @@
                 long accountID = account.getAccountID();
                 request.getSession().setAttribute("accountID", accountID);
                 request.getSession().setAttribute("userID", user.getUserID());
+                userID = user.getUserID();
                 success = true;
             }
         }
@@ -29,6 +34,13 @@
 %>
 <%  if(success) {
         String scorecardIDString = (String) request.getParameter("scorecardID");
+        if(scorecardIDString == null || scorecardIDString.isEmpty() || "null".equals(scorecardIDString)) {
+            try {
+                scorecardIDString = (String) JCS.getInstance("scorecardQueue").get(userID);
+            } catch (CacheException e) {
+                LogClass.error(e);
+            }
+        }
         if (scorecardIDString == null || scorecardIDString.isEmpty() || "null".equals(scorecardIDString)) {
         %>
     <jsp:include page="scorecardList.jsp" />

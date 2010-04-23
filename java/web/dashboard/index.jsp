@@ -9,9 +9,11 @@
 <%@ page import="com.easyinsight.scorecard.ScorecardWrapper" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.text.NumberFormat" %>
+<%@ page import="org.apache.jcs.JCS" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
+    JCS cache = JCS.getInstance("scorecardQueue");
     boolean loggedIn = true;
     com.easyinsight.scorecard.Scorecard scorecard = null;
     NumberFormat nf = NumberFormat.getPercentInstance();
@@ -93,11 +95,21 @@
                     if(scorecardID) {
                         $("#scorecardID").val(scorecardID);
                         $("#credsScorecardID").val(scorecardID);
-                    <% if (loggedIn) {%>
+                        <% if (loggedIn) {%>
                         loadScorecard(scorecardID);
-                   <% } %>
+                        <% } %>
                     }
+                    <% if(loggedIn && cache.get(userID) != null) { %>
+                    else {
+                        loadScorecard(<%= cache.get(userID) %>);
+                    }
+                    <% } %>
                 }
+                <% if(loggedIn && cache.get(userID) != null) { %>
+                else {
+                    loadScorecard(<%= cache.get(userID) %>);
+                }
+                <% } %>
             });
 
             function login() {
