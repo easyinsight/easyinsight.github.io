@@ -7,8 +7,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.EmptyValue;
-import com.easyinsight.userupload.IDataTypeGuesser;
-import com.easyinsight.userupload.DataTypeGuesser;
 
 import java.util.List;
 import java.util.Map;
@@ -28,12 +26,11 @@ public abstract class UploadFormat implements Serializable {
     public static final int VERTICAL_HEADERS = 1;
     public static final int HORIZONTAL_HEADERS = 2;
 
-    public UserUploadAnalysis analyze(long uploadID, byte[] data) {
-        DataTypeGuesser dataTypeGuesser = createDataTypeGuesser(uploadID, data);
+    public UserUploadAnalysis analyze(byte[] data) {
+        DataTypeGuesser dataTypeGuesser = createDataTypeGuesser(data);
         UserUploadAnalysis userUploadAnalysis = new UserUploadAnalysis(dataTypeGuesser.createFeedItems());
         userUploadAnalysis.setSampleMap(dataTypeGuesser.getGuessesMap());
         userUploadAnalysis.setSize(data.length);
-        UploadAnalysisCache.instance().addUserUploadAnalysis(uploadID, userUploadAnalysis);
         return userUploadAnalysis;
     }
 
@@ -41,10 +38,9 @@ public abstract class UploadFormat implements Serializable {
         return createInternalDataSet(data, null, fields);
     }
 
-    private DataTypeGuesser createDataTypeGuesser(long uploadID, byte[] data) {
+    private DataTypeGuesser createDataTypeGuesser(byte[] data) {
         DataTypeGuesser dataTypeGuesser = new DataTypeGuesser();
-        PersistableDataSetForm dataSet = createInternalDataSet(data, dataTypeGuesser, null);
-        UploadAnalysisCache.instance().addDataSet(uploadID, dataSet);
+        createInternalDataSet(data, dataTypeGuesser, null);
         return dataTypeGuesser;
     }
 

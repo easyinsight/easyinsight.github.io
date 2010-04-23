@@ -93,7 +93,7 @@ public class SecurityUtil {
                     user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                 }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(), 
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), null, user.isAccountAdmin(), user.isDataSourceCreator(),
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(), user.isDataSourceCreator(),
                         user.isInsightCreator(), account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
                         user.getUiSettings(), user.getFirstName());
             } else {

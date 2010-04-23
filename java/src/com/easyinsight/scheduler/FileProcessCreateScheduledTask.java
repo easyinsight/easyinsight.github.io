@@ -9,7 +9,6 @@ import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.FeedCreationResult;
 import com.easyinsight.datafeeds.FeedCreation;
-import com.easyinsight.eventing.AsyncRunningEvent;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.AsyncCompletedEvent;
 
@@ -31,14 +30,6 @@ import org.hibernate.Session;
 @PrimaryKeyJoinColumn(name = "task_id")
 public class FileProcessCreateScheduledTask extends ScheduledTask {
 
-    public long getUploadID() {
-        return uploadID;
-    }
-
-    public void setUploadID(long uploadID) {
-        this.uploadID = uploadID;
-    }
-
     public String getName() {
         return name;
     }
@@ -46,8 +37,6 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
     public void setName(String name) {
         this.name = name;
     }
-    @Column(name="upload_id")
-    private long uploadID;
     
     @Column(name="upload_name")
     private String name;
@@ -83,24 +72,22 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
     private long analysisID;
 
     protected void execute(Date now, EIConnection conn) throws Exception {
-        UserUploadService.RawUploadData rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
-        UploadFormat uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.getUserData());
+
+        /*UploadFormat uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.getUserData());
         AsyncRunningEvent ev = new AsyncRunningEvent();
         ev.setTask(this);
         ev.setUserID(userID);
         ev.setFeedID(0);
         ev.setFeedName(name);
-        EventDispatcher.instance().dispatch(ev);
+        EventDispatcher.instance().dispatch(ev);*/
         //createFeed(conn,  rawUploadData.getUserData(), uploadFormat);
     }
 
     public void createFeed(Connection conn, byte[] bytes, UploadFormat uploadFormat, List<AnalysisItem> fields) throws Exception {
         DataStorage tableDef = null;
         try {
-            PersistableDataSetForm dataSet = UploadAnalysisCache.instance().getDataSet(uploadID);
-            if (dataSet == null) {
-                dataSet = uploadFormat.createDataSet(bytes, fields);
-            }
+            PersistableDataSetForm dataSet = uploadFormat.createDataSet(bytes, fields);
+
             for (AnalysisItem field : fields) {
                 dataSet.refreshKey(field.getKey());
             }

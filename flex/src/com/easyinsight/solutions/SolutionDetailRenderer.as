@@ -6,13 +6,8 @@ import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
-import com.easyinsight.goals.GoalDataAnalyzeSource;
-import com.easyinsight.goals.GoalTreeDescriptor;
-import com.easyinsight.listing.DescriptorAnalyzeSource;
 import com.easyinsight.listing.IPerspective;
 import com.easyinsight.quicksearch.EIDescriptor;
-import com.easyinsight.report.MultiScreenAnalyzeSource;
-import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.util.FileAlert;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
@@ -21,15 +16,10 @@ import flash.display.Bitmap;
 import flash.display.Loader;
 import flash.display.LoaderInfo;
 import flash.events.Event;
-import flash.events.HTTPStatusEvent;
-import flash.events.IOErrorEvent;
-import flash.events.ProgressEvent;
-import flash.events.SecurityErrorEvent;
 import flash.net.FileReference;
 import flash.net.URLRequest;
-import flash.net.URLRequestMethod;
-import flash.net.URLVariables;
 import flash.net.navigateToURL;
+import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
@@ -62,6 +52,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         solutionService = new RemoteObject();
         solutionService.destination = "solutionService";
         solutionService.installSolution.addEventListener(ResultEvent.RESULT, installedSolution);
+        solutionService.getSolutionArchive.addEventListener(ResultEvent.RESULT, gotSolutionArchive);
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
     }
 
@@ -138,27 +129,6 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         }
         var dataSource:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;        
         dispatchEvent(new AnalyzeEvent(new PostInstallSource(dataSource, _solution)));
-        /*var window:PostInstallWindow = new PostInstallWindow();
-        window.dataSourceDescriptor = dataSource;
-        window.solution = _solution;
-        window.addEventListener(AnalyzeEvent.ANALYZE, passThrough);
-        window.addEventListener(NavigationEvent.NAVIGATION, passThrough);
-        PopUpManager.addPopUp(window, this, true);
-        PopUpUtil.centerPopUp(window);*/
-        /*if (items.length == 1 && goalTrees == 1) {
-            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource((GoalTreeDescriptor(items.getItemAt(0)).id))));
-        } else if (items.length == 1 && reports == 1) {
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(items.getItemAt(0)))));
-        } else if (items.length > 1) {
-            dispatchEvent(new AnalyzeEvent(new MultiScreenAnalyzeSource(items, _solution)));
-        } else {
-            var dataSourceDescriptor:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceDescriptor.id, dataSourceDescriptor.name)));
-        }*/
-    }
-
-    private function passThrough(event:Event):void {
-        dispatchEvent(event);
     }
 
     private function installedSolution(event:ResultEvent):void {
@@ -183,7 +153,6 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         }
         if (immediate) {
             postInstall();
-            //Alert.show("The solution has been installed. Any data sources and/or reports associated to this solution will now be available to you under the My Data page.");
         }
         dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
     }
@@ -247,28 +216,15 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
     }
 
     protected function download():void {
-        var request:URLRequest = new URLRequest("/app/DownloadServlet");
-        request.method = URLRequestMethod.GET;
-        var vars:URLVariables = new URLVariables();
+        solutionService.getSolutionArchive.send(_solution.solutionID);
+    }
 
-        vars.userName = User.getInstance().userName;
-        vars.password = User.getInstance().password;
-        vars.operation = String(2);
-        vars.fileID = String(_solution.solutionID);
-        request.data = vars;
-
+    private function gotSolutionArchive(event:ResultEvent):void {
+        var bytes:ByteArray = solutionService.getSolutionAchive.lastResult as ByteArray;
         fileRef = new FileReference();
-        fileRef.addEventListener(Event.CANCEL, doEvent);
         fileRef.addEventListener(Event.COMPLETE, complete);
-        fileRef.addEventListener(Event.OPEN, doEvent);
-        fileRef.addEventListener(Event.SELECT, doEvent);
-        fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
-        fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-        fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
-        fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-
         FileAlert.alert(this, "Downloading...", null, fileRef);
-        fileRef.download(request, _solution.solutionArchiveName);
+        fileRef.save(bytes);
     }
 
     private function doEvent(event:Event):void {

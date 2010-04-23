@@ -554,21 +554,19 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public void updateData(long feedID, long rawDataID, boolean update) {
+    public void updateData(long feedID, byte[] bytes, boolean update) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            RawUploadData rawUploadData = retrieveRawData(rawDataID);
             FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
             task.setStatus(ScheduledTask.SCHEDULED);
             task.setExecutionDate(new Date());
             task.setFeedID(feedID);
             task.setUpdate(update);
-            task.setUploadID(rawDataID);
             task.setUserID(SecurityUtil.getUserID());
             task.setAccountID(SecurityUtil.getAccountID());
-            if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
+            /*if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
                 Scheduler.instance().saveTask(task, conn);
                 AsyncCreatedEvent e = new AsyncCreatedEvent();
                 e.setTask(task);
@@ -580,8 +578,8 @@ public class UserUploadService implements IUserUploadService {
                 e.setFeedID(feedID);
                 EventDispatcher.instance().dispatch(e);
             }
-            else
-                task.updateData(feedID, update, conn, rawUploadData);
+            else*/
+            task.updateData(feedID, update, conn, bytes);
             conn.commit();
         } catch (Throwable e) {
             LogClass.error(e);

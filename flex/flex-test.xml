@@ -19,7 +19,7 @@
         </external-library-path>
         -->
         <external-library-path>
-         <path-element>${flexlib}/libs/player/9/playerglobal.swc</path-element>
+         <path-element>${flexlib}/libs/player/10/playerglobal.swc</path-element>
       </external-library-path>
        <library-path>
          <path-element>${flexlib}/libs/datavisualization.swc</path-element>

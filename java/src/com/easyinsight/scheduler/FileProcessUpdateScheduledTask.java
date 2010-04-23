@@ -58,9 +58,9 @@ public class FileProcessUpdateScheduledTask extends ScheduledTask {
 
 
     protected void execute(Date now, EIConnection conn) throws Exception {
-        UserUploadService.RawUploadData rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
+        /*UserUploadService.RawUploadData rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
         background = true;
-        updateData(feedID, update, conn, rawUploadData);
+        updateData(feedID, update, conn, rawUploadData);*/
 
     }
 
@@ -75,11 +75,11 @@ public class FileProcessUpdateScheduledTask extends ScheduledTask {
         super.onComplete(session);
     }
 
-    public void updateData(long feedID, boolean update, Connection conn, UserUploadService.RawUploadData rawUploadData) throws SQLException {
+    public void updateData(long feedID, boolean update, Connection conn, byte[] bytes) throws SQLException {
         DataStorage metadata = null;
         try {
             FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) UserUploadService.getFeedDefinition(feedID);
-            if(background) {
+            /*if(background) {
                 AsyncRunningEvent ev = new AsyncRunningEvent();
                 ev.setTask(this);
                 ev.setUserID(userID);
@@ -87,9 +87,9 @@ public class FileProcessUpdateScheduledTask extends ScheduledTask {
                 ev.setFeedID(feedDefinition.getDataFeedID());
                 ev.setFeedName(feedDefinition.getFeedName());
                 EventDispatcher.instance().dispatch(ev);
-            }
+            }*/
             metadata = DataStorage.writeConnection(feedDefinition, conn, accountID);
-            PersistableDataSetForm form = feedDefinition.getUploadFormat().createDataSet(rawUploadData.getUserData(), feedDefinition.getFields());
+            PersistableDataSetForm form = feedDefinition.getUploadFormat().createDataSet(bytes, feedDefinition.getFields());
             if (update) {
                 //DataRetrievalManager.instance().storeData(feedID, form);
                 metadata.truncate();
@@ -101,7 +101,7 @@ public class FileProcessUpdateScheduledTask extends ScheduledTask {
             metadata.commit();
         }
         catch(SQLException se) {
-            metadata.rollback();
+            if (metadata != null) metadata.rollback();
             throw se;
         }
     }

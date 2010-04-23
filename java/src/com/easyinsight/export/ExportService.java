@@ -5,11 +5,9 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
-import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
@@ -22,14 +20,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import org.apache.poi.hssf.usermodel.*;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -83,7 +75,7 @@ public class ExportService {
         return 0;
     }
 
-    public long exportReportIDTOCSV(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters) {
+    public byte[] exportReportIDTOCSV(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters) {
         SecurityUtil.authorizeInsight(reportID);
         try {
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
@@ -101,11 +93,11 @@ public class ExportService {
         }
     }
 
-    private long toCSV(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) {
-        return 0;
+    private byte[] toCSV(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) {
+        return null;
     }
 
-    public long exportReportIDToExcel(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters, InsightRequestMetadata insightRequestMetadata) {
+    public byte[] exportReportIDToExcel(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeInsight(reportID);
         try {
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
@@ -123,28 +115,24 @@ public class ExportService {
         }
     }
 
-    public long exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+    public byte[] exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
-        long exportID;
         try {
             ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
-            exportID = toExcel(analysisDefinition, listDataResults);
+            return toExcel(analysisDefinition, listDataResults);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-        return exportID;
     }
 
-    private long toExcel(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) throws IOException, SQLException {
-        long exportID;
+    private byte[] toExcel(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) throws IOException {
         HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         workbook.write(baos);
         byte[] bytes = baos.toByteArray();
         baos.close();
-        exportID = saveBytes(bytes);
-        return exportID;
+        return bytes;
     }
 
     private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ListDataResults listDataResults) {
@@ -199,24 +187,6 @@ public class ExportService {
             i++;
         }
         return workbook;
-    }
-
-    private long saveBytes(byte[] bytes) throws SQLException {
-        long exportID;
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (excel_file, user_id) VALUES (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            BufferedInputStream bis = new BufferedInputStream(bais, 1024);         
-            insertStmt.setBinaryStream(1, bis, bytes.length);
-            insertStmt.setLong(2, SecurityUtil.getUserID());
-            insertStmt.execute();
-            exportID = Database.instance().getAutoGenKey(insertStmt);
-        } finally {
-            Database.instance().closeConnection(conn);
-        }
-        return exportID;
     }
 
     private HSSFCellStyle getStyle(Map<String, HSSFCellStyle> styleMap, AnalysisItem analysisItem) {

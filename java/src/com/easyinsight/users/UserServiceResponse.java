@@ -13,7 +13,6 @@ public class UserServiceResponse {
     private long userID;
     private long accountID;
     private String userName;
-    private String encryptedPassword;
     private String name;
     private int accountType;
     private long spaceAllowed;
@@ -33,7 +32,7 @@ public class UserServiceResponse {
     }
 
     public UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
-                               long spaceAllowed, String email, String userName, String encryptedPassword, boolean accountAdmin,
+                               long spaceAllowed, String email, String userName, boolean accountAdmin,
                                boolean dataSourceCreator, boolean insightCreator, boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName) {
         this.successful = successful;
@@ -44,7 +43,6 @@ public class UserServiceResponse {
         this.spaceAllowed = spaceAllowed;
         this.email = email;
         this.userName = userName;
-        this.encryptedPassword = encryptedPassword;
         this.accountAdmin = accountAdmin;
         this.dataSourceCreator = dataSourceCreator;
         this.insightCreator = insightCreator;
@@ -79,14 +77,6 @@ public class UserServiceResponse {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public String getEncryptedPassword() {
-        return encryptedPassword;
-    }
-
-    public void setEncryptedPassword(String encryptedPassword) {
-        this.encryptedPassword = encryptedPassword;
     }
 
     public String getName() {

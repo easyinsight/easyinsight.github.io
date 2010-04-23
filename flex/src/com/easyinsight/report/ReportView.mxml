@@ -24,9 +24,7 @@
         import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
-        import com.easyinsight.datasources.DataSourceInfo;
-        import com.easyinsight.detail.DataDetailEvent;
-        import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.datasources.DataSourceInfo;        
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -127,7 +125,6 @@
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            addEventListener(DataDetailEvent.DATA_DETAIL, toDetails);
         }
 
         private function onRollup(event:HierarchyRollupEvent):void {
@@ -146,15 +143,6 @@
             overrideObj.position = event.position;
             viewFactory.addOverride(overrideObj);
             transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
-        }
-
-        private function toDetails(event:DataDetailEvent):void {
-            var filter:FilterDefinition = transformContainer.createSimpleFilter(event.filterRawData);
-            var filters:ArrayCollection = transformContainer.getFilterDefinitions();
-            var allFilters:ArrayCollection = new ArrayCollection(filters.toArray());
-            allFilters.addItem(filter);
-            // TODO: implement
-            //detailService.getAllData.send(dataService.dataFeedID, allFilters);
         }
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {

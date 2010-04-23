@@ -354,8 +354,7 @@
                 User.initializeUser(authResult.name, authResult.email,
                         authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
                         authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState,
-                        authResult.uiSettings, authResult.firstName);
-                User.getInstance().password = authResult.encryptedPassword;
+                        authResult.uiSettings, authResult.firstName);                
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));

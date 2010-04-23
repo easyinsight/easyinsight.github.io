@@ -16,24 +16,22 @@ import java.util.*;
 * Time: 3:21:36 PM
 */
 public class FlatFileUploadContext extends UploadContext {
-    private long uploadID;
+    private byte[] bytes;
 
-    public long getUploadID() {
-        return uploadID;
+    public byte[] getBytes() {
+        return bytes;
     }
 
-    public void setUploadID(long uploadID) {
-        this.uploadID = uploadID;
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
     }
 
     private transient UploadFormat uploadFormat;
-    private transient UserUploadService.RawUploadData rawUploadData;
 
     @Override
     public String validateUpload(EIConnection conn) throws SQLException {
-        rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
         try {
-            uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.userData);
+            uploadFormat = new UploadFormatTester().determineFormat(bytes);
         } catch (InvalidFormatException e) {
             return e.getMessage();
         }
@@ -48,18 +46,16 @@ public class FlatFileUploadContext extends UploadContext {
 
     @Override
     public List<AnalysisItem> guessFields(EIConnection conn) throws Exception {
-        UserUploadAnalysis userUploadAnalysis = uploadFormat.analyze(uploadID, rawUploadData.userData);
+        UserUploadAnalysis userUploadAnalysis = uploadFormat.analyze(bytes);
         sampleMap = userUploadAnalysis.getSampleMap();
         return userUploadAnalysis.getFields();
     }
 
     @Override
     public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn) throws Exception {
-        UserUploadService.RawUploadData rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
-        UploadFormat uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.userData);
+        UploadFormat uploadFormat = new UploadFormatTester().determineFormat(bytes);
 
         FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
-        task.setUploadID(uploadID);
         task.setName(name);
         task.setStatus(ScheduledTask.SCHEDULED);
         task.setExecutionDate(new Date());
@@ -76,7 +72,7 @@ public class FlatFileUploadContext extends UploadContext {
             uploadResponse = new UploadResponse("Your file has been uploaded and verified, and will be processed shortly.");
         }
         else {*/
-        task.createFeed(conn, rawUploadData.getUserData(), uploadFormat, analysisItems);
+        task.createFeed(conn, bytes, uploadFormat, analysisItems);
         return task.getFeedID();
     }
 

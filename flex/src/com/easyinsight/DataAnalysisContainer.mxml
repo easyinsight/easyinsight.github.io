@@ -55,8 +55,6 @@
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.datasources.DataSourceInfo;
-        import com.easyinsight.detail.DataDetailEvent;
-        import com.easyinsight.detail.DetailBook;
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -468,7 +466,6 @@
             stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            addEventListener(DataDetailEvent.DATA_DETAIL, toDetails);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
@@ -515,21 +512,6 @@
 
         private function childFilterCreation(event:HierarchyDrilldownEvent):void {
             transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
-        }
-
-        private function toDetails(event:DataDetailEvent):void {
-            var filter:FilterDefinition = transformContainer.createSimpleFilter(event.filterRawData);
-            var filters:ArrayCollection = transformContainer.getFilterDefinitions();
-            var allFilters:ArrayCollection = new ArrayCollection(filters.toArray());
-            allFilters.addItem(filter);
-            detailService.getAllData.send(dataService.dataFeedID, allFilters);
-        }
-
-        private function gotDetailData():void {
-            var window:DetailBook = new DetailBook();
-            window.details = detailService.getAllData.lastResult as ArrayCollection;
-            PopUpManager.addPopUp(window, this);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function onKey(event:KeyboardEvent):void {
@@ -913,7 +895,6 @@
         <mx:method name="getUserCapabilitiesForInsight" result="gotUserCapabilitiesForInsight()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="detailService" destination="data">
-        <mx:method name="getAllData" result="gotDetailData()"/>
         <mx:method name="getCredentialRequirements" result="gotCredentialRequirements()"/>
     </mx:RemoteObject>
     <analysis:ReportEditorFieldControlsFactory fields="{wrappers}" id="controlsFactory" dataSourceID="{dataSourceID}"/>
@@ -938,8 +919,8 @@
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
                        toolTip="Adminster" visible="{admin}"/>
-            <!--<mx:Button icon="@Embed(source='../../../assets/blackboard.png')"
-                       click="tutorial()"/>-->
+            <mx:Button icon="@Embed(source='../../../assets/blackboard.png')"
+                       click="tutorial()"/>
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"

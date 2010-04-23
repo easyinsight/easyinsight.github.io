@@ -57,25 +57,16 @@
         import com.easyinsight.customupload.DataSourceConfiguredEvent;
         import com.easyinsight.framework.AuthorizationRequirement;
         import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-
-        import com.easyinsight.goals.GoalDataAnalyzeSource;
-        import com.easyinsight.goals.GoalTreeDescriptor;
         import com.easyinsight.help.ScreencastWindow;
-        import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.quicksearch.EIDescriptor;
-        import com.easyinsight.report.MultiScreenAnalyzeSource;
-        import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.util.FileAlert;
-
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.controls.Alert;
-
-        import com.easyinsight.framework.User;
-
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.managers.BrowserManager;
         import mx.managers.CursorManager;
         import mx.managers.PopUpManager;
@@ -212,11 +203,12 @@
                 controlsEnabled = false;
                 controlsAlpha = .5;
                 currentState = "NotLoggedIn";
-            } /*else if (_newAuth) {
-                currentState = "Authorized";
-            } else {
-                solutionService.determineAuthorizationRequirements.send(solutionID);
-            }*/
+            }
+            /*else if (_newAuth) {
+             currentState = "Authorized";
+             } else {
+             solutionService.determineAuthorizationRequirements.send(solutionID);
+             }*/
         }
 
         public function set treeData(data:ArrayCollection):void {
@@ -267,28 +259,15 @@
         }
 
         private function download():void {
-            var request:URLRequest = new URLRequest("/app/DownloadServlet");
-            request.method = URLRequestMethod.GET;
-            var vars:URLVariables = new URLVariables();
+            solutionService.getSolutionArchive.send(_solution.solutionID);
+        }
 
-            vars.userName = User.getInstance().userName;
-            vars.password = User.getInstance().password;
-            vars.operation = String(2);
-            vars.fileID = String(_solution.solutionID);
-            request.data = vars;
-
+        private function gotSolutionArchive():void {
+            var bytes:ByteArray = solutionService.getSolutionAchive.lastResult as ByteArray;
             fileRef = new FileReference();
-            fileRef.addEventListener(Event.CANCEL, doEvent);
             fileRef.addEventListener(Event.COMPLETE, complete);
-            fileRef.addEventListener(Event.OPEN, doEvent);
-            fileRef.addEventListener(Event.SELECT, doEvent);
-            fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
-            fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-            fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
-            fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-
             FileAlert.alert(this, "Downloading...", null, fileRef);
-            fileRef.download(request, _solution.solutionArchiveName);
+            fileRef.save(bytes);
         }
 
         private function doEvent(event:Event):void {
@@ -317,18 +296,18 @@
         }
 
         /*private function gotRequirements():void {
-            authRequirement = solutionService.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
-            if (authRequirement != null) {
-                currentState = "AuthorizationRequired";
-            }
-        }*/
+         authRequirement = solutionService.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
+         if (authRequirement != null) {
+         currentState = "AuthorizationRequired";
+         }
+         }*/
 
         /*private function authorize():void {
-            var window:AuthSubNavWindow = new AuthSubNavWindow();
-            window.googleURL = authRequirement.url;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }*/
+         var window:AuthSubNavWindow = new AuthSubNavWindow();
+         window.googleURL = authRequirement.url;
+         PopUpManager.addPopUp(window, this, true);
+         PopUpUtil.centerPopUp(window);
+         }*/
 
         private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
             postInstall();
@@ -399,14 +378,14 @@
 
         private function toExternalPage():void {
             if (_solution.logoLink != null && _solution.logoLink != "") {
-                flash.net.navigateToURL(new URLRequest(_solution.logoLink), "_blank");
+                navigateToURL(new URLRequest(_solution.logoLink), "_blank");
             }
         }
 
         /*private function determineAuth():void {
-            ProgressAlert.alert(this, "Determining authorization requirements...", null, solutionService.determineAuthorizationRequirements);
-            solutionService.determineAuthorizationRequirements.send(solutionID);
-        }*/
+         ProgressAlert.alert(this, "Determining authorization requirements...", null, solutionService.determineAuthorizationRequirements);
+         solutionService.determineAuthorizationRequirements.send(solutionID);
+         }*/
 
         public function cleanup():void {
         }
@@ -414,6 +393,7 @@
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
 		<mx:method name="installSolution" result="installedSolution()"/>
+		<mx:method name="getSolutionArchive" result="gotSolutionArchive()"/>
 		<!--<mx:method name="determineAuthorizationRequirements" result="gotRequirements()"/>-->
     </mx:RemoteObject>
     <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"

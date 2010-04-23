@@ -9,8 +9,7 @@
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
-        import com.easyinsight.framework.User;
-        import mx.validators.Validator;
+        
         // Reference to the file on disk (selected by user)
         [Bindable]
         public var file:FileReference = new FileReference();
@@ -30,11 +29,11 @@
 
         private function next():void {
 
-                nextButton.enabled = false;
-                finishingSection.visible = true;
-                var context:FlatFileUploadContext = new FlatFileUploadContext();
-                context.uploadID = uploadID;
-                uploadService.analyzeUpload.send(context);
+            nextButton.enabled = false;
+            finishingSection.visible = true;
+            var context:FlatFileUploadContext = new FlatFileUploadContext();
+            context.bytes = fileData;
+            uploadService.analyzeUpload.send(context);
             
         }
 
@@ -42,7 +41,7 @@
             var uploadResponse:UploadResponse = uploadService.analyzeUpload.lastResult as UploadResponse;
             if (uploadResponse.successful) {
                 var context:FlatFileUploadContext = new FlatFileUploadContext();
-                context.uploadID = uploadID;
+                context.bytes = fileData;
                 dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
                 PopUpManager.removePopUp(this);
             } else {
@@ -50,13 +49,17 @@
             }
         }
 
+        private var fileData:ByteArray;
+
         // Called when the upload operation has completed
         // Specifically manages response data
-        public function doComplete( event:DataEvent ):void
+        public function doComplete( event:Event ):void
         {
-            var xml:XML = new XML(event.data);
+            fileData = file.data;
+            Alert.show("size = " + fileData.bytesAvailable);
+            /*var xml:XML = new XML(event.data);
             var uploadIDString:String = xml.uploadID.toString();
-            this.uploadID = parseInt(uploadIDString);
+            this.uploadID = parseInt(uploadIDString);*/
             successMessage.visible = true;
             //formatBox.enabled = true;
             nextButton.enabled = true;
@@ -68,7 +71,7 @@
             // Listen for when the user has selected a file
             // Listen for when the file upload is complete
             file.addEventListener( Event.SELECT, doSelect );
-            file.addEventListener( DataEvent.UPLOAD_COMPLETE_DATA, doComplete );
+            file.addEventListener( Event.COMPLETE, doComplete );
             file.addEventListener( IOErrorEvent.IO_ERROR, onIOError);
         }
 
@@ -89,7 +92,7 @@
         {
             // Specify the endpoint for the upload operation
             // Create an object to hold additional data fields
-            var request:URLRequest = new URLRequest( "/app/UploadExample" );
+            /*var request:URLRequest = new URLRequest( "/app/UploadExample" );
             var vars:URLVariables = new URLVariables();
 
             // Set the data fields as appropriate
@@ -102,7 +105,9 @@
             progressBar.visible = true;
 
             // Start the file upload process
-            file.upload( request );
+            file.upload( request );*/
+            progressBar.visible = true;
+            file.load();
         }
 
         private function cancel():void {

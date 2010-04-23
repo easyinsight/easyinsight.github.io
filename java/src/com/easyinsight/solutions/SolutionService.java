@@ -34,6 +34,10 @@ import org.hibernate.Session;
  */
 public class SolutionService {
 
+    public long getDataSourceInstall() {
+        return 0;
+    }
+
     public StaticReport getStaticReport(long reportID) {
         StaticReport staticReport = null;
         Connection conn = Database.instance().getConnection();
@@ -106,7 +110,29 @@ public class SolutionService {
         }
     }
 
+    public byte[] getSolutionArchive(long solutionID) {
+        byte[] bytes;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ARCHIVE, SOLUTION_ARCHIVE_NAME FROM SOLUTION WHERE SOLUTION_ID = ?");
+            queryStmt.setLong(1, solutionID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                bytes = rs.getBytes(1);
+            } else {
+                throw new RuntimeException("No data found for that file ID.");
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return bytes;
+    }
+
     public void addSolutionArchive(byte[] archive, long solutionID, String solutionArchiveName) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement updateArchiveStmt = conn.prepareStatement("UPDATE SOLUTION SET ARCHIVE = ?, SOLUTION_ARCHIVE_NAME = ? WHERE SOLUTION_ID = ?");

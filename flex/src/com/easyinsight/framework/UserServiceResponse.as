@@ -15,7 +15,6 @@ import com.easyinsight.preferences.UISettings;
 		public var accountType:int;
 		public var email:String;
 		public var userName:String;
-		public var encryptedPassword:String;
         public var accountAdmin:Boolean;
         public var dataSourceCreator:Boolean;
         public var insightCreator:Boolean;

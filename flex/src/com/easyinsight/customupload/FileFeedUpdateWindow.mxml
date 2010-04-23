@@ -2,17 +2,13 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="300" creationComplete="doCreationComplete()">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.framework.User;
 
             import com.easyinsight.listing.RefreshNotificationEvent;
 
-            import mx.controls.Alert;
-            import mx.rpc.events.ResultEvent;
 			import mx.managers.PopUpManager;
 
 
-			
-			private var rawUploadID:int;
+
 			private var _feedID:int;
 			[Bindable]
             public var file:FileReference = new FileReference();
@@ -25,23 +21,26 @@
                 file.browse();
             }
             
-            public function doComplete( event:DataEvent ):void  {
-                var xml:XML = new XML(event.data);
+            public function doComplete( event:Event ):void  {
+                fileData = file.data;
+                /*var xml:XML = new XML(event.data);
 				var uploadIDString:String = xml.uploadID.toString();
 				var uploadID:Number = parseInt(uploadIDString);
-                this.rawUploadID = uploadID;
+                this.rawUploadID = uploadID;*/
                 successMessage.visible = true;
                 //formatBox.enabled = true;
                 replaceButton.enabled = true;
                 appendButton.enabled = true;   
             }
 
+            private var fileData:ByteArray;
+
             // Called when the window has completed startup
             public function doCreationComplete():void {
                 // Listen for when the user has selected a file
                 // Listen for when the file upload is complete
                 file.addEventListener( Event.SELECT, doSelect );
-                file.addEventListener( DataEvent.UPLOAD_COMPLETE_DATA, doComplete );
+                file.addEventListener( Event.COMPLETE, doComplete );
             }
 
             // Called when the user selects a file from disk
@@ -54,31 +53,17 @@
             // Called when the "Submit" button is clicked
             // Initiates file upload operation
             public function doSubmit( event:Event ):void {
-                // Specify the endpoint for the upload operation
-                // Create an object to hold additional data fields
-                var request:URLRequest = new URLRequest( "/app/UploadExample" );
-                var vars:URLVariables = new URLVariables();
-
-                // Set the data fields as appropriate
-                vars.userName = new String(User.getInstance().userName);
-                vars.password = new String(User.getInstance().password);
-
-                // Assign the data fields to the request
-                request.data = vars;
-
                 progressBar.visible = true;
-
-                // Start the file upload process
-                file.upload( request );
+                file.load();
             }
 
 			
 			private function replace():void {
-				uploadService.updateData.send(_feedID, rawUploadID, true);
+				uploadService.updateData.send(_feedID, fileData, true);
 			}
 			
 			private function append():void {
-				uploadService.updateData.send(_feedID, rawUploadID, false);
+				uploadService.updateData.send(_feedID, fileData, false);
 			}
 			
 			private function cancel():void {
@@ -108,7 +93,7 @@
 			</mx:FormItem>
 			<mx:FormItem label="" direction="horizontal">
 				<mx:HBox horizontalAlign="center">
-					<mx:ProgressBar id="progressBar" visible="false" source="file"/>
+					<mx:ProgressBar id="progressBar" visible="false" source="{file}"/>
 				</mx:HBox>
 				<mx:Label text="Upload successful!" visible="false" id="successMessage"/>
 			</mx:FormItem>		

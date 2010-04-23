@@ -3,6 +3,8 @@ import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.util.ProgressAlert;
 
+import flash.utils.ByteArray;
+
 import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
 
@@ -28,6 +30,8 @@ public class ExcelCreator {
         private var excelID:int;
         private var report:AnalysisDefinition;
 
+    private var excelData:ByteArray;
+
 		public function ExcelCreator()
 		{
 			upload = new RemoteObject();
@@ -38,32 +42,12 @@ public class ExcelCreator {
 
         private function alertListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                var request:URLRequest = new URLRequest("/app/DownloadServlet");
-                request.method = URLRequestMethod.GET;
-                var vars:URLVariables = new URLVariables();
-
-                vars.userName = new String(User.getInstance().userName);
-                vars.password = new String(User.getInstance().password);
-                vars.operation = new String(3);
-                vars.fileID = new String(excelID);
-                request.data = vars;
-
-                fileRef = new FileReference();
-                fileRef.addEventListener(Event.CANCEL, doEvent);
-                fileRef.addEventListener(Event.COMPLETE, complete);
-                fileRef.addEventListener(Event.OPEN, doEvent);
-                fileRef.addEventListener(Event.SELECT, doEvent);
-                fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
-                fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-                fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
-                fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-
-                fileRef.download(request, "export" + excelID + ".xls");
+                fileRef.save(excelData, "export" + excelID + ".xls");
             }
         }
 
 		private function gotExcelID(event:ResultEvent):void {
-			excelID = upload.exportToExcel.lastResult as int;
+			excelData = upload.exportToExcel.lastResult as ByteArray;
             var msg:String = "Click to start download of the Excel spreadsheet.";
             if(report.reportType != AnalysisDefinition.LIST) {
                 msg += " The report will be saved in a list format.";
@@ -74,7 +58,7 @@ public class ExcelCreator {
 		}
 
         private function gotExcelByReportID(event:ResultEvent):void {
-			excelID = upload.exportReportIDToExcel.lastResult as int;
+			excelData = upload.exportReportIDToExcel.lastResult as ByteArray;
             var msg:String = "Click to start download of the Excel spreadsheet.";
             Alert.show(msg, "Alert",
 		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
