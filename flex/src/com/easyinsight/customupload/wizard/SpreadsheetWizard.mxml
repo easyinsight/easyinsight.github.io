@@ -121,9 +121,9 @@
                                          showExpertMode="false"
                                          kpiTutorialNext="panelIndex++"
                                          kpiTutorialPrevious="panelIndex--"
+                                         kpiTutorialFinish="onFinish(event)"
                                          kpiTutorialCancel="onCancel(event)"/>
                 </kpi:TutorialPanel>
-
             </mx:ViewStack>
         </mx:Box>
     </mx:Canvas>

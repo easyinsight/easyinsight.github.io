@@ -16,8 +16,7 @@
         private var passwordText:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:SendGridDataSource = new SendGridDataSource();
-            return obj;
+            return new SendGridDataSource();
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {

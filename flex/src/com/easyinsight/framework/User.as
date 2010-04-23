@@ -5,9 +5,7 @@ import com.easyinsight.preferences.UISettings;
 
 import flash.net.SharedObject;
 
-	
-	
-	public class User
+public class User
 	{
 		private var name:String;
 		private var email:String;
@@ -49,6 +47,16 @@ import flash.net.SharedObject;
             }
             try {
                 sharedObject = SharedObject.getLocal(userID.toString());
+                var credentialIDs:String = sharedObject.data["credentials"];
+                if (credentialIDs != null && credentialIDs != "") {
+                    var ids:Array = credentialIDs.split(",");
+                    for each (var idString:String in ids) {
+                        var credentials:Credentials = getCredentials(int(idString));
+                        if (credentials != null) {
+                            CredentialsCache.getCache().addCredentials(int(idString), credentials);    
+                        }
+                    }
+                }
             } catch (e:Error) {
 
             }
@@ -110,6 +118,12 @@ import flash.net.SharedObject;
                 c.userName = User.getSharedObject().data[idString].username;
                 c.password = User.getSharedObject().data[idString].password;
                 c.encrypted = true;
+                var credentialIDs:String = getSharedObject().data["credentials"];
+                if (credentialIDs == null || credentialIDs == "") {
+                    credentialIDs = String(dataSourceID);
+                    getSharedObject().data["credentials"] = credentialIDs;
+                    getSharedObject().flush();
+                }
                 return c;
             }
             return CredentialsCache.getCache().getCredentials(dataSourceID);            
@@ -121,6 +135,13 @@ import flash.net.SharedObject;
                 getSharedObject().data[idString] = new Object();
                 getSharedObject().data[idString].username = c.userName;
                 getSharedObject().data[idString].password = c.password;
+                var credentialIDs:String = getSharedObject().data["credentials"];
+                if (credentialIDs == null && credentialIDs != "") {
+                    credentialIDs = String(dataSourceID);
+                } else {
+                    credentialIDs = credentialIDs + "," + String(dataSourceID);
+                }
+                getSharedObject().data["credentials"] = credentialIDs;
                 getSharedObject().flush();
             }
         }

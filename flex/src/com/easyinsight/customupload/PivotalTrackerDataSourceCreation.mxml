@@ -17,8 +17,7 @@
         private var password:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:PivotalTrackerBaseSource = new PivotalTrackerBaseSource();
-            return obj;
+            return new PivotalTrackerBaseSource();
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
@@ -27,7 +26,7 @@
         }
 
         public function get savesCredentials():Boolean {
-            return true;
+            return false;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {

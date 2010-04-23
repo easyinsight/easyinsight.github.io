@@ -13,6 +13,13 @@
         </mxmlc>
     </target>
 
+    <target name="compileFlexTest">
+        <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
+               static-rsls="true" incremental="true">
+            <load-config filename="../flex-autotest.xml"/>
+        </mxmlc>
+    </target>
+
     <target name="compilePrototype">
         <mxmlc file="../src/PrototypePage.mxml" output="${deployment.path}/PrototypePage.swf"
                static-rsls="true" incremental="true">
@@ -380,8 +387,8 @@
     </target>
 
     <target name="modules1" depends="module.area3dchart, module.areachart, module.bar3dchart, module.barchart, module.bubblechart"/>
-    <target name="modules2" depends="module.column3dchart, module.columnchart, module.line3dchart, module.list"/>
-    <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart"/>
+    <target name="modules2" depends="module.column3dchart, module.columnchart, module.linechart, module.line3dchart, module.list"/>
+    <target name="modules3" depends="module.mmlinechart, module.pie3dchart, module.piechart, module.plotchart"/>
     <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap"/>
     <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap"/>
 

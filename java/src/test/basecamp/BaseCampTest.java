@@ -1,7 +1,7 @@
 package test.basecamp;
 
 import junit.framework.TestCase;
-import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
+
 import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.users.Credentials;

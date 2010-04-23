@@ -14,7 +14,7 @@ import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 
 
     override public function configClass():Class {
-        return SendGoalDataSourceCreation;
+        return SendGridDataSourceCreation;
     }
 
     override public function isLiveData():Boolean {

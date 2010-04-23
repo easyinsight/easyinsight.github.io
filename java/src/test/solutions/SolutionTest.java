@@ -1,5 +1,6 @@
 package test.solutions;
 
+import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import junit.framework.TestCase;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
@@ -9,7 +10,7 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedRegistry;
-import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
+
 import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
 import com.easyinsight.api.ValidatingPublishService;
 import com.easyinsight.api.Row;
@@ -129,10 +130,10 @@ public class SolutionTest extends TestCase {
         AnalysisHierarchyItem responsibility = new AnalysisHierarchyItem();
         responsibility.setKey(new NamedKey("Responsibility"));
         HierarchyLevel respPartyLevel = new HierarchyLevel();
-        respPartyLevel.setAnalysisItem(TestUtil.getActualItem(sourceId, BaseCampDataSource.RESPONSIBLEPARTYNAME));
+        respPartyLevel.setAnalysisItem(TestUtil.getActualItem(sourceId, BaseCampTodoSource.RESPONSIBLEPARTYNAME));
         respPartyLevel.setPosition(0);
         HierarchyLevel todoLevel = new HierarchyLevel();
-        todoLevel.setAnalysisItem(TestUtil.getActualItem(sourceId, BaseCampDataSource.TODOLISTNAME));
+        todoLevel.setAnalysisItem(TestUtil.getActualItem(sourceId, BaseCampTodoSource.TODOLISTNAME));
         todoLevel.setPosition(1);
         responsibility.setHierarchyLevel(respPartyLevel);
         responsibility.setHierarchyLevels(Arrays.asList(respPartyLevel, todoLevel));
@@ -143,19 +144,19 @@ public class SolutionTest extends TestCase {
         WSTreeMapDefinition treeMap = new WSTreeMapDefinition();
         treeMap.setDataFeedID(sourceId);
         treeMap.setHierarchy(TestUtil.getItem(sourceId, "Responsibility"));
-        treeMap.setMeasure1(TestUtil.getItem(sourceId, BaseCampDataSource.COUNT));
-        treeMap.setMeasure2(TestUtil.getItem(sourceId, BaseCampDataSource.COUNT));
+        treeMap.setMeasure1(TestUtil.getItem(sourceId, BaseCampTodoSource.COUNT));
+        treeMap.setMeasure2(TestUtil.getItem(sourceId, BaseCampTodoSource.COUNT));
         treeMap.setName("Responsibility Tree Map");
-        FilterValueDefinition filterValueDefinition = new FilterValueDefinition(TestUtil.getItem(sourceId, BaseCampDataSource.COMPLETED),
+        FilterValueDefinition filterValueDefinition = new FilterValueDefinition(TestUtil.getItem(sourceId, BaseCampTodoSource.COMPLETED),
                 true, Arrays.asList((Object) "false"));
         treeMap.setFilterDefinitions(Arrays.asList((FilterDefinition) filterValueDefinition));
         new AnalysisService().saveAnalysisDefinition(treeMap);
         WSLineChartDefinition lineChart = new WSLineChartDefinition();
         lineChart.setDataFeedID(sourceId);
         lineChart.setName("Line Chart");
-        lineChart.setMeasure(TestUtil.getItem(sourceId, BaseCampDataSource.COUNT));
-        lineChart.setYaxis(TestUtil.getItem(sourceId, BaseCampDataSource.RESPONSIBLEPARTYNAME));
-        lineChart.setXaxis(TestUtil.getItem(sourceId, BaseCampDataSource.ITEMCYCLE));
+        lineChart.setMeasure(TestUtil.getItem(sourceId, BaseCampTodoSource.COUNT));
+        lineChart.setYaxis(TestUtil.getItem(sourceId, BaseCampTodoSource.RESPONSIBLEPARTYNAME));
+        lineChart.setXaxis(TestUtil.getItem(sourceId, BaseCampTodoSource.ITEMCYCLE));
         new AnalysisService().saveAnalysisDefinition(lineChart);
         Solution solution = new Solution();
         solution.setName("Blah");
@@ -172,7 +173,7 @@ public class SolutionTest extends TestCase {
                 new DataService().getFeedMetadata(newSourceID);
                 WSListDefinition defaultQuery = new WSListDefinition();
                 defaultQuery.setDataFeedID(info.getDescriptor().getId());
-                defaultQuery.setColumns(Arrays.asList(getItem(BaseCampDataSource.CREATORNAME, newDataSource)));
+                defaultQuery.setColumns(Arrays.asList(getItem(BaseCampTodoSource.CREATORNAME, newDataSource)));
                 ListDataResults results = (ListDataResults) new DataService().list(defaultQuery, new InsightRequestMetadata());
                 assertEquals(0, results.getRows().length);
             }
@@ -182,7 +183,7 @@ public class SolutionTest extends TestCase {
         ds.refreshData(c, SecurityUtil.getAccountID(), new Date(), null);
         WSListDefinition defaultQuery = new WSListDefinition();
         defaultQuery.setDataFeedID(newSourceID);
-        defaultQuery.setColumns(Arrays.asList(getItem(BaseCampDataSource.CREATORNAME, ds)));
+        defaultQuery.setColumns(Arrays.asList(getItem(BaseCampTodoSource.CREATORNAME, ds)));
         ListDataResults results = (ListDataResults) new DataService().list(defaultQuery, new InsightRequestMetadata());
         assertTrue(results.getRows().length > 0);
     }

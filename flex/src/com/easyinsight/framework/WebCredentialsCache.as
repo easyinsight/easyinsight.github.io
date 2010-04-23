@@ -41,6 +41,13 @@ public class WebCredentialsCache extends EventDispatcher implements ICredentials
         var credentialRequirementState:CredentialRequirementState = new CredentialRequirementState(displayObject, credentials,
                 successFunction, callbackParams);
         credentialRequirementState.act();
-    }    
+    }
+
+    public function loadIfPossible(dataSourceID:int):void {
+        var encryptedCredentials:Credentials = User.getCredentials(dataSourceID);
+        if (encryptedCredentials != null) {
+            CredentialsCache.getCache().addCredentials(dataSourceID, encryptedCredentials);
+        }
+    }
 }
 }
