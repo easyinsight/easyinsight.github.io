@@ -91,7 +91,8 @@
             <node label="Europe" type="{AnalysisDefinition.MAP_EUROPE}"/>
             <node label="Asia" type="{AnalysisDefinition.MAP_ASIA}"/>
             <node label="Middle East" type="{AnalysisDefinition.MAP_MIDDLE_EAST}"/>
-        </node>        
+            <node label="Africa" type="{AnalysisDefinition.MAP_AFRICA}"/>
+        </node>
         <node label="Heat Map" type="{AnalysisDefinition.HEATMAP}"/>
         <node label="Tree Map" type="{AnalysisDefinition.TREEMAP}"/>
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
