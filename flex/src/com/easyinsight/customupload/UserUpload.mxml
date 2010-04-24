@@ -56,7 +56,7 @@
         public function doComplete( event:Event ):void
         {
             fileData = file.data;
-            Alert.show("size = " + fileData.bytesAvailable);
+            
             /*var xml:XML = new XML(event.data);
             var uploadIDString:String = xml.uploadID.toString();
             this.uploadID = parseInt(uploadIDString);*/
