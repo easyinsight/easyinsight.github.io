@@ -2,11 +2,11 @@ package com.easyinsight.analysis
 {
 	import com.easyinsight.analysis.conditions.ConditionRenderer;
 
-import com.easyinsight.detail.DataDetailEvent;
-import com.easyinsight.filtering.FilterRawData;
+
+
 import com.easyinsight.pseudocontext.PseudoContextWindow;
 
-import flash.events.ContextMenuEvent;
+
 import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.net.URLRequest;
@@ -35,13 +35,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             addEventListener(MouseEvent.CLICK, onClick);
 		}
 
-        private function details(event:ContextMenuEvent):void {
-            var dataField:String = _analysisItem.qualifiedName();
-            var dataString:String = data[dataField];
-            var filterRawData:FilterRawData = new FilterRawData();
-            filterRawData.addPair(_analysisItem, dataString);
-            dispatchEvent(new DataDetailEvent(filterRawData));
-        }
 
         private function onClick(event:MouseEvent):void {
             if (event.shiftKey) {
