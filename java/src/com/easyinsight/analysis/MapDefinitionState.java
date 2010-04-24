@@ -22,6 +22,7 @@ public class MapDefinitionState extends AnalysisDefinitionState {
     public static final int ASIA = 4;
     public static final int AMERICAS = 5;
     public static final int MIDDLE_EAST = 6;
+    public static final int AFRICA = 7;
 
     @Column(name="map_type")
     private int mapType;
@@ -66,6 +67,8 @@ public class MapDefinitionState extends AnalysisDefinitionState {
             return WSAnalysisDefinition.MAP_AMERICAS;
         } else if (mapType == MIDDLE_EAST) {
             return WSAnalysisDefinition.MAP_MIDDLE_EAST;
+        } else if (mapType == AFRICA) {
+            return WSAnalysisDefinition.MAP_AFRICA;
         } else {
             throw new RuntimeException();
         }

@@ -390,7 +390,7 @@
     <target name="modules2" depends="module.column3dchart, module.columnchart, module.linechart, module.line3dchart, module.list"/>
     <target name="modules3" depends="module.mmlinechart, module.pie3dchart, module.piechart, module.plotchart"/>
     <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap"/>
-    <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap"/>
+    <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap, module.africamap"/>
 
     <target name="module.list">
         <mxmlc file="../src/com/easyinsight/analysis/list/ListModule.mxml" output="${deployment.path}/ListModule.swf"
@@ -774,6 +774,27 @@
         <mxmlc file="../src/com/easyinsight/analysis/maps/AsiaMapModule.mxml" output="${deployment.path}/AsiaMapModule.swf"
                static-rsls="false">
             <load-config filename="../modules/map-asia-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.africamap">
+        <mxmlc file="../src/com/easyinsight/analysis/maps/AfricaMapModule.mxml" output="${deployment.path}/AfricaMapModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/map-africa-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.5.0.12683.swz"/>
                 <url rsl-url="framework_3.5.0.12683.swf"/>

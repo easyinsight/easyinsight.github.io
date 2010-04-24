@@ -16,6 +16,7 @@ import com.easyinsight.analysis.crosstab.CrosstabEmbeddedController;
 import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
 import com.easyinsight.analysis.heatmap.HeatMapEmbeddedController;
 import com.easyinsight.analysis.list.ListEmbeddedController;
+import com.easyinsight.analysis.maps.AfricaMapEmbeddedController;
 import com.easyinsight.analysis.maps.AmericasMapEmbeddedController;
 import com.easyinsight.analysis.maps.AsiaMapEmbeddedController;
 import com.easyinsight.analysis.maps.EuropeMapEmbeddedController;
@@ -57,6 +58,9 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.MAP_MIDDLE_EAST:
                 controller = MiddleEastMapEmbeddedController;
+                break;
+            case AnalysisDefinition.MAP_AFRICA:
+                controller = AfricaMapEmbeddedController;
                 break;
             case AnalysisDefinition.COLUMN:
                 controller = ColumnChartEmbeddedController;

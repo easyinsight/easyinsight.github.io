@@ -1,8 +1,7 @@
 <?xml version="1.0" ?>
 <maps:MapModuleBase xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:maps="com.easyinsight.analysis.maps.*"
-        xmlns:ilog="ilog.maps.*">
+    xmlns:ilog="ilog.maps.*">
     <mx:Script><![CDATA[
-        import ilog.maps.EuropeMiddleEastAfricaMap;
         import ilog.maps.MapBase;
 
         import ilog.maps.MapEvent;
@@ -22,7 +21,6 @@
 
 
         override protected function get mapType():int {
-            return MapDefinition.MIDDLE_EAST;
+            return MapDefinition.AFRICA;
         }]]></mx:Script>
-
 </maps:MapModuleBase>

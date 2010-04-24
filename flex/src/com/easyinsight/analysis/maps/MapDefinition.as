@@ -12,7 +12,8 @@ import mx.collections.ArrayCollection;
 		public static const ASIA:int = 4;
 		public static const AMERICAS:int = 5;
 		public static const MIDDLE_EAST:int = 6;
-		
+		public static const AFRICA:int = 7;
+
 		public var mapType:int = WORLD;
 		public var mapDefinitionID:int;
         public var measure:AnalysisItem;
@@ -48,6 +49,8 @@ import mx.collections.ArrayCollection;
                 return AnalysisDefinition.MAP_AMERICAS;
             } else if (mapType == MIDDLE_EAST) {
                 return AnalysisDefinition.MAP_MIDDLE_EAST;
+            } else if (mapType == AFRICA) {
+                return AnalysisDefinition.MAP_AFRICA;
             }
             return AnalysisDefinition.MAP;
         }

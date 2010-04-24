@@ -17,6 +17,7 @@ import com.easyinsight.analysis.gauge.GaugeController;
 import com.easyinsight.analysis.heatmap.HeatMapControlBar;
 import com.easyinsight.analysis.heatmap.HeatMapController;
 import com.easyinsight.analysis.list.ListController;
+import com.easyinsight.analysis.maps.AfricaMapController;
 import com.easyinsight.analysis.maps.AmericasMapController;
 import com.easyinsight.analysis.maps.AsiaMapController;
 import com.easyinsight.analysis.maps.EuropeMapController;
@@ -55,6 +56,9 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.MAP_AMERICAS:
                 controller = AmericasMapController;
+                break;
+            case AnalysisDefinition.MAP_AFRICA:
+                controller = AfricaMapController;
                 break;
             case AnalysisDefinition.MAP_MIDDLE_EAST:
                 controller = MiddleEastMapController;
