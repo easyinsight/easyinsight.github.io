@@ -56,7 +56,6 @@
                         authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
                         authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState,
                         authResult.uiSettings, authResult.firstName);
-                User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
                 currentState = "loggedIn";
             } else {
@@ -117,7 +116,6 @@
                             authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
                         authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState,
                         authResult.uiSettings, authResult.firstName);
-                User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
                 currentState = "loggedIn";
             }

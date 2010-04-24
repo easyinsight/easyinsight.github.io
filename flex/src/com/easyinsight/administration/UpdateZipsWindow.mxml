@@ -27,18 +27,22 @@
         }
 
         public function doSubmit():void {
-            var request:URLRequest = new URLRequest("/app/ZipUploadServlet");
+            /*var request:URLRequest = new URLRequest("/app/ZipUploadServlet");
             var vars:URLVariables = new URLVariables();
             vars.userName = new String(User.getInstance().userName);
             vars.password = new String(User.getInstance().password);
             request.data = vars;
 
             // Start the file upload process
-            file.upload(request);
+            file.upload(request);*/
+            file.load();
         }
 
+        private var fileData:ByteArray;
+
         private function doComplete(event:Event):void {
-            Alert.show("Successful!");
+            fileData = file.data;
+            adminService.updateZips.send(fileData);
         }
 
         private function cancel():void {
@@ -46,6 +50,9 @@
         }
 		]]>
 	</mx:Script>
+    <mx:RemoteObject destination="adminService" id="adminService">
+        <mx:method name="updateZips" result="Alert.show('Successful!')"/>
+    </mx:RemoteObject>
 	<mx:VBox>
 		<mx:TextInput id="fileName" editable="false" />
 		<mx:Button label="Browse..." click="doBrowse( event )" />

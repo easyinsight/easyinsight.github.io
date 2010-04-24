@@ -45,41 +45,6 @@
         <servlet-class>com.easyinsight.users.TokenRedirectServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
-               
-    <servlet>
-        <servlet-name>UploadExample</servlet-name>
-        <display-name>UploadExample</display-name>
-        <servlet-class>com.easyinsight.userupload.UploadServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet>
-        <servlet-name>DownloadServlet</servlet-name>
-        <display-name>DownloadServlet</display-name>
-        <servlet-class>com.easyinsight.userupload.DownloadServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet>
-        <servlet-name>SolutionUploadServlet</servlet-name>
-        <display-name>SolutionUploadServlet</display-name>
-        <servlet-class>com.easyinsight.solutions.SolutionUploadServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet>
-        <servlet-name>ZipUploadServlet</servlet-name>
-        <display-name>ZipUploadServlet</display-name>
-        <servlet-class>com.easyinsight.analysis.ZipUploadServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet>
-        <servlet-name>SolutionImageServlet</servlet-name>
-        <display-name>SolutionImageServlet</display-name>
-        <servlet-class>com.easyinsight.solutions.SolutionImageServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
 
     <!-- MessageBroker Servlet -->
     <servlet>
@@ -112,43 +77,8 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>UploadExample</servlet-name>
-        <url-pattern>/UploadExample</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>DownloadServlet</servlet-name>
-        <url-pattern>/DownloadServlet</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
         <servlet-name>TokenRedirect</servlet-name>
         <url-pattern>/TokenRedirect</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>SolutionUploadServlet</servlet-name>
-        <url-pattern>/SolutionUploadServlet</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>ZipUploadServlet</servlet-name>
-        <url-pattern>/ZipUploadServlet</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>SolutionImageServlet</servlet-name>
-        <url-pattern>/SolutionImageServlet</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>QuickBooksSubscribe</servlet-name>
-        <url-pattern>/QuickBooksSubscribe</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>QuickBooksChange</servlet-name>
-        <url-pattern>/QuickBooksChange</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

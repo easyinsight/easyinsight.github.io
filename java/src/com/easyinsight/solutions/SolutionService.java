@@ -1003,6 +1003,7 @@ public class SolutionService {
     }
 
     public void addSolutionImage(byte[] bytes, long solutionID) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement updateArchiveStmt = conn.prepareStatement("UPDATE SOLUTION SET SOLUTION_IMAGE = ? WHERE SOLUTION_ID = ?");

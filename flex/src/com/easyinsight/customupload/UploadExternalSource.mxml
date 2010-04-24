@@ -116,7 +116,7 @@
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)" />
                         <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.datasources.SendGoalDataSourceCreation"
+                                dataSourceClass="com.easyinsight.datasources.SendGridDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)" />
                     </mx:ViewStack>

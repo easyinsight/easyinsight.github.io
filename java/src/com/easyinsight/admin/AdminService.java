@@ -1,11 +1,13 @@
 package com.easyinsight.admin;
 
+import com.easyinsight.analysis.ZipGeocodeCache;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.outboundnotifications.BroadcastInfo;
 import com.easyinsight.eventing.MessageUtils;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.management.ThreadInfo;
@@ -25,6 +27,15 @@ import com.easyinsight.users.Account;
 public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
+
+    public void saveZips(byte[] bytes) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        try {
+            new ZipGeocodeCache().saveFile(bytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void threadDump() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);

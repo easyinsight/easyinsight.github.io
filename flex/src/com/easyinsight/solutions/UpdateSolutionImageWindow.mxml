@@ -31,19 +31,22 @@
         }
 
         public function doSubmit():void {
-            var request:URLRequest = new URLRequest("/app/SolutionImageServlet");
+            /*var request:URLRequest = new URLRequest("/app/SolutionImageServlet");
             var vars:URLVariables = new URLVariables();
 
             vars.solutionID = _sourceID;
 
-            request.data = vars;
+            request.data = vars;*/
 
             // Start the file upload process
-            file.upload(request);
+            file.load();
         }
 
+        private var fileData:ByteArray;
+
         private function doComplete(event:Event):void {
-            Alert.show("Successful!");
+            fileData = file.data;
+            solutionService.addSolutionImage.send(fileData, _sourceID);
         }
 
         private function cancel():void {
@@ -51,6 +54,9 @@
         }
 		]]>
 	</mx:Script>
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+        <mx:method name="addSolutionImage" result="Alert.show('Successful!')"/>
+    </mx:RemoteObject>
 	<mx:VBox>
 		<mx:TextInput id="fileName" editable="false" />
 		<mx:Button label="Browse..." click="doBrowse( event )" />
