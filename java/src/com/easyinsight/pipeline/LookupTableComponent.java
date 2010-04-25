@@ -37,7 +37,7 @@ public class LookupTableComponent implements IComponent {
             }
             row.addValue(lookupTable.getTargetField().createAggregateKey(), targetValue);
         }
-        Collection<AnalysisItem> allRequestedAnalysisItems = pipelineData.getReportItems();
+        Collection<AnalysisItem> allRequestedAnalysisItems = pipelineData.getReport().getAllAnalysisItems();
         boolean itemFound = findItem(lookupTable.getSourceField(), allRequestedAnalysisItems, pipelineData.getAllItems());
         if (!itemFound) {
             pipelineData.getReportItems().remove(lookupTable.getSourceField());
@@ -51,7 +51,7 @@ public class LookupTableComponent implements IComponent {
             List<AnalysisItem> items = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true);
             found += items.contains(field) ? 1 : 0;
         }
-        return found > 0;
+        return found > 1;
     }
 
     public void decorate(DataResults listDataResults) {
