@@ -47,12 +47,6 @@
                 Alert.show("You need to select a field.");
                 return;
             }
-            var results1:Array = Validator.validateAll([ lookupTableValidator ]);
-            if (results1.length > 0) {
-                nameInput.setFocus();
-                nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-                return;
-            }
             var results2:Array = Validator.validateAll([ destinationValidator ]);
             if (results2.length > 0) {
                 destinationFieldInput.setFocus();
@@ -60,7 +54,7 @@
                 return;
             }
             var lookupTable:LookupTable = new LookupTable();
-            lookupTable.name = nameInput.text;
+            lookupTable.name = destinationFieldInput.text;
             lookupTable.dataSourceID = dataSourceBox.selectedItem.dataFeedID;
             lookupTable.sourceField = sourceFieldBox.selectedItem as AnalysisItem;
             var targetField:AnalysisItem = new AnalysisItem();
@@ -147,9 +141,6 @@
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="Name:">
-                <mx:TextInput id="nameInput"/>
-            </mx:FormItem>
             <mx:FormItem label="Data Source:">
                 <mx:ViewStack resizeToContent="true" selectedIndex="{dataSourceIndex}">
                     <mx:Box>
@@ -187,6 +178,5 @@
             <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
-    <mx:StringValidator id="lookupTableValidator" source="{nameInput}" minLength="3" maxLength="50" property="text"/>
     <mx:StringValidator id="destinationValidator" source="{destinationFieldInput}" minLength="3" maxLength="50" property="text"/>
 </util:EITitleWindow>
