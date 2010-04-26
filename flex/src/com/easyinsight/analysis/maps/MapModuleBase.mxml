@@ -3,7 +3,8 @@
            xmlns:maps="com.easyinsight.analysis.maps.*"
            width="100%" height="100%"
            xmlns:analysis="com.easyinsight.analysis.*" xmlns:map="com.easyinsight.map.*"
-           implements="com.easyinsight.analysis.IReportRenderer" creationComplete="blah()">
+           implements="com.easyinsight.analysis.IReportRenderer" creationComplete="blah()"
+        removedFromStage="cleanup()">
     <mx:Script>
 		<![CDATA[
 
