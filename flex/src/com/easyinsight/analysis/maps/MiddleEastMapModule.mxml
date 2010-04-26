@@ -8,7 +8,7 @@
         import ilog.maps.MapEvent;
 
         override protected function createMap():MapBase {
-            var map:AfricaMap = new AfricaMap();
+            var map:EuropeMiddleEastAfricaMap = new EuropeMiddleEastAfricaMap();			
             map.allowNavigation = false;
             map.allowMultipleSelection = false;
             map.addEventListener(MouseEvent.CLICK, onClick);
