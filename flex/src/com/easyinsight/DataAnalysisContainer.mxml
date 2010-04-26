@@ -919,8 +919,8 @@
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
                        toolTip="Adminster" visible="{admin}"/>
-            <mx:Button icon="@Embed(source='../../../assets/blackboard.png')"
-                       click="tutorial()"/>
+            <!--<mx:Button icon="@Embed(source='../../../assets/blackboard.png')"
+                       click="tutorial()"/>-->
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"
