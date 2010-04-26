@@ -13,7 +13,7 @@ public class AfricaMapController implements IReportController {
         factory.reportDataService = ListDataService;
         factory.reportControlBar = MapControlBar;
         factory.explicitType = AnalysisDefinition.MAP_AFRICA;
-        factory.reportRenderer = "AfricaModule.swf";
+        factory.reportRenderer = "AfricaMapModule.swf";
         factory.newDefinition = MapDefinition;
         return factory;
     }
