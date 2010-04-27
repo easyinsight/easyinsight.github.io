@@ -31,8 +31,10 @@
             viewMode = index;
             listsBox.removeAllChildren();
             if (index == 0) {
+                headerIndex = 0;
                 exchangeController = publicDataController;
             } else if (index == 1) {
+                headerIndex = 1;
                 exchangeController = solutionDataController;
             }
             introText = exchangeController.text;
@@ -175,6 +177,9 @@
             dispatchEvent(new Event("solutionChanged"));
         }
 
+        [Bindable]
+        private var headerIndex:int = 0;
+
         private var _solution:Object;
 
         public function cleanup():void {
@@ -205,9 +210,23 @@ fillAlphas: 1, 1;
         <mx:HBox verticalAlign="middle" horizontalAlign="center"
                                          width="100%" backgroundImage="{banner}" backgroundSize="100%">
             <mx:Spacer width="100"/>
-            <mx:LinkButton label="Public Data" click="toState(0)" fontSize="14" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+            <mx:ViewStack resizeToContent="true" selectedIndex="{headerIndex}">
+                <mx:Box>
+                    <mx:LinkButton label="Public Data" click="toState(0)" fontSize="18" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+                </mx:Box>
+                <mx:Box>
+                    <mx:LinkButton label="Public Data" click="toState(0)" fontSize="14" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+                </mx:Box>
+            </mx:ViewStack>
             <mx:Spacer width="100"/>
-            <mx:LinkButton label="Connection Reports" click="toState(1)" fontSize="14" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+            <mx:ViewStack resizeToContent="true" selectedIndex="{headerIndex}">
+                <mx:Box>
+                    <mx:LinkButton label="Connection Reports" click="toState(1)" fontSize="14" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+                </mx:Box>
+                <mx:Box>
+                    <mx:LinkButton label="Connection Reports" click="toState(1)" fontSize="18" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+                </mx:Box>
+            </mx:ViewStack>
             <mx:Spacer width="100"/>
         </mx:HBox>        
         
