@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="10" paddingLeft="10"
+        paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
+        import mx.managers.PopUpManager;
+
+        private function confirm():void {
+            // does the account already have billing information set up?
+            if (User.getInstance().billingInformationGiven) {
+                
+            } else if (User.getInstance().freeUpgradePossible) {
+
+            } else {
+                
+            }
+        }
+        ]]></mx:Script>
+    <mx:VBox verticalGap="20">
+    <mx:HBox>
+        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                 backgroundColor="#FFFFFF"
+                 width="280" paddingTop="5" paddingBottom="10">
+            <mx:Label text="BASIC" fontSize="20" fontWeight="bold"/>
+            <mx:Text selectable="false" text="Get started with full&#13;business intelligence power"
+                     color="#3A3A3A"/>
+            <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+            <mx:Button label="Upgrade to Basic!" click="dispatchEvent(new UpgradeEvent())" styleName="blueButton"
+                    fontSize="16"/>
+            <mx:HRule width="100%"/>
+            <mx:VBox width="100%">
+                <mx:Text selectable="false"
+                         text="Connect to Google Analytics, Highrise,&#13;Basecamp, and other SaaS solutions"/>
+                <mx:Text selectable="false"
+                         text="Establish connections to databases and&#13;existing data warehouses"/>
+                <mx:Text selectable="false" text="Use the API to publish your own&#13;custom data"/>
+                <mx:Text selectable="false" text="5 users"/>
+                <mx:Text selectable="false" text="100 MB of storage"/>
+            </mx:VBox>
+        </mx:VBox>
+        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                             backgroundColor="#FFFFFF"
+                             width="280" paddingTop="5" paddingBottom="10">
+            <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
+            <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight"
+                     color="#3A3A3A"/>
+            <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+            <mx:Button label="Upgrade To Professional!" click="" styleName="blueButton"
+                       fontSize="16"/>
+            <mx:HRule width="100%"/>
+            <mx:VBox width="100%">                
+                <mx:Text selectable="false"
+                         text="Build visibility across all the business silos&#13;from accounting and R&amp;D to sales and&#13;marketing"/>
+                <mx:Text selectable="false"
+                         text="Data level security to ensure your users see&#13;only what they should see"/>
+                <mx:Text selectable="false"
+                         text="Customize the interface on a user role basis"/>
+                <mx:Text selectable="false" text="50 users"/>
+                <mx:Text selectable="false" text="500 MB of storage"/>
+            </mx:VBox>
+        </mx:VBox>
+    </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

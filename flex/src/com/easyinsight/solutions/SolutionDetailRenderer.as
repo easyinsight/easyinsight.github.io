@@ -1,6 +1,8 @@
 package com.easyinsight.solutions {
 import com.easyinsight.LoginDialog;
 import com.easyinsight.account.Account;
+import com.easyinsight.account.BasicUpgradeWindow;
+import com.easyinsight.account.ChangeAccountTypeWindow;
 import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.framework.NavigationEvent;
@@ -24,6 +26,7 @@ import flash.utils.ByteArray;
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 import mx.controls.Alert;
+import mx.events.CloseEvent;
 import mx.events.FlexEvent;
 import mx.managers.BrowserManager;
 import mx.managers.PopUpManager;
@@ -53,6 +56,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         solutionService.destination = "solutionService";
         solutionService.installSolution.addEventListener(ResultEvent.RESULT, installedSolution);
         solutionService.getSolutionArchive.addEventListener(ResultEvent.RESULT, gotSolutionArchive);
+        solutionService.alreadyHasConnection.addEventListener(ResultEvent.RESULT, checkedValidity);
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
     }
 
@@ -77,6 +81,11 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         }
     }
 
+    protected function upgrade():void {
+        var window:BasicUpgradeWindow = new BasicUpgradeWindow();
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+    }
 
     public function get newAuth():Boolean {
         return _newAuth;
@@ -168,9 +177,27 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS, null, props));
     }
 
+    private function checkedValidity(event:ResultEvent):void {
+        var alreadyHasConnection:Boolean = solutionService.alreadyHasConnection.lastResult as Boolean;
+        if (alreadyHasConnection) {
+            Alert.show("It looks like you already have a data source for this connection under your My Data page. Are you sure you want to install a new data source?",
+                    "Before we go ahead...", Alert.OK | Alert.CANCEL, this, goAheadAndInstall, null, Alert.CANCEL);
+        } else {
+            ProgressAlert.alert(this, "Installing connection...", null, solutionService.installSolution);
+            solutionService.installSolution.send(_solution.solutionID);
+        }
+    }
+
+    private function goAheadAndInstall(event:CloseEvent):void {
+        if (event.detail == Alert.OK) {
+            ProgressAlert.alert(this, "Installing connection...", null, solutionService.installSolution);
+            solutionService.installSolution.send(_solution.solutionID);
+        }
+    }
+
     protected function installSolution():void {
-        ProgressAlert.alert(this, "Installing connection...", null, solutionService.installSolution);
-        solutionService.installSolution.send(_solution.solutionID);
+        ProgressAlert.alert(this, "Installing connection...", null, solutionService.alreadyHasConnection);
+        solutionService.alreadyHasConnection.send(_solution.solutionID);
     }
 
     protected function login():void {
