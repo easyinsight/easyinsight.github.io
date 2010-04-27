@@ -9,7 +9,6 @@
         import mx.managers.PopUpManager;
 
 
-
         [Bindable]
         private var file:FileReference = new FileReference();
 
@@ -19,7 +18,12 @@
 
         public function doCreationComplete():void {
             file.addEventListener(Event.SELECT, doSelect);
-            file.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, doComplete);
+            file.addEventListener(Event.COMPLETE, doComplete);
+            file.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
+        }
+
+        private function onIOError(event:IOErrorEvent):void {
+            Alert.show(event.text);
         }
 
         public function doSelect(event:Event):void {
@@ -28,21 +32,29 @@
 
         public function doSubmit():void {
             /*var request:URLRequest = new URLRequest("/app/ZipUploadServlet");
-            var vars:URLVariables = new URLVariables();
-            vars.userName = new String(User.getInstance().userName);
-            vars.password = new String(User.getInstance().password);
-            request.data = vars;
+             var vars:URLVariables = new URLVariables();
+             vars.userName = new String(User.getInstance().userName);
+             vars.password = new String(User.getInstance().password);
+             request.data = vars;
 
-            // Start the file upload process
-            file.upload(request);*/
-            file.load();
+             // Start the file upload process
+             file.upload(request);*/
+            try {
+                file.load();
+            } catch(e:Error) {
+                Alert.show(e.message);
+            }
         }
 
         private var fileData:ByteArray;
 
         private function doComplete(event:Event):void {
-            fileData = file.data;
-            adminService.updateZips.send(fileData);
+            try {
+                fileData = file.data;
+                adminService.updateZips.send(fileData);
+            } catch(e:Error) {
+                Alert.show(e.message);
+            }
         }
 
         private function cancel():void {

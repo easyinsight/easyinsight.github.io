@@ -51,6 +51,7 @@
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IReportController;
+        import com.easyinsight.analysis.ReportEditorHelp;
         import com.easyinsight.analysis.ReportSizingEvent;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.UserCapabilities;
@@ -871,10 +872,9 @@
         private var fieldsIndex:int = 0;
 
         private function tutorial():void {
-            /*var reportEditorTutorial:ReportEditorTutorial = new ReportEditorTutorial();
-             reportEditorTutorial.reportEditor = this;
-             reportEditorTutorial.startTutorial();
-             PrimaryWorkspace.registerTutorial(reportEditorTutorial);*/
+            var window:ReportEditorHelp = new ReportEditorHelp();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);        
         }
 
         private function editToggle():void {
@@ -919,8 +919,8 @@
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
                        toolTip="Adminster" visible="{admin}"/>
-            <!--<mx:Button icon="@Embed(source='../../../assets/blackboard.png')"
-                       click="tutorial()"/>-->
+            <mx:Button icon="@Embed(source='../../../assets/help.png')"
+                       click="tutorial()"/>
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"

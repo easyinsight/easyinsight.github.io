@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="0" paddingLeft="0"
+        paddingRight="0" paddingTop="0" headerHeight="0">
+    <mx:VBox verticalGap="0">
+        <mx:HBox paddingBottom="20" paddingLeft="20" paddingRight="20" paddingTop="20" backgroundColor="#000000">
+            <mx:Button label="Quick Report Editor Intro" click="video1()" fontSize="20"/>
+            <mx:Button label="Creating Hierarchies" click="video2()" fontSize="20"/>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center" paddingBottom="20" paddingLeft="20" paddingRight="20" paddingTop="20" backgroundColor="#FFFFFF">
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="20"/>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:Script><![CDATA[
+        import com.easyinsight.help.ScreencastWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+        private function video1():void {
+            var window:ScreencastWindow = new ScreencastWindow();
+            window.width = 946;
+            window.height = 504;
+            window.screencastSource = "http://eivideo.s3.amazonaws.com/ReportEditor1.mov";
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function video2():void {
+            var window:ScreencastWindow = new ScreencastWindow();
+            window.width = 946;
+            window.height = 504;
+            window.screencastSource = "http://eivideo.s3.amazonaws.com/Hierarchies.mov";
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+        ]]></mx:Script>
+</util:EITitleWindow>
