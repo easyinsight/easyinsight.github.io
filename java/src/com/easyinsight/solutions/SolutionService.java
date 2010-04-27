@@ -34,7 +34,7 @@ import org.hibernate.Session;
  */
 public class SolutionService {
 
-    public boolean alreadyhasConnection(long connectionID) {
+    public boolean alreadyHasConnection(long connectionID) {
         List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
         EIConnection conn = Database.instance().getConnection();
         try {
