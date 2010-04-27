@@ -23,6 +23,7 @@ public class User
         public var accountState:int;
         public var uiConfiguration:UIConfiguration;
         public var firstName:String;
+        public var freeUpgradePossible:Boolean;
 
         public function User() {
 
