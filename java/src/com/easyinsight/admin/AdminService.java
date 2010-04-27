@@ -28,7 +28,7 @@ public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
 
-    public void saveZips(byte[] bytes) {
+    public void updateZips(byte[] bytes) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         try {
             new ZipGeocodeCache().saveFile(bytes);
