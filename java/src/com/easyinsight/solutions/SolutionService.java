@@ -35,7 +35,7 @@ import org.hibernate.Session;
 public class SolutionService {
 
     public boolean alreadyHasConnection(long connectionID) {
-        /*List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
+        List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID FROM " +
@@ -48,9 +48,10 @@ public class SolutionService {
                     "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
                     "SOLUTION_INSTALL.original_data_source_id = ? AND " +
                     "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.visible = ?");
                 queryStmt.setLong(1, originalDataSourceID);
                 queryStmt.setLong(2, SecurityUtil.getUserID());
+                queryStmt.setBoolean(3, true);
                 ResultSet rs = queryStmt.executeQuery();
                 while (rs.next()) {
                     long id = rs.getLong(1);
@@ -63,9 +64,10 @@ public class SolutionService {
                             "SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID = ? AND " +
                             "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
                             "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND UPLOAD_POLICY_GROUPS.group_id = group_to_user_join.group_id AND " +
-                            "group_to_user_join.user_id = ?");
+                            "group_to_user_join.user_id = ? AND DATA_FEED.VISIBLE = ?");
                     groupQueryStmt.setLong(1, originalDataSourceID);
                     groupQueryStmt.setLong(2, SecurityUtil.getUserID());
+                    groupQueryStmt.setBoolean(3, true);
                     rs = queryStmt.executeQuery();
                     while (rs.next()) {
                         long id = rs.getLong(1);
@@ -80,8 +82,7 @@ public class SolutionService {
         } finally {
             Database.closeConnection(conn);
         }
-        return !descriptors.isEmpty();*/
-        return false;
+        return !descriptors.isEmpty();
     }
 
     public StaticReport getStaticReport(long reportID) {
@@ -373,9 +374,10 @@ public class SolutionService {
                     "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
                     "SOLUTION_INSTALL.original_data_source_id = ? AND " +
                     "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
                 queryStmt.setLong(1, originalDataSourceID);
                 queryStmt.setLong(2, SecurityUtil.getUserID());
+                queryStmt.setBoolean(3, true);
                 ResultSet rs = queryStmt.executeQuery();
                 while (rs.next()) {
                     long id = rs.getLong(1);
@@ -388,9 +390,10 @@ public class SolutionService {
                             "SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID = ? AND " +
                             "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
                             "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND UPLOAD_POLICY_GROUPS.group_id = group_to_user_join.group_id AND " +
-                            "group_to_user_join.user_id = ?");
-                    groupQueryStmt.setLong(1, SecurityUtil.getUserID());
-                    groupQueryStmt.executeQuery();
+                            "group_to_user_join.user_id = ? AND DATA_FEED.VISIBLE = ?");
+                    groupQueryStmt.setLong(1, originalDataSourceID);
+                    groupQueryStmt.setLong(2, SecurityUtil.getUserID());
+                    groupQueryStmt.setBoolean(3, true); 
                     rs = queryStmt.executeQuery();
                     while (rs.next()) {
                         long id = rs.getLong(1);
