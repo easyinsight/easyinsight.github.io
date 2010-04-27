@@ -1,4 +1,5 @@
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
+    <target-player>10.0.0</target-player>
     <compiler>
         <debug>true</debug>
         <!--
@@ -22,6 +23,7 @@
          <path-element>${flexlib}/libs/player/10/playerglobal.swc</path-element>
       </external-library-path>
        <library-path>
+         <path-element>${flexlib}/libs/player/10/playerglobal.swc</path-element>
          <path-element>${flexlib}/libs/datavisualization.swc</path-element>
          <path-element>${flexlib}/libs/flex.swc</path-element>
          <path-element>${flexlib}/libs/framework.swc</path-element>
