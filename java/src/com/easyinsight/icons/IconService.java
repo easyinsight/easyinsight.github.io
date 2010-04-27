@@ -1,5 +1,6 @@
 package com.easyinsight.icons;
 
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 
@@ -17,27 +18,31 @@ import java.util.Comparator;
 public class IconService {
     
     public List<Icon> getIcons() {
-        SecurityUtil.authorizeAccountTier(Account.BASIC);
-        File iconFolder = new File("../webapps/app/assets/icons/32x32");
-        File[] iconFiles = iconFolder.listFiles();
-        List<Icon> icons = new ArrayList<Icon>(); 
-        for (File iconFile : iconFiles) {
-            String fileName = iconFile.getName();
-            if (fileName.endsWith("png")) {
-                //String path = "/DMS/assets/icons/32x32/" + fileName;
-                //String path = fileName;
-                Icon icon = new Icon();
-                icon.setName(fileName.substring(0, fileName.length() - 4));
-                icon.setPath(fileName);
-                icons.add(icon);
+        try {
+            File iconFolder = new File("../webapps/app/assets/icons/32x32");
+            File[] iconFiles = iconFolder.listFiles();
+            List<Icon> icons = new ArrayList<Icon>();
+            for (File iconFile : iconFiles) {
+                String fileName = iconFile.getName();
+                if (fileName.endsWith("png")) {
+                    //String path = "/DMS/assets/icons/32x32/" + fileName;
+                    //String path = fileName;
+                    Icon icon = new Icon();
+                    icon.setName(fileName.substring(0, fileName.length() - 4));
+                    icon.setPath(fileName);
+                    icons.add(icon);
+                }
             }
-        }
-        Collections.sort(icons, new Comparator<Icon>() {
+            Collections.sort(icons, new Comparator<Icon>() {
 
-            public int compare(Icon o1, Icon o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        return icons;
+                public int compare(Icon o1, Icon o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+            return icons;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 }
