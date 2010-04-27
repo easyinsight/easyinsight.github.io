@@ -53,6 +53,11 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
             token.setTokenType(TokenStorage.BASECAMP_TOKEN);
             token.setUserID(SecurityUtil.getUserID());
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
+        } else if (token != null && credentials != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
+                !credentials.getUserName().equals(token.getTokenValue())) {
+            token.setTokenValue(credentials.getUserName());
+            token.setUserID(SecurityUtil.getUserID());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         if (token == null) {
             throw new RuntimeException();
