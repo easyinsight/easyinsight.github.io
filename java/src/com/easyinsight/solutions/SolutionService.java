@@ -64,8 +64,8 @@ public class SolutionService {
                             "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
                             "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND UPLOAD_POLICY_GROUPS.group_id = group_to_user_join.group_id AND " +
                             "group_to_user_join.user_id = ?");
-                    groupQueryStmt.setLong(1, SecurityUtil.getUserID());
-                    groupQueryStmt.executeQuery();
+                    groupQueryStmt.setLong(1, originalDataSourceID);
+                    groupQueryStmt.setLong(2, SecurityUtil.getUserID());
                     rs = queryStmt.executeQuery();
                     while (rs.next()) {
                         long id = rs.getLong(1);
