@@ -35,7 +35,7 @@ import org.hibernate.Session;
 public class SolutionService {
 
     public boolean alreadyHasConnection(long connectionID) {
-        List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
+        /*List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID FROM " +
@@ -80,7 +80,8 @@ public class SolutionService {
         } finally {
             Database.closeConnection(conn);
         }
-        return !descriptors.isEmpty();
+        return !descriptors.isEmpty();*/
+        return false;
     }
 
     public StaticReport getStaticReport(long reportID) {
