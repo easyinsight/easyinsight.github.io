@@ -44,6 +44,24 @@ public class ScorecardService {
 
     private ScorecardStorage scorecardStorage = new ScorecardStorage();
 
+    /*private Set<Long> visibilityMatrix(EIConnection conn) throws SQLException {
+        Set<Long> ids = new HashSet<Long>();
+        PreparedStatement queryAnalysisStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM user_to_analysis WHERE USER_ID = ?");
+        queryAnalysisStmt.setLong(1, SecurityUtil.getUserID());
+        ResultSet reportRS = queryAnalysisStmt.executeQuery();
+        while (reportRS.next()) {
+            ids.add(reportRS.getLong(1));
+        }
+        PreparedStatement queryGroupReportStmt = conn.prepareStatement("SELECT GROUP_TO_INSIGHT.insight_id FROM GROUP_TO_INSIGHT, GROUP_TO_USER_JOIN " +
+                "WHERE GROUP_TO_INSIGHT.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ?");
+        queryGroupReportStmt.setLong(1, SecurityUtil.getUserID());
+        ResultSet groupRS = queryAnalysisStmt.executeQuery();
+        while (groupRS.next()) {
+            ids.add(groupRS.getLong(1));
+        }
+        return ids;
+    }*/
+
     public void saveScorecardOrdering(List<ScorecardDescriptor> descriptors) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -152,8 +170,7 @@ public class ScorecardService {
         return new ScorecardList(scorecards, hasData);
     }
 
-    public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) {
-        System.out.println("retrieving " + scorecardID);
+    public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) {        
         SecurityUtil.authorizeScorecard(scorecardID);
         try {
             return scorecardStorage.getScorecard(scorecardID, credentials, forceRefresh);
@@ -441,7 +458,13 @@ public class ScorecardService {
                     if (credentials != null && credentials.isEncrypted()) {
                         credentials = credentials.decryptCredentials();
                     }
-                    dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                    if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                        try {
+                            dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                        } finally {
+                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                        }
+                    }
                 }
             }
         }

@@ -236,7 +236,13 @@ public class ScorecardStorage {
                         info.setType(DataSourceRefreshEvent.DATA_SOURCE_NAME);
                         info.setUserId(userID);
                         MessageUtils.sendMessage("generalNotifications", info);
-                        dataSource.refreshData(credentials, accountID, new Date(), null);
+                        if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                            try {
+                            dataSource.refreshData(credentials, accountID, new Date(), null);
+                            } finally {
+                                DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());    
+                            }
+                        }
                     }
                     DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                     info.setDataSourceID(dataSourceID);
@@ -293,7 +299,13 @@ public class ScorecardStorage {
                         info.setType(ScorecardRefreshEvent.DATA_SOURCE_NAME);
                         info.setUserId(userID);
                         MessageUtils.sendMessage("generalNotifications", info);
-                        dataSource.refreshData(credentials, accountID, new Date(), null);
+                        if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                            try {
+                                dataSource.refreshData(credentials, accountID, new Date(), null);
+                            } finally {
+                                DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());    
+                            }
+                        }
                     }
                     List<KPI> kpis;
                     EIConnection conn = Database.instance().getConnection();
