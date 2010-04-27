@@ -16,6 +16,15 @@ public class AccountTransferObject {
     private int accountState;
     private boolean apiEnabled;
     private Date creationDate;
+    private boolean optInEmail;
+
+    public boolean isOptInEmail() {
+        return optInEmail;
+    }
+
+    public void setOptInEmail(boolean optInEmail) {
+        this.optInEmail = optInEmail;
+    }
 
     public Date getCreationDate() {
         return creationDate;
@@ -85,6 +94,7 @@ public class AccountTransferObject {
         Account account = new Account();
         account.setMaxUsers(maxUsers);
         account.setMaxSize(maxSize);
+        account.setOptInEmail(optInEmail);
         account.setAccountState(accountState);
         account.setAccountType(accountType);
         account.setAccountID(accountID);
