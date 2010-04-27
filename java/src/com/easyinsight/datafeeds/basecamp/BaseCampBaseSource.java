@@ -9,6 +9,7 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -54,38 +55,57 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
+        try {
+            Thread.sleep(250);
+        } catch (InterruptedException e) {
+        }
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
-        Document doc;
-        try {
-            client.executeMethod(restMethod);
-            //System.out.println(restMethod.getResponseBodyAsString());
-            doc = builder.build(restMethod.getResponseBodyAsStream());
-            String rootValue = doc.getRootElement().getValue();
-            if ("The API is not available to this account".equals(rootValue)) {
-                throw new BaseCampDataException("You need to enable API access to your Basecamp account--you can do this under Account (Upgrade/Invoice), Basecamp API in the Basecamp user interface.");
-            }
-            //Thread.dumpStack();
-            //System.out.println(doc.getRootElement().getValue());
-            if(pageInfo != null) {
-                pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
-            }
-        }
-        catch (nu.xom.ParsingException e) {
-            String statusLine = restMethod.getStatusLine().toString();
-            if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
-            } else {
-                if (badCredentialsOnError) {
-                    throw new BaseCampLoginException("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
-                } else {
-                    throw e;
+        boolean successful = false;
+        Document doc = null;
+        int retryCount = 0;
+        do {
+
+            try {
+                client.executeMethod(restMethod);
+                //System.out.println(restMethod.getResponseBodyAsString());
+                doc = builder.build(restMethod.getResponseBodyAsStream());
+                String rootValue = doc.getRootElement().getValue();
+                if ("The API is not available to this account".equals(rootValue)) {
+                    throw new BaseCampDataException("You need to enable API access to your Basecamp account--you can do this under Account (Upgrade/Invoice), Basecamp API in the Basecamp user interface.");
                 }
+                //Thread.dumpStack();
+                //System.out.println(doc.getRootElement().getValue());
+                if(pageInfo != null) {
+                    pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
+                }
+                successful = true;
             }
-        } catch (BaseCampLoginException ble) {
-            throw ble;
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+            catch (ParsingException e) {
+                retryCount++;
+                String statusLine = restMethod.getStatusLine().toString();
+                if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
+                    throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
+                } else if ("HTTP/1.1 503 Service Temporarily Unavailable".equals(statusLine)) {
+                    try {
+                        Thread.sleep(20000);
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    if (badCredentialsOnError) {
+                        throw new BaseCampLoginException("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
+                    } else {
+                        throw e;
+                    }
+                }
+            } catch (BaseCampLoginException ble) {
+                throw ble;
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        } while (!successful && retryCount < 3);
+        if (!successful) {
+            throw new RuntimeException("Basecamp could not be reached due to a large number of current users, please try again in a bit.");
         }
         return doc;
     }

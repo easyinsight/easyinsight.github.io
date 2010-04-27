@@ -8,6 +8,7 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import nu.xom.*;
 import org.jetbrains.annotations.NotNull;
 import org.apache.commons.httpclient.HttpClient;
 
@@ -23,10 +24,6 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Nodes;
-import nu.xom.Node;
 
 /**
  * User: jamesboe
@@ -82,13 +79,13 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         return analysisItems;
     }
 
-    private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException {
+    private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException, ParsingException {
         try {
             String contactName = null;
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url);
+                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -100,13 +97,13 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         }
     }
 
-    private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url) throws HighRiseLoginException {
+    private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url) throws HighRiseLoginException, ParsingException {
         try {
             String contactName = null;
             if(categoryID != null) {
                 contactName = categoryCache.get(categoryID);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url);
+                    Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url, false);
                     Nodes dealNodes = contactInfo.query("/deal-category");
                     if (dealNodes.size() > 0) {
                         Node deal = dealNodes.get(0);
@@ -155,7 +152,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             EIPageInfo info = new EIPageInfo();
             info.currentPage = 1;
             //do {
-                Document deals = runRestRequest("/deals.xml", client, builder, url);
+                Document deals = runRestRequest("/deals.xml", client, builder, url, true);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
                     try {

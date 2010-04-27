@@ -78,7 +78,12 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return FeedType.BASECAMP;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {        
+        /*try {
+            Thread.sleep(120000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }*/
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();
@@ -114,7 +119,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false);
 
                 Map<String, String> milestoneCommentMap = new HashMap<String, String>();
-                Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
+                /*Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
                 for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
                     Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
                     String id = queryField(milestoneNode, "id/text()");
@@ -124,7 +129,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                         Node commentNode = commentNodes.get(0);
                         milestoneCommentMap.put(id, queryField(commentNode, "body"));
                     }
-                }
+                }*/
 
                 Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null, false);
                 Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");

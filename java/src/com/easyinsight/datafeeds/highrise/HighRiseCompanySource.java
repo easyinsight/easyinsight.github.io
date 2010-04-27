@@ -6,6 +6,7 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import nu.xom.*;
 import org.jetbrains.annotations.NotNull;
 import org.apache.commons.httpclient.HttpClient;
 
@@ -21,10 +22,6 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.analysis.*;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Nodes;
-import nu.xom.Node;
 
 /**
  * User: jamesboe
@@ -60,13 +57,13 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         return analysisItems;
     }
 
-    private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException {
+    private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException, ParsingException {
         try {
             String contactName = null;
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url);
+                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -109,7 +106,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
            /* EIPageInfo info = new EIPageInfo();
             info.currentPage = 1;
             do {*/
-                Document companies = runRestRequest("/companies.xml", client, builder, url);
+                Document companies = runRestRequest("/companies.xml", client, builder, url, true);
                 Nodes companyNodes = companies.query("/companies/company");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
@@ -126,7 +123,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     String responsiblePartyName = retrieveContactInfo(client, builder, peopleCache, personId, url);
                     row.addValue(OWNER, responsiblePartyName);
 
-                    Document tags = runRestRequest("/companies/"+id+"/tags.xml", client, builder, url);
+                    Document tags = runRestRequest("/companies/"+id+"/tags.xml", client, builder, url, false);
                     Nodes tagNodes = tags.query("/tags/tag");
                     StringBuilder tagBuilder = new StringBuilder();
                     for (int j = 0; j < tagNodes.size(); j++) {
