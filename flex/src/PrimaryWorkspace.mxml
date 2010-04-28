@@ -23,8 +23,7 @@
         import com.easyinsight.framework.ActivationEvent;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
-        import com.easyinsight.framework.FragmentParser;
-        import com.easyinsight.framework.FullScreenModuleEvent;
+        import com.easyinsight.framework.FragmentParser;        
         import com.easyinsight.framework.IFullScreenPage;
         import com.easyinsight.framework.WebCredentialsCache;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
@@ -393,11 +392,9 @@
                                reportBug="launchBugReportWindow()"/>
             <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="highBar"/>
             <mx:HBox width="100%" height="100%" horizontalGap="0" id="primarySpace">
-                <framework:LeftApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)" messageListener="{messageListener}"/>
                 <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0"
                          paddingRight="0">
                 </mx:HBox>
-                <framework:RightApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)" messageListener="{messageListener}"/>
             </mx:HBox>
         </mx:VBox>
      </util:AntiScrollCanvas>
