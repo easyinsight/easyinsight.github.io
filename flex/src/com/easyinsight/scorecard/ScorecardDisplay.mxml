@@ -92,7 +92,7 @@
         private function newScorecard():void {
             var scorecardWindow:ScorecardWindow = new ScorecardWindow();
             configureNewScorecardWindow(scorecardWindow);
-            scorecardWindow.addEventListener(ScorecardEvent.SCORECARD_ADDED, onScorecardAdd);
+            scorecardWindow.addEventListener(ScorecardEvent.SCORECARD_ADDED, onScorecardAdd, false, 0, true);
             PopUpManager.addPopUp(scorecardWindow, this, true);
             PopUpUtil.centerPopUp(scorecardWindow);
         }
@@ -352,7 +352,7 @@
                     </mx:VBox>
                 </mx:ViewStack>
                 <mx:Box paddingLeft="15" paddingRight="15">
-                    <mx:ViewStack id="scorecardStack" selectedIndex="{scorecardIndex}" height="350"
+                    <mx:ViewStack id="scorecardStack" selectedIndex="{scorecardIndex}" height="400"
                                   resizeToContent="true">
 
                     </mx:ViewStack>
