@@ -186,7 +186,7 @@
             addEventListener(KPIEvent.KPI_EDITED, onKPIEdit);
             addEventListener(KPIEvent.KPI_ADDED, addedKPI);
             addEventListener(KPIEvent.KPI_REMOVED, onKPIDelete);
-            EIMessageListener.instance().addEventListener(ScorecardMessageEvent.SCORECARD_MESSAGE, onMessage);
+            EIMessageListener.instance().addEventListener(ScorecardMessageEvent.SCORECARD_MESSAGE, onMessage, false, 0, true);
             BindingUtils.bindProperty(kpiNameFactory, "contextMenuAvailable", this, "contextMenuAvailable");
         }
 
@@ -219,7 +219,7 @@
             var kpiWindow:KPIParentWindow = new KPIParentWindow();
             kpiWindow.scorecardID = _scorecard.scorecardID;
             kpiWindow.groupID = _groupID;
-            kpiWindow.addEventListener(KPIEvent.KPI_ADDED, addedKPI);
+            kpiWindow.addEventListener(KPIEvent.KPI_ADDED, addedKPI, false, 0, true);
             PopUpManager.addPopUp(kpiWindow, this, true);
             PopUpUtil.centerPopUpWithY(kpiWindow, 20);
         }
