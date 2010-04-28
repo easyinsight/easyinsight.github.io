@@ -93,14 +93,6 @@
             window.y = 80;
         }
 
-        private function lesson1():void {
-            var window:ScreencastWindow = new ScreencastWindow();
-            window.screencastSource = "../assets/lesson1/training.mp4";
-            PopUpManager.addPopUp(window, this);
-            window.x = 300;
-            window.y = 200;
-        }
-
         private var _tour:Boolean;
 
         public function get tour():Boolean {

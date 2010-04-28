@@ -426,7 +426,7 @@
 
         private function createPackage():void {
             var window:ReportPackageWindow = new ReportPackageWindow();
-            window.addEventListener(PackageEvent.PACKAGE_ADDED, onPackageAdded);
+            window.addEventListener(PackageEvent.PACKAGE_ADDED, onPackageAdded, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
