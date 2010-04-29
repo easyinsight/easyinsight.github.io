@@ -42,6 +42,8 @@ public class ExcelCreator {
 
         private function alertListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
+                fileRef = new FileReference();
+                fileRef.addEventListener(Event.COMPLETE, complete);
                 fileRef.save(excelData, "export" + excelID + ".xls");
             }
         }
