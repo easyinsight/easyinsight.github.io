@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+        label="State:">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var accountState:String;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            switch (accountInfo.accountState) {
+                case (Account.ACTIVE):
+                    accountState = "Active";
+                    break;
+                case (Account.TRIAL):
+                    accountState = "Trial";
+                    break;
+            }
+        }]]></mx:Script>
+    <mx:Label text="{accountState}" fontFamily="Lucida Grande" fontWeight="normal"/>
+</account:AccountFormItem>

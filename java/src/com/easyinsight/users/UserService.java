@@ -341,6 +341,25 @@ public class UserService implements IUserService {
         }
     }
 
+    public String updatePassword(String password) {
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);            
+            String encryptedPassword = PasswordService.getInstance().encrypt(password);
+            user.setPassword(encryptedPassword);
+            session.update(user);
+            session.getTransaction().commit();
+            return encryptedPassword;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public String updatePassword(String existingPassword, String password) {
         Session session = Database.instance().createSession();
         try {
@@ -444,22 +463,7 @@ public class UserService implements IUserService {
             account.setAccountState(Account.TRIAL);
         }
         account.setActivated(false);
-        if (account.getAccountType() == Account.ENTERPRISE) {
-            account.setMaxUsers(500);
-            account.setMaxSize(1000000000);
-        } else if (account.getAccountType() == Account.PREMIUM) {
-            account.setMaxUsers(50);
-            account.setMaxSize(500000000);
-        } else if (account.getAccountType() == Account.BASIC) {
-            account.setMaxUsers(5);
-            account.setMaxSize(100000000);
-        } else if (account.getAccountType() == Account.PERSONAL) {
-            account.setMaxUsers(1);
-            account.setMaxSize(1000000);
-        } else if (account.getAccountType() == Account.PROFESSIONAL) {
-            account.setMaxUsers(50);
-            account.setMaxSize(500000000);
-        }
+        AccountLimits.configureAccount(account);
     }
    
     public void deleteAccount() {
@@ -486,12 +490,14 @@ public class UserService implements IUserService {
         } else {
             User user = retrieveUser();
             Account account = user.getAccount();
-            if(account.getAccountState() == Account.CLOSED || account.getAccountState() == Account.DELINQUENT)
+            if(account.getAccountState() == Account.CLOSED || account.getAccountState() == Account.DELINQUENT) {
+                
                 return null;
+            }
             UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                     user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                    user.getUiSettings(), user.getFirstName());
+                    user.getUiSettings(), user.getFirstName(), !account.isUpgraded());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -557,7 +563,7 @@ public class UserService implements IUserService {
                         userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(), user.isDataSourceCreator(),
                                 user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                                user.getUiSettings(), user.getFirstName());
+                                user.getUiSettings(), user.getFirstName(), !account.isUpgraded());
 
                         userServiceResponse.setActivated(account.isActivated());
                     } else {
@@ -631,7 +637,8 @@ public class UserService implements IUserService {
                 }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                      user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(),
-                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName());
+                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
+                        !account.isUpgraded());
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);

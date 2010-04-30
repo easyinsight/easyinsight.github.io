@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" width="100%">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" width="100%" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.AnalyzeSource;
@@ -158,9 +158,9 @@
         <mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
     </mx:RemoteObject>
     <groups:GroupDataControlsFactory id="controlsFactory" groupAdmin="{groupAdmin}"/>
-    <mx:ViewStack selectedIndex="{adminIndex}" creationPolicy="all" resizeToContent="true">
-        <mx:HBox>
-            <mx:VBox>
+    <mx:ViewStack selectedIndex="{adminIndex}" creationPolicy="all" resizeToContent="true" height="100%">
+        <mx:HBox height="100%">
+            <mx:VBox height="100%">
                 <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
                         paddingTop="5"
                         paddingBottom="5">
@@ -185,8 +185,8 @@
                 </mx:AdvancedDataGrid>
             </mx:VBox>
         </mx:HBox>
-        <mx:HBox>
-            <mx:VBox>
+        <mx:HBox height="100%">
+            <mx:VBox height="100%">
                 <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
                         paddingTop="5"
                         paddingBottom="5">

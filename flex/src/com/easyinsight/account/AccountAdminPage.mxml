@@ -6,27 +6,25 @@
                 paddingBottom="5">
             <mx:Label text="Account Administration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
         </mx:Box>
-        <mx:VBox id="accountSettingsBox">            
-            <account:AccountInfoDisplay/>
+        <mx:VBox id="accountSettingsBox">     
             <mx:Form>
-                <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
-                    <account:AvailableSpace/>
-                </mx:FormItem>
+                <account:AccountType accountInfo="{accountInfo}"/>
+                <account:AccountUsers accountInfo="{accountInfo}"/>
+                <account:AccountStorage accountInfo="{accountInfo}"/>
+                <account:AccountAPIUse accountInfo="{accountInfo}"/>
+                <account:AccountState accountInfo="{accountInfo}"/>
+                <account:AccountTrialDate accountInfo="{accountInfo}"/>
                 <mx:FormItem label="Account Settings: " fontFamily="Tahoma" fontWeight="bold">
                     <mx:Button label="Edit Account Settings..." click="editAccountSettings()"/>
                 </mx:FormItem>
                 <mx:FormItem>
-                    <mx:Button label="Change/Update Billing Information..." click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/><mx:Button label="Cancel Account..." click="cancelPaidAccount()"/> 
-                </mx:FormItem>
-                <mx:FormItem>
-                    <mx:Button label="Upgrade Account..." click="onUpgradeAccount()" visible="{showUpgrade}" />
+                    <mx:Button label="Change/Update Billing Information..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/><mx:Button label="Cancel Account..." click="cancelPaidAccount()"/> 
                 </mx:FormItem>
             </mx:Form>
         </mx:VBox>
     </mx:VBox>
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
-
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
@@ -36,16 +34,13 @@
         private var backgroundImage:Class;
 
         [Bindable]
+        public var accountInfo:AccountInfo;
+
+        [Bindable]
         private var showUpgrade:Boolean;
 
         private function onCreationComplete():void {
             showUpgrade = User.getInstance().getAccountType() != Account.ENTERPRISE;
-        }
-
-        private function onUpgradeAccount():void {
-            var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);            
         }
 
         private function cancelPaidAccount():void {

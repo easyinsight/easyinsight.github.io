@@ -2,11 +2,15 @@ package com.easyinsight.account {
 import flash.events.Event;
 
 public class UpgradeEvent extends Event {
+
+    public static const UPGRADE_EVENT:String = "upgradeEvent";
     
     public function UpgradeEvent() {
         super(UPGRADE_EVENT)
     }
 
-    public static const UPGRADE_EVENT:String = "upgradeEvent";
+    override public function clone():Event {
+        return new UpgradeEvent();
+    }
 }
 }

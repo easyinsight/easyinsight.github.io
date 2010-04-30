@@ -28,7 +28,7 @@
                         <mx:Label text="This solution requires a higher account"/>
                         <mx:Label text="tier than what your current subscription."/>
                     </mx:VBox>
-                    <mx:Button label="Upgrade Account" styleName="blueButton" click="login()"/>
+                    <mx:Button label="Upgrade Account" styleName="blueButton" click="upgrade()"/>
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>

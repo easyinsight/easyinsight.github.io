@@ -53,6 +53,9 @@ public class Account {
     @OneToMany (cascade = CascadeType.ALL)
     private List<User> users = new ArrayList<User>();
 
+    @Column(name="upgraded")
+    private boolean upgraded;
+
     @Column(name="activated")
     private boolean activated;
 
@@ -114,6 +117,14 @@ public class Account {
 
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public boolean isUpgraded() {
+        return upgraded;
+    }
+
+    public void setUpgraded(boolean upgraded) {
+        this.upgraded = upgraded;
+    }
 
     public boolean isMarketplaceEnabled() {
         return marketplaceEnabled;
@@ -277,6 +288,7 @@ public class Account {
         transfer.setAdminUsers(adminUsers);
         transfer.setAccountState(accountState);
         transfer.setApiEnabled(apiEnabled);
+        transfer.setOptIn(optInEmail);
         return transfer;
     }
     

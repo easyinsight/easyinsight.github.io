@@ -3,7 +3,7 @@
 	creationComplete="doCreationComplete()">
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.Alert;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
 
@@ -23,7 +23,7 @@
 
         public function doCreationComplete():void {
             file.addEventListener(Event.SELECT, doSelect);
-            file.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, doComplete);
+            file.addEventListener(Event.COMPLETE, doComplete);
         }
 
         public function doSelect(event:Event):void {
@@ -32,21 +32,29 @@
 
         public function doSubmit():void {
             /*var request:URLRequest = new URLRequest("/app/SolutionImageServlet");
-            var vars:URLVariables = new URLVariables();
+             var vars:URLVariables = new URLVariables();
 
-            vars.solutionID = _sourceID;
+             vars.solutionID = _sourceID;
 
-            request.data = vars;*/
+             request.data = vars;*/
 
             // Start the file upload process
-            file.load();
+            try {
+                file.load();
+            } catch(e:Error) {
+                Alert.show(e.message);
+            }
         }
 
         private var fileData:ByteArray;
 
         private function doComplete(event:Event):void {
-            fileData = file.data;
-            solutionService.addSolutionImage.send(fileData, _sourceID);
+            try {
+                fileData = file.data;
+                solutionService.addSolutionImage.send(fileData, _sourceID);
+            } catch(e:Error) {
+                Alert.show(e.message);
+            }
         }
 
         private function cancel():void {

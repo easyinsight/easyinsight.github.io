@@ -303,8 +303,8 @@
                     </mx:Array>
                 </mx:dataProvider>
             </mx:ToggleButtonBar>
-            <mx:ViewStack width="100%" creationPolicy="all" resizeToContent="true"
-                    paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" id="viewStack">
+            <mx:ViewStack width="100%" creationPolicy="all"
+                    paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" id="viewStack" height="100%">
                 <scorecards:ScorecardGroupDisplay groupID="{groupID}" label="Scorecards" hideEffect="leftEffect" showEffect="leftEffect"/>
                 <discussion:DiscussionPanel dataProvider="{messages}" width="100%" label="Messages" hideEffect="leftEffect" showEffect="leftEffect"/>
                 <groups:GroupMyData groupID="{groupID}" label="Data Sources and Reports" groupAdmin="{editorEnabled}" id="groupData" hideEffect="leftEffect" showEffect="leftEffect"/>

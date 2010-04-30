@@ -28,7 +28,7 @@
                         <mx:Label text="This solution requires a higher account" fontSize="16"/>
                         <mx:Label text="tier than what your current subscription." fontSize="16"/>
                     </mx:VBox>
-                    <mx:Button label="Upgrade Account" styleName="blueButton" click="login()"/>
+                    <mx:Button label="Upgrade Account" styleName="blueButton" click="upgrade()"/>
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>
@@ -107,11 +107,10 @@
                 <!--<mx:HBox width="100%" horizontalAlign="center">
                     <mx:Label text="Easy Data Exploration" fontSize="16"/>
                 </mx:HBox>-->
-                <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
-                    <mx:Image source="../assets/GA2.png" maxWidth="200" maxHeight="120"/>
+                <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">                    
                     <mx:VBox>
-                        <mx:Text text="Ad hoc reporting on your todos and time &#13;tracking" fontSize="14"/>
-                        <mx:Text text="Improve your software life cycle &#13;management" fontSize="14"/>
+                        <mx:Text text="Ad hoc reporting on your todos and time tracking" fontSize="14"/>
+                        <mx:Text text="Improve your software life cycle management" fontSize="14"/>
                         <mx:Text text="Track your engineering and billing trends" fontSize="14"/>
                     </mx:VBox>
                 </mx:HBox>

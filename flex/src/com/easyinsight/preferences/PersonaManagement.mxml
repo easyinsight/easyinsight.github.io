@@ -2,6 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="setup()" width="100%" horizontalAlign="center">
     <mx:Script><![CDATA[
+        import com.easyinsight.account.AccountInfo;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -13,6 +14,9 @@
 
         [Bindable]
         private var personas:ArrayCollection;
+
+        [Bindable]
+        public var accountInfo:AccountInfo;
 
         [Bindable]
         private var stackIndex:int;

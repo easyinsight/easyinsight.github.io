@@ -25,6 +25,7 @@ public class UserServiceResponse {
     private int accountState;
     private UISettings uiSettings;
     private String firstName;
+    private boolean freeUpgradePossible;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -34,7 +35,7 @@ public class UserServiceResponse {
     public UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
                                long spaceAllowed, String email, String userName, boolean accountAdmin,
                                boolean dataSourceCreator, boolean insightCreator, boolean billingInformationGiven, int accountState,
-                               UISettings uiSettings, String firstName) {
+                               UISettings uiSettings, String firstName, boolean freeUpgradePossible) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -50,6 +51,7 @@ public class UserServiceResponse {
         this.accountState = accountState;
         this.uiSettings = uiSettings;
         this.firstName = firstName;
+        this.freeUpgradePossible = freeUpgradePossible;
     }
 
     public String getFirstName() {
@@ -61,6 +63,14 @@ public class UserServiceResponse {
     }
 
     public UserServiceResponse() {
+    }
+
+    public boolean isFreeUpgradePossible() {
+        return freeUpgradePossible;
+    }
+
+    public void setFreeUpgradePossible(boolean freeUpgradePossible) {
+        this.freeUpgradePossible = freeUpgradePossible;
     }
 
     public UISettings getUiSettings() {

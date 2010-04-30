@@ -2,7 +2,7 @@ package com.easyinsight.solutions {
 import com.easyinsight.LoginDialog;
 import com.easyinsight.account.Account;
 import com.easyinsight.account.BasicUpgradeWindow;
-import com.easyinsight.account.ChangeAccountTypeWindow;
+import com.easyinsight.account.UpgradeEvent;
 import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.framework.NavigationEvent;
@@ -72,6 +72,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
     }
 
     private function determineInitialState():void {
+        currentState = "";
         if (User.getInstance() == null) {
             toNotLoggedInState();
         } else if (User.getInstance().getAccountType() < _solution.solutionTier) {
@@ -83,8 +84,13 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
 
     protected function upgrade():void {
         var window:BasicUpgradeWindow = new BasicUpgradeWindow();
+        window.addEventListener(UpgradeEvent.UPGRADE_EVENT, onUpgrade, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);
+    }
+
+    private function onUpgrade(event:UpgradeEvent):void {
+        determineInitialState();
     }
 
     public function get newAuth():Boolean {

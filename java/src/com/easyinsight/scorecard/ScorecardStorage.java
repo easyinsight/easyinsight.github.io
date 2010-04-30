@@ -515,10 +515,21 @@ public class ScorecardStorage {
     }
 
     public long getFirstScorecard(EIConnection conn) throws SQLException {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID FROM SCORECARD ORDER BY SCORECARD_ORDER ASC LIMIT 1");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID FROM SCORECARD, USER_SCORECARD_ORDERING WHERE " +
+                "SCORECARD.SCORECARD_ID = USER_SCORECARD_ORDERING.SCORECARD_ID AND SCORECARD.USER_ID = ? ORDER BY USER_SCORECARD_ORDERING.SCORECARD_ORDER ASC LIMIT 1");
+        queryStmt.setLong(1, SecurityUtil.getUserID());
         ResultSet rs = queryStmt.executeQuery();
-        rs.next();
-        long id = rs.getLong(1);
+        long id;
+        if (rs.next()) {
+            id = rs.getLong(1);
+        } else {
+            queryStmt.close();
+            queryStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID FROM SCORECARD WHERE SCORECARD.USER_ID = ? LIMIT 1");
+            queryStmt.setLong(1, SecurityUtil.getUserID());
+            rs = queryStmt.executeQuery();
+            rs.next();
+            id = rs.getLong(1);
+        }
         queryStmt.close();
         return id;
     }

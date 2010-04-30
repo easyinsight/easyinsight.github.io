@@ -27,6 +27,9 @@
         private var firstName:String;
 
         [Bindable]
+        public var accountInfo:AccountInfo;
+
+        [Bindable]
         [Embed(source="../../../../assets/pencil.png")]
         private var editIcon:Class;
 
@@ -54,12 +57,15 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function upgradeAccount():void {
-            var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
-            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh, false, 0, true);
+        protected function upgrade():void {
+            var window:BasicUpgradeWindow = new BasicUpgradeWindow();
+            window.addEventListener(UpgradeEvent.UPGRADE_EVENT, onUpgrade, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-            window.y = 10;
+        }
+
+        private function onUpgrade(event:UpgradeEvent):void {
+            dispatchEvent(new Event("refreshAccount"));
         }
 
         private function cancelAccount():void {
@@ -92,17 +98,17 @@
                 <mx:Label text="Account Attributes" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
             </mx:Box>
             <mx:Form width="100%">
-                <mx:FormItem label="Account Type: " fontFamily="Tahoma" fontWeight="bold">
-                    <mx:Label text="Basic" fontFamily="Lucida Grande" fontWeight="normal"/>
-                </mx:FormItem>
-                <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
-                    <account:AvailableSpace/>
-                </mx:FormItem>
+                <account:AccountType accountInfo="{accountInfo}"/>
+                <account:AccountUsers accountInfo="{accountInfo}"/>
+                <account:AccountStorage accountInfo="{accountInfo}"/>
+                <account:AccountAPIUse accountInfo="{accountInfo}"/>                
+                <account:AccountState accountInfo="{accountInfo}"/>
+                <account:AccountTrialDate accountInfo="{accountInfo}"/>
                 <mx:FormItem label="Account Settings: " fontFamily="Tahoma" fontWeight="bold">
                     <mx:Button label="Edit Account Settings..." click="editAccountSettings()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
-                    <mx:Button label="Upgrade Account..." click="upgradeAccount()"/>
+                    <mx:Button label="Upgrade Account..." click="upgrade()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
                     <mx:Button label="Change/Update Billing Information..." click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/>
@@ -111,7 +117,6 @@
                     <mx:Button label="Cancel Account..." click="cancelAccount()"/>
                 </mx:FormItem>
             </mx:Form>
-            <account:AccountInfoDisplay/>
         </mx:VBox>
         <mx:Spacer width="40"/>
         <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid"

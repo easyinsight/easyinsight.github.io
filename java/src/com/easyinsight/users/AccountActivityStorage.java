@@ -32,6 +32,14 @@ public class AccountActivityStorage {
 
     }
 
+    public void updateTrialTime(long accountID, Connection conn, Date newTrialDate) throws SQLException {
+        PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TIMED_STATE SET STATE_CHANGE_TIME = ? WHERE ACCOUNT_ID = ? AND ACCOUNT_STATE = ?");
+        updateStmt.setTimestamp(1, new java.sql.Timestamp(newTrialDate.getTime()));
+        updateStmt.setLong(2, accountID);
+        updateStmt.setInt(3, Account.ACTIVE);
+        updateStmt.executeUpdate();
+    }
+
     @Nullable
     public Date getTrialTime(long accountID, Connection conn) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT state_change_time from " +

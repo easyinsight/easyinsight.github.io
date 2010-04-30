@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+        label="Type:">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var accountType:String;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            switch (accountInfo.accountType) {
+                case Account.FREE:
+                    accountType = "Personal";
+                    break;
+                case Account.INDIVIDUAL:
+                    accountType = "Basic";
+                    break;
+                case Account.GROUP:
+                    accountType = "Professional";
+                    break;
+                case Account.PROFESSIONAL:
+                    accountType = "Premium";
+                    break;
+                case Account.ENTERPRISE:
+                    accountType = "Enterprise";
+                    break;
+                case Account.ADMINISTRATOR:
+                    accountType = "Administrator";
+                    break;
+            }
+        }]]></mx:Script>
+    <mx:Label text="{accountType}" fontFamily="Lucida Grande" fontWeight="normal"/>
+</account:AccountFormItem>

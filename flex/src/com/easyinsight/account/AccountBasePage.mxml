@@ -2,11 +2,6 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.listing.IPerspective"
 	xmlns:listing="com.easyinsight.listing.*" xmlns:account="com.easyinsight.account.*"  backgroundColor="#818285" creationComplete="setupListeners()" paddingTop="0" top="0"
         verticalGap="0" horizontalAlign="center">
-	<mx:states>
-		<mx:State name="loggedIn">
-			<mx:RemoveChild target="{accountWizard}"/>
-		</mx:State>
-	</mx:states>	
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
@@ -14,9 +9,6 @@
 
         import mx.managers.BrowserManager;
         import mx.utils.URLUtil;
-
-        [Bindable]
-        public var account:Account;
 
         [Bindable]
         [Embed(source="../../../../assets/background2.JPG")]
@@ -80,9 +72,7 @@
         }
 
         private function refreshAccount(event:RefreshAccountEvent):void {
-            this.account = null;
-            coreContent.removeAllChildren();
-            retrieveAccountInfo();
+            gotFocus();
         }
 
         public function gotFocus():void {
@@ -93,31 +83,16 @@
             BrowserManager.getInstance().setFragment(fragmentString);
             var user:User = User.getInstance();
             if (user != null) {
-                if (currentState != "loggedIn") {
-                    currentState = "loggedIn";
-                    if (account == null) {
-                        retrieveAccountInfo();
-                    }
-                }
+                stackIndex = 2;
+                accountSummary.gotFocus();
             } else {
-                currentState = "";
+                stackIndex = 1;                
                 accountWizard.gotFocus();
             }
         }
 
-        private function retrieveAccountInfo():void {
-            userService.retrieveAccount.send();
-        }
-
-        private function gotAccountInfo():void {
-            var x:Account = userService.retrieveAccount.lastResult as Account;
-            if (x != null) {
-                this.account = x;
-                var accountSummary:AccountSummary = new AccountSummary();
-                accountSummary.account = account;
-                coreContent.addChild(accountSummary);
-            }
-        }
+        [Bindable]
+        private var stackIndex:int = 0;
 
         public function lostFocus():void {
         }
@@ -140,10 +115,7 @@
         public function cleanup():void {
         }
 		]]>
-	</mx:Script>
-	<mx:RemoteObject destination="login" id="userService">
-		<mx:method name="retrieveAccount" result="gotAccountInfo()"/>
-	</mx:RemoteObject>
+	</mx:Script>	
     <mx:Canvas width="100%" height="100%" backgroundColor="#000000">
         <mx:VBox width="100%" height="100%" verticalGap="0">
             <mx:Canvas height="50%" width="100%" backgroundColor="#888888"/>
@@ -151,11 +123,14 @@
         </mx:VBox>
         <mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="30" paddingLeft="10" paddingRight="10"
              paddingBottom="10" horizontalAlign="center">
-            <mx:VBox width="1000" paddingLeft="20"
-                 paddingRight="20" paddingTop="5" paddingBottom="20" id="coreContent" backgroundColor="#FFFFFF">
+            <mx:ViewStack width="1000" paddingLeft="20" resizeToContent="true"
+                 paddingRight="20" paddingTop="5" paddingBottom="20" id="coreContent" backgroundColor="#FFFFFF" creationPolicy="all"
+                    selectedIndex="{stackIndex}">
+                <mx:Box/>
                 <account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)" destinationURL="{destinationURL}"
                         requiredTier="{requiredTier}" connectionName="{connectionName}"/>
-            </mx:VBox>
+                <account:AccountSummary id="accountSummary"/>
+             </mx:ViewStack>
         </mx:VBox>
     </mx:Canvas>
 </mx:VBox>

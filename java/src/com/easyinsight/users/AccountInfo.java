@@ -13,6 +13,24 @@ public class AccountInfo {
     private Date createdDate;
     private Date trialEndDate;
     private Date lastBillingPaidDate;
+    private AccountTransferObject account;
+    private AccountStats accountStats;
+
+    public AccountStats getAccountStats() {
+        return accountStats;
+    }
+
+    public void setAccountStats(AccountStats accountStats) {
+        this.accountStats = accountStats;
+    }
+
+    public AccountTransferObject getAccount() {
+        return account;
+    }
+
+    public void setAccount(AccountTransferObject account) {
+        this.account = account;
+    }
 
     public int getAccountType() {
         return accountType;

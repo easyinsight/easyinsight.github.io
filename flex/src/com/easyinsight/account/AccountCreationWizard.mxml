@@ -83,6 +83,7 @@
             if (_requiredTier >= Account.INDIVIDUAL) {
                 recommendationText = "You'll need an account of Basic or higher to access " + _connectionName + ".";
                 accountIndex = 2;
+
             } else {
                 accountIndex = 1;
             }

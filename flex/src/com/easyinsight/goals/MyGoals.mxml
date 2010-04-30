@@ -42,7 +42,7 @@
                         </mx:VBox>
                     </mx:HBox>
                     <mx:HBox width="100%" paddingLeft="30" paddingRight="30">
-                        <mx:TextArea editable="false"  text="You can't use any of the KPI functionality with your account level. You'll have to upgrade to Group or higher for access to the functionality."
+                        <mx:TextArea editable="false"  text="You can't use any of the KPI functionality with your account level. You'll have to upgrade to Professional or higher for access to the functionality."
                                 width="100%" borderStyle="none" fontSize="14"/>
                     </mx:HBox>
                 </mx:VBox>

@@ -18,11 +18,9 @@ import java.io.IOException;
 
 
 /**
- * Created by IntelliJ IDEA.
  * User: abaldwin
  * Date: Jun 26, 2009
  * Time: 10:13:10 AM
- * To change this template use File | Settings | File Templates.
  */
 public class BrainTreeBillingSystem {
     public String getUsername() {
@@ -43,8 +41,6 @@ public class BrainTreeBillingSystem {
 
     private String username;
     private String password;
-    private static final String INDIVIDUAL_AMOUNT = "10.00";
-    private static final String GROUP_AMOUNT = "100.00";
 
     public void cancelPlan(long accountID) {
         HttpClient client = new HttpClient();

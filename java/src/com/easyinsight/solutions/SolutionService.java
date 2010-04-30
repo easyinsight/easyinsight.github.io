@@ -307,11 +307,26 @@ public class SolutionService {
                     "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
                     "SOLUTION_INSTALL.solution_id = ? AND " +
                     "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND " +
+                    "DATA_FEED.VISIBLE = ?");
             queryStmt.setLong(1, solutionID);
             queryStmt.setLong(2, SecurityUtil.getUserID(false));
+            queryStmt.setBoolean(3, true);
             ResultSet rs = queryStmt.executeQuery();
             boolean valid = rs.next();
+            if (!valid) {
+                PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID, DATA_FEED.FEED_NAME FROM " +
+                            "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_GROUPS, GROUP_TO_USER_JOIN WHERE " +
+                            "SOLUTION_INSTALL.SOLUTION_ID = ? AND " +
+                            "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
+                            "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND UPLOAD_POLICY_GROUPS.group_id = group_to_user_join.group_id AND " +
+                            "group_to_user_join.user_id = ? AND DATA_FEED.VISIBLE = ?");
+                groupQueryStmt.setLong(1, solutionID);
+                groupQueryStmt.setLong(2, SecurityUtil.getUserID(false));
+                groupQueryStmt.setBoolean(3, true);
+                rs = queryStmt.executeQuery();
+                valid = rs.next();
+            }
             return valid;
         } catch (Exception e) {
             LogClass.error(e);

@@ -519,6 +519,9 @@ public class UserUploadService implements IUserUploadService {
             }
             CredentialsResponse credentialsResponse;
             IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
+            if (SecurityUtil.getAccountTier() < dataSource.getRequiredAccountTier()) {
+                return new CredentialsResponse(false, "Your account level is no longer valid for this data source connection.", feedID);
+            }
             FeedDefinition feedDefinition = (FeedDefinition) dataSource;
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (synchronous) {

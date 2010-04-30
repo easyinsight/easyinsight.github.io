@@ -8,6 +8,8 @@ public class AccountInfo {
     public var createdDate:Date;
     public var trialEndDate:Date;
     public var lastBillingPaidDate:Date;
+    public var account:Account;
+    public var accountStats:AccountStats;
 
     public function AccountInfo() {
     }

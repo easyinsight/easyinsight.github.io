@@ -12,7 +12,7 @@
         import mx.managers.PopUpManager;
 
         [Bindable]
-        private var consultants:ArrayCollection;
+        private var trialDate:Date;
         [Bindable]
         private var adminUsers:ArrayCollection;
 
@@ -26,9 +26,12 @@
             super.commitProperties();
             accountNameInput.text = _accountAdminTO.name;
             accountTypeComboBox.selectedIndex = _accountAdminTO.accountType - 1;
+            accountStatusComboBox.selectedIndex = _accountAdminTO.accountState - 1;
             adminUsers = _accountAdminTO.adminUsers;
-            consultants = _accountAdminTO.consultants;
+            trialDate = _accountAdminTO.trialDate;
         }
+
+
 
         private function addConsultant():void {
            
@@ -43,11 +46,11 @@
         }
 
         private function create():void {
-            
             _accountAdminTO.name = accountNameInput.text;
             _accountAdminTO.accountType = accountTypeComboBox.selectedIndex + 1;
             _accountAdminTO.accountState = accountStatusComboBox.selectedIndex + 1;
-
+            if (trialDate != null) _accountAdminTO.trialDate = dateSelector.selectedDate;
+            userService.adminUpdate.send(_accountAdminTO);
         }
 
         private function statusChange():void {
@@ -101,16 +104,15 @@
                             <mx:String>Pending Billing</mx:String>
                             <mx:String>Preparing</mx:String>
                             <mx:String>Beta</mx:String>
+                            <mx:String>Trial</mx:String>
+                            <mx:String>Closing</mx:String>
                         </mx:Array>
                     </mx:ArrayCollection>
                 </mx:dataProvider>
             </mx:ComboBox>
             <mx:Box id="actionsBox"/>
         </mx:HBox>
-        <mx:HBox>
-            <mx:Label text="Administators"/>
-            <mx:Button label="Add Admin User" click="addAdminUser()"/>
-        </mx:HBox>
+        <mx:DateField selectedDate="{trialDate}" id="dateSelector"/>
         <mx:DataGrid dataProvider="{adminUsers}" width="100%">
             <mx:columns>
                 <mx:DataGridColumn dataField="name" headerText="Name"/>
@@ -118,7 +120,7 @@
             </mx:columns>
         </mx:DataGrid>        
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Apply" click="create()"/>
+            <mx:Button label="Save" click="create()"/>
             <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>

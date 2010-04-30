@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%"
-        initialize="initHandlers()" horizontalAlign="center" paddingLeft="15"
+        creationComplete="initHandlers()" horizontalAlign="center" paddingLeft="15"
         paddingTop="15" paddingBottom="15" paddingRight="15">
     <mx:Metadata>
         [Event(name="userDefined", type="com.easyinsight.account.UserDefinitionEvent")]
@@ -42,7 +42,8 @@
 
         private function initHandlers():void {
             validators = [ emailValidator, userNameValidator, passwordValidator, fullNameValidator ];
-            addEventListener(KeyboardEvent.KEY_UP, onKey);
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
+            userName.setFocus();
         }
 
         private function onKey(event:KeyboardEvent):void {
@@ -91,27 +92,27 @@
         </mx:Box>
         <mx:Form width="100%" backgroundColor="0xDCDBD0">
             <mx:FormItem label="User Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="userName" fontFamily="Lucida Grande" fontWeight="normal"/>
+                <mx:TextInput id="userName" fontFamily="Lucida Grande" fontWeight="normal" tabIndex="0"/>
             </mx:FormItem>
             <mx:FormItem label="Company Name (Optional):" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="companyName" fontFamily="Lucida Grande" fontWeight="normal"/>
+                <mx:TextInput id="companyName" fontFamily="Lucida Grande" fontWeight="normal" tabIndex="1"/>
             </mx:FormItem>
             <mx:FormItem label="Password:" direction="vertical" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="password" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal"/>
+                <mx:TextInput id="password" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal" tabIndex="2"/>
                 <account:PasswordStrengthMeter target="{password}" trackHeight="10"/>
             </mx:FormItem>
             <mx:FormItem label="Confirm Password:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
                 <mx:TextInput id="confirmPassword" displayAsPassword="true" fontFamily="Lucida Grande"
-                              fontWeight="normal"/>
+                              fontWeight="normal" tabIndex="3"/>
             </mx:FormItem>
             <mx:FormItem label="First Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="firstName" fontFamily="Lucida Grande" fontWeight="normal"/>
+                <mx:TextInput id="firstName" fontFamily="Lucida Grande" fontWeight="normal" tabIndex="4"/>
             </mx:FormItem>
             <mx:FormItem label="Last Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal"/>
+                <mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal" tabIndex="5"/>
             </mx:FormItem>
             <mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal"/>
+                <mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal" tabIndex="6"/>
             </mx:FormItem>
             <mx:FormItem label="">
                 <mx:TextArea text="An Easy Insight representative will contact you after signup to help answer any questions you may have as you use the service."
@@ -119,16 +120,16 @@
                         fontFamily="Tahoma" fontWeight="bold" height="50" width="350"/>
             </mx:FormItem>
             <mx:FormItem label="Send Me Occasional Updates About Easy Insight" direction="horizontal">
-                <mx:CheckBox id="optInCheckbox" selected="true"/>
+                <mx:CheckBox id="optInCheckbox" selected="true" tabIndex="7"/>
             </mx:FormItem>
             <mx:FormItem label="I Accept the Terms of Service:" direction="horizontal">
-                <mx:CheckBox id="tosCheckbox"/>
+                <mx:CheckBox id="tosCheckbox" tabIndex="8"/>
                 <mx:LinkButton label="View Terms of Service" click="showTerms()" textDecoration="underline"/>
             </mx:FormItem>
             <mx:FormItem>
                 <mx:HBox>
-                    <mx:Button label="Create" click="createAccount()"/>
-                    <mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline"/>
+                    <mx:Button label="Create" click="createAccount()" tabIndex="8"/>
+                    <mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline" tabIndex="9"/>
                 </mx:HBox>
             </mx:FormItem>
             <mx:FormItem label="">

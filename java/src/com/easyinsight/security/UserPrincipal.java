@@ -24,6 +24,10 @@ public class UserPrincipal implements Principal, Serializable {
         this.accountAdmin = accountAdmin;
     }
 
+    public void setAccountType(int accountType) {
+        this.accountType = accountType;
+    }
+
     public boolean isAccountAdmin() {
         return accountAdmin;
     }

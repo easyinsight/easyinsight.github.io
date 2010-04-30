@@ -23,6 +23,7 @@ import com.easyinsight.preferences.UISettings;
         public var accountState:int;
         public var uiSettings:UISettings;
         public var firstName:String;
+        public var freeUpgradePossible:Boolean;
 		
 		public function UserServiceResponse()
 			{

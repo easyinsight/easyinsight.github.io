@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        width="900" height="550">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private function finish():void {
+            if (passwordInput.text == confirmInput.text) {
+                ProgressAlert.alert(this, "Updating...", null, userService.updatePassword);
+                userService.updatePassword.send(passwordInput.text);
+            } else {
+                Alert.show("The passwords didn't match.");
+            }
+        }
+
+        private function updated():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userService" id="userService">
+        <mx:method name="updatePassword" result="updated()"/>
+    </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%" verticalGap="0">
+        <mx:Box height="50%" width="100%"  backgroundColor="#000000" horizontalAlign="center" verticalAlign="middle">
+            <mx:Text text="Let's do some initial setup for your account&#13;and change that initial password to&#13;something you can remember." fontSize="24" color="#FFFFFF"/>
+        </mx:Box>
+        <mx:VBox verticalAlign="middle" horizontalAlign="center" height="50%" width="100%" backgroundColor="#FFFFFF">
+            <mx:Spacer height="100%"/>
+            <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+                <mx:FormItem label="New Password:" fontSize="18">
+                    <mx:TextInput id="passwordInput" fontSize="18" displayAsPassword="true"/>
+                </mx:FormItem>
+                <mx:FormItem label="Once More to Confirm:" fontSize="18">
+                    <mx:TextInput id="confirmInput" fontSize="18" displayAsPassword="true"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Spacer height="100%"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button label="Finish" click="finish()" fontSize="14"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:VBox>
+</util:EITitleWindow>

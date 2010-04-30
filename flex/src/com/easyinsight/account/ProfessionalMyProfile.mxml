@@ -17,6 +17,10 @@
         private var fullName:String;
         [Bindable]
         private var email:String;
+        [Bindable]
+        private var firstName:String;
+        [Bindable]
+        private var lastName:String;
 
         [Bindable]
         [Embed(source="../../../../assets/pencil.png")]
@@ -26,16 +30,22 @@
         [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
         private var backgroundImage:Class;
 
+        [Bindable]
+        public var accountInfo:AccountInfo;
+
         private function initProperties():void {
             this.userName = User.getInstance().userName;
-            this.fullName = User.getInstance().getName();
+            this.fullName = User.getInstance().firstName + " " + User.getInstance().getName();
+            this.firstName = User.getInstance().firstName;
+            this.lastName = User.getInstance().getName();
             this.email = User.getInstance().getEmail();
         }
 
         private function editProfile():void {
             var editor:UserProfileEditor = new UserProfileEditor();
             editor.userNameText = userName;
-            editor.fullNameText = fullName;
+            editor.fullNameText = lastName;
+            editor.firstNameText = firstName;
             editor.emailText = email;
             editor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onProfileEdit, false, 0, true);
             PopUpManager.addPopUp(editor, this, true);

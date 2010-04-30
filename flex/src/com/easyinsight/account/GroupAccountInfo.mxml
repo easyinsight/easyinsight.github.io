@@ -5,14 +5,22 @@
     <mx:Metadata>
         [Event(name="upgrade", type="com.easyinsight.account.UpgradeEvent")]
     </mx:Metadata>
-      <mx:Label text="GROUP" fontSize="20" fontWeight="bold"/>
-                    <mx:Label text="$200/month" color="#D42525" fontWeight="bold"/>                    
-                    <mx:HRule width="100%"/>
-                    <mx:Label text="Collaborate across your business"/>
-                    <mx:Label text="Data level security"/>
-                    <mx:Label text="500 MB of storage"/>
-                    <mx:Label text="50 users"/>
-                    <mx:Button label="Upgrade to Group!" click="dispatchEvent(new UpgradeEvent())" styleName="blueButton"/>
+    <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
+    <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight"
+             color="#3A3A3A"/>
+    <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
+    <mx:Button label="Upgrade to Group!" click="dispatchEvent(new UpgradeEvent())" styleName="blueButton"/>
+    <mx:HRule width="100%"/>
+    <mx:VBox width="100%">        
+        <mx:Text selectable="false"
+                 text="Build visibility across all the business silos&#13;from accounting and R&amp;D to sales and&#13;marketing"/>
+        <mx:Text selectable="false"
+                 text="Data level security to ensure your users see&#13;only what they should see"/>
+        <mx:Text selectable="false"
+                 text="Customize the interface on a user role basis"/>
+        <mx:Text selectable="false" text="50 users"/>
+        <mx:Text selectable="false" text="500 MB of storage"/>
+    </mx:VBox>                   
     <mx:Script><![CDATA[
         import com.easyinsight.account.UpgradeEvent;
         ]]></mx:Script>

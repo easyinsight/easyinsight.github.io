@@ -8,6 +8,9 @@ package com.easyinsight.framework
 	{
 		public var billingInformationNeeded:Boolean;
 		public var user:UserTransferObject;
+        public var successful:Boolean;
+        public var resultMessage:String;
+        public var newAccountType:int;
 		
 		public function UpgradeAccountResponse()
 		{

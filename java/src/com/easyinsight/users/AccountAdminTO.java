@@ -23,6 +23,24 @@ public class AccountAdminTO {
     private Date creationDate;
     private Date lastUserLoginDate;
     private long defaultPersonaID;
+    private boolean optIn;
+    private Date trialDate;
+
+    public Date getTrialDate() {
+        return trialDate;
+    }
+
+    public void setTrialDate(Date trialDate) {
+        this.trialDate = trialDate;
+    }
+
+    public boolean isOptIn() {
+        return optIn;
+    }
+
+    public void setOptIn(boolean optIn) {
+        this.optIn = optIn;
+    }
 
     public long getDefaultPersonaID() {
         return defaultPersonaID;
@@ -120,17 +138,18 @@ public class AccountAdminTO {
         this.accountID = accountID;
     }
 
-    public Account toAccount() {
-        Account account = new Account();
+    public Account toAccount(Account account) {
         account.setAccountType(accountType);
         account.setAccountID(accountID);
         if (groupID != 0) {
             account.setGroupID(groupID);
         }
         account.setName(name);
+        account.setCreationDate(creationDate);
         account.setAccountState(accountState);
         account.setMaxSize(maxSize);
         account.setMaxUsers(maxUsers);
+        account.setOptInEmail(optIn);
         account.setAccountState(accountState);
         account.setApiEnabled(apiEnabled);
         return account;

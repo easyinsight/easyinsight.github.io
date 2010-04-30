@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+        label="Account API Use:" direction="horizontal">
+    <mx:Script><![CDATA[
+        import mx.formatters.NumberFormatter;
+
+        [Bindable]
+        private var spaceUsed:String;
+
+        [Bindable]
+        private var availableSpace:String;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            var accountStats:AccountStats = accountInfo.accountStats;
+            var numberFormatter:NumberFormatter = new NumberFormatter();
+            if (accountStats.apiMaxToday <= 1000000) {
+                spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000) + " KB";
+                availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000) + " KB";
+            } else if (accountStats.maxSpace <= 1000000000) {
+                spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000000) + " MB";
+                availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000000) + " MB";
+            } else {
+                spaceUsed = numberFormatter.format(accountStats.apiUsedToday / 1000000000) + " GB";
+                availableSpace = numberFormatter.format(accountStats.apiMaxToday / 1000000000) + " GB";
+            }
+        }]]>
+    </mx:Script>
+    <mx:Label text="{spaceUsed}" fontFamily="Lucida Grande" fontWeight="normal"/>
+    <mx:Label text=" / "/>
+    <mx:Label text="{availableSpace}" fontFamily="Lucida Grande" fontWeight="normal"/>
+</account:AccountFormItem>

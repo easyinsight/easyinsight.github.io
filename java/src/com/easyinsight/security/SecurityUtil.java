@@ -95,7 +95,7 @@ public class SecurityUtil {
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(), 
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(), user.isDataSourceCreator(),
                         user.isInsightCreator(), account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
-                        user.getUiSettings(), user.getFirstName());
+                        user.getUiSettings(), user.getFirstName(), !account.isUpgraded());
             } else {
                /* results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
                 if (results.size() > 0) {
@@ -228,6 +228,10 @@ public class SecurityUtil {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public static void changeAccountType(int accountType) {
+        securityProvider.getUserPrincipal().setAccountType(accountType);
     }
 
     public static int getAccountTier() {

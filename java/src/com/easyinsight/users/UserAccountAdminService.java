@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import com.easyinsight.groups.Group;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.security.Roles;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.ArrayList;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -108,7 +108,7 @@ public class UserAccountAdminService {
         AccountInfo accountInfo = new AccountInfo();
         long accountID = SecurityUtil.getAccountID();
         AccountActivityStorage storage = new AccountActivityStorage();
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
@@ -119,6 +119,8 @@ public class UserAccountAdminService {
                 Date trialDate = storage.getTrialTime(accountID, conn);
                 accountInfo.setTrialEndDate(trialDate);
             }
+            accountInfo.setAccount(account.toTransferObject());
+            accountInfo.setAccountStats(getAccountStats(conn));
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
@@ -281,44 +283,128 @@ public class UserAccountAdminService {
         return userCreationResponse;
     }
 
-    public UpgradeAccountResponse upgradeAccount(int toType) {
-        UpgradeAccountResponse response = new UpgradeAccountResponse();
+    public void downgradeAccount(int toType) {
         if (toType == Account.ADMINISTRATOR) {
             throw new SecurityException();
         }
         SecurityUtil.authorizeAccountAdmin();
+        if (toType >= Account.PREMIUM || SecurityUtil.getAccountTier() >= Account.PREMIUM) {
+            throw new RuntimeException("You'll need Easy Insight support to deal with this account type change.");
+        }
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
-            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
-            account.setAccountType(toType);
-            Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
-            if(trialEnd != null && trialEnd.after(new Date()) && account.getBillingDayOfMonth() == null) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(trialEnd);
-                account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
-            }
-            else {
-                if(account.isBillingInformationGiven() == null || !account.isBillingInformationGiven()) {
-                    account.setAccountState(Account.DELINQUENT);
-                }
-            }
-            if(account.isBillingInformationGiven() == null || !account.isBillingInformationGiven())
-                response.setBillingInformationNeeded(true);
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);            
 
-            if (toType == Account.PROFESSIONAL || toType == Account.PREMIUM || toType == Account.ENTERPRISE) {
-                user.setAccountAdmin(true);
-                user.setDataSourceCreator(true);
-                user.setInsightCreator(true);
-                session.update(user);
+            if (toType == Account.PERSONAL) {
+                account.setAccountState(Account.ACTIVE);
+                account.setBillingDayOfMonth(null);
+                if (account.getGroupID() != null) {
+                    new GroupStorage().deleteGroup(account.getGroupID(), conn);
+                }
+            } else {
+                // is there anything we need to do here?
+                
             }
+
+            AccountLimits.configureAccount(account);
+
+            account.setAccountType(toType);
+
             session.update(account);
-            account.toTransferObject();
+            
             session.flush();
             conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public UpgradeAccountResponse upgradeAccount(int toType) {
+        UpgradeAccountResponse response = new UpgradeAccountResponse();
+        if (toType == Account.ADMINISTRATOR) {
+            throw new SecurityException();
+        }
+        if (toType == Account.PREMIUM || toType == Account.ENTERPRISE) {
+            throw new RuntimeException("You'll need Easy Insight support to upgrade your account to these tiers.");
+        }
+        SecurityUtil.authorizeAccountAdmin();
+        long accountID = SecurityUtil.getAccountID();
+        if (toType < SecurityUtil.getAccountTier()) {
+            throw new RuntimeException();
+        }
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+
+            boolean goAheadWithUpgrade = false;
+
+            if (account.getAccountType() == Account.PERSONAL && !account.isUpgraded()) {
+
+                // If the user has a free account and hasn't upgraded
+
+                goAheadWithUpgrade = true;
+
+                account.setAccountState(Account.TRIAL);
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.DAY_OF_YEAR, 30);
+                new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
+
+                Group group = new Group();
+                group.setName(account.getName());
+                group.setPubliclyVisible(false);
+                group.setPubliclyJoinable(false);
+                group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
+                account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
+
+
+            } else if (account.getAccountType() == Account.PERSONAL && account.isUpgraded()) {
+
+                // if the user has a free account that they've previously upgraded/downgraded
+
+            } else {
+
+                Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
+
+                if (trialEnd != null && trialEnd.after(new Date())) {
+
+                    // if the user is currently in a trial period
+
+                    goAheadWithUpgrade = true;
+
+                } else if (account.getBillingDayOfMonth() != null) {
+
+                    // if the user has billing set up
+                    
+                    goAheadWithUpgrade = true;
+                }
+            }
+
+            if (goAheadWithUpgrade) {
+                account.setAccountType(toType);
+                AccountLimits.configureAccount(account);
+                response.setNewAccountType(toType);
+                account.setUpgraded(true);
+                session.update(account);
+                SecurityUtil.changeAccountType(toType);
+            } else {
+                throw new RuntimeException("Unhandled account upgrade case, please contact support.");
+            }
+
+            session.flush();
+            conn.commit();
+            response.setSuccessful(true);
             response.setUser(user.toUserTransferObject());
             return response;
         } catch (Exception e) {
@@ -326,6 +412,7 @@ public class UserAccountAdminService {
             conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -441,7 +528,7 @@ public class UserAccountAdminService {
         }
     }
 
-    public AccountStats getAccountStats() {
+    private AccountStats getAccountStats(EIConnection conn) throws SQLException {
         long accountID = SecurityUtil.getAccountID();
         long usedSize = 0;
         long maxSize = 0;
@@ -449,8 +536,6 @@ public class UserAccountAdminService {
         int maxUsers = 0;
         long usedAPI = 0;
         long maxAPI = Account.getMaxCount(SecurityUtil.getAccountTier());
-        Connection conn = Database.instance().getConnection();
-        try {
             PreparedStatement queryUsedStmt = conn.prepareStatement("select sum(feed_persistence_metadata.size) from feed_persistence_metadata, " +
                     "upload_policy_users, user where feed_persistence_metadata.feed_id = upload_policy_users.feed_id and user.user_id = upload_policy_users.user_id and user.account_id = ?");
             queryUsedStmt.setLong(1, accountID);
@@ -476,13 +561,7 @@ public class UserAccountAdminService {
             ResultSet statRS = statsStmt.executeQuery();
             statRS.next();
             maxUsers = statRS.getInt(1);
-            maxSize = statRS.getLong(2);            
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
+            maxSize = statRS.getLong(2);
         AccountStats accountStats = new AccountStats();
         accountStats.setMaxSpace(maxSize);
         accountStats.setUsedSpace(usedSize);

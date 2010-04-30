@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+        label="Account Users Used:" direction="horizontal">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var usersUsed:String;
+
+        [Bindable]
+        private var usersAvailable:String;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            var accountStats:AccountStats = accountInfo.accountStats;
+            usersUsed = String(accountStats.currentUsers);
+            usersAvailable = String(accountStats.availableUsers);
+        }]]>
+    </mx:Script>
+    <mx:Label text="{usersUsed}" fontFamily="Lucida Grande" fontWeight="normal"/>
+    <mx:Label text=" / "/>
+    <mx:Label text="{usersAvailable}" fontFamily="Lucida Grande" fontWeight="normal"/>
+</account:AccountFormItem>

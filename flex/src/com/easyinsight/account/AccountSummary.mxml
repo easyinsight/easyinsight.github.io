@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
         xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*" width="100%"
-        height="100%" xmlns:account="com.easyinsight.account.*">
+        height="100%" xmlns:account="com.easyinsight.account.*" creationComplete="setupListeners()">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.preferences.PersonaManagement;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
+        import mx.core.Container;
         import mx.events.ItemClickEvent;
         import mx.managers.PopUpManager;
 
-        private var _account:Account;
+        private var accountInfo:AccountInfo;
         [Bindable]
         private var accountName:String;
         [Bindable]
@@ -20,52 +22,80 @@
         [Bindable]
         private var toggleOptions:ArrayCollection;
 
-        public function set account(account:Account):void {
-            if (_account != account) {
-                this._account = account;
-                if (account == null) {
-                } else {
-                    this.accountName = User.getInstance().userName;
-                }
-                invalidateProperties();
-            }
+        private function setupListeners():void {
+            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, onLogout);
         }
+
+        private function onLogout(event:LoginEvent):void {
+            accountInfo = null;
+            lastAccountType = 0;
+        }
+
+        public function gotFocus():void {
+            userService.getAccountInfo.send();
+        }
+
+        private function gotAccountInfo():void {
+            accountInfo = userService.getAccountInfo.lastResult as AccountInfo;
+            invalidateProperties();
+        }
+
+        private function onAccountRefresh(event:Event):void {
+            userService.getAccountInfo.send();
+        }
+
+        private var lastAccountType:int;
 
         override protected function commitProperties():void {
             super.commitProperties();
-            coreBox.removeAllChildren();
-            if (_account.accountType == Account.FREE) {
-                // user profile information, option to upgrade, option to cancel
-                toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new FreeAccountSettings()) ]);
-            } else if (_account.accountType == Account.INDIVIDUAL) {
-                if (User.getInstance().accountAdmin) {
-                    // user profile information, option to ugprade, option to cancel, billing link, general account settings?
-                    toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()),
-                                new AccountOption("User Administration", new UserAdministration())]);
-                    showToggle = true;
-                } else {
-                    toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);
+            if (accountInfo != null) {
+                if (lastAccountType != User.getInstance().getAccountType()) {
+                    lastAccountType = accountInfo.accountType;
+                    coreBox.removeAllChildren();
+                    if (accountInfo.accountType == Account.FREE) {
+                        // user profile information, option to upgrade, option to cancel
+                        toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new FreeAccountSettings()) ]);
+                        showToggle = false;
+                    } else if (accountInfo.accountType == Account.INDIVIDUAL) {
+                        if (User.getInstance().accountAdmin) {
+                            // user profile information, option to ugprade, option to cancel, billing link, general account settings?
+                            toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()),
+                                        new AccountOption("User Administration", new UserAdministration())]);
+                            showToggle = true;
+                        } else {
+                            toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);
+                            showToggle = false;
+                        }
+                    } else {
+                        if (User.getInstance() != null && User.getInstance().accountAdmin) {
+                            // user profile
+                            // space allocation, user licensing?, ssl configuration, ip range configuration
+                            // core user administration...add user, remove user, change user privileges
+                            toggleOptions = new ArrayCollection([ new AccountOption("Account Administration", new AccountAdminPage()),
+                                new AccountOption("User Administration", new UserAdministration()),
+                                new AccountOption("My Profile", new ProfessionalMyProfile()),
+                                new AccountOption("Persona", new PersonaManagement())]);
+                            showToggle = true;
+                        } else {
+                            toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);
+                            showToggle = false;
+                        }
+                    }
+                    for each (var accountOption:AccountOption in toggleOptions) {
+                        var container:Container = accountOption.container;
+                        container["accountInfo"] = accountInfo;
+                        container.addEventListener("refreshAccount", onAccountRefresh, false, 0, true);
+                        coreBox.addChild(container);
+                        accountOption.container.setStyle("hideEffect", leftEffect);
+                        accountOption.container.setStyle("showEffect", leftEffect);
+                    }
+                    startIndex = 0;
                 }
-            } else {
-                if (User.getInstance() != null && User.getInstance().accountAdmin) {
-                    // user profile
-                    // space allocation, user licensing?, ssl configuration, ip range configuration
-                    // core user administration...add user, remove user, change user privileges
-                    toggleOptions = new ArrayCollection([ new AccountOption("Account Administration", new AccountAdminPage()),
-                        new AccountOption("User Administration", new UserAdministration()),
-                        new AccountOption("My Profile", new ProfessionalMyProfile()),
-                        new AccountOption("Persona", new PersonaManagement())]);
-                    showToggle = true;
-                } else {
-                    toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);
-                }
-            }
-            for each (var accountOption:AccountOption in toggleOptions) {
-                coreBox.addChild(accountOption.container);
-                accountOption.container.setStyle("hideEffect", leftEffect);
-                accountOption.container.setStyle("showEffect", leftEffect);
             }
         }
+
+        [Bindable]
+        private var startIndex:int = -1;
 
         [Bindable]
         private var index:int;
@@ -88,10 +118,14 @@
         }
 		]]>
     </mx:Script>
+    <mx:RemoteObject destination="accountAdmin" id="userService">
+		<mx:method name="getAccountInfo" result="gotAccountInfo()"/>
+	</mx:RemoteObject>
     <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
     <mx:VBox width="100%" height="100%" paddingTop="15">
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:ToggleButtonBar itemClick="choseButton(event)" dataProvider="{toggleOptions}" visible="{showToggle}"/>
+            <mx:ToggleButtonBar itemClick="choseButton(event)" dataProvider="{toggleOptions}" visible="{showToggle}"
+                    selectedIndex="{startIndex}"/>
         </mx:HBox>
         <mx:ViewStack id="coreBox" width="100%" resizeToContent="true" selectedIndex="{index}">
 

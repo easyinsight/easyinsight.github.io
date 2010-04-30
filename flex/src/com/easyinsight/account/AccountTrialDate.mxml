@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+        label="Trial End Date:" visible="{trialDateVisible}">
+    <mx:Script><![CDATA[
+        import mx.formatters.DateFormatter;
+
+        [Bindable]
+        private var trialEndDate:String;
+
+        [Bindable]
+        private var trialDateVisible:Boolean;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            switch (accountInfo.accountState) {
+                case (Account.TRIAL):
+                    var dateFormatter:DateFormatter = new DateFormatter();
+                    trialEndDate = dateFormatter.format(accountInfo.trialEndDate);
+                    trialDateVisible = true;
+                    break;
+            }
+        }]]></mx:Script>
+    <mx:Label text="{trialEndDate}" fontFamily="Lucida Grande" fontWeight="normal"/>
+</account:AccountFormItem>

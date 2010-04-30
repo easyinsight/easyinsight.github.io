@@ -23,6 +23,9 @@
         private var usersAvailableString:String;
 
         [Bindable]
+        public var accountInfo:AccountInfo;
+
+        [Bindable]
         private var usersUsedString:String;
 
         private var usersAvailable:int;
@@ -37,12 +40,16 @@
             addEventListener(DeleteUserEvent.DELETE_USER, deleteUser);
             addEventListener("userChange", userChange);
             userButtonFactory = new EditUserButtonFactory(this);
-            userService.getUsers.send();
-            userService.getAccountStats.send();
+            enableAdd = accountInfo.accountStats.currentUsers < accountInfo.accountStats.availableUsers;
+            usersUsedString = String(accountInfo.accountStats.currentUsers);
+            usersAvailableString = String(accountInfo.accountStats.availableUsers);
+            usersUsed = accountInfo.accountStats.currentUsers;
+            usersAvailable = accountInfo.accountStats.availableUsers;
             if (User.getInstance().getAccountType() >= Account.GROUP) {
                 preferencesService.getPersonas.send();
                 userIndex = 1;
             }
+            userService.getUsers.send();
         }
 
         private function userChange(event:Event):void {
@@ -55,12 +62,16 @@
 
         private function refreshAccount(event:RefreshAccountEvent):void {
             event.stopPropagation();
+            usersAvailableString = String(accountInfo.accountStats.availableUsers);
+            usersAvailable = accountInfo.accountStats.availableUsers;
             userService.getUsers.send();
-            userService.getAccountStats.send();
         }
 
         private function gotUsers():void {
             users = userService.getUsers.lastResult as ArrayCollection;
+            usersUsed = users.length;
+            usersUsedString = String(users.length);
+            enableAdd = users.length < accountInfo.accountStats.availableUsers;
         }
 
         private function addUser():void {
@@ -69,24 +80,8 @@
             PopUpUtil.centerPopUp(newUserDialog);
         }
 
-        private function addGuestUser():void {
-            var window:AddGuestUserWindow = new AddGuestUserWindow();
-            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
         private function deletedUser():void {
             refreshAccount(null);
-        }
-
-        private function gotStats():void {
-            var accountStats:AccountStats = userService.getAccountStats.lastResult as AccountStats;
-            usersUsedString = String(accountStats.currentUsers);
-            usersAvailableString = String(accountStats.availableUsers);
-            usersUsed = accountStats.currentUsers;
-            usersAvailable = accountStats.availableUsers;
-            enableAdd = usersUsed < usersAvailable;
         }
 
         [Bindable]
@@ -117,7 +112,6 @@
         <mx:method name="getUsers" result="gotUsers()"/>
         <mx:method name="deleteUser" result="deletedUser()"/>
         <mx:method name="updateUsers" result="updatedUsers()"/>
-        <mx:method name="getAccountStats" result="gotStats()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getPersonas" result="gotPersonas()"/>

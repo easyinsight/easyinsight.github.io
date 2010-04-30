@@ -33,6 +33,8 @@ package com.easyinsight.account
         public var apiEnabled:Boolean;
         public var lastUserLoginDate:Date;
         public var creationDate:Date;
+        public var optIn:Boolean;
+        public var trialDate:Date;
 		
 		public function AccountAdminTO()
 		{

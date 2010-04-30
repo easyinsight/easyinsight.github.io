@@ -13,6 +13,7 @@ import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.Connection;
@@ -23,6 +24,22 @@ import java.sql.Connection;
  * Time: 3:14:53 PM
  */
 public class EIAccountManagementService {
+
+    public void updateTrial(long accountID, Date newTrialDate) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            new AccountActivityStorage().updateTrialTime(accountID, conn, newTrialDate);
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
 
     @NotNull
     public UserServiceResponse authenticateAdmin(String userName, String password) {
@@ -49,7 +66,7 @@ public class EIAccountManagementService {
                     userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                             user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName());
+                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded());
                     // FlexContext.getFlexSession().getRemoteCredentials();
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
@@ -91,21 +108,26 @@ public class EIAccountManagementService {
 
     public void adminUpdate(AccountAdminTO accountTO) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
+            conn.setAutoCommit(false);
             List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, accountTO.getAccountID()).list();
             Account account = (Account) accountResults.get(0);
-            Account updatedAccount = accountTO.toAccount();
-            updatedAccount.setUsers(account.getUsers());
+            Account updatedAccount = accountTO.toAccount(account);
+            if (accountTO.getTrialDate() != null) {
+                new AccountActivityStorage().updateTrialTime(accountTO.getAccountID(), conn, accountTO.getTrialDate());
+            }
             session.update(updatedAccount);
-            session.getTransaction().commit();
+            session.flush();
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            session.close();
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
@@ -220,20 +242,25 @@ public class EIAccountManagementService {
     public List<AccountAdminTO> getAccounts() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         List<AccountAdminTO> accounts = new ArrayList<AccountAdminTO>();
-        Session session = Database.instance().createSession();
+        AccountActivityStorage storage = new AccountActivityStorage();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
             List results = session.createQuery("from Account").list();
             for (Object obj : results) {
                 Account account = (Account) obj;
-                accounts.add(account.toAdminTO());
+                AccountAdminTO accountTO = account.toAdminTO();
+                if (account.getAccountState() == Account.TRIAL) {
+                    Date trialDate = storage.getTrialTime(account.getAccountID(), conn);
+                    accountTO.setTrialDate(trialDate);
+                }
+                accounts.add(accountTO);
             }
-            session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
         } finally {
             session.close();
+            Database.closeConnection(conn);
         }
         return accounts;
     }

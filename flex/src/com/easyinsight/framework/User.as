@@ -31,7 +31,7 @@ public class User
 		
 		static public function initializeUser(name:String, email:String, accountType:int,
 		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean, userID:int, activated:Boolean, billingInformationGiven:Boolean, accountState:int,
-                uiSettings:UISettings, firstName:String):void {
+                uiSettings:UISettings, firstName:String, freeUpgradePossible:Boolean):void {
 			_user = new User();
 			_user.name = name;
 			_user.email = email;
@@ -43,6 +43,7 @@ public class User
             _user.activated = activated;
             _user.billingInformationGiven = billingInformationGiven;
             _user.accountState = accountState;
+            _user.freeUpgradePossible = freeUpgradePossible;
             if (uiSettings != null) {
                 _user.uiConfiguration = UIConfiguration.fromUISettings(uiSettings);
             }

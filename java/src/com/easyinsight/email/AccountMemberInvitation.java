@@ -122,7 +122,7 @@ public class AccountMemberInvitation {
     }
 
     public void sendAccountEmail(String to, String adminFirstName, String accountOwner, String userName, String password) {
-        String body = MessageFormat.format(groupInviteText, adminFirstName, accountOwner, userName, password);
+        String body = MessageFormat.format(groupInviteText, adminFirstName != null ? adminFirstName : "", accountOwner, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
             new AuthSMTPConnection().sendSSLMessage(to, subject, body, accountOwner);

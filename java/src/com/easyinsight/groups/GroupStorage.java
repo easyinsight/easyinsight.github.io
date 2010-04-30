@@ -28,6 +28,12 @@ import java.sql.*;
  */
 public class GroupStorage {
 
+    public void deleteGroup(long groupID, EIConnection conn) throws SQLException {
+        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM COMMUNITY_GROUP WHERE COMMUNITY_GROUP_ID = ?");
+        deleteStmt.setLong(1, groupID);
+        deleteStmt.executeUpdate();
+    }
+
     public long addGroupComment(GroupComment groupComment) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
