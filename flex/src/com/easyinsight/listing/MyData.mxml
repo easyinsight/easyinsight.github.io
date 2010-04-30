@@ -2,22 +2,6 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initListeners()"
 	implements="com.easyinsight.listing.IPerspective" xmlns:listing="com.easyinsight.listing.*" 
 	xmlns:customupload="com.easyinsight.customupload.*" doubleClickEnabled="true" backgroundColor="#DCE2F8">
-	<mx:states>
-		<mx:State name="notLoggedIn">
-			<mx:RemoveChild target="{uploadBox}"/>
-			<mx:RemoveChild target="{myDataBox}"/>
-			<mx:AddChild relativeTo="{coreContent}">
-				<listing:GottaLoginPage/>
-			</mx:AddChild>
-		</mx:State>
-        <mx:State name="noData">
-            <mx:RemoveChild target="{uploadBox}"/>
-            <mx:RemoveChild target="{myDataBox}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-				<listing:MyNoData/>
-			</mx:AddChild>
-        </mx:State>
-	</mx:states>
 	<mx:Script>
 		<![CDATA[        
         import com.easyinsight.customupload.UploadConfigEvent;
@@ -120,6 +104,9 @@
 
         private var _messageListener:EIMessageListener;
 
+        [Bindable]
+        private var stackIndex:int;
+
         private function onAsyncRefresh(event:AsyncInfoEvent):void {
             if (event.info.action == RefreshEventInfo.COMPLETE) {
                 showLoading = true;
@@ -195,7 +182,7 @@
         private function alertFeedListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 var feedDescriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
-                ProgressAlert.alert(this, "Deleting data source...", "Deleted data soucre!", uploadService.deleteUserUpload);
+                ProgressAlert.alert(this, "Deleting data source...", null, uploadService.deleteUserUpload);
                 uploadService.deleteUserUpload.send(feedDescriptor.dataFeedID);
             }
         }
@@ -203,7 +190,7 @@
         private function alertLookupListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 var feedDescriptor:LookupTableDescriptor = uploadGrid.selectedItem as LookupTableDescriptor;
-                ProgressAlert.alert(this, "Deleting lookup table...", "Deleted lookup table!", etlService.deleteLookupTable);
+                ProgressAlert.alert(this, "Deleting lookup table...", null, etlService.deleteLookupTable);
                 etlService.deleteLookupTable.send(feedDescriptor.id);
             }
         }
@@ -211,7 +198,7 @@
         private function alertPackageListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 var reportDescriptor:ReportPackageDescriptor = uploadGrid.selectedItem as ReportPackageDescriptor;
-                ProgressAlert.alert(this, "Deleting package...", "Deleted package!", packageService.deleteReportPackage);
+                ProgressAlert.alert(this, "Deleting package...", null, packageService.deleteReportPackage);
                 packageService.deleteReportPackage.send(reportDescriptor.id);
             }
         }
@@ -262,6 +249,11 @@
             }
         }
 
+        public static const GOTTA_LOGIN:int = 1;
+        public static const NO_DATA:int = 2;
+        public static const LOADING_DATA:int = 3;
+        public static const MY_DATA:int = 4;
+
         public function gotFocus():void {
             var fragmentObject:Object = new Object();
             fragmentObject.page = "myData";
@@ -270,12 +262,14 @@
             BrowserManager.getInstance().setFragment(fragmentString);
             var user:User = User.getInstance();
             if (user == null) {
-                currentState = "notLoggedIn";
+                stackIndex = GOTTA_LOGIN;
             } else {
-                if (currentState != "") {
-                    currentState = "";
+                if (stackIndex == 0 || stackIndex == GOTTA_LOGIN) {
+                    stackIndex = LOADING_DATA;
+                } else {
+                    showLoading = true;
                 }
-                showLoading = true;
+
                 if (User.getInstance().uiConfiguration != null) {
                     var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
                     showComposite = uiConfig.getConfiguration(UIConfiguration.SHOW_COMBINE_SOURCES).selected;
@@ -310,13 +304,16 @@
 
         private function gotFeedAnalysisTree():void {
 
+
             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
             var myDataTree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
-            if (myDataTree.objects.length == 0) {
-                currentState = "noData";
+
+            if (myDataTree != null && myDataTree.objects.length == 0) {
+                stackIndex = NO_DATA;
             } else {
-                currentState = "";
+                stackIndex = MY_DATA;
             }
+
             if (initialEntry) {
                 initialEntry = false;
                 includeGroups = myDataTree.includeGroup;
@@ -478,6 +475,8 @@
         private function onAnalyze(event:AnalyzeEvent):void {
             dispatchEvent(event);
         }
+
+
 		]]>
 </mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
@@ -494,7 +493,14 @@
 		<mx:method name="deleteLookupTable" result="deletedLookupTable()"/>
 	</mx:RemoteObject>
 
-	<mx:VBox id="coreContent" height="100%" width="100%" verticalGap="10">
+	<mx:ViewStack id="coreContent" height="100%" width="100%" verticalGap="10" selectedIndex="{stackIndex}" creationPolicy="all">
+        <mx:Box width="100%" height="100%"/>
+        <listing:GottaLoginPage/>
+        <listing:MyNoData/>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ProgressBar label="Loading your data..." indeterminate="true"/>
+        </mx:Box>
+        <mx:VBox width="100%" height="100%" verticalGap="10">
 		<mx:HBox width="100%" id="uploadBox" verticalAlign="middle"  paddingTop="10" paddingLeft="10" paddingRight="10">
 			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
 				label="Combine Sources" labelPlacement="bottom" visible="{showComposite}"/>
@@ -523,21 +529,22 @@
             </mx:VBox>
 		</mx:HBox>
 
-        <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" id="myDataBox">
-		<mx:AdvancedDataGrid width="100%" height="100%" id="uploadGrid" allowMultipleSelection="true" fontSize="12"
-			itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader" itemOpen="onItemOpen(event)"
-                iconFunction="simpleIconFunction">
-			<mx:dataProvider>
-	            <mx:HierarchicalData source="{displayTreeData}"/>
-	        </mx:dataProvider>
-			<mx:columns>
-				<mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
-				<mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110" itemRenderer="com.easyinsight.listing.SizeRenderer"/>
-				<mx:AdvancedDataGridColumn id="dataColumn" headerText="Last Data Time" dataField="lastDataTime" width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
-                        sortCompareFunction="customSort"/>
-				<mx:AdvancedDataGridColumn width="250" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
-			</mx:columns>
-		</mx:AdvancedDataGrid>
-        </mx:Box>
-	</mx:VBox>
+            <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" id="myDataBox">
+            <mx:AdvancedDataGrid width="100%" height="100%" id="uploadGrid" allowMultipleSelection="true" fontSize="12"
+                itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader" itemOpen="onItemOpen(event)"
+                    iconFunction="simpleIconFunction">
+                <mx:dataProvider>
+                    <mx:HierarchicalData source="{displayTreeData}"/>
+                </mx:dataProvider>
+                <mx:columns>
+                    <mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
+                    <mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110" itemRenderer="com.easyinsight.listing.SizeRenderer"/>
+                    <mx:AdvancedDataGridColumn id="dataColumn" headerText="Last Data Time" dataField="lastDataTime" width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
+                            sortCompareFunction="customSort"/>
+                    <mx:AdvancedDataGridColumn width="250" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
+                </mx:columns>
+            </mx:AdvancedDataGrid>
+            </mx:Box>
+        </mx:VBox>
+	</mx:ViewStack>
 </mx:VBox>
