@@ -10,6 +10,7 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.BindingUtils;
+        import mx.binding.utils.ChangeWatcher;
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.effects.Effect;
@@ -101,10 +102,10 @@
             scorecards.addItem(event.scorecard);
             var newIndex:int = scorecards.getItemIndex(event.scorecard);
             var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
-            BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
+            configureRenderer(scorecardRenderer);
             scorecardRenderer.addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
                 scorecardIndex = newIndex;                
-            });
+            }, false, 0, true);
             scorecardRenderer.scorecardDescriptor = event.scorecard;
             scorecardRenderer.retrieveData();
             scorecardStack.addChild(scorecardRenderer);
@@ -141,8 +142,11 @@
         }
 
         protected function configureRenderer(scorecardRenderer:ScorecardRenderer):void {
-            BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
+            var watcher:ChangeWatcher = BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
+            watchers.addItem(watcher);
         }
+
+        private var watchers:ArrayCollection = new ArrayCollection();
 
         protected function anyDataCase():Boolean {
             return true;
@@ -200,12 +204,14 @@
             if (!anyDataCase() || scorecardList.anyData) {
                 scorecards = scorecardList.scorecardDescriptors;
                 scorecardStack.removeAllChildren();
+                for each (var watcher:ChangeWatcher in watchers) {
+                    watcher.unwatch();
+                }
+                watchers = new ArrayCollection();
                 for each (var scorecard:ScorecardDescriptor in scorecards) {
                     var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
                     scorecardRenderer.setStyle("hideEffect", rightEffect);
                     scorecardRenderer.setStyle("showEffect", rightEffect);
-                    //BindingUtils.bindProperty(scorecardRenderer, "hideEffect", this, "activeEffect");
-                    //BindingUtils.bindProperty(scorecardRenderer, "showEffect", this, "activeEffect");
                     configureRenderer(scorecardRenderer);
                     scorecardRenderer.groupID = scorecard.groupID;
                     scorecardRenderer.scorecardDescriptor = scorecard;
