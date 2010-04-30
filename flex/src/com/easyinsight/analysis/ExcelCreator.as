@@ -10,16 +10,11 @@ import mx.core.UIComponent;
 
 public class ExcelCreator {
     import mx.events.CloseEvent;
-	import com.easyinsight.framework.User;
+
 	import flash.events.Event;
-	import flash.events.HTTPStatusEvent;
-	import flash.events.IOErrorEvent;
-	import flash.events.ProgressEvent;
-	import flash.events.SecurityErrorEvent;
+
 	import flash.net.FileReference;
-	import flash.net.URLRequest;
-	import flash.net.URLRequestMethod;
-	import flash.net.URLVariables;
+	
 
 	import mx.controls.Alert;
 	import mx.rpc.events.ResultEvent;
@@ -54,21 +49,14 @@ public class ExcelCreator {
             if(report.reportType != AnalysisDefinition.LIST) {
                 msg += " The report will be saved in a list format.";
             }
-            Alert.show(msg, "Alert",
-		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+            Alert.show(msg, "Alert", Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
 
 		}
 
         private function gotExcelByReportID(event:ResultEvent):void {
 			excelData = upload.exportReportIDToExcel.lastResult as ByteArray;
             var msg:String = "Click to start download of the Excel spreadsheet.";
-            Alert.show(msg, "Alert",
-		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
-
-		}
-
-		private function doEvent(event:Event):void {
-			trace(event);
+            Alert.show(msg, "Alert", Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
 		}
 
 		private function complete(event:Event):void {
