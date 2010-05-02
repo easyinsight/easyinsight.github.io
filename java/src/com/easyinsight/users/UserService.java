@@ -24,14 +24,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-import flex.messaging.FlexSession;
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import flex.messaging.FlexContext;
-import org.openid4java.consumer.ConsumerManager;
-import org.openid4java.discovery.DiscoveryInformation;
-import org.openid4java.message.AuthRequest;
 
 import javax.servlet.http.HttpSession;
 
