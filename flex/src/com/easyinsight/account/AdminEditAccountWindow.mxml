@@ -70,7 +70,7 @@
         <mx:method name="eiActivateBizAccount" result="created()"/>
         <mx:method name="adminUpdate" result="created()"/>
     </mx:RemoteObject>
-    <mx:VBox styleName="TitleWindowContents">
+    <mx:VBox styleName="TitleWindowContents" width="100%">
         <mx:Form>
             <mx:FormItem label="Account Name:">
                 <mx:TextInput id="accountNameInput"/>
@@ -113,10 +113,13 @@
             <mx:Box id="actionsBox"/>
         </mx:HBox>
         <mx:DateField selectedDate="{trialDate}" id="dateSelector"/>
-        <mx:DataGrid dataProvider="{adminUsers}" width="100%">
+        <mx:DataGrid dataProvider="{adminUsers}" width="600">
             <mx:columns>
-                <mx:DataGridColumn dataField="name" headerText="Name"/>
-                <mx:DataGridColumn dataField="email" headerText="Email Address"/>
+                <mx:DataGridColumn dataField="firstName" headerText="First Name" width="150"/>
+                <mx:DataGridColumn dataField="name" headerText="Name" width="150"/>
+                <mx:DataGridColumn dataField="email" headerText="Email Address" width="200"/>
+                <mx:DataGridColumn dataField="" headerText="" sortable="false"
+                        itemRenderer="com.easyinsight.account.AdminUsersEmailControls" width="100"/>
             </mx:columns>
         </mx:DataGrid>        
         <mx:HBox width="100%" horizontalAlign="center">

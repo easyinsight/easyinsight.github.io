@@ -3,6 +3,7 @@ package com.easyinsight.admin;
 import com.easyinsight.analysis.ZipGeocodeCache;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.outboundnotifications.BroadcastInfo;
 import com.easyinsight.eventing.MessageUtils;
@@ -18,6 +19,8 @@ import java.text.MessageFormat;
 
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
+import com.easyinsight.users.User;
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -34,6 +37,24 @@ public class AdminService {
             new ZipGeocodeCache().saveFile(bytes);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void welcomeEmail(long userID) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        User user;
+        Session session = Database.instance().createSession();
+        try {
+            user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+        } finally {
+            session.close();
+        }
+        try {
+            new SendGridEmail().sendEmail(user.getUserID(), user.getEmail(), "Welcome", "Welcome to Easy Insight!", MessageFormat.format(SendGridEmail.BASIC_OR_PRO_EMAIL_WELCOME,
+                    (user.getFirstName() != null ? user.getFirstName() : user.getName())));
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);  
         }
     }
 

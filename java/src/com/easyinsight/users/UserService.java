@@ -24,10 +24,16 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+import flex.messaging.FlexSession;
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import flex.messaging.FlexContext;
+import org.openid4java.consumer.ConsumerManager;
+import org.openid4java.discovery.DiscoveryInformation;
+import org.openid4java.message.AuthRequest;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * User: jboe
@@ -313,8 +319,25 @@ public class UserService implements IUserService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }    
+    }/*
 
+    public void associateToOpenID(String userSuppliedString) {
+        ConsumerManager manager = new ConsumerManager();
+        List discoveries = manager.discover(userSuppliedString);
+
+        // attempt to associate with the OpenID provider
+        // and retrieve one service endpoint for authentication
+        DiscoveryInformation discovered = manager.associate(discoveries);
+
+        // store the discovery information in the user's session for later use
+        // leave out for stateless operation / if there is no session
+        HttpSession session = FlexContext.getHttpRequest().getSession();
+        session.setAttribute("openid-disc", discovered);
+
+        // obtain a AuthRequest message to be sent to the OpenID provider
+        AuthRequest authReq = manager.authenticate(discovered, "");
+    }
+*/
     public void updateUserLabels(String userName, String fullName, String email, String firstName) {
         User user = retrieveUser();
         if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
