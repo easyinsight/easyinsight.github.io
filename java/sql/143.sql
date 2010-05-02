@@ -1,6 +1,6 @@
 drop table group_to_feed_join;
 
-# alter table account add upgraded tinyint(4) not null default 0;
+alter table account add upgraded tinyint(4) not null default 0;
 
 # alter table distributed_lock add lock_time bigint(20) not null default 0;
 
