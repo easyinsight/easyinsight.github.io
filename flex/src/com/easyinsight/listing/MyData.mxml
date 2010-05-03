@@ -24,7 +24,7 @@
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.reportpackage.ReportPackageWindow;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.styling.StyleEditor;
+        /*import com.easyinsight.styling.StyleEditor;*/
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
