@@ -18,11 +18,13 @@
         import com.easyinsight.help.MyDataHelp;
         import com.easyinsight.outboundnotifications.RefreshEventInfo;
         import com.easyinsight.preferences.UIConfiguration;
+        import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.reportpackage.PackageEvent;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.reportpackage.ReportPackageWindow;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.styling.StyleEditor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -79,6 +81,10 @@
         [Bindable]
         [Embed(source="../../../../assets/package_add.png")]
         public var packageAddIcon:Class;
+
+        /*[Bindable]
+        [Embed(source="../../../../assets/palette2.png")]
+        public var themeAddIcon:Class;*/
 
         [Bindable]
         [Embed(source="../../../../assets/tablesx48.png")]
@@ -243,6 +249,8 @@
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else if (selectedObject is LookupTableDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
+            } else if (selectedObject is ReportPackageDescriptor) {
+                dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(ReportPackageDescriptor(selectedObject))));
             } else {
                 analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
@@ -476,6 +484,11 @@
             dispatchEvent(event);
         }
 
+        /*private function createTheme():void {
+            var editor:StyleEditor = new StyleEditor();
+            PopUpManager.addPopUp(editor, this, true);
+            PopUpUtil.centerPopUp(editor);
+        }*/
 
 		]]>
 </mx:Script>
@@ -511,6 +524,8 @@
                label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>
             <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton" icon="{tablesAddIcon}"
                label="Lookup Table" labelPlacement="bottom"/>
+            <!--<mx:Button toolTip="Create theme..." click="createTheme()" id="styleAddButton" icon="{themeAddIcon}"
+               label="Create Theme" labelPlacement="bottom"/>-->
             <mx:ProgressBar indeterminate="true" visible="{showLoading}"/>
             <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" visible="{showConnections}">
                 <mx:Label text="Need to add data?" fontSize="16"/>
