@@ -1,5 +1,9 @@
 package com.easyinsight.administration.feed {
+import flash.events.KeyboardEvent;
+import flash.ui.Keyboard;
+
 import mx.binding.utils.BindingUtils;
+import mx.controls.Alert;
 import mx.events.FlexEvent;
 import mx.collections.ArrayCollection;
 import com.easyinsight.analysis.NamedKey;
@@ -25,6 +29,7 @@ public class HierarchyAdminBox extends VBox {
 
     override protected function createChildren():void {
         super.createChildren();
+        addEventListener(KeyboardEvent.KEY_UP, onKey);
         list = new List();
         list.dragEnabled = true;
         list.dropEnabled = true;
@@ -48,6 +53,14 @@ public class HierarchyAdminBox extends VBox {
         validator.property = "text";
         validator.minLength = 3;
         validators = [ validator ];
+    }
+
+    private function onKey(event:KeyboardEvent):void {
+        if (event.keyCode == Keyboard.DELETE || event.keyCode == Keyboard.BACKSPACE) {
+            if (list.selectedItem != null) {
+                levels.removeItemAt(levels.getItemIndex(list.selectedItem));
+            }
+        }
     }
 
     private function onNameChange(event:Event):void {
