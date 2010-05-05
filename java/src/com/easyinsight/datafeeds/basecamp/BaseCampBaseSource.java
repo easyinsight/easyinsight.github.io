@@ -109,7 +109,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
-        } while (!successful && retryCount < 3);
+        } while (!successful && retryCount < 10);
         if (!successful) {
             throw new RuntimeException("Basecamp could not be reached due to a large number of current users, please try again in a bit.");
         }
