@@ -84,24 +84,28 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 			if (value != null) {
                 var field:String = analysisItem.qualifiedName();
                 var formatter:Formatter = analysisItem.getFormatter();
-				var objVal:Value = value[field];
-				
-				
-				if (objVal == null) {
-					this.text = "";
-				} else {
-                    this.text = formatter.format(objVal.getValue());                    
+                if (value[field] is Value) {
+                    var objVal:Value = value[field];
 
-                    //Alert.show("retrieving " + field + " produced " + objVal + " gave us formatted text = " + this.text);
-					if (renderer.hasCustomColor()) {
-						var color:uint = renderer.getColor(objVal);
-                        setStyle("color", color);
-						//this.textColor = color;
-						//defaultLabel.textColor = color;
-					} else {
-                        //this.textColor = 0x000000;
+
+                    if (objVal == null) {
+                        this.text = "";
+                    } else {
+                        this.text = formatter.format(objVal.getValue());
+
+                        //Alert.show("retrieving " + field + " produced " + objVal + " gave us formatted text = " + this.text);
+                        if (renderer.hasCustomColor()) {
+                            var color:uint = renderer.getColor(objVal);
+                            setStyle("color", color);
+                            //this.textColor = color;
+                            //defaultLabel.textColor = color;
+                        } else {
+                            //this.textColor = 0x000000;
+                        }
                     }
-				}
+                } else {
+                    this.text = formatter.format(value[field]);
+                }
 			} else {
 				/*if (objVal == null) {
 					defaultLabel = instantiateNewLabel("");		
