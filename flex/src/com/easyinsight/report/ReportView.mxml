@@ -19,8 +19,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
-        import com.easyinsight.analysis.HierarchyRollupEvent;
-        import com.easyinsight.analysis.RefreshReportSourceWindow;
+        import com.easyinsight.analysis.HierarchyRollupEvent;        
         import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
@@ -480,7 +479,7 @@
         }
 
         public function refreshData():void {
-            var window:RefreshReportSourceWindow = new RefreshReportSourceWindow();
+            /*var window:RefreshReportSourceWindow = new RefreshReportSourceWindow();
             window.dataSourceID = _dataSourceID;
             window.reportID = _reportID;
             window.embeddedViewFactory = viewFactory;
@@ -488,7 +487,8 @@
                 window.filterDefinitions = transformContainer.getFilterDefinitions();
             }
             PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);*/
+            viewFactory.retrieveData(false);
             //viewFactory.retrieveData(false);
         }
 
