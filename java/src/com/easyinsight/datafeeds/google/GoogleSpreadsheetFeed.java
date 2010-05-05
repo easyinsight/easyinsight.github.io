@@ -1,5 +1,7 @@
 package com.easyinsight.datafeeds.google;
 
+import com.easyinsight.datafeeds.CredentialRequirement;
+import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -39,7 +41,7 @@ public class GoogleSpreadsheetFeed extends Feed {
         if (token == null) {
             Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_DOCS_TOKEN, getFeedID(), true);
             if (tokenObject == null) {
-                throw new TokenMissingException();
+                throw new TokenMissingException(new CredentialRequirement(getFeedID(), getName(), CredentialsDefinition.STANDARD_USERNAME_PW));
             }
             token = tokenObject.getTokenValue();
         }

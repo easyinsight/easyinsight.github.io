@@ -14,7 +14,6 @@ import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
 import com.easyinsight.users.Credentials;
 
-import java.sql.PreparedStatement;
 import java.util.*;
 import java.io.Serializable;
 
@@ -195,19 +194,7 @@ public class DataService {
                     embeddedResults.setCredentialRequirements(credentialsRequired);
                     return embeddedResults;
                 }
-            }
-            if (insightRequestMetadata.isRefreshAllSources()) {
-                List<Long> containedIDs = feed.getDataSourceIDs();
-                for (Long containedID : containedIDs) {
-                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(containedID);
-                    if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL ||
-                            feedDefinition.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL) {
-                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                        Credentials credentials = insightRequestMetadata.getCredentialForDataSource(feedDefinition.getDataFeedID());                        
-                        dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
-                    }
-                }
-            }
+            }            
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID, drillThroughFilters);
             Map<EmbeddedCacheKey, EmbeddedResults> resultsCache = null;
             if (!insightRequestMetadata.isNoCache() && reportCache != null) {
@@ -282,7 +269,9 @@ public class DataService {
                 }
                 Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
                 boolean aggregateQuery = true;
-                for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+                Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+                items.remove(null);
+                for (AnalysisItem analysisItem : items) {
                     if (analysisItem.blocksDBAggregation()) {
                         aggregateQuery = false;
                     }
@@ -375,18 +364,6 @@ public class DataService {
                     return embeddedDataResults;
                 }
             }
-            if (insightRequestMetadata.isRefreshAllSources()) {
-                List<Long> containedIDs = feed.getDataSourceIDs();
-                for (Long containedID : containedIDs) {
-                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(containedID);
-                    if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL ||
-                            feedDefinition.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL) {
-                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                        Credentials credentials = insightRequestMetadata.getCredentialForDataSource(feedDefinition.getDataFeedID());
-                        dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
-                    }
-                }
-            }
             DataResults results;
 
             /*Set<Long> ids = validate(analysisDefinition, feed);
@@ -407,7 +384,9 @@ public class DataService {
                 }
             }
             boolean aggregateQuery = true;
-            for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+            Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+            items.remove(null);
+            for (AnalysisItem analysisItem : items) {
                 if (analysisItem.blocksDBAggregation()) {
                     aggregateQuery = false;
                 }
@@ -434,6 +413,10 @@ public class DataService {
            // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
+        } catch (DataAccessException dae) {
+            ListDataResults embeddedDataResults = new ListDataResults();
+            embeddedDataResults.setCredentialRequirements(new HashSet<CredentialRequirement>(Arrays.asList(dae.getCredentialRequirement())));
+            return embeddedDataResults;
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);

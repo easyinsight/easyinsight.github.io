@@ -10,8 +10,15 @@ import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.ParsingException;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.*;
 
@@ -84,6 +91,22 @@ public class SendGridDataSource extends ServerDataSourceDefinition {
 
     @Override
     public String validateCredentials(Credentials credentials) {
+        try {
+            String url = "https://sendgrid.com/api/stats.get.xml";
+            GetMethod getMethod = new GetMethod(url);
+            getMethod.setQueryString(new NameValuePair[] { new NameValuePair("api_user", credentials.getUserName()),
+                new NameValuePair("api_key", credentials.getPassword()), new NameValuePair("list", "true")});
+            HttpClient httpClient = new HttpClient();
+            httpClient.executeMethod(getMethod);
+            Document doc = new Builder().build(getMethod.getResponseBodyAsStream());
+            if (doc.toString().indexOf("error") != -1) {
+                return "Your credentials were invalid.";
+            }
+        } catch (IOException e) {
+            return e.getMessage();
+        } catch (ParsingException e) {
+            return e.getMessage();
+        }
         return null;
     }
 

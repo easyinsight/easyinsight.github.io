@@ -131,6 +131,10 @@ public class SendGridFeed extends Feed {
                     new NameValuePair("api_key", credentials.getPassword()), new NameValuePair("list", "true")});
                 httpClient.executeMethod(getMethod);
                 Document doc = new Builder().build(getMethod.getResponseBodyAsStream());
+                if (doc.toString().indexOf("error") != -1) {
+                    throw new DataAccessException(new CredentialRequirement(getFeedID(), getName(), CredentialsDefinition.STANDARD_USERNAME_PW));
+                }
+                System.out.println(getMethod.getResponseBodyAsString());
                 Nodes categories = doc.query("/categories/category");
                 List<NameValuePair> pairs = Arrays.asList(new NameValuePair("api_user", credentials.getUserName()),
                     new NameValuePair("api_key", credentials.getPassword()), new NameValuePair("start_date", startDateString), new NameValuePair("end_date", endDateString));
@@ -204,6 +208,8 @@ public class SendGridFeed extends Feed {
                 }
             }
             return dataSet;
+        } catch (DataAccessException dae) {
+            throw dae;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
