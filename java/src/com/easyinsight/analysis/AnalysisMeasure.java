@@ -111,6 +111,10 @@ public class AnalysisMeasure extends AnalysisItem {
         return new AnalysisMeasureResultMetadata();
     }
 
+    public int getQueryAggregation() {
+        return aggregation;
+    }
+
     @Override
     public AnalysisItem clone() throws CloneNotSupportedException {
         AnalysisMeasure analysisMeasure = (AnalysisMeasure) super.clone();

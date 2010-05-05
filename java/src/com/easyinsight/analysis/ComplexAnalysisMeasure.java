@@ -26,6 +26,10 @@ public class ComplexAnalysisMeasure extends AnalysisMeasure {
         return wrappedAggregation;
     }
 
+    public int getQueryAggregation() {
+        return wrappedAggregation;
+    }
+
     public void setWrappedAggregation(int wrappedAggregation) {
         this.wrappedAggregation = wrappedAggregation;
     }
