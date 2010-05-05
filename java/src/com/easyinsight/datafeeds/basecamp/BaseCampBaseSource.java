@@ -2,10 +2,7 @@ package com.easyinsight.datafeeds.basecamp;
 
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import nu.xom.*;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
@@ -56,7 +53,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
         try {
-            Thread.sleep(250);
+            Thread.sleep(150);
         } catch (InterruptedException e) {
         }
         restMethod.setRequestHeader("Accept", "application/xml");
@@ -87,9 +84,18 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
                 } else if ("HTTP/1.1 503 Service Temporarily Unavailable".equals(statusLine)) {
-                    try {
-                        Thread.sleep(20000);
-                    } catch (InterruptedException e1) {
+                    Header retryHeader = restMethod.getResponseHeader("Retry-After");
+                    if (retryHeader == null) {
+                        try {
+                            Thread.sleep(20000);
+                        } catch (InterruptedException e1) {
+                        }
+                    } else {
+                        int time = Integer.parseInt(retryHeader.getValue()) * 1000;
+                        try {
+                            Thread.sleep(time);
+                        } catch (InterruptedException e1) {                            
+                        }
                     }
                 } else {
                     if (badCredentialsOnError) {
