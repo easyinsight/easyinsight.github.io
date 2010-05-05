@@ -649,15 +649,16 @@ public class DataStorage {
             String columnName = analysisItem.toKeySQL();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
+                int aggregation = analysisMeasure.getQueryAggregation();
+                if (aggregation == AggregationTypes.SUM) {
                     columnName = "SUM(" + columnName + ")";
-                } else if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+                } else if (aggregation == AggregationTypes.AVERAGE) {
                     columnName = "AVG(" + columnName + ")";
-                } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                } else if (aggregation == AggregationTypes.COUNT) {
                     columnName = "COUNT(DISTINCT " + columnName + ")";
-                } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
+                } else if (aggregation == AggregationTypes.MAX) {
                     columnName = "MAX(" + columnName + ")";
-                } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
+                } else if (aggregation == AggregationTypes.MIN) {
                     columnName = "MIN(" + columnName + ")";
                 } else {
                     groupByItems.add(analysisItem.getKey().toBaseKey());
@@ -1014,7 +1015,6 @@ public class DataStorage {
                 insertStmt.close();
             }
         } catch (SQLException e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
