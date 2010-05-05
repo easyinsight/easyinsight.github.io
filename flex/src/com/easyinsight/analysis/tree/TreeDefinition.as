@@ -1,6 +1,9 @@
 package com.easyinsight.analysis.tree {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+
 import mx.collections.ArrayCollection;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.WSTreeDefinition")]
@@ -27,7 +30,15 @@ public class TreeDefinition extends AnalysisDefinition{
     }
 
     override public function populate(fields:ArrayCollection):void {
-        
+        var hierarchies:ArrayCollection = findItems(fields, AnalysisItemTypes.HIERARCHY);
+        if (hierarchies.length > 0) {
+            hierarchy = hierarchies.getItemAt(0) as AnalysisHierarchyItem;
+        }
+        for each (var item:AnalysisItem in fields) {
+            if (!item.hasType(AnalysisItemTypes.HIERARCHY)) {
+                items.addItem(item);
+            }
+        }
     }
 }
 }

@@ -1,22 +1,24 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AggregationTypes;
         import com.easyinsight.analysis.AnalysisCellRenderer;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.HierarchyLevel;
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
-        import com.easyinsight.analysis.TreeStubCellRenderer;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Grouping;
         import mx.collections.GroupingCollection;
         import mx.collections.GroupingField;
-        import mx.controls.Alert;
+        import mx.collections.SummaryField;
+        import mx.collections.SummaryRow;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
 
         [Bindable]
@@ -60,32 +62,44 @@
             if (dataSet.length > 0) {
                 var treeDefinition:TreeDefinition = analysisDefinition as TreeDefinition;
                 var hierarchy:AnalysisHierarchyItem = treeDefinition.hierarchy as AnalysisHierarchyItem;
-                /*var results:ArrayCollection = new ArrayCollection();
-                 var masterResult:Object = new Object();*/
-                /*for each (var row:Object in dataSet) {
-                 handleLevel(hierarchy.hierarchyLevels.getItemAt(0) as HierarchyLevel, hierarchy.hierarchyLevels, row,
-                 masterResult, treeDefinition.items);
-                 }
-                 for each (var obj:Object in masterResult) {
-                 results.addItem(obj);
-                 }*/
                 var groupingColl:GroupingCollection = new GroupingCollection();
                 groupingColl.source = dataSet;
                 var columns:Array = [];
                 var analysisItems:Array = [];
                 var grouping:Grouping = new Grouping();
                 var groupingFields:Array = [];
-                //analysisItems.push(hierarchy.hierarchyLevels.getItemAt(0).analysisItem);
                 for (var lvlCount:int = 0; lvlCount < hierarchy.hierarchyLevels.length - 1; lvlCount++) {
                     var level:HierarchyLevel = hierarchy.hierarchyLevels.getItemAt(lvlCount) as HierarchyLevel;
                     var groupingField:GroupingField = new GroupingField();
                     groupingField.name = level.analysisItem.qualifiedName();
                     groupingFields.push(groupingField);
+                    var summaryRow:SummaryRow = new SummaryRow();
+                    summaryRow.summaryPlacement = "group";
+                    var fields:Array = [];
+                    for each (var measure:AnalysisItem in treeDefinition.items) {
+                        if (measure.hasType(AnalysisItemTypes.MEASURE)) {
+                            var summaryField:SummaryField = new SummaryField();
+                            var castMeasure:AnalysisMeasure = measure as AnalysisMeasure;
+                            if (castMeasure.aggregation == AggregationTypes.SUM) {
+                                summaryField.operation = "SUM";
+                            } else if (castMeasure.aggregation == AggregationTypes.AVERAGE) {
+                                summaryField.operation = "AVG";
+                            } else if (castMeasure.aggregation == AggregationTypes.MAX) {
+                                summaryField.operation = "MAX";
+                            } else if (castMeasure.aggregation == AggregationTypes.MIN) {
+                                summaryField.operation = "MIN";
+                            } else if (castMeasure.aggregation == AggregationTypes.COUNT) {
+                                summaryField.operation = "COUNT";
+                            } else {
+                                summaryField.operation = "SUM";
+                            }
+                            summaryField.dataField = measure.qualifiedName();
+                            fields.push(summaryField);
+                        }
+                    }
+                    summaryRow.fields = fields;
+                    groupingField.summaries = [ summaryRow ];
                 }
-                /*for each (var level:HierarchyLevel in hierarchy.hierarchyLevels) {
-                 //analysisItems.push(level.analysisItem);
-
-                 }*/
                 grouping.fields = groupingFields;
                 groupingColl.grouping = grouping;
                 for each (var item:AnalysisItem in treeDefinition.items) {
@@ -110,11 +124,6 @@
                     factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[myHeader.qualifiedName()] };
                     columnHeaderObject.itemRenderer = factory;
 
-                    /*columnHeaderObject.itemRenderer = new AnalysisCellRendererFactory(keyString, myHeader,
-                     clientProcessorMap[keyString]);*/
-                    /*var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
-                     factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[keyString] };
-                     columnHeaderObject.itemRenderer = factory;*/
                     columns[k + 1] = columnHeaderObject;
                 }
                 myData = dataSet;
