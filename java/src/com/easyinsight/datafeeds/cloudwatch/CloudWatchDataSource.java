@@ -11,7 +11,11 @@ import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.core.Key;
 import org.jetbrains.annotations.NotNull;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.security.SignatureException;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -119,6 +123,17 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
 
     @Override
     public String validateCredentials(Credentials credentials) {
+        try {
+            EC2Util.getInstances(credentials.getUserName(), credentials.getPassword());
+        } catch (RuntimeException re) {
+            if (re.getMessage().indexOf("401") != -1) {
+                return "Your credentials were invalid.";
+            } else {
+                return re.getMessage();
+            }
+        } catch (Exception e) {
+            return e.getMessage();
+        }
         return null;
     }
 

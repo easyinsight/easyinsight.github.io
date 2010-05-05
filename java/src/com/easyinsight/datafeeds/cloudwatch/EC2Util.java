@@ -60,6 +60,7 @@ public class EC2Util {
 
             if (statusCode != HttpStatus.SC_OK) {
               System.err.println("Method failed: " + method.getStatusLine());
+                throw new RuntimeException(method.getStatusLine().toString());
             }
 
             InputStream content = method.getResponseBodyAsStream();
