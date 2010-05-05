@@ -16,7 +16,6 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartModule;
 import com.easyinsight.analysis.crosstab.CrosstabModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.list.ListModule;
-import com.easyinsight.analysis.maps.MapModule;
 import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.treemap.TreeMapModule;
@@ -119,7 +118,7 @@ public class AirViewFactory extends AbstractViewFactory {
         if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
 
         } else {
-            _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap);
+            _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap, event.additionalProperties);
         }
         dispatchEvent(event);
     }
@@ -144,9 +143,6 @@ public class AirViewFactory extends AbstractViewFactory {
                 break;
             case AnalysisDefinition.CROSSTAB:
                 controller = CrosstabModule;
-                break;
-            case AnalysisDefinition.MAP:
-                controller = MapModule;
                 break;
             case AnalysisDefinition.COLUMN:
                 controller = ColumnChartModule;

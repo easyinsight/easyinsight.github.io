@@ -258,10 +258,7 @@
             var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
             var successful:Boolean = authResult.successful;
             if (successful) {
-                User.initializeUser(authResult.name, authResult.email,
-                        authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState);
-                User.getInstance().password = authResult.encryptedPassword;
+                User.initializeUser(authResult);                
                 User.getInstance().userName = authResult.userName;
                 removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
                 if (currentState == "LoginState") {

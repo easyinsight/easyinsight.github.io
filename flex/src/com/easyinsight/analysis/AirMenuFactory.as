@@ -1,10 +1,7 @@
 package com.easyinsight.analysis {
-import com.easyinsight.goals.GoalTreeNodeData;
 
 import flash.display.InteractiveObject;
-import flash.events.ContextMenuEvent;
 import flash.ui.ContextMenu;
-import flash.ui.ContextMenuItem;
 
 public class AirMenuFactory implements IMenuFactory {
     public function AirMenuFactory() {
