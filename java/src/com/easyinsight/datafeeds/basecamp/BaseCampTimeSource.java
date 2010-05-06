@@ -132,8 +132,6 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                     } while(info.currentPage++ < info.MaxPages);
                 
             }
-        } catch (BaseCampDataException bcde) {
-            return ds;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
