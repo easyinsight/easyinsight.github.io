@@ -20,6 +20,7 @@ public class SizeRenderer extends Label{
                     break;
                 case DataFeedDescriptor.SALESFORCE:
                 case DataFeedDescriptor.GOOGLE_ANALYTICS:
+                case DataFeedDescriptor.SENDGRID:
                 case DataFeedDescriptor.GOOGLE:
                 case DataFeedDescriptor.TWITTER:
                 case DataFeedDescriptor.GNIP:
