@@ -7,6 +7,7 @@ import com.easyinsight.framework.HierarchyOverride;
 import com.easyinsight.report.AbstractViewFactory;
 
 import com.easyinsight.report.ReportNavigationEvent;
+import com.easyinsight.util.EIErrorEvent;
 
 import flash.display.DisplayObject;
 import flash.system.ApplicationDomain;
@@ -119,9 +120,14 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
         } else {
             event.additionalProperties.prefix = _prefix;
-            _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap, event.additionalProperties);
+            try {
+                _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap, event.additionalProperties);
+                dispatchEvent(event);
+            } catch(e:Error) {
+                dispatchEvent(new EIErrorEvent(e));
+            }
         }
-        dispatchEvent(event);
+
     }
 
     private function loadReportRenderer():void {

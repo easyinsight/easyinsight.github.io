@@ -19,11 +19,11 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
-        import com.easyinsight.analysis.HierarchyRollupEvent;        
+        import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
-        import com.easyinsight.datasources.DataSourceInfo;        
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -33,6 +33,7 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.EIErrorEvent;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.BindingUtils;
@@ -369,70 +370,70 @@
         private var report:AnalysisDefinition;
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
-            if (event.credentialRequirements != null) {
-                CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
-            } else {
-                report = event.analysisDefinition;
-                dataSource = event.dataSourceInfo;
-                reportName = report.name;
-                var nf:NumberFormatter = new NumberFormatter();
-                if (_originReportID > 0) {
-                    _score = _originReportScore;
-                    _placeHolderID = _originReportID;
+                if (event.credentialRequirements != null) {
+                    CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
                 } else {
-                    _score = event.ratingsAverage;
-                    _placeHolderID = _dataSourceID;
-                }
-                reportRatingCount = nf.format(event.ratingsCount);
-                reportRating = nf.format(event.ratingsAverage);
-                reportViews = String(report.viewCount);
-                description = report.description;
-                attribution = event.attribution;
-                tags = "";
-                if (report.tagCloud != null && report.tagCloud.length > 0) {
-                    for each (var tag:Tag in report.tagCloud) {
-                        tags += tag.tagName;
-                        tags += ",";
+                    report = event.analysisDefinition;
+                    dataSource = event.dataSourceInfo;
+                    reportName = report.name;
+                    var nf:NumberFormatter = new NumberFormatter();
+                    if (_originReportID > 0) {
+                        _score = _originReportScore;
+                        _placeHolderID = _originReportID;
+                    } else {
+                        _score = event.ratingsAverage;
+                        _placeHolderID = _dataSourceID;
                     }
-                    tags = tags.substring(0, tags.length - 1);
-                }
-                admin = event.dataSourceAccessible;
+                    reportRatingCount = nf.format(event.ratingsCount);
+                    reportRating = nf.format(event.ratingsAverage);
+                    reportViews = String(report.viewCount);
+                    description = report.description;
+                    attribution = event.attribution;
+                    tags = "";
+                    if (report.tagCloud != null && report.tagCloud.length > 0) {
+                        for each (var tag:Tag in report.tagCloud) {
+                            tags += tag.tagName;
+                            tags += ",";
+                        }
+                        tags = tags.substring(0, tags.length - 1);
+                    }
+                    admin = event.dataSourceAccessible;
 
-                if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                    filterDefinitions = report.filterDefinitions;
-                    showFilters = true;
-                } else {
-                    filterDefinitions = new ArrayCollection();
-                    if (filterBox.contains(adjustFiltersbutton)) {
-                        filterBox.removeChild(adjustFiltersbutton);
+                    if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                        filterDefinitions = report.filterDefinitions;
+                        showFilters = true;
+                    } else {
+                        filterDefinitions = new ArrayCollection();
+                        if (filterBox.contains(adjustFiltersbutton)) {
+                            filterBox.removeChild(adjustFiltersbutton);
+                        }
                     }
-                }
 
-                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                if (!admin) {
-                    if (leftButtonBar.contains(editReportButton)) {
-                        leftButtonBar.removeChild(editReportButton);
+                    transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+                    if (!admin) {
+                        if (leftButtonBar.contains(editReportButton)) {
+                            leftButtonBar.removeChild(editReportButton);
+                        }
+                        showReportEditor = false;
                     }
-                    showReportEditor = false;
+                    ownerName = report.authorName;
+                    var dateFormatter:DateFormatter = new DateFormatter();
+                    dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                    reportDate = dateFormatter.format(report.dateCreated);
+                    // lastDataTime = dateFormatter.format(event.lastDataTime);
+                    if (!_embedded && _updateURL) {
+                        var feedFragmentObject:Object = new Object();
+                        feedFragmentObject.reportID = report.urlKey;
+                        var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                        BrowserManager.getInstance().setFragment(feedFragmentString);
+                        BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                        loading = false;
+                    }
+                    overlayIndex = 0;
+                    receivedData = true;
+                    dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+                    retrievedDataOnce = true;
                 }
-                ownerName = report.authorName;
-                var dateFormatter:DateFormatter = new DateFormatter();
-                dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-                reportDate = dateFormatter.format(report.dateCreated);
-                // lastDataTime = dateFormatter.format(event.lastDataTime);
-                if (!_embedded && _updateURL) {
-                    var feedFragmentObject:Object = new Object();
-                    feedFragmentObject.reportID = report.urlKey;
-                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                    BrowserManager.getInstance().setFragment(feedFragmentString);
-                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                    loading = false;
-                }
-                overlayIndex = 0;
-                receivedData = true;
-                dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
-                retrievedDataOnce = true;
-            }
         }
 
         private function close():void {
@@ -480,14 +481,14 @@
 
         public function refreshData():void {
             /*var window:RefreshReportSourceWindow = new RefreshReportSourceWindow();
-            window.dataSourceID = _dataSourceID;
-            window.reportID = _reportID;
-            window.embeddedViewFactory = viewFactory;
-            if (transformContainer != null) {
-                window.filterDefinitions = transformContainer.getFilterDefinitions();
-            }
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);*/
+             window.dataSourceID = _dataSourceID;
+             window.reportID = _reportID;
+             window.embeddedViewFactory = viewFactory;
+             if (transformContainer != null) {
+             window.filterDefinitions = transformContainer.getFilterDefinitions();
+             }
+             PopUpManager.addPopUp(window, this, true);
+             PopUpUtil.centerPopUp(window);*/
             viewFactory.retrieveData(false);
             //viewFactory.retrieveData(false);
         }
@@ -666,6 +667,7 @@
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
             viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
             viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
+            viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
             ;
 
             if (!_embedded) {
@@ -675,6 +677,11 @@
             // if filters were passed in
             overlayIndex = 1;
             viewFactory.retrieveData(false);
+        }
+
+        private function onError(event:EIErrorEvent):void {
+            stackTrace = event.error.getStackTrace();
+            overlayIndex = 3;
         }
 
         [Bindable]
@@ -703,6 +710,9 @@
         override public function cleanup():void {
             reportBox.removeChild(viewFactory);
         }
+
+        [Bindable]
+        private var stackTrace:String;
 
         [Bindable]
         private var showingFilters:Boolean = false;
@@ -786,7 +796,7 @@
                 <mx:HBox width="100%" id="addReportBox" horizontalAlign="center" verticalAlign="middle"/>
                 <mx:Canvas width="100%" height="100%">
                     <mx:Canvas width="100%" height="100%" id="reportBox"/>
-                    <mx:ViewStack width="100%" height="100%" selectedIndex="{overlayIndex}">
+                    <mx:ViewStack width="100%" height="100%" selectedIndex="{overlayIndex}" resizeToContent="true">
                         <mx:Box/>
                         <mx:Box width="100%" height="100%" id="loadingLayer" visible="{loading}"
                                 horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
@@ -800,6 +810,26 @@
                                 <util:AutoSizeTextArea text="We're sorry, but something went wrong in retrieving data for this report. We've logged the error on our servers and our engineers will fix it as soon as possible." visible="true" fontSize="18" width="400"
                                     editable="false" backgroundAlpha="0"/>
                             </mx:Box>
+                        </mx:Box>
+                        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
+                                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+                            <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+                                backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+                                cornerRadius="10">
+                                <util:AutoSizeTextArea text="We're sorry, but something went wrong in retrieving data for this report. You may want to edit the report, see if any fields are missing from the report drop areas, and adjust from there." visible="true" fontSize="18" width="400"
+                                    editable="false" backgroundAlpha="0"/>
+                                <mx:Button label="See Error Details" click="overlayIndex = 4"/>
+                            </mx:VBox>
+                        </mx:Box>
+                        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
+                                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+                            <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+                                backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+                                cornerRadius="10">
+                                <mx:TextArea text="{stackTrace}" visible="true" fontSize="12" width="500"
+                                    editable="false" backgroundAlpha="0" height="300"/>
+                                <mx:Button label="Hide Error Details" click="overlayIndex = 3"/>
+                            </mx:VBox>
                         </mx:Box>
                     </mx:ViewStack>
                 </mx:Canvas>
