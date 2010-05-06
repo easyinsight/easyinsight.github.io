@@ -82,7 +82,7 @@ public class DataService {
             });
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];
             sortedList.toArray(feedItemArray);
-            FeedMetadata feedMetadata = new FeedMetadata();            
+            FeedMetadata feedMetadata = new FeedMetadata();
             feedMetadata.setCredentials(credentialRequirements);
             feedMetadata.setFilterExampleMessage(feed.getFilterExampleMessage());
             feedMetadata.setDataSourceName(feed.getName());
@@ -141,7 +141,7 @@ public class DataService {
     }
 
     private static class EmbeddedCacheKey implements Serializable {
-        
+
         private Collection<FilterDefinition> filters;
         private List<FilterDefinition> drillThroughFilters;
         private long reportID;
@@ -177,7 +177,7 @@ public class DataService {
     }
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
-                                                  InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
+                                              InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
         SecurityUtil.authorizeInsight(reportID);
         try {
             Feed feed = feedRegistry.getFeed(dataSourceID);
@@ -194,7 +194,7 @@ public class DataService {
                     embeddedResults.setCredentialRequirements(credentialsRequired);
                     return embeddedResults;
                 }
-            }            
+            }
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID, drillThroughFilters);
             Map<EmbeddedCacheKey, EmbeddedResults> resultsCache = null;
             if (!insightRequestMetadata.isNoCache() && reportCache != null) {
@@ -239,71 +239,70 @@ public class DataService {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
 
-            long startTime = System.currentTimeMillis();      
+            long startTime = System.currentTimeMillis();
             EmbeddedResults results;
             /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {
                 throw new RuntimeException("Report is no longer valid.");
             } else {*/
 
-                if (insightRequestMetadata.getHierarchyOverrides() != null) {
-                    for (HierarchyOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
-                        for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
-                            if (analysisItem.getAnalysisItemID() == hierarchyOverride.getAnalysisItemID()) {
-                                AnalysisHierarchyItem hierarchy = (AnalysisHierarchyItem) analysisItem;
-                                hierarchy.setHierarchyLevel(hierarchy.getHierarchyLevels().get(hierarchyOverride.getPosition()));
-                            }
+            if (insightRequestMetadata.getHierarchyOverrides() != null) {
+                for (HierarchyOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
+                    for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+                        if (analysisItem.getAnalysisItemID() == hierarchyOverride.getAnalysisItemID()) {
+                            AnalysisHierarchyItem hierarchy = (AnalysisHierarchyItem) analysisItem;
+                            hierarchy.setHierarchyLevel(hierarchy.getHierarchyLevels().get(hierarchyOverride.getPosition()));
                         }
                     }
                 }
-                List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
-                if (analysisDefinition.getAddedItems() != null) {
-                    allFields.addAll(analysisDefinition.getAddedItems());
+            }
+            List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
+            if (analysisDefinition.getAddedItems() != null) {
+                allFields.addAll(analysisDefinition.getAddedItems());
+            }
+            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
+            Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
+                    validQueryItems.add(analysisItem);
                 }
-                Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
-                Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
-                for (AnalysisItem analysisItem : analysisItems) {
-                    if (!analysisItem.isDerived()) {
-                        validQueryItems.add(analysisItem);
-                    }
+            }
+            boolean aggregateQuery = true;
+            Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+            items.remove(null);
+            for (AnalysisItem analysisItem : items) {
+                if (analysisItem.blocksDBAggregation()) {
+                    aggregateQuery = false;
                 }
-                Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
-                boolean aggregateQuery = true;
-                Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
-                items.remove(null);
-                for (AnalysisItem analysisItem : items) {
-                    if (analysisItem.blocksDBAggregation()) {
-                        aggregateQuery = false;
-                    }
-                }
-                insightRequestMetadata.setAggregateQuery(aggregateQuery);
-                DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
-                Pipeline pipeline = new StandardReportPipeline();
-                pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-                // todo: fix
-                DataResults listDataResults = pipeline.toList(dataSet);
-                results = listDataResults.toEmbeddedResults();
-                results.setDataSourceAccessible(dataSourceAccessible);
-                results.setDefinition(analysisDefinition);
-                ReportMetrics reportMetrics = new AnalysisStorage().getRating(reportID);
-                results.setRatingsAverage(reportMetrics.getAverage());
-                results.setRatingsCount(reportMetrics.getCount());
-                if (dataSet.getLastTime() == null) {
-                    dataSet.setLastTime(new Date());
-                }
-                DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
-                EIConnection conn = Database.instance().getConnection();
-                try {
-                    dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
-                } finally {
-                    Database.closeConnection(conn);
-                }
-                results.setDataSourceInfo(dataSourceInfo);
-                results.setAttribution(feed.getAttribution());
-                if (resultsCache != null) {
-                    resultsCache.put(key, results);                    
-                    reportCache.put(dataSourceID, resultsCache);
-                }
+            }
+            insightRequestMetadata.setAggregateQuery(aggregateQuery);
+            Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
+            Pipeline pipeline = new StandardReportPipeline();
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+            DataResults listDataResults = pipeline.toList(dataSet);
+            results = listDataResults.toEmbeddedResults();
+            results.setDataSourceAccessible(dataSourceAccessible);
+            results.setDefinition(analysisDefinition);
+            ReportMetrics reportMetrics = new AnalysisStorage().getRating(reportID);
+            results.setRatingsAverage(reportMetrics.getAverage());
+            results.setRatingsCount(reportMetrics.getCount());
+            if (dataSet.getLastTime() == null) {
+                dataSet.setLastTime(new Date());
+            }
+            DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+            } finally {
+                Database.closeConnection(conn);
+            }
+            results.setDataSourceInfo(dataSourceInfo);
+            results.setAttribution(feed.getAttribution());
+            if (resultsCache != null) {
+                resultsCache.put(key, results);
+                reportCache.put(dataSourceID, resultsCache);
+            }
             //}
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
@@ -410,7 +409,7 @@ public class DataService {
             }
             //dataSourceInfo.setLastDataTime(dataSet.getLastTime());
             results.setDataSourceInfo(dataSourceInfo);
-           // }
+            // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
         } catch (DataAccessException dae) {
