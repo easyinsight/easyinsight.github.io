@@ -38,11 +38,17 @@
 
         public function set filterValueDefinition(filterValueDefinition:FilterValueDefinition):void {
             this._filterValueDefinition = filterValueDefinition;
+            if (_filterValueDefinition != null) {
+                includeFilter = _filterValueDefinition.inclusive;
+            }
         }
 
         public function set feedID(feedID:int):void {
             this._feedID = feedID;
         }
+
+        [Bindable]
+        private var includeFilter:Boolean;
 
         override protected function commitProperties():void {
             super.commitProperties();
@@ -139,11 +145,15 @@
 
         public function makeUpdates():FilterDefinition {
             _filterValueDefinition.filteredValues = targetList.dataProvider as ArrayCollection;
+            _filterValueDefinition.inclusive = includeCheckbox.selected;
             return _filterValueDefinition;
         }
 
         public function set filterDefinition(filterDefinition:FilterDefinition):void {
             _filterValueDefinition = filterDefinition as FilterValueDefinition;
+            if (_filterValueDefinition != null) {
+                includeFilter = _filterValueDefinition.inclusive;
+            }
         }
 
         private function onTypeChange():void {
@@ -169,7 +179,8 @@
             <mx:ProgressBar label="Loading the available values..." indeterminate="true"/>
         </mx:Box>
         <mx:VBox>
-            <mx:Label text="Drag Items Between Available and Included to Filter"/>
+            <mx:Label text="Drag Items Between Available and Filtered"/>
+            <mx:CheckBox label="Filter Includes Values" id="includeCheckbox" selected="{includeFilter}"/>
             <mx:HBox>
                 <mx:VBox>
                     <mx:ApplicationControlBar width="200">
@@ -180,7 +191,7 @@
                 </mx:VBox>
                 <mx:VBox>
                     <mx:ApplicationControlBar width="200">
-                        <mx:Label text="Included Values"/>
+                        <mx:Label text="Filtered Values"/>
                     </mx:ApplicationControlBar>
                     <mx:TextInput id="includedSearch" change="includedChange()"/>
                     <mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"

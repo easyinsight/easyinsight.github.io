@@ -16,7 +16,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 
 import mx.controls.AdvancedDataGrid;
-import mx.controls.Alert;
 import mx.controls.DataGrid;
 import mx.controls.List;
 import mx.controls.ToolTip;
@@ -500,7 +499,7 @@ public class TransformContainer extends HBox
                         multiValueFilter.toInclusive(uniqueValues);
                         // gonna change...
                     } else if (multiValueFilter.inclusive && !includeFilter) {
-                        // TODO
+                        multiValueFilter.removeValues(uniqueValues);
                     } else {
                         // just changing values
                         multiValueFilter.addValues(uniqueValues);

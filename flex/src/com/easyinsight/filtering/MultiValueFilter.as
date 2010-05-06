@@ -9,7 +9,7 @@ import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
-	import flash.geom.Point;
+	
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
@@ -167,6 +167,13 @@ import mx.controls.Label;
 			_filterDefinition.filteredValues = filterValues;
 			//updateState();	
 		}
+
+        public function removeValues(filterValues:ArrayCollection):void {
+            for each (var string:String in filterValues) {
+                var index:int = _filterDefinition.filteredValues.getItemIndex(string);
+                if (index != -1) _filterDefinition.filteredValues.removeItemAt(index);
+            }
+        }
 		
 		public function addValues(filterValues:ArrayCollection):void {
 			if (_filterDefinition.inclusive) {
