@@ -43,6 +43,10 @@ import mx.formatters.Formatter;
 		public function qualifiedName():String {
 			return key.internalString() + getQualifiedSuffix();
 		}
+
+        public function get qualifiedProperty():String {
+            return qualifiedName();
+        }
 		
 		protected function getQualifiedSuffix():String {
 			return String(getType());
