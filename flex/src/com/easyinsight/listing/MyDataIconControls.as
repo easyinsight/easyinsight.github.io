@@ -27,12 +27,15 @@ import mx.binding.utils.BindingUtils;
 import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Button;
+import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UIComponent;
+import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-public class MyDataIconControls extends HBox
+public class MyDataIconControls extends UIComponent implements IListItemRenderer
 {
     private var obj:Object;
 
@@ -80,36 +83,63 @@ public class MyDataIconControls extends HBox
         BindingUtils.bindProperty(analyzeButton, "toolTip", this, "analyzeTooltip");
         BindingUtils.bindProperty(analyzeButton, "visible", this, "analyzeVisible");
         analyzeButton.addEventListener(MouseEvent.CLICK, analyzeCalled);
-        addChild(analyzeButton);
+
         refreshButton = new Button();
         refreshButton.setStyle("icon", refreshIcon);
         BindingUtils.bindProperty(refreshButton, "toolTip", this, "refreshTooltip");
         BindingUtils.bindProperty(refreshButton, "visible", this, "refreshVisible");
         refreshButton.addEventListener(MouseEvent.CLICK, refreshCalled);
-        addChild(refreshButton);
+
         adminButton = new Button();
         adminButton.setStyle("icon", adminIcon);
         BindingUtils.bindProperty(adminButton, "toolTip", this, "adminTooltip");
         BindingUtils.bindProperty(adminButton, "visible", this, "adminVisible");
         adminButton.addEventListener(MouseEvent.CLICK, adminCalled);
-        addChild(adminButton);
+
         copyButton = new Button();
         copyButton.setStyle("icon", copyIcon);
         BindingUtils.bindProperty(copyButton, "toolTip", this, "copyTooltip");
         BindingUtils.bindProperty(copyButton, "visible", this, "copyVisible");
         copyButton.addEventListener(MouseEvent.CLICK, copyCalled);
-        addChild(copyButton);
+
         deleteButton = new Button();
         deleteButton.setStyle("icon", deleteIcon);
         BindingUtils.bindProperty(deleteButton, "toolTip", this, "deleteTooltip");
         BindingUtils.bindProperty(deleteButton, "visible", this, "deleteVisible");
         deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
-        addChild(deleteButton);
+
 
         this.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
 
         this.setStyle("paddingLeft", 5);
         this.setStyle("paddingRight", 5);
+    }
+
+
+    override protected function createChildren():void {
+        super.createChildren();
+        addChild(analyzeButton);
+        addChild(refreshButton);
+        addChild(adminButton);
+        addChild(copyButton);
+        addChild(deleteButton);
+    }
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        var buttonWidth:int = 40;
+        var buttonHeight:int = 22;
+        var padding:int = 5;
+        analyzeButton.move((padding),0);
+        analyzeButton.setActualSize(buttonWidth, buttonHeight);
+        refreshButton.move((padding * 2) + (buttonWidth),0);
+        refreshButton.setActualSize(buttonWidth, buttonHeight);
+        adminButton.move((padding * 3) + (buttonWidth * 2),0);
+        adminButton.setActualSize(buttonWidth, buttonHeight);
+        copyButton.move((padding * 4) + (buttonWidth * 3),0);
+        copyButton.setActualSize(buttonWidth, buttonHeight);
+        deleteButton.move((padding * 5) + (buttonWidth * 4),0);
+        deleteButton.setActualSize(buttonWidth, buttonHeight);
     }
 
     [Bindable(event="analyzeTooltipChanged")]
@@ -272,23 +302,12 @@ public class MyDataIconControls extends HBox
     }
 
     private function refreshData(feedDescriptor:DataFeedDescriptor):void {
-        /*if (feedDescriptor.hasSavedCredentials) {
-            userUploadSource = new RemoteObject();
-            userUploadSource.destination = "userUpload";
-            userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
-            userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
-            userUploadSource.refreshData.send(feedDescriptor.dataFeedID, null, false);
-            dispatchEvent(new RefreshNotificationEvent());
-            return;
-        }
-        else */
 
         var c:Credentials = User.getCredentials(feedDescriptor.dataFeedID);
         if (c != null) {
             userUploadSource = new RemoteObject();
             userUploadSource.destination = "userUpload";
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
-            userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
             ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
             userUploadSource.refreshData.send(feedDescriptor.dataFeedID, c, false, true);
             //dispatchEvent(new RefreshNotificationEvent());
@@ -298,7 +317,6 @@ public class MyDataIconControls extends HBox
         feedService = new RemoteObject();
         feedService.destination = "feeds";
         feedService.needsConfig.addEventListener(ResultEvent.RESULT, gotConfigNeed);
-        feedService.needsConfig.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
         ProgressAlert.alert(this, "Getting ready to refresh data...", null, feedService.needsConfig);
         feedService.needsConfig.send(feedDescriptor.dataFeedID);
     }
@@ -318,7 +336,6 @@ public class MyDataIconControls extends HBox
             userUploadSource = new RemoteObject();
             userUploadSource.destination = "userUpload";
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
-            userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
             ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
             userUploadSource.refreshData.send(descriptor.dataFeedID, null, false, true);    
         }
@@ -370,7 +387,8 @@ public class MyDataIconControls extends HBox
         }
     }
 
-    override public function set data(value:Object):void {
+    [Bindable("dataChange")]
+    public function set data(value:Object):void {
         this.obj = value;
         if (value is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = value as DataFeedDescriptor;
@@ -383,6 +401,7 @@ public class MyDataIconControls extends HBox
                 case DataFeedDescriptor.EMPTY:
                 case DataFeedDescriptor.BASECAMP:
                 case DataFeedDescriptor.HIGHRISE:
+                case DataFeedDescriptor.PIVOTAL_TRACKER:
                     refreshVisible = true;
                     break;
                 default:
@@ -405,9 +424,10 @@ public class MyDataIconControls extends HBox
             adminVisible = false;
             copyVisible = false;
         }
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
-    override public function get data():Object {
+    public function get data():Object {
         return this.obj;
     }
 }
