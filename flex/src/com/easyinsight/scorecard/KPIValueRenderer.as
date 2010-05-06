@@ -3,20 +3,19 @@ import com.easyinsight.kpi.KPI;
 
 import mx.containers.HBox;
 import mx.controls.Label;
+import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UIComponent;
+import mx.events.FlexEvent;
 import mx.formatters.Formatter;
 import mx.formatters.NumberFormatter;
-public class KPIValueRenderer extends HBox{
+public class KPIValueRenderer extends UIComponent implements IListItemRenderer {
 
     private var valueLabel:Label;
 
     public function KPIValueRenderer() {
         super();
         valueLabel = new Label();
-        setStyle("horizontalAlign", "center");
-        setStyle("verticalAlign", "middle");
-        setStyle("fontSize", 14);
-        this.percentWidth = 100;
-        this.percentHeight = 100;
+        valueLabel.setStyle("fontSize", 14);
     }
 
 
@@ -27,7 +26,8 @@ public class KPIValueRenderer extends HBox{
 
     private var kpi:KPI;
 
-    override public function set data(val:Object):void {
+    [Bindable("dataChange")]
+    public function set data(val:Object):void {
         this.kpi = val as KPI;
         if (this.kpi.kpiOutcome != null) {
             var formatter:Formatter;
@@ -38,10 +38,17 @@ public class KPIValueRenderer extends HBox{
             }
             valueLabel.text = formatter.format(kpi.kpiOutcome.outcomeValue);
         }
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));    
     }
 
-    override public function get data():Object {
+    public function get data():Object {
         return this.kpi;
+    }
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        valueLabel.move(0,8);
+        valueLabel.setActualSize(unscaledWidth, unscaledHeight);
     }
 }
 }

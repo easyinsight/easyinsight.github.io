@@ -7,10 +7,13 @@ import flash.events.MouseEvent;
 import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Label;
+import mx.controls.listClasses.IListItemRenderer;
 import mx.core.Application;
+import mx.core.UIComponent;
+import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
-public class KPINameRenderer extends HBox {
+public class KPINameRenderer extends UIComponent implements IListItemRenderer {
 
     private var kpi:KPI;
     private var kpiLabel:Label;
@@ -20,9 +23,7 @@ public class KPINameRenderer extends HBox {
     public function KPINameRenderer() {
         super();
         kpiLabel = new Label();
-        setStyle("verticalAlign", "middle");
-        setStyle("fontSize", 14);
-        setStyle("paddingLeft", 5);
+        kpiLabel.setStyle("fontSize", 14);
         useHandCursor = true;
         buttonMode = true;
         mouseChildren = false;
@@ -90,13 +91,21 @@ public class KPINameRenderer extends HBox {
         addChild(kpiLabel);
     }
 
-    override public function set data(val:Object):void {
+    [Bindable("dataChange")]
+    public function set data(val:Object):void {
         kpi = val as KPI;
         kpiLabel.text = kpi.name;
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
-    override public function get data():Object {
+    public function get data():Object {
         return kpi;
+    }
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        kpiLabel.move(5,8);
+        kpiLabel.setActualSize(unscaledWidth, unscaledHeight);
     }
 }
 }

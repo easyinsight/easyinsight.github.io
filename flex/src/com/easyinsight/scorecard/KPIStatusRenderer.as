@@ -5,8 +5,11 @@ import com.easyinsight.kpi.KPIOutcome;
 
 import mx.containers.HBox;
 import mx.controls.Image;
+import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UIComponent;
+import mx.events.FlexEvent;
 
-public class KPIStatusRenderer extends HBox {
+public class KPIStatusRenderer extends UIComponent implements IListItemRenderer  {
 
 
 
@@ -15,10 +18,6 @@ public class KPIStatusRenderer extends HBox {
     public function KPIStatusRenderer() {
         super();
         image = new Image();
-        setStyle("horizontalAlign", "center");
-        setStyle("verticalAlign", "middle");
-        this.percentWidth = 100;
-        this.percentHeight = 100;
     }
 
     override protected function createChildren():void {
@@ -28,13 +27,21 @@ public class KPIStatusRenderer extends HBox {
     
     private var _kpi:KPI;
 
-    override public function set data(val:Object):void {
+    [Bindable("dataChange")]
+    public function set data(val:Object):void {
         this._kpi = val as KPI;
         image.source = KPIIconFactory.iconForKPI(_kpi);
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
-    override public function get data():Object {
+    public function get data():Object {
         return this._kpi;
+    }
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        image.move(8,8);
+        image.setActualSize(16, 16);
     }
 }
 }
