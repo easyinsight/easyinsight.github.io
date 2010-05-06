@@ -33,11 +33,15 @@ public class RowComparator implements Comparator<IRow> {
             DateValue date1 = (DateValue) value1;
             DateValue date2 = (DateValue) value2;
             return date1.getDate().compareTo(date2.getDate()) * ascending;
+        } else if (value1.type() == Value.DATE && value2.type() == Value.EMPTY) {
+            return ascending;
+        } else if (value1.type() == Value.EMPTY && value2.type() == Value.DATE) {
+            return -ascending;
         } else if (value1.type() == Value.STRING && value2.type() == Value.STRING) {
             StringValue stringValue1 = (StringValue) value1;
             StringValue stringValue2 = (StringValue) value2;
             return stringValue1.getValue().compareTo(stringValue2.getValue()) * ascending;
         }
-        return 1;
+        return -1;
     }
 }
