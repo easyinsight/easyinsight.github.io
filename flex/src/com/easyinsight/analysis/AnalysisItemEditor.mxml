@@ -411,9 +411,9 @@
         private var linkFactory:ClassFactory;
         ]]>
     </mx:Script>
-    <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true">
+    <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120">
         <mx:VBox label="Item" width="100%" height="100%" horizontalAlign="center">
-            <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick(event)">
+            <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick(event)" buttonWidth="100">
                 <mx:dataProvider>
                     <mx:Array>
                         <mx:String>Grouping</mx:String>
