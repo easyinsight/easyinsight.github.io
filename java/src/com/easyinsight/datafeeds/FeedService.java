@@ -28,6 +28,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 
 /**
@@ -49,7 +50,7 @@ public class FeedService implements IDataFeedService {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
         try {
             return feedStorage.getFeedDefinitionData(dataSourceID).getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS;
-        } catch (SQLException e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -461,6 +462,7 @@ public class FeedService implements IDataFeedService {
                 }
             }.visit(feedDef);*/
             feedDef.populateFields(conn);
+            feedDef.setApiKey(RandomTextGenerator.generateText(12));
             long feedID = feedStorage.addFeedDefinitionData(feedDef, conn);
             DataStorage.liveDataSource(feedID, conn);
             //new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER, conn);
@@ -770,6 +772,7 @@ public class FeedService implements IDataFeedService {
             id = Database.instance().getAutoGenKey(insertTableStmt);
             lookupTable.getTargetField().setLookupTableID(id);
             new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
+            FeedRegistry.instance().flushCache(dataSource.getDataFeedID());
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
