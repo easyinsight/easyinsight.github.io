@@ -525,13 +525,19 @@ public class UserUploadService implements IUserUploadService {
             FeedDefinition feedDefinition = (FeedDefinition) dataSource;
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (synchronous) {
-                    credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
-                    if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
-                        feedDefinition.setVisible(true);
-                        feedStorage.updateDataFeedConfiguration(feedDefinition);
+                    if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                        try {
+                            credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                            if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
+                                feedDefinition.setVisible(true);
+                                feedStorage.updateDataFeedConfiguration(feedDefinition);
+                            }
+                        } finally {
+                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());    
+                        }
+                    } else {
+                        credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                     }
-                    // TODO: refactor into event model
-                    //new GoalStorage().updateGoals(feedID);
                 } else {
                     String message = dataSource.validateCredentials(credentials);
                     if (message == null) {
