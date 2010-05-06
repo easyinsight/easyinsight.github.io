@@ -1,11 +1,14 @@
 package com.easyinsight.analysis {
+import flash.events.Event;
+
+import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UIComponent;
 import mx.events.FlexEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.controls.Image;
-import mx.containers.HBox;
 
-public class AnalysisItemTypeRenderer extends HBox {
+public class AnalysisItemTypeRenderer extends UIComponent implements IListItemRenderer {
     [Bindable]
     [Embed(source="../../../../assets/calendar.png")]
     public static var dateIcon:Class;
@@ -44,18 +47,17 @@ public class AnalysisItemTypeRenderer extends HBox {
 
     public function AnalysisItemTypeRenderer() {
         super();
-        setStyle("horizontalAlign", "center");
-        this.percentWidth = 100;
     }
 
-    [Bindable]
+    [Bindable(event="typeSourceChanged")]
     public function get typeSource():Class {
         return _typeSource;
     }
 
-    public function set typeSource(val:Class):void {
-        _typeSource = val;
-        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+    public function set typeSource(value:Class):void {
+        if (_typeSource == value) return;
+        _typeSource = value;
+        dispatchEvent(new Event("typeSourceChanged"));
     }
 
     override protected function createChildren():void {
@@ -68,7 +70,24 @@ public class AnalysisItemTypeRenderer extends HBox {
         addChild(typeIcon);
     }
 
-    override public function get data():Object {
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        typeIcon.move(9,0);
+        typeIcon.setActualSize(16, 16);
+    }
+
+    [Bindable("dataChange")]
+    public function set data(obj:Object):void {
+        if (analysisItemWrapper != null) {
+            analysisItemWrapper.removeEventListener(ItemWrapperInvalidationEvent.ITEM_INVALIDATION, invalidateStuff);
+        }
+        this.analysisItemWrapper = obj as AnalysisItemWrapper;
+        analysisItemWrapper.addEventListener(ItemWrapperInvalidationEvent.ITEM_INVALIDATION, invalidateStuff, false, 0, true);
+        updateIcon();
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+    }
+
+    public function get data():Object {
         return analysisItemWrapper;
     }
 
@@ -101,14 +120,7 @@ public class AnalysisItemTypeRenderer extends HBox {
         updateIcon();
     }
 
-    override public function set data(obj:Object):void {
-        if (analysisItemWrapper != null) {
-            analysisItemWrapper.removeEventListener(ItemWrapperInvalidationEvent.ITEM_INVALIDATION, invalidateStuff);
-        }
-        this.analysisItemWrapper = obj as AnalysisItemWrapper;
-        analysisItemWrapper.addEventListener(ItemWrapperInvalidationEvent.ITEM_INVALIDATION, invalidateStuff);
-        updateIcon();
-    }
+
 
     private function updateIcon():void {
         if (analysisItemWrapper.isAnalysisItem()) {

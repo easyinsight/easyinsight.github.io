@@ -104,7 +104,12 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
                         }
                     }
                 } else {
-                    this.text = formatter.format(value[field]);
+                    if (value[field] != null) {
+                        this.text = formatter.format(value[field]);
+                    } else {
+                        this.text = "";
+                    }
+
                 }
 			} else {
 				/*if (objVal == null) {

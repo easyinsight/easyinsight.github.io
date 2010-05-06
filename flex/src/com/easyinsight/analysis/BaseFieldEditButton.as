@@ -8,13 +8,16 @@ import flash.events.MouseEvent;
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.controls.Button;
+import mx.controls.listClasses.IListItemRenderer;
 import mx.core.Application;
+import mx.core.UIComponent;
+import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-public class BaseFieldEditButton extends HBox
+public class BaseFieldEditButton extends UIComponent implements IListItemRenderer
 	{
 		private var analysisItemWrapper:AnalysisItemWrapper;
 		private var _displayName:String;
@@ -73,6 +76,19 @@ public class BaseFieldEditButton extends HBox
             addChild(deleteButton);
 		}
 
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        var buttonWidth:int = 40;
+        var buttonHeight:int = 22;
+        var padding:int = 5;
+        button.move((padding),0);
+        button.setActualSize(buttonWidth, buttonHeight);
+        copyButton.move((padding * 2) + (buttonWidth),0);
+        copyButton.setActualSize(buttonWidth, buttonHeight);
+        deleteButton.move((padding * 3) + (buttonWidth * 2),0);
+        deleteButton.setActualSize(buttonWidth, buttonHeight);
+    }
+
         private function copy(event:MouseEvent):void {
             event.stopPropagation();
             analysisService = new RemoteObject();
@@ -99,30 +115,20 @@ public class BaseFieldEditButton extends HBox
             dispatchEvent(new AnalysisItemDeleteEvent(analysisItemWrapper));
         }
 		
-		private function editItem(event:MouseEvent):void {
-			var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-			analysisItemEditor.editorClass = AnalysisItemEditor; 			
-			analysisItemEditor.analysisItem = analysisItemWrapper.analysisItem;
-			analysisItemEditor.analysisItems = this._analysisItems;
-			analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, analysisItemEdited, false, 0, true);
-			PopUpManager.addPopUp(analysisItemEditor, this.parent, true);
-			analysisItemEditor.x = Application.application.width / 2 - 100;
-			analysisItemEditor.y = Application.application.height / 2 - 100;
-		}
-		
 		private function analysisItemEdited(event:AnalysisItemEditEvent):void {
 			this.analysisItemWrapper.analysisItem = event.analysisItem;
 			this.analysisItemWrapper.displayName = event.analysisItem.displayName;
 			this.displayName = event.analysisItem.displayName;			 
 		}
 		
-		[Bindable]
-		override public function set data(value:Object):void {
+		[Bindable("dataChange")]
+		public function set data(value:Object):void {
 			this.analysisItemWrapper = value as AnalysisItemWrapper;
-			this.displayName = analysisItemWrapper.displayName;			
+			this.displayName = analysisItemWrapper.displayName;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
 		}
 		
-		override public function get data():Object {
+		public function get data():Object {
 			return this.analysisItemWrapper;
 		}
 	}

@@ -2,6 +2,10 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
            xmlns:analysis="com.easyinsight.analysis.*"
            creationComplete="setupListeners()" height="100%" width="100%">
+    <mx:Metadata>
+        [Event(name="disableControls", type="flash.events.Event")]
+        [Event(name="enableControls", type="flash.events.Event")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.AnalysisItemDeleteEvent;
         import com.easyinsight.analysis.AnalysisCalculation;
@@ -29,14 +33,19 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.BindingUtils;
+        import mx.binding.utils.ChangeWatcher;
         import mx.collections.ArrayCollection;
         import mx.collections.IList;
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.Alert;
+        import mx.core.UIComponent;
         import mx.events.FlexEvent;
         import mx.events.ListEvent;
         import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var loaded:Boolean = false;
 
         private var _allFields:ArrayCollection = new ArrayCollection();
 
@@ -54,7 +63,7 @@
         [Embed(source="../../../../../assets/background2.JPG")]
         private var background2:Class;
 
-        [Bindable]
+        [Bindable(event="allFieldsChanged")]
         public function get allFields():ArrayCollection {
             return _allFields;
         }
@@ -62,50 +71,78 @@
         public function set allFields(value:ArrayCollection):void {
             if (_allFields == value) return;
             _allFields = value;
-            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+            dispatchEvent(new Event("allFieldsChanged"));
         }
+
+        private var fieldWatcher:ChangeWatcher;
 
         private function toFocus(wrapper:AnalysisItemWrapper):void {
-            if (selectedWrapper != null) {
-                selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
-                selectedWrapper.displayName = selectedWrapper.analysisItem.display;
-                
-                selectedWrapper.invalidateItem();
+            try {
+                if (wrapper == selectedWrapper) return;
+                if (selectedWrapper != null) {
+                    selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
+                    selectedWrapper.displayName = selectedWrapper.analysisItem.display;
+                    selectedWrapper.invalidateItem();
+                    fieldWatcher.unwatch();
+                }
+                selectedWrapper = wrapper;
+                if (wrapper.analysisItem.concrete) {
+                    coreGrid.selectedIndex = coreFields.getItemIndex(wrapper);
+                    derivedGrid.selectedIndex = -1;
+                } else {
+                    derivedGrid.selectedIndex = derivedFields.getItemIndex(wrapper);
+                    coreGrid.selectedIndex = -1;
+                }
+                var editor:IAnalysisItemEditor;
+                var analysisItem:AnalysisItem = wrapper.analysisItem;
+                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    editor = new HierarchyWindow();
+                } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    editor = new CalculationWindow();
+                } else {
+                    editor = new AnalysisItemEditor();
+                }
+                var editorComp:UIComponent = editor as UIComponent;
+                editorComp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation, false, 0, true);
+                editor.dataSourceID = _dataSourceID;
+                openEditor = editor;
+                fieldWatcher = BindingUtils.bindProperty(editor, "analysisItems", this, "allFields");
+                editor.analysisItem = wrapper.analysisItem;
+                editCanvas.removeAllChildren();
+                editorComp.x = 25;
+                editorComp.y = 25;
+                editCanvas.addChild(editorComp);
+                editCanvas.validateNow();
+            } catch(e:Error) {
+                Alert.show("On toFocus() - " + e.message + " - " + e.getStackTrace());
             }
-            selectedWrapper = wrapper;
-            if (wrapper.analysisItem.concrete) {
-                coreGrid.selectedIndex = coreFields.getItemIndex(wrapper);
-                derivedGrid.selectedIndex = -1;
-            } else {
-                derivedGrid.selectedIndex = derivedFields.getItemIndex(wrapper);
-                coreGrid.selectedIndex = -1;
-            }
-            var editor:IAnalysisItemEditor;
-            var analysisItem:AnalysisItem = wrapper.analysisItem;
-            if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                editor = new HierarchyWindow();
-            } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                editor = new CalculationWindow();
-            } else {
-                editor = new AnalysisItemEditor();
-            }
-            editor.dataSourceID = _dataSourceID;
-            openEditor = editor;
-            BindingUtils.bindProperty(editor, "analysisItems", this, "allFields");
-            editor.analysisItem = wrapper.analysisItem;
-            editCanvas.removeAllChildren();
-            editCanvas.addChild(editor as DisplayObject);
         }
 
+        private function onCreation(event:FlexEvent):void {
+            dispatchEvent(new Event("enableControls"));
+        }
+
+
         private function onItemClick(event:ListEvent):void {
-            var grid:DataGrid = event.currentTarget as DataGrid;
-            var row:int = event.rowIndex;
-            var list:IList = IList(grid.dataProvider);
-            if (row < list.length) {
-                var wrapper:AnalysisItemWrapper = list.getItemAt(row) as AnalysisItemWrapper;
-                if (wrapper.isAnalysisItem()) {
-                    toFocus(wrapper);
+            try {
+                if (loaded) {
+                    loaded = false;
+                    dispatchEvent(new Event("disableControls"));
+                    var grid:DataGrid = event.currentTarget as DataGrid;
+                    var row:int = event.rowIndex;
+                    var list:IList = IList(grid.dataProvider);
+                    if (row < list.length) {
+                        var wrapper:AnalysisItemWrapper = list.getItemAt(row) as AnalysisItemWrapper;
+                        if (wrapper.isAnalysisItem() && wrapper != selectedWrapper) {
+                            toFocus(wrapper);
+                        } else {
+                            dispatchEvent(new Event("enableControls"));
+                        }
+                    }
+                    loaded = true;
                 }
+            } catch(e:Error) {
+                Alert.show("On Item Click - " + e.message + " - " + e.getStackTrace());
             }
         }
 
@@ -132,37 +169,45 @@
         private var _feedDefinition:FeedDefinitionData;
 
         public function set feedDefinition(value:FeedDefinitionData):void {
-            _feedDefinition = value;
-            invalidateProperties();
+            if (_feedDefinition != value) {
+                _feedDefinition = value;
+                invalidateProperties();
+            }
         }
 
         override protected function commitProperties():void {
             super.commitProperties();
-            if (_feedDefinition != null) {
-                derivedFields = new ArrayCollection();
-                allFields = new ArrayCollection();
-                coreFields = new ArrayCollection();
-                for each (var item:AnalysisItem in _feedDefinition.fields) {
-                    var aNode:AnalysisItemNode = new AnalysisItemNode();
-                    aNode.analysisItem = item;
-                    var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-                    if (!item.concrete) {
-                        derivedFields.addItem(wrapper);
-                    } else {
-                        coreFields.addItem(wrapper);
+            try {
+                if (_feedDefinition != null) {
+                    derivedFields = new ArrayCollection();
+                    allFields = new ArrayCollection();
+                    coreFields = new ArrayCollection();
+                    for each (var item:AnalysisItem in _feedDefinition.fields) {
+                        var aNode:AnalysisItemNode = new AnalysisItemNode();
+                        aNode.analysisItem = item;
+                        var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
+                        if (!item.concrete) {
+                            derivedFields.addItem(wrapper);
+                        } else {
+                            coreFields.addItem(wrapper);
+                        }
+                        allFields.addItem(wrapper);
                     }
-                    allFields.addItem(wrapper);
+                    var sort:Sort = new Sort();
+                    sort.fields = [ new SortField("displayName", false) ];
+                    coreFields.sort = sort;
+                    coreFields.refresh();
+                    derivedFields.sort = sort;
+                    derivedFields.refresh();
+                    loaded = true;
                 }
-                var sort:Sort = new Sort();
-                sort.fields = [ new SortField("displayName", false) ];
-                coreFields.sort = sort;
-                coreFields.refresh();
-                derivedFields.sort = sort;
-                derivedFields.refresh();
+            } catch(e:Error) {
+                Alert.show(e.message);
             }
         }
 
         public function createFields():ArrayCollection {
+            trace("saving fields");
             if (selectedWrapper != null) {
                 selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
             }
@@ -170,6 +215,7 @@
             for each (var wrapper:AnalysisItemWrapper in allFields) {
                 fields.addItem(wrapper.analysisItem);
             }
+            trace("saved fields");
             return fields;
         }
 
@@ -338,68 +384,67 @@
             <mx:Box width="100%" horizontalAlign="center">
                 <mx:Label text="Click on the fields below to edit their properties." fontSize="14"/>
             </mx:Box>
-        <mx:VDividedBox height="100%">
-            <mx:VBox height="50%">
-                <mx:HBox width="100%" horizontalAlign="center">
-                    <mx:Label text="Concrete Fields"/>
-                    <mx:Label text="?" textDecoration="underline" fontSize="11"
-                              toolTip="Concrete fields define the core structure of the data source. You can publish data into fields defined here through the API, through flat files, and so on. The Key Name is the name used in API calls, while the Display Name is what shows up in reports."/>
-                </mx:HBox>
-                <mx:HBox paddingLeft="5">
-                    <mx:Button icon="@Embed(source='../../../../../assets/text.png')" toolTip="Add Grouping..."
-                               click="addGrouping()"/>
-                    <mx:Button icon="@Embed(source='../../../../../assets/text_sum.png')" toolTip="Add Measure..."
-                               click="addMeasure()"/>
-                    <mx:Button icon="@Embed(source='../../../../../assets/calendar.png')" toolTip="Add Date..."
-                               click="addDate()"/>
-                </mx:HBox>
-                <mx:DataGrid dataProvider="{coreFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true"
-                             rowHeight="30" id="coreGrid">
-                    <mx:columns>
-                        <util:EIDataGridColumn dataField="displayName" headerText=""
+            <mx:VDividedBox height="100%">
+                <mx:VBox height="50%" enabled="{loaded}">
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Label text="Concrete Fields"/>
+                        <mx:Label text="?" textDecoration="underline" fontSize="11"
+                                  toolTip="Concrete fields define the core structure of the data source. You can publish data into fields defined here through the API, through flat files, and so on. The Key Name is the name used in API calls, while the Display Name is what shows up in reports."/>
+                    </mx:HBox>
+                    <mx:HBox paddingLeft="5">
+                        <mx:Button icon="@Embed(source='../../../../../assets/text.png')" toolTip="Add Grouping..."
+                                   click="addGrouping()"/>
+                        <mx:Button icon="@Embed(source='../../../../../assets/text_sum.png')" toolTip="Add Measure..."
+                                   click="addMeasure()"/>
+                        <mx:Button icon="@Embed(source='../../../../../assets/calendar.png')" toolTip="Add Date..."
+                                   click="addDate()"/>
+                    </mx:HBox>
+                    <mx:DataGrid dataProvider="{coreFields}" itemClick="onItemClick(event)" height="100%"
+                                 dragEnabled="true"
+                                 rowHeight="30" id="coreGrid">
+                        <mx:columns>
+                            <util:EIDataGridColumn dataField="displayName" headerText=""
+                                                   itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
+                                                   width="32"/>
+                            <util:EIDataGridColumn dataField="keyName" headerText="Key Name"/>
+                            <util:EIDataGridColumn dataField="displayName" headerText="Display Name"/>
+                            <util:EIDataGridColumn dataField="displayName"
+                                                   itemRenderer="com.easyinsight.analysis.BaseFieldEditButton"
+                                                   rendererIsEditor="true" editorDataField="displayName" width="150"
+                                                   headerText=""/>
+                        </mx:columns>
+                    </mx:DataGrid>
+                </mx:VBox>
+                <mx:VBox height="50%" enabled="{loaded}">
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Label text="Derived Fields"/>
+                        <mx:Label text="?" textDecoration="underline" fontSize="11"
+                                  toolTip="Derived fields are computed in various ways from the above concrete fields."/>
+                    </mx:HBox>
+                    <mx:HBox paddingLeft="5">
+                        <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
+                                   toolTip="Add Hierarchy..." click="addHierarchy()"/>
+                        <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
+                                   toolTip="Add Calculation..." click="addCalculation()"/>
+                        <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"
+                                   toolTip="Add Cycle..." click="addCycle()()"/>
+                    </mx:HBox>
+                    <mx:DataGrid dataProvider="{derivedFields}" itemClick="onItemClick(event)" height="100%"
+                                 dragEnabled="true" rowHeight="30" id="derivedGrid">
+                        <mx:columns>
+                            <mx:DataGridColumn dataField="displayName" headerText=""
                                                itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
                                                width="32"/>
-                        <util:EIDataGridColumn dataField="keyName" headerText="Key Name"/>
-                        <util:EIDataGridColumn dataField="displayName" headerText="Display Name"/>
-                        <util:EIDataGridColumn dataField="displayName"
+                            <mx:DataGridColumn dataField="displayName" headerText=""/>
+                            <mx:DataGridColumn dataField="displayName"
                                                itemRenderer="com.easyinsight.analysis.BaseFieldEditButton"
                                                rendererIsEditor="true" editorDataField="displayName" width="150"
                                                headerText=""/>
-                    </mx:columns>
-                </mx:DataGrid>
-            </mx:VBox>
-            <mx:VBox height="50%">
-                <mx:HBox width="100%" horizontalAlign="center">
-                    <mx:Label text="Derived Fields"/>
-                    <mx:Label text="?" textDecoration="underline" fontSize="11"
-                              toolTip="Derived fields are computed in various ways from the above concrete fields."/>
-                </mx:HBox>
-                <mx:HBox paddingLeft="5">
-                    <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
-                               toolTip="Add Hierarchy..." click="addHierarchy()"/>
-                    <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
-                               toolTip="Add Calculation..." click="addCalculation()"/>
-                    <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"
-                               toolTip="Add Cycle..." click="addCycle()()"/>
-                </mx:HBox>
-                <mx:DataGrid dataProvider="{derivedFields}" itemClick="onItemClick(event)" height="100%"
-                             dragEnabled="true" rowHeight="30" id="derivedGrid">
-                    <mx:columns>
-                        <mx:DataGridColumn dataField="displayName" headerText=""
-                                           itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
-                                           width="32"/>
-                        <mx:DataGridColumn dataField="displayName" headerText=""/>
-                        <mx:DataGridColumn dataField="displayName"
-                                           itemRenderer="com.easyinsight.analysis.BaseFieldEditButton"
-                                           rendererIsEditor="true" editorDataField="displayName" width="150"
-                                           headerText=""/>
-                    </mx:columns>
-                </mx:DataGrid>
-            </mx:VBox>
-        </mx:VDividedBox>
+                        </mx:columns>
+                    </mx:DataGrid>
+                </mx:VBox>
+            </mx:VDividedBox>
         </mx:VBox>
-        <mx:Box id="editCanvas" paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10"
-                backgroundImage="{background2}" backgroundSize="100%" horizontalAlign="center" width="100%"
-                height="100%"/>
+        <mx:Canvas id="editCanvas" width="100%" height="100%"/>
     </mx:HBox>
 </mx:Canvas>

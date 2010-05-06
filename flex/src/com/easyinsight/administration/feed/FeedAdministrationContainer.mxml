@@ -166,6 +166,7 @@
         }
 
         private function save():void {
+            trace("saving");
             var results:Array = Validator.validateAll(generalValidators);
             var detailValidated:Boolean = true;
             if (feedAdminDetail != null) {
@@ -189,9 +190,11 @@
                 if (feedAdminDetail != null) {
                     feedAdminDetail.updateDataSource(feedDefinition);
                 }
+                trace("sending save");
                 ProgressAlert.alert(this, "Updating data source...", "Updated data source!", feedService.updateFeedDefinition);
                 feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text);
                 this.unsavedChanges = false;
+                trace("sent save");
             }
         }
 
@@ -264,18 +267,33 @@
         [Bindable]
         private var liveData:Boolean;
 
+        [Bindable]
+        private var controlsEnabled:Boolean = true;
+
+        public function disableControls():void {
+            controlsEnabled = false;
+        }
+
+        public function enableControls():void {
+            controlsEnabled = true;
+        }
+
         override public function cleanup():void {
+        }
+
+        private function updated():void {
+            trace("update call completed");
         }
 		]]>
 	</mx:Script>
 
 	<mx:RemoteObject id="feedService" destination="feeds">
 		<mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
-		<mx:method name="updateFeedDefinition"/>
+		<mx:method name="updateFeedDefinition" result="updated()"/>
 		<mx:method name="wipeData" result="wipedData()"/>
 	</mx:RemoteObject>
 	<mx:VBox width="100%" height="100%" paddingLeft="5">
-		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
+		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" enabled="{controlsEnabled}">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
 			<mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
 			<mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="toReport()" toolTip="Jump to Report Editor"/>
@@ -321,7 +339,8 @@
 				</mx:VBox>
 			</mx:HBox>
             <mx:Box label="Fields">
-                <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}"/>
+                <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
+                        enableControls="enableControls()"/>
             </mx:Box>            
 			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
 

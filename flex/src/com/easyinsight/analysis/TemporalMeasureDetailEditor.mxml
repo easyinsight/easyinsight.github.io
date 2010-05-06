@@ -2,8 +2,7 @@
 <analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
                                    xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
-        [Bindable]
-        private var dimensionIsDate:Boolean;
+        import mx.controls.Alert;
 
         [Bindable]
         private var dateLevel:int;
@@ -12,12 +11,10 @@
         private var grouping:AnalysisDimension;
 
         [Bindable]
-        private var wrappedAggregation:String = "Sum";
+        private var groupingName:String;
 
-        private function onDimensionChange():void {
-            var analysisItem:AnalysisItem = dimensionComboBox.selectedItem as AnalysisItem;
-            dimensionIsDate = analysisItem is AnalysisDateDimension;
-        }
+        [Bindable]
+        private var wrappedAggregation:String = "Sum";
 
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
             var measure:TemporalAnalysisMeasure = new TemporalAnalysisMeasure();
@@ -36,8 +33,8 @@
             if (val is TemporalAnalysisMeasure) {
                 var measure:TemporalAnalysisMeasure = val as TemporalAnalysisMeasure;
                 grouping = measure.analysisDimension;
-                if (grouping != null && grouping.hasType(AnalysisItemTypes.DATE)) {
-                    dimensionIsDate = true;
+                if (grouping != null) {
+                    groupingName = grouping.qualifiedProperty;
                     var dateDim:AnalysisDateDimension = grouping as AnalysisDateDimension;
                     dateLevel = dateDim.dateLevel - 1;
                 }
@@ -63,7 +60,6 @@
             } else {
                 grouping = dimensionFields.getItemAt(0) as AnalysisDimension;
                 if (grouping != null && grouping.hasType(AnalysisItemTypes.DATE)) {
-                    dimensionIsDate = true;
                     dateDim = grouping as AnalysisDateDimension;
                     dateLevel = dateDim.dateLevel - 1;
                 }
@@ -73,7 +69,6 @@
         override public function save(analysisItem:AnalysisItem):void {
             super.save(analysisItem);
             var measure:TemporalAnalysisMeasure = analysisItem as TemporalAnalysisMeasure;
-            measure.analysisDimension = dimensionComboBox.selectedItem as AnalysisDimension;
             var temporalAggregationType:int;
             switch (temporalWrappedAggregations.selectedLabel) {
                 case "Sum":
@@ -93,24 +88,18 @@
                     break;
             }
             var existingDim:AnalysisDimension = dimensionComboBox.selectedItem as AnalysisDimension;
-            var sortDim:AnalysisDimension;
-            if (dimensionIsDate) {
-                var existingDateDim:AnalysisDateDimension = existingDim as AnalysisDateDimension;
-                var dateDim:AnalysisDateDimension = new AnalysisDateDimension(temporalDateBox.selectedItem.data,
-                        existingDateDim.customDateFormat);
-                dateDim.key = existingDim.key;
-                sortDim = dateDim;
-            } else {
-                sortDim = existingDim;
-            }
+            var existingDateDim:AnalysisDateDimension = existingDim as AnalysisDateDimension;
+            var dateDim:AnalysisDateDimension = new AnalysisDateDimension(temporalDateBox.selectedItem.data,
+                    existingDateDim.customDateFormat);
+            dateDim.key = existingDim.key;
             measure.wrappedAggregation = temporalAggregationType;
-            measure.analysisDimension = sortDim;
+            measure.analysisDimension = dateDim;
         }
         ]]></mx:Script>
-    <mx:FormItem label="Wrapped Aggregation: ">
-        <mx:ComboBox dataProvider="{measureObjects}" id="temporalWrappedAggregations" selectedItem="{wrappedAggregation}"/>
+    <mx:FormItem label="Wrapped Aggregation:">
+        <mx:ComboBox dataProvider="{measureObjects}" id="temporalWrappedAggregations" selectedItem="{wrappedAggregation}" rowCount="7"/>
     </mx:FormItem>
-    <mx:FormItem label="Date Level:" direction="horizontal" enabled="{dimensionIsDate}">
+    <mx:FormItem label="Date Level:" direction="horizontal">
         <mx:ComboBox id="temporalDateBox" selectedIndex="{dateLevel}">
             <mx:ArrayCollection>
                 <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
@@ -123,8 +112,8 @@
             </mx:ArrayCollection>
         </mx:ComboBox>
     </mx:FormItem>
-    <mx:FormItem label="Grouping: ">
-        <util:AnalysisItemCompletionInput items="{dimensionFields}" id="dimensionComboBox" labelField="display"
-                                   itemChanged="onDimensionChange()" selectedItem="{grouping}"/>        
+    <mx:FormItem label="Grouping:">
+        <util:SmartComboBox dataProvider="{dateDimensionFields}" id="dimensionComboBox" labelField="display"
+                                   selectedValue="{groupingName}" selectedProperty="qualifiedProperty"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>
