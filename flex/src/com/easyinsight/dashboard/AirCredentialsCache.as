@@ -85,5 +85,8 @@ public class AirCredentialsCache implements ICredentialsCache {
                 successFunction, callbackParams);
         credentialRequirementState.act();
     }
+
+    public function nukeCredentials(dataSourceID:int):void {
+    }
 }
 }

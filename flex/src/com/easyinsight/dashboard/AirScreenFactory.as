@@ -4,7 +4,6 @@ import com.easyinsight.analysis.EmbeddedControllerLookup;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.genredata.AnalyzeEvent;
-import com.easyinsight.goals.MyGoalsGrid;
 import com.easyinsight.goals.GoalTreeViewContainer;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportView;
@@ -52,10 +51,6 @@ public class AirScreenFactory implements IAsyncScreenFactory{
             goalView.showFullScreen = false;
             goalView.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze);
             return goalView;
-        } else if (descriptor.getType() == EIDescriptor.MY_GOALS) {
-            var grid:MyGoalsGrid = new MyGoalsGrid();
-            grid.inAir = true;
-            return grid;
         } else if (descriptor.getType() == EIDescriptor.AIR_INTRO) {
             return new DefaultAirScreen();
         } else {
