@@ -351,6 +351,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setDataScrubs(scrubs);
 
         Collection<AnalysisItem> reportItems = createBlazeDefinition().getAllAnalysisItems();
+        reportItems.remove(null);
         for (AnalysisItem baseItem : reportItems) {
             if (replacementMap.get(baseItem.getAnalysisItemID()) == null) {
                 AnalysisItem clonedItem = baseItem.clone();

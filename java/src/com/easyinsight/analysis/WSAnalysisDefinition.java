@@ -276,6 +276,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public List<Key> getColumnKeys(List<AnalysisItem> allItems) {
         Set<Key> columnSet = new HashSet<Key>();
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
+        analysisItems.remove(null);
         for (AnalysisItem analysisItem : analysisItems) {
             List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true);
             for (AnalysisItem item : items) {
@@ -313,6 +314,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public Set<AnalysisItem> getColumnItems(List<AnalysisItem> allItems) {
         Set<AnalysisItem> columnSet = new HashSet<AnalysisItem>();
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
+        analysisItems.remove(null);
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
                 columnSet.add(analysisItem);

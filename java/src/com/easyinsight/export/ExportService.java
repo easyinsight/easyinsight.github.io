@@ -148,6 +148,7 @@ public class ExportService {
         HSSFRow headerRow = sheet.createRow(0);
         Map<AnalysisItem, Short> positionMap = new HashMap<AnalysisItem, Short>();
         List<AnalysisItem> items = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems());
+        items.remove(null);
         Collections.sort(items, new Comparator<AnalysisItem>() {
 
             public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
