@@ -9,17 +9,19 @@ import flash.ui.ContextMenuItem;
 
 import mx.containers.HBox;
 import mx.controls.Image;
-public class KPIIconRenderer extends HBox{
+import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UIComponent;
+import mx.events.FlexEvent;
+
+public class KPIIconRenderer extends UIComponent implements IListItemRenderer {
 
     private var image:Image;
 
     public function KPIIconRenderer() {
         super();
         image = new Image();
-        this.percentWidth = 100;
-        setStyle("horizontalAlign", "center");
-        setStyle("verticalAlign", "middle");
-        this.percentHeight = 100;
+        //this.percentWidth = 100;
+        //this.percentHeight = 100;
     }
 
     override protected function createChildren():void {
@@ -29,17 +31,25 @@ public class KPIIconRenderer extends HBox{
 
     private var kpi:KPI;
 
-    override public function set data(val:Object):void {
+    [Bindable("dataChange")]    
+    public function set data(val:Object):void {
         this.kpi = val as KPI;
         if (this.kpi.iconImage != null) {
             image.load(PrefixManager.prefix + "/app/assets/icons/32x32/" + this.kpi.iconImage);
         } else {
             image.source = null;
         }
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));        
     }
 
-    override public function get data():Object {
+    public function get data():Object {
         return this.kpi;
+    }
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        image.move(9,0);
+        image.setActualSize(32, 32);
     }
 }
 }
