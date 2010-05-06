@@ -28,7 +28,7 @@ public class LastValueComponent implements IComponent {
         DataSet producedSet = new DataSet();
         AnalysisDimension existingDate = null;
         AnalysisDateDimension sortDim = (AnalysisDateDimension) lastValueFilter.getField();
-        for (AnalysisItem analysisItem : pipelineData.getReport().getAllAnalysisItems()) {
+        for (AnalysisItem analysisItem : pipelineData.getAllRequestedItems()) {
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dimension = (AnalysisDateDimension) analysisItem;
                 if (analysisItem.getKey().equals(lastValueFilter.getField().getKey()) && dimension.getDateLevel() == sortDim.getDateLevel()) {

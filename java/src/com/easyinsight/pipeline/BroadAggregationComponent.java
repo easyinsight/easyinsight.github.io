@@ -17,12 +17,12 @@ public class BroadAggregationComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
-        for (AnalysisItem item : pipelineData.getReport().getAllAnalysisItems()) {
+        for (AnalysisItem item : pipelineData.getAllRequestedItems()) {
             derivedItems.addAll(item.getDerivedItems());
         }
 
         List<AnalysisItem> list = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
-        ListTransform listTransform = dataSet.listTransform(list, list);
+        ListTransform listTransform = dataSet.listTransform(list);
         return listTransform.aggregate(list, derivedItems);
     }
 

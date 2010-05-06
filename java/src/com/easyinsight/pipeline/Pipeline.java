@@ -19,7 +19,7 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
-        components = generatePipelineCommands(allNeededAnalysisItems, report.getAllAnalysisItems(), report.retrieveFilterDefinitions(), report);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report);
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
@@ -35,7 +35,8 @@ public abstract class Pipeline {
             allFields.addAll(report.getAddedItems());
         }
 
-        List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(report.getAllAnalysisItems());
+        Set<AnalysisItem> allRequestedAnalysisItems = report.getAllAnalysisItems();
+        allRequestedAnalysisItems.remove(null);
 
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         if (report.retrieveFilterDefinitions() != null) {
@@ -64,7 +65,7 @@ public abstract class Pipeline {
         }*/
         
 
-        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties());
+        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties(), allRequestedAnalysisItems);
         return allNeededAnalysisItems;
     }
 
@@ -89,7 +90,7 @@ public abstract class Pipeline {
         for (IComponent component : components) {
             dataSet = component.apply(dataSet, pipelineData);
         }
-        DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems()));
+        DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));
         for (IComponent component : components) {
             component.decorate(results);
         }

@@ -7,6 +7,7 @@ import com.easyinsight.analysis.InsightRequestMetadata;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: James Boe
@@ -19,14 +20,20 @@ public class PipelineData {
     private Collection<AnalysisItem> reportItems;
     private InsightRequestMetadata insightRequestMetadata;
     private Map<String, String> dataSourceProperties;
+    private Set<AnalysisItem> allRequestedItems;
 
     public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
-                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties) {
+                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems) {
         this.report = report;
         this.reportItems = reportItems;
         this.insightRequestMetadata = insightRequestMetadata;
         this.allItems = allItems;
         this.dataSourceProperties = dataSourceProperties;
+        this.allRequestedItems = allRequestedItems;
+    }
+
+    public Set<AnalysisItem> getAllRequestedItems() {
+        return allRequestedItems;
     }
 
     public Map<String, String> getDataSourceProperties() {

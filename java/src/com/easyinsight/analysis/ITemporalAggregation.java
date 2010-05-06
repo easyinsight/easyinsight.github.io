@@ -15,9 +15,9 @@ public interface ITemporalAggregation {
 
     Key getAggregateKey();
 
-    void addValue(Value value, int position);
+    void addValue(Value value, Value timeValue);
 
-    Value getValue(int i);
+    Value getValue(Value timeValue);
 
     Key getNewAggregateKey();
 

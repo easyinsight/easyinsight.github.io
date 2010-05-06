@@ -2,7 +2,6 @@ package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedService;
-import com.easyinsight.etl.ETLService;
 
 import java.util.*;
 
@@ -127,6 +126,8 @@ public class StandardReportPipeline extends Pipeline {
             temporalAdded = true;
             components.add(new TemporalComponent((TemporalAnalysisMeasure) temporal));
         }
+
+        components.add(new AggregationComponent());
 
         components.add(new LinkDecorationComponent());
         components.add(new FilterComponent(false));

@@ -19,29 +19,28 @@ public class ListTransform {
     private Set<Map<Key, Value>> compositeKeys = new HashSet<Map<Key, Value>>();
     private Map<AnalysisMeasure, AggregationFactory> factoryMap = new HashMap<AnalysisMeasure, AggregationFactory>();
 
-
     public ListTransform() {
     }
 
     public void groupData(Map<Key, Value> compositeDimensionKey, AnalysisMeasure measure, Value value, IRow row) {
-            compositeKeys.add(compositeDimensionKey);
-            Map<AnalysisMeasure, Aggregation> values = keyMap.get(compositeDimensionKey);
-            if (values == null) {
-                values = new HashMap<AnalysisMeasure, Aggregation>();
-                keyMap.put(compositeDimensionKey, values);
-            }
-            AggregationFactory aggregationFactory = factoryMap.get(measure);
-            if (aggregationFactory == null) {
-                aggregationFactory = new AggregationFactory(measure);
-                factoryMap.put(measure, aggregationFactory);
-            }
+        compositeKeys.add(compositeDimensionKey);
+        Map<AnalysisMeasure, Aggregation> values = keyMap.get(compositeDimensionKey);
+        if (values == null) {
+            values = new HashMap<AnalysisMeasure, Aggregation>();
+            keyMap.put(compositeDimensionKey, values);
+        }
+        AggregationFactory aggregationFactory = factoryMap.get(measure);
+        if (aggregationFactory == null) {
+            aggregationFactory = new AggregationFactory(measure);
+            factoryMap.put(measure, aggregationFactory);
+        }
 
-            Aggregation aggregation = values.get(measure);
-            if (aggregation == null) {
-                aggregation = aggregationFactory.getAggregation();
-                values.put(measure, aggregation);
-            }
-            aggregation.addValue(value);
+        Aggregation aggregation = values.get(measure);
+        if (aggregation == null) {
+            aggregation = aggregationFactory.getAggregation();
+            values.put(measure, aggregation);
+        }
+        aggregation.addValue(value);
     }
 
     public void groupData(Map<Key, Value> compositeDimensionKey, AnalysisDimension dimension, Value value) {
@@ -83,10 +82,6 @@ public class ListTransform {
         if (derivedItems != null) {
             for (IRow row : dataSet.getRows()) {
                 for (AnalysisItem analysisItem : derivedItems) {
-//                    if (analysisItem.isCalculated()) {
-//                        Value value = analysisItem.calculate(dataSet, row);
-//                        row.addValue(analysisItem.createAggregateKey(), value);
-//                    } else
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem analysisHierarchy = (AnalysisHierarchyItem) analysisItem;
                         AggregateKey aggregateKey = analysisHierarchy.getHierarchyLevel().getAnalysisItem().createAggregateKey();

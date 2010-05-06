@@ -44,9 +44,15 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
     }
 
     @Override
+    public int getQueryAggregation() {
+        return wrappedAggregation;
+    }
+
+    @Override
     public void afterLoad() {
         super.afterLoad();
         setAnalysisDimension((AnalysisDimension) Database.deproxy(getAnalysisDimension()));
+        getAnalysisDimension().afterLoad();
     }
 
     public AnalysisDimension getAnalysisDimension() {
@@ -66,7 +72,7 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
     }
 
     public Key getAggregateKey() {
-        return new AggregateKey(getKey(), wrappedAggregation);
+        return new AnalysisMeasure(this.getKey(), wrappedAggregation).createAggregateKey();
     }
 
     public int getType() {
@@ -76,6 +82,7 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisMeasure(this.getKey(), wrappedAggregation));
+        //items.add(this);
         boolean foundDateDim = false;
         if (getAnalysisDimension().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             AnalysisDateDimension sortDim = (AnalysisDateDimension) getAnalysisDimension();

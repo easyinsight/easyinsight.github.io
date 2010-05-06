@@ -74,7 +74,8 @@ public class DataSet implements Serializable {
         return rows.toString();
     }    
 
-    public ListTransform listTransform(List<AnalysisItem> columns, List<AnalysisItem> allItems) {
+    public ListTransform listTransform(List<AnalysisItem> columns) {
+        ListTransform listTransform = new ListTransform();
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
         for (AnalysisItem column : columns) {
             if (column.hasType(AnalysisItemTypes.DIMENSION)) {
@@ -87,8 +88,7 @@ public class DataSet implements Serializable {
                 }
             }
         }
-        Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);
-        ListTransform listTransform = new ListTransform();
+        Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);        
         for (IRow row : rows) {
             Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>();
             for (AnalysisDimension dimension : ourDimensions) {
@@ -118,7 +118,48 @@ public class DataSet implements Serializable {
         return listTransform;
     }
 
+    public TemporalTransform temporalTransform(List<AnalysisItem> columns, TemporalAnalysisMeasure temporalAnalysisMeasure) {
+        TemporalTransform listTransform = new TemporalTransform(temporalAnalysisMeasure);
+        sort(temporalAnalysisMeasure.getAnalysisDimension(), false);
+        Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
+        sort(temporalAnalysisMeasure.getAnalysisDimension(), false);
+        for (AnalysisItem column : columns) {
+            if (column.hasType(AnalysisItemTypes.DIMENSION)) {
+                AnalysisDimension analysisDimension = (AnalysisDimension) column;
+                if (analysisDimension.isGroup()) {
+                    ourDimensions.add(analysisDimension);
+                }
+            }
+        }
+        Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);
+        for (IRow row : rows) {
+            Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>();
+            for (AnalysisDimension dimension : ourDimensions) {
+                if (dimension == temporalAnalysisMeasure.getAnalysisDimension()) {
+                    continue;
+                }
+                Value dimensionValue = row.getValue(dimension.createAggregateKey());
+                compositeDimensionKey.put(dimension.createAggregateKey(), dimensionValue);
+            }
+
+            for (AnalysisItem column : paredDownColumns) {
+                if (column.getKey().equals(temporalAnalysisMeasure.getKey())) {
+                    /*System.out.println("date = " + row.getValue(temporalAnalysisMeasure.getAnalysisDimension().createAggregateKey()));
+                    System.out.println("value = " + row.getValue(temporalAnalysisMeasure.getAggregateKey()));*/
+                    listTransform.temporalMeasure(compositeDimensionKey, row.getValue(temporalAnalysisMeasure.getAnalysisDimension().createAggregateKey()),
+                            row.getValue(temporalAnalysisMeasure.getAggregateKey()));
+                }
+
+                listTransform.groupData(compositeDimensionKey, column.createAggregateKey(), row.getValue(column.createAggregateKey()));
+
+            }
+
+        }
+        return listTransform;
+    }
+
     public DataSet merge(DataSet dataSet, Key myJoinDimension, Key fromJoinDimension) {
+        System.out.println("Merging data set on " + myJoinDimension.toKeyString() + " to " + fromJoinDimension.toKeyString());
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
         for (IRow row : rows) {

@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class MeasureFilterPipelineCleanupComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems());
+        List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems());
         for (AnalysisItem analysisItem : new ArrayList<AnalysisItem>(pipelineData.getReportItems())) {
             if (analysisItem.getFilters().size() > 0) {
                 for (FilterDefinition filterDefinition : analysisItem.getFilters()) {

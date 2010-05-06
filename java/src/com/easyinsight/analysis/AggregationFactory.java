@@ -20,7 +20,7 @@ public class AggregationFactory {
     }
 
     public Aggregation getAggregation() {
-        return getAggregation(analysisMeasure.getAggregation());
+        return getAggregation(analysisMeasure.getQueryAggregation());
     }
 
     private Aggregation getAggregation(int value) {

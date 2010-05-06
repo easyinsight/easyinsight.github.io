@@ -17,12 +17,11 @@ public class AggregationComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
-        for (AnalysisItem item : pipelineData.getReport().getAllAnalysisItems()) {
+        for (AnalysisItem item : pipelineData.getAllRequestedItems()) {
             derivedItems.addAll(item.getDerivedItems());
         }
-        List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems());
         List<AnalysisItem> list = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
-        ListTransform listTransform = dataSet.listTransform(list, allRequestedAnalysisItems);
+        ListTransform listTransform = dataSet.listTransform(list);
         return listTransform.aggregate(list, derivedItems);
     }
 

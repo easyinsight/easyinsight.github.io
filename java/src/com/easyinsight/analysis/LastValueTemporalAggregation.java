@@ -18,13 +18,12 @@ public class LastValueTemporalAggregation extends TemporalAggregation implements
         super(sortDate, wrappedMeasure, newAggregation, requiresReAggregation);
     }
 
-    public void addValue(Value value, int position) {
+    public void addValue(Value value, Value dateValue) {
         previousValue = latestValue;
         latestValue = value.toDouble();
-        positionLimit = position;
     }
 
-    public Value getValue(int i) {
+    public Value getValue(Value dateValue) {
         /*if (i == positionLimit && latestValue != null) {
             return new NumericValue(latestValue);
         } else {
