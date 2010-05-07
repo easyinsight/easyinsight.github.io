@@ -56,7 +56,7 @@ public class AggregationFactory {
                 aggregation = new VarianceAggregation();
                 break;
             default:
-                throw new RuntimeException("unknown value " + value);
+                aggregation = new SumAggregation();
         }
         return aggregation;
     }
