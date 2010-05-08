@@ -7,6 +7,12 @@ import com.easyinsight.config.ConfigLoader;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
+import flex.messaging.FlexContext;
+import oauth.signpost.OAuth;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.OAuthProvider;
+import oauth.signpost.basic.DefaultOAuthConsumer;
+import oauth.signpost.basic.DefaultOAuthProvider;
 
 import java.net.URL;
 import java.util.List;
@@ -18,6 +24,49 @@ import java.util.ArrayList;
  * Time: 2:25:19 PM
  */
 public class TokenService {
+
+    /*public void verifyOAuth(String pin) throws Exception {
+        try {
+            provider.retrieveAccessToken(consumer, pin);
+            System.out.println("token = " + consumer.getToken());
+            System.out.println("secret token token = " + consumer.getTokenSecret());
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }*/
+
+    public String getOAuthURL(int type, long connectionID) {
+        try {
+
+            OAuthConsumer consumer;
+            OAuthProvider provider;
+
+            if (type == FeedType.LINKEDIN.getType()) {
+                consumer = new DefaultOAuthConsumer("pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq",
+                                                     "leKpqRVV3M8CMup_x6dY8THBiKT-T4PXSs3cpSVXp0kaMS4AiZYW830yRvH6JU2O");
+                provider = new DefaultOAuthProvider(
+                        "https://api.linkedin.com/uas/oauth/requestToken", "https://api.linkedin.com/uas/oauth/accessToken",
+                        "https://api.linkedin.com/uas/oauth/authorize");
+            } else if (type == FeedType.TWITTER.getType()) {
+                consumer = new DefaultOAuthConsumer("Kb9mqPL8TlaJB3lZHK8Fpw",
+                                                 "q7W04Nth2vZYOvOfiiLfTZNdE83sPDpI2uGSAtJhKnM");
+            provider = new DefaultOAuthProvider(
+                    "http://twitter.com/oauth/request_token", "http://twitter.com/oauth/access_token",
+                    "http://twitter.com/oauth/authorize");
+            } else {
+                throw new RuntimeException();
+            }
+            FlexContext.getHttpRequest().getSession().setAttribute("oauthConsumer", consumer);
+            FlexContext.getHttpRequest().getSession().setAttribute("oauthProvider", provider);
+
+            //return provider.retrieveRequestToken(consumer, "http://www.easy-insight.com/solutions.html?sourceType=5&connectionID=" + connectionID);
+            return provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public List<TokenSpecification> getTokenSpecifications() {
         List<TokenSpecification> tokenSpecs = new ArrayList<TokenSpecification>();
