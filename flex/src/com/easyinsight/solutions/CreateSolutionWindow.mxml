@@ -271,6 +271,7 @@
                                 <mx:String>com.easyinsight.solutions.HighriseSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.FileUploadSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.GoogleSpreadsheetSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.LinkedInSolutionDetail</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>
