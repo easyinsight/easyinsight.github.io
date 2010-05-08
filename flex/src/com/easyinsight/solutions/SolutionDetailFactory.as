@@ -63,6 +63,7 @@ public class SolutionDetailFactory {
         var c:HighriseSolutionDetail;
         var d:FileUploadSolutionDetail;
         var e:GoogleSpreadsheetSolutionDetail;
+        var f:LinkedInSolutionDetail;
 
     }
 }
