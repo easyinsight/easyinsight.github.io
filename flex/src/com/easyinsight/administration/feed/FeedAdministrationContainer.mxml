@@ -14,7 +14,9 @@
         import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.datasources.JiraDataSource;
+        import com.easyinsight.datasources.LinkedInDataSource;
         import com.easyinsight.datasources.MarketoDataSource;
+        import com.easyinsight.datasources.MeetupDataSource;
         import com.easyinsight.datasources.PivotalTrackerBaseSource;
         import com.easyinsight.datasources.SendGridDataSource;
         import com.easyinsight.framework.User;
@@ -262,6 +264,8 @@
             var marketoSource:MarketoDataSource;
             var pivotal:PivotalTrackerBaseSource;
             var sendGrid:SendGridDataSource;
+            var meetup:MeetupDataSource;
+            var linked:LinkedInDataSource;
         }
 
         [Bindable]

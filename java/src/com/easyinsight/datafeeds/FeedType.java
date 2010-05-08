@@ -41,6 +41,10 @@ public class FeedType {
     public static final FeedType HIGHRISE_TASKS = new FeedType(33);
     public static final FeedType PIVOTAL_TRACKER = new FeedType(34);
     public static final FeedType SENDGRID = new FeedType(35);
+    public static final FeedType MAILCHIMP = new FeedType(36);
+    public static final FeedType TEAMWORKPM = new FeedType(37);
+    public static final FeedType MEETUP = new FeedType(38);
+    public static final FeedType LINKEDIN = new FeedType(39);
 
     private int type;
 

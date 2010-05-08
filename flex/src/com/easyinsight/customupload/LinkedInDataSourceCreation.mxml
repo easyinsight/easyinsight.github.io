@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.LinkedInDataSource;
+        import com.easyinsight.framework.Credentials;
+
+        import mx.controls.Alert;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var source:LinkedInDataSource = new LinkedInDataSource();
+            source.pin = pinInput.text;
+            return source;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:LinkedInDataSource = feedDefinition as LinkedInDataSource;
+
+        }
+
+        public function get savesCredentials():Boolean {
+            return false;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:LinkedInDataSource = feedDefinition as LinkedInDataSource;
+            ds.pin = pinInput.text;
+            Alert.show("set pin " + ds.pin);
+        }
+
+        public function get credentials():Credentials {
+            var credentials:Credentials = new Credentials();
+            return credentials;
+        }
+
+        public function set credentials(c:Credentials):void {
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Pin:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="pinInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+		</mx:FormItem>
+    </mx:Form>
+</mx:HBox>

@@ -52,6 +52,8 @@
                                     <mx:String>Marketo</mx:String>
                                     <mx:String>Pivotal Tracker</mx:String>
                                     <mx:String>SendGrid</mx:String>
+                                    <mx:String>Meetup</mx:String>
+                                    <mx:String>LinkedIn</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
                         </mx:dataProvider>
@@ -117,6 +119,14 @@
                                 userConfigCancel="cancel(event)" />
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.datasources.SendGridDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)" />
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.MeetupDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)" />
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.LinkedInDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)" />
                     </mx:ViewStack>
