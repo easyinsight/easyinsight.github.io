@@ -29,7 +29,6 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:LinkedInDataSource = feedDefinition as LinkedInDataSource;
             ds.pin = pinInput.text;
-            Alert.show("set pin " + ds.pin);
         }
 
         public function get credentials():Credentials {
