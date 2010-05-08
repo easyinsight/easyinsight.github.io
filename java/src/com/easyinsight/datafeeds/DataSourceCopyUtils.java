@@ -80,7 +80,7 @@ public class DataSourceCopyUtils {
         ConfigureDataFeedTodo todo = null;        
         if (clonedFeedDefinition instanceof IServerDataSourceDefinition) {
             IServerDataSourceDefinition def = (IServerDataSourceDefinition) clonedFeedDefinition;
-            if (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS) {
+            if (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS || def.getFeedType() == FeedType.LINKEDIN) {
                 Session session = Database.instance().createSession(conn);
 
                 todo = new ConfigureDataFeedTodo();
