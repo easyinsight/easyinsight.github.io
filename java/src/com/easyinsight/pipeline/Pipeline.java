@@ -38,35 +38,56 @@ public abstract class Pipeline {
         Set<AnalysisItem> allRequestedAnalysisItems = report.getAllAnalysisItems();
         allRequestedAnalysisItems.remove(null);
 
+        Map<AnalysisItem, Integer> refMap = new HashMap<AnalysisItem, Integer>();
+
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                allNeededAnalysisItems.addAll(filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true));
+                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true);
+                updateCount(items, refMap);
+                allNeededAnalysisItems.addAll(items);
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                allNeededAnalysisItems.addAll(item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true));
-                allNeededAnalysisItems.addAll(item.addLinkItems(allFields, allRequestedAnalysisItems));
+                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true);
+                updateCount(baseItems, refMap);
+                allNeededAnalysisItems.addAll(baseItems);
+                List<AnalysisItem> linkItems = item.addLinkItems(allFields, allRequestedAnalysisItems);
+                updateCount(linkItems, refMap);
+                allNeededAnalysisItems.addAll(linkItems);
                 if (item.isVirtual()) {
+                    updateCount(item, refMap);
                     allNeededAnalysisItems.add(item);
                 }
             }
         }
+        updateCount(report.getLimitFields(), refMap);
         allNeededAnalysisItems.addAll(report.getLimitFields());
-        /// TODO: this needs to factor in user added fields
-        // there's the question of resolution here as well, really need a uniquely defined name for fields
-        // have to bubble that up to visibility
-        // that's what we're sort of defining as Key right now, but without the appropriate unique constraint
-
-        /*List<AnalysisItem> masterFieldList = new ArrayList<AnalysisItem>(dataSource.getFields());
-        if (additionalFields != null) {
-            masterFieldList.addAll(additionalFields);
-        }*/
         
 
-        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties(), allRequestedAnalysisItems);
+        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties(), allRequestedAnalysisItems, refMap);
         return allNeededAnalysisItems;
+    }
+
+    private void updateCount(AnalysisItem analysisItem, Map<AnalysisItem, Integer> refMap) {
+        Integer count = refMap.get(analysisItem);
+        if (count == null) {
+            refMap.put(analysisItem, 1);
+        } else {
+            refMap.put(analysisItem, count + 1);
+        }
+    }
+
+    private void updateCount(Collection<AnalysisItem> analysisItems, Map<AnalysisItem, Integer> refMap) {
+        for (AnalysisItem analysisItem : analysisItems) {
+            Integer count = refMap.get(analysisItem);
+            if (count == null) {
+                refMap.put(analysisItem, 1);
+            } else {
+                refMap.put(analysisItem, count + 1);
+            }
+        }
     }
 
     protected final Collection<AnalysisItem> items(int type, Collection<AnalysisItem> items) {

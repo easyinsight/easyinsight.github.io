@@ -12,7 +12,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
-import com.easyinsight.users.Credentials;
 
 import java.util.*;
 import java.io.Serializable;
@@ -316,15 +315,21 @@ public class DataService {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
-            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
+            List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
+            if (analysisDefinition.getAddedItems() != null) {
+                allFields.addAll(analysisDefinition.getAddedItems());
+            }
+            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
-                if (!analysisItem.isDerived()) {
+                if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
                     validQueryItems.add(analysisItem);
                 }
             }
             boolean aggregateQuery = true;
-            for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+            Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+            items.remove(null);
+            for (AnalysisItem analysisItem : items) {
                 if (analysisItem.blocksDBAggregation()) {
                     aggregateQuery = false;
                 }

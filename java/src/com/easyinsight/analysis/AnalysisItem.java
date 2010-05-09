@@ -318,7 +318,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         items.add(this);
         if (includeFilters && getFilters().size() > 0) {
             for (FilterDefinition filterDefinition : getFilters()) {
-                items.add(filterDefinition.getField());
+                items.addAll(filterDefinition.getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters));
             }
         }
         if (getLookupTableID() != null && getLookupTableID() > 0) {

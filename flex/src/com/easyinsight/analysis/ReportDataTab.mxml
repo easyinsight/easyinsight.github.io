@@ -9,6 +9,9 @@
         [Event(name="reportSizing", type="com.easyinsight.analysis.ReportSizingEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.scrub.DataScrubEvent;
+        import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
+        import com.easyinsight.analysis.scrub.TextReplaceScrubWindow;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.DataService;
         import com.easyinsight.util.PopUpUtil;
@@ -97,6 +100,13 @@
             dispatchEvent(new Event("analysisDefinitionChanged"));
         }
 
+        private var _dataSourceID:int;
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+
         private function showAPIInfo():void {
             var window:QuickDataSourceAPIWindow = new QuickDataSourceAPIWindow();
             window.dataSourceID = dataService.dataFeedID;
@@ -170,6 +180,41 @@
             }
             dataView.retrieveData();
         }
+
+        private function newTextReplaceScrub():void {
+            var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));
+            textWindow.fields = wrappers;
+            textWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
+            PopUpUtil.centerPopUp(textWindow);
+        }
+
+
+
+        private function editTextReplaceScrubs():void {
+            var scrubListWindow:TextReplaceScrubListWindow = TextReplaceScrubListWindow(PopUpManager.createPopUp(this, TextReplaceScrubListWindow, false));
+            scrubListWindow.definition = _analysisDefinition;
+            scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
+            scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
+            scrubListWindow.initState(wrappers, _dataSourceID);
+            PopUpUtil.centerPopUp(scrubListWindow);
+        }
+
+        private function scrubAdded(event:DataScrubEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            _analysisDefinition.dataScrubs.addItem(event.dataScrub);
+            _dataView.retrieveData();
+        }
+
+        private function scrubUpdated(event:DataScrubEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            _dataView.retrieveData();
+        }
+
+        private function scrubDeleted(event:DataScrubEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            _analysisDefinition.dataScrubs.removeItemAt(_analysisDefinition.dataScrubs.getItemIndex(event.dataScrub));
+            _dataView.retrieveData();
+        }
         ]]></mx:Script>
     <mx:Button id="refreshButton" toolTip="Refresh Data"
                icon="@Embed(source='../../../../assets/refresh.png')"
@@ -186,5 +231,11 @@
                icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
     <mx:Button id="obfuscateButton" toolTip="Toggle Obfuscation"
                icon="@Embed(source='../../../../assets/lock.png')" click="obfuscate()"/>
+        <mx:Button id="textScrubButton" toolTip="Text Replace"
+               icon="@Embed(source='../../../../assets/text_find.png')"
+               click="newTextReplaceScrub()"/>
+    <mx:Button id="textListButton" toolTip="Edit Text Replaces..."
+               icon="@Embed(source='../../../../assets/document_edit.png')"
+               click="editTextReplaceScrubs()"/>
     <!--<analysis:ResultLimitComboBox limits="{limits}"/>-->    
 </mx:HBox>

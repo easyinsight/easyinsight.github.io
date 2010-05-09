@@ -91,7 +91,10 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
     public abstract int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException;
 
     public boolean validForQuery() {
-        if (getField().hasType(AnalysisItemTypes.STEP)) {
+        if (getField().hasType(AnalysisItemTypes.STEP) || getField().hasType(AnalysisItemTypes.RANGE_DIMENSION)) {
+            return false;
+        }
+        if (getField().getLookupTableID() != null && getField().getLookupTableID() > 0) {
             return false;
         }
         return enabled;

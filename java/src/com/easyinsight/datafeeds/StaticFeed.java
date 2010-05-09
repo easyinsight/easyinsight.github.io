@@ -1,6 +1,9 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.etl.LookupPair;
+import com.easyinsight.etl.LookupTable;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.AnalysisItem;
@@ -40,6 +43,23 @@ public class StaticFeed extends Feed implements Serializable {
     }
 
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+        if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
+            AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
+            Map<Value, Value> lookupMap = new HashMap<Value, Value>();
+            LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
+            AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) getMetadata(lookupTable.getSourceField(), insightRequestMetadata);
+            for (LookupPair lookupPair : lookupTable.getLookupPairs()) {
+                lookupMap.put(lookupPair.getSourceValue(), lookupPair.getTargetValue());
+            }
+            for (Value value : sourceMetadata.getValues()) {
+                Value targetValue = lookupMap.get(value);
+                if (targetValue == null) {
+                    targetValue = new EmptyValue();
+                }
+                analysisItemResultMetadata.addValue(analysisItem, targetValue, insightRequestMetadata);
+            }
+            return analysisItemResultMetadata;
+        }
         // this would change to return the data from our contained analysis definition
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         AnalysisItem queryItem;

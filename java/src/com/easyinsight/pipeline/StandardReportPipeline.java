@@ -19,6 +19,13 @@ public class StandardReportPipeline extends Pipeline {
     }
 
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report) {
+
+        // current problematic scenarios
+        // a measure filter on a calculation
+        // a calculation on a calculation
+        // a tag filter?
+        // 
+
         List<IComponent> components = new ArrayList<IComponent>();
 
         //components.add(new ReportPreHandleComponent());
@@ -127,7 +134,7 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new TemporalComponent((TemporalAnalysisMeasure) temporal));
         }
 
-        components.add(new AggregationComponent());
+        components.add(new AggregationComponent(AggregationTypes.RANK));
 
         components.add(new LinkDecorationComponent());
         components.add(new FilterComponent(false));

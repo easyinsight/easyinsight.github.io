@@ -2,6 +2,7 @@ package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisRangeResultMetadata;
 import com.easyinsight.analysis.AnalysisTagsResultMetadata;
 import com.easyinsight.analysis.Value;
 
@@ -215,6 +216,7 @@ public class ComboBoxFilter extends HBox implements IFilter
 
         private function blah():void {
             var metadata:AnalysisTagsResultMetadata;
+            var metadata2:AnalysisRangeResultMetadata;;
         }
 		
 		private function gotMetadata(event:ResultEvent):void {
@@ -222,13 +224,15 @@ public class ComboBoxFilter extends HBox implements IFilter
 			var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as 
 				AnalysisDimensionResultMetadata;
 			var strings:ArrayCollection = new ArrayCollection();
-			for each (var value:Value in analysisDimensionResultMetadata.values) {
-				var string:String = String(value.getValue());
+            if (analysisDimensionResultMetadata.values != null) {
+                for each (var value:Value in analysisDimensionResultMetadata.values) {
+                    var string:String = String(value.getValue());
 
-				if (!strings.contains(string)) {
-					strings.addItem(string);
-				}
-			}
+                    if (!strings.contains(string)) {
+                        strings.addItem(string);
+                    }
+                }
+            }
 			strings.sort = new Sort();
 			strings.refresh();			
 			comboBox.dataProvider = strings;

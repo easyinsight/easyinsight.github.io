@@ -1,6 +1,5 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.EmptyValue;
@@ -37,21 +36,10 @@ public class LookupTableComponent implements IComponent {
             }
             row.addValue(lookupTable.getTargetField().createAggregateKey(), targetValue);
         }
-        Collection<AnalysisItem> allRequestedAnalysisItems = pipelineData.getReportItems();
-        boolean itemFound = findItem(lookupTable.getSourceField(), allRequestedAnalysisItems, pipelineData.getAllItems());
-        if (!itemFound) {
+        if (pipelineData.decrementReferenceCount(lookupTable.getSourceField())) {
             pipelineData.getReportItems().remove(lookupTable.getSourceField());
-        }        
-        return dataSet;
-    }
-
-    private boolean findItem(AnalysisItem field, Collection<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allFields) {
-        int found = 0;
-        for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true);
-            found += items.contains(field) ? 1 : 0;
         }
-        return found > 1;
+        return dataSet;
     }
 
     public void decorate(DataResults listDataResults) {

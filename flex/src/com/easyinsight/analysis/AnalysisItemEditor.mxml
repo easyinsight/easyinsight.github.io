@@ -271,7 +271,7 @@
         }
 
         protected function getMeasureOptions():ArrayCollection {
-            return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count", "Median", "Variance"]);
+            return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count", "Median", "Variance", "Ranking"]);
         }
 
         protected function getComplexOptions():ArrayCollection {
@@ -318,6 +318,7 @@
                 case "Count":
                 case "Median":
                 case "Variance":
+                case "Ranking":
                     currentState = "Measure";
                     break;
                 case "Delta":
@@ -459,6 +460,7 @@
                                         <mx:String>Count</mx:String>
                                         <mx:String>Median</mx:String>
                                         <mx:String>Variance</mx:String>
+                                        <mx:String>Ranking</mx:String>
                                     </mx:Array>
                                 </mx:dataProvider>
                             </mx:ComboBox>

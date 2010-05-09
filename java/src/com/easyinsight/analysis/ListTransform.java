@@ -19,7 +19,10 @@ public class ListTransform {
     private Set<Map<Key, Value>> compositeKeys = new HashSet<Map<Key, Value>>();
     private Map<AnalysisMeasure, AggregationFactory> factoryMap = new HashMap<AnalysisMeasure, AggregationFactory>();
 
-    public ListTransform() {
+    private Set<Integer> skipAggregations;
+
+    public ListTransform(Set<Integer> skipAggregations) {
+        this.skipAggregations = skipAggregations;
     }
 
     public void groupData(Map<Key, Value> compositeDimensionKey, AnalysisMeasure measure, Value value, IRow row) {
@@ -29,9 +32,10 @@ public class ListTransform {
             values = new HashMap<AnalysisMeasure, Aggregation>();
             keyMap.put(compositeDimensionKey, values);
         }
+
         AggregationFactory aggregationFactory = factoryMap.get(measure);
         if (aggregationFactory == null) {
-            aggregationFactory = new AggregationFactory(measure);
+            aggregationFactory = new AggregationFactory(measure, skipAggregations.contains(measure.getAggregation()));
             factoryMap.put(measure, aggregationFactory);
         }
 

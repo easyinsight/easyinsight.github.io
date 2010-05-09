@@ -21,15 +21,33 @@ public class PipelineData {
     private InsightRequestMetadata insightRequestMetadata;
     private Map<String, String> dataSourceProperties;
     private Set<AnalysisItem> allRequestedItems;
+    private Map<AnalysisItem, Integer> refMap;
 
     public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
-                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems) {
+                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems,
+                        Map<AnalysisItem, Integer> refMap) {
         this.report = report;
         this.reportItems = reportItems;
         this.insightRequestMetadata = insightRequestMetadata;
         this.allItems = allItems;
         this.dataSourceProperties = dataSourceProperties;
         this.allRequestedItems = allRequestedItems;
+        this.refMap = refMap;
+    }
+
+    public Map<AnalysisItem, Integer> getRefMap() {
+        return refMap;
+    }
+
+    public void setRefMap(Map<AnalysisItem, Integer> refMap) {
+        this.refMap = refMap;
+    }
+
+    public boolean decrementReferenceCount(AnalysisItem analysisItem) {
+        Integer count = getRefMap().get(analysisItem);
+        count--;
+        getRefMap().put(analysisItem, count);
+        return count == 0;
     }
 
     public Set<AnalysisItem> getAllRequestedItems() {

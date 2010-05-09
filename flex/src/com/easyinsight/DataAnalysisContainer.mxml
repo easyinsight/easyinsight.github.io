@@ -929,7 +929,8 @@
                     dataView="{dataView}"/>
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
                     wrappers="{wrappers}" availableFields="{availableFields}"
-                    dataView="{dataView}" analysisItemCreated="sortFields()" reportSizing="onReportSizing(event)" analysisItemEdit="sortFields()"/>
+                    dataView="{dataView}" analysisItemCreated="sortFields()" reportSizing="onReportSizing(event)" analysisItemEdit="sortFields()"
+                    dataSourceID="{dataService.dataFeedID}"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" label="Filters (F3)" icon="@Embed(source='../../../assets/funnel.png')"
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
@@ -940,12 +941,11 @@
                 <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"
                            toolTip="Exclude Data" click="exclude()"/>
             </filtering:TransformContainer>
-            <analysis:DataTransformationTab dataView="{dataView}" dataSourceID="{dataService.dataFeedID}"
-                                            analysisDefinition="{analysisDefinition}" analysisItems="{wrappers}" id="scrubTab"/>
             <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab"/>
             <analysis:ReportSharingTab analysisDefinition="{analysisDefinition}" originSolution="{originSolution}" id="reportSharingTab"
                     reportSaveable="{reportSaveable}" canSubscribeToFeed="{canSubscribeToFeed}" canAddFeedToGroup="{canAddFeedToGroup}"
                     canSaveToMyData="{canSubscribeToInsight}" dataService="{dataService}"/>
+            
         </mx:TabNavigator>
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">

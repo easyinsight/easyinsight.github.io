@@ -5,7 +5,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FilterDefinition;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -27,23 +26,13 @@ public class FilterPipelineCleanupComponent implements IComponent {
         if (pipelineData.getReport().retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : pipelineData.getReport().retrieveFilterDefinitions()) {
                 if ((before && filterDefinition.isApplyBeforeAggregation()) || (!before && !filterDefinition.isApplyBeforeAggregation())) {
-                    boolean itemFound = findItem(filterDefinition.getField(), allRequestedAnalysisItems, pipelineData.getAllItems());
-                    if (!itemFound) {
+                    if (pipelineData.decrementReferenceCount(filterDefinition.getField())) {
                         pipelineData.getReportItems().remove(filterDefinition.getField());
                     }
                 }
             }
         }
         return dataSet;
-    }
-
-    private boolean findItem(AnalysisItem field, Collection<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allFields) {
-        int found = 0;
-        for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true);
-            found += items.contains(field) ? 1 : 0;
-        }
-        return found > 0;
     }
 
     public void decorate(DataResults listDataResults) {

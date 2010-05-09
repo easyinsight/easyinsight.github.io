@@ -9,14 +9,21 @@ public class AggregationFactory {
 
     private AnalysisMeasure analysisMeasure;
     private IAggregationState aggregationState;
+    private boolean skip;
 
-    public AggregationFactory(AnalysisMeasure analysisMeasure) {
+    public AggregationFactory(AnalysisMeasure analysisMeasure, boolean skip) {
         this.analysisMeasure = analysisMeasure;
-        switch (analysisMeasure.getAggregation()) {
-            case AggregationTypes.NORMALS:
-                aggregationState = new NormalsAggregationState();
-                break;
+        if (!skip) {
+            switch (analysisMeasure.getAggregation()) {
+                case AggregationTypes.NORMALS:
+                    aggregationState = new NormalsAggregationState();
+                    break;
+                case AggregationTypes.RANK:
+                    aggregationState = new RankAggregationState();
+                    break;
+            }
         }
+        this.skip = skip;
     }
 
     public Aggregation getAggregation() {
@@ -24,6 +31,9 @@ public class AggregationFactory {
     }
 
     private Aggregation getAggregation(int value) {
+        if (skip) {
+            return new SumAggregation();
+        }
         Aggregation aggregation;
         switch (value) {
             case AggregationTypes.SUM:
@@ -54,6 +64,10 @@ public class AggregationFactory {
                 break;
             case AggregationTypes.VARIANCE:
                 aggregation = new VarianceAggregation();
+                break;
+            case AggregationTypes.RANK:
+                aggregation = new RankAggregation(aggregationState, getAggregation(AggregationTypes.SUM));
+                aggregationState.addAggregation(aggregation);
                 break;
             default:
                 aggregation = new SumAggregation();

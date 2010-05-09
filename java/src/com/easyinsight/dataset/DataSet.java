@@ -74,8 +74,8 @@ public class DataSet implements Serializable {
         return rows.toString();
     }    
 
-    public ListTransform listTransform(List<AnalysisItem> columns) {
-        ListTransform listTransform = new ListTransform();
+    public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations) {
+        ListTransform listTransform = new ListTransform(skipAggregations);
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
         for (AnalysisItem column : columns) {
             if (column.hasType(AnalysisItemTypes.DIMENSION)) {

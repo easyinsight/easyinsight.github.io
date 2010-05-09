@@ -36,6 +36,9 @@
                 case "Variance":
                     analysisMeasure = new AnalysisMeasure(AggregationTypes.VARIANCE);
                     break;
+                case "Ranking":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.RANK);
+                        break;
             }
             return analysisMeasure;
         }

@@ -11,12 +11,15 @@ import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Button;
+import mx.controls.listClasses.IListItemRenderer;
+import mx.core.UIComponent;
+import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-public class ReportEditorFieldControls extends HBox
+public class ReportEditorFieldControls extends UIComponent implements IListItemRenderer
 	{
 		private var analysisItemWrapper:AnalysisItemWrapper;
 		private var _displayName:String;
@@ -90,6 +93,19 @@ public class ReportEditorFieldControls extends HBox
 			setStyle("horizontalAlign", "center");
 			this.percentWidth = 100;		
 		}
+
+    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        var buttonWidth:int = 40;
+        var buttonHeight:int = 22;
+        var padding:int = 5;
+        editButton.move((padding),0);
+        editButton.setActualSize(buttonWidth, buttonHeight);
+        button.move((padding * 2) + (buttonWidth),0);
+        button.setActualSize(buttonWidth, buttonHeight);
+        deleteButton.move((padding * 3) + (buttonWidth * 2),0);
+        deleteButton.setActualSize(buttonWidth, buttonHeight);
+    }
 		
 		override protected function createChildren():void {
             if (editButton == null) {
@@ -177,8 +193,8 @@ public class ReportEditorFieldControls extends HBox
             dispatchEvent(new AddedItemUpdateEvent(AddedItemUpdateEvent.UPDATE, existingItem, this.analysisItemWrapper, event.analysisItem));
 		}
 		
-		[Bindable]
-		override public function set data(value:Object):void {
+		[Bindable("dataChange")]
+		public function set data(value:Object):void {
 			this.analysisItemWrapper = value as AnalysisItemWrapper;
 			this.displayName = analysisItemWrapper.displayName;
             if (analysisItemWrapper.analysisItem != null) {
@@ -193,9 +209,10 @@ public class ReportEditorFieldControls extends HBox
             } else {
                 showCopy = false;
             }
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
 		}
 		
-		override public function get data():Object {
+		public function get data():Object {
 			return this.analysisItemWrapper;
 		}
 	}

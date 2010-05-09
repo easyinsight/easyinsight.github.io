@@ -25,7 +25,7 @@ public class ListSummaryComponent implements IComponent {
         for (AnalysisItem reportItem : pipelineData.getReportItems()) {
             if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) reportItem;
-                AggregationFactory aggregationFactory = new AggregationFactory(analysisMeasure);
+                AggregationFactory aggregationFactory = new AggregationFactory(analysisMeasure, false);
                 Aggregation aggregation = aggregationFactory.getAggregation();
                 for (IRow row : dataSet.getRows()) {
                     Value value = row.getValue(analysisMeasure.createAggregateKey());

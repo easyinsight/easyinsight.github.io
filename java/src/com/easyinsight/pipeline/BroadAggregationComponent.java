@@ -5,6 +5,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.ListTransform;
 import com.easyinsight.analysis.AnalysisItem;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -22,7 +23,7 @@ public class BroadAggregationComponent implements IComponent {
         }
 
         List<AnalysisItem> list = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
-        ListTransform listTransform = dataSet.listTransform(list);
+        ListTransform listTransform = dataSet.listTransform(list, new HashSet<Integer>());
         return listTransform.aggregate(list, derivedItems);
     }
 

@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
-import com.easyinsight.database.Database;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -68,17 +67,13 @@ public class AnalysisRangeDimension extends AnalysisDimension {
         setExplicitOptions(new ArrayList<RangeOption>(getExplicitOptions()));
     }
 
-    /* @Override
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
-        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-        items.add(this);
-        AnalysisMeasure analysisMeasure = new AnalysisMeasure(getKey(), aggregationType);
-        items.add(analysisMeasure);
-        return items;
-    }*/
-
     public RangeOption getLowerBound() {
         return lowerBound;
+    }
+
+    @Override
+    public AnalysisItemResultMetadata createResultMetadata() {
+        return new AnalysisRangeResultMetadata();
     }
 
     public void setLowerBound(RangeOption lowerBound) {
