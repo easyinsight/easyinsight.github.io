@@ -1,6 +1,7 @@
 package com.easyinsight.core;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * User: James Boe
@@ -10,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @Table(name="value")
 @Inheritance(strategy= InheritanceType.JOINED)
-public abstract class PersistableValue implements Cloneable {
+public abstract class PersistableValue implements Cloneable, Serializable {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="value_id")
     private long valueID;
