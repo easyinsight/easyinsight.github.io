@@ -32,6 +32,18 @@ public class HeatMapDefinitionState extends AnalysisDefinitionState {
     @Column(name="zoom_level")
     private int zoomLevel;
 
+    @Column(name="min_long")
+    private double minLong;
+
+    @Column(name="max_long")
+    private double maxLong;
+
+    @Column(name="min_lat")
+    private double minLat;
+
+    @Column(name="max_lat")
+    private double maxLat;
+
     public int getMapType() {
         return mapType;
     }
@@ -86,7 +98,43 @@ public class HeatMapDefinitionState extends AnalysisDefinitionState {
         heatMapDefinition.setLongitude(longitude);
         heatMapDefinition.setMapType(mapType);
         heatMapDefinition.setZoomLevel(zoomLevel);
+        heatMapDefinition.setMinLat(minLat);
+        heatMapDefinition.setMinLong(minLong);
+        heatMapDefinition.setMaxLat(maxLat);
+        heatMapDefinition.setMaxLong(maxLong);
         heatMapDefinition.setHeatMapID(getHeatMapDefinitionID());
         return heatMapDefinition;
+    }
+
+    public double getMinLong() {
+        return minLong;
+    }
+
+    public void setMinLong(double minLong) {
+        this.minLong = minLong;
+    }
+
+    public double getMaxLong() {
+        return maxLong;
+    }
+
+    public void setMaxLong(double maxLong) {
+        this.maxLong = maxLong;
+    }
+
+    public double getMinLat() {
+        return minLat;
+    }
+
+    public void setMinLat(double minLat) {
+        this.minLat = minLat;
+    }
+
+    public double getMaxLat() {
+        return maxLat;
+    }
+
+    public void setMaxLat(double maxLat) {
+        this.maxLat = maxLat;
     }
 }

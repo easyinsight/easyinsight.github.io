@@ -21,6 +21,10 @@ public class WSHeatMap extends WSAnalysisDefinition {
 
     private double latitude;
     private double longitude;
+    private double minLong;
+    private double maxLong;
+    private double minLat;
+    private double maxLat;
     private int zoomLevel;
     private int mapType;
 
@@ -112,5 +116,37 @@ public class WSHeatMap extends WSAnalysisDefinition {
         latitudeItem = firstItem("latitudeItem", structure);
         longitudeItem = firstItem("longitudeItem", structure);
         measure = firstItem("measure", structure);
+    }
+
+    public double getMaxLat() {
+        return maxLat;
+    }
+
+    public void setMaxLat(double maxLat) {
+        this.maxLat = maxLat;
+    }
+
+    public double getMinLat() {
+        return minLat;
+    }
+
+    public void setMinLat(double minLat) {
+        this.minLat = minLat;
+    }
+
+    public double getMinLong() {
+        return minLong;
+    }
+
+    public void setMinLong(double minLong) {
+        this.minLong = minLong;
+    }
+
+    public double getMaxLong() {
+        return maxLong;
+    }
+
+    public void setMaxLong(double maxLong) {
+        this.maxLong = maxLong;
     }
 }

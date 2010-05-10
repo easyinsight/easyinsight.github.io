@@ -73,16 +73,26 @@
             return 0;
         }
 
+        private function setBounding():void {
+            heatMapDefinition.minLat = map.getLatLngBounds().getNorthWest().lat();
+            heatMapDefinition.minLong = map.getLatLngBounds().getNorthWest().lng();
+            heatMapDefinition.maxLat = map.getLatLngBounds().getSouthEast().lat();
+            heatMapDefinition.maxLong = map.getLatLngBounds().getSouthEast().lng();
+        }
+
         private function onMoveEnd(event:MapMoveEvent):void {
             if (heatMapDefinition != null) {
                 heatMapDefinition.latitude = event.latLng.lat();
                 heatMapDefinition.longitude = event.latLng.lng();
+                setBounding();
             }
+
         }
 
         private function onZoomChanged(event:MapZoomEvent):void {
             if (heatMapDefinition != null) {
                 heatMapDefinition.zoomLevel = event.zoomLevel;
+                setBounding();
             }
         }
 
@@ -152,7 +162,6 @@
                     }
                 }
                 this.dataSet = data;
-
                 if (map.isLoaded()) {
                     prepareMap();
                 }

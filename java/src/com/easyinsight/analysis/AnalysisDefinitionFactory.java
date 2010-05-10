@@ -81,6 +81,10 @@ public class AnalysisDefinitionFactory {
             heatMapDefinitionState.setMapType(heatMap.getMapType());
             heatMapDefinitionState.setZoomLevel(heatMap.getZoomLevel());
             heatMapDefinitionState.setHeatMapDefinitionID(heatMap.getHeatMapID());
+            heatMapDefinitionState.setMinLat(heatMap.getMinLat());
+            heatMapDefinitionState.setMinLong(heatMap.getMinLong());
+            heatMapDefinitionState.setMaxLat(heatMap.getMaxLat());
+            heatMapDefinitionState.setMaxLong(heatMap.getMaxLong());
             analysisDefinitionState = heatMapDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());

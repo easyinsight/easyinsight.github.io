@@ -1,0 +1,1 @@
+alter table heat_map add column (min_long double, max_long double, min_lat double, max_lat double);
