@@ -67,12 +67,12 @@ public class ListTransform {
             if (dimensions != null) superSet.putAll(dimensions);
             if (measures != null) superSet.putAll(measures);
             for (AnalysisItem column : columns) {
-                if (column.hasType(AnalysisItemTypes.CALCULATION)) {
+                /*if (column.hasType(AnalysisItemTypes.CALCULATION)) {
                     AnalysisCalculation analysisCalculation = (AnalysisCalculation) column;
                     if (!analysisCalculation.isApplyBeforeAggregation()) {
                         continue;
                     }
-                }
+                }*/
                 Value obj = superSet.get(column);
                 if (obj == null) { obj = new EmptyValue(); }
                 if (obj instanceof Aggregation) {
