@@ -8,6 +8,7 @@ import javax.mail.*;
 import javax.mail.internet.*;
 import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.Properties;
@@ -75,13 +76,7 @@ public class SendGridEmail {
     public void sendEmail(long userID, String emailAddress, String category, String header, String body) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EMAIL_AUDIT (USER_ID, EMAIL_CATEGORY) VALUES (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            insertStmt.setLong(1, userID);
-            insertStmt.setString(2, category);
-            insertStmt.execute();
-            long id = Database.instance().getAutoGenKey(insertStmt);
-            sendEmail(emailAddress, header, body, id);
+            sendEmail(userID, emailAddress, category, header, body, conn);
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
@@ -89,14 +84,27 @@ public class SendGridEmail {
         }
     }
 
+    public void sendEmail(long userID, String emailAddress, String category, String header, String body, EIConnection conn) throws SQLException, MessagingException, UnsupportedEncodingException {
+
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EMAIL_AUDIT (USER_ID, EMAIL_CATEGORY) VALUES (?, ?)",
+                Statement.RETURN_GENERATED_KEYS);
+        insertStmt.setLong(1, userID);
+        insertStmt.setString(2, category);
+        insertStmt.execute();
+        long id = Database.instance().getAutoGenKey(insertStmt);
+        sendEmail(emailAddress, header, body, id);
+
+    }
+
     private void sendEmail(String emailAddress, String subject, String htmlBody, long auditID) throws MessagingException, UnsupportedEncodingException {
         Properties props = new Properties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.host", SMTP_HOST_NAME);
         props.put("mail.smtp.auth", "true");
+        props.put("vendor", "SendGrid");
 
         Authenticator auth = new SMTPAuthenticator();
-        Session mailSession = Session.getDefaultInstance(props, auth);
+        Session mailSession = Session.getInstance(props, auth);
         // uncomment for debugging infos to stdout
         // mailSession.setDebug(true);
         Transport transport = mailSession.getTransport();

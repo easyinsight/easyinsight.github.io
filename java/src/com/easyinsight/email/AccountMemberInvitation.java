@@ -125,7 +125,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(groupInviteText, adminFirstName != null ? adminFirstName : "", accountOwner, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, accountOwner);
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, adminFirstName + " " + accountOwner);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

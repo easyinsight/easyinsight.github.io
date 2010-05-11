@@ -31,8 +31,9 @@ public class AuthSMTPConnection {
         Properties props = new Properties();
         props.put("mail.smtp.host", HOSTNAME);
         props.put("mail.smtp.auth", "true");
+        props.put("vendor", "AuthSMTP");
 
-        Session session = Session.getDefaultInstance(props,new javax.mail.Authenticator() {
+        Session session = Session.getInstance(props,new javax.mail.Authenticator() {
 
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(USERNAME, PASSWORD);
