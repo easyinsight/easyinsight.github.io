@@ -24,7 +24,6 @@
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.reportpackage.ReportPackageWindow;
         import com.easyinsight.solutions.InsightDescriptor;
-        /*import com.easyinsight.styling.StyleEditor;*/
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -84,8 +83,8 @@
 
         /*[Bindable]
         [Embed(source="../../../../assets/palette2.png")]
-        public var themeAddIcon:Class;*/
-
+        public var themeAddIcon:Class;
+*/
         [Bindable]
         [Embed(source="../../../../assets/tablesx48.png")]
         public var tablesAddIcon:Class;
@@ -520,8 +519,8 @@
             <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton" icon="{packageAddIcon}"
 				label="Create Package" labelPlacement="bottom" visible="{showPackage}"/>
             <!--<mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>-->
-			<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
-               label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>
+			<!--<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
+               label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>-->
             <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton" icon="{tablesAddIcon}"
                label="Lookup Table" labelPlacement="bottom"/>
             <!--<mx:Button toolTip="Create theme..." click="createTheme()" id="styleAddButton" icon="{themeAddIcon}"
