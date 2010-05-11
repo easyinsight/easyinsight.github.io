@@ -1,8 +1,11 @@
 package com.easyinsight.account
 {
+import com.easyinsight.framework.User;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
+
+import mx.controls.Alert;
 import mx.managers.PopUpManager;
 import com.easyinsight.framework.UserTransferObject;
 import flash.events.MouseEvent;
@@ -57,6 +60,9 @@ import mx.containers.HBox;
         }
 
         private function onDelete(event:MouseEvent):void {
+            if (user.userID == User.getInstance().userID) {
+                Alert.show("You can't delete yourself.");
+            }
             dispatchEvent(new DeleteUserEvent(user.userID));
         }
 

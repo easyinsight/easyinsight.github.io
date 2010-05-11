@@ -6,6 +6,7 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.preferences.Persona;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
@@ -57,11 +58,12 @@
         }
 
         private function deleteUser(event:DeleteUserEvent):void {
+            ProgressAlert.alert(this, "Deleting user...", null, userService.deleteUser);
             userService.deleteUser.send(event.userID);
         }
 
         private function refreshAccount(event:RefreshAccountEvent):void {
-            event.stopPropagation();
+            if (event != null) event.stopPropagation();
             usersAvailableString = String(accountInfo.accountStats.availableUsers);
             usersAvailable = accountInfo.accountStats.availableUsers;
             userService.getUsers.send();
