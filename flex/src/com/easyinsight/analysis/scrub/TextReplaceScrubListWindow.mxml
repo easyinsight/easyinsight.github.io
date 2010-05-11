@@ -29,10 +29,11 @@
             }
 
             private function onDelete(event:DataScrubEvent):void {
-                report.dataScrubs.removeItemAt(report.dataScrubs.getItemIndex(event));
+                report.dataScrubs.removeItemAt(report.dataScrubs.getItemIndex(event.dataScrub));
             }
 			
 			public function set definition(definition:AnalysisDefinition):void {
+                this.report = definition;
                 if (definition.dataScrubs == null) {
                     definition.dataScrubs = new ArrayCollection();
                 }
