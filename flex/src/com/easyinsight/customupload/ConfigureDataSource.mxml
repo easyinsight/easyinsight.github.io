@@ -86,7 +86,13 @@
             if (dataSourceCreation.savesCredentials) {
                 credentialsIndex = 1;
             }
-            coreContent.addChild(dataSourceCreation as DisplayObject);
+            var dispObject:DisplayObject = dataSourceCreation as DisplayObject;
+            dispObject.addEventListener(FlexEvent.CREATION_COMPLETE, onDataCreation, false, 0, true);
+            coreContent.addChild(dispObject);
+
+        }
+
+        private function onDataCreation(event:FlexEvent):void {
             PopUpUtil.centerPopUp(this);
         }
 
