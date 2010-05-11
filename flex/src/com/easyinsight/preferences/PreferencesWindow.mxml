@@ -89,49 +89,6 @@
         <mx:HRule width="100%"/>
         <tokens:TokenManagementWindow/>
         <mx:HRule width="100%"/>
-        <!--<mx:HBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Image source="{homeIcon}" id="homeImage"/>
-                <mx:Label text="Intro" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-                <mx:CheckBox id="introCheckbox" selected="{homeIconSelected}"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Image source="{myDataIcon}" id="myDataImage"/>
-                <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-                <mx:CheckBox id="myDataCheckbox" selected="{myDataSelected}"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Image source="{catalogIcon}" id="catalogImage"/>
-                <mx:Label text="Marketplace" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-                <mx:CheckBox id="marketplaceCheckbox" selected="{marketplaceSelected}"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Image source="{groupsIcon}" id="groupsImage"/>
-                <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-                <mx:CheckBox id="groupCheckbox" selected="{groupsSelected}"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
-                <mx:Label text="Solutions" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-                <mx:CheckBox id="solutionsCheckbox" selected="{solutionsSelected}"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Image source="{goalsIcon}" id="goalsImage"/>
-                <mx:Label text="KPIs" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-                <mx:CheckBox id="kpisCheckbox" selected="{goalsSelected}"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Image source="{apiIcon}" id="apiImage"/>
-                <mx:Label text="API" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-                <mx:CheckBox id="apiCheckbox" selected="{apiSelected}"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:Image source="{accountIcon}" id="accountImage"/>
-                <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-                <mx:CheckBox id="accountCheckbox" selected="{accountSelected}"/>
-            </mx:VBox>
-        </mx:HBox>
-        <mx:HRule width="100%"/>-->
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
