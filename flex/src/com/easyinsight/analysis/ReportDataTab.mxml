@@ -229,8 +229,8 @@
                toolTip="Add Hierarchy..." click="createHierarchy()"/>
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
                icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
-    <mx:Button id="obfuscateButton" toolTip="Toggle Obfuscation"
-               icon="@Embed(source='../../../../assets/lock.png')" click="obfuscate()"/>
+    <!--<mx:Button id="obfuscateButton" toolTip="Toggle Obfuscation"
+               icon="@Embed(source='../../../../assets/lock.png')" click="obfuscate()"/>-->
         <mx:Button id="textScrubButton" toolTip="Text Replace"
                icon="@Embed(source='../../../../assets/text_find.png')"
                click="newTextReplaceScrub()"/>
