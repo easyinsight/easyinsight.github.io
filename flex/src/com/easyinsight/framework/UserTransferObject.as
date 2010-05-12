@@ -13,6 +13,7 @@ package com.easyinsight.framework
         public var firstName:String;
         public var title:String;
         public var personaID:int;
+        public var optInEmail:Boolean;
 		
 		public function UserTransferObject()
 		{

@@ -37,6 +37,33 @@ import nu.xom.Document;
 public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     private String url;
+    private boolean includeArchived;
+    private boolean includeInactive;
+    private boolean includeComments;
+
+    public boolean isIncludeInactive() {
+        return includeInactive;
+    }
+
+    public void setIncludeInactive(boolean includeInactive) {
+        this.includeInactive = includeInactive;
+    }
+
+    public boolean isIncludeArchived() {
+        return includeArchived;
+    }
+
+    public void setIncludeArchived(boolean includeArchived) {
+        this.includeArchived = includeArchived;
+    }
+
+    public boolean isIncludeComments() {
+        return includeComments;
+    }
+
+    public void setIncludeComments(boolean includeComments) {
+        this.includeComments = includeComments;
+    }
 
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
@@ -68,7 +95,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         Token token = new TokenStorage().getToken(userID, TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false);
         CredentialFulfillment ourFulfillment = null;
         for (CredentialFulfillment credentialFulfillment : existingCredentials) {
-            if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
+            if (credentialFulfillment.getDataSourceID() == getDataFeedID() && credentialFulfillment.getCredentials() != null) {
                 ourFulfillment = credentialFulfillment;
             }
         }
@@ -187,19 +214,27 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM BASECAMP WHERE DATA_FEED_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
-        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO BASECAMP (DATA_FEED_ID, URL) VALUES (?, ?)");
+        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO BASECAMP (DATA_FEED_ID, URL, INCLUDE_ARCHIVED," +
+                "include_inactive, INCLUDE_COMMENTS) VALUES (?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
+        basecampStmt.setBoolean(3, isIncludeArchived());
+        basecampStmt.setBoolean(4, isIncludeInactive());
+        basecampStmt.setBoolean(5, isIncludeComments());
         basecampStmt.execute();
     }
 
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL FROM BASECAMP WHERE DATA_FEED_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_ARCHIVED, INCLUDE_INACTIVE, INCLUDE_COMMENTS FROM " +
+                "BASECAMP WHERE DATA_FEED_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
             this.setUrl(rs.getString(1));
+            this.setIncludeArchived(rs.getBoolean(2));
+            this.setIncludeInactive(rs.getBoolean(3));
+            this.setIncludeComments(rs.getBoolean(4));
         }
     }
 

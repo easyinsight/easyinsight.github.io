@@ -109,7 +109,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.BASIC;
+        return Account.PERSONAL;
     }
 
     protected Document runRestRequest(HttpClient httpClient, String token, String url) throws IOException, ParsingException {
@@ -167,6 +167,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 Node curProject = projectNodes.get(i);
                 String id = queryField(curProject, "id/text()");
                 String name = queryField(curProject, "name/text()");
+                loadingProgress(i, projectNodes.size(), "Synchronizing with " + name + "...", false);
                 int initialVelocity = Integer.parseInt(queryField(curProject, "initial_velocity/text()"));
                 int currentVelocity = Integer.parseInt(queryField(curProject, "current_velocity/text()"));
                 String labels = queryField(curProject, "labels/text()");

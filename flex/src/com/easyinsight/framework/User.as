@@ -1,8 +1,10 @@
 package com.easyinsight.framework
 {
+import com.easyinsight.account.Account;
 import com.easyinsight.preferences.UIConfiguration;
 import com.easyinsight.preferences.UISettings;
 
+import flash.events.Event;
 import flash.net.SharedObject;
 
 public class User
@@ -24,45 +26,60 @@ public class User
         public var uiConfiguration:UIConfiguration;
         public var firstName:String;
         public var freeUpgradePossible:Boolean;
+    public var lastLoginDate:Date;
+    public var firstLogin:Boolean;
+    public var accountName:String;
+    public var renewalOptionPossible:Boolean;
 
         public function User() {
 
         }
-		
-		static public function initializeUser(name:String, email:String, accountType:int,
-		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean, userID:int, activated:Boolean, billingInformationGiven:Boolean, accountState:int,
-                uiSettings:UISettings, firstName:String, freeUpgradePossible:Boolean):void {
-			_user = new User();
-			_user.name = name;
-			_user.email = email;
-            _user.firstName = firstName;
-            _user.accountAdmin = accountAdmin;
-			_user.spaceAllowed = spaceAllowed;
-			_user.accountType = accountType;
-            _user.userID = userID;
-            _user.activated = activated;
-            _user.billingInformationGiven = billingInformationGiven;
-            _user.accountState = accountState;
-            _user.freeUpgradePossible = freeUpgradePossible;
-            if (uiSettings != null) {
-                _user.uiConfiguration = UIConfiguration.fromUISettings(uiSettings);
-            }
-            try {
-                sharedObject = SharedObject.getLocal(userID.toString());
-                var credentialIDs:String = sharedObject.data["credentials"];
-                if (credentialIDs != null && credentialIDs != "") {
-                    var ids:Array = credentialIDs.split(",");
-                    for each (var idString:String in ids) {
-                        var credentials:Credentials = getCredentials(int(idString));
-                        if (credentials != null) {
-                            CredentialsCache.getCache().addCredentials(int(idString), credentials);    
-                        }
+
+    static public function initializeUser(response:UserServiceResponse):void {
+        _user = new User();
+        _user.name = response.name;
+        _user.email = response.email;
+        _user.firstName = response.firstName;
+        _user.accountAdmin = response.accountAdmin;
+        _user.spaceAllowed = response.spaceAllowed;
+        _user.accountType = response.accountType;
+        _user.userID = response.userID;
+        _user.activated = response.activated;
+        _user.billingInformationGiven = response.billingInformationGiven;
+        _user.accountState = response.accountState;
+        _user.freeUpgradePossible = response.freeUpgradePossible;
+        _user.lastLoginDate = response.lastLoginDate;
+        _user.firstLogin = response.firstLogin;
+        _user.accountName = response.accountName;
+        _user.renewalOptionPossible = response.renewalOptionPossible;
+        if (_user.firstLogin) {
+            User.getEventNotifier().dispatchEvent(new Event("firstLogin"));
+        } else if (response.renewalOptionPossible) {
+            User.getEventNotifier().dispatchEvent(new Event("renewalOption"));
+        } else if (response.accountType == Account.DELINQUENT) {
+            User.getEventNotifier().dispatchEvent(new Event("accountDelinquent"));
+        }
+        if (response.uiSettings != null) {
+            _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);
+        }
+        try {
+            sharedObject = SharedObject.getLocal(response.userID.toString());
+            var credentialIDs:String = sharedObject.data["credentials"];
+            if (credentialIDs != null && credentialIDs != "") {
+                var ids:Array = credentialIDs.split(",");
+                for each (var idString:String in ids) {
+                    var credentials:Credentials = getCredentials(int(idString));
+                    if (credentials != null) {
+                        CredentialsCache.getCache().addCredentials(int(idString), credentials);
                     }
                 }
-            } catch (e:Error) {
-
             }
-		}
+        } catch (e:Error) {
+
+        }
+    }
+
+
 
         public function updateLabels(userName:String, fullName:String, email:String, firstName:String):void {
             this.email = email;

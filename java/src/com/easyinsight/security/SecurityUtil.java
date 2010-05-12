@@ -93,16 +93,11 @@ public class SecurityUtil {
                     user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                 }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(), 
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(), user.isDataSourceCreator(),
-                        user.isInsightCreator(), account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
-                        user.getUiSettings(), user.getFirstName(), !account.isUpgraded());
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                        account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
+                        user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
+                        user.isRenewalOptionAvailable());
             } else {
-               /* results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
-                if (results.size() > 0) {
-
-                } else {
-                    throw new SecurityException();
-                }*/
                 throw new SecurityException();
             }
             conn.commit();

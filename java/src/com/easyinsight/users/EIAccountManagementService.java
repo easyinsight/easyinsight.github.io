@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
@@ -13,6 +14,10 @@ import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.MessageFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
@@ -25,12 +30,122 @@ import java.sql.Connection;
  */
 public class EIAccountManagementService {
 
+    public void specialOffer(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, 30);
+        Date newDate = cal.getTime();
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+            // find all trial users who are older than two weeks ago
+
+            // ideal sales automation is once/week, because it seems like they're losing interest after one week
+
+            // initial email:
+            // how to create reports, how to create KPIs, how to connect to data sources
+
+            // week 1 email:
+            // report types, going from KPIs to reports
+
+            // week 2 email:
+            // pulling in further data to extend your dashboard?, hierarchies
+
+            // week 3 email:
+            // kpi trees (if pro), combining data sources
+
+            // week 4 email:
+            //  
+
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT state_change_time FROM ACCOUNT_TIMED_STATE WHERE " +
+                    "date(state_change_time) > ? and account_state = ?");
+
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void testDeliver(String htmlText) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
+            PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
+            queryStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet rs = queryStmt.executeQuery();
+            String unsubscribeKey;
+            if (rs.next()) {
+                unsubscribeKey = rs.getString(1);
+            } else {
+                unsubscribeKey = RandomTextGenerator.generateText(12);
+                insertKeyStmt.setLong(1, SecurityUtil.getUserID());
+                insertKeyStmt.setString(2, unsubscribeKey);
+                insertKeyStmt.execute();
+            }
+            String emailBody = MessageFormat.format(htmlText, "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
+            PreparedStatement userQueryStmt = conn.prepareStatement("SELECT email from USER where USER_ID = ?");
+            userQueryStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet userRS = userQueryStmt.executeQuery();
+            userRS.next();
+            String emailAddress = userRS.getString(1);
+            SendGridEmail sendGridEmail = new SendGridEmail();
+            sendGridEmail.sendEmail(SecurityUtil.getUserID(), emailAddress, "Newsletter Test", "What's New with Easy Insight", emailBody, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void sendNewsletter(String htmlText) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        SendGridEmail sendGridEmail = new SendGridEmail();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL, USER.USER_ID FROM USER WHERE USER.opt_in_email = ?");
+            queryStmt.setBoolean(1, true);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                String email = rs.getString(1);
+                long userID = rs.getLong(2);
+                PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
+                PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
+                queryUnsubscribeStmt.setLong(1, SecurityUtil.getUserID());
+                ResultSet unsubscribeRS = queryUnsubscribeStmt.executeQuery();
+                String unsubscribeKey;
+                if (unsubscribeRS.next()) {
+                    unsubscribeKey = unsubscribeRS.getString(1);
+                } else {
+                    unsubscribeKey = RandomTextGenerator.generateText(12);
+                    insertKeyStmt.setLong(1, SecurityUtil.getUserID());
+                    insertKeyStmt.setString(2, unsubscribeKey);
+                    insertKeyStmt.execute();
+                }
+                String emailBody = MessageFormat.format(htmlText, "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
+                sendGridEmail.sendEmail(userID, email, "Newsletter", "What's new with Easy Insight...", emailBody, conn);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void updateTrial(long accountID, Date newTrialDate) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             new AccountActivityStorage().updateTrialTime(accountID, conn, newTrialDate);
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -65,8 +180,9 @@ public class EIAccountManagementService {
                     }
                     userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                            user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded());
+                            (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded(),
+                            !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable());
                     // FlexContext.getFlexSession().getRemoteCredentials();
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
@@ -190,7 +306,7 @@ public class EIAccountManagementService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         session = Database.instance().createSession();
         try {

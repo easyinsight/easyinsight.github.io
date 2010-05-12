@@ -1,6 +1,8 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.eventing.MessageUtils;
+import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
 import com.easyinsight.dataset.DataSet;
@@ -34,6 +36,18 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
 
     public void setCredentialsDefinition(int i) { }
+
+    public void loadingProgress(int current, int total, String message, boolean async) {
+        DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+        info.setDataSourceID(getParentSourceID() == 0 ? getDataFeedID() : getParentSourceID());
+        info.setDataSourceName(message);
+        info.setType(DataSourceRefreshEvent.PROGRESS);
+        info.setUserId(SecurityUtil.getUserID());
+        info.setCurrent(current);
+        info.setMax(total);
+        MessageUtils.sendMessage("generalNotifications", info);
+
+    }
 
     public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
         if (getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {

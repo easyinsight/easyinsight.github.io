@@ -115,6 +115,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     companies = runRestRequest("/people.xml?n=" + offset, client, builder, url, true);
                 }
                 Nodes companyNodes = companies.query("/people/person");
+                loadingProgress(0, 1, "Synchronizing with contacts...", true);
                 contactCount = 0;
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();

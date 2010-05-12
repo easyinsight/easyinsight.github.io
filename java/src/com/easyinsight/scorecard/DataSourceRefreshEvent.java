@@ -3,6 +3,7 @@ package com.easyinsight.scorecard;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.scheduler.OutboundEvent;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,11 +14,48 @@ import java.util.List;
 public class DataSourceRefreshEvent extends OutboundEvent {
 
     public static final int DATA_SOURCE_NAME = 1;
+    public static final int PROGRESS = 3;
     public static final int DONE = 2;
 
     private long dataSourceID;
     private int type;
     private String dataSourceName;
+    private int current;
+    private int max;
+    private Date timestamp = new Date();
+    private boolean async;
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public int getCurrent() {
+        return current;
+    }
+
+    public void setCurrent(int current) {
+        this.current = current;
+    }
+
+    public int getMax() {
+        return max;
+    }
+
+    public void setMax(int max) {
+        this.max = max;
+    }
 
     public String getDataSourceName() {
         return dataSourceName;

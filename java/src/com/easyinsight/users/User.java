@@ -4,7 +4,6 @@ import com.easyinsight.preferences.UISettings;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 /**
  * User: jboe
@@ -27,6 +26,9 @@ public class User {
     @Column(name="name")
     private String name;
 
+    @Column(name="initial_setup_done")
+    private boolean initialSetupDone;
+
     @Transient
     private UISettings uiSettings;
 
@@ -39,15 +41,8 @@ public class User {
     @Column(name="persona_id")
     private Long personaID;
 
-    @Column(name="permissions")
-    private int permissions;
-
     @Column(name="account_admin")
     private boolean accountAdmin;
-    @Column(name="data_source_creator")
-    private boolean dataSourceCreator;
-    @Column(name="insight_creator")
-    private boolean insightCreator;
 
     @Column(name="user_key")
     private String userKey;
@@ -56,6 +51,12 @@ public class User {
 
     @Column(name="last_login_date")
     private Date lastLoginDate;
+
+    @Column(name="renewal_option_available")
+    private boolean renewalOptionAvailable;
+
+    @Column(name="opt_in_email")
+    private boolean optInEmail;
 
     @ManyToOne
     @JoinColumn (name="account_id")
@@ -82,6 +83,30 @@ public class User {
         userTransferObject.setFirstName(firstName);
         userTransferObject.setPersonaID(personaID != null ? personaID : 0);
         return userTransferObject;
+    }
+
+    public boolean isOptInEmail() {
+        return optInEmail;
+    }
+
+    public void setOptInEmail(boolean optInEmail) {
+        this.optInEmail = optInEmail;
+    }
+
+    public boolean isInitialSetupDone() {
+        return initialSetupDone;
+    }
+
+    public void setInitialSetupDone(boolean initialSetupDone) {
+        this.initialSetupDone = initialSetupDone;
+    }
+
+    public boolean isRenewalOptionAvailable() {
+        return renewalOptionAvailable;
+    }
+
+    public void setRenewalOptionAvailable(boolean renewalOptionAvailable) {
+        this.renewalOptionAvailable = renewalOptionAvailable;
     }
 
     public UISettings getUiSettings() {
@@ -148,14 +173,6 @@ public class User {
         this.userID = userID;
     }
 
-    public int getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(int permissions) {
-        this.permissions = permissions;
-    }
-
     public String getUserName() {
         return userName;
     }
@@ -204,22 +221,6 @@ public class User {
         this.accountAdmin = accountAdmin;
     }
 
-    public boolean isDataSourceCreator() {
-        return dataSourceCreator;
-    }
-
-    public void setDataSourceCreator(boolean dataSourceCreator) {
-        this.dataSourceCreator = dataSourceCreator;
-    }
-
-    public boolean isInsightCreator() {
-        return insightCreator;
-    }
-
-    public void setInsightCreator(boolean insightCreator) {
-        this.insightCreator = insightCreator;
-    }
-
     public void update(UserTransferObject transferObject) {
         setUserName(transferObject.getUserName());
         setAccountAdmin(transferObject.isAccountAdmin());
@@ -228,6 +229,7 @@ public class User {
         setLastLoginDate(transferObject.getLastLoginDate());
         setPersonaID(transferObject.getPersonaID() > 0 ? transferObject.getPersonaID() : null);
         setName(transferObject.getName());
-        setTitle(transferObject.getTitle());        
+        setTitle(transferObject.getTitle());
+        setOptInEmail(transferObject.isOptInEmail());
     }
 }

@@ -25,6 +25,8 @@
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FragmentParser;        
         import com.easyinsight.framework.IFullScreenPage;
+        import com.easyinsight.framework.InitialLoginWindow;
+        import com.easyinsight.framework.RenewalSource;
         import com.easyinsight.framework.WebCredentialsCache;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.intro.WelcomeScreen;
@@ -39,8 +41,8 @@
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.tour.TutorialFramework;
+        import com.easyinsight.util.DiagnosticsWindow;
         import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
 
         import mx.rpc.events.FaultEvent;
 
@@ -83,6 +85,8 @@
 
         private var fullScreenPage:IFullScreenPage;
 
+        private var allowNavigation:Boolean;
+
         public var browserManager:IBrowserManager;
 
 
@@ -92,9 +96,26 @@
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
+            User.getEventNotifier().addEventListener("firstLogin", onFirstLogin);
+            User.getEventNotifier().addEventListener("renewalOption", onRenewalOption);
+            User.getEventNotifier().addEventListener("accountDelinquent", onAccountDelinquent);
             EIMessageListener.initialize();
             messageListener = EIMessageListener.instance();
             userService.isSessionLoggedIn.send();
+        }
+
+        private function onFirstLogin(event:Event):void {
+            var window:InitialLoginWindow = new InitialLoginWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onRenewalOption(event:Event):void {
+            doAnalyze(new RenewalSource());
+        }
+
+        private function onAccountDelinquent(event:Event):void {
+
         }
 
         private function applicationListeners():void {
@@ -104,20 +125,27 @@
         private function onKeyDown(event:KeyboardEvent):void {
             if (event.ctrlKey && event.keyCode == 190 && User.getInstance() != null) {
                 launchQuickSearchWindow();
+            } else if (event.ctrlKey && event.keyCode == 191) {
+                var window:DiagnosticsWindow = new DiagnosticsWindow();
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
             }
         }
 
         private function launchQuickSearchWindow():void {
             var window:QuickSearchWindow = new QuickSearchWindow();
-            window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
-            window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
+            window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch, false, 0, true);
+            window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch, false, 0, true);
             PopUpManager.addPopUp(window, this, false);
             PopUpUtil.centerPopUp(window);
         }
 
         private function launchBugReportWindow():void {
-            var window:BugReportWindow = new BugReportWindow();
+            /*var window:BugReportWindow = new BugReportWindow();
             PopUpManager.addPopUp(window, this, false);
+            PopUpUtil.centerPopUp(window);*/
+            var window:DiagnosticsWindow = new DiagnosticsWindow();
+            PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
 
@@ -350,10 +378,7 @@
         private function sessionCheck():void {
             var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
             if (authResult != null) {
-                User.initializeUser(authResult.name, authResult.email,
-                        authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState,
-                        authResult.uiSettings, authResult.firstName, authResult.freeUpgradePossible);                
+                User.initializeUser(authResult);                
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
@@ -361,9 +386,11 @@
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             }
             browserManager = BrowserManager.getInstance();
-            browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);           
-            browserManager.init("home", "Home");
-            parseURL(null);
+            browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);
+            if (User.getInstance() == null || !User.getInstance().renewalOptionPossible) {
+                browserManager.init("home", "Home");
+                parseURL(null);    
+            }
         }
 
         private function setup():void {

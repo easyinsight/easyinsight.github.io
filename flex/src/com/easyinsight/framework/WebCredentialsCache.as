@@ -28,10 +28,12 @@ public class WebCredentialsCache extends EventDispatcher implements ICredentials
     public function createCredentials():ArrayCollection {
         var creds:ArrayCollection = new ArrayCollection();
         for (var dataSourceID:String in cache) {
-            var credentialFulfillment:CredentialFulfillment = new CredentialFulfillment();
-            credentialFulfillment.dataSourceID = int(dataSourceID);
-            credentialFulfillment.credentials = cache[dataSourceID];
-            creds.addItem(credentialFulfillment);
+            if (cache[dataSourceID] != null) {
+                var credentialFulfillment:CredentialFulfillment = new CredentialFulfillment();
+                credentialFulfillment.dataSourceID = int(dataSourceID);
+                credentialFulfillment.credentials = cache[dataSourceID];
+                creds.addItem(credentialFulfillment);
+            }
         }
         return creds;
     }

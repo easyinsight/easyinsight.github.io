@@ -222,9 +222,6 @@
     <mx:Button id="calculationButton" toolTip="Create Calculation"
                icon="@Embed(source='../../../../assets/text_formula.png')"
                click="createCalculation()"/>
-    <mx:Button id="newFieldButton" toolTip="Create Blank Field"
-               icon="@Embed(source='../../../../assets/document_add.png')"
-               click="createBlankField()"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
                toolTip="Add Hierarchy..." click="createHierarchy()"/>
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"

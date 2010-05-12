@@ -20,6 +20,7 @@ public class UserTransferObject {
     private String title;
 
     private boolean accountAdmin;
+    private boolean optInEmail;
 
     public UserTransferObject() {
     }
@@ -30,6 +31,14 @@ public class UserTransferObject {
         this.email = email;
         this.name = name;
         this.firstName = firstName;
+    }
+
+    public boolean isOptInEmail() {
+        return optInEmail;
+    }
+
+    public void setOptInEmail(boolean optInEmail) {
+        this.optInEmail = optInEmail;
     }
 
     public long getPersonaID() {
@@ -114,6 +123,7 @@ public class UserTransferObject {
         user.setTitle(getTitle());
         user.setName(getName());
         user.setUserName(getUserName());
+        user.setOptInEmail(isOptInEmail());
         return user;
     }
 }

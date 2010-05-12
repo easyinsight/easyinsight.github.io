@@ -108,6 +108,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
             do {*/
                 Document companies = runRestRequest("/companies.xml", client, builder, url, true);
                 Nodes companyNodes = companies.query("/companies/company");
+                loadingProgress(0, 1, "Synchronizing with companies...", true);
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
                     Node companyNode = companyNodes.get(i);

@@ -327,8 +327,39 @@ public class UserAccountAdminService {
         }
     }
 
+    public void welcomeBack(WelcomeBackInfo welcomeBackInfo) {
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+            if (!user.isRenewalOptionAvailable()) {
+                throw new RuntimeException();
+            }
+            user.setRenewalOptionAvailable(false);
+            user.setFirstName(welcomeBackInfo.getFirstName());
+            user.setName(welcomeBackInfo.getLastName());
+            user.setAccountAdmin(true);
+            Account account = user.getAccount();
+            account.setName(welcomeBackInfo.getAccountName());
+            if (welcomeBackInfo.getAccountTier() != SecurityUtil.getAccountTier()) {
+                updateAccount(welcomeBackInfo.getAccountTier(), conn, session, account, user);
+            }
+            session.update(user);
+            session.flush();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public UpgradeAccountResponse upgradeAccount(int toType) {
-        UpgradeAccountResponse response = new UpgradeAccountResponse();
+
         if (toType == Account.ADMINISTRATOR) {
             throw new SecurityException();
         }
@@ -348,64 +379,9 @@ public class UserAccountAdminService {
 
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
 
-            boolean goAheadWithUpgrade = false;
-
-            if (account.getAccountType() == Account.PERSONAL && !account.isUpgraded()) {
-
-                // If the user has a free account and hasn't upgraded
-
-                goAheadWithUpgrade = true;
-
-                account.setAccountState(Account.TRIAL);
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_YEAR, 30);
-                new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
-
-                Group group = new Group();
-                group.setName(account.getName());
-                group.setPubliclyVisible(false);
-                group.setPubliclyJoinable(false);
-                group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
-                account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
-
-
-            } else if (account.getAccountType() == Account.PERSONAL && account.isUpgraded()) {
-
-                // if the user has a free account that they've previously upgraded/downgraded
-
-            } else {
-
-                Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
-
-                if (trialEnd != null && trialEnd.after(new Date())) {
-
-                    // if the user is currently in a trial period
-
-                    goAheadWithUpgrade = true;
-
-                } else if (account.getBillingDayOfMonth() != null) {
-
-                    // if the user has billing set up
-                    
-                    goAheadWithUpgrade = true;
-                }
-            }
-
-            if (goAheadWithUpgrade) {
-                account.setAccountType(toType);
-                AccountLimits.configureAccount(account);
-                response.setNewAccountType(toType);
-                account.setUpgraded(true);
-                session.update(account);
-                SecurityUtil.changeAccountType(toType);
-            } else {
-                throw new RuntimeException("Unhandled account upgrade case, please contact support.");
-            }
-
+            UpgradeAccountResponse response = updateAccount(toType, conn, session, account, user);
             session.flush();
             conn.commit();
-            response.setSuccessful(true);
-            response.setUser(user.toUserTransferObject());
             return response;
         } catch (Exception e) {
             LogClass.error(e);
@@ -415,6 +391,66 @@ public class UserAccountAdminService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+    }
+
+    private UpgradeAccountResponse updateAccount(int toType, EIConnection conn, Session session, Account account, User user) throws SQLException {
+        UpgradeAccountResponse response = new UpgradeAccountResponse();
+        boolean goAheadWithUpgrade = false;
+
+        if (account.getAccountType() == Account.PERSONAL && !account.isUpgraded()) {
+
+            // If the user has a free account and hasn't upgraded
+
+            goAheadWithUpgrade = true;
+
+            account.setAccountState(Account.TRIAL);
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, 30);
+            new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
+
+            Group group = new Group();
+            group.setName(account.getName());
+            group.setPubliclyVisible(false);
+            group.setPubliclyJoinable(false);
+            group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
+            account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
+
+
+        } else if (account.getAccountType() == Account.PERSONAL && account.isUpgraded()) {
+
+            // if the user has a free account that they've previously upgraded/downgraded
+
+        } else {
+
+            Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
+
+            if (trialEnd != null && trialEnd.after(new Date())) {
+
+                // if the user is currently in a trial period
+
+                goAheadWithUpgrade = true;
+
+            } else if (account.getBillingDayOfMonth() != null) {
+
+                // if the user has billing set up
+
+                goAheadWithUpgrade = true;
+            }
+        }
+
+        if (goAheadWithUpgrade) {
+            account.setAccountType(toType);
+            AccountLimits.configureAccount(account);
+            response.setNewAccountType(toType);
+            account.setUpgraded(true);
+            session.update(account);
+            SecurityUtil.changeAccountType(toType);
+        } else {
+            throw new RuntimeException("Unhandled account upgrade case, please contact support.");
+        }
+        response.setSuccessful(true);
+        response.setUser(user.toUserTransferObject());
+        return response;
     }
 
     public void deleteUser(long userID) {

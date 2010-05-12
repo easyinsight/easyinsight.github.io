@@ -1,0 +1,115 @@
+<?xml version="1.0" ?>
+<listing:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                        xmlns:listing="com.easyinsight.*" xmlns:kpi="com.easyinsight.kpi.*"
+                        xmlns:framework="com.easyinsight.framework.*" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
+                        width="100%" height="100%" implements="com.easyinsight.framework.IFullScreenPage" creationComplete="setup()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.kpi.KPITutorialEvent;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.binding.utils.BindingUtils;
+        import mx.managers.PopUpManager;
+
+        private function setup():void {
+            welcomeBackInfo = new WelcomeBackInfo();
+            welcomeBackInfo.accountName = User.getInstance().accountName;
+            welcomeBackInfo.firstName = User.getInstance().firstName;
+            welcomeBackInfo.lastName = User.getInstance().getName();
+            welcomeBackInfo.accountTier = User.getInstance().getAccountType();
+        }
+
+        private var _welcomeBackInfo:WelcomeBackInfo;
+
+        [Bindable(event="welcomeBackInfoChanged")]
+        public function get welcomeBackInfo():WelcomeBackInfo {
+            return _welcomeBackInfo;
+        }
+
+        public function set welcomeBackInfo(value:WelcomeBackInfo):void {
+            if (_welcomeBackInfo == value) return;
+            _welcomeBackInfo = value;
+            dispatchEvent(new Event("welcomeBackInfoChanged"));
+        }
+
+        private function welcomed():void {
+            User.getInstance().setAccountType(welcomeBackInfo.accountTier);
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
+        [Bindable]
+        private var panelIndex:int = 0;
+
+        private function updated():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (User.getInstance().getAccountType() == Account.FREE) {
+                var panel:AccountTypeUpdatePanel = new AccountTypeUpdatePanel();
+                panel.addEventListener(KPITutorialEvent.NEXT, next);
+                BindingUtils.bindProperty(panel, "welcomeBackInfo", this, "welcomeBackInfo");
+                var tutorialPanel:TutorialPanel = new TutorialPanel();
+                tutorialPanel.percentHeight = 100;
+                tutorialPanel.percentWidth = 100;
+                tutorialPanel.addChild(panel);
+                tutorialPanel.setStyle("hideEffect", leftEffect);
+                tutorialPanel.setStyle("showEffect", leftEffect);
+                viewStack.addChildAt(tutorialPanel, 1);
+            }
+        }
+
+        private function next(event:KPITutorialEvent):void {
+            panelIndex++;
+        }
+
+        private function back(event:KPITutorialEvent):void {
+            panelIndex--;
+        }
+
+        private function onFinish(event:KPITutorialEvent):void {
+            ProgressAlert.alert(this, "Updating your account...", null, userService.welcomeBack);
+            userService.welcomeBack.send(welcomeBackInfo);
+        }
+
+        private function onCancel(event:Event):void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="userService" destination="accountAdmin">
+        <mx:method name="welcomeBack" result="welcomed()"/>
+    </mx:RemoteObject>
+    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
+    <mx:Canvas width="100%" height="100%">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="0x000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="0xAAAAAA"/>
+        </mx:VBox>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ViewStack selectedIndex="{panelIndex}"
+                          id="viewStack" resizeToContent="true" width="800" height="500" creationPolicy="all"
+                          backgroundColor="0xFFFFFF">
+                <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+                    <framework:WelcomeBackPanel id="welcomeBackPanel"/>
+                    <kpi:TutorialButtons tutorialPanel="{welcomeBackPanel}" backEnabled="false" nextEnabled="true"
+                                         finishEnabled="false"
+                                         showExpertMode="false"
+                                         kpiTutorialNext="panelIndex++"
+                                         kpiTutorialCancel="onCancel(event)" cancelVisible="false" backVisible="false"
+                            finishVisible="false"/>
+                </kpi:TutorialPanel>
+                <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+                    <framework:UpdateUserInfoPanel id="userInfoPanel" welcomeBackInfo="{welcomeBackInfo}"/>
+                    <kpi:TutorialButtons tutorialPanel="{userInfoPanel}" backEnabled="true" nextEnabled="false"
+                                         finishEnabled="true"
+                                         showExpertMode="false"
+                                         kpiTutorialFinish="onFinish(event)"
+                                         kpiTutorialCancel="onCancel(event)" backVisible="false" nextVisible="false"
+                            cancelVisible="false"/>
+                </kpi:TutorialPanel>                
+            </mx:ViewStack>
+        </mx:Box>
+    </mx:Canvas>
+</listing:FullScreenPage>

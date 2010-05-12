@@ -9,7 +9,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
@@ -113,24 +112,33 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectName = queryField(curProject, "name/text()");
+                loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", false);
                 System.out.println("project = " + projectName);
                 String projectStatus = queryField(curProject, "status/text()");
+                if (!source.isIncludeArchived() && "archived".equals(projectStatus)) {
+                    continue;
+                }
+                if (!source.isIncludeInactive() && "inactive".equals(projectStatus)) {
+                    continue;
+                }
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
 
                 Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false);
 
                 Map<String, String> milestoneCommentMap = new HashMap<String, String>();
-                /*Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
-                for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
-                    Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
-                    String id = queryField(milestoneNode, "id/text()");
-                    Document comments = runRestRequest("/milestones/" + id + "/comments.xml", client, builder, url, null, false);
-                    Nodes commentNodes = comments.query("/comments/comment");
-                    if (commentNodes.size() > 0) {
-                        Node commentNode = commentNodes.get(0);
-                        milestoneCommentMap.put(id, queryField(commentNode, "body"));
+                if (source.isIncludeComments()) {
+                    Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
+                    for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
+                        Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
+                        String id = queryField(milestoneNode, "id/text()");
+                        Document comments = runRestRequest("/milestones/" + id + "/comments.xml", client, builder, url, null, false);
+                        Nodes commentNodes = comments.query("/comments/comment");
+                        if (commentNodes.size() > 0) {
+                            Node commentNode = commentNodes.get(0);
+                            milestoneCommentMap.put(id, queryField(commentNode, "body"));
+                        }
                     }
-                }*/
+                }
 
                 Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null, false);
                 Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");
@@ -269,6 +277,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     dataStorage.insertData(ds);
                     ds = new DataSet();
                 }
+
             }
         } catch (Throwable e) {
             throw new RuntimeException(e);

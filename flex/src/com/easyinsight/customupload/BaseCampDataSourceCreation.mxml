@@ -17,6 +17,12 @@
         [Bindable]
         private var url:String;
         [Bindable]
+        private var archivedIncluded:Boolean;
+        [Bindable]
+        private var inactiveIncluded:Boolean;
+        [Bindable]
+        private var commentsIncluded:Boolean;
+        [Bindable]
         private var usernameInputText:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
@@ -29,6 +35,9 @@
             var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
             CredentialsCache.getCache().nukeCredentials(ds.dataFeedID);
             url = ds.url;
+            archivedIncluded = ds.includeArchived;
+            inactiveIncluded = ds.includeInactive;
+            commentsIncluded = ds.includeComments;
             usernameInputText = ds.username;
         }
 
@@ -39,6 +48,9 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
             ds.url = urlInput.text;
+            ds.includeArchived = archivedCheckbox.selected;
+            ds.includeComments = commentsCheckbox.selected;
+            ds.includeInactive = inactiveCheckbox.selected;
         }
 
         public function get credentials():Credentials {
@@ -70,6 +82,18 @@
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
         <mx:FormItem label="You can find the token on your Basecamp page under My Info - API Token." fontSize="10"/>
+        <mx:FormItem label="Include Inactive Projects:" direction="horizontal">
+            <mx:CheckBox id="inactiveCheckbox" selected="{inactiveIncluded}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on inactive projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>
+        </mx:FormItem>
+        <mx:FormItem label="Include Archived Projects:" direction="horizontal">
+            <mx:CheckBox id="archivedCheckbox" selected="{archivedIncluded}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on archived projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>
+        </mx:FormItem>
+        <mx:FormItem label="Include Comments:" direction="horizontal">
+            <mx:CheckBox id="commentsCheckbox" selected="{commentsIncluded}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on comments, you can save significant time on your synchronization by not pulling that field across into Easy Insight."/>
+        </mx:FormItem>
 	</mx:Form>
     <!--<mx:VRule/>
     <mx:VBox>

@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import flex.messaging.FlexContext;
 
-import javax.servlet.http.HttpSession;
 
 /**
  * User: jboe
@@ -37,6 +36,8 @@ import javax.servlet.http.HttpSession;
  * Time: 5:34:56 PM
  */
 public class UserService implements IUserService {
+
+    
 
     public boolean verifyPasswordReset(String passwordResetString) {
         EIConnection conn = Database.instance().getConnection();
@@ -367,6 +368,7 @@ public class UserService implements IUserService {
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);            
             String encryptedPassword = PasswordService.getInstance().encrypt(password);
             user.setPassword(encryptedPassword);
+            user.setInitialSetupDone(true);
             session.update(user);
             session.getTransaction().commit();
             return encryptedPassword;
@@ -415,6 +417,7 @@ public class UserService implements IUserService {
             account.setCreationDate(new Date());
             configureNewAccount(account);
             User user = createInitialUser(userTransferObject, password, account);
+            user.setInitialSetupDone(true);
             account.addUser(user);
             session.save(account);
             user.setAccount(account);
@@ -509,14 +512,10 @@ public class UserService implements IUserService {
         } else {
             User user = retrieveUser();
             Account account = user.getAccount();
-            if(account.getAccountState() == Account.CLOSED || account.getAccountState() == Account.DELINQUENT) {
-                
-                return null;
-            }
             UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
-                    user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                    user.getUiSettings(), user.getFirstName(), !account.isUpgraded());
+                    user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
+                    user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -575,19 +574,18 @@ public class UserService implements IUserService {
                     List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                     Account account = (Account) accountResults.get(0);
 
-                    if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
+
                         if (user.getPersonaID() != null) {
                             user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                         }
                         userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                            user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(), user.isDataSourceCreator(),
-                                user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                                user.getUiSettings(), user.getFirstName(), !account.isUpgraded());
+                            user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                                (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
+                                user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
+                                user.isRenewalOptionAvailable());
 
                         userServiceResponse.setActivated(account.isActivated());
-                    } else {
-                        userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
-                    }
+
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                 }
@@ -650,20 +648,19 @@ public class UserService implements IUserService {
         if (encryptedPassword.equals(actualPassword)) {
             List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
             Account account = (Account) accountResults.get(0);
-            if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING  || account.getAccountState() == Account.DELINQUENT) {
+
                 if (user.getPersonaID() != null) {
                     user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                 }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                     user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(),
-                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                        !account.isUpgraded());
+                     user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                        user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
+                        !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable());
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);
-            } else {
-                userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
-            }
+
             // FlexContext.getFlexSession().getRemoteCredentials();
         } else {
             userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");

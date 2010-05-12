@@ -2,6 +2,8 @@ package com.easyinsight.users;
 
 import com.easyinsight.preferences.UISettings;
 
+import java.util.Date;
+
 /**
  * User: jboe
  * Date: Jan 2, 2008
@@ -18,14 +20,16 @@ public class UserServiceResponse {
     private long spaceAllowed;
     private String email;
     private boolean accountAdmin;
-    private boolean dataSourceCreator;
-    private boolean insightCreator;
     private boolean activated;
     private boolean billingInformationGiven;
     private int accountState;
     private UISettings uiSettings;
     private String firstName;
     private boolean freeUpgradePossible;
+    private boolean firstLogin;
+    private Date lastLoginDate;
+    private String accountName;
+    private boolean renewalOptionPossible;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -34,8 +38,9 @@ public class UserServiceResponse {
 
     public UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
                                long spaceAllowed, String email, String userName, boolean accountAdmin,
-                               boolean dataSourceCreator, boolean insightCreator, boolean billingInformationGiven, int accountState,
-                               UISettings uiSettings, String firstName, boolean freeUpgradePossible) {
+                               boolean billingInformationGiven, int accountState,
+                               UISettings uiSettings, String firstName, boolean freeUpgradePossible,
+                               boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -45,13 +50,47 @@ public class UserServiceResponse {
         this.email = email;
         this.userName = userName;
         this.accountAdmin = accountAdmin;
-        this.dataSourceCreator = dataSourceCreator;
-        this.insightCreator = insightCreator;
         this.billingInformationGiven = billingInformationGiven;
         this.accountState = accountState;
         this.uiSettings = uiSettings;
         this.firstName = firstName;
         this.freeUpgradePossible = freeUpgradePossible;
+        this.firstLogin = firstLogin;
+        this.lastLoginDate = lastLoginDate;
+        this.accountName = accountName;
+        this.renewalOptionPossible = renewalOptionPossible;
+    }
+
+    public boolean isRenewalOptionPossible() {
+        return renewalOptionPossible;
+    }
+
+    public void setRenewalOptionPossible(boolean renewalOptionPossible) {
+        this.renewalOptionPossible = renewalOptionPossible;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
+    }
+
+    public boolean isFirstLogin() {
+        return firstLogin;
+    }
+
+    public void setFirstLogin(boolean firstLogin) {
+        this.firstLogin = firstLogin;
+    }
+
+    public Date getLastLoginDate() {
+        return lastLoginDate;
+    }
+
+    public void setLastLoginDate(Date lastLoginDate) {
+        this.lastLoginDate = lastLoginDate;
     }
 
     public String getFirstName() {
@@ -159,22 +198,6 @@ public class UserServiceResponse {
 
     public void setAccountAdmin(boolean accountAdmin) {
         this.accountAdmin = accountAdmin;
-    }
-
-    public boolean isDataSourceCreator() {
-        return dataSourceCreator;
-    }
-
-    public void setDataSourceCreator(boolean dataSourceCreator) {
-        this.dataSourceCreator = dataSourceCreator;
-    }
-
-    public boolean isInsightCreator() {
-        return insightCreator;
-    }
-
-    public void setInsightCreator(boolean insightCreator) {
-        this.insightCreator = insightCreator;
     }
 
     public boolean isActivated() {

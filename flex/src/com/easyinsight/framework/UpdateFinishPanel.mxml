@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.kpi.ITutorialPanel" horizontalAlign="center"
+         verticalAlign="middle" width="100%" height="100%">
+    <mx:Script><![CDATA[
+
+        public function saveValues():void {
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        public function gotFocus():void {
+        }]]></mx:Script>
+    <mx:Label text="Congratulations, you're up and running again!" fontSize="24"/>
+</mx:VBox>

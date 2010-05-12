@@ -177,10 +177,7 @@
                         function (event:ResultEvent, token:Object = null):void {
                             switch (event.result) {
                                 case "success":
-                                    User.initializeUser(authResult.name, authResult.email,
-                                            authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState,
-                                            authResult.uiSettings, authResult.firstName, authResult.freeUpgradePossible);
+                                    User.initializeUser(authResult);
                                     User.getInstance().userName = authResult.userName;
                                     dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
                                     User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));

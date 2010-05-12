@@ -275,7 +275,7 @@
         }
 
         protected function getComplexOptions():ArrayCollection {
-            return new ArrayCollection(["Delta", "Last Value", "Percent Change", "Normality", "Step", "Six Sigma"]);
+            return new ArrayCollection(["Normality", "Step", "Six Sigma"]);
         }
 
         public function save(dataSourceID:int):AnalysisItem {
@@ -320,11 +320,6 @@
                 case "Variance":
                 case "Ranking":
                     currentState = "Measure";
-                    break;
-                case "Delta":
-                case "Last Value":
-                case "Percent Change":
-                    currentState = "TemporalMeasure";
                     break;
                 case "Normality":
                     currentState = "ComplexMeasure";
@@ -469,10 +464,7 @@
                             <mx:ComboBox id="complexAggregationBox"
                                  close="aggregationTypeChanged(event)" rowCount="9">
                                 <mx:dataProvider>
-                                    <mx:Array>
-                                        <mx:String>Delta</mx:String>
-                                        <mx:String>Last Value</mx:String>
-                                        <mx:String>Percent Change</mx:String>
+                                    <mx:Array>                                        
                                         <mx:String>Normality</mx:String>
                                         <mx:String>Step</mx:String>
                                         <mx:String>Six Sigma</mx:String>

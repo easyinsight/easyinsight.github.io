@@ -48,10 +48,10 @@
 
         override public function save(analysisItem:AnalysisItem):void {
             var analysisMeasure:AnalysisMeasure = analysisItem as AnalysisMeasure;
-            var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
+            /*var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
             if (measureConditionRange != null) {
                 analysisMeasure.measureConditionRange = measureRangeSelection.createMeasureConditionRange();
-            }
+            }*/
             analysisMeasure.highIsGood = highGroup.selectedValue == "yes";
             analysisMeasure.formattingConfiguration = formattingSetup.formattingConfiguration;
         }
@@ -73,7 +73,7 @@
     <mx:FormItem label="Formatting: ">
         <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
     </mx:FormItem>
-    <mx:FormItem label="">
+    <!--<mx:FormItem label="">
         <analysis:ColorSelection id="measureRangeSelection" measureConditionRange="{measureConditionRange}"/>
-    </mx:FormItem>
+    </mx:FormItem>-->
 </analysis:AnalysisItemDetailEditor>

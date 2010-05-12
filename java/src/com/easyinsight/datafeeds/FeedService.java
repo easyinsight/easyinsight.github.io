@@ -480,14 +480,22 @@ public class FeedService implements IDataFeedService {
 
     public void updateCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges, long feedID) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
+        EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             CompositeFeedDefinition compositeFeed = (CompositeFeedDefinition) getFeedDefinition(feedID);
             compositeFeed.setCompositeFeedNodes(compositeFeedNodes);
             compositeFeed.setConnections(edges);
-            feedStorage.updateDataFeedConfiguration(compositeFeed);
+            compositeFeed.populateFields(conn);
+            feedStorage.updateDataFeedConfiguration(compositeFeed, conn);
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 

@@ -1,13 +1,24 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        width="900" height="550">
+        width="900" height="550" creationComplete="passwordInput.setFocus()">
     <mx:Script><![CDATA[
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
+        import mx.validators.Validator;
 
         private function finish():void {
+            var passwordResults:Array = Validator.validateAll([ passwordValidator ]);
+            if (passwordResults.length > 0) {
+                passwordInput.setFocus();
+                passwordInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            }
+            var confirmResults:Array = Validator.validateAll([ confirmValidator ]);
+            if (confirmResults.length > 0) {
+                confirmInput.setFocus();
+                confirmInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            }
             if (passwordInput.text == confirmInput.text) {
                 ProgressAlert.alert(this, "Updating...", null, userService.updatePassword);
                 userService.updatePassword.send(passwordInput.text);
@@ -20,7 +31,7 @@
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
-    <mx:RemoteObject destination="userService" id="userService">
+    <mx:RemoteObject destination="login" id="userService">
         <mx:method name="updatePassword" result="updated()"/>
     </mx:RemoteObject>
     <mx:VBox width="100%" height="100%" verticalGap="0">
@@ -38,9 +49,11 @@
                 </mx:FormItem>
             </mx:Form>
             <mx:Spacer height="100%"/>
-            <mx:HBox width="100%" horizontalAlign="center">
+            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10">
                 <mx:Button label="Finish" click="finish()" fontSize="14"/>
             </mx:HBox>
         </mx:VBox>
     </mx:VBox>
+    <mx:StringValidator source="{passwordInput}" property="text" minLength="3" maxLength="20" id="passwordValidator"/>
+    <mx:StringValidator source="{confirmInput}" property="text" minLength="3" maxLength="20" id="confirmValidator"/>
 </util:EITitleWindow>

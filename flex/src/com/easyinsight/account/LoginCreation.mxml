@@ -73,7 +73,7 @@
                 } else {
                     _account.name = companyName.text;
                 }
-                _account.optInEmail = optInCheckbox.selected;
+                user.optInEmail = optInCheckbox.selected;
                 ProgressAlert.alert(this, "Validating the account...", null, creationService.doesUserExist);
                 creationService.doesUserExist.send(userName.text, email.text, _account.name);
             }

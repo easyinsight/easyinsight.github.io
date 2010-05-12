@@ -92,6 +92,15 @@ public class FragmentParser {
                 redirector.onURL(sessionToken);
                 redirector.addEventListener(ListingChangeEvent.LISTING_CHANGE, workspace.changePerspective);
             }),
+            new FragmentTester("oauthRedirectID", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
+                var oauthRedirectID:int = int(key);
+                var token:String = String(o.token);
+                var secret:String = String(o.secret);
+                var refSolutionID:int = int(o.refSolutionID);
+                var properties:Object = new Object();
+                properties["token"] = token;
+                properties["secret"] = secret;
+            }),
             new FragmentTester("resetPassword", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 new PasswordReset(key, workspace).reset();
                 workspace.navigation(new NavigationEvent("Home"));

@@ -153,6 +153,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             info.currentPage = 1;
             //do {
                 Document deals = runRestRequest("/deals.xml", client, builder, url, true);
+                loadingProgress(0, 1, "Synchronizing with deals...", true);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
                     try {

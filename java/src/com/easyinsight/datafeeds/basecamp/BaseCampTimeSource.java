@@ -90,6 +90,14 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                 Node curProject = projectNodes.get(i);
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
                 String projectName = queryField(curProject, "name/text()");
+                loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", false);
+                String projectStatus = queryField(curProject, "status/text()");
+                if (!baseCampCompositeSource.isIncludeArchived() && "archived".equals(projectStatus)) {
+                    continue;
+                }
+                if (!baseCampCompositeSource.isIncludeInactive() && "inactive".equals(projectStatus)) {
+                    continue;
+                }
 
                 EIPageInfo info = new EIPageInfo();
                 info.currentPage = 1;
@@ -130,7 +138,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                             }
                         }
                     } while(info.currentPage++ < info.MaxPages);
-                
+
             }
         } catch (Throwable e) {
             throw new RuntimeException(e);

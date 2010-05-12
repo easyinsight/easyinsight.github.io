@@ -77,7 +77,7 @@
                 user.email = email.text;
                 user.accountAdmin = true;
                 _account.name = accountName.text;
-                _account.optInEmail = optInCheckbox.selected;
+                user.optInEmail = optInCheckbox.selected;
                 ProgressAlert.alert(this, "Validating the account...", null, creationService.doesUserExist);
                 creationService.doesUserExist.send(userName.text, email.text, accountName.text);
             }

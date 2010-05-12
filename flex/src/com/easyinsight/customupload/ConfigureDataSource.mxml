@@ -5,9 +5,12 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
 
         import com.easyinsight.datasources.IServerDataSourceDefinition;
+        import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.User;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.scorecard.DataSourceAsyncEvent;
+        import com.easyinsight.scorecard.DataSourceMessageEvent;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
@@ -28,6 +31,7 @@
 
         private function setupListeners():void {
             stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
+            EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
         }
 
         private var _dataSourceClass:Class;
@@ -134,6 +138,24 @@
             }
         }
 
+        private var lastMessage:Date;
+
+        private function onMessage(event:DataSourceMessageEvent):void {
+            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
+            if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
+                lastMessage = scorecardEvent.timestamp;
+                if (scorecardEvent.dataSourceID == dataSourceDefinition.dataFeedID) {
+                    if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
+                        asyncLabel = scorecardEvent.dataSourceName;
+                        if (scorecardEvent.max > 0 && progressBar != null) {
+                            progressBar.maximum = scorecardEvent.max;
+                            progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
+                        }
+                    }
+                }
+            }
+        }
+
         private function created():void {
             uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
         }
@@ -159,6 +181,9 @@
         }
 
         [Bindable]
+        private var asyncLabel:String = "Retrieving data, this may take a few minutes...";
+
+        [Bindable]
         private var credentialsIndex:int;
         ]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
@@ -172,7 +197,7 @@
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Label text="Now that you've installed this connection, you need to configure it:" fontSize="14"/>
         <mx:Box id="coreContent"/>
-        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="Retrieving data, this may take a few minutes..."/>
+        <mx:ProgressBar id="progressBar" indeterminate="false" mode="manual" visible="false" label="{asyncLabel}"/>
         <mx:ViewStack selectedIndex="{credentialsIndex}">
             <mx:Box/>
             <mx:HBox>

@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.kpi.ITutorialPanel" horizontalAlign="center"
+         verticalAlign="middle"
+        creationComplete="firstNameInput.setFocus(); gotFocus()" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import mx.validators.Validator;
+
+        [Bindable]
+        private var firstName:String;
+
+        [Bindable]
+        private var lastName:String;
+
+        [Bindable]
+        private var companyName:String;
+
+        private var _welcomeBackInfo:WelcomeBackInfo;
+
+        public function set welcomeBackInfo(value:WelcomeBackInfo):void {
+            _welcomeBackInfo = value;
+            invalidateProperties();
+        }
+
+        public function saveValues():void {
+            _welcomeBackInfo.firstName = firstNameInput.text;
+            _welcomeBackInfo.lastName = lastNameInput.text;
+            _welcomeBackInfo.accountName = companyNameInput.text;
+            _welcomeBackInfo.optIn = optInInput.selected;
+        }
+
+        public function validate():Boolean {
+            var results:Array = Validator.validateAll([firstNameValidator]);
+            if (results.length > 0) {
+                firstNameInput.setFocus();
+                firstNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
+            results = Validator.validateAll([lastNameValidator]);
+            if (results.length > 0) {
+                lastNameInput.setFocus();
+                lastNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
+            return true;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_welcomeBackInfo != null) {
+                firstName = _welcomeBackInfo.firstName;
+                lastName = _welcomeBackInfo.lastName;
+                companyName = _welcomeBackInfo.accountName;
+            }
+        }
+
+        public function gotFocus():void {
+            
+        }]]></mx:Script>
+    <mx:Label text="Here's our most recent information about your account." fontSize="20"/>
+    <mx:Label text="Please correct anything that may have changed." fontSize="20"/>
+    <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+        <mx:FormItem label="Company Name:">
+            <mx:TextInput id="companyNameInput" text="{companyName}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Your First Name:">
+            <mx:TextInput id="firstNameInput" text="{firstName}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Your Last Name:">
+            <mx:TextInput id="lastNameInput" text="{lastName}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Opt In for Occasional Updates about Easy Insight">
+            <mx:CheckBox id="optInInput" selected="true"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:StringValidator id="firstNameValidator" minLength="3" maxLength="30" property="text" source="{firstNameInput}"/>
+    <mx:StringValidator id="lastNameValidator" minLength="3" maxLength="30" property="text" source="{lastNameInput}"/>
+</mx:VBox>

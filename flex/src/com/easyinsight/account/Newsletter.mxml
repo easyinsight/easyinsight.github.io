@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        private function testSend():void {
+            ProgressAlert.alert(this, "Sending test...", null, authAdminService.testDeliver);
+            authAdminService.testDeliver.send(newsletterEditor.text);
+        }
+
+        private function deliver():void {
+            ProgressAlert.alert(this, "Delivering newsletter...", null, authAdminService.sendNewsletter);
+            authAdminService.sendNewsletter.send(newsletterEditor.text);
+        }
+
+        private function sentTest():void {
+
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="authAdminService" destination="eiAdmin">
+        <mx:method name="testDeliver" result="sentTest()"/>
+        <mx:method name="sendNewsletter" result="sentTest()"/>
+    </mx:RemoteObject>
+    <mx:TextArea id="newsletterEditor" width="600" height="500"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:Button label="Test Send" click="testSend()"/>
+        <mx:Button label="Deliver" click="deliver()"/>
+    </mx:HBox>
+</mx:VBox>

@@ -7,6 +7,9 @@ import com.easyinsight.listing.DataFeedDescriptor;
 public class BaseCampDataSource extends CompositeServerDataSource {
 
     public var url:String;
+    public var includeArchived:Boolean;
+    public var includeInactive:Boolean;
+    public var includeComments:Boolean;
 
     public function BaseCampDataSource() {
         super();

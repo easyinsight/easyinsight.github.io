@@ -15,10 +15,11 @@ import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.ProgressBar;
+import mx.controls.ProgressBarMode;
 import mx.controls.TextArea;
 import mx.formatters.DateFormatter;
 import mx.rpc.events.ResultEvent;
@@ -36,7 +37,7 @@ public class DataSourceDisplay extends VBox {
     public function DataSourceDisplay() {
         super();
         setStyle("horizontalAlign", "center");
-        EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage);
+        EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
     }
 
     public function cleanup():void {
@@ -144,8 +145,10 @@ public class DataSourceDisplay extends VBox {
         button.addEventListener(MouseEvent.CLICK, onClick);
         outOfDateBox.addChild(button);
         var asyncBox:Box = new Box();
-        var progressBar:ProgressBar = new ProgressBar();
-        progressBar.indeterminate = true;
+        progressBar = new ProgressBar();
+        progressBar.indeterminate = false;
+        progressBar.mode = ProgressBarMode.MANUAL;
+        //progressBar.indeterminate = true;
         BindingUtils.bindProperty(progressBar, "label", this, "asyncLabel");
         asyncBox.addChild(progressBar);
         var doneBox:HBox = new HBox();
@@ -164,18 +167,32 @@ public class DataSourceDisplay extends VBox {
         BindingUtils.bindProperty(viewStack, "selectedIndex", this, "stackIndex");
     }
 
+    private var progressBar:ProgressBar;
+
     private function refreshReport(event:MouseEvent):void {
         _dataView.retrieveData();
         stackIndex = 1;
     }
 
+    private var lastMessage:Date;
+
     private function onMessage(event:DataSourceMessageEvent):void {
         var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
-        if (scorecardEvent.dataSourceID == _dataSource.dataSourceID) {
-            if (scorecardEvent.type == DataSourceAsyncEvent.NAME_UPDATE) {
-                asyncLabel = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
-            } else {
-                stackIndex = 3;
+        //Alert.show("got a message with type = " + scorecardEvent.type);
+        if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
+            lastMessage = scorecardEvent.timestamp;
+            if (scorecardEvent.dataSourceID == _dataSource.dataSourceID) {
+                if (scorecardEvent.type == DataSourceAsyncEvent.NAME_UPDATE) {
+                    asyncLabel = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
+                } else if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
+                    asyncLabel = scorecardEvent.dataSourceName;
+                    if (scorecardEvent.max > 0 && progressBar != null) {
+                        progressBar.maximum = scorecardEvent.max;
+                        progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
+                    }
+                } else {
+                    stackIndex = 3;
+                }
             }
         }
     }
