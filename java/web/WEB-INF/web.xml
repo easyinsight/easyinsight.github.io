@@ -46,6 +46,13 @@
         <load-on-startup>2</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>UnsubscribeServlet</servlet-name>
+        <display-name>UnsubscribeServlet</display-name>
+        <servlet-class>com.easyinsight.users.UnsubscribeServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
     <!-- MessageBroker Servlet -->
     <servlet>
         <servlet-name>MessageBrokerServlet</servlet-name>
@@ -79,6 +86,11 @@
     <servlet-mapping>
         <servlet-name>TokenRedirect</servlet-name>
         <url-pattern>/TokenRedirect</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>UnsubscribeServlet</servlet-name>
+        <url-pattern>/unsubscribe</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
