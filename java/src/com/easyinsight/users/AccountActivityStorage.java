@@ -25,6 +25,7 @@ public class AccountActivityStorage {
             insertStmt.setInt(2, accountState);
             insertStmt.setTimestamp(3, new Timestamp(when.getTime()));
             insertStmt.execute();
+            insertStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -38,6 +39,7 @@ public class AccountActivityStorage {
         updateStmt.setLong(2, accountID);
         updateStmt.setInt(3, Account.ACTIVE);
         updateStmt.executeUpdate();
+        updateStmt.close();
     }
 
     @Nullable
@@ -48,11 +50,12 @@ public class AccountActivityStorage {
         queryStmt.setLong(2, accountID);
         queryStmt.setInt(3, Account.ACTIVE);
         ResultSet rs = queryStmt.executeQuery();
+        Date date = null;
         if (rs.next()) {
-            return rs.getDate(1);
-        } else {
-            return null;
+            date = rs.getDate(1);
         }
+        queryStmt.close();
+        return date;
     }
 
     public void updateAccountTimes(Date date, Connection conn) {
