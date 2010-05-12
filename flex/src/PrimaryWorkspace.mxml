@@ -41,7 +41,6 @@
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.tour.TutorialFramework;
-        import com.easyinsight.util.DiagnosticsWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.rpc.events.FaultEvent;
@@ -125,11 +124,7 @@
         private function onKeyDown(event:KeyboardEvent):void {
             if (event.ctrlKey && event.keyCode == 190 && User.getInstance() != null) {
                 launchQuickSearchWindow();
-            } else if (event.ctrlKey && event.keyCode == 191) {
-                var window:DiagnosticsWindow = new DiagnosticsWindow();
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            }
+            } 
         }
 
         private function launchQuickSearchWindow():void {
@@ -141,12 +136,12 @@
         }
 
         private function launchBugReportWindow():void {
-            /*var window:BugReportWindow = new BugReportWindow();
+            var window:BugReportWindow = new BugReportWindow();
             PopUpManager.addPopUp(window, this, false);
-            PopUpUtil.centerPopUp(window);*/
-            var window:DiagnosticsWindow = new DiagnosticsWindow();
-            PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+            /*var window:DiagnosticsWindow = new DiagnosticsWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);*/
         }
 
 
