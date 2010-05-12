@@ -25,6 +25,55 @@ public class TutorialButtons extends Canvas {
     private var _backEnabled:Boolean;
     private var _nextEnabled:Boolean;
     private var _finishEnabled:Boolean;
+    private var _backVisible:Boolean = true;
+    private var _nextVisible:Boolean = true;
+    private var _cancelVisible:Boolean = true;
+    private var _finishVisible:Boolean = true;
+
+
+    [Bindable(event="cancelVisibleChanged")]
+    public function get cancelVisible():Boolean {
+        return _cancelVisible;
+    }
+
+    public function set cancelVisible(value:Boolean):void {
+        if (_cancelVisible == value) return;
+        _cancelVisible = value;
+        dispatchEvent(new Event("cancelVisibleChanged"));
+    }
+
+    [Bindable(event="finishVisibleChanged")]
+    public function get finishVisible():Boolean {
+        return _finishVisible;
+    }
+
+    public function set finishVisible(value:Boolean):void {
+        if (_finishVisible == value) return;
+        _finishVisible = value;
+        dispatchEvent(new Event("finishVisibleChanged"));
+    }
+
+    [Bindable(event="backVisibleChanged")]
+    public function get backVisible():Boolean {
+        return _backVisible;
+    }
+
+    public function set backVisible(value:Boolean):void {
+        if (_backVisible == value) return;
+        _backVisible = value;
+        dispatchEvent(new Event("backVisibleChanged"));
+    }
+
+    [Bindable(event="nextVisibleChanged")]
+    public function get nextVisible():Boolean {
+        return _nextVisible;
+    }
+
+    public function set nextVisible(value:Boolean):void {
+        if (_nextVisible == value) return;
+        _nextVisible = value;
+        dispatchEvent(new Event("nextVisibleChanged"));
+    }
 
     private var _showExpertMode:Boolean = true;
 
@@ -92,23 +141,27 @@ public class TutorialButtons extends Canvas {
         backButton.setStyle("fontSize", 14);
         backButton.addEventListener(MouseEvent.CLICK, back);
         BindingUtils.bindProperty(backButton, "enabled", this, "backEnabled");
+        BindingUtils.bindProperty(backButton, "visible", this, "backVisible");
         hbox.addChild(backButton);
         var nextButton:Button = new Button();
         nextButton.label = "Next";
         nextButton.setStyle("fontSize", 14);
         BindingUtils.bindProperty(nextButton, "enabled", this, "nextEnabled");
+        BindingUtils.bindProperty(nextButton, "visible", this, "nextVisible");
         nextButton.addEventListener(MouseEvent.CLICK, next);
         hbox.addChild(nextButton);
         var finishButton:Button = new Button();
         finishButton.label = "Finish";
         finishButton.setStyle("fontSize", 14);
         BindingUtils.bindProperty(finishButton, "enabled", this, "finishEnabled");
+        BindingUtils.bindProperty(finishButton, "visible", this, "finishVisible");
         finishButton.addEventListener(MouseEvent.CLICK, finish);
         hbox.addChild(finishButton);
         var cancelButton:Button = new Button();
         cancelButton.label = "Cancel";
         cancelButton.setStyle("fontSize", 14);
         cancelButton.addEventListener(MouseEvent.CLICK, cancel);
+        BindingUtils.bindProperty(cancelButton, "visible", this, "cancelVisible");
         hbox.addChild(cancelButton);
         hbox.setStyle("paddingBottom", 8);
         addChild(hbox);
