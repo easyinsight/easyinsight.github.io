@@ -14,8 +14,11 @@ import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 
+import javax.mail.MessagingException;
+import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -129,7 +132,11 @@ public class EIAccountManagementService {
                     insertKeyStmt.execute();
                 }
                 String emailBody = MessageFormat.format(htmlText, "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
-                sendGridEmail.sendEmail(userID, email, "Newsletter", "What's new with Easy Insight...", emailBody, conn);
+                try {
+                    sendGridEmail.sendEmail(userID, email, "Newsletter", "What's new with Easy Insight...", emailBody, conn);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
             }
         } catch (Exception e) {
             LogClass.error(e);
