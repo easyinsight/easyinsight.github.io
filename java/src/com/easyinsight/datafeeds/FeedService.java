@@ -133,8 +133,9 @@ public class FeedService implements IDataFeedService {
 
         try {
             PreparedStatement queryDataSources = conn.prepareStatement("SELECT FEED_NAME, DATA_FEED.DATA_FEED_ID FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
-                    "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.user_id = ?");
+                    "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.user_id = ? AND DATA_FEED.visible = ?");
             queryDataSources.setLong(1, SecurityUtil.getUserID());
+            queryDataSources.setBoolean(2, true);
             ResultSet queryRS = queryDataSources.executeQuery();
             while (queryRS.next()) {
                 descriptorList.add(new DataSourceDescriptor(queryRS.getString(1), queryRS.getLong(2)));

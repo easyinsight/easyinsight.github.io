@@ -554,6 +554,8 @@ public class UserUploadService implements IUserUploadService {
                     }
                 }
             } else {
+                feedDefinition.setVisible(true);
+                feedStorage.updateDataFeedConfiguration(feedDefinition);
                 credentialsResponse = new CredentialsResponse(true, feedID);
             }
             return credentialsResponse;
