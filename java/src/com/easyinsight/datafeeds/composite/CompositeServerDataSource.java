@@ -3,6 +3,8 @@ package com.easyinsight.datafeeds.composite;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.eventing.MessageUtils;
+import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
 import com.easyinsight.users.Account;
@@ -210,22 +212,27 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
-        if(credentials == null) {
-            if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                credentials = new Credentials();
-                credentials.setUserName(getUsername());
-                credentials.setPassword(retrievePassword());
+        DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
+        try {
+            if (credentials == null) {
+                if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                    credentials = new Credentials();
+                    credentials.setUserName(getUsername());
+                    credentials.setPassword(retrievePassword());
+                }
             }
-        }
-        boolean changed = false;
-        // possibilities...
-        // a new data soucrce was added as a child as part of an upgrade
-        // a new custom field was added, etc
-        List<AnalysisItem> allItems = new ArrayList<AnalysisItem>();
-        List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn, credentials);
-        for (IServerDataSourceDefinition source : sources) {
-            source.refreshData(credentials, accountID, now, conn, this);
-            allItems.addAll(source.getFields());
+            boolean changed = false;
+            // possibilities...
+            // a new data soucrce was added as a child as part of an upgrade
+            // a new custom field was added, etc
+            List<AnalysisItem> allItems = new ArrayList<AnalysisItem>();
+            List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn, credentials);
+            for (IServerDataSourceDefinition source : sources) {
+                source.refreshData(credentials, accountID, now, conn, this);
+                allItems.addAll(source.getFields());
+            }
+        } finally {
+            DataTypeMutex.mutex().unlock(getFeedType());
         }
         
         //notifyOfDataUpdate();

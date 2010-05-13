@@ -5,10 +5,10 @@ import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.customupload.RefreshWindow;
 import com.easyinsight.customupload.UploadConfigEvent;
+import com.easyinsight.datasources.DataSourceRefreshWindow;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableSource;
 import com.easyinsight.framework.Credentials;
-import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.PackageAnalyzeSource;
@@ -24,14 +24,12 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
-import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
-import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -305,11 +303,10 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
 
         var c:Credentials = User.getCredentials(feedDescriptor.dataFeedID);
         if (c != null) {
-            userUploadSource = new RemoteObject();
-            userUploadSource.destination = "userUpload";
-            userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
-            ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
-            userUploadSource.refreshData.send(feedDescriptor.dataFeedID, c, false, true);
+            var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
+            dsRefreshWindow.dataSourceID = feedDescriptor.dataFeedID;
+            PopUpManager.addPopUp(dsRefreshWindow, this, true);
+            PopUpUtil.centerPopUp(dsRefreshWindow);
             //dispatchEvent(new RefreshNotificationEvent());
             return;
         }
@@ -333,11 +330,10 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             PopUpManager.addPopUp(refreshWindow, this, true);
             PopUpUtil.centerPopUp(refreshWindow);
         } else {
-            userUploadSource = new RemoteObject();
-            userUploadSource.destination = "userUpload";
-            userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
-            ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
-            userUploadSource.refreshData.send(descriptor.dataFeedID, null, false, true);    
+            var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
+            dsRefreshWindow.dataSourceID = descriptor.dataFeedID;
+            PopUpManager.addPopUp(dsRefreshWindow, this, true);
+            PopUpUtil.centerPopUp(dsRefreshWindow);
         }
     }
 

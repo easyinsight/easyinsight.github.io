@@ -142,6 +142,7 @@
 
         private function onMessage(event:DataSourceMessageEvent):void {
             var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
+            Alert.show("got event with type " + scorecardEvent.type + " and ds " + scorecardEvent.dataSourceID + " and my type = " + dataSourceDefinition.dataFeedID);
             if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
                 lastMessage = scorecardEvent.timestamp;
                 if (scorecardEvent.dataSourceID == dataSourceDefinition.dataFeedID) {
@@ -151,6 +152,8 @@
                             progressBar.maximum = scorecardEvent.max;
                             progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
                         }
+                    } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
+                        asyncLabel = scorecardEvent.dataSourceName;
                     }
                 }
             }

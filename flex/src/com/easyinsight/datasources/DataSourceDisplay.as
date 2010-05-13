@@ -190,7 +190,9 @@ public class DataSourceDisplay extends VBox {
                         progressBar.maximum = scorecardEvent.max;
                         progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
                     }
-                } else {
+                } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
+                    asyncLabel = scorecardEvent.dataSourceName;
+                } else if (scorecardEvent.type == DataSourceAsyncEvent.DONE) {
                     stackIndex = 3;
                 }
             }

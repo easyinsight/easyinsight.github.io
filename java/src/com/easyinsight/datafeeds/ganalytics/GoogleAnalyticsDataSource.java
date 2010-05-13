@@ -187,7 +187,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     }
 
     public int getRequiredAccountTier() {
-        return Account.BASIC;
+        return Account.PERSONAL;
     }
 
     public int getDataSourceType() {

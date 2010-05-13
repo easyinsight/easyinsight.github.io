@@ -16,6 +16,8 @@ import java.util.Map;
  */
 public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
 
+    
+
     protected static HttpClient getHttpClient(String username, String password) {
         HttpClient client = new HttpClient();
         client.getParams().setAuthenticationPreemptive(true);

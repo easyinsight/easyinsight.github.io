@@ -1,0 +1,79 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setupListeners()" headerHeight="4">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.EIMessageListener;
+        import com.easyinsight.scorecard.DataSourceAsyncEvent;
+        import com.easyinsight.scorecard.DataSourceMessageEvent;
+
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        private var lastMessage:Date;
+        private var _dataSourceID:int;
+
+        [Bindable]
+        private var asyncLabel:String = "Synchronizing with the data source...";
+
+        private function setupListeners():void {
+            EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
+            uploadService.refreshData.send(_dataSourceID, null, false, true);
+        }
+
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        [Bindable]
+        private var index:int;
+
+        [Bindable]
+        private var errorText:String;
+
+        private function onResult(event:ResultEvent):void {
+            PopUpManager.removePopUp(this);           
+        }
+
+        private function onFault(event:FaultEvent):void {
+            errorText = event.fault.faultString;
+            index = 1;
+        }
+
+        private function onMessage(event:DataSourceMessageEvent):void {
+            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
+            //Alert.show("got a message with type = " + scorecardEvent.type);
+            if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
+                lastMessage = scorecardEvent.timestamp;
+                if (scorecardEvent.dataSourceID == _dataSourceID) {
+                    if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
+                        asyncLabel = scorecardEvent.dataSourceName;
+                        if (scorecardEvent.max > 0 && progressBar != null) {
+                            progressBar.maximum = scorecardEvent.max;
+                            progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
+                        }
+                    } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
+                        asyncLabel = scorecardEvent.dataSourceName;
+                    }
+                }
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="refreshData" result="onResult(event)" fault="onFault(event)"/>
+    </mx:RemoteObject>
+    <mx:Canvas width="500">
+        <mx:ViewStack selectedIndex="{index}" resizeToContent="true" width="100%">
+            <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="30" width="100%">
+                <mx:ProgressBar indeterminate="false" mode="manual" id="progressBar" label=""/>
+                <mx:TextArea editable="false" selectable="false" borderStyle="none" backgroundAlpha="0" width="400" height="50" text="{asyncLabel}"/>
+                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" width="100%">
+                <mx:Label text="{errorText}"/>
+                <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+            </mx:VBox>
+        </mx:ViewStack>
+    </mx:Canvas>
+</util:EITitleWindow>

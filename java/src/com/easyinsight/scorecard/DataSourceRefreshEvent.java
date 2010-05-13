@@ -16,6 +16,7 @@ public class DataSourceRefreshEvent extends OutboundEvent {
     public static final int DATA_SOURCE_NAME = 1;
     public static final int PROGRESS = 3;
     public static final int DONE = 2;
+    public static final int BLOCKED = 4;
 
     private long dataSourceID;
     private int type;

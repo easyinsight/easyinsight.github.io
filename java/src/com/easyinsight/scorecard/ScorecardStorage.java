@@ -238,7 +238,7 @@ public class ScorecardStorage {
                         MessageUtils.sendMessage("generalNotifications", info);
                         if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                             try {
-                            dataSource.refreshData(credentials, accountID, new Date(), null);
+                                dataSource.refreshData(credentials, accountID, new Date(), null);
                             } finally {
                                 DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());    
                             }
