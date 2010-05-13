@@ -20,7 +20,7 @@ import java.sql.SQLException;
  */
 public class UnsubscribeServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
         String unsubscribeToken = req.getParameter("user");
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -33,7 +33,10 @@ public class UnsubscribeServlet extends HttpServlet {
                 PreparedStatement changeStmt = conn.prepareStatement("UPDATE USER SET OPT_IN_EMAIL = ? WHERE USER_ID = ?");
                 changeStmt.setLong(1, userID);
                 changeStmt.executeUpdate();
-                resp.getOutputStream().print("You will no longer receive the newsletter.");
+                response.setContentType("text/html");
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getOutputStream().print("You will no longer receive the newsletter.");
+                response.getOutputStream().close();
             }
         } catch (Exception e) {
             LogClass.error(e);
