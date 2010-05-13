@@ -31,7 +31,8 @@ public class UnsubscribeServlet extends HttpServlet {
             if (rs.next()) {
                 long userID = rs.getLong(1);
                 PreparedStatement changeStmt = conn.prepareStatement("UPDATE USER SET OPT_IN_EMAIL = ? WHERE USER_ID = ?");
-                changeStmt.setLong(1, userID);
+                changeStmt.setBoolean(1, false);
+                changeStmt.setLong(2, userID);
                 changeStmt.executeUpdate();
                 response.setContentType("text/html");
                 response.setStatus(HttpServletResponse.SC_OK);
