@@ -141,8 +141,7 @@
         private var lastMessage:Date;
 
         private function onMessage(event:DataSourceMessageEvent):void {
-            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
-            Alert.show("got event with type " + scorecardEvent.type + " and ds " + scorecardEvent.dataSourceID + " and my type = " + dataSourceDefinition.dataFeedID);
+            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;            
             if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
                 lastMessage = scorecardEvent.timestamp;
                 if (scorecardEvent.dataSourceID == dataSourceDefinition.dataFeedID) {
