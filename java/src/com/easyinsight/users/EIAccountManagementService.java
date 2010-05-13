@@ -131,7 +131,7 @@ public class EIAccountManagementService {
                     insertKeyStmt.setString(2, unsubscribeKey);
                     insertKeyStmt.execute();
                 }
-                String emailBody = MessageFormat.format(htmlText, "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
+                String emailBody = htmlText.replace("{0}", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
                 try {
                     sendGridEmail.sendEmail(userID, email, "Newsletter", "What's new with Easy Insight...", emailBody, conn);
                 } catch (Exception e) {
