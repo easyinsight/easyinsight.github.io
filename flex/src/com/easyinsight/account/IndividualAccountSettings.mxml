@@ -3,6 +3,7 @@
          xmlns:account="com.easyinsight.account.*" creationComplete="initProperties()"
          width="100%" height="100%">
     <mx:Script><![CDATA[
+        import com.easyinsight.preferences.PreferencesWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
@@ -84,6 +85,12 @@
             PopUpManager.addPopUp(accountSettingsWindow, this, true);
             PopUpUtil.centerPopUp(accountSettingsWindow);
         }
+
+        private function showPreferences():void {
+            var window:PreferencesWindow = new PreferencesWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
     <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
             paddingTop="5" paddingBottom="5">
@@ -109,6 +116,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="">
                     <mx:Button label="Upgrade Account..." click="upgrade()"/>
+                </mx:FormItem>
+                <mx:FormItem label="">
+                    <mx:Button label="Manage Credentials..." click="showPreferences()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
                     <mx:Button label="Change/Update Billing Information..." click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/>

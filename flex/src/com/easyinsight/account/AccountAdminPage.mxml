@@ -17,6 +17,9 @@
                 <mx:FormItem label="Account Settings: " fontFamily="Tahoma" fontWeight="bold">
                     <mx:Button label="Edit Account Settings..." click="editAccountSettings()"/>
                 </mx:FormItem>
+                <mx:FormItem label="">
+                    <mx:Button label="Manage Credentials..." click="showPreferences()"/>
+                </mx:FormItem>
                 <mx:FormItem>
                     <mx:Button label="Change/Update Billing Information..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/><mx:Button label="Cancel Account..." click="cancelPaidAccount()"/> 
                 </mx:FormItem>
@@ -25,6 +28,7 @@
     </mx:VBox>
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
+        import com.easyinsight.preferences.PreferencesWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
@@ -53,6 +57,12 @@
             var accountSettingsWindow:AccountSettingsWindow = new AccountSettingsWindow();
             PopUpManager.addPopUp(accountSettingsWindow, this, true);
             PopUpUtil.centerPopUp(accountSettingsWindow);
+        }
+
+        private function showPreferences():void {
+            var window:PreferencesWindow = new PreferencesWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
         ]]></mx:Script>
 </mx:VBox>

@@ -15,7 +15,6 @@
         import com.easyinsight.framework.LoginEvent;        
         import com.easyinsight.framework.User;
         import com.easyinsight.goals.MyGoals;
-        import com.easyinsight.preferences.PreferencesWindow;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.preferences.UIOption;
         import com.easyinsight.solutions.RevisedSolutionSummary;
@@ -25,17 +24,8 @@
         import com.easyinsight.genredata.GenreDataProvider;
         import com.easyinsight.intro.IntroPanel;
 
-        import com.easyinsight.util.PopUpUtil;
-        
-        import mx.managers.PopUpManager;
         import mx.states.RemoveChild;
         import mx.states.State;
-
-        private function showPreferences():void {
-            var window:PreferencesWindow = new PreferencesWindow();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
 
         private function setup():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
@@ -57,10 +47,6 @@
         [Bindable]
         [Embed(source="../../../../assets/find.png")]
         private var findIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/preferences.png")]
-        private var preferencesIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/headericons/house.png")]
@@ -222,16 +208,12 @@
         <mx:Image source="{helpIcon}" id="helpImage"/>
         <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-
-
-
     <mx:ViewStack selectedIndex="{stackIndex}" width="100%" resizeToContent="true">
         <mx:HBox width="100%" horizontalAlign="center">
             <easyinsight:AnonymousLogonStatus/>
         </mx:HBox>
         <mx:HBox verticalAlign="middle">
             <mx:Spacer width="100%"/>
-            <mx:Button icon="{preferencesIcon}" click="showPreferences()" toolTip="Preferences"/>
             <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug"/>
             <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)"/>
             <easyinsight:LoggedOnStatus/>

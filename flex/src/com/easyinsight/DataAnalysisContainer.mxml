@@ -551,6 +551,9 @@
 
         private function createFilter():void {
             var filterRawData:FilterRawData = dataView.createFilterRawData();
+            if (filterRawData.keys == null || filterRawData.keys.length == 0) {
+                Alert.show("Select items from the grid, click this button, and the report will filter down to that set of items.");
+            }
             dispatchEvent(new AnalysisChangedEvent());
             transformContainer.processRawFilterData(filterRawData, true);
         }
@@ -567,6 +570,9 @@
 
         private function exclude():void {
             var filterRawData:FilterRawData = dataView.createFilterRawData();
+            if (filterRawData.keys == null || filterRawData.keys.length == 0) {
+                Alert.show("Select items from the grid, click this button, and the report will create an exclusive filter to remove those items.");
+            }
             transformContainer.processRawFilterData(filterRawData, false);
         }
 
