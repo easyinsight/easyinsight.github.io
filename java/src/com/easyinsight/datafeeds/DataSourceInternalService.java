@@ -41,6 +41,7 @@ public class DataSourceInternalService {
     public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn, boolean systemUpdate) throws Exception {
         DataStorage metadata = null;
         try {
+            feedDefinition.beforeSave(conn);
             FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID(), conn, false);
             if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL) {
                 List<AnalysisItem> existingFields = existingFeed.getFields();
@@ -56,21 +57,6 @@ public class DataSourceInternalService {
             } else {
                 feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
             }
-            /*Session session = Database.instance().createSession(conn);
-            try {
-                if (newTaskGen) {
-                    DataSourceTaskGenerator generator = new DataSourceTaskGenerator();
-                    generator.setStartTaskDate(new Date());
-                    generator.setDataSourceID(feedDefinition.getDataFeedID());
-                    generator.setTaskInterval((int) feedDefinition.getRefreshDataInterval());
-                    session.save(generator);
-                }
-                notifyNewOwners(feedDefinition, existingFeed, session);
-                notifyNewViewers(feedDefinition, existingFeed, session);
-                session.flush();
-            } finally {
-                session.close();
-            }*/
 
             updateComposites(feedDefinition, conn);
 

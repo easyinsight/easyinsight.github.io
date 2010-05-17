@@ -626,4 +626,8 @@ public class FeedDefinition implements Cloneable, Serializable {
     public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
         return false;
     }
+
+    public void beforeSave(EIConnection conn) {
+
+    }
 }

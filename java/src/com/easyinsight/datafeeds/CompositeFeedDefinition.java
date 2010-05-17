@@ -5,6 +5,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.security.SecurityUtil;
@@ -47,6 +48,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
     public FeedType getFeedType() {
         return FeedType.COMPOSITE;
+    }
+
+    public void beforeSave(EIConnection conn) {
+        populateFields(conn);    
     }
 
     public void customStorage(Connection conn) throws SQLException {

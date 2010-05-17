@@ -514,45 +514,6 @@ public class FeedService implements IDataFeedService {
                 tagList.add(new Tag(tagName));
             }
             feedDefinition.setTags(tagList);
-            /*if (existingFeed.getRefreshDataInterval() != feedDefinition.getRefreshDataInterval()) {
-                newTaskGen = feedDefinition.getRefreshDataInterval() > 0;
-                if (existingFeed.getRefreshDataInterval() > 0) {
-                    // nuke the existing generator
-                    Session session = Database.instance().createSession(conn);
-                    try {
-                        List results = session.createQuery("from DataSourceTaskGenerator where dataSourceID = ?").setLong(0, existingFeed.getDataFeedID()).list();
-                        if (results.size() > 0) {
-                            session.delete(results.get(0));
-                        }
-                    } finally {
-                        session.close();
-                    }
-                }
-            }*/
-            /*if(feedDefinition instanceof IServerDataSourceDefinition) {
-                IServerDataSourceDefinition serverSource = (IServerDataSourceDefinition) feedDefinition;
-                if(serverSource.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW){
-                    if(serverSource.getUsername() != null && serverSource.retrievePassword() != null && !"".equals(serverSource.retrievePassword())) {
-                            PasswordStorage.setPasswordCredentials(serverSource.getUsername(), serverSource.retrievePassword(), serverSource.getDataFeedID(), conn);
-                    }
-                    else if(serverSource.getUsername() == null && serverSource.getPassword() == null) {
-                        PasswordStorage.clearPasswordCredentials(serverSource.getDataFeedID(), conn);
-                    }
-                }
-                else if(serverSource.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE) {
-                    PreparedStatement updateStatement = conn.prepareStatement("UPDATE session_id_storage SET session_id = ? WHERE data_feed_id = ?");
-                    updateStatement.setString(1, serverSource.getSessionId());
-                    updateStatement.setLong(2, serverSource.getDataFeedID());
-
-                    PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO session_id_storage(data_feed_id, session_id) VALUES (?,?)");
-                    insertStatement.setLong(1, serverSource.getDataFeedID());
-                    insertStatement.setString(2, serverSource.getSessionId());
-
-                    int rows = updateStatement.executeUpdate();
-                    if (rows == 0)
-                        insertStatement.execute();
-                }
-            }*/
             new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
             FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
             conn.commit();
@@ -566,17 +527,6 @@ public class FeedService implements IDataFeedService {
             Database.closeConnection(conn);
         }
         EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
-        /*final User originator = new UserService().retrieveUser();
-        new Thread(new Runnable() {
-            public void run() {
-
-                InternalUserService internalUserService = new InternalUserService();
-                for (UserFeedLink userFeedLink : userMap.values()) {
-                    User user = internalUserService.retrieveUser(userFeedLink.getUserID());
-                    new NewAccountInvitation().sendFeedInvitation(user.getEmail(), feedName, String.valueOf(feedID), originator.getName());
-                }
-            }
-        }).start();*/
     }
 
 
