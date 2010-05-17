@@ -103,6 +103,30 @@ public class DataViewFactory extends VBox implements IRetrievable {
         dispatchEvent(new Event("obfuscateChanged"));
     }
 
+    private var firstSize:Boolean = true;
+
+    private var _controlBarWidth:int;
+
+
+    [Bindable(event="controlBarWidthChanged")]
+    public function get controlBarWidth():int {
+        return _controlBarWidth;
+    }
+
+    public function set controlBarWidth(value:int):void {
+        if (_controlBarWidth == value) return;
+        _controlBarWidth = value;
+        dispatchEvent(new Event("controlBarWidthChanged"));
+    }
+
+    protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+        super.updateDisplayList(unscaledWidth, unscaledHeight);
+        if (firstSize) {
+            DisplayObject(_controlBar).width = unscaledWidth;
+            firstSize = false;
+        }
+    }
+
     override protected function createChildren():void {
         super.createChildren();
 
@@ -119,6 +143,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest, false, 0, true);
         _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar, false, 0, true);
         _controlBar.analysisDefinition = _analysisDefinition;
+        //BindingUtils.bindProperty(_controlBar, "width", this, "controlBarWidth");
         addChild(_controlBar as DisplayObject);
 
         canvas = new Canvas();

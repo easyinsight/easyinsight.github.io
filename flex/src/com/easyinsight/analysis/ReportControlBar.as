@@ -1,4 +1,5 @@
 package com.easyinsight.analysis {
+import flash.display.DisplayObject;
 import flash.events.Event;
 
 import mx.binding.utils.BindingUtils;
@@ -32,6 +33,20 @@ public class ReportControlBar extends HBox {
             addChild(grouping);
         } else {
             parent.addChild(grouping);
+        }
+        invalidateProperties();
+    }
+
+    protected override function commitProperties():void {
+        super.commitProperties();
+        var lastGrouping:ListDropAreaGrouping = null;
+        for each (var child:DisplayObject in getChildren()) {
+            if (child is ListDropAreaGrouping) {
+                lastGrouping = child as ListDropAreaGrouping;
+            }
+        }
+        if (lastGrouping != null) {
+            lastGrouping.percentWidth = 100;
         }
     }
 

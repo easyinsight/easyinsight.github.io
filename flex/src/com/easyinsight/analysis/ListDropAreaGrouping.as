@@ -1,14 +1,19 @@
 package com.easyinsight.analysis
 {
 	import com.easyinsight.commands.CommandEvent;
-	
-	import flash.events.Event;
-	
-	import mx.collections.ArrayCollection;
+
+import flash.display.DisplayObject;
+import flash.events.Event;
+
+import flexlib.containers.FlowBox;
+
+import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 import mx.controls.Alert;
+import mx.core.UIComponent;
+import mx.events.FlexEvent;
 
-public class ListDropAreaGrouping extends HBox
+public class ListDropAreaGrouping extends FlowBox
 	{		
 		private var dropAreas:ArrayCollection = new ArrayCollection();
 		private var _dropAreaType:Class;
@@ -23,12 +28,56 @@ public class ListDropAreaGrouping extends HBox
 		
 		public function ListDropAreaGrouping() {
 			super();
-			//addEventListener(FlexEvent.CREATION_COMPLETE, initializeState);
+			addEventListener(FlexEvent.UPDATE_COMPLETE, adapterFlowBoxUpdateCompleteHandler);
 		}
 
 
     public function set dataSourceID(value:int):void {
         _dataSourceID = value;
+    }
+
+    protected function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
+    {
+        // resize the FlowBox manually, as the internal calculation doesn't work
+
+        var fb:FlowBox = event.target as FlowBox;
+
+        if (fb != null)
+        {
+            if (fb.numChildren > 0)
+            {
+                // default the needed height to the top view metric
+
+                var maxBottom:int = fb.viewMetrics.top;
+
+                // Iterate over the children of the FlowBox to find the bottom-most bottom, so
+                // we can determine how big / small we can make the FlowBox.
+                // If it's a UIComponent, include it if the includeInLayout property is true.
+                // If it's not a UIComponent, include it if the visible property is true.
+
+                for (var idx:int = 0; idx < fb.numChildren; idx++)
+                {
+                    var displayObject:DisplayObject = fb.getChildAt(idx);
+
+                    if ((displayObject is UIComponent && (displayObject as
+                                                          UIComponent).includeInLayout) ||
+                        (!(displayObject is UIComponent) && displayObject.visible))
+                    {
+                        var thisBottom:int = fb.getChildAt(idx).y + fb.getChildAt(idx).height;
+
+                        if (thisBottom > maxBottom)
+                            maxBottom = thisBottom;
+                    }
+                }
+
+                fb.height = maxBottom + fb.viewMetrics.bottom +
+                            fb.getStyle("paddingBottom") + 1;
+            }
+            else
+            {
+                fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
+            }
+        }
     }
 
     public function invalidateItems(items:ArrayCollection):void {
