@@ -100,7 +100,7 @@ public class SendGridFeed extends Feed {
             }
 
             Map<String, Key> keys = new HashMap<String, Key>();
-            for (AnalysisItem analysisItem : getFields()) {
+            for (AnalysisItem analysisItem : analysisItems) {
                 keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
             }
 
