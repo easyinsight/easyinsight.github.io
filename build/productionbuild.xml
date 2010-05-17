@@ -314,7 +314,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, modules1, modules2, modules3, modules4, modules5">
+    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, compileYahooWidget, modules1, modules2, modules3, modules4, modules5">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
