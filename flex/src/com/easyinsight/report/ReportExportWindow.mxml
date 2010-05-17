@@ -67,12 +67,12 @@
         }
 
         private function netvibes():void {
-            navigateToURL(new URLRequest("http://www.netvibes.com/subscribe.php?module=UWA&moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(_report.urlKey)) + "&reportName=" + escape(_reportName) + "&reportType=" + escape(String(_reportType)) + "&dataSourceID=" + escape(String(_dataSourceID)))));
+            navigateToURL(new URLRequest("http://www.netvibes.com/subscribe.php?module=UWA&moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(_report.analysisID)) + "&reportName=" + escape(_reportName) + "&reportType=" + escape(String(_reportType)) + "&dataSourceID=" + escape(String(_dataSourceID)))));
             PopUpManager.removePopUp(this);
         }
 
         private function igoogle():void {
-            navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=" + escape("http://www.netvibes.com/api/uwa/compile/google.php?moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(_report.urlKey)) + "&reportName=" + escape(_reportName) + "&reportType=" + escape(String(_reportType)) + "&dataSourceID=" + escape(String(_dataSourceID))))));
+            navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=" + escape("http://www.netvibes.com/api/uwa/compile/google.php?moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(_report.analysisID)) + "&reportName=" + escape(_reportName) + "&reportType=" + escape(String(_reportType)) + "&dataSourceID=" + escape(String(_dataSourceID))))));
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
