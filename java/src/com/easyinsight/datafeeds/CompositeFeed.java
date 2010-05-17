@@ -118,7 +118,6 @@ public class CompositeFeed extends Feed {
         try {
             return getDataSet(analysisItems, filters, insightRequestMetadata);
         } catch (Exception e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
