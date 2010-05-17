@@ -21,7 +21,7 @@
         import com.easyinsight.framework.CredentialsCache;
             import com.easyinsight.framework.WebCredentialsCache;
             [Bindable]
-            private var analysisID:int;
+            private var urlKey:String;
 
             [Bindable]
             private var reportType:int;
@@ -35,7 +35,7 @@
 			private function handleFlashVars():void {
                 CredentialsCache.initialize(new WebCredentialsCache());
                 PopupMenuFactory.menuFactory = new DefaultMenuFactory();
-				this.analysisID = int(Application.application.parameters.analysisID);
+				this.urlKey = String(Application.application.parameters.analysisID);
                 this.reportType = int(Application.application.parameters.reportType);
                 this.dataSourceID = int(Application.application.parameters.dataSourceID);
                 this.reportName = String(Application.application.parameters.reportName);
@@ -60,7 +60,7 @@
 	</mx:Script>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
 	<mx:VBox width="100%" height="100%">		
-		<dashboard:EmbeddedReportView id="panel" analysisID="{analysisID}" reportName="{reportName}"
+		<dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
                 dataSourceID="{dataSourceID}" reportType="{reportType}" prefix="https://www.easy-insight.com/"/>
 	</mx:VBox>
 </mx:Application>

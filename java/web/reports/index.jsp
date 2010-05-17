@@ -15,7 +15,7 @@
 <html>
 <%
     String reportID = request.getParameter("reportID");
-    com.easyinsight.analysis.InsightResponse insightResponse = new com.easyinsight.analysis.AnalysisService().openAnalysisIfPossible(Long.parseLong(reportID));
+    com.easyinsight.analysis.InsightResponse insightResponse = new com.easyinsight.analysis.AnalysisService().openAnalysisIfPossible(reportID);
     long dataSourceID = insightResponse.getInsightDescriptor().getDataFeedID();
     String reportName = insightResponse.getInsightDescriptor().getName();
     int reportType = insightResponse.getInsightDescriptor().getReportType();

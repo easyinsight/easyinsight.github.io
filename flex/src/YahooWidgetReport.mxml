@@ -57,7 +57,6 @@
             import com.easyinsight.analysis.DefaultMenuFactory;
             import com.easyinsight.analysis.PopupMenuFactory;
             import com.easyinsight.analysis.SixSigmaMeasure;
-            import com.easyinsight.analysis.TemporalAnalysisMeasure;
             import com.easyinsight.framework.CredentialsCache;
             import com.easyinsight.framework.WebCredentialsCache;
             import com.easyinsight.solutions.InsightDescriptor;
@@ -151,11 +150,7 @@
             var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
             var successful:Boolean = authResult.successful;
             if (successful) {
-                User.initializeUser(authResult.name, authResult.email,
-                        authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState,
-                        authResult.uiSettings, authResult.firstName);
-                User.getInstance().password = authResult.encryptedPassword;
+                User.initializeUser(authResult);
                 User.getInstance().userName = authResult.userName;
                 /*
                  Set the username and password at this point through the standard UWA javascript mechanisms.
@@ -211,7 +206,6 @@
             var analysisDate:AnalysisDateDimension;
             var dim:AnalysisDimension;
             var measure:AnalysisMeasure;
-            var temporal:TemporalAnalysisMeasure;
             var complex:ComplexAnalysisMeasure;
             var range:AnalysisRangeDimension;
             var list:AnalysisList;

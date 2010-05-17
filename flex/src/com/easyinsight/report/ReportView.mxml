@@ -71,13 +71,7 @@
             viewFactory.updateExportMetadata();
             var window:ReportExportWindow = new ReportExportWindow();
             window.report = viewFactory.report;
-            window.reportID = _reportID;
-            window.reportType = _reportType;
-            window.dataSourceID = _dataSourceID;
-            window.reportName = reportName;
-            window.coreView = viewFactory.getChildAt(0);
-            window.filterDefinitions = filterDefinitions;
-            window.embeddedFilters = viewFactory.drillthroughFilters;
+            window.coreView = viewFactory.getChildAt(0);            
             PopUpManager.addPopUp(window, this);
             window.x = exportButton.x - 20;
             window.y = exportButton.y + exportButton.height + 10;
@@ -669,8 +663,7 @@
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
             viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
             viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
-            viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
-            ;
+            viewFactory.addEventListener(EIErrorEvent.ERROR, onError);            
 
             if (!_embedded) {
                 loading = true;
