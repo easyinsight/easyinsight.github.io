@@ -41,6 +41,10 @@ public class RowComparator implements Comparator<IRow> {
             StringValue stringValue1 = (StringValue) value1;
             StringValue stringValue2 = (StringValue) value2;
             return stringValue1.getValue().compareTo(stringValue2.getValue()) * ascending;
+        } else if (value1.type() == Value.STRING && value2.type() == Value.EMPTY) {
+            return -ascending;
+        } else if (value1.type() == Value.EMPTY && value2.type() == Value.STRING) {
+            return ascending;
         }
         return -1;
     }

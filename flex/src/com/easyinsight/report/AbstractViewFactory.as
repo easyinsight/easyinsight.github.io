@@ -1,4 +1,5 @@
 package com.easyinsight.report {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.HierarchyOverride;
@@ -86,6 +87,14 @@ public class AbstractViewFactory extends VBox implements IRetrievable {
 
     public function get drillthroughFilters():ArrayCollection {
         return _drillthroughFilters;
+    }
+
+    public function get report():AnalysisDefinition {
+        return null;
+    }
+
+    public function updateExportMetadata():void {
+        
     }
 
     public function retrieveData(allSources:Boolean = false):void {

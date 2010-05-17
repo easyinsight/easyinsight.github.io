@@ -116,11 +116,18 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         _noCache = value;
     }
 
+    private var _report:AnalysisDefinition;
+
+    override public function get report():AnalysisDefinition {
+        return _report;
+    }
+
     override public function gotData(event:EmbeddedDataServiceEvent):void {
         if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
         } else {
             event.additionalProperties.prefix = _prefix;
             try {
+                _report = event.analysisDefinition;
                 _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap, event.additionalProperties);
                 dispatchEvent(event);
             } catch(e:Error) {
@@ -167,6 +174,10 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
 
     private function customChangeFromControlBar(event:CustomChangeEvent):void {
         _reportRenderer.onCustomChangeEvent(event);
+    }
+
+    override public function updateExportMetadata():void {
+        _reportRenderer.updateExportMetadata();
     }
 
     private function forceRender(event:ReportRendererEvent):void {

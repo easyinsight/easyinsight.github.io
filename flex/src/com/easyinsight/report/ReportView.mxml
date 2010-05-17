@@ -68,7 +68,9 @@
         }
 
         private function exportExcel():void {
+            viewFactory.updateExportMetadata();
             var window:ReportExportWindow = new ReportExportWindow();
+            window.report = viewFactory.report;
             window.reportID = _reportID;
             window.reportType = _reportType;
             window.dataSourceID = _dataSourceID;
