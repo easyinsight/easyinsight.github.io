@@ -12,6 +12,7 @@ public class CredentialsDefinition implements Serializable {
     public static final int NO_CREDENTIALS = 0;
     public static final int STANDARD_USERNAME_PW = 1;
     public static final int SALESFORCE = 2;
+    public static final int OAUTH = 3;
 
     private String credentialsName;    
 

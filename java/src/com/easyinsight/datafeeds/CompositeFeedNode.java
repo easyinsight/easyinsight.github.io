@@ -15,12 +15,32 @@ import java.io.Serializable;
  */
 public class CompositeFeedNode implements Serializable {
     private long dataFeedID;
+    private int x;
+    private int y;
 
     public CompositeFeedNode() {
     }
 
-    public CompositeFeedNode(long dataFeedID) {
+    public CompositeFeedNode(long dataFeedID, int x, int y) {
         this.dataFeedID = dataFeedID;
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
     }
 
     public long getDataFeedID() {
@@ -32,10 +52,12 @@ public class CompositeFeedNode implements Serializable {
     }
 
     public void store(Connection conn, Long compositeFeedID) throws SQLException {
-        PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO COMPOSITE_NODE (DATA_FEED_ID, COMPOSITE_FEED_ID) " +
-                "VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO COMPOSITE_NODE (DATA_FEED_ID, COMPOSITE_FEED_ID, X, Y) " +
+                "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertNodeStmt.setLong(1, dataFeedID);
         insertNodeStmt.setLong(2, compositeFeedID);
+        insertNodeStmt.setInt(3, x);
+        insertNodeStmt.setInt(4, y);
         insertNodeStmt.execute();
         long id = Database.instance().getAutoGenKey(insertNodeStmt);
         insertNodeStmt.close();

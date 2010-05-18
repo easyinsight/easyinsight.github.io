@@ -26,6 +26,7 @@
         import com.easyinsight.analysis.EmptyValue;
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
         import com.easyinsight.analysis.ReportRendererEvent;
+        import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.filtering.FilterRawData;
 
@@ -227,7 +228,7 @@
                 var myHeader:AnalysisItem = def.columns.getItemAt(k) as AnalysisItem;
                 columnMap[myHeader.qualifiedName()] = myHeader;
                 var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                columnHeaderObject.sortCompareFunction = createSortFunction(myHeader, columnHeaderObject);
+                columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                 columnHeaderObject.headerText = myHeader.display;
                 //columnHeaderObject.headerText = "";
                 var keyString:String = myHeader.qualifiedName();
@@ -248,96 +249,6 @@
             if (dataGrid.selectionMode == "none") {
                 dataGrid.selectionMode = "multipleCells";
             }
-        }
-
-        private function createSortFunction(myHeader:AnalysisItem, column:AdvancedDataGridColumn):Function {
-            return function(obj1:Object, obj2:Object):int {
-
-                var value1:Value = obj1[myHeader.qualifiedName()];
-                var value2:Value = obj2[myHeader.qualifiedName()];
-
-                if (value1 == null) {
-                    value1 = new EmptyValue();
-                }
-                if (value2 == null) {
-                    value2 = new EmptyValue();
-                }
-
-                if (value1.summary) {
-                    if (column.sortDescending) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
-                }
-
-                if (value2.summary) {
-                    if (column.sortDescending) {
-                        return 1;
-                    } else {
-                        return -1;
-                    }
-                }
-
-                if (value1.toSortValue().type() == Value.EMPTY && value2.toSortValue().type() == Value.EMPTY) {
-                    return 0;
-                }
-                if (value1.type() == Value.EMPTY) {
-
-                    if (column.sortDescending) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
-                }
-                if (value2.type == Value.EMPTY || value2.toSortValue().type() == Value.EMPTY) {
-                    if (column.sortDescending) {
-                        return 1;
-                    } else {
-                        return -1;
-                    }
-                }
-                if (value1.toSortValue().type() == Value.NUMBER && value2.toSortValue().type() == Value.NUMBER) {
-                    var number1:Number = value1.toSortValue().toNumber();
-                    if (isNaN(number1) || !isFinite(number1)) {
-                        if (column.sortDescending) {
-                            return -1;
-                        } else {
-                            return 1;
-                        }
-                    }
-
-                    var number2:Number = value2.toSortValue().toNumber();
-                    if (isNaN(number2) || !isFinite(number2)) {
-                        if (column.sortDescending) {
-                            return 1;
-                        } else {
-                            return -1;
-                        }
-                    }
-                    if (number1 < number2) {
-                        return -1;
-                    } else if (number1 > number2) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                }
-                if (value1.toSortValue().type() == Value.STRING && value2.toSortValue().type() == Value.STRING) {
-                    var string1:String = value1.toSortValue().toString();
-                    var string2:String = value2.toSortValue().toString();
-                    return ObjectUtil.stringCompare(string1, string2, true);
-                }
-                if (value1.toSortValue().type() == Value.DATE && value2.toSortValue().type() == Value.DATE) {
-                    var date1:Date = value1.toSortValue().toDate();
-                    var date2:Date = value2.toSortValue().toDate();
-                    return ObjectUtil.dateCompare(date1, date2);
-                }
-                var strCopy1:String = String(value1.toSortValue().getValue());
-                var strCopy2:String = String(value2.toSortValue().getValue());
-                return ObjectUtil.stringCompare(strCopy1, strCopy2, true);
-                //return Number(value1.getValue()) - Number(value2.getValue());
-            };
         }
 
         private function globalListeners():void {

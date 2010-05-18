@@ -36,7 +36,7 @@ import mx.containers.ApplicationControlBar;
 			addEventListener(MouseEvent.CLICK, gotClicked);
             var connectItem:ContextMenuItem = new ContextMenuItem("Connect...");
             connectItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onConnect);
-            var deleteItem:ContextMenuItem = new ContextMenuItem("Delete");
+            var deleteItem:ContextMenuItem = new ContextMenuItem("Delete Data Source");
             deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
             PopupMenuFactory.assignMenu(this, [ connectItem, deleteItem ]);
 		}

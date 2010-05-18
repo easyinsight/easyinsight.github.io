@@ -24,32 +24,34 @@ package com.easyinsight.analysis
 		
 		public function ChartSortButton() {
 			super();
-			if (sortState == NONE) {
-				setStyle("icon", noneIcon);	
+			addEventListener(MouseEvent.CLICK, sortClick);
+		}
+
+        private function updateIcon():void {
+            if (sortState == NONE) {
+				setStyle("icon", noneIcon);
 			} else if (sortState == ASCENDING) {
 				this.setStyle("icon", sortUpIcon);
 			} else if (sortState == DESCENDING) {
 				this.setStyle("icon", sortDownIcon);
 			}
-			addEventListener(MouseEvent.CLICK, sortClick);
-		}
+        }
 
         public function set analysisItem(val:AnalysisItem):void {
             _analysisItem = val;
             this.sortState = val.sort;
+            updateIcon();
         }
 
         private function sortClick(event:MouseEvent):void {
 			if (sortState == NONE) {
 				sortState = ASCENDING;
-				this.setStyle("icon", sortUpIcon);				
 			} else if (sortState == ASCENDING) {
 				sortState = DESCENDING;
-				this.setStyle("icon", sortDownIcon);
 			} else if (sortState == DESCENDING) {
 				sortState = NONE;
-				this.setStyle("icon", noneIcon);
 			}
+            updateIcon();
 			_analysisItem.sort = sortState;
 			dispatchEvent(new ChartSortEvent(_analysisItem, sortState));
 		}

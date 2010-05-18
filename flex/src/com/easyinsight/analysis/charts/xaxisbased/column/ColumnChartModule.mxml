@@ -9,7 +9,8 @@ import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartSortButton;
         import com.easyinsight.analysis.ChartSortEvent;
         import com.easyinsight.analysis.CustomChangeEvent;
-import com.easyinsight.analysis.SortableAxisTitle;
+        import com.easyinsight.analysis.SortFunctionFactory;
+        import com.easyinsight.analysis.SortableAxisTitle;
 
 import com.easyinsight.analysis.conditions.ConditionRenderer;
 
@@ -30,7 +31,6 @@ import mx.charts.series.ColumnSeries;
         import mx.charts.series.items.ColumnSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
-        import mx.collections.SortField;
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.BitmapFill;
@@ -107,8 +107,7 @@ import mx.charts.series.ColumnSeries;
            if (event.sortState == ChartSortButton.ASCENDING ||
                event.sortState == ChartSortButton.DESCENDING) {
                var sort:Sort = new Sort();
-               sort.fields = [ new SortField(event.analysisItem.qualifiedName(), false,
-                   event.sortState == ChartSortButton.DESCENDING) ];
+               sort.compareFunction = SortFunctionFactory.createSortFunction(event.analysisItem, event.analysisItem.sort == ChartSortButton.DESCENDING);
                graphData.sort = sort;
                graphData.refresh();
            }
@@ -247,12 +246,13 @@ import mx.charts.series.ColumnSeries;
 
                 if (columnChartDef.xaxis.sort > 0) {
                     var sort:Sort = new Sort();
-                    sort.fields = [ new SortField(columnChartDef.xaxis.qualifiedName(), false, columnChartDef.xaxis.sort == ChartSortButton.DESCENDING)];
+                    //sort.fields = [ new SortField(columnChartDef.xaxis.qualifiedName(), false, )];
+                    sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, columnChartDef.xaxis.sort == ChartSortButton.DESCENDING);
                     dataSet.sort = sort;
                     dataSet.refresh();
                 } else if (columnChartDef.measure.sort > 0) {
                     var measureSort:Sort = new Sort();
-                    measureSort.fields = [ new SortField(columnChartDef.measure.qualifiedName(), false, columnChartDef.measure.sort == ChartSortButton.DESCENDING)];
+                    measureSort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, columnChartDef.measure.sort == ChartSortButton.DESCENDING);
                     dataSet.sort = measureSort;
                     dataSet.refresh();    
                 }

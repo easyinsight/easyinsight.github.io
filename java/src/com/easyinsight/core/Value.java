@@ -20,8 +20,26 @@ public abstract class Value implements Serializable {
 
     // in theory, we have URL, we have image
 
+    public Value() {
+
+    }
+
+    public Value(Value sortValue) {
+        this.sortValue = sortValue;
+    }
+
     private Map<String, String> links;
+
     private Value originalValue;
+    private Value sortValue;
+
+    public Value getSortValue() {
+        return sortValue;
+    }
+
+    public void setSortValue(Value sortValue) {
+        this.sortValue = sortValue;
+    }
 
     public Value getOriginalValue() {
         return originalValue;

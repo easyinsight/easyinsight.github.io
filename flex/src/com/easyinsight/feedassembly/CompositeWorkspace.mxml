@@ -257,7 +257,7 @@
             } else {
                 for each (var compositeFeedNode:CompositeFeedNode in definedNodes) {
                     var descriptor:DataFeedDescriptor = findDescriptor(compositeFeedNode.dataFeedID);
-                    addDescriptorToGraph(descriptor, 0, 0);
+                    addDescriptorToGraph(descriptor, compositeFeedNode.x, compositeFeedNode.y);
                 }
                 for each (var compositeFeedConnection:CompositeFeedConnection in definedEdges) {
                     var fromItem:Item = graph.find(String(compositeFeedConnection.sourceFeedID));
@@ -396,7 +396,18 @@
             for each (var item:Item in graph.nodes) {
                 var feedID:Number = Number(item.id);
                 var node:CompositeFeedNode = new CompositeFeedNode();
+                for each (var obj:Object in s.getChildren()) {
+                    if (obj is GraphFeedNode) {
+                        var graphNode:GraphFeedNode = obj as GraphFeedNode;
+                        if (graphNode.data == item) {
+                            node.x = graphNode.x;
+                            node.y = graphNode.y;
+                        }
+                    }
+                }
+
                 node.dataFeedID = feedID;
+                
                 compositeFeedNodes.addItem(node);
             }
             return compositeFeedNodes;

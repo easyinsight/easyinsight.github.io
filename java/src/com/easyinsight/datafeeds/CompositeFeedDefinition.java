@@ -82,13 +82,13 @@ public class CompositeFeedDefinition extends FeedDefinition {
         rs.next();
         long compositeFeedID = rs.getLong(1);
         getCustomFeedIDStmt.close();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM COMPOSITE_NODE WHERE COMPOSITE_FEED_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, X, Y FROM COMPOSITE_NODE WHERE COMPOSITE_FEED_ID = ?");
         queryStmt.setLong(1, compositeFeedID);
         ResultSet nodeRS = queryStmt.executeQuery();
         List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
         while (nodeRS.next()) {
             long feedID = nodeRS.getLong(1);
-            nodes.add(new CompositeFeedNode(feedID));
+            nodes.add(new CompositeFeedNode(feedID, nodeRS.getInt(2), nodeRS.getInt(3)));
         }
         queryStmt.close();
         PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
@@ -309,7 +309,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
             new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
             replacementMap.put(child.getDataFeedID(), result);
-            newChildren.add(new CompositeFeedNode(clonedDefinition.getDataFeedID()));
+            newChildren.add(new CompositeFeedNode(clonedDefinition.getDataFeedID(), child.getX(), child.getY()));
         }
 
         // 

@@ -26,6 +26,11 @@ public class StringValue extends Value implements Serializable {
         this.value = value;
     }
 
+    public StringValue(String value, Value originalValue) {
+        super(originalValue);
+        this.value = value;
+    }
+
     public void setValue(String value) {
         this.value = value;
     }

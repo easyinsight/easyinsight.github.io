@@ -9,7 +9,8 @@ import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartSortButton;
         import com.easyinsight.analysis.ChartSortEvent;
         import com.easyinsight.analysis.CustomChangeEvent;
-import com.easyinsight.analysis.SortableAxisTitle;
+        import com.easyinsight.analysis.SortFunctionFactory;
+        import com.easyinsight.analysis.SortableAxisTitle;
 import com.easyinsight.analysis.conditions.ConditionRenderer;
 
         import com.easyinsight.filtering.FilterRawData;
@@ -291,6 +292,19 @@ import mx.events.FlexEvent;
             var barChartDef:BarChartDefinition = analysisDefinition as BarChartDefinition;
 
             if (dataSet.length > 0) {
+
+                if (barChartDef.yaxis.sort > 0) {
+                    var sort:Sort = new Sort();
+                    //sort.fields = [ new SortField(columnChartDef.xaxis.qualifiedName(), false, )];
+                    sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, barChartDef.yaxis.sort == ChartSortButton.DESCENDING);
+                    dataSet.sort = sort;
+                    dataSet.refresh();
+                } else if (barChartDef.measure.sort > 0) {
+                    var measureSort:Sort = new Sort();
+                    measureSort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measure, barChartDef.measure.sort == ChartSortButton.DESCENDING);
+                    dataSet.sort = measureSort;
+                    dataSet.refresh();
+                }
 
                 yField = barChartDef.yaxis.qualifiedName();
                 createChart();

@@ -11,6 +11,7 @@ package com.easyinsight.analysis
         public static const EMPTY:int = 4;
 
         public var links:Object;
+        public var sortValue:Value;
         public var originalValue:Value;
         public var summary:Boolean;
 
@@ -39,8 +40,8 @@ package com.easyinsight.analysis
 		}
 
         public function toSortValue():Value {
-            if (originalValue != null) {
-                return originalValue;
+            if (sortValue != null) {
+                return sortValue;
             }
             return this;
         }

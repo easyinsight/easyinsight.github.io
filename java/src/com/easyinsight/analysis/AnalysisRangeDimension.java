@@ -117,7 +117,7 @@ public class AnalysisRangeDimension extends AnalysisDimension {
                     } else {
                         String string = matchedOption.getRangeMinimum() + " to " + matchedOption.getRangeMaximum();
                         transformedValue = new StringValue(string);
-                        transformedValue.setOriginalValue(new NumericValue(matchedOption.getRangeMinimum()));
+                        transformedValue.setSortValue(new NumericValue(matchedOption.getRangeMinimum()));
                     }
                 } else {
                     transformedValue = new EmptyValue();

@@ -198,7 +198,47 @@ public class AnalysisDateDimension extends AnalysisDimension {
             } else {
                 switch (dateLevel) {
                     case MONTH_FLAT:
-                        resultValue = new NumericValue(calendar.get(Calendar.MONTH));
+                        int month = calendar.get(Calendar.MONTH);
+                        switch (month) {
+                            case Calendar.JANUARY:
+                                resultValue = new StringValue("January", new NumericValue(0));
+                                break;
+                            case Calendar.FEBRUARY:
+                                resultValue = new StringValue("February", new NumericValue(1));
+                                break;
+                            case Calendar.MARCH:
+                                resultValue = new StringValue("March", new NumericValue(2));
+                                break;
+                            case Calendar.APRIL:
+                                resultValue = new StringValue("April", new NumericValue(3));
+                                break;
+                            case Calendar.MAY:
+                                resultValue = new StringValue("May", new NumericValue(4));
+                                break;
+                            case Calendar.JUNE:
+                                resultValue = new StringValue("June", new NumericValue(5));
+                                break;
+                            case Calendar.JULY:
+                                resultValue = new StringValue("July", new NumericValue(6));
+                                break;
+                            case Calendar.AUGUST:
+                                resultValue = new StringValue("August", new NumericValue(7));
+                                break;
+                            case Calendar.SEPTEMBER:
+                                resultValue = new StringValue("September", new NumericValue(8));
+                                break;
+                            case Calendar.OCTOBER:
+                                resultValue = new StringValue("October", new NumericValue(9));
+                                break;
+                            case Calendar.NOVEMBER:
+                                resultValue = new StringValue("November", new NumericValue(10));
+                                break;
+                            case Calendar.DECEMBER:
+                                resultValue = new StringValue("December", new NumericValue(11));
+                                break;
+                            default:
+                                throw new RuntimeException();
+                        }
                         break;
                     case DAY_OF_YEAR_FLAT:
                         resultValue = new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
@@ -207,25 +247,25 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
                         switch (dayOfWeek) {
                             case Calendar.MONDAY:
-                                resultValue = new StringValue("Monday");
+                                resultValue = new StringValue("Monday", new NumericValue(1));
                                 break;
                             case Calendar.TUESDAY:
-                                resultValue = new StringValue("Tuesday");
+                                resultValue = new StringValue("Tuesday", new NumericValue(2));
                                 break;
                             case Calendar.WEDNESDAY:
-                                resultValue = new StringValue("Wednesday");
+                                resultValue = new StringValue("Wednesday", new NumericValue(3));
                                 break;
                             case Calendar.THURSDAY:
-                                resultValue = new StringValue("Thursday");
+                                resultValue = new StringValue("Thursday", new NumericValue(4));
                                 break;
                             case Calendar.FRIDAY:
-                                resultValue = new StringValue("Friday");
+                                resultValue = new StringValue("Friday", new NumericValue(5));
                                 break;
                             case Calendar.SATURDAY:
-                                resultValue = new StringValue("Saturday");
+                                resultValue = new StringValue("Saturday", new NumericValue(6));
                                 break;
                             case Calendar.SUNDAY:
-                                resultValue = new StringValue("Sunday");
+                                resultValue = new StringValue("Sunday", new NumericValue(0));
                                 break;
                             default:
                                 throw new RuntimeException();
