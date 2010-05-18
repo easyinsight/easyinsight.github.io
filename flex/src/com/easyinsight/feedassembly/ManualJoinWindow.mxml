@@ -1,9 +1,16 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="getDefinitions()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="getDefinitions()"
+        paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
     <mx:Script><![CDATA[
-import mx.managers.PopUpManager;
-import mx.collections.ArrayCollection;
-import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+
+        import mx.collections.Sort;
+
+        import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
         public var sourceFeedID:int;
         public var targetFeedID:int;
 
@@ -29,8 +36,25 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
             targetDefinition = feeds.getItemAt(1) as FeedDefinitionData;
             sourceFeedName = sourceDefinition.feedName;
             targetFeedName = targetDefinition.feedName;
-            sourceFields = sourceDefinition.fields;
-            targetFields = targetDefinition.fields;
+            var sort:Sort = new Sort();
+            var groupingSourceFields:ArrayCollection = new ArrayCollection();
+            for each (var field:AnalysisItem in sourceDefinition.fields) {
+                if (field.hasType(AnalysisItemTypes.DIMENSION) && !field.hasType(AnalysisItemTypes.DATE)) {
+                    groupingSourceFields.addItem(field);
+                }
+            }
+            sourceFields = groupingSourceFields;
+            sourceFields.sort = sort;
+            sourceFields.refresh();
+            var groupingTargetFields:ArrayCollection = new ArrayCollection();
+            for each (var targetField:AnalysisItem in targetDefinition.fields) {
+                if (targetField.hasType(AnalysisItemTypes.DIMENSION) && !targetField.hasType(AnalysisItemTypes.DATE)) {
+                    groupingTargetFields.addItem(targetField);
+                }
+            }
+            targetFields = groupingTargetFields;
+            targetFields.sort = sort;
+            targetFields.refresh();
         }
 
         private function create():void {
@@ -56,11 +80,11 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
         <mx:HBox>
             <mx:VBox>
                 <mx:Label text="{sourceFeedName}"/>
-                <util:AnalysisItemCompletionInput id="sourceBox" items="{sourceFields}" labelField="display"/>
+                <util:SmartComboBox id="sourceBox" dataProvider="{sourceFields}" labelField="display"/>
             </mx:VBox>
             <mx:VBox>
                 <mx:Label text="{targetFeedName}"/>                
-                <util:AnalysisItemCompletionInput id="targetBox" items="{targetFields}" labelField="display"/>
+                <util:SmartComboBox id="targetBox" dataProvider="{targetFields}" labelField="display"/>
             </mx:VBox>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">

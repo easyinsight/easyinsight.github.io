@@ -1,10 +1,13 @@
 package com.easyinsight.util
 {
-	import com.easyinsight.feedassembly.EdgeEditEvent;
-	
-	import flash.events.MouseEvent;
-	
-	import mx.controls.VRule;
+import com.easyinsight.analysis.PopupMenuFactory;
+import com.easyinsight.feedassembly.EdgeEditEvent;
+
+import flash.events.ContextMenuEvent;
+import flash.events.MouseEvent;
+import flash.ui.ContextMenuItem;
+
+import mx.controls.VRule;
 	import mx.core.UIComponent;
 
 	public class GraphLine extends UIComponent
@@ -30,8 +33,26 @@ package com.easyinsight.util
 			this.doubleClickEnabled = true;
 			addEventListener(MouseEvent.DOUBLE_CLICK, editLine);
 			addEventListener(MouseEvent.CLICK, selectLine);
+            var editContextItem:ContextMenuItem = new ContextMenuItem("Edit Join...");
+            editContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onEdit);
+            var testContextItem:ContextMenuItem = new ContextMenuItem("Test Join...");
+            testContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onTest);
+            var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Join");
+            deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
+            PopupMenuFactory.assignMenu(this, [ editContextItem, testContextItem, deleteContextItem ]);
 		}
 
+        private function onDelete(event:ContextMenuEvent):void {
+            dispatchEvent(new EdgeEditEvent(EdgeEditEvent.EDGE_DELETE, String(this.fromID), String(this.toID), this));
+        }
+
+        private function onEdit(event:ContextMenuEvent):void {
+            dispatchEvent(new EdgeEditEvent(EdgeEditEvent.EDGE_EDIT, String(this.fromID), String(this.toID), this));
+        }
+
+        private function onTest(event:ContextMenuEvent):void {
+            dispatchEvent(new EdgeEditEvent(EdgeEditEvent.EDGE_TEST, String(this.fromID), String(this.toID), this));
+        }
 
         public function get fromNodeID():int {
             return fromID;
@@ -48,7 +69,7 @@ package com.easyinsight.util
 		}
 		
 		private function editLine(event:MouseEvent):void {
-			dispatchEvent(new EdgeEditEvent(String(this.fromID), String(this.toID)));
+			dispatchEvent(new EdgeEditEvent(EdgeEditEvent.EDGE_EDIT, String(this.fromID), String(this.toID), this));
 		}
 		
 		public function clearSelection():void {

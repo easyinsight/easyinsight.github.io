@@ -1,10 +1,13 @@
 package com.easyinsight.util
 {
 	import com.adobe.flex.extras.controls.springgraph.Item;
-	
-	import flash.events.MouseEvent;
-	
-	import mx.containers.ApplicationControlBar;
+import com.easyinsight.analysis.PopupMenuFactory;
+
+import flash.events.ContextMenuEvent;
+import flash.events.MouseEvent;
+import flash.ui.ContextMenuItem;
+
+import mx.containers.ApplicationControlBar;
 	import mx.containers.VBox;
 	import mx.controls.Image;
 	import mx.controls.Label;
@@ -16,7 +19,7 @@ package com.easyinsight.util
 		private var feedName:String = "Sample Name";
 		private var labelBar:ApplicationControlBar;
 		private var labelImage:Image;
-		
+
 		private var item:Item;
 		
 		private var selected:Boolean = false;		
@@ -31,7 +34,20 @@ package com.easyinsight.util
 			setStyle("horizontalAlign", "center");
 			setStyle("borderThickness", 2);			
 			addEventListener(MouseEvent.CLICK, gotClicked);
+            var connectItem:ContextMenuItem = new ContextMenuItem("Connect...");
+            connectItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onConnect);
+            var deleteItem:ContextMenuItem = new ContextMenuItem("Delete");
+            deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
+            PopupMenuFactory.assignMenu(this, [ connectItem, deleteItem ]);
 		}
+
+        private function onConnect(event:ContextMenuEvent):void {
+            dispatchEvent(new GraphEvent(GraphEvent.CONNECT, this));
+        }
+
+        private function onDelete(event:ContextMenuEvent):void {
+            dispatchEvent(new GraphEvent(GraphEvent.DELETE, this));
+        }
 		
 		private function gotClicked(event:MouseEvent):void {			
 			if (selected) {

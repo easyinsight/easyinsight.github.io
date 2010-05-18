@@ -1,53 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <core:FullScreenPage xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
-	creationComplete="initializeData()" xmlns:adobe="com.adobe.flex.extras.controls.springgraph.*"
-	implements="com.easyinsight.administration.feed.IFeedAdminDetail"
-    paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" backgroundImage="{background2}" backgroundSize="100%">
+                     creationComplete="initializeData()" xmlns:adobe="com.adobe.flex.extras.controls.springgraph.*"
+                     implements="com.easyinsight.administration.feed.IFeedAdminDetail"
+                     paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0">
     <mx:Metadata>
         [Event(name="feedChange", type="com.easyinsight.administration.feed.FeedChangeEvent")]
     </mx:Metadata>
-	<mx:Script>
+    <mx:Script>
 		<![CDATA[
-			import com.easyinsight.administration.feed.FeedChangeEvent;
+        import com.adobe.flex.extras.controls.springgraph.Graph;
+        import com.adobe.flex.extras.controls.springgraph.Item;
+        import com.adobe.flex.extras.controls.springgraph.SpringGraph;
+        import com.easyinsight.administration.feed.FeedChangeEvent;
         import com.easyinsight.administration.feed.FeedDefinitionData;
-            import com.easyinsight.analysis.CredentialRequirement;
-            import com.easyinsight.analysis.CredentialsEvent;
-            import com.easyinsight.analysis.RuntimeCredentialsWindow;
-            import com.easyinsight.framework.CredentialsCache;
-            import com.easyinsight.util.GraphFeedNode;
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.util.EdgeSelectionEvent;
+        import com.easyinsight.util.GraphEvent;
+        import com.easyinsight.util.GraphFeedNode;
+        import com.easyinsight.util.GraphFeedNodeFactory;
+        import com.easyinsight.util.GraphLine;
         import com.easyinsight.util.GraphSelectionState;
         import com.easyinsight.util.NodeSelectionEvent;
-            import com.easyinsight.util.PopUpUtil;
-            import com.easyinsight.util.ProgressAlert;
-            import com.easyinsight.util.TestEdgeRenderer;
-        import com.easyinsight.util.GraphLine;
-
-            import mx.collections.Sort;
-            import mx.collections.SortField;
-            import mx.controls.List;
-        import mx.managers.PopUpManager;
-
-        import com.adobe.flex.extras.controls.springgraph.Item;
-
-        import mx.managers.DragManager;
-
-        import com.adobe.flex.extras.controls.springgraph.SpringGraph;
-        import com.easyinsight.listing.DataFeedDescriptor;
-
-        import mx.events.DragEvent;
-
-        import com.adobe.flex.extras.controls.springgraph.Graph;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.TestEdgeRenderer;
 
         import mx.collections.ArrayCollection;
-
-        [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.controls.Alert;
+        import mx.controls.List;
+        import mx.events.DragEvent;
+        import mx.managers.DragManager;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var allFeeds:ArrayCollection;
-
         [Bindable]
         private var graph:Graph = new Graph();
 
@@ -86,6 +75,10 @@
             s.addEventListener(EdgeSelectionEvent.EDGE_CTRL_SELECT, edgeCtrlSelect);
             s.addEventListener(EdgeSelectionEvent.EDGE_DESELECTED, edgeDeselected);
             s.addEventListener(EdgeEditEvent.EDGE_EDIT, onEdgeEdit);
+            s.addEventListener(EdgeEditEvent.EDGE_DELETE, onEdgeDelete);
+            s.addEventListener(EdgeEditEvent.EDGE_TEST, onEdgeTest);
+            s.addEventListener(GraphEvent.CONNECT, join);
+            s.addEventListener(GraphEvent.DELETE, deleteItem);
         }
 
         private function determineCounts():GraphSelectionState {
@@ -106,6 +99,25 @@
             return state;
         }
 
+        private function onEdgeTest(edgeEvent:EdgeEditEvent):void {
+            var compositeFeedConnection:CompositeFeedConnection = graph.getLinkData(graph.find(edgeEvent.sourceID), graph.find(edgeEvent.targetID)) as CompositeFeedConnection;
+            feedService.testJoin.send(compositeFeedConnection, CredentialsCache.getCache().createCredentials());
+        }
+
+        private function tested():void {
+            var joinAnalysis:JoinAnalysis = feedService.testJoin.lastResult as JoinAnalysis;
+            Alert.show("Analysis showed that " + joinAnalysis.joinedValues.length + " were matched correctly. " + joinAnalysis.sourceDataSourceName + " had " +
+                    joinAnalysis.unjoinedSourceValues.length + " values with no match. " + joinAnalysis.targetDataSourceName + " had " +
+                    joinAnalysis.unjoinedTargetValues.length + " values with no match.");
+        }
+
+        private function onEdgeDelete(edgeEvent:EdgeEditEvent):void {
+            var firstItem:Item = graph.find(String(edgeEvent.sourceID));
+            var secondItem:Item = graph.find(String(edgeEvent.targetID));
+            graph.unlink(firstItem, secondItem);
+            s.removeChild(edgeEvent.graphLine);
+        }
+
         private function onEdgeEdit(edgeEditEvent:EdgeEditEvent):void {
             var compositeFeedConnection:CompositeFeedConnection = graph.getLinkData(graph.find(edgeEditEvent.sourceID), graph.find(edgeEditEvent.targetID)) as CompositeFeedConnection;
             var decoratedConnection:ConnectionWithInfo = new ConnectionWithInfo();
@@ -120,14 +132,7 @@
             PopUpUtil.centerPopUp(joinDetailWindow);
         }
 
-        private function join():void {
-            /*var state:GraphSelectionState = determineCounts();
-             var firstNode:GraphFeedNode = state.nodeCount[0];
-             var secondNode:GraphFeedNode = state.nodeCount[1];
-             var firstItem:Item = graph.find(String(firstNode.feedID));
-             var secondItem:Item = graph.find(String(secondNode.feedID));
-             graph.link(firstItem, secondItem);
-             dispatchEvent(new FeedChangeEvent());*/
+        private function join(event:GraphEvent):void {
             var manualJoinWindow:ManualJoinWindow = new ManualJoinWindow();
             var state:GraphSelectionState = determineCounts();
             var firstNode:GraphFeedNode = state.nodeCount[0];
@@ -139,26 +144,20 @@
             PopUpUtil.centerPopUp(manualJoinWindow);
         }
 
-        private function deleteItem():void {
-            var state:GraphSelectionState = determineCounts();
-            for each (var edge:GraphLine in state.edgeCount) {
-                var firstItem:Item = graph.find(String(edge.fromID));
-                var secondItem:Item = graph.find(String(edge.toID));
-                graph.unlink(firstItem, secondItem);
-                s.removeChild(edge);
-            }
-            for each (var node:GraphFeedNode in state.nodeCount) {
-                var item:Item = graph.find(String(node.feedID));
-                for each (var obj:Object in s.getChildren()) {
-                    if (obj is GraphLine) {
-                        var graphLine:GraphLine = obj as GraphLine;
-                        if (graphLine.fromNodeID == node.feedID || graphLine.toNodeID == node.feedID) {
-                            s.removeChild(graphLine);
-                        }
+        private function deleteItem(event:GraphEvent):void {
+
+            var node:GraphFeedNode = event.node;
+            var item:Item = graph.find(String(node.feedID));
+            for each (var obj:Object in s.getChildren()) {
+                if (obj is GraphLine) {
+                    var graphLine:GraphLine = obj as GraphLine;
+                    if (graphLine.fromNodeID == node.feedID || graphLine.toNodeID == node.feedID) {
+                        s.removeChild(graphLine);
                     }
                 }
-                graph.remove(item);
             }
+            graph.remove(item);
+            
             dispatchEvent(new FeedChangeEvent());
         }
 
@@ -239,13 +238,19 @@
             sort.fields = [ sortField ];
             allFeeds.sort = sort;
             allFeeds.refresh();
-            if (initialFeedIDs != null) {
-                queuedExistings = new ArrayCollection();
-                queuedNews = initialFeedIDs;
+            if (initialFeedIDs != null && initialFeedIDs.length > 0) {
                 var dsIDs:ArrayCollection = new ArrayCollection();
                 for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
+                    //allFeeds.removeItemAt(allFeeds.getItemIndex(feedDescriptor));
+                    addDescriptorToGraph(feedDescriptor, 0, 0);
                     dsIDs.addItem(feedDescriptor.dataFeedID);
                 }
+                /*queuedExistings = new ArrayCollection();
+                queuedNews = initialFeedIDs;
+
+                for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
+
+                }*/
                 ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
                 feedService.getCredentials.send(dsIDs, CredentialsCache.getCache().createCredentials());
                 //feedService.initialDefine.send(new ArrayCollection(), initialFeedIDs);
@@ -356,21 +361,31 @@
             feedService.getCredentials.send(new ArrayCollection([selectedObject.dataFeedID]), CredentialsCache.getCache().createCredentials());
         }
 
-        
-            private var queuedExistings:ArrayCollection;
-            private var queuedNews:ArrayCollection;
 
-            private function onCredentials():void {
+        private var queuedExistings:ArrayCollection;
+        private var queuedNews:ArrayCollection;
 
-                    ProgressAlert.alert(this, "Trying to automatically find joins...", null, feedService.initialDefine);
-                    feedService.initialDefine.send(queuedExistings, queuedNews, CredentialsCache.getCache().createCredentials());
+        private function onCredentials():void {
+            /*var detectWindow:AutoDetectJoins = new AutoDetectJoins();
+            detectWindow.addEventListener("autoDetectJoins", autoDetectJoins);
+            detectWindow.addEventListener("noDetectJoins", noDetectJoins);
+            PopUpManager.addPopUp(detectWindow, this, true);
+            PopUpUtil.centerPopUp(detectWindow);*/
+        }
 
-            }
+        private function noDetectJoins(event:Event):void {
 
-            private function gotCredentials():void {
-                var requirements:ArrayCollection = feedService.getCredentials.lastResult as ArrayCollection;
-                CredentialsCache.getCache().obtainCredentials(this, requirements, onCredentials);                
-            }
+        }
+
+        private function autoDetectJoins(event:Event):void {
+            ProgressAlert.alert(this, "Trying to automatically find joins...", null, feedService.initialDefine);
+            feedService.initialDefine.send(queuedExistings, queuedNews, CredentialsCache.getCache().createCredentials());
+        }
+
+        private function gotCredentials():void {
+            var requirements:ArrayCollection = feedService.getCredentials.lastResult as ArrayCollection;
+            CredentialsCache.getCache().obtainCredentials(this, requirements, onCredentials);
+        }
 
         private function dragOverHandler(event:DragEvent):void {
             DragManager.showFeedback(DragManager.MOVE);
@@ -407,13 +422,13 @@
             var valid:Boolean = true;
             var failureMessage:String;
             if (graph.nodeCount == 0) {
-                failureMessage = "You must have at least one feed.";
+                failureMessage = "You must have at least one data source.";
                 valid = false;
             } else if (graph.nodeCount > 1) {
                 for each (var item:Item in graph.nodes) {
                     var foundOne:Boolean = graph.neighbors(item.id) != null;
                     if (!foundOne) {
-                        failureMessage = "You must connect all feeds.";
+                        failureMessage = "You must connect all data sources.";
                         valid = false;
                     }
                 }
@@ -429,23 +444,28 @@
         }
 		]]>
 	</mx:Script>
-	<mx:RemoteObject destination="feeds" id="feedService">
-		<mx:method name="initialDefine" result="gotDefine()"/>
-		<mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
-		<mx:method name="getCredentials" result="gotCredentials()"/>
-	</mx:RemoteObject>
-	<mx:HDividedBox width="100%" height="100%">
-		<mx:List dataProvider="{allFeeds}" dragEnabled="true" labelField="name" height="100%" width="150"/>
-		<mx:VBox width="100%" height="100%">
-			<mx:HBox>
-				<mx:Button id="joinButton" icon="@Embed(source='../../../../assets/graph_edge.png')" click="join()" toolTip="Connect"/>
-				<mx:Button id="deleteButton" icon="@Embed(source='../../../../assets/navigate_cross.png')" click="deleteItem()" toolTip="Delete"/>
-				<mx:Text fontSize="14" id="failureText" visible="false"/>
-			</mx:HBox>
-			<adobe:SpringGraph dragEnter="dragEnterHandler(event)" dragOver="dragOverHandler(event)"
-				dragDrop="dragDropHandler(event)" id="s" backgroundColor="#777777" lineColor="#6666ff"
-				edgeRenderer="{testEdgeRenderer}" itemRenderer="{ new com.easyinsight.util.GraphFeedNodeFactory() }"
-				width="800" height="100%" autoFit="true" dataProvider="{graph}"/>
-		</mx:VBox>
-	</mx:HDividedBox>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="initialDefine" result="gotDefine()"/>
+        <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+        <mx:method name="getCredentials" result="gotCredentials()"/>
+        <mx:method name="testJoin" result="tested()"/>
+    </mx:RemoteObject>
+    <mx:Canvas width="100%" height="100%">
+        <mx:VBox width="250" paddingLeft="5" paddingRight="10" height="100%" backgroundColor="#333333" paddingBottom="10" paddingTop="10">
+            <mx:TextArea text="Drag data sources into the canvas to the right to add them to the composite data source." borderStyle="none"
+                    backgroundAlpha="0" editable="false" selectable="false" height="70" width="235" color="#FFFFFF" fontSize="14"/>
+            <mx:List dataProvider="{allFeeds}" dragEnabled="true" labelField="name" height="100%" width="235"/>
+        </mx:VBox>
+        <mx:VBox width="100%" height="100%" backgroundColor="#E0E0E0" x="250">
+            <mx:HBox paddingTop="5" paddingLeft="5" horizontalAlign="center" width="100%">
+                <mx:TextArea text="Right click on data sources once you've added them to the canvas to create new joins or remove the data sources. Right click on joins to describe, test, or delete." borderStyle="none"
+                    backgroundAlpha="0" editable="false" selectable="false" height="40" width="500" color="#000000" fontSize="12"/>
+                <mx:Text fontSize="14" id="failureText" visible="false"/>
+            </mx:HBox>
+            <adobe:SpringGraph dragEnter="dragEnterHandler(event)" dragOver="dragOverHandler(event)"
+                               dragDrop="dragDropHandler(event)" id="s" backgroundColor="#777777" lineColor="#6666ff"
+                               edgeRenderer="{testEdgeRenderer}" itemRenderer="{new GraphFeedNodeFactory()}"
+                               width="100%" height="100%" autoFit="true" dataProvider="{graph}"/>
+        </mx:VBox>
+    </mx:Canvas>
 </core:FullScreenPage>

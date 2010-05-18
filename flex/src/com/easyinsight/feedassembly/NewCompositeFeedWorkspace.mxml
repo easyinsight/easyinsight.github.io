@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
                 xmlns:feedassembly="com.easyinsight.feedassembly.*"
-                paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+                paddingTop="10" paddingLeft="0" paddingRight="0" paddingBottom="0"
         implements="com.easyinsight.framework.IFullScreenPage">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.feed.FeedChangeEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -21,6 +23,7 @@
 
         private var saveNeeded:Boolean;
 
+        [Bindable]
         private var feedDefinition:CompositeFeedDefinition;
 
         private function createdFeed(event:CompositeFeedSaveEvent):void {
@@ -73,17 +76,34 @@
 
         override public function cleanup():void {
         }
+
+        private function analyze():void {
+            if (saveNeeded) {
+                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, analyzeListener, null, Alert.CANCEL);
+            } else {
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.feedName)));
+            }
+        }
+
+        private function analyzeListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.feedName)));
+            }
+        }
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
 		<mx:method name="updateFeedDefinition" result="updated()"/>
 	</mx:RemoteObject>
 	<mx:VBox width="100%" height="100%">
-		<mx:HBox>
-            <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
+		<mx:HBox paddingLeft="20">
+            <mx:Button icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
                        toolTip="Close"/>
-            <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+            <mx:Button icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
                            toolTip="Save"/>
+            <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="analyze()"
+                           toolTip="Analyze" enabled="{feedDefinition != null}"/>
 		</mx:HBox>
 		<feedassembly:CompositeWorkspace id="workspace" width="100%" height="100%" feeds="{_feedList}" feedChange="onFeedChange(event)"/>
 	</mx:VBox>

@@ -329,6 +329,15 @@ public class FeedService implements IDataFeedService {
         }
     }
 
+    public JoinAnalysis testJoin(CompositeFeedConnection connection, List<CredentialFulfillment> credentials) {
+        try {
+            return new JoinTester(connection).generateReport(credentials);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<CompositeFeedConnection> initialDefine(List<CompositeFeedNode> nodes, List<FeedDescriptor> newFeeds, List<CredentialFulfillment> credentials) {
         try {
             Set<Set<Long>> connectionMap = new HashSet<Set<Long>>();
