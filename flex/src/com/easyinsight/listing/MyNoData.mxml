@@ -8,13 +8,10 @@
         [Embed(source="../../../../assets/components_x_48.png")]
         public var connectionsIcon:Class;
 
-        [Bindable]
-        [Embed(source="../../../../assets/shopping_bag x48.png")]
-        public var exchangeIcon:Class;
         ]]></mx:Script>
     <mx:Box height="40%" width="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000">
-        <mx:Text text="You don't have any data yet. We've got a couple&#13;of ways you can get started:" fontSize="28" color="#FFFFFF"
-                selectable="false"/>
+        <mx:Text text="You don't have any data yet.&#13;Let's get started!" fontSize="28" color="#FFFFFF"
+                selectable="false" textAlign="center"/>
     </mx:Box>
     <mx:HBox height="60%" width="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF">
         <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="240"
@@ -25,16 +22,6 @@
             <mx:Text text="Add Your Own Data" fontSize="24" selectable="false"/>
             <mx:TextArea text="Want to connect to Basecamp, Google Analytics, Salesforce, or more? Upload an Excel spreadsheet or a CSV? Pull in data from a relational database?"
                     fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="140" width="310" textAlign="center"/>
-        </mx:VBox>
-        <mx:Spacer width="100"/>
-        <mx:VBox borderStyle="solid" borderThickness="1" useHandCursor="true" height="240" backgroundColor="#FFFFFF" width="350" horizontalAlign="center"
-                cornerRadius="8" buttonMode="true" id="exchangeBox" mouseOver="exchangeBox.setStyle('backgroundColor', 0xDDDDDD)"
-                mouseOut="exchangeBox.setStyle('backgroundColor', 0xFFFFFF)" click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Exchange'))"
-                mouseChildren="false">
-            <mx:Image source="{exchangeIcon}"/>
-            <mx:Text text="Look at Public Data" fontSize="24" selectable="false"/>
-            <mx:TextArea text="Want a quick start? You can browse public data sets and reports submitted by other users." fontSize="18"
-                     backgroundAlpha="0" editable="false" selectable="false" height="140" width="310" textAlign="center"/>
         </mx:VBox>
     </mx:HBox>
 </mx:VBox>

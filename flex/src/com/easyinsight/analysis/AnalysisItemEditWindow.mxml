@@ -25,6 +25,12 @@
             _analysisItem = analysisItem;
         }
 
+        private var _originalWrapper:AnalysisItemWrapper;
+
+        public function set originalWrapper(analysisItemWrapper:AnalysisItemWrapper):void {
+            _originalWrapper = analysisItemWrapper;
+        }
+
         public function set analysisItems(analysisItems:ArrayCollection):void {
             _analysisItems = analysisItems;
         }
@@ -49,7 +55,7 @@
         }
 
         private function onSaveComplete(event:AnalysisItemSaveEvent):void {
-            dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, true));
+            dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, _originalWrapper, true));
             editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
             PopUpManager.removePopUp(this);
         }

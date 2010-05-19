@@ -4,7 +4,6 @@
          paddingRight="10" width="100%" height="100%" xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:datasources="com.easyinsight.datasources.*" xmlns:analysis="com.easyinsight.analysis.*">
     <mx:Metadata>
-        [Event(name="analysisItemCreated", type="com.easyinsight.analysis.AnalysisItemCreationEvent")]
         [Event(name="analysisItemEdit", type="com.easyinsight.analysis.AnalysisItemEditEvent")]
         [Event(name="reportSizing", type="com.easyinsight.analysis.ReportSizingEvent")]
     </mx:Metadata>
@@ -16,9 +15,7 @@
         import com.easyinsight.framework.DataService;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.collections.ArrayCollection;
-        import mx.collections.Sort;
-        import mx.collections.SortField;
+        import mx.collections.ArrayCollection;        
         import mx.managers.PopUpManager;
 
         private var _analysisDefinition:AnalysisDefinition;
@@ -151,27 +148,7 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function createBlankField():void {
-            var window:NewBlankFeedWindow = NewBlankFeedWindow(PopUpManager.createPopUp(this, NewBlankFeedWindow));
-            window.addEventListener(AnalysisItemCreationEvent.ANALYSIS_ITEM_CREATED, newFieldCreated);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function newFieldCreated(event:AnalysisItemCreationEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            dispatchEvent(event);
-            var node:AnalysisItemNode = new AnalysisItemNode();
-            node.analysisItem = event.analysisItem;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-            availableFields.addItem(wrapper);
-            wrappers.addItem(wrapper);
-            if (analysisDefinition.addedItems == null) {
-                analysisDefinition.addedItems = new ArrayCollection();
-            }
-            analysisDefinition.addedItems.addItem(event.analysisItem);
-        }
-
-        private function obfuscate():void {
+        /*private function obfuscate():void {
             dataView.obfuscate = !dataView.obfuscate;
             if (dataView.obfuscate) {
                 dispatchEvent(new ReportSizingEvent(700));
@@ -179,7 +156,7 @@
                 dispatchEvent(new ReportSizingEvent(0));
             }
             dataView.retrieveData();
-        }
+        }*/
 
         private function newTextReplaceScrub():void {
             var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));

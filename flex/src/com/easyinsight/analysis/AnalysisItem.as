@@ -67,7 +67,6 @@ import mx.formatters.Formatter;
 		private static function iHateThis():void {
 			var namedKey:NamedKey;
 			var derivedKey:DerivedKey;
-			var namespacedKey:NamespacedKey;
 			var numericValue:NumericValue;
 			var stringValue:StringValue;
 			var dateValue:DateValue;

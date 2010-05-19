@@ -19,7 +19,6 @@
         import com.easyinsight.datasources.MeetupDataSource;
         import com.easyinsight.datasources.PivotalTrackerBaseSource;
         import com.easyinsight.datasources.SendGridDataSource;
-        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.salesforce.SalesforceFeedDefinition;
@@ -66,8 +65,6 @@
         private var passwordInputText:String;
         [Bindable]
         private var sessionIdInputText:String;
-        [Bindable]
-        private var activated:Boolean;
 
         [Bindable]
         private var haveFeed:Boolean = false;
@@ -144,7 +141,7 @@
             this.feedAttribution = feedDefinition.attribution;
 
 
-            this.activated = User.getInstance().activated;
+            //this.activated = User.getInstance().activated;
 
             this.refreshInterval = feedDefinition.refreshDataInterval / (1000 * 60 * 60);
             this.sessionIdInputText = feedDefinition.sessionId;
@@ -339,7 +336,7 @@
 							<mx:Label text="Sharing" fontSize="14"/>
 						</mx:Box>
 					</mx:HBox>
-					<feed:FeedSharing id="feedPolicy" paddingTop="15" paddingLeft="45" uploadPolicy="{feedUploadPolicy}" activated="{activated}" liveData="{liveData}"/>
+					<feed:FeedSharing id="feedPolicy" paddingTop="15" paddingLeft="45" uploadPolicy="{feedUploadPolicy}" liveData="{liveData}"/>
 				</mx:VBox>
 			</mx:HBox>
             <mx:Box label="Fields">

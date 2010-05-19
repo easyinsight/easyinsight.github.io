@@ -306,6 +306,32 @@ public class TransformContainer extends HBox
         showingFeedback = false;
     }
 
+    public function createNewFilter(analysisItem:AnalysisItem, stageX:int, stageY:int):void {
+        if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+            var window:DateFilterWindow = new DateFilterWindow();
+            window.feedID = _feedID;
+            window.item = analysisItem;
+            window.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            //Alert.show(event.localX + " - " + event.localY);
+            var x:int = stageX - 220;
+            x = Math.max(x, 30);
+            window.x = x;
+            window.y = stageY - 35;
+        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem);
+            initializeFilter(sliderMeasureFilter);
+        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
+            dimWindow.item = analysisItem;
+            dimWindow.feedID = _feedID;
+            dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
+            PopUpManager.addPopUp(dimWindow, this, true);
+            dimWindow.x = Math.max(stageX - 220, 30);;
+            dimWindow.y = stageY - 35;
+        }
+    }
+
     protected function dragDropHandler(event:DragEvent):void {
         setStyle("borderThickness", 0);
         setStyle("borderStyle", "none");
@@ -327,29 +353,7 @@ public class TransformContainer extends HBox
                 analysisItem = wrapper.analysisItem;
             }
         }
-        if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
-            var window:DateFilterWindow = new DateFilterWindow();
-            window.feedID = _feedID;
-            window.item = analysisItem;
-            window.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            //Alert.show(event.localX + " - " + event.localY);
-            var x:int = event.stageX - 220;
-            x = Math.max(x, 30);
-            window.x = x;
-            window.y = event.stageY - 35;
-        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-            var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem);
-            initializeFilter(sliderMeasureFilter);
-        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-            var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
-            dimWindow.item = analysisItem;
-            dimWindow.feedID = _feedID;
-            dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
-            PopUpManager.addPopUp(dimWindow, this, true);
-            dimWindow.x = Math.max(event.stageX - 220, 30);;
-            dimWindow.y = event.stageY - 35;
-        }
+        createNewFilter(analysisItem, event.stageX, event.stageY);
     }
 
     private function onFilterSelection(event:FilterCreationEvent):void {

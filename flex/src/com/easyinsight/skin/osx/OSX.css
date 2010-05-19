@@ -9,7 +9,7 @@ ApplicationControlBar {
 }
 
 @font-face {
-	src:url("lucidaGrande.swf"); 
+	src:url("LucidaGrande.swf"); 
 	font-family: "Lucida Grande";
 }
 
@@ -324,13 +324,6 @@ DataGrid {
    textSelectedColor: #ffffff;
    fontSize: 10;
    themeColor: #3370ce;
-}
-
-
-
-PrettyDataGridHeader {
-	color: #000000;
-	fontSize: 10;	
 }
 
 VScrollBar {

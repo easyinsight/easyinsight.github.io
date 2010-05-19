@@ -1,28 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
          xmlns:util="com.easyinsight.util.*" xmlns:solutions="com.easyinsight.solutions.*" width="100%" height="100%"
          implements="com.easyinsight.listing.IPerspective"
-         backgroundColor="#DCE2F8" doubleClickEnabled="true" creationComplete="initListeners()"
-         paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" verticalGap="0">
+         backgroundColor="#DCE2F8" doubleClickEnabled="true" creationComplete="initListeners()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
 
-        import com.easyinsight.help.ScreencastWindow;
-
         import com.easyinsight.listing.IPerspective;
         import com.easyinsight.listing.ListingChangeEvent;
 
-        import com.easyinsight.util.PopUpUtil;
-
-        import mx.binding.utils.BindingUtils;
         import mx.events.ItemClickEvent;
         import mx.utils.URLUtil;
 
         import com.easyinsight.framework.User;
 
         import mx.managers.BrowserManager;
-        import mx.managers.PopUpManager;
+
         import mx.collections.ArrayCollection;
 
         private function onClick(event:ItemClickEvent):void {
@@ -188,23 +182,17 @@
                         <mx:Label fontSize="24" text="Ready to connect to your own data?"/>
                     </mx:Box>
                     <mx:Label text="Click on any of the options below to quickly connect and get started." fontSize="18"/>
-                    <!--<mx:HBox>
-                        <mx:CheckBox label="SaaS Integrations" id="saasCheckbox" selected="{saas}"/>
-                        <mx:CheckBox label="Client Downloads" id="clientCheckbox" selected="{client}"/>
-                        <mx:CheckBox label="Business Patterns" id="bizCheckbox" selected="{biz}"/>
-                        <mx:CheckBox label="Easy Insight Training" id="trainingCheckbox" selected="{learning}"/>
-                    </mx:HBox>-->
                 </mx:VBox>
             </mx:HBox>
             <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}">
                 <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
                     <mx:ProgressBar indeterminate="true" label="Loading available connections..."/>
                 </mx:Box>
-                <mx:Box width="100%" height="100%">
+                <mx:Canvas width="100%" height="100%">
                     <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-                        columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%" verticalScrollPolicy="off"/>
-                </mx:Box>
+                        columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%"/>
+                </mx:Canvas>
             </mx:ViewStack>
         </mx:VBox>
     </mx:VBox>
-</mx:VBox>
+</mx:Canvas>

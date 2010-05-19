@@ -35,7 +35,7 @@
         <mx:State name="Authorized">
             <mx:AddChild relativeTo="{authBox}">
                 <mx:TextArea
-                        text="You're now authorized to access the external data. Click Install Solution below to start!"
+                        text="You're now authorized to access the external data. Click Install Connection below to start!"
                         backgroundAlpha="0"
                         borderStyle="none" editable="false" selectable="false" fontSize="16" width="300" height="90"/>
             </mx:AddChild>

@@ -50,7 +50,6 @@
         }
 
         public function updateReport():void {
-            analysisDefinition.marketplaceVisible = marketplaceVisibleCheckbox.selected;
             analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
             analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
             analysisDefinition.solutionVisible = solutionVisibleCheckbox.selected;
@@ -70,12 +69,9 @@
 
         private function sourceSharingChange(event:MouseEvent):void {
             if (shareDataSourceSharingCheckbox.selected) {
-                marketplaceVisibleCheckbox.selected = false;
-                marketplaceVisibleCheckbox.enabled = false;
                 publiclyVisibleCheckbox.selected = false;
                 publiclyVisibleCheckbox.enabled = false;
             } else {
-                marketplaceVisibleCheckbox.enabled = true;
                 publiclyVisibleCheckbox.enabled = true;
             }
         }
@@ -202,12 +198,6 @@
                              change="publiclyVisible = publiclyVisibleCheckbox.selected"/>
                 <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
                           toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
-            </mx:HBox>
-            <mx:HBox verticalAlign="middle">
-                <mx:CheckBox label="Marketplace Visible" id="marketplaceVisibleCheckbox"
-                             selected="{marketplaceVisible}" enabled="{publiclyVisible}"/>
-                <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                          toolTip="By checking this box, you make the report visible to all other Easy Insight users in the marketplace."/>
             </mx:HBox>
         </mx:VBox>
     </mx:HBox>

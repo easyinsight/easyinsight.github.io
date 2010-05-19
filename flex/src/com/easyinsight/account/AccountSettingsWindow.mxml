@@ -16,9 +16,6 @@
         private var publicDataEnabled:Boolean;
 
         [Bindable]
-        private var marketplaceEnabled:Boolean;
-
-        [Bindable]
         private var sharingEnabled:Boolean;
 
         [Bindable]
@@ -31,7 +28,6 @@
             var accountSettings:AccountSettings = userService.getAccountSettings.lastResult as AccountSettings;
             apiEnabled = accountSettings.apiEnabled;
             publicDataEnabled = accountSettings.publicData;
-            marketplaceEnabled = accountSettings.marketplace;
             sharingEnabled = accountSettings.reportSharing;
             groupID = accountSettings.groupID;
         }
@@ -39,7 +35,6 @@
         private function save():void {
             var accountSettings:AccountSettings = new AccountSettings();
             accountSettings.apiEnabled = apiEnabledCheckbox.selected;
-            accountSettings.marketplace = marketplaceCheckbox.selected;
             accountSettings.publicData = publicDataCheckbox.selected;
             accountSettings.reportSharing = sharingCheckbox.selected;
             accountSettings.groupID = groupBox.selectedItem.groupID;
@@ -77,9 +72,6 @@
             </mx:FormItem>
             <mx:FormItem label="Public Data Source and Report Sharing Enabled:">
                 <mx:CheckBox id="publicDataCheckbox" selected="{publicDataEnabled}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Marketplace Data Source and Reporting Sharing Enabled:">
-                <mx:CheckBox id="marketplaceCheckbox" selected="{marketplaceEnabled}"/>
             </mx:FormItem>
             <mx:FormItem label="Report Sharing Outside of Account Enabled:">
                 <mx:CheckBox id="sharingCheckbox" selected="{sharingEnabled}"/>

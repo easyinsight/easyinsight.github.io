@@ -328,39 +328,12 @@ public class FeedStorage {
 
     private void saveFields(long feedID, Connection conn, List<AnalysisItem> analysisItems, List<VirtualDimension> virtualDimensions) throws SQLException {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
-        //PreparedStatement virtualStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_TO_VIRTUAL_DIMENSION WHERE DATA_SOURCE_ID = ?");
         deleteStmt.setLong(1, feedID);
         deleteStmt.executeUpdate();
         deleteStmt.close();
-        /*virtualStmt.setLong(1, feedID);
-        virtualStmt.executeUpdate();
-        virtualStmt.close();*/
         if (analysisItems != null) {
             Session session = Database.instance().createSession(conn);
             try {
-                //session.getTransaction().begin();
-                /*if (virtualDimensions != null) {
-                    for (VirtualDimension virtualDimension : virtualDimensions) {
-                        AnalysisDimension dim = virtualDimension.getDefaultTransform().getTransformDimension();
-                        if (dim.getAnalysisItemID() == 0) {
-                            for (AnalysisItem analysisItem : analysisItems) {
-                                if (analysisItem.getKey().equals(dim.getKey())) {
-                                    virtualDimension.getDefaultTransform().setTransformDimension((AnalysisDimension) analysisItem);
-                                }
-                            }
-                        }
-                        for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {
-                            AnalysisDimension transformDim = transform.getTransformDimension();
-                            if (transformDim.getAnalysisItemID() == 0) {
-                                for (AnalysisItem analysisItem : analysisItems) {
-                                    if (analysisItem.getKey().equals(transformDim.getKey())) {
-                                        transform.setTransformDimension((AnalysisDimension) analysisItem);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }*/
                 for (AnalysisItem analysisItem : analysisItems) {
                     if (analysisItem.getKey().getKeyID() == 0) {
                         session.save(analysisItem.getKey());
@@ -373,22 +346,10 @@ public class FeedStorage {
                     if (analysisItem.getAnalysisItemID() == 0) {
                         session.save(analysisItem);
                     } else {
-                        session.merge(analysisItem);
+                        session.update(analysisItem);
                     }
-                    //session.saveOrUpdate(analysisItem);
                 }
-                /*if (virtualDimensions != null) {
-                    for (VirtualDimension remoteDimension : virtualDimensions) {
-                        remoteDimension.fromRemote();
-                        session.saveOrUpdate(remoteDimension);
-                    }
-                }*/
-                /*for (AnalysisItem analysisItem : analysisItems) {
-                    analysisItem.resetIDs();
-                    session.save(analysisItem);
-                }*/
                 session.flush();
-                //session.getTransaction().commit();
             } finally {
                 session.close();
             }
@@ -400,16 +361,6 @@ public class FeedStorage {
                 insertLinkStmt.execute();
             }
             insertLinkStmt.close();
-            /*PreparedStatement virtualLinkStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_VIRTUAL_DIMENSION (DATA_SOURCE_ID, VIRTUAL_DIMENSION_ID) " +
-                    "VALUES (?, ?)");
-            if (virtualDimensions != null) {
-                for (VirtualDimension virtualDimension : virtualDimensions) {
-                    virtualLinkStmt.setLong(1, feedID);
-                    virtualLinkStmt.setLong(2, virtualDimension.getVirtualDimensionID());
-                    virtualLinkStmt.execute();
-                }
-            }
-            virtualLinkStmt.close();*/
         }
     }
 

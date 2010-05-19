@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="creationComplete()" enabled="{_activated}">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="creationComplete()">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisChangedEvent;
@@ -21,18 +21,11 @@
         public var addGroupIcon:Class;
 
         [Bindable]
-        private var _activated:Boolean;
-
-        [Bindable]
         private var owners:ArrayCollection;
         [Bindable]
         private var viewers:ArrayCollection;
         [Bindable]
         private var anyoneCanView:Boolean;
-        [Bindable]
-        private var marketplaceViewable:Boolean;
-
-        private const SHARE_ERROR:String = "You cannot share data until you have activated your account.";
 
         private function creationComplete():void {
             initHandlers();
@@ -82,10 +75,6 @@
             owners = uploadPolicy.owners;
             viewers = uploadPolicy.viewers;
             anyoneCanView = uploadPolicy.publiclyVisible;
-            if (anyoneCanView && _activated) {
-                marketplaceCheckbox.enabled = true;
-                marketplaceViewable = uploadPolicy.marketplaceVisible;
-            }
         }
 
         public function get uploadPolicy():UploadPolicy {
@@ -93,7 +82,6 @@
             uploadPolicy.owners = ownersGrid.dataProvider as ArrayCollection;
             uploadPolicy.viewers = viewersGrid.dataProvider as ArrayCollection;
             uploadPolicy.publiclyVisible = anyoneCheckbox.selected;
-            uploadPolicy.marketplaceVisible = marketplaceCheckbox.selected;
             return uploadPolicy;
         }
 
@@ -139,24 +127,6 @@
         private function onGroupViewerAdd(event:GroupLinkEvent):void {
             viewers.addItem(event.groupDescriptor);
             dispatchEvent(new AnalysisChangedEvent());
-        }
-
-        private function anyoneCanViewChange(event:MouseEvent):void {
-            if (event.currentTarget.selected && _activated) {
-                marketplaceCheckbox.enabled = true;
-            } else {
-                marketplaceCheckbox.selected = false;
-                marketplaceCheckbox.enabled = false;
-            }
-        }
-
-        public function get activated():Boolean {
-            return _activated;
-        }
-
-        public function set activated(value:Boolean):void {
-            _activated = value;
-            invalidateProperties();
         }
 
         private var _liveData:Boolean;
@@ -211,6 +181,5 @@
 		</mx:VBox>
 	</mx:HBox>
 	<mx:Spacer height="30"/>
-	<mx:CheckBox label="Anyone Can View: " selected="{anyoneCanView}" id="anyoneCheckbox" click="anyoneCanViewChange(event)" enabled="{!liveData}"/>
-	<mx:CheckBox label="Visible in the Marketplace: " selected="{marketplaceViewable}" id="marketplaceCheckbox" enabled="false"/>
+	<mx:CheckBox label="Anyone Can View: " selected="{anyoneCanView}" id="anyoneCheckbox" enabled="{!liveData}"/>
 </mx:VBox>
