@@ -3,12 +3,11 @@ package com.easyinsight.datafeeds.highrise;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.basecamp.BaseCampDataException;
 import nu.xom.*;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
+
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -28,10 +27,29 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         return client;
     }
 
+    protected String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException, ParsingException {
+        try {
+            String contactName = null;
+            if(contactId != null) {
+                contactName = peopleCache.get(contactId);
+                if(contactName == null) {
+                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false);
+                    contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
+                    peopleCache.put(contactId, contactName);
+                }
+
+            }
+            return contactName;
+        } catch (HighRiseLoginException e) {
+            peopleCache.put(contactId, "");
+            return "";
+        }
+    }
+
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError) throws HighRiseLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
         try {
-            Thread.sleep(250);
+            Thread.sleep(150);
         } catch (InterruptedException e) {
         }
         restMethod.setRequestHeader("Accept", "application/xml");
@@ -54,9 +72,18 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new HighRiseLoginException("Could not locate a Highrise instance at " + url);
                 } else if ("HTTP/1.1 503 Service Temporarily Unavailable".equals(statusLine)) {
-                    try {
-                        Thread.sleep(20000);
-                    } catch (InterruptedException e1) {
+                    Header retryHeader = restMethod.getResponseHeader("Retry-After");
+                    if (retryHeader == null) {
+                        try {
+                            Thread.sleep(20000);
+                        } catch (InterruptedException e1) {
+                        }
+                    } else {
+                        int time = Integer.parseInt(retryHeader.getValue()) * 1000;
+                        try {
+                            Thread.sleep(time);
+                        } catch (InterruptedException e1) {
+                        }
                     }
                 } else {
                     if (badCredentialsOnError) {

@@ -59,24 +59,6 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         return analysisItems;
     }
 
-    private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException, ParsingException {
-        try {
-            String contactName = null;
-            if(contactId != null) {
-                contactName = peopleCache.get(contactId);
-                if(contactName == null) {
-                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false);
-                    contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
-                    peopleCache.put(contactId, contactName);
-                }
-
-            }
-            return contactName;
-        } catch (HighRiseLoginException e) {
-            return "";
-        }
-    }
-
     @Override
     public FeedType getFeedType() {
         return FeedType.HIGHRISE_CONTACTS;

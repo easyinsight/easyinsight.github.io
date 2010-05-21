@@ -58,6 +58,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_NAME), true));
+        analysisItems.add(new AnalysisDimension(keys.get(DEAL_OWNER), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
         AnalysisMeasure priceMeasure = new AnalysisMeasure(PRICE, AggregationTypes.SUM);
         FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
@@ -79,23 +80,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         return analysisItems;
     }
 
-    private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException, ParsingException {
-        try {
-            String contactName = null;
-            if(contactId != null) {
-                contactName = peopleCache.get(contactId);
-                if(contactName == null) {
-                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false);
-                    contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
-                    peopleCache.put(contactId, contactName);
-                }
 
-            }
-            return contactName;
-        } catch (HighRiseLoginException e) {
-            return "";
-        }
-    }
 
     private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url) throws HighRiseLoginException, ParsingException {
         try {
@@ -176,7 +161,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                             }
                         } else {
                             String durationString = queryField(currDeal, "duration/text()");
-                            int duration = 0;
+                            int duration;
                             try {
                                 duration = Integer.parseInt(durationString);
                             } catch (Exception e) {
@@ -220,11 +205,11 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList((DataSourceMigration) new HighRise1To2(this));
+        return Arrays.asList(new HighRise1To2(this), new HighRiseDeal2To3(this));
     }
 }
