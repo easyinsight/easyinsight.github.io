@@ -1,4 +1,5 @@
 package com.easyinsight.genredata {
+import com.easyinsight.framework.User;
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
@@ -43,14 +44,17 @@ public class SolutionGridActionRenderer extends HBox{
     }
 
     private function viewReport(event:MouseEvent):void {
-        if (exchangeItem.exchangeData is ExchangeReportData) {
-            var exchangeReportData:ExchangeReportData = exchangeItem.exchangeData as ExchangeReportData;
-            solutionService.determineDataSource.send(exchangeReportData.dataSourceID);
-        } else if (exchangeItem.exchangeData is ExchangePackageData) {
-            var exchangePackageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
-            solutionService.determineDataSourceForPackage.send(exchangePackageData.packageID);
+        if (User.getInstance() != null) {
+            if (exchangeItem.exchangeData is ExchangeReportData) {
+                var exchangeReportData:ExchangeReportData = exchangeItem.exchangeData as ExchangeReportData;
+                solutionService.determineDataSource.send(exchangeReportData.dataSourceID);
+            } else if (exchangeItem.exchangeData is ExchangePackageData) {
+                var exchangePackageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
+                solutionService.determineDataSourceForPackage.send(exchangePackageData.packageID);
+            }
+        } else {
+            
         }
-
     }
 
     private function installedPackage(event:ResultEvent):void {
