@@ -21,7 +21,7 @@ public class HighRiseDeal2To3 extends DataSourceMigration {
 
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
-        addAnalysisItem(new AnalysisDimension(keys.get(HighRiseDealSource.DEAL_NAME), true));
+        addAnalysisItem(new AnalysisDimension(keys.get(HighRiseDealSource.DEAL_OWNER), true));
     }
 
     @Override
