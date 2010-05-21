@@ -22,9 +22,10 @@ public class ReportAnalyzeSource implements AnalyzeSource{
     private var origin:int;
     private var originalReportID:int;
     private var originScore:Number;
+    private var templateUrlKey:String;
 
     public function ReportAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null, installOption:Boolean = false, origin:int = 0,
-            originalReportID:int = 0, originScore:Number = 0) {
+            originalReportID:int = 0, originScore:Number = 0, templateUrlKey:String = null) {
         super();
         this.insightDescriptor = insightDescriptor;
         this.filters = filters;
@@ -32,6 +33,7 @@ public class ReportAnalyzeSource implements AnalyzeSource{
         this.origin = origin;
         this.originalReportID = originalReportID;
         this.originScore = originScore;
+        this.templateUrlKey = templateUrlKey;
     }
 
     public function createAnalysisPopup():FullScreenPage {
@@ -45,6 +47,7 @@ public class ReportAnalyzeSource implements AnalyzeSource{
         reportView.showLogo = false;
         reportView.originReportID = originalReportID;
         reportView.originReportScore = originScore;
+        reportView.templateUrlKey = templateUrlKey;
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         reportView.viewFactory = controller.createEmbeddedView();

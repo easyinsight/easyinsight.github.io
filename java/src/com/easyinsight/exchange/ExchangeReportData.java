@@ -10,6 +10,15 @@ public class ExchangeReportData extends ExchangeData {
     private long dataSourceID;
     private String dataSourceName;
     private boolean dataSourceAccessible;
+    private String reportUrlKey;
+
+    public String getReportUrlKey() {
+        return reportUrlKey;
+    }
+
+    public void setReportUrlKey(String reportUrlKey) {
+        this.reportUrlKey = reportUrlKey;
+    }
 
     public long getReportType() {
         return reportType;

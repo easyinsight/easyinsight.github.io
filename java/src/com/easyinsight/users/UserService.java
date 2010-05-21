@@ -437,14 +437,6 @@ public class UserService implements IUserService {
                 todo.setUserID(user.getUserID());
                 session.save(todo);
             }
-            //if (account.getAccountType() == Account.FREE || account.getAccountType() == Account.INDIVIDUAL) {
-            String activationKey = RandomTextGenerator.generateText(12);
-            PreparedStatement insertActivationStmt = conn.prepareStatement("INSERT INTO ACCOUNT_ACTIVATION (ACCOUNT_ID, ACTIVATION_KEY, CREATION_DATE, target_url) VALUES (?, ?, ?, ?)");
-            insertActivationStmt.setLong(1, account.getAccountID());
-            insertActivationStmt.setString(2, activationKey);
-            insertActivationStmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
-            insertActivationStmt.setString(4, sourceURL);
-            insertActivationStmt.execute();
             new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
                     new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);
             if (account.getAccountType() != Account.PERSONAL) {
@@ -456,7 +448,7 @@ public class UserService implements IUserService {
             session.flush();
             conn.commit();
             if (SecurityUtil.getSecurityProvider() instanceof DefaultSecurityProvider) {
-                new AccountMemberInvitation().sendActivationEmail(user.getEmail(), activationKey);
+                //new AccountMemberInvitation().sendActivationEmail(user.getEmail(), activationKey);
                 new Thread(new SalesEmail(account, user)).start();
             }
             return account.getAccountID();

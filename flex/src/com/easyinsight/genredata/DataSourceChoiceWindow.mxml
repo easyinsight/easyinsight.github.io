@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" title="Choose a Data Source">
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.DataSourceDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.controls.RadioButton;
+        import mx.managers.PopUpManager;
+
+        private var _sources:ArrayCollection;
+
+        public function set sources(value:ArrayCollection):void {
+            _sources = value;
+        }
+
+        protected override function createChildren():void {
+            super.createChildren();
+            var i:int = 1;
+            for each (var descriptor:DataSourceDescriptor in _sources) {
+                var radioButton:RadioButton = new RadioButton();
+                radioButton.label = descriptor.name + "--" + descriptor.description;
+                radioButton.groupName = "dataSourceGroup";
+                radioButton.value = descriptor;
+                box.addChildAt(radioButton, i++);
+            }
+        }
+
+        private function useDataSource():void {
+            if (dataSourceGroup.selectedValue == null) {
+                Alert.show("You need to select a data source.");
+            } else {
+                dispatchEvent(new DataSourceSelectionEvent(dataSourceGroup.selectedValue as DataSourceDescriptor));
+                PopUpManager.removePopUp(this);
+            }
+        }
+        ]]></mx:Script>
+    <mx:VBox id="box" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
+        <mx:Text text="It looks like you have multiple data sources installed into your account which match this report's&#13;data source type. Please choose the one you wish to use for the demonstration of this report:"
+                fontSize="14"/>
+        <mx:RadioButtonGroup id="dataSourceGroup"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Use this Data Source" click="useDataSource()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

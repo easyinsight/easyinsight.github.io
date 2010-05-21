@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center" width="420" height="130">
-    <mx:TextArea text="Your account has been created and an activation email has been sent to your address. You can set up your billing information to ensure uninterrupted service." backgroundAlpha="0" borderThickness="0" width="400" height="60" editable="false" selectable="false" />
+    <mx:TextArea text="Your account has been created and you're good to go! You can set up your billing information now to ensure uninterrupted service." backgroundAlpha="0" borderThickness="0" width="400" height="60" editable="false" selectable="false" />
     <mx:HBox>
         <mx:Button label="Set up Billing Information Now" click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self')" />
         <mx:Button label="Set up Later" click="PopUpManager.removePopUp(this)" />

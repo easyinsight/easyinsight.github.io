@@ -20,6 +20,7 @@ import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.users.Account;
 import com.easyinsight.exchange.SolutionReportExchangeItem;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
@@ -338,6 +339,7 @@ public class SolutionService {
 
     public List<DataSourceDescriptor> determineDataSourceForPackage(long packageID) {
         List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
+        List<ExtraDataSourceInfo> extraInfos = new ArrayList<ExtraDataSourceInfo>();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement packageQuery = conn.prepareStatement("SELECT REPORT_PACKAGE.data_source_id FROM REPORT_PACKAGE WHERE REPORT_PACKAGE_ID = ?");
@@ -351,20 +353,11 @@ public class SolutionService {
                 ResultSet dsRS = dsQueryStmt.executeQuery();
                 if (dsRS.next()) {
                     long originalDataSourceID = dsRS.getLong(1);
-                    PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.installed_data_source_id, DATA_FEED.FEED_NAME FROM " +
-                        "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
-                        "SOLUTION_INSTALL.original_data_source_id = ? AND " +
-                        "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
-                        "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
-                    queryStmt.setLong(1, originalDataSourceID);
-                    queryStmt.setLong(2, SecurityUtil.getUserID());
-                    ResultSet rs = queryStmt.executeQuery();
-                    while (rs.next()) {
-                        long id = rs.getLong(1);
-                        String name = rs.getString(2);
-                        descriptors.add(new DataSourceDescriptor(name, id));
-                    }
+                    determineDataSources(descriptors, extraInfos, conn, originalDataSourceID);
                 }
+            }
+            if (descriptors.size() > 1) {
+                describe(descriptors, extraInfos, conn);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -375,8 +368,46 @@ public class SolutionService {
         return descriptors;
     }
 
+    public ReportTemplateInfo determineDataSourceForURLKey(String urlKey) {
+        List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
+        List<ExtraDataSourceInfo> extraInfos = new ArrayList<ExtraDataSourceInfo>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, DATA_FEED_ID FROM ANALYSIS WHERE ANALYSIS.solution_visible = ? AND " +
+                    "ANALYSIS.url_key = ?");
+            reportQueryStmt.setBoolean(1, true);
+            reportQueryStmt.setString(2, urlKey);
+            ResultSet rs = reportQueryStmt.executeQuery();
+            if (rs.next()) {
+                long reportID = rs.getLong(1);
+                long dataSourceID = rs.getLong(2);
+                PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID, SOLUTION_INSTALL.SOLUTION_ID FROM " +
+                    "SOLUTION_INSTALL WHERE SOLUTION_INSTALL.installed_data_source_id = ?");
+                dsQueryStmt.setLong(1, dataSourceID);
+                long solutionID = 0;
+                ResultSet dsRS = dsQueryStmt.executeQuery();
+                if (dsRS.next()) {
+                    long originalDataSourceID = dsRS.getLong(1);
+                    solutionID = dsRS.getLong(2);
+                    determineDataSources(descriptors, extraInfos, conn, originalDataSourceID);
+                }
+                if (descriptors.size() > 1) {
+                    describe(descriptors, extraInfos, conn);
+                }
+                return new ReportTemplateInfo(descriptors, reportID, solutionID);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return null;
+    }
+
     public List<DataSourceDescriptor> determineDataSource(long dataSourceID) {
         List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
+        List<ExtraDataSourceInfo> extraInfos = new ArrayList<ExtraDataSourceInfo>();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID FROM " +
@@ -385,41 +416,11 @@ public class SolutionService {
             ResultSet dsRS = dsQueryStmt.executeQuery();
             if (dsRS.next()) {
                 long originalDataSourceID = dsRS.getLong(1);
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.installed_data_source_id, DATA_FEED.FEED_NAME FROM " +
-                    "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
-                    "SOLUTION_INSTALL.original_data_source_id = ? AND " +
-                    "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
-                queryStmt.setLong(1, originalDataSourceID);
-                queryStmt.setLong(2, SecurityUtil.getUserID());
-                queryStmt.setBoolean(3, true);
-                ResultSet rs = queryStmt.executeQuery();
-                while (rs.next()) {
-                    long id = rs.getLong(1);
-                    String name = rs.getString(2);
-                    descriptors.add(new DataSourceDescriptor(name, id));
-                }
-                if (descriptors.isEmpty()) {
-                    PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID, DATA_FEED.FEED_NAME FROM " +
-                            "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_GROUPS, GROUP_TO_USER_JOIN WHERE " +
-                            "SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID = ? AND " +
-                            "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
-                            "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND UPLOAD_POLICY_GROUPS.group_id = group_to_user_join.group_id AND " +
-                            "group_to_user_join.user_id = ? AND DATA_FEED.VISIBLE = ?");
-                    groupQueryStmt.setLong(1, originalDataSourceID);
-                    groupQueryStmt.setLong(2, SecurityUtil.getUserID());
-                    groupQueryStmt.setBoolean(3, true); 
-                    rs = queryStmt.executeQuery();
-                    while (rs.next()) {
-                        long id = rs.getLong(1);
-                        String name = rs.getString(2);
-                        descriptors.add(new DataSourceDescriptor(name, id));
-                    }
-                }
+                determineDataSources(descriptors, extraInfos, conn, originalDataSourceID);
             }
-
-
-
+            if (descriptors.size() > 1) {
+                describe(descriptors, extraInfos, conn);
+            }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -427,6 +428,79 @@ public class SolutionService {
             Database.closeConnection(conn);
         }
         return descriptors;
+    }
+
+    private void determineDataSources(List<DataSourceDescriptor> descriptors, List<ExtraDataSourceInfo> extraInfos, EIConnection conn, long originalDataSourceID) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.installed_data_source_id, DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE, DATA_FEED.create_date FROM " +
+            "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
+            "SOLUTION_INSTALL.original_data_source_id = ? AND " +
+            "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
+            "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
+        queryStmt.setLong(1, originalDataSourceID);
+        queryStmt.setLong(2, SecurityUtil.getUserID());
+        queryStmt.setBoolean(3, true);
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            long id = rs.getLong(1);
+            String name = rs.getString(2);
+            descriptors.add(new DataSourceDescriptor(name, id));
+            extraInfos.add(new ExtraDataSourceInfo(rs.getTimestamp(4), rs.getInt(3)));
+        }
+        if (descriptors.isEmpty()) {
+            PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID, DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE," +
+                    "DATA_FEED.create_date FROM " +
+                    "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_GROUPS, GROUP_TO_USER_JOIN WHERE " +
+                    "SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID = ? AND " +
+                    "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
+                    "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND UPLOAD_POLICY_GROUPS.group_id = group_to_user_join.group_id AND " +
+                    "group_to_user_join.user_id = ? AND DATA_FEED.VISIBLE = ?");
+            groupQueryStmt.setLong(1, originalDataSourceID);
+            groupQueryStmt.setLong(2, SecurityUtil.getUserID());
+            groupQueryStmt.setBoolean(3, true);
+            rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long id = rs.getLong(1);
+                String name = rs.getString(2);
+                descriptors.add(new DataSourceDescriptor(name, id));
+                extraInfos.add(new ExtraDataSourceInfo(rs.getTimestamp(4), rs.getInt(3)));
+            }
+        }
+    }
+
+    private static class ExtraDataSourceInfo {
+        private Date creationDate;
+        private int feedType;
+
+        private ExtraDataSourceInfo(Date creationDate, int feedType) {
+            this.creationDate = creationDate;
+            this.feedType = feedType;
+        }
+    }
+
+    private void describe(List<DataSourceDescriptor> descriptors, List<ExtraDataSourceInfo> extraInfos, EIConnection conn) throws SQLException {
+        PreparedStatement queryReportCountStmt = conn.prepareStatement("SELECT COUNT(ANALYSIS_ID) FROM ANALYSIS WHERE " +
+                "ANALYSIS.data_feed_id = ? AND ANALYSIS.temporary_report = ?");
+        for (int i = 0; i < descriptors.size(); i++) {
+            DataSourceDescriptor descriptor = descriptors.get(i); 
+            ExtraDataSourceInfo extraInfo = extraInfos.get(i);
+            String description;
+            queryReportCountStmt.setLong(1, descriptor.getId());
+            queryReportCountStmt.setBoolean(2, false);
+            ResultSet rs = queryReportCountStmt.executeQuery();
+            int count = 0;
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+            String dateString = SimpleDateFormat.getDateInstance().format(extraInfo.creationDate);
+            if (count == 0) {
+                description = "this data source was created on " + dateString + " and has no reports.";
+            } else if (count == 1) {
+                description = "this data source was created on " + dateString + " and has 1 report.";
+            } else {
+                description = "this data source was created on " + dateString + " and has " + count + " reports.";
+            }
+            descriptor.setDescription(description);
+        }
     }
 
     public ReportPackageDescriptor installPackage(long packageID, long dataSourceID) {
@@ -609,7 +683,7 @@ public class SolutionService {
                     "ANALYSIS_TO_TAG.analysis_tags_id = ANALYSIS_TAGS.analysis_tags_id AND analysis_to_tag.analysis_id = ?");
             PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE, " +
                     "avg(USER_REPORT_RATING.rating), analysis.create_date, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
-                    "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID FROM DATA_FEED, SOLUTION_INSTALL, SOLUTION, ANALYSIS " +
+                    "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID, ANALYSIS.url_key FROM DATA_FEED, SOLUTION_INSTALL, SOLUTION, ANALYSIS " +
                     " LEFT JOIN USER_REPORT_RATING ON USER_REPORT_RATING.report_id = ANALYSIS.ANALYSIS_ID WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                     "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND ANALYSIS.SOLUTION_VISIBLE = ? " +
                     "AND solution_install.solution_id = solution.solution_id GROUP BY ANALYSIS.ANALYSIS_ID");
@@ -643,12 +717,14 @@ public class SolutionService {
                 boolean accessible = analysisRS.getBoolean(10);
                 String solutionName = analysisRS.getString(11);
                 long solutionID = analysisRS.getLong(12);
+                String urlKey = analysisRS.getString(13);
                 getTagsStmt.setLong(1, analysisID);
                 ExchangeReportData exchangeReportData = new ExchangeReportData();
                 exchangeReportData.setDataSourceAccessible(accessible);
                 exchangeReportData.setDataSourceID(dataSourceID);
                 exchangeReportData.setDataSourceName(dataSourceName);
                 exchangeReportData.setReportType(reportType);
+                exchangeReportData.setReportUrlKey(urlKey);
                 SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID, "",
                         ratingAverage, 0, created, description, authorName, exchangeReportData, solutionID, solutionName);
                 reports.add(item);

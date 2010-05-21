@@ -73,7 +73,7 @@ public class AnalysisMeasure extends AnalysisItem {
 
     @Override
     protected String getQualifiedSuffix() {
-        return getType() + ":" + aggregation;
+        return getType() + ":" + aggregation + ":" + toDisplay();
     }
 
     public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {

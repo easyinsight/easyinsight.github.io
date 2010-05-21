@@ -8,7 +8,6 @@
         import com.easyinsight.listing.ListingChangeEvent;
         import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.report.StaticReportSource;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
 
@@ -23,7 +22,7 @@
         private function installedReport():void {
             var insightDescriptor:InsightDescriptor = solutionService.installReport.lastResult as InsightDescriptor;
             // has to emit special property here to let us decide whether or not we want to keep this report
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, reportID, score)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, reportID, score, ExchangeReportData(_item.exchangeData).reportUrlKey)));
         }
 
         private function installedPackage():void {
@@ -40,20 +39,26 @@
         private function gotMatchingDataSources():void {
             var dataSources:ArrayCollection = solutionService.determineDataSource.lastResult as ArrayCollection;
             if (dataSources.length == 0) {
-                /*var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+                var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
                 window.solution = _item.solutionID;
                 window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
                 PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);*/
-                dispatchEvent(new AnalyzeEvent(new StaticReportSource(reportID)));
+                PopUpUtil.centerPopUp(window);
             } else if (dataSources.length == 1) {
                 ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
                 solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
             } else {
-                // TODO: this is a hack for now
-                ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
-                solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
+                var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
+                dsWindow.sources = dataSources;
+                dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourceChoice, false, 0, true);
+                PopUpManager.addPopUp(dsWindow, this, true);
+                PopUpUtil.centerPopUp(dsWindow);
             }
+        }
+
+        private function dataSourceChoice(event:DataSourceSelectionEvent):void {
+            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
+            solutionService.installReport.send(reportID, event.dataSource.id);
         }
 
         private function gotMatchingDataSourcesForPackage():void {
@@ -69,10 +74,18 @@
                 ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
                 solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
             } else {
-                // TODO: this is a hack for now
-                ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
-                solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
+                var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
+                dsWindow.sources = dataSources;
+                dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourcePackageChoice, false, 0, true);
+                PopUpManager.addPopUp(dsWindow, this, true);
+                PopUpUtil.centerPopUp(dsWindow);
             }
+        }
+
+        private function dataSourcePackageChoice(event:DataSourceSelectionEvent):void {
+            var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
+            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
+            solutionService.installPackage.send(packageData.packageID, event.dataSource.id);
         }
 
         private function addReport():void {

@@ -7,6 +7,7 @@ public class ExchangeReportData extends ExchangeData {
     public var dataSourceID:int;
     public var dataSourceName:String;
     public var dataSourceAccessible:Boolean;
+    public var reportUrlKey:String;
 
     public function ExchangeReportData() {
         super();

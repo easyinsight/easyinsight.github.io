@@ -71,7 +71,7 @@
             viewFactory.updateExportMetadata();
             var window:ReportExportWindow = new ReportExportWindow();
             window.report = viewFactory.report;
-            window.coreView = viewFactory.getChildAt(0);            
+            window.coreView = viewFactory.getChildAt(0);
             PopUpManager.addPopUp(window, this);
             window.x = exportButton.x - 20;
             window.y = exportButton.y + exportButton.height + 10;
@@ -366,70 +366,83 @@
         private var report:AnalysisDefinition;
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
-                if (event.credentialRequirements != null) {
-                    CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
+            if (event.credentialRequirements != null) {
+                CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
+            } else {
+                report = event.analysisDefinition;
+                dataSource = event.dataSourceInfo;
+                reportName = report.name;
+                var nf:NumberFormatter = new NumberFormatter();
+                if (_originReportID > 0) {
+                    _score = _originReportScore;
+                    _placeHolderID = _originReportID;
                 } else {
-                    report = event.analysisDefinition;
-                    dataSource = event.dataSourceInfo;
-                    reportName = report.name;
-                    var nf:NumberFormatter = new NumberFormatter();
-                    if (_originReportID > 0) {
-                        _score = _originReportScore;
-                        _placeHolderID = _originReportID;
-                    } else {
-                        _score = event.ratingsAverage;
-                        _placeHolderID = _dataSourceID;
-                    }
-                    reportRatingCount = nf.format(event.ratingsCount);
-                    reportRating = nf.format(event.ratingsAverage);
-                    reportViews = String(report.viewCount);
-                    description = report.description;
-                    attribution = event.attribution;
-                    tags = "";
-                    if (report.tagCloud != null && report.tagCloud.length > 0) {
-                        for each (var tag:Tag in report.tagCloud) {
-                            tags += tag.tagName;
-                            tags += ",";
-                        }
-                        tags = tags.substring(0, tags.length - 1);
-                    }
-                    admin = event.dataSourceAccessible;
-
-                    if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                        filterDefinitions = report.filterDefinitions;
-                        showFilters = true;
-                    } else {
-                        filterDefinitions = new ArrayCollection();
-                        if (filterBox.contains(adjustFiltersbutton)) {
-                            filterBox.removeChild(adjustFiltersbutton);
-                        }
-                    }
-
-                    transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                    if (!admin) {
-                        if (leftButtonBar.contains(editReportButton)) {
-                            leftButtonBar.removeChild(editReportButton);
-                        }
-                        showReportEditor = false;
-                    }
-                    ownerName = report.authorName;
-                    var dateFormatter:DateFormatter = new DateFormatter();
-                    dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-                    reportDate = dateFormatter.format(report.dateCreated);
-                    // lastDataTime = dateFormatter.format(event.lastDataTime);
-                    if (!_embedded && _updateURL) {
-                        var feedFragmentObject:Object = new Object();
-                        feedFragmentObject.reportID = report.urlKey;
-                        var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                        BrowserManager.getInstance().setFragment(feedFragmentString);
-                        BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                        loading = false;
-                    }
-                    overlayIndex = 0;
-                    receivedData = true;
-                    dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
-                    retrievedDataOnce = true;
+                    _score = event.ratingsAverage;
+                    _placeHolderID = _dataSourceID;
                 }
+                reportRatingCount = nf.format(event.ratingsCount);
+                reportRating = nf.format(event.ratingsAverage);
+                reportViews = String(report.viewCount);
+                description = report.description;
+                attribution = event.attribution;
+                tags = "";
+                if (report.tagCloud != null && report.tagCloud.length > 0) {
+                    for each (var tag:Tag in report.tagCloud) {
+                        tags += tag.tagName;
+                        tags += ",";
+                    }
+                    tags = tags.substring(0, tags.length - 1);
+                }
+                admin = event.dataSourceAccessible;
+
+                if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                    filterDefinitions = report.filterDefinitions;
+                    showFilters = true;
+                } else {
+                    filterDefinitions = new ArrayCollection();
+                    if (filterBox.contains(adjustFiltersbutton)) {
+                        filterBox.removeChild(adjustFiltersbutton);
+                    }
+                }
+
+                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+                if (!admin) {
+                    if (leftButtonBar.contains(editReportButton)) {
+                        leftButtonBar.removeChild(editReportButton);
+                    }
+                    showReportEditor = false;
+                }
+                ownerName = report.authorName;
+                var dateFormatter:DateFormatter = new DateFormatter();
+                dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                reportDate = dateFormatter.format(report.dateCreated);
+                // lastDataTime = dateFormatter.format(event.lastDataTime);
+                if (!_embedded && _updateURL && !_showAddBar) {
+                    var feedFragmentObject:Object = new Object();
+                    feedFragmentObject.reportID = report.urlKey;
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                } else if (_showAddBar) {
+                    var templateFragmentObject:Object = new Object();
+                    templateFragmentObject.reportTemplateID = _templateUrlKey;
+                    var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
+                    BrowserManager.getInstance().setFragment(templateFragmentString);
+                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                }
+                loading = false;
+                overlayIndex = 0;
+                receivedData = true;
+                dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+                retrievedDataOnce = true;
+            }
+        }
+
+        private var _templateUrlKey:String;
+
+
+        public function set templateUrlKey(value:String):void {
+            _templateUrlKey = value;
         }
 
         private function close():void {
@@ -663,7 +676,7 @@
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
             viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
             viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
-            viewFactory.addEventListener(EIErrorEvent.ERROR, onError);            
+            viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
 
             if (!_embedded) {
                 loading = true;

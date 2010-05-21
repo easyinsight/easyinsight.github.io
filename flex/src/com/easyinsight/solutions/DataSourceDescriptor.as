@@ -3,6 +3,9 @@ import com.easyinsight.quicksearch.EIDescriptor;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.core.DataSourceDescriptor")]
 public class DataSourceDescriptor extends EIDescriptor{
+
+    public var description:String;
+
     public function DataSourceDescriptor() {
         super();
     }

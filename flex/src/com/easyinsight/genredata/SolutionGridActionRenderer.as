@@ -2,7 +2,6 @@ package com.easyinsight.genredata {
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
-import com.easyinsight.report.StaticReportSource;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
@@ -35,20 +34,20 @@ public class SolutionGridActionRenderer extends HBox{
         runButton = new Button();
         runButton.setStyle("icon", playIcon);
         runButton.addEventListener(MouseEvent.CLICK, viewReport);
+        solutionService = new RemoteObject();
+        solutionService.destination = "solutionService";
+        solutionService.determineDataSource.addEventListener(ResultEvent.RESULT, gotMatchingDataSources);
+        solutionService.installReport.addEventListener(ResultEvent.RESULT, installedReport);
+        solutionService.determineDataSourceForPackage.addEventListener(ResultEvent.RESULT, gotMatchingDataSourcesForPackage);
+        solutionService.installPackage.addEventListener(ResultEvent.RESULT, installedPackage);
     }
 
     private function viewReport(event:MouseEvent):void {
-        solutionService = new RemoteObject();
-        solutionService.destination = "solutionService";
         if (exchangeItem.exchangeData is ExchangeReportData) {
             var exchangeReportData:ExchangeReportData = exchangeItem.exchangeData as ExchangeReportData;
-            solutionService.determineDataSource.addEventListener(ResultEvent.RESULT, gotMatchingDataSources);
-            solutionService.installReport.addEventListener(ResultEvent.RESULT, installedReport);
             solutionService.determineDataSource.send(exchangeReportData.dataSourceID);
         } else if (exchangeItem.exchangeData is ExchangePackageData) {
             var exchangePackageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
-            solutionService.determineDataSourceForPackage.addEventListener(ResultEvent.RESULT, gotMatchingDataSourcesForPackage);
-            solutionService.installPackage.addEventListener(ResultEvent.RESULT, installedPackage);
             solutionService.determineDataSourceForPackage.send(exchangePackageData.packageID);
         }
 
@@ -64,11 +63,36 @@ public class SolutionGridActionRenderer extends HBox{
     private function installedReport(event:ResultEvent):void {
         var insightDescriptor:InsightDescriptor = solutionService.installReport.lastResult as InsightDescriptor;
         // has to emit special property here to let us decide whether or not we want to keep this report
-        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, exchangeItem.id, exchangeItem.ratingAverage)));
+        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, exchangeItem.id, exchangeItem.ratingAverage, ExchangeReportData(exchangeItem.exchangeData).reportUrlKey)));
     }
 
     private function onListingEvent(event:ListingChangeEvent):void {
         dispatchEvent(event);
+    }
+
+    private function gotMatchingDataSources(event:ResultEvent):void {
+        var dataSources:ArrayCollection = solutionService.determineDataSource.lastResult as ArrayCollection;
+        if (dataSources.length == 0) {
+            var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+            window.solution = exchangeItem.solutionID;
+            window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        } else if (dataSources.length == 1) {
+            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
+            solutionService.installReport.send(exchangeItem.id, dataSources.getItemAt(0).id);
+        } else {
+            var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
+            dsWindow.sources = dataSources;
+            dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourceChoice, false, 0, true);
+            PopUpManager.addPopUp(dsWindow, this, true);
+            PopUpUtil.centerPopUp(dsWindow);
+        }
+    }
+
+    private function dataSourceChoice(event:DataSourceSelectionEvent):void {
+        ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
+        solutionService.installReport.send(exchangeItem.id, event.dataSource.id);
     }
 
     private function gotMatchingDataSourcesForPackage(event:ResultEvent):void {
@@ -84,24 +108,18 @@ public class SolutionGridActionRenderer extends HBox{
             ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
             solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
         } else {
-            // TODO: this is a hack for now
-            ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
-            solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
+            var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
+            dsWindow.sources = dataSources;
+            dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourcePackageChoice, false, 0, true);
+            PopUpManager.addPopUp(dsWindow, this, true);
+            PopUpUtil.centerPopUp(dsWindow);
         }
     }
 
-    private function gotMatchingDataSources(event:ResultEvent):void {
-        var dataSources:ArrayCollection = solutionService.determineDataSource.lastResult as ArrayCollection;
-        if (dataSources.length == 0) {
-            dispatchEvent(new AnalyzeEvent(new StaticReportSource(exchangeItem.id)));
-        } else if (dataSources.length == 1) {
-            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
-            solutionService.installReport.send(exchangeItem.id, dataSources.getItemAt(0).id);
-        } else {
-            // TODO: this is a hack for now
-            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
-            solutionService.installReport.send(exchangeItem.id, dataSources.getItemAt(0).id);
-        }
+    private function dataSourcePackageChoice(event:DataSourceSelectionEvent):void {
+        var packageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
+        ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
+        solutionService.installPackage.send(packageData.packageID, event.dataSource.id);
     }
 
     override protected function createChildren():void {

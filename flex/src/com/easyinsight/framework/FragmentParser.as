@@ -5,6 +5,7 @@ import com.easyinsight.analysis.DelayedFeedAdminLink;
 import com.easyinsight.analysis.DelayedFeedLink;
 import com.easyinsight.analysis.DelayedReportLink;
 import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.genredata.DelayedReportTemplate;
 import com.easyinsight.goals.DelayedGoalAdminLink;
 import com.easyinsight.goals.DelayedGoalLink;
 import com.easyinsight.groups.DelayedGroupLink;
@@ -82,6 +83,12 @@ public class FragmentParser {
                 var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(key);
                 delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedGoalAdminLink.execute();
+            }),
+            new FragmentTester("reportTemplateID", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
+                var delayedTemplate:DelayedReportTemplate = new DelayedReportTemplate(key);
+                delayedTemplate.addEventListener(ListingChangeEvent.LISTING_CHANGE, workspace.changePerspective);
+                delayedTemplate.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                delayedTemplate.execute();
             }),
             new FragmentTester("redirectID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var redirectType:int = int(key);

@@ -6,6 +6,26 @@ package com.easyinsight.core;
  * Time: 2:31:58 PM
  */
 public class DataSourceDescriptor extends EIDescriptor {
+
+    private String description;
+    private int dataSourceType;
+
+    public int getDataSourceType() {
+        return dataSourceType;
+    }
+
+    public void setDataSourceType(int dataSourceType) {
+        this.dataSourceType = dataSourceType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public int getType() {
         return EIDescriptor.DATA_SOURCE;
