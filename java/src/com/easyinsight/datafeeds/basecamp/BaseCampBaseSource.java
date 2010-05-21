@@ -80,8 +80,17 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                     pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
                 }
                 successful = true;
-            }
-            catch (ParsingException e) {
+            } catch (IOException e) {
+                retryCount++;
+                if (e.getMessage().contains("503")) {
+                    try {
+                        Thread.sleep(20000);
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    throw new RuntimeException(e);
+                }
+            } catch (ParsingException e) {
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
