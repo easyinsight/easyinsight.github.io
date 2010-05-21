@@ -98,6 +98,8 @@
                     var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
                     solutionService.determineDataSourceForPackage.send(packageData.packageID);
                 }
+            } else {
+                
             }
         }
         

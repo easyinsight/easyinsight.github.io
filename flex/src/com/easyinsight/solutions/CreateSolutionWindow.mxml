@@ -272,6 +272,8 @@
                                 <mx:String>com.easyinsight.solutions.FileUploadSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.GoogleSpreadsheetSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.LinkedInSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.PivotalTrackerSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.SendGridSolutionDetail</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>

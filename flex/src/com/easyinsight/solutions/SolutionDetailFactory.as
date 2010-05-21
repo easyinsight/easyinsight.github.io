@@ -64,6 +64,8 @@ public class SolutionDetailFactory {
         var d:FileUploadSolutionDetail;
         var e:GoogleSpreadsheetSolutionDetail;
         var f:LinkedInSolutionDetail;
+        var g:PivotalTrackerSolutionDetail;
+        var h:SendGridSolutionDetail;
 
     }
 }

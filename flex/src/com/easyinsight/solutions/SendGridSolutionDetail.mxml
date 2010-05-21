@@ -6,14 +6,10 @@
     <solutions:states>
         <mx:State name="NotLoggedIn">
             <mx:RemoveChild target="{installButton}"/>
-            <mx:RemoveChild target="{pinButton}"/>
-            <mx:RemoveChild target="{startHereLabel}"/>
-            <mx:RemoveChild target="{thenLabel}"/>
             <mx:AddChild relativeTo="{controlsBox}">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
                     <mx:VBox verticalGap="0">
-                        <mx:Label text="You'll need to create an account at the Personal or"/>
-                        <mx:Label text="higher tier or log in before installing the solution."/>
+                        <mx:Text text="You'll need to create an account at the Basic or&#13;higher tier or log in before installing the&#13;connection." fontSize="12" selectable="false"/>
                     </mx:VBox>
                     <mx:HBox width="100%" horizontalAlign="center">
                         <mx:Button label="Create Account" styleName="blueButton" click="createAccount()" fontSize="14"/>
@@ -26,8 +22,6 @@
     </solutions:states>
     <mx:Script><![CDATA[
 
-        [Bindable]
-        private var startButtonText:String = "Authorize Access";
 
         override protected function toNotLoggedInState():void {
             currentState = "NotLoggedIn";
@@ -36,19 +30,7 @@
         override protected function toAccountBelowRequiredState():void {
             currentState = "AccountBelowRequired";
         }
-
-        private function install():void {
-            tokenService.getOAuthURL.send(39, solution.solutionID);
-        }
-
-        private function gotURL():void {
-            var url:String = tokenService.getOAuthURL.lastResult as String;
-            navigateToURL(new URLRequest(url));
-        }
         ]]></mx:Script>
-    <mx:RemoteObject destination="tokenService" id="tokenService">
-        <mx:method name="getOAuthURL" result="gotURL()"/>
-    </mx:RemoteObject>
     <mx:HBox width="1000" height="100%" backgroundColor="#FFFFFF" paddingLeft="20"
              paddingRight="20" paddingTop="20" paddingBottom="20" horizontalAlign="center">
             <mx:VBox width="900" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
@@ -56,22 +38,19 @@
                 <mx:HBox verticalAlign="middle" width="100%">
                     <mx:Image source="{logo}" click="toVendorPage()"/>
                     <mx:Spacer width="100%"/>
-                    <mx:Label text="LinkedIn Reports and Analysis" fontSize="18"/>
+                    <mx:Label text="Why Use Easy Insight with Sendgrid?" fontSize="18"/>
                     <mx:Spacer width="100%"/>
                 </mx:HBox>
                 <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" width="820" height="70" text="Want to see where you rank on your number of connections? How about LinkedIn reports by industry? One common data source that seemed at least halfway interesting to us was LinkedIn, so if you want a quick start with our reporting and analysis, here's your chance!" fontSize="14"/>
+                <mx:TextArea backgroundAlpha="0" borderStyle="none" width="820" height="70" text="Want the ability to perform custom Sendgrid reporting? Whether it's simple reports on email activity or in depth business conversion rate analysis, Easy Insight can get you that visibility in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation." fontSize="14"/>
                 <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10">
-                    <mx:Image source="../assets/LinkedInReport.jpg"/>
+                    <mx:Image source="../assets/SendGrid.jpg"/>
                 </mx:HBox>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" width="820" height="40" text="Measure your connections and network. Analyze your network by company--how many of your former coworkers are still stuck at that horrible place you worked before? Share your results with friends!" fontSize="14"/>
-                <mx:Box id="authBox"/>
-                <mx:VBox id="controlsBox" paddingTop="0" paddingBottom="10" width="100%" horizontalAlign="center">
-                    <mx:Label text="Start Here:" fontSize="14" id="startHereLabel"/>
-                    <mx:Button label="Authorize Access" fontSize="14" click="install()" styleName="blueButton" id="installButton"/>
-                    <mx:Label text="Then copy that value here:" fontSize="14" id="thenLabel"/>
-                    <mx:Button label="Enter a Pin" fontSize="14" click="installSolution()" styleName="blueButton" id="pinButton"/>
-                </mx:VBox>
+                <mx:TextArea backgroundAlpha="0" borderStyle="none" width="820" height="50" text="Measure your conversion rates. Filter by category, join your categories to other data sources, and view as lists, trees, charts, or more. Share the reports with your coworkers or embed them into iGoogle or another dashboard." fontSize="14"/>
+                <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
+                    <mx:Button label="Get Started Now!" fontSize="14" click="installSolution()" styleName="blueButton"
+                               id="installButton"/>
+                </mx:Box>
             </mx:VBox>
     </mx:HBox>
 </solutions:SolutionDetailRenderer>

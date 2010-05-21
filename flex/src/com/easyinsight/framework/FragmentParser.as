@@ -12,7 +12,6 @@ import com.easyinsight.groups.DelayedGroupLink;
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.report.DelayedMultiReportLink;
 import com.easyinsight.report.DelayedPackageLink;
-import com.easyinsight.report.StaticReportSource;
 import com.easyinsight.solutions.DelayedSolutionLink;
 
 public class FragmentParser {
@@ -45,9 +44,6 @@ public class FragmentParser {
                 var groupLink:DelayedGroupLink = new DelayedGroupLink(key);
                 groupLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 groupLink.execute();
-            }),
-            new FragmentTester("staticReportID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                workspace.internalAnalyze(new AnalyzeEvent(new StaticReportSource(Number(key))));
             }),
             new FragmentTester("goalTreeID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var goalLink:DelayedGoalLink = new DelayedGoalLink(key);
