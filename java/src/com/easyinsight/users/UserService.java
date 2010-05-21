@@ -579,10 +579,10 @@ public class UserService implements IUserService {
                         userServiceResponse.setActivated(account.isActivated());
 
                 } else {
-                    userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
+                    userServiceResponse = new UserServiceResponse(false, "Invalid username or password, please try again.");
                 }
             } else {
-                userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
+                userServiceResponse = new UserServiceResponse(false, "Invalid username or password, please try again.");
             }
             conn.commit();
         } catch (Exception e) {
