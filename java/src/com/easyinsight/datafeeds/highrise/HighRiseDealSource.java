@@ -38,6 +38,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     public static final String DURATION = "Duration";
     public static final String PRICE_TYPE = "Price Type";
     public static final String DEAL_OWNER = "Deal Owner";
+    public static final String RESPONSIBLE_PARTY = "Responsible Party";
     public static final String CATEGORY = "Category";
     public static final String STATUS = "Status";
     public static final String CREATED_AT = "Created At";
@@ -52,13 +53,14 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(DEAL_NAME, COMPANY_ID, PRICE, DURATION, PRICE_TYPE, DEAL_OWNER,
-                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON);
+                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_OWNER), true));
+        analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE_PARTY), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
         AnalysisMeasure priceMeasure = new AnalysisMeasure(PRICE, AggregationTypes.SUM);
         FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
@@ -179,6 +181,8 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
                         String personID = queryField(currDeal, "owner-id/text()");
                         row.addValue(DEAL_OWNER, retrieveContactInfo(client, builder, peopleCache, personID, url));
+                        String responsibleParty = queryField(currDeal, "responsible-party-id/text()");
+                        row.addValue(RESPONSIBLE_PARTY, retrieveContactInfo(client, builder, peopleCache, responsibleParty, url));
                         String categoryID = queryField(currDeal, "category-id/text()");
                         row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
                         row.addValue(COUNT, new NumericValue(1));
