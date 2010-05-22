@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+  "-//Hibernate/Hibernate Configuration DTD//EN"
+  "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="connection.url">jdbc:derby:eiDataSourceConnection;create=true</property>
+    <property name="connection.driver_class">org.apache.derby.jdbc.EmbeddedDriver</property>
+    <property name="connection.username"></property>
+    <property name="connection.password"></property>
+    <!-- DB schema will be updated if needed -->
+    <property name="hbm2ddl.auto">update</property> 
+    <mapping class="com.easyinsight.connections.database.data.EIUser" />
+    <mapping class="com.easyinsight.connections.database.data.Query" />
+    <mapping class="com.easyinsight.connections.database.data.ConnectionInfo" />
+    <mapping class="com.easyinsight.connections.database.data.JdbcConnectionInfo" />
+    <mapping class="com.easyinsight.connections.database.data.MySqlConnectionInfo" />
+    <mapping class="com.easyinsight.connections.database.data.MsSqlConnectionInfo" />
+    <mapping class="com.easyinsight.connections.database.data.OracleConnectionInfo" />
+    <mapping class="com.easyinsight.connections.database.data.SecurityUser" />
+  </session-factory>
+</hibernate-configuration>

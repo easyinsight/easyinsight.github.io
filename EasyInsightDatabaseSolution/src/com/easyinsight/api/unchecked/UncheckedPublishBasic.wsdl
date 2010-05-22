@@ -1,0 +1,365 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions name="BasicAuthUncheckedPublishServiceService" targetNamespace="http://basicauth.api.easyinsight.com/" xmlns:ns1="http://schemas.xmlsoap.org/wsdl/soap/http" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://basicauth.api.easyinsight.com/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:types>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://basicauth.api.easyinsight.com/" xmlns:tns="http://basicauth.api.easyinsight.com/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="addRow" type="tns:addRow" />
+<xs:element name="addRowResponse" type="tns:addRowResponse" />
+<xs:element name="addRows" type="tns:addRows" />
+<xs:element name="addRowsResponse" type="tns:addRowsResponse" />
+<xs:element name="deleteRows" type="tns:deleteRows" />
+<xs:element name="deleteRowsResponse" type="tns:deleteRowsResponse" />
+<xs:element name="disableUnchecked" type="tns:disableUnchecked" />
+<xs:element name="disableUncheckedResponse" type="tns:disableUncheckedResponse" />
+<xs:element name="replaceRows" type="tns:replaceRows" />
+<xs:element name="replaceRowsResponse" type="tns:replaceRowsResponse" />
+<xs:element name="updateRow" type="tns:updateRow" />
+<xs:element name="updateRowResponse" type="tns:updateRowResponse" />
+<xs:element name="updateRows" type="tns:updateRows" />
+<xs:element name="updateRowsResponse" type="tns:updateRowsResponse" />
+<xs:element name="validateCredentials" type="tns:validateCredentials" />
+<xs:element name="validateCredentialsResponse" type="tns:validateCredentialsResponse" />
+<xs:complexType name="updateRow">
+<xs:sequence>
+<xs:element minOccurs="0" name="dataSourceName" type="xs:string" />
+<xs:element minOccurs="0" name="row" type="tns:row" />
+<xs:element minOccurs="0" name="where" type="tns:where" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="row">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="datePairs" nillable="true" type="tns:datePair" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="numberPairs" nillable="true" type="tns:numberPair" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="stringPairs" nillable="true" type="tns:stringPair" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="datePair">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string" />
+<xs:element minOccurs="0" name="value" type="xs:dateTime" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="numberPair">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string" />
+<xs:element name="value" type="xs:double" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="stringPair">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string" />
+<xs:element minOccurs="0" name="value" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="where">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dateWheres" nillable="true" type="tns:dateWhere" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dayWheres" nillable="true" type="tns:dayWhere" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="numberWheres" nillable="true" type="tns:numberWhere" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="stringWheres" nillable="true" type="tns:stringWhere" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="dateWhere">
+<xs:sequence>
+<xs:element minOccurs="0" name="comparison" type="tns:comparison" />
+<xs:element minOccurs="0" name="key" type="xs:string" />
+<xs:element minOccurs="0" name="value" type="xs:dateTime" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="dayWhere">
+<xs:sequence>
+<xs:element name="dayOfYear" type="xs:int" />
+<xs:element minOccurs="0" name="key" type="xs:string" />
+<xs:element name="year" type="xs:int" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="numberWhere">
+<xs:sequence>
+<xs:element minOccurs="0" name="comparison" type="tns:comparison" />
+<xs:element minOccurs="0" name="key" type="xs:string" />
+<xs:element name="value" type="xs:double" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="stringWhere">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string" />
+<xs:element minOccurs="0" name="value" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="updateRowResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="addRows">
+<xs:sequence>
+<xs:element minOccurs="0" name="dataSourceName" type="xs:string" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="rows" type="tns:row" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="addRowsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="replaceRows">
+<xs:sequence>
+<xs:element minOccurs="0" name="dataSourceName" type="xs:string" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="rows" type="tns:row" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="replaceRowsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="validateCredentials">
+<xs:sequence />
+</xs:complexType>
+<xs:complexType name="validateCredentialsResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="deleteRows">
+<xs:sequence>
+<xs:element minOccurs="0" name="dataSourceName" type="xs:string" />
+<xs:element minOccurs="0" name="where" type="tns:where" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="deleteRowsResponse">
+<xs:sequence />
+</xs:complexType>
+<xs:complexType name="updateRows">
+<xs:sequence>
+<xs:element minOccurs="0" name="dataSourceName" type="xs:string" />
+<xs:element maxOccurs="unbounded" minOccurs="0" name="rows" type="tns:row" />
+<xs:element minOccurs="0" name="where" type="tns:where" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="updateRowsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="addRow">
+<xs:sequence>
+<xs:element minOccurs="0" name="dataSourceName" type="xs:string" />
+<xs:element minOccurs="0" name="row" type="tns:row" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="addRowResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="disableUnchecked">
+<xs:sequence>
+<xs:element minOccurs="0" name="dataSourceKey" type="xs:string" />
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="disableUncheckedResponse">
+<xs:sequence />
+</xs:complexType>
+<xs:simpleType name="comparison">
+<xs:restriction base="xs:string">
+<xs:enumeration value="GREATER_THAN" />
+<xs:enumeration value="EQUAL_TO" />
+<xs:enumeration value="LESS_THAN" />
+</xs:restriction>
+</xs:simpleType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="addRowResponse">
+    <wsdl:part element="tns:addRowResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="validateCredentials">
+    <wsdl:part element="tns:validateCredentials" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="disableUnchecked">
+    <wsdl:part element="tns:disableUnchecked" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="addRows">
+    <wsdl:part element="tns:addRows" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="deleteRowsResponse">
+    <wsdl:part element="tns:deleteRowsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="deleteRows">
+    <wsdl:part element="tns:deleteRows" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="validateCredentialsResponse">
+    <wsdl:part element="tns:validateCredentialsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="updateRowResponse">
+    <wsdl:part element="tns:updateRowResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="addRowsResponse">
+    <wsdl:part element="tns:addRowsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="updateRowsResponse">
+    <wsdl:part element="tns:updateRowsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="disableUncheckedResponse">
+    <wsdl:part element="tns:disableUncheckedResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="replaceRowsResponse">
+    <wsdl:part element="tns:replaceRowsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="addRow">
+    <wsdl:part element="tns:addRow" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="updateRow">
+    <wsdl:part element="tns:updateRow" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="updateRows">
+    <wsdl:part element="tns:updateRows" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="replaceRows">
+    <wsdl:part element="tns:replaceRows" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="BasicAuthUncheckedPublish">
+    <wsdl:operation name="updateRow">
+      <wsdl:input message="tns:updateRow" name="updateRow">
+    </wsdl:input>
+      <wsdl:output message="tns:updateRowResponse" name="updateRowResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addRows">
+      <wsdl:input message="tns:addRows" name="addRows">
+    </wsdl:input>
+      <wsdl:output message="tns:addRowsResponse" name="addRowsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="replaceRows">
+      <wsdl:input message="tns:replaceRows" name="replaceRows">
+    </wsdl:input>
+      <wsdl:output message="tns:replaceRowsResponse" name="replaceRowsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="validateCredentials">
+      <wsdl:input message="tns:validateCredentials" name="validateCredentials">
+    </wsdl:input>
+      <wsdl:output message="tns:validateCredentialsResponse" name="validateCredentialsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteRows">
+      <wsdl:input message="tns:deleteRows" name="deleteRows">
+    </wsdl:input>
+      <wsdl:output message="tns:deleteRowsResponse" name="deleteRowsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="updateRows">
+      <wsdl:input message="tns:updateRows" name="updateRows">
+    </wsdl:input>
+      <wsdl:output message="tns:updateRowsResponse" name="updateRowsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addRow">
+      <wsdl:input message="tns:addRow" name="addRow">
+    </wsdl:input>
+      <wsdl:output message="tns:addRowResponse" name="addRowResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="disableUnchecked">
+      <wsdl:input message="tns:disableUnchecked" name="disableUnchecked">
+    </wsdl:input>
+      <wsdl:output message="tns:disableUncheckedResponse" name="disableUncheckedResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicAuthUncheckedPublishServiceServiceSoapBinding" type="tns:BasicAuthUncheckedPublish">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="updateRow">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="updateRow">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="updateRowResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addRows">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="addRows">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="addRowsResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="replaceRows">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="replaceRows">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="replaceRowsResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="validateCredentials">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="validateCredentials">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="validateCredentialsResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteRows">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="deleteRows">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="deleteRowsResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="updateRows">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="updateRows">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="updateRowsResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addRow">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="addRow">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="addRowResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="disableUnchecked">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="disableUnchecked">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="disableUncheckedResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="BasicAuthUncheckedPublishServiceService">
+    <wsdl:port binding="tns:BasicAuthUncheckedPublishServiceServiceSoapBinding" name="BasicAuthUncheckedPublishServicePort">
+      <soap:address location="https://www.easy-insight.com/app/services/UncheckedPublishBasic" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
