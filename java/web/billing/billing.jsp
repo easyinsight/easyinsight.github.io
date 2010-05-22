@@ -178,7 +178,7 @@
           <td>Address 2:</td><td><input id="address2" type="text" value="" name="address2" style="width:16.5em" /></td>
       </tr>
       <tr>
-          <td>City:</td><td><input id="city" type="text" value="" name="city" style="width:16.5em" /><span class="error">*</span></td><td style="text-align:right">State:</td><td><input id="state" type="text" value="" style="width:2.5em" maxlength="2" name="state" /><span class="error">*</span></td><td style="text-align:right">Zip/Postal Code:</td><td> <input id="zip" type="text" value="" name="zip" /><span class="error">*</span></td>
+          <td>City:</td><td><input id="city" type="text" value="" name="city" style="width:16.5em" /><span class="error">*</span></td><td style="text-align:right">State/Province:</td><td><input id="state" type="text" value="" style="width:2.5em" maxlength="2" name="state" /><span class="error">*</span></td><td style="text-align:right">Zip/Postal Code:</td><td> <input id="zip" type="text" value="" name="zip" /><span class="error">*</span></td>
       </tr>
       <tr>
           <td>Country:</td><td colspan="5"><select id="country_name" type="text" name="country_name">
