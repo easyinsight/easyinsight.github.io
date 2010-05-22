@@ -177,7 +177,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                         }
                         row.addValue(TOTAL_DEAL_VALUE, new NumericValue(totalDealValue));
 
-                        String personID = queryField(currDeal, "person-id/text()");
+                        String personID = queryField(currDeal, "owner-id/text()");
                         row.addValue(DEAL_OWNER, retrieveContactInfo(client, builder, peopleCache, personID, url));
                         String categoryID = queryField(currDeal, "category-id/text()");
                         row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
