@@ -134,6 +134,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
+        Map<String, String> userCache = new HashMap<String, String>();
         Map<String, String> categoryCache = new HashMap<String, String>();
         try {
             EIPageInfo info = new EIPageInfo();
@@ -180,9 +181,9 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                         row.addValue(TOTAL_DEAL_VALUE, new NumericValue(totalDealValue));
 
                         String personID = queryField(currDeal, "owner-id/text()");
-                        row.addValue(DEAL_OWNER, retrieveContactInfo(client, builder, peopleCache, personID, url));
+                        row.addValue(DEAL_OWNER, retrieveUserInfo(client, builder, userCache, personID, url));
                         String responsibleParty = queryField(currDeal, "responsible-party-id/text()");
-                        row.addValue(RESPONSIBLE_PARTY, retrieveContactInfo(client, builder, peopleCache, responsibleParty, url));
+                        row.addValue(RESPONSIBLE_PARTY, retrieveUserInfo(client, builder, userCache, responsibleParty, url));
                         String categoryID = queryField(currDeal, "category-id/text()");
                         row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
                         row.addValue(COUNT, new NumericValue(1));

@@ -46,6 +46,25 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         }
     }
 
+    protected String retrieveUserInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException, ParsingException {
+        try {
+            String contactName = null;
+            if(contactId != null) {
+                contactName = peopleCache.get(contactId);
+                if(contactName == null) {
+                    Document contactInfo = runRestRequest("/users/" + contactId, client, builder, url, false);
+                    contactName = queryField(contactInfo, "/user/name/text()");
+                    peopleCache.put(contactId, contactName);
+                }
+
+            }
+            return contactName;
+        } catch (HighRiseLoginException e) {
+            peopleCache.put(contactId, "");
+            return "";
+        }
+    }
+
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError) throws HighRiseLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
         try {
@@ -60,7 +79,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         do {
             try {
                 client.executeMethod(restMethod);
-                doc = builder.build(restMethod.getResponseBodyAsStream());
+                doc = builder.build(restMethod.getResponseBodyAsStream());                
                 String rootValue = doc.getRootElement().getValue();
                 if ("The API is not available to this account".equals(rootValue)) {
                     throw new BaseCampDataException("You need to enable API access to your Highrise account--you can do this under Account (Upgrade/Invoice), Highrise API in the Highrise user interface.");
