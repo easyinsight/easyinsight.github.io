@@ -103,7 +103,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     row.addValue(COUNT, new NumericValue(1));
                     String personId = queryField(companyNode, "owner-id/text()");
-                    String responsiblePartyName = retrieveContactInfo(client, builder, peopleCache, personId, url);
+                    String responsiblePartyName = retrieveUserInfo(client, builder, peopleCache, personId, url);
                     row.addValue(OWNER, responsiblePartyName);
 
                     Document tags = runRestRequest("/companies/"+id+"/tags.xml", client, builder, url, false);
