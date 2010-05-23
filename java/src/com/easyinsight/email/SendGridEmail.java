@@ -128,7 +128,7 @@ public class SendGridEmail {
 
         message.setContent(multipart);
 
-        message.setFrom(new InternetAddress("jboe@easy-insight.com", "James Boe"));
+        message.setFrom(new InternetAddress("sales@easy-insight.com", "Easy Insight"));
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
 
         transport.connect();
