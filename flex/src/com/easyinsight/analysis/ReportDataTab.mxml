@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox label="Data (F2)" icon="@Embed(source='../../../../assets/data_table.png')" paddingLeft="10"
+<mx:HBox label="Data" icon="@Embed(source='../../../../assets/data_table.png')" paddingLeft="10"
          paddingTop="10" paddingBottom="10"
          paddingRight="10" width="100%" height="100%" xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:datasources="com.easyinsight.datasources.*" xmlns:analysis="com.easyinsight.analysis.*">
@@ -192,6 +192,23 @@
             _analysisDefinition.dataScrubs.removeItemAt(_analysisDefinition.dataScrubs.getItemIndex(event.dataScrub));
             _dataView.retrieveData();
         }
+
+        public function removeCalculationButton():void {
+            removeChild(calculationButton);
+        }
+
+        public function removeHierarchy():void {
+            removeChild(hierarchyButton);
+        }
+
+        public function removeScrubs():void {
+            removeChild(textScrubButton);
+            removeChild(textListButton);
+        }
+
+        public function removeAPI():void {
+            removeChild(apiButton);
+        }
         ]]></mx:Script>
     <mx:Button id="refreshButton" toolTip="Refresh Data"
                icon="@Embed(source='../../../../assets/refresh.png')"
@@ -200,7 +217,7 @@
                icon="@Embed(source='../../../../assets/text_formula.png')"
                click="createCalculation()"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
-               toolTip="Add Hierarchy..." click="createHierarchy()"/>
+               toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton"/>
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
                icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
     <!--<mx:Button id="obfuscateButton" toolTip="Toggle Obfuscation"

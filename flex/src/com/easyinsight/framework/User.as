@@ -7,33 +7,36 @@ import com.easyinsight.preferences.UISettings;
 import flash.events.Event;
 import flash.net.SharedObject;
 
+import mx.controls.Alert;
+
 public class User
-	{
-		private var name:String;
-		private var email:String;
-		private var accountType:int;
-		static private var _user:User;
-		static private var notifier:UserEventNotifier;
-        static private var sharedObject:SharedObject;
-		public var commercialEnabled:Boolean;
-		public var spaceAllowed:int;		
-		public var userName:String;
-        public var accountAdmin:Boolean;
-        public var userID:int;
-        public var activated:Boolean;
-        public var billingInformationGiven:Boolean;
-        public var accountState:int;
-        public var uiConfiguration:UIConfiguration;
-        public var firstName:String;
-        public var freeUpgradePossible:Boolean;
+{
+    private var name:String;
+    private var email:String;
+    private var accountType:int;
+    static private var _user:User;
+    static private var notifier:UserEventNotifier;
+    static private var sharedObject:SharedObject;
+    public var commercialEnabled:Boolean;
+    public var spaceAllowed:int;
+    public var userName:String;
+    public var accountAdmin:Boolean;
+    public var userID:int;
+    public var activated:Boolean;
+    public var billingInformationGiven:Boolean;
+    public var accountState:int;
+    public var uiConfiguration:UIConfiguration;
+    public var firstName:String;
+    public var freeUpgradePossible:Boolean;
     public var lastLoginDate:Date;
     public var firstLogin:Boolean;
     public var accountName:String;
     public var renewalOptionPossible:Boolean;
+    public var personaID:int;
 
-        public function User() {
+    public function User() {
 
-        }
+    }
 
     static public function initializeUser(response:UserServiceResponse):void {
         _user = new User();
@@ -52,6 +55,7 @@ public class User
         _user.firstLogin = response.firstLogin;
         _user.accountName = response.accountName;
         _user.renewalOptionPossible = response.renewalOptionPossible;
+        _user.personaID = response.personaID;
         if (_user.firstLogin) {
             User.getEventNotifier().dispatchEvent(new Event("firstLogin"));
         } else if (response.renewalOptionPossible) {
@@ -79,91 +83,92 @@ public class User
         }
     }
 
+    public function changeSettings(settings:UISettings):void {
+        _user.uiConfiguration = UIConfiguration.fromUISettings(settings);
+        User.getEventNotifier().dispatchEvent(new Event("uiChange"));
+    }
 
+    public function updateLabels(userName:String, fullName:String, email:String, firstName:String):void {
+        this.email = email;
+        this.userName = userName;
+        this.name = fullName;
+        this.firstName = firstName;
+    }
 
-        public function updateLabels(userName:String, fullName:String, email:String, firstName:String):void {
-            this.email = email;
-            this.userName = userName;
-            this.name = fullName;
-            this.firstName = firstName;
+    public function resync(userTransferObject:UserTransferObject):void {
+        this.accountAdmin = userTransferObject.accountAdmin;
+    }
+
+    static public function destroy():void {
+        _user = null;
+    }
+
+    static public function getEventNotifier():UserEventNotifier {
+        if (notifier == null) {
+            notifier = new UserEventNotifier();
         }
+        return notifier;
+    }
 
-        public function resync(userTransferObject:UserTransferObject):void {
-            this.accountAdmin = userTransferObject.accountAdmin;
-            //this.dataSourceCreator = userTransferObject.dataSourceCreator;
-            //this.insightCreator = userTransferObject.insightCreator;
-        }
-		
-		static public function destroy():void {
-			_user = null;
-		}
-		
-		static public function getEventNotifier():UserEventNotifier {
-			if (notifier == null) {
-				notifier = new UserEventNotifier();
-			}
-			return notifier;	
-		}
-		
-		public function getAccountType():int {
-			return accountType;
-		}
+    public function getAccountType():int {
+        return accountType;
+    }
 
-        public function setAccountType(type:int):void {
-            this.accountType = type;
-        }
-		
-		public function getEmail():String {
-			return email;
-		}
-		
-		public function getName():String {
-			return name;
-		}
+    public function setAccountType(type:int):void {
+        this.accountType = type;
+    }
 
-		
-		static public function getInstance():User {
-			return _user;
-		}
+    public function getEmail():String {
+        return email;
+    }
 
-        static public function getSharedObject():SharedObject {
-            return sharedObject;
-        }
+    public function getName():String {
+        return name;
+    }
 
-        static public function getCredentials(dataSourceID:int):Credentials {
-            var idString:String = dataSourceID.toString();
-            if(getSharedObject() != null && getSharedObject().data[idString] != null) {
-                var c:Credentials = new Credentials();
-                c.userName = User.getSharedObject().data[idString].username;
-                c.password = User.getSharedObject().data[idString].password;
-                c.encrypted = true;
-                var credentialIDs:String = getSharedObject().data["credentials"];
-                if (credentialIDs == null || credentialIDs == "") {
-                    credentialIDs = String(dataSourceID);
-                    getSharedObject().data["credentials"] = credentialIDs;
-                    getSharedObject().flush();
-                }
-                return c;
-            }
-            return CredentialsCache.getCache().getCredentials(dataSourceID);            
-        }
 
-        static public function saveCredentials(dataSourceID:int, c:Credentials):void {
-            var idString:String = dataSourceID.toString();
-            if (getSharedObject() != null) {
-                getSharedObject().data[idString] = new Object();
-                getSharedObject().data[idString].username = c.userName;
-                getSharedObject().data[idString].password = c.password;
-                var credentialIDs:String = getSharedObject().data["credentials"];
-                if (credentialIDs == null && credentialIDs != "") {
-                    credentialIDs = String(dataSourceID);
-                } else {
-                    credentialIDs = credentialIDs + "," + String(dataSourceID);
-                }
+    static public function getInstance():User {
+        return _user;
+    }
+
+    static public function getSharedObject():SharedObject {
+        return sharedObject;
+    }
+
+    static public function getCredentials(dataSourceID:int):Credentials {
+        var idString:String = dataSourceID.toString();
+        if (getSharedObject() != null && getSharedObject().data[idString] != null) {
+            var c:Credentials = new Credentials();
+            c.userName = User.getSharedObject().data[idString].username;
+            c.password = User.getSharedObject().data[idString].password;
+            c.encrypted = true;
+            var credentialIDs:String = getSharedObject().data["credentials"];
+            if (credentialIDs == null || credentialIDs == "") {
+                credentialIDs = String(dataSourceID);
                 getSharedObject().data["credentials"] = credentialIDs;
                 getSharedObject().flush();
             }
+            return c;
         }
+        return CredentialsCache.getCache().getCredentials(dataSourceID);
+    }
 
+    static public function saveCredentials(dataSourceID:int, c:Credentials):void {
+        var idString:String = dataSourceID.toString();
+        if (getSharedObject() != null) {
+            getSharedObject().data[idString] = new Object();
+            getSharedObject().data[idString].username = c.userName;
+            getSharedObject().data[idString].password = c.password;
+            var credentialIDs:String = getSharedObject().data["credentials"];
+            if (credentialIDs == null && credentialIDs != "") {
+                credentialIDs = String(dataSourceID);
+            } else {
+                credentialIDs = credentialIDs + "," + String(dataSourceID);
+            }
+            getSharedObject().data["credentials"] = credentialIDs;
+            getSharedObject().flush();
         }
+    }
+
+}
 }

@@ -24,12 +24,14 @@
         import com.easyinsight.genredata.GenreDataProvider;
         import com.easyinsight.intro.IntroPanel;
 
+        import mx.controls.Alert;
         import mx.states.RemoveChild;
         import mx.states.State;
 
         private function setup():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
+            User.getEventNotifier().addEventListener("uiChange", uiChangeEvent);
         }
 
         private function loginEvent(event:LoginEvent):void {
@@ -39,6 +41,10 @@
                     createState(User.getInstance().uiConfiguration);
                 }
             }
+        }
+
+        private function uiChangeEvent(event:Event):void {
+            createState(User.getInstance().uiConfiguration);
         }
 
         [Bindable]
@@ -119,7 +125,7 @@
         }
 
         private function createState(config:UIConfiguration):void {
-
+            currentState = "";
             var ops:Array = [];
             evaluate(apiListingOption, UIConfiguration.SHOW_APIS, config, ops);
             evaluate(myDataOption, UIConfiguration.SHOW_MY_DATA, config, ops);

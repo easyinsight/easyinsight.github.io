@@ -7,6 +7,7 @@ import com.easyinsight.security.SecurityUtil;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,32 +65,7 @@ public class PreferencesService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            if (persona.getPersonaID() == 0) {
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PERSONA (PERSONA_NAME, ACCOUNT_ID) VALUES (?, ?)",
-                        Statement.RETURN_GENERATED_KEYS);
-                insertStmt.setString(1, persona.getName());
-                insertStmt.setLong(2, SecurityUtil.getAccountID());
-                insertStmt.execute();
-                persona.setPersonaID(Database.instance().getAutoGenKey(insertStmt));
-            } else {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE PERSONA SET PERSONA_NAME = ? WHERE " +
-                        "PERSONA_ID = ? AND ACCOUNT_ID = ?");
-                updateStmt.setString(1, persona.getName());
-                updateStmt.setLong(2, persona.getPersonaID());
-                updateStmt.setLong(3, SecurityUtil.getAccountID());
-                updateStmt.executeUpdate();
-            }
-            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM UI_VISIBILITY_SETTING WHERE PERSONA_ID = ?");
-            clearStmt.setLong(1, persona.getPersonaID());
-            clearStmt.executeUpdate();
-            PreparedStatement insertSettingStmt = conn.prepareStatement("INSERT INTO UI_VISIBILITY_SETTING (CONFIG_ELEMENT, VISIBLE, PERSONA_ID) " +
-                    "VALUES (?, ?, ?)");
-            for (UIVisibilitySetting setting : persona.getUiSettings().getVisibilitySettings()) {
-                insertSettingStmt.setString(1, setting.getKey());
-                insertSettingStmt.setBoolean(2, setting.isSelected());
-                insertSettingStmt.setLong(3, persona.getPersonaID());
-                insertSettingStmt.execute();
-            }
+            savePersona(persona, conn);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -98,6 +74,36 @@ public class PreferencesService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+        return persona.getPersonaID();
+    }
+
+    public long savePersona(Persona persona, EIConnection conn) throws SQLException {
+        if (persona.getPersonaID() == 0) {
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PERSONA (PERSONA_NAME, ACCOUNT_ID) VALUES (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            insertStmt.setString(1, persona.getName());
+            insertStmt.setLong(2, SecurityUtil.getAccountID());
+            insertStmt.execute();
+            persona.setPersonaID(Database.instance().getAutoGenKey(insertStmt));
+        } else {
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE PERSONA SET PERSONA_NAME = ? WHERE " +
+                    "PERSONA_ID = ? AND ACCOUNT_ID = ?");
+            updateStmt.setString(1, persona.getName());
+            updateStmt.setLong(2, persona.getPersonaID());
+            updateStmt.setLong(3, SecurityUtil.getAccountID());
+            updateStmt.executeUpdate();
+        }
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM UI_VISIBILITY_SETTING WHERE PERSONA_ID = ?");
+        clearStmt.setLong(1, persona.getPersonaID());
+        clearStmt.executeUpdate();
+        PreparedStatement insertSettingStmt = conn.prepareStatement("INSERT INTO UI_VISIBILITY_SETTING (CONFIG_ELEMENT, VISIBLE, PERSONA_ID) " +
+                "VALUES (?, ?, ?)");
+        for (UIVisibilitySetting setting : persona.getUiSettings().getVisibilitySettings()) {
+            insertSettingStmt.setString(1, setting.getKey());
+            insertSettingStmt.setBoolean(2, setting.isSelected());
+            insertSettingStmt.setLong(3, persona.getPersonaID());
+            insertSettingStmt.execute();
         }
         return persona.getPersonaID();
     }

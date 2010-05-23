@@ -30,30 +30,21 @@
                 <mx:Label text="An email has been sent to your email address to allow you to reset your password."/>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="UserNameReminded">
-            <mx:AddChild relativeTo="{activationBox}">
-                <mx:Label text="Your user name has been sent to your email address."/>
-            </mx:AddChild>
-        </mx:State>
         <mx:State name="AdditionalInfo">
             <mx:AddChild relativeTo="{activationBox}">
                 <mx:Label text="{_additionalInfo}"/>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="Activated">
-            <mx:RemoveChild target="{noAccount}"/>
-            <mx:AddChild relativeTo="{activationBox}">
-                <mx:Label text="Your account has been activated! You can now log in: " fontSize="14"/>
-            </mx:AddChild>
-        </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
+
         import mx.messaging.config.ServerConfig;
         import mx.rpc.AsyncResponder;
         import mx.rpc.AsyncToken;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
+        import mx.validators.Validator;
 
         private function passwordResetEnter(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
@@ -76,8 +67,6 @@
 
         [Bindable]
         private var _cancelVisible:Boolean;
-
-        private var _showActivation:Boolean;
 
         private var _newAccount:Boolean;
 
@@ -130,38 +119,24 @@
             _cancelVisible = value;
         }
 
-        public function set showActivation(val:Boolean):void {
-            _showActivation = val;
-            invalidateProperties();
-        }
-
         private function resetPassword():void {
+            var results:Array = Validator.validateAll([emailValidator]);
+            if (results.length > 0) {
+                emailAddressInput.setFocus();
+                emailAddressInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            stackIndex = 1;
             authService.remindPassword.send(emailAddressInput.text);
         }
 
         private function reset():void {
+            stackIndex = 0;
             var result:Boolean = authService.remindPassword.lastResult as Boolean;
             if (result) {
                 currentState = "PasswordReset";
             } else {
                 emailFailure = "No such email address was found in Easy Insight.";
-            }
-        }
-
-        private function remindedUserName():void {
-            var result:Boolean = authService.remindUserName.lastResult as Boolean;
-            if (result) {
-                currentState = "UserNameReminded";
-            } else {
-                emailFailure = "No such email address was found in Easy Insight.";
-            }
-        }
-
-
-        override protected function commitProperties():void {
-            super.commitProperties();
-            if (_showActivation) {
-                currentState = "Activated";
             }
         }
 
@@ -191,11 +166,6 @@
                                 case "Client.Authentication":
                                 default:
                                     failureMessage = event.fault.faultString;
-                                /*if (failureMessageLabel != null)
-                                 failureMessageLabel.text = failureMessage;
-                                 else
-                                 Alert.show(failureMessage);
-                                 authService.isAccountDelinquentOrClosed.send(userNameStr);*/
                             }
                         }
                         ));
@@ -215,8 +185,6 @@
             this.userNameStr = userNameStr;
             this.passwordStr = passwordStr;
             authService.authenticate.send(this.userNameStr, this.passwordStr);
-
-
         }
 
         private function cancel():void {
@@ -225,8 +193,24 @@
 
         private function keyedSignon(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
-                signon(userName.text, password.text);
+                defaultSignon();
             }
+        }
+
+        private function defaultSignon():void {
+            var results:Array = Validator.validateAll([userNameValidator]);
+            if (results.length > 0) {
+                userName.setFocus();
+                userName.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var passwordResults:Array = Validator.validateAll([passwordValidator]);
+            if (passwordResults.length > 0) {
+                password.setFocus();
+                password.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            signon(userName.text, password.text);
         }
 
         private function createNewAccount():void {
@@ -249,8 +233,6 @@
             <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
                 <mx:FormItem label="User Name or Email:" direction="horizontal">
                     <mx:TextInput id="userName" tabIndex="1"/>
-                    <!--<mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your User Name?"
-                                   click="currentState='RemindUserName'"/>-->
                 </mx:FormItem>
                 <mx:FormItem label="Password:" direction="horizontal">
                     <mx:TextInput id="password" displayAsPassword="true" tabIndex="2"/>
@@ -264,7 +246,7 @@
         </mx:ViewStack>
         <mx:Spacer height="10"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Sign In" click="signon(userName.text, password.text)" tabIndex="3"/>
+            <mx:Button label="Sign In" click="defaultSignon()" tabIndex="3"/>
             <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}" tabIndex="4"/>
         </mx:HBox>
         <mx:Spacer height="10"/>
@@ -278,10 +260,12 @@
             <mx:Text text="{failureMessage}" fontSize="14"/>
         </mx:HBox>
     </mx:VBox>
+    <mx:StringValidator id="userNameValidator" minLength="3" source="{userName}" property="text"/>
+    <mx:StringValidator id="passwordValidator" minLength="3" source="{password}" property="text"/>
+    <mx:EmailValidator id="emailValidator" source="{emailAddressInput}" property="text"/>
     <mx:RemoteObject id="authService" destination="login">
-        <mx:method name="authenticate" result="handleAuthentication()"/>
-        <mx:method name="remindPassword" result="reset()"/>
-        <mx:method name="remindUserName" result="remindedUserName()"/>
+        <mx:method name="authenticate" result="handleAuthentication()" fault="failureMessage = event.fault.faultString"/>
+        <mx:method name="remindPassword" result="reset()"  fault="emailFailure = event.fault.faultString"/>
         <mx:method name="isAccountDelinquentOrClosed" result="delinquentAccount()" />
     </mx:RemoteObject>
 </mx:Box>

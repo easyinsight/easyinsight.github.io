@@ -30,6 +30,7 @@ public class UserServiceResponse {
     private Date lastLoginDate;
     private String accountName;
     private boolean renewalOptionPossible;
+    private long personaID;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -40,7 +41,8 @@ public class UserServiceResponse {
                                long spaceAllowed, String email, String userName, boolean accountAdmin,
                                boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
-                               boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible) {
+                               boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible,
+                               Long personaID) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -59,6 +61,15 @@ public class UserServiceResponse {
         this.lastLoginDate = lastLoginDate;
         this.accountName = accountName;
         this.renewalOptionPossible = renewalOptionPossible;
+        this.personaID = personaID == null ? 0 : personaID;
+    }
+
+    public long getPersonaID() {
+        return personaID;
+    }
+
+    public void setPersonaID(long personaID) {
+        this.personaID = personaID;
     }
 
     public boolean isRenewalOptionPossible() {

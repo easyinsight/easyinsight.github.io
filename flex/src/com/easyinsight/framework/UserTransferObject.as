@@ -19,5 +19,8 @@ package com.easyinsight.framework
 		{
 		}
 
+        public function get fullName():String {
+            return firstName + " " + name;
+        }
 	}
 }

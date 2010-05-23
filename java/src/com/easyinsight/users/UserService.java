@@ -2,24 +2,21 @@ package com.easyinsight.users;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.salesautomation.SalesEmail;
-import com.easyinsight.security.PasswordService;
-import com.easyinsight.security.UserPrincipal;
-import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.security.DefaultSecurityProvider;
+import com.easyinsight.security.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.email.AccountMemberInvitation;
+import com.easyinsight.security.SecurityException;
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.groups.Group;
 import com.easyinsight.groups.GroupStorage;
 import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.outboundnotifications.BuyOurStuffTodo;
 
-import java.util.List;
-import java.util.Date;
-import java.util.Calendar;
+import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -37,7 +34,124 @@ import flex.messaging.FlexContext;
  */
 public class UserService implements IUserService {
 
-    
+    public AccountSetupData applySetupData(AccountSetupData accountSetupData) {
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+            Account account = admin.getAccount();
+            boolean tooManyUsers = false;
+            if (account.getMaxUsers() <= account.getUsers().size() + accountSetupData.getUsers().size()) {
+                tooManyUsers = true;
+            }
+            boolean problem = isProblem(accountSetupData, conn);
+            if (!problem && !tooManyUsers) {
+
+                Map<Integer, Long> personaMap = new HashMap<Integer, Long>();
+                personaMap.put(AccountSetupData.BIZ_USER, null);
+                personaMap.put(AccountSetupData.DEVELOPER, null);
+                personaMap.put(AccountSetupData.BI_GURU, null);
+                PreparedStatement personasStmt = conn.prepareStatement("SELECT PERSONA_ID, PERSONA_NAME FROM PERSONA WHERE PERSONA.account_id = ?");
+                personasStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet personaRS = personasStmt.executeQuery();
+                while (personaRS.next()) {
+                    long personaID = personaRS.getLong(1);
+                    String personaName = personaRS.getString(2);
+                    if ("Business User".equals(personaName)) {
+                        personaMap.put(AccountSetupData.BIZ_USER, personaID);
+                    } else if ("Developer".equals(personaName)) {
+                        personaMap.put(AccountSetupData.DEVELOPER, personaID);
+                    } else if ("BI Guru".equals(personaName)) {
+                        personaMap.put(AccountSetupData.BI_GURU, personaID);
+                    }
+                }
+                if (personaMap.get(AccountSetupData.BIZ_USER) == null) {
+                    personaMap.put(AccountSetupData.BIZ_USER, new PreferencesService().savePersona(accountSetupData.getPersonas().get(0), conn));
+                }
+                if (personaMap.get(AccountSetupData.DEVELOPER) == null) {
+                    personaMap.put(AccountSetupData.DEVELOPER, new PreferencesService().savePersona(accountSetupData.getPersonas().get(1), conn));
+                }
+                if (personaMap.get(AccountSetupData.BI_GURU) == null) {
+                    personaMap.put(AccountSetupData.BI_GURU, new PreferencesService().savePersona(accountSetupData.getPersonas().get(2), conn));
+                }
+                PreparedStatement updateUserStmt = conn.prepareStatement("UPDATE USER SET PERSONA_ID = ? WHERE USER_ID = ?");
+                updateUserStmt.setLong(1, personaMap.get(accountSetupData.getMyPersona()));
+                updateUserStmt.setLong(2, SecurityUtil.getUserID());
+                updateUserStmt.executeUpdate();
+                for (UserPersonaObject user : accountSetupData.getUsers()) {
+                    user.setPersonaID(personaMap.get(user.getPersona()));
+                }
+                bulkCreateUser(accountSetupData.getUsers(), account, admin, conn);
+                session.update(account);
+                session.flush();
+                conn.commit();
+            } else {
+                return accountSetupData;
+            }
+
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    private void bulkCreateUser(List<UserPersonaObject> users, Account account, User admin, EIConnection conn) throws SQLException {
+        for (UserTransferObject userTransferObject : users) {
+            User user = userTransferObject.toUser();
+            user.setAccount(account);
+            final String adminFirstName = admin.getFirstName();
+            final String adminName = admin.getName();
+            final String userEmail = user.getEmail();
+            final String userName = user.getUserName();
+            final String password = RandomTextGenerator.generateText(12);
+            user.setPassword(PasswordService.getInstance().encrypt(password));
+            account.addUser(user);
+            user.setAccount(account);
+            new Thread(new Runnable() {
+                public void run() {
+                    new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password);
+                }
+            }).start();
+            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE
+                    || account.getAccountType() == Account.ADMINISTRATOR) {
+                new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER, conn);
+            } else if (account.getAccountType() == Account.BASIC) {
+                if (account.getGroupID() != null) {
+                    new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER, conn);
+                }
+            }
+        }
+    }
+
+    private boolean isProblem(AccountSetupData accountSetupData, EIConnection conn) throws SQLException {
+        boolean problem = false;
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL FROM USER WHERE EMAIL = ?");
+        for (UserPersonaObject user : accountSetupData.getUsers()) {
+            queryStmt.setString(1, user.getEmail());
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                problem = true;
+                user.setBadEmail(true);
+            }
+        }
+        PreparedStatement userNameStmt = conn.prepareStatement("SELECT USERNAME FROM USER WHERE USERNAME = ?");
+        for (UserPersonaObject user : accountSetupData.getUsers()) {
+            userNameStmt.setString(1, user.getUserName());
+            ResultSet rs = userNameStmt.executeQuery();
+            if (rs.next()) {
+                problem = true;
+                user.setBadUserName(true);
+            }
+        }
+        return problem;
+    }
 
     public boolean verifyPasswordReset(String passwordResetString) {
         EIConnection conn = Database.instance().getConnection();
@@ -507,7 +621,8 @@ public class UserService implements IUserService {
             UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                    user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable());
+                    user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                    user.getPersonaID());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -574,7 +689,7 @@ public class UserService implements IUserService {
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                                user.isRenewalOptionAvailable());
+                                user.isRenewalOptionAvailable(), user.getPersonaID());
 
                         userServiceResponse.setActivated(account.isActivated());
 
@@ -648,7 +763,8 @@ public class UserService implements IUserService {
                      user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                         (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                         user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                        !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable());
+                        !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                        user.getPersonaID());
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);

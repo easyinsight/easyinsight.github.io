@@ -63,6 +63,7 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.FeedAdminAnalyzeSource;
+        import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
@@ -460,6 +461,7 @@
 
         public function initializeForWorksheet():void {
             loading = true;
+            uiConfig();
             rendererFactory = new ClassFactory(AvailableFieldRenderer);
             commandProcessor = new CommandProcessor();
             addEventListener(ReportEditorFieldEvent.ITEM_ADD_TO_REPORT, addFieldToReport);
@@ -484,6 +486,36 @@
                 analysisService.openAnalysisDefinition.send(_reportID);
             } else {
                 initializeState();
+            }
+        }
+
+        private function uiConfig():void {
+            if (User.getInstance().uiConfiguration != null) {
+                var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
+                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected) {
+                    controlBar.removeChild(adminButton);
+                }
+                if (uiConfig.getConfiguration(UIConfiguration.SHOW_DATA_TAB).selected) {
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CALCULATION).selected) reportDataTab.removeCalculationButton();
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_HIERARCHY).selected) reportDataTab.removeHierarchy();
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_REPORT_EDITOR_API).selected) reportDataTab.removeAPI();
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_TEXT_REPLACES).selected) reportDataTab.removeScrubs();
+                } else {
+                    tabNavigator.removeChild(reportDataTab);
+                }
+                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_FILTER_BUTTONS).selected) {
+                    transformContainer.removeChild(filterButton);
+                    transformContainer.removeChild(excludeButton);
+                }
+                if (uiConfig.getConfiguration(UIConfiguration.SHOW_EXPORT).selected) {
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_DLS).selected) exportTab.removeDLS();
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_PNG).selected) exportTab.removePNG();
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_NETVIBES).selected) exportTab.removeNetvibes();
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_IGOOGLE).selected) exportTab.removeIGoogle();
+                } else {
+                    tabNavigator.removeChild(exportTab);
+                }
             }
         }
 
@@ -967,10 +999,10 @@
                     dataView="{dataView}" reportSizing="onReportSizing(event)" analysisItemEdit="sortFields()"
                     dataSourceID="{dataService.dataFeedID}"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
-                                          paddingRight="10" label="Filters (F3)" icon="@Embed(source='../../../assets/funnel.png')"
+                                          paddingRight="10" label="Filters" icon="@Embed(source='../../../assets/funnel.png')"
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
                                           feedID="{dataService.dataFeedID}"
-                                          analysisItems="{wrappers}">
+                                          analysisItems="{wrappers}" minHeight="40">
                 <mx:Button id="filterButton" icon="@Embed(source='../../../assets/funnel_new.png')"
                            toolTip="Filter Data" click="createFilter()"/>
                 <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"

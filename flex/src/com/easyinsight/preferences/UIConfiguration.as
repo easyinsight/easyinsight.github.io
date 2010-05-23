@@ -17,9 +17,23 @@ public class UIConfiguration {
     public static const SHOW_GROUPS:String = "SHOW_GROUPS";
     public static const SHOW_HOME:String = "SHOW_HOME";
     public static const SHOW_MY_DATA:String = "SHOW_MY_DATA";
-    public static const SHOW_ACCOUNT:String = "SHOW_ACCOUNT";
     public static const SHOW_DATA_TAB:String = "SHOW_DATA_TAB";
-    public static const SHOW_SCRUB_TAB:String = "SHOW_SCRUB_TAB";
+    public static const SHOW_CALCULATION:String = "SHOW_CALCULATION";
+    public static const SHOW_HIERARCHY:String = "SHOW_HIERARCHY";
+    public static const SHOW_REPORT_EDITOR_API:String = "SHOW_REPORT_EDITOR_API";
+    public static const SHOW_TEXT_REPLACES:String = "SHOW_TEXT_REPLACES";
+    public static const SHOW_FILTER_BUTTONS:String = "SHOW_FILTER_BUTTONS";
+    public static const SHOW_EXPORT:String = "SHOW_EXPORT_TAB";
+    public static const SHOW_DLS:String = "SHOW_DLS";
+    public static const SHOW_EMBED:String = "SHOW_EMBED";
+    public static const SHOW_PNG:String = "SHOW_PNG";
+    public static const SHOW_NETVIBES:String = "SHOW_NETVIBES";
+    public static const SHOW_IGOOGLE:String = "SHOW_IGOOGLE";
+    public static const SHOW_SHARING:String = "SHOW_SHARING";
+    public static const SHOW_SHARING_OTHERS:String = "SHOW_SHARING_OTHERS";
+    public static const SHOW_SHARING_WORLD:String = "SHOW_SHARING_WORLD";
+    public static const SHOW_SHARING_TEMPLATE:String = "SHOW_SHARING_TEMPLATE";
+    public static const SHOW_LOOKUP_TABLE:String = "SHOW_LOOKUP_TABLE";
 
     public var configMap:Object = new Object();
 
@@ -60,35 +74,68 @@ public class UIConfiguration {
     public function getNodes():ArrayCollection {
         var showCombineSources:UIOption = new UIOption(SHOW_COMBINE_SOURCES, "Combine Sources", []);
         var showCreatePackage:UIOption = new UIOption(SHOW_CREATE_PACKAGE, "Create Package", []);
-        var showDesktopWidget:UIOption = new UIOption(SHOW_DESKTOP_WIDGET, "Desktop Widget", []);
         var showAdminDataSource:UIOption = new UIOption(SHOW_ADMIN_DATA_SOURCES, "Administer Data Sources", []);
         var showCopy:UIOption = new UIOption(SHOW_COPY_DATA_SOURCES, "Copy Data Sources", []);
+        var showLookupTables:UIOption = new UIOption(SHOW_LOOKUP_TABLE, "Show Lookup Tables", []);
+
+        var showAPIReportEditorOption:UIOption = new UIOption(SHOW_REPORT_EDITOR_API, "Data Source API Info", []);
+        var showTextReplace:UIOption = new UIOption(SHOW_TEXT_REPLACES, "Text Replacement", []);
+        var showCreateCalculation:UIOption = new UIOption(SHOW_CALCULATION, "Create Calculation", []);
+        var showCreateHierarchy:UIOption = new UIOption(SHOW_HIERARCHY, "Create Hierarchy", []);
+        var showFilterButtons:UIOption = new UIOption(SHOW_FILTER_BUTTONS, "Filter Buttons", []);
+
+        var showDLS:UIOption = new UIOption(SHOW_DLS, "Data Level Security", []);
+        var showEmbed:UIOption = new UIOption(SHOW_EMBED, "Embed Report HTML", []);
+        var showPNG:UIOption = new UIOption(SHOW_PNG, "Export PNG", []);
+        var showNetvibes:UIOption = new UIOption(SHOW_NETVIBES, "Export Netvibes", []);
+        var showIGoogle:UIOption = new UIOption(SHOW_IGOOGLE, "Export iGoogle", []);
 
         var showConnections:UIOption = new UIOption(SHOW_CONNECTIONS, "Connections", []);
         var showExchange:UIOption = new UIOption(SHOW_EXCHANGE, "Exchange", []);
         var showKPIs:UIOption = new UIOption(SHOW_KPIS, "KPIs", []);
         var showAPI:UIOption = new UIOption(SHOW_APIS, "API", []);
         var showGroups:UIOption = new UIOption(SHOW_GROUPS, "Groups", []);
-        var showHome:UIOption = new UIOption(SHOW_HOME, "Home", []);
         var showMyData:UIOption = new UIOption(SHOW_MY_DATA, "My Data", [
-            showCombineSources, showCreatePackage, showDesktopWidget, showAdminDataSource, showCopy
+            showCombineSources, showCreatePackage, showAdminDataSource, showCopy, showLookupTables
         ]);
-        var showAccount:UIOption = new UIOption(SHOW_ACCOUNT, "Account", []);
 
         var headerConfiguration:UIOption = new UIOption(null, "Header Configuration", [
-            showHome, showMyData, showConnections, showExchange, showGroups, showKPIs, showAPI, showAccount
+            showMyData, showConnections, showExchange, showGroups, showKPIs, showAPI
         ]);
 
-        var showDataTab:UIOption = new UIOption(SHOW_DATA_TAB, "Data Tab", []);
-        var showScrubTab:UIOption = new UIOption(SHOW_SCRUB_TAB, "Scrub Tab", []);
+        var showDataTab:UIOption = new UIOption(SHOW_DATA_TAB, "Data Tab", [ showAPIReportEditorOption, showCreateCalculation,
+                showCreateHierarchy, showTextReplace]);
+
+        var showExport:UIOption = new UIOption(SHOW_EXPORT, "Export Tab", [
+                showDLS, showEmbed, showPNG, showNetvibes, showIGoogle
+        ]);
+
 
         var reportEditorConfiguration:UIOption = new UIOption(null, "Report Editor", [
-            showDataTab, showScrubTab
+            showDataTab, showFilterButtons, showExport
         ]);
 
         roots = [ headerConfiguration, reportEditorConfiguration ];
 
         return new ArrayCollection(roots);
+    }
+
+    public function toggle(key:String, state:Boolean):void {
+        for each (var option:UIOption in roots) {
+            if (option.key == key) {
+                option.selected = state;
+            }
+            toggleNodes(key, state, option.children);
+        }
+    }
+
+    private function toggleNodes(key:String, state:Boolean, nodes:ArrayCollection):void {
+        for each (var option:UIOption in nodes) {
+            if (option.key == key) {
+                option.selected = state;
+            }
+            toggleNodes(key, state, option.children);
+        }
     }
 
     private function recurseOptions(options:ArrayCollection):void {
@@ -99,6 +146,10 @@ public class UIConfiguration {
     }
 
     public function getConfiguration(key:String):UIOption {
-        return configMap[key];        
+        var option:UIOption = configMap[key];
+        if (option == null) {
+            option = new UIOption(key, "", []);
+        }
+        return option;
     }}
 }

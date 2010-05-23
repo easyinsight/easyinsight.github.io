@@ -3,7 +3,7 @@
                     xmlns:util="com.easyinsight.util.*"
                     title="Login" removedEffect="{dissolveOut}" creationCompleteEffect="{dissolveIn}">
     <framework:LoginComponent loginEvent2="PopUpManager.removePopUp(this)" loginClose="PopUpManager.removePopUp(this)"
-                              showActivation="{_showActivation}" cancelVisible="true" additionalInfo="{_additionalInfo}"
+                              cancelVisible="true" additionalInfo="{_additionalInfo}"
                               targetURL="{_targetURL}"/>
     <mx:Dissolve id="dissolveOut" duration="500" alphaFrom="1.0" alphaTo="0.0"/>
     <mx:Dissolve id="dissolveIn" duration="500" alphaFrom="0.0" alphaTo="1.0"/>
@@ -12,9 +12,6 @@
 
         [Bindable]
         private var _targetURL:String;
-
-        [Bindable]
-        private var _showActivation:Boolean;
 
         [Bindable]
         private var _additionalInfo:String;
@@ -27,8 +24,5 @@
         public function set additionalInfo(value:String):void {
             _additionalInfo = value;
         }
-
-        public function set showActivation(value:Boolean):void {
-            _showActivation = value;
-        }]]></mx:Script>
+        ]]></mx:Script>
 </util:EITitleWindow>

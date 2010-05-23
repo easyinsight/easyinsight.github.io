@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" label="Export (F5)" icon="@Embed(source='../../../../assets/tables_add.png')" paddingLeft="10"
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" label="Export" icon="@Embed(source='../../../../assets/tables_add.png')" paddingLeft="10"
              paddingTop="10" paddingBottom="10" paddingRight="10" creationComplete="onCreation()">
     <mx:states>
         <mx:State name="NotLoggedIn">            
@@ -130,21 +130,39 @@
         private function igoogle():void {
             flash.net.navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=" + escape("http://www.netvibes.com/api/uwa/compile/google.php?moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(analysisDefinition.analysisID)) + "&reportName=" + escape(analysisDefinition.name) + "&reportType=" + escape(String(analysisDefinition.type)) + "&dataSourceID=" + escape(String(analysisDefinition.dataFeedID))))));
         }
+
+        public function removeDLS():void {
+            removeChild(createFeedButton);
+        }
+
+        public function removeEmbed():void {
+            removeChild(embedButton);
+        }
+
+        public function removePNG():void {
+            removeChild(imageButton);
+        }
+
+        public function removeNetvibes():void {
+            removeChild(netvibesButton);
+        }
+
+        public function removeIGoogle():void {
+            removeChild(igoogleButton);
+        }
         ]]>
     </mx:Script>
-    <mx:HBox >
-        <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
-                   icon="@Embed(source='../../../../assets/data_add.png')"/>
-        <mx:Button id="embedButton" toolTip="Embed" click="embed()"
-                   icon="@Embed(source='../../../../assets/link.png')"/>
-        <mx:Button id="imageButton" toolTip="Export PNG Image"
-                   icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()"/>
-        <mx:Button id="excelButton" toolTip="Export to Excel"
-                   icon="@Embed(source='../../../../assets/table.png')" click="exportExcel()"/>
+    <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
+               icon="@Embed(source='../../../../assets/data_add.png')"/>
+    <mx:Button id="embedButton" toolTip="Embed" click="embed()"
+               icon="@Embed(source='../../../../assets/link.png')"/>
+    <mx:Button id="imageButton" toolTip="Export PNG Image"
+               icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()"/>
+    <mx:Button id="excelButton" toolTip="Export to Excel"
+               icon="@Embed(source='../../../../assets/table.png')" click="exportExcel()"/>
 
-        <mx:Button id="netvibesButton" toolTip="Add to netvibes"
-                   icon="@Embed(source='../../../../assets/uwa-netvibes.png')" click="netvibes()"/>
-        <mx:Button id="igoogleButton" toolTip="Add to iGoogle"
-                   icon="@Embed(source='../../../../assets/uwa-google.png')" click="igoogle()"/>
-    </mx:HBox>
+    <mx:Button id="netvibesButton" toolTip="Add to netvibes"
+               icon="@Embed(source='../../../../assets/uwa-netvibes.png')" click="netvibes()"/>
+    <mx:Button id="igoogleButton" toolTip="Add to iGoogle"
+               icon="@Embed(source='../../../../assets/uwa-google.png')" click="igoogle()"/>
 </mx:HBox>

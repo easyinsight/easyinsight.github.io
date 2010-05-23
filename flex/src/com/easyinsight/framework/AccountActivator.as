@@ -34,7 +34,7 @@ public class AccountActivator {
             var targetURL:String = accountService.activateAccount.lastResult as String;
             var loginDialog:LoginDialog = new LoginDialog();
             loginDialog.targetURL = targetURL;
-            loginDialog.showActivation = true;
+            //loginDialog.showActivation = true;
             PopUpManager.addPopUp(loginDialog, workspace, true);
             PopUpUtil.centerPopUp(loginDialog);
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, workspace.onLogin);

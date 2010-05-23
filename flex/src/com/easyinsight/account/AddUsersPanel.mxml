@@ -1,0 +1,155 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         xmlns:scorecard="com.easyinsight.scorecard.*"
+         implements="com.easyinsight.kpi.ITutorialPanel" horizontalAlign="center"
+         width="100%" height="100%" creationComplete="addListeners()" paddingTop="20" paddingBottom="20">
+    <mx:Script><![CDATA[
+
+        import mx.collections.ArrayCollection;
+        import mx.validators.Validator;
+
+        private function addListeners():void {
+            addEventListener("removeUser", removeUser);
+        }
+
+        private function removeUser(event:Event):void {
+            users.removeItemAt(users.getItemIndex(event["user"]));
+            userGrid.rowCount = users.length;
+        }
+
+        public function saveValues():void {
+            _setupData.users = users;
+        }
+
+        public function validate():Boolean {
+            if (firstNameInput.text.length > 0) {
+                var firstNameResults:Array = Validator.validateAll([firstNameValidator]);
+                if (firstNameResults.length > 0) {
+                    firstNameInput.setFocus();
+                    firstNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                    return false;
+                }
+                var lastNameResults:Array = Validator.validateAll([lastNameValidator]);
+                if (lastNameResults.length > 0) {
+                    lastNameInput.setFocus();
+                    lastNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                    return false;
+                }
+                var emailResults:Array = Validator.validateAll([emailValidator]);
+                if (emailResults.length > 0) {
+                    emailInput.setFocus();
+                    emailInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                    return false;
+                }
+                var userNameResults:Array = Validator.validateAll([userNameValidator]);
+                if (userNameResults.length > 0) {
+                    userNameInput.setFocus();
+                    userNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                    return false;
+                }
+                var user:UserPersonaObject = new UserPersonaObject();
+                user.firstName = firstNameInput.text;
+                user.name = lastNameInput.text;
+                user.email = emailInput.text;
+                user.accountAdmin = adminCheckbox.selected;
+                user.userName = userNameInput.text;
+                user.persona = int(roleGroup.selectedValue);
+                users.addItem(user);
+            }
+            return true;
+        }
+
+        public function gotFocus():void {
+        }
+
+        private var _setupData:AccountSetupData;
+
+        [Bindable]
+        private var users:ArrayCollection = new ArrayCollection();
+
+        public function set setupData(value:AccountSetupData):void {
+            _setupData = value;
+        }
+
+        private function addAnotherUser():void {
+            var firstNameResults:Array = Validator.validateAll([firstNameValidator]);
+            if (firstNameResults.length > 0) {
+                firstNameInput.setFocus();
+                firstNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var lastNameResults:Array = Validator.validateAll([lastNameValidator]);
+            if (lastNameResults.length > 0) {
+                lastNameInput.setFocus();
+                lastNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var emailResults:Array = Validator.validateAll([emailValidator]);
+            if (emailResults.length > 0) {
+                emailInput.setFocus();
+                emailInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var userNameResults:Array = Validator.validateAll([userNameValidator]);
+            if (userNameResults.length > 0) {
+                userNameInput.setFocus();
+                userNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var user:UserPersonaObject = new UserPersonaObject();
+            user.firstName = firstNameInput.text;
+            user.name = lastNameInput.text;
+            user.email = emailInput.text;
+            user.accountAdmin = adminCheckbox.selected;
+            user.userName = userNameInput.text;
+            user.persona = int(roleGroup.selectedValue);
+            users.addItem(user);
+            userGrid.rowCount = users.length;
+            firstNameInput.text = "";
+            firstNameInput.errorString = "";
+            lastNameInput.text = "";
+            lastNameInput.errorString = "";
+            emailInput.text = "";
+            emailInput.errorString = "";
+            adminCheckbox.selected = false;
+        }
+        ]]></mx:Script>
+    <mx:Text fontSize="20"
+             text="What's the fun of keeping the data to yourself? If you&#13;want to quickly show off your reports to coworkers, you&#13;can easily add more users here now or later."/>
+    <mx:Spacer height="100%"/>
+    <scorecard:HackDataGrid dataProvider="{users}" headerHeight="0" rowHeight="28" id="userGrid" rowCount="1" visible="{users.length > 0}">
+        <scorecard:columns>
+            <util:EIDataGridColumn dataField="fullName" width="400"/>
+            <util:EIDataGridColumn itemRenderer="com.easyinsight.account.RemoveUserButton" width="50"/>
+        </scorecard:columns>
+    </scorecard:HackDataGrid>
+    <mx:Spacer height="100%"/>
+    <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+        <mx:FormItem label="First name:">
+            <mx:TextInput id="firstNameInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="Last name:">
+            <mx:TextInput id="lastNameInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="User name:">
+            <mx:TextInput id="userNameInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="Email address:">
+            <mx:TextInput id="emailInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="Make this user an administrator?">
+            <mx:CheckBox id="adminCheckbox"/>
+        </mx:FormItem>
+        <mx:FormItem label="What role is appropriate for this user?">
+            <mx:RadioButtonGroup id="roleGroup"/>
+            <mx:RadioButton groupName="roleGroup" label="Business User" value="0" selected="true"/>
+            <mx:RadioButton groupName="roleGroup" label="Developer" value="1"/>
+            <mx:RadioButton groupName="roleGroup" label="BI Guru" value="2"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:Button label="Add Another User" click="addAnotherUser()"/>
+    <mx:StringValidator id="firstNameValidator" minLength="3" maxLength="30" source="{firstNameInput}" property="text"/>
+    <mx:StringValidator id="lastNameValidator" minLength="3" maxLength="30" source="{lastNameInput}" property="text"/>
+    <mx:StringValidator id="userNameValidator" minLength="3" maxLength="30" source="{userNameInput}" property="text"/>
+    <mx:EmailValidator id="emailValidator" source="{emailInput}" property="text"/>
+</mx:VBox>

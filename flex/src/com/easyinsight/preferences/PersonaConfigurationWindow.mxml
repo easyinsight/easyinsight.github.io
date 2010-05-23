@@ -2,8 +2,11 @@
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="setupNodes()" width="100%" horizontalAlign="center">
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
         import mx.collections.ArrayCollection;
         import mx.collections.HierarchicalData;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -81,6 +84,9 @@
                 dispatchEvent(new PersonaEvent(PersonaEvent.NEW_PERSONA, _persona));
             } else {
 
+            }
+            if (_persona.personaID == User.getInstance().personaID) {
+                User.getInstance().changeSettings(_persona.uiSettings);
             }
             PopUpManager.removePopUp(this);
         }

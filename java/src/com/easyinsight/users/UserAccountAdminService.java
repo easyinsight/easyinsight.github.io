@@ -239,11 +239,11 @@ public class UserAccountAdminService {
                     User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
                     user = userTransferObject.toUser();
                     user.setAccount(account);
-                    final String password = RandomTextGenerator.generateText(12);
                     final String adminFirstName = admin.getFirstName();
                     final String adminName = admin.getName();
                     final String userEmail = user.getEmail();
                     final String userName = user.getUserName();
+                    final String password = RandomTextGenerator.generateText(12);
                     user.setPassword(PasswordService.getInstance().encrypt(password));
                     account.addUser(user);
                     user.setAccount(account);

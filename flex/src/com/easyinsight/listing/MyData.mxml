@@ -131,6 +131,7 @@
             addEventListener(KeyboardEvent.KEY_UP, keyHit);
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, onLogout);
+            User.getEventNotifier().addEventListener("uiChange", uiChangeEvent);
             addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
             messageListener = EIMessageListener.instance();
@@ -277,22 +278,25 @@
                     showLoading = true;
                 }
 
-                if (User.getInstance().uiConfiguration != null) {
-                    var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
-                    showComposite = uiConfig.getConfiguration(UIConfiguration.SHOW_COMBINE_SOURCES).selected;
-                    showPackage = uiConfig.getConfiguration(UIConfiguration.SHOW_CREATE_PACKAGE).selected;
-                    showWidget = uiConfig.getConfiguration(UIConfiguration.SHOW_DESKTOP_WIDGET).selected;
-                    showConnections = uiConfig.getConfiguration(UIConfiguration.SHOW_CONNECTIONS).selected;
-                }
+                uiChangeEvent(null);
                 uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
             }
+        }
+
+        private function uiChangeEvent(event:Event):void {
+            if (User.getInstance().uiConfiguration != null) {
+                var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
+                showComposite = uiConfig.getConfiguration(UIConfiguration.SHOW_COMBINE_SOURCES).selected;
+                showPackage = uiConfig.getConfiguration(UIConfiguration.SHOW_CREATE_PACKAGE).selected;
+                showWidget = uiConfig.getConfiguration(UIConfiguration.SHOW_DESKTOP_WIDGET).selected;
+                showConnections = uiConfig.getConfiguration(UIConfiguration.SHOW_CONNECTIONS).selected;
+                showLookupTable = uiConfig.getConfiguration(UIConfiguration.SHOW_LOOKUP_TABLE).selected;
+            }       
         }
 
         private function passThrough(event:Event):void {
             dispatchEvent(event);
         }
-
-
 
         private function uploadConfigComplete(event:UploadConfigEvent):void {
             showLoading = true;
@@ -464,6 +468,8 @@
         private var showWidget:Boolean = true;
         [Bindable]
         private var showConnections:Boolean = true;
+        [Bindable]
+        private var showLookupTable:Boolean = true;
 
         private function createLookupTable():void {
             var window:NewLookupTableWindow = new NewLookupTableWindow();
@@ -518,11 +524,10 @@
 				label="Combine Sources" labelPlacement="bottom" visible="{showComposite}"/>
             <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton" icon="{packageAddIcon}"
 				label="Create Package" labelPlacement="bottom" visible="{showPackage}"/>
-            <!--<mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>-->
 			<!--<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
                label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>-->
             <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton" icon="{tablesAddIcon}"
-               label="Lookup Table" labelPlacement="bottom"/>
+               label="Lookup Table" labelPlacement="bottom" visible="{showLookupTable}"/>
             <!--<mx:Button toolTip="Create theme..." click="createTheme()" id="styleAddButton" icon="{themeAddIcon}"
                label="Create Theme" labelPlacement="bottom"/>-->
             <mx:ProgressBar indeterminate="true" visible="{showLoading}"/>

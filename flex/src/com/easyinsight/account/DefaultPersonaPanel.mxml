@@ -1,0 +1,171 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.kpi.ITutorialPanel" horizontalAlign="center"
+         verticalAlign="middle"
+         width="100%" height="100%" verticalGap="20">
+    <mx:Metadata>
+        [Event(name="kpiTutorialNext", type="com.easyinsight.kpi.KPITutorialEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.kpi.KPITutorialEvent;
+        import com.easyinsight.preferences.Persona;
+        import com.easyinsight.preferences.UIConfiguration;
+        import com.easyinsight.preferences.UIOption;
+        import com.easyinsight.preferences.UISettings;
+        import com.easyinsight.preferences.UIVisibilitySetting;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        [Embed(source="../../../../assets/businesswoman.png")]
+        private var businessWoman:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/geniusx48.png")]
+        private var genius:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/userx48.png")]
+        private var coder:Class;
+
+        private var _setupData:AccountSetupData;
+
+        public function set setupData(value:AccountSetupData):void {
+            _setupData = value;
+        }
+
+        private function bizUser():void {
+            _setupData.myPersona = 1;
+            _setupData.personas = createPersonas();
+            dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
+        }
+
+        private function createPersonas():ArrayCollection {
+            var personas:ArrayCollection = new ArrayCollection();
+            personas.addItem(bizUserPersona());
+            personas.addItem(developerPersona());
+            personas.addItem(guruPersona());
+            return personas;
+        }
+
+        private function guruPersona():Persona {
+            var persona:Persona = new Persona();
+            persona.name = "BI Guru";
+            var uiSettings:UISettings = new UISettings();
+            var uiConfig:UIConfiguration = new UIConfiguration();
+            uiConfig.getNodes();
+            var map:Object = new Object();
+            recurseOptions(uiConfig.getRoots(), map);
+            var options:ArrayCollection = new ArrayCollection();
+            for each (var setting:UIVisibilitySetting in map) {
+                options.addItem(setting);
+            }
+            uiSettings.visibilitySettings = options;
+            persona.uiSettings = uiSettings;
+            return persona;
+        }
+
+        private function developerPersona():Persona {
+            var persona:Persona = new Persona();
+            persona.name = "Developer";
+            var uiSettings:UISettings = new UISettings();
+            var uiConfig:UIConfiguration = new UIConfiguration();
+            uiConfig.getNodes();
+            uiConfig.toggle(UIConfiguration.SHOW_KPIS, false);
+            uiConfig.toggle(UIConfiguration.SHOW_CREATE_PACKAGE, false);
+            var map:Object = new Object();
+            recurseOptions(uiConfig.getRoots(), map);
+            var options:ArrayCollection = new ArrayCollection();
+            for each (var setting:UIVisibilitySetting in map) {
+                options.addItem(setting);
+            }
+            uiSettings.visibilitySettings = options;
+            persona.uiSettings = uiSettings;
+            return persona;
+        }
+
+        private function bizUserPersona():Persona {
+            var persona:Persona = new Persona();
+            persona.name = "Business User";
+            var uiSettings:UISettings = new UISettings();
+            var uiConfig:UIConfiguration = new UIConfiguration();
+            uiConfig.getNodes();
+            uiConfig.toggle(UIConfiguration.SHOW_APIS, false);
+            uiConfig.toggle(UIConfiguration.SHOW_KPIS, false);
+            uiConfig.toggle(UIConfiguration.SHOW_COMBINE_SOURCES, false);
+            uiConfig.toggle(UIConfiguration.SHOW_CREATE_PACKAGE, false);
+            var map:Object = new Object();
+            recurseOptions(uiConfig.getRoots(), map);
+            var options:ArrayCollection = new ArrayCollection();
+            for each (var setting:UIVisibilitySetting in map) {
+                options.addItem(setting);
+            }
+            uiSettings.visibilitySettings = options;
+            persona.uiSettings = uiSettings;
+            return persona;
+        }
+
+        private function recurseOptions(options:ArrayCollection, configMap:Object):void {
+            for each (var option:UIOption in options) {
+                if (option.key != null) {
+                    var visibilitySetting:UIVisibilitySetting = new UIVisibilitySetting();
+                    visibilitySetting.key = option.key;
+                    visibilitySetting.selected = option.selected;
+                    configMap[option.key] = visibilitySetting;
+                }
+                recurseOptions(option.children, configMap);
+            }
+        }
+
+        private function developer():void {
+            _setupData.myPersona = 2;
+            _setupData.personas = createPersonas();
+            dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
+        }
+
+        private function biGuru():void {
+            _setupData.myPersona = 3;
+            _setupData.personas = createPersonas();
+            dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
+        }
+
+        public function saveValues():void {
+        }
+
+        public function validate():Boolean {
+            return false;
+        }
+
+        public function gotFocus():void {
+        }]]></mx:Script>
+    <mx:Text fontSize="18" text="Which of the roles below best describes&#13;your comfort level with reporting and analytics?" textAlign="center"/>
+    <mx:HBox width="100%" paddingLeft="10" paddingRight="10">
+        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="180"
+                width="350" cornerRadius="8" buttonMode="true" id="bizUserBox" mouseOver="bizUserBox.setStyle('backgroundColor', 0xDDDDDD)"
+                mouseOut="bizUserBox.setStyle('backgroundColor', 0xFFFFFF)" click="bizUser()"
+                mouseChildren="false">
+            <mx:Image source="{businessWoman}"/>
+            <mx:Text text="Business User" fontSize="24" selectable="false"/>
+            <mx:TextArea text="Want a minimal, simple set of options to start with? This role will give you the easiest starting point."
+                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="80" width="310" textAlign="center"/>
+        </mx:VBox>
+        <mx:Spacer width="100%"/>
+        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="180"
+                width="350" cornerRadius="8" buttonMode="true" id="developerBox" mouseOver="developerBox.setStyle('backgroundColor', 0xDDDDDD)"
+                mouseOut="developerBox.setStyle('backgroundColor', 0xFFFFFF)" click="developer()"
+                mouseChildren="false">
+            <mx:Image source="{coder}"/>
+            <mx:Text text="Developer" fontSize="24" selectable="false"/>
+            <mx:TextArea text="Savvy around web services and software development? Start coding quickly with this role."
+                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="80" width="310" textAlign="center"/>
+        </mx:VBox>
+    </mx:HBox>
+    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="180"
+                width="350" cornerRadius="8" buttonMode="true" id="biExpertBox" mouseOver="biExpertBox.setStyle('backgroundColor', 0xDDDDDD)"
+                mouseOut="biExpertBox.setStyle('backgroundColor', 0xFFFFFF)" click="biGuru()"
+                mouseChildren="false">
+            <mx:Image source="{genius}"/>
+            <mx:Text text="BI Expert" fontSize="24" selectable="false"/>
+            <mx:TextArea text="If you're already a business intelligence guru, this role will turn on every available option."
+                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="80" width="310" textAlign="center"/>
+        </mx:VBox>
+</mx:VBox>
