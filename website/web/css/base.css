@@ -159,6 +159,10 @@ body {
 	right:10px;
 }
 
+#topBar {
+    background-image:url(../images/docs/Banner1.jpg);
+}
+
 .headline > a {
 	padding-left:40px;
 	text-decoration:none;
@@ -201,6 +205,17 @@ p {
 	margin:2px;
 	padding:2px 2px 2px 10px;
 	line-height:18px;
+}
+
+#frontPageTop {
+    font-size:18px;
+    color:#FFFFFF;
+    font-weight: bold;
+}
+
+#frontPageTop a {
+    text-decoration: none;
+    color:#FFFFFF;
 }
 
 p > a {
@@ -275,6 +290,19 @@ h1.headliner {
 	margin:2px;
 	padding:20px 2px 2px 10px;
 	font-weight:normal;
+}
+
+#footer {
+    font-size:10px;
+    text-decoration:none;
+    font-weight:bold;
+    background-color: #333333;
+    color:#FCE9E9;
+}
+
+#footer a {
+    text-decoration:none;
+    color:#FCE9E9;
 }
 
 #footer ul > li {

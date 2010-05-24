@@ -8,86 +8,130 @@
 <!-- InstanceBeginEditable name="head" -->
 <!-- InstanceEndEditable -->
     <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
-    	<div style="width:100%;text-align:left;height:70px;position:relative">
-        	<a href="/index.html"><img src="../images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
-            <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
-            <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
+    <div style="width:1000px;margin:0 auto;">
+    	<div id="topBar" style="width:100%;text-align:left;height:95px;position:relative;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;">
+        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+    <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+                <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
 
         </div>
 	    <!-- InstanceBeginEditable name="submenu" -->
-    	<!-- InstanceEndEditable -->
-        <div id="content">
+    	<!-- InstanceEndEditable -->        
+        <div id="content" style="margin-top:10px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;background-color:#FFFFFF">
 		    <!-- InstanceBeginEditable name="content" -->
             <div style="width:100%;background-color:#FFFFFF">
                 <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Easy Insight APIs</h1></div>
                 <h2>Table of Contents</h2>
                 <ul>
-                    <li>SOAP API Overview</li>
-                    <ul>
-                        <li>Services</li>
-                        <ul>
-                            <li><a href="api.html#difference">What's the Difference?</a></li>
-                            <li>Unchecked</li>
-                            <ul>
-                                <li><a href="unchecked.html#addRow">addRow</a></li>
-                                <li>addRows</li>
-                                <li>updateRow</li>
-                                <li>updateRows</li>
-                                <li>deleteRows</li>
-                                <li>replaceRows</li>
-                                <li>validateCredentials</li>
-                                <li>disableUnchecked</li>
-                            </ul>
-                            <li>Validated</li>
-                            <li>Dynamic</li>
-                        </ul>
-                    </ul>
+                    <li><a href="api.html#r1">What are the available Easy Insight APIs?</a></li>
+                    <li><a href="kpi.html#r2">How do I use the Unchecked API?</a></li>
+                    <li><a href="kpi.html#r3">What are the data types of the Unchecked API?</a></li>
+                    <li><a href="kpi.html#r3">What are the operations of the Unchecked API?</a></li>
+                    <li><a href="kpi.html#r2">I hate SOAP, how about a REST interface?</a></li>
+                    <li><a href="kpi.html#r2">Okay, how about wrapper libraries to make this easier?</a></li>
+                    <li><a href="kpi.html#r2">How do I use the Validated API?</a></li>
                 </ul>
-                <a name="difference" />
-                <h2>What's the Difference?</h2>
-                <p>Easy Insight offers three APIs for loading data, and knowing the differences will help you decide
+                <h2><a name="r1">What are the available Easy Insight APIs?</a></h2>
+                <p>Easy Insight offers two SOAP APIs for loading data, and knowing the differences will help you decide
                     which is best to use to load your data.  The Unchecked API is the simplest, and the easiest to get started with -
                     but it also has the potential to cause the most problems.  The Unchecked API allows you to create a data set dynamically by name, if it doesn't exist,
                     as well as rows.  This may be ideal for some, but it can also lead to allowing malformed data into the system, as well as incorrect types.
                 </p>
                 <p>The Validated API solves these issues by requiring you to set up a data source beforehand.  The API is similar,
                 but it will prevent you from creating erroneous fields, and notify you about the error.</p>
-                <p>The Dynamic API goes a step farther - a WSDL file is created specifically for the data source being connected to.  The schema for the file is
-                tied directly to the data source, automatically type-checking the rows added to the application at compile-time.</p>
-                <h2>The Row Data Type</h2>
-                <p></p>
+                <h2><a name="r2">How do I use the Unchecked API?</a></h2>
+                <p>
+                    The Unchecked API is a SOAP web services API. The WSDL for the Unchecked API is located at <a href="https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl">https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl</a>. You should be able to use any SOAP stack to generate client code against this WSDL.
+                </p>
+                <p>
+                    Once you have client code, you'll need to authenticate against the web service by basic authentication. As the username and password in your basic authentication setup, you need to use the key and secret key found under your "My API Information..." section of the API page in Easy Insight.
+                </p>
+                <h2><a name="r2">What are the data types of the Unchecked API?</a></h2>
+                <p>
+                    All of the calls pass across Row objects, along with various other parameters. Row contains three properties, all arrays.</p>
+                <p>
+                    The first array, stringPairs, contains StringPair objects. Use this array for any Grouping fields you may be passing into Easy Insight--string fields such as Customer, OrderID, or Project. StringPair itself contains a String key and a String value.
+                </p>
+                <p>
+                    The second array, numberPairs, contains NumberPair objects. Use this array for any Measure fields you may be passing into Easy Insight--numeric fields such as Revenue, Count, or Units. NumberPair itself contains a String key and a Double value. Do not pass numeric IDs such as CustomerID into this field--use StringPair for identifiers. Only use NumberPair for those fields which you'll want to sum, average, and so on.
+                </p>
+                <p>
+                    The third array, DatePairs, contains DatePair objects. Use thise array for any Date fields you may be passing into Easy Insight.
+                </p>
+                <h2><a name="r2">What are the operations of the Unchecked API?</a></h2>
+                <ul>
+                    <li>addRow</li>
+                    <p>
+                        addRow adds a single row to a data source. The operation takes a data source name and a Row.
+                    </p>
+                    <li>addRows</li>
+                    <p>
+                        addRow adds multiple rows to a data source. The operation takes a data source name and an array of Rows.
+                    </p>
+                    <li>updateRow</li>
+                    <p>
+                        updateRow performs a single update on a data source. The operation takes a 
+                    </p>
+                    <li>updateRows</li>
+                    <li>replaceRows</li>
+                    <li>deleteRows</li>
+                </ul>
             </div>
     		<!-- InstanceEndEditable -->
-<div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
-            	<div style="float:right;padding-right:200px;">
-                    <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
-                    <ul>
-                        <li><a href="/terms.html">Terms of Service</a></li>
-                        <li><a href="/privacy.html">Privacy Policy</a></li>
-                    </ul>
+<div id="footer" style="margin:0px;width:100%;height:60px">
+                <div id="linkLine"
+                        style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+                    <div style="float:left;padding-left:10px;">
+                        <a href="/documentation/toc.html">Documentation</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/pricing.html">Pricing</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/developers.html">Developers</a>
+                    </div>
+                    <div style="float:left;padding-left:35px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/privacy.html">Privacy Policy</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/tos.html">Terms of Service</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/partners.html">Partners</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/contactus.html">Contact Us</a>
+                    </div>
                 </div>
-                <div style="padding-left:180px;">
-					<span style="font-weight:bold;font-size:12px;">About</span>
-                    <ul>
-                        <li><a href="/company.html">Company Overview</a></li>
-                        <li><a href="/whoweare.html">Who We Are</a></li>
-                        <li><a href="/contactus.html">Contact Us</a></li>
-                    </ul>
+                <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+                    Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
                 </div>
             </div>
-	    </div>
+		</div>
     </div>
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-
-<script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-8316271-1");
-pageTracker._trackPageview();
-</script>
+	<script type="text/javascript" src="/js/lightbox.js"></script>
 </body>
 <!-- InstanceEnd --></html>

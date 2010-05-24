@@ -3,80 +3,133 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Easy Insight - Data</title>
+<title>Easy Insight - SaaS Reports and Analytics</title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 <link type="text/css" rel="stylesheet" media="screen" href="css/data.css" />
 <meta name="keywords" content="business intelligence, data, report, solution, exchange, cloudwatch, ec2, google analytics, web analytics, mysql, salesforce, sql server, jetbrains, teamcity, highrise, basecamp, jira, atlassian" />
 <meta name="description" content="Connect your Easy Insight business intelligence to a wide variety of external systems." />
 <!-- InstanceEndEditable -->
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
-    <script type="text/javascript" src="/js/swfobject.js"></script>
-    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
-    <script type="text/javascript" src="/js/startup.js"></script>
-    <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
-    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
+    <link type="text/css" rel="stylesheet" media="screen" href="css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
-    	<div style="width:100%;text-align:left;height:70px;position:relative">
-        	<a href="/index.html"><img src="images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+    <div style="width:1000px;margin:0 auto;">
+    	<div id="topBar" style="width:100%;text-align:left;height:95px;position:relative;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;">
+        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
     <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
                 <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
 
         </div>
 	    <!-- InstanceBeginEditable name="submenu" -->
     	<!-- InstanceEndEditable -->        
-        <div id="content">
-		    
-            <div style="width:30%;position:relative;float:right;">
-            	<div style="width:250px;height:210px;position:absolute;top:25px;left:34px;" class="box greybox">
-                	<div class="top"><span></span></div>
-                    <div class="content" style="padding-bottom:12px"><span style="padding-bottom:12px;"></span>
-                    	<div style="width:100%;color:#FFFFFF;padding:0px 0px 12px 0px;margin:0px;text-align:center">Want more info?</div>
-                        <div class="box whitebox" style="position:relative;left:5px;width:240px;height:158px;">
-                        	<div class="top"><span></span></div>
-                            <div id="moreinfo" class="content" style="text-align:left;padding-bottom:12px;"><span style="padding-bottom:12px;"></span>
-                            	<a href="https://www.easy-insight.com/app/#page=intro&type=tour"><img alt="Film" src="assets/logos/film.png" /><p>Watch Product Tour</p></a>
-                                <a href="https://www.easy-insight.com/app/#page=account"><img alt="Mouse" src="assets/logos/mouse.png" /> <p>Free Trial Account</p></a>
-                                <a href="contactus.html"><img alt="Message" src="assets/logos/message.png" /><p>Contact Us</p></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style="width:250px;height:210px;position:absolute;top:284px;left:34px;" class="box redbox">
-                	<div class="top"><span></span></div>
-                    <div class="content"><span></span>
-                         <div id="twitter_div" style="font-size:10px;color:#222222">
-                             <h2 class="sidebar-title" style="font-size:10px;margin:0px;padding:0px;color:#222222">Twitter Updates</h2>
-                             <div id="twitter_update_list" style="border-width:1px;border-style:solid;height:17em;list-style-type:none;overflow:auto;font-size:10px;margin-right:10px;"></div>
-                             <a href="http://twitter.com/easyinsight" id="twitter-link" style="display:block;text-align:right;padding-right:10px;">follow us  on Twitter</a>
-                         </div>
-
-                    </div>
-                </div>
-            </div>
-            
-            <div style="width:70%;text-align:left;background-color:#FFFFFF;padding-bottom:12px">
-                <div style="width:100%;height:60px;background:url(images/banner.jpg);text-align:center">
-                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Instant Data<!-- InstanceEndEditable --></h1>
+        <div id="content" style="margin-top:10px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;background-color:#FFFFFF">
+		                            
+            <div style="width:100%;text-align:left;background-color:#FFFFFF;padding-bottom:12px">
+                <div style="width:100%;height:60px;background-color:#848080;text-align:center">
+                	<h1 style="margin:0px;padding:14px;color:#FFFFFF;font-size:24px;"><!-- InstanceBeginEditable name="innerTitle" -->SaaS Reporting and Analytics<!-- InstanceEndEditable --></h1>
 				</div>
             <!-- InstanceBeginEditable name="innerContent" -->
-            <div style="width:280px;height:192px;padding:10px 10px 22px 22px;float:right;">
-            	<div style="width:100%;height:100%;" class="box redbox">
-                	<div class="top"><span></span></div>
-                    <div class="content"><span></span>
-                    <h2 style="width:100%;margin-left:-12px;margin-top:0px;padding:0px;text-align:center">Want to Explore Free Data?</h2>
-                    <p>Easy Insight offers users the ability to publish and distribute free data. If you want to simply explore some of Easy Insight's functionality against some existing data, the Data Exchange is a great place to start!</p>
-                    <h2 style="width:100%;margin-left:-12px;text-align:center"><a href="https://www.easy-insight.com/app/#view=0&page=exchange&display=0" class="startexploringButton"></a></h2>
+            <h2>Immediate SaaS Reporting and Analytics</h2>
+            <p>You can quickly pull data into Easy Insight for any of the data sources listed below. Simply click on the data source name to jump into the Easy Insight application and start running! Prebuilt KPIs are available with each solution to help improve your time to results. Further reports produced by the community can be found in the Exchange.</p>
+               
+            <div style="width:100%;text-align:left;height:180px">
+                <h2>Project Management Reporting and Analysis</h2>
+                <div style="float:left;padding-left:10px;width:200px">
+                    <div style="height:60px;padding-top:20px">
+                        <a href="solutions/basecamp.html"><img src="images/logos/Basecamp.png" alt="Basecamp Logo"></a>
                     </div>
+                    <p>Basecamp reporting and analysis for your todos and time tracking</p>
+                </div>
+                <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
+                    <div style="height:60px">
+                        <a href="solutions/PivotalTracker.html" style="padding-left:10px"><img src="images/logos/Pivotal%20Tracker%20Logo.png" alt="Pivotal Tracker Logo"></a>
+                    </div>
+                    <p>Track and report against your iterations in Pivotal Tracker</p>
                 </div>
             </div>
-            <h2>Immediate Connections to Data Sources</h2>
-            <p style="height:180px;">You can quickly pull data into Easy Insight for any of the data sources listed below. Simply click on the data source name to jump into the Easy Insight application and start running! Prebuilt reports are available with each solution to help improve your time to results. Further reports produced by the community can be found at the Solution Exchange.</p>
-            <ul class="solutions" style="height:200px;padding:10px;">
+
+            <div style="width:100%;text-align:left;height:180px">
+                <h2>Spreadsheet Reporting and Analysis</h2>
+                <div style="float:left;padding-left:10px;width:200px">
+                    <div style="height:60px;padding-top:20px">
+                        <a href="solutions/googlespreadsheets.html" style="padding-left:10px"><img src="images/logos/Google%20Docs.png" alt="Google Docs Logo"></a>
+                    </div>
+                    <p>Build reports and analyze your Google Spreadsheets data</p>
+                </div>
+                <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
+                    <div style="height:60px">
+                        <a href="solutions/excel.html" style="padding-left:10px"><img src="images/logos/Excel.png" alt="Microsoft Excel Logo"></a>
+                    </div>
+                    <p>Upload Excel or CSV files for reports and analysis</p>
+                </div>
+            </div>
+
+            <div style="width:100%;text-align:left;height:180px">
+                <h2>Sales Reporting and Analysis</h2>
+                <div style="float:left;padding-left:10px;width:200px">
+                    <div style="height:60px;padding-top:20px">
+                        <a href="solutions/highrise.html" style="padding-left:10px"><img src="images/logos/Highrise.png" alt="Highrise Logo"></a>
+                    </div>
+                    <p>Highrise reporting and analysis for your sales pipeline data</p>
+                </div>
+                <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
+                    <div style="height:60px">
+                        <a href="solutions/salesforce.html" style="padding-left:10px"><img src="images/logos/Salesforce.png" alt="Salesforce Logo"></a>
+                    </div>
+                    <p>Maximize your Salesforce value with ad hoc reports and analysis</p>
+                </div>
+            </div>
+
+            <div style="width:100%;text-align:left;height:180px">
+                <h2>Email and Website Reporting and Analysis</h2>
+                <div style="float:left;padding-left:10px;width:200px">
+                    <div style="height:60px;padding-top:20px">
+                        <a href="solutions/googleanalytics.html" style="padding-left:10px"><img src="images/logos/Google%20Analytics.png" alt="Google Analytics Logo"></a>
+                    </div>
+                    <p>Extend your Google Analytics reporting to the next level</p>
+                </div>
+                <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
+                    <div style="height:60px">
+                        <a href="solutions/SendGrid.html" style="padding-left:10px"><img src="images/logos/SendGrid.png" alt="SendGrid Logo"></a>
+                    </div>
+                    <p>Maximize your email success and join campaign data with other sources</p>
+                </div>
+            </div>
+
+            <div style="width:100%;text-align:left;height:200px">
+                <h2>Database Reporting and Analysis</h2>
+                <div style="float:left;padding-left:10px;width:200px">
+                    <div style="height:80px;padding-top:20px">
+                        <a style="padding-left:10px"><img src="images/logos/MySQL.png" alt="MySQL Logo"></a>
+                    </div>
+                    <p>Report on and analyze the data in your MySQL databases</p>
+                </div>
+                <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
+                    <div style="height:80px">
+                        <a style="padding-left:10px"><img src="images/logos/Oracle.png" alt="Oracle Logo"></a>
+                    </div>
+                    <p>Report on and analyze the data in your Oracle databases</p>
+                </div>
+                <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
+                    <div style="height:80px">
+                        <a style="padding-left:10px"><img src="images/logos/SQL%20Server.png" alt="SQL Server Logo"></a>
+                    </div>
+                    <p>Report on and analyze the data in your SQL Server databases</p>
+                </div>
+            </div>
+
+            <div style="width:100%;text-align:left;height:180px">
+                <h2>Cloud Reporting and Analysis</h2>
+                <div style="float:left;padding-left:10px;width:200px">
+                    <div style="height:60px;padding-top:20px">
+                        <a href="solutions/cloudwatch.html"><img src="images/logos/Amazon%20Web%20Services.png" alt="Amazon Web Services Logo"></a>
+                    </div>
+                    <p>Create reports on your EC2 system performance through Cloudwatch</p>
+                </div>
+            </div>
 
 
 
@@ -89,48 +142,63 @@
 
 
 
-<li><a href="solutions/cloudwatch.html">Amazon Cloudwatch</a></li>
-<li><a href="solutions/googleanalytics.html">Google Analytics</a></li>
-<li><a href="https://www.easy-insight.com/app/#solutionID=15">MySQL</a></li>
-<li><a href="https://www.easy-insight.com/app/#solutionID=9">Atlassian JIRA</a></li>
-<li><a href="solutions/googlespreadsheets.html">Google Spreadsheets</a></li>
-<li><a href="https://www.easy-insight.com/app/#solutionID=14">Salesforce.com</a></li>
-<li><a href="solutions/basecamp.html">Basecamp</a></li>
-<li><a href="solutions/highrise.html">Highrise</a></li>
-<li>SQL Server</li>
-<li><a href="solutions/excel.html">Excel/CSV</a></li>
-<li><a href="https://www.easy-insight.com/app/#solutionID=7">JetBrains Teamcity</a></li>
-            </ul>
+                </div>
+
+
+
+
 			<!-- InstanceEndEditable --> </div>
            <!-- InstanceBeginEditable name="BottomContent" --><!-- InstanceEndEditable -->
 			
-<div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
-            	<div style="float:right;padding-right:200px;">
-                    <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
-                    <ul>
-                        <li><a href="/terms.html">Terms of Service</a></li>
-                        <li><a href="/privacy.html">Privacy Policy</a></li>
-                    </ul>
+<div id="footer" style="margin:0px;width:100%;height:60px">
+                <div id="linkLine"
+                        style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+                    <div style="float:left;padding-left:10px;">
+                        <a href="/documentation/toc.html">Documentation</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/pricing.html">Pricing</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/developers.html">Developers</a>
+                    </div>
+                    <div style="float:left;padding-left:35px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/privacy.html">Privacy Policy</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/tos.html">Terms of Service</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/partners.html">Partners</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/contactus.html">Contact Us</a>
+                    </div>
                 </div>
-                <div style="padding-left:180px;">
-					<span style="font-weight:bold;font-size:12px;">About</span>
-                    <ul>
-                        <li><a href="/company.html">Company Overview</a></li>
-                        <li><a href="/whoweare.html">Who We Are</a></li>
-                        <li><a href="/contactus.html">Contact Us</a></li>
-                    </ul>
+                <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+                    Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
                 </div>
             </div>
-	    </div>
+		</div>
     </div>
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-
-<script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-8316271-1");
-pageTracker._trackPageview();
-</script>
+	<script type="text/javascript" src="/js/lightbox.js"></script>
 </body>
 <!-- InstanceEnd --></html>

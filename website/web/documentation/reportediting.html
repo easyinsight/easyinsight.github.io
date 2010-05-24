@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Easy Insight</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
+</head>
+<body style="width:100%;text-align:center;margin:0px auto;">
+    <div style="width:1000px;margin:0 auto;">
+    	<div id="topBar" style="width:100%;text-align:left;height:95px;position:relative;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;">
+        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+    <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+                <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
+
+        </div>
+	    <!-- InstanceBeginEditable name="submenu" -->
+    	<!-- InstanceEndEditable -->        
+        <div id="content" style="margin-top:10px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;background-color:#FFFFFF">
+		    <!-- InstanceBeginEditable name="content" -->
+            <div style="width:100%;background-color:#FFFFFF">
+                <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Report Building</h1></div>
+                <h2><a href="toc.html">Table of Contents</a></h2>
+                <ul>
+                    <li><a href="reportediting.html#r1">How do I create a new report?</a></li>
+                    <li><a href="reportediting.html#r2">How do I assemble a basic report?</a></li>
+                    <li><a href="reportediting.html#r3">What are these field types?</a></li>
+                    <li><a href="reportediting.html#r4">How do I show a measure as something other than a sum?</a></li>
+                    <li><a href="reportediting.html#r5">How about if I want to do a custom calculation like Revenue / Units?</a></li>
+                    <li><a href="reportediting.html#r6">What if I want to filter the data shown on the report?</a></li>
+                    <li><a href="reportediting.html#r7">What if I want to create a dedicated field for something like "Completed Todo Items?"</a></li>
+                    <li><a href="reportediting.html#r8">How do I show a summary row on a list?</a></li>
+                    <li><a href="reportediting.html#r9">How do I look at different date aggregations?</a></li>
+                    <li><a href="reportediting.html#r10">What are hierarchies and how do I use them?</a></li>
+                    <li><a href="reportediting.html#r11">How do I use trees and tree maps?</a></li>
+                    <li><a href="reportediting.html#r12">How do I link to external URLs from a report?</a></li>
+                    <li><a href="reportediting.html#r13">How do I tie together reports through links?</a></li>
+                    <li><a href="reportediting.html#r14">How do I export a report to Excel?</a></li>
+                    <li><a href="reportediting.html#r15">How do I share a report with other users in my account?</a></li>
+                </ul>
+                <h2><a name="r1">How do I create a new report?</a></h2>
+                <p>You can create reports from the My Data page by double clicking on a Data Source or clicking the Analyze... button on the right side of the Data Source row under My Data.</p>
+                <img src="../images/docs/mydata.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
+                <h2><a name="r2">How do I assemble a basic report?</a></h2>
+                <p>
+                    For the data source you've opened, you'll have a set of available fields down the left hand side of the report editor. You can create reports by dragging these fields into the Drop Areas to the right. You can also double click on fields to automatically add them to the report. And finally, you can right click on fields and choose "Add to Report."
+                </p>
+                <h2><a name="r3">What are these field types?</a></h2>
+                <p>You'll notice that fields have a basic type indicated by an icon to the left of the field in that left hand list. Basic field types are as follows:</p>
+                <ul>
+                    <li>Grouping</li>
+                    <ul>
+                        <li>A grouping represents a value by which you'll want to group up data. For example, Customer, Deal Status, and Responsible Party are examples of groupings.</li>
+                    </ul>
+                    <li>Measure</li>
+                    <ul>
+                        <li>A measure represents a numeric metric which you'll want to aggregate by some mathematical operation. Revenue and Quantity are examples of measures. Numbers are not necessarily measures--you might have something like Deal ID which is a number, but does not represent a metric you'd want to sum or average.</li>
+                    </ul>
+                    <li>Date</li>
+                    <ul>
+                        <li>A date simply represents a point in time.</li>
+                    </ul>
+                </ul>
+                <h2><a name="r4">How do I show a measure as something other than a sum?</a></h2>
+                <p>Measures typically default to display as Sum. You can change this by clicking on the Edit icon of the Drop Area where you've added a field.</p>
+                <img src="../images/docs/MeasureEditor.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
+                <div style="float:right;padding-top:30px;padding-left:15px;padding-bottom:75px">
+                    <p>There are a number of available options for aggregation types:</p>
+                    <ul>
+                        <li>Sum -- Sums up the data (A + B + C). For most fields, this aggregation will be the default.</li>
+                        <li>Average -- Averages the data (A + B + C) / N.</li>
+                        <li>Min -- Calculates the minimum value of the data set.</li>
+                        <li>Max -- Calculates the maximum value of the data set.</li>
+                        <li>Count -- Calculates the number of rows in the data set.</li>
+                        <li>Median -- Calculates the median value of the data set.</li>
+                        <li>Variance -- Calculates the <a href="http://en.wikipedia.org/wiki/Variance">variance</a> of the data set, useful for more complex calculations.</li>
+                        <li>Rank -- Calculates the rank of each row in the data set.</li>
+                    </ul>
+                </div>
+                <h2><a name="r5">How about if I want to do a custom calculation like Revenue / Units?</a></h2>
+                <p>You can define custom calculations from the report editor by clicking the Create Calculation button found under the Data tab.</p>
+                <img src="../images/docs/CalculationExample.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
+                <p>At the most basic level, you can drag fields from the left hand list into the Calculation text area to quickly fill in names. The basic operators of +, -, *, and / are supported. You can use parentheses as you'd expect to control order of operations.</p>
+                <p>You can optionally surround fields with brackets ([]) as you see in the example to the left with Deals - Count. If the field has an operator in it, like - in this case, you'll need to surround it with brackets to ensure that it doesn't try to subtract two nonexistent fields.</p>
+                <p>Easy Insight supports a basic set of functions to augment these simple calculations. This set of functions will be expanded over time. The most important (and tricky) at the moment are the various cast functions. You might find yourself needing to explicitly state the aggregation of a given field within a calculation. For example, if you want to divide the maximum Deal Amount by the sum of Deal Amounts. You can achieve this by using an expression of castmax(Deal Amount) / castsum(Deal Amount). You'll see the various cast functions under the Data Type folder in the Available Functions tree.</p>
+                <h2><a name="r6">What if I want to filter the data shown on the report?</a></h2>
+                <p>You can define filters by dragging fields from the left hand list into the Filter tab. You can also right click on a field and choose "Filter on this Field." Depending on the field type, you'll get a set of appropriate filter types as choices.</p>
+                <p>If the field is a grouping, you can choose from the following set of filters:</p>
+                <ul>
+                    <li>Combo Box -- represents itself to you as a combo box, restricting the chosen field to one value</li>
+                    <li>Multi Value -- allows you to choose multiple values from a swap box for the chosen field</li>
+                    <li>Pattern Match -- enables you to define a pattern using wildcards (*) or regular expressions</li>
+                </ul>
+                <p>If the field is a date, you can choose from the following set of filters:</p>
+                <ul>
+                    <li>Absolute -- enables you to choose two absolute dates for the filter</li>
+                    <li>Rolling -- represents a rolling time window</li>
+                    <li>Last Value -- show only the latest row of data</li>
+                </ul>
+                <p>If the field is a measure, you'll be able to define a measure filter. With a measure filter, you can define a start value and an end value to restrict the report to rows where that value is in the specified range. You can leave either value blank to filter down to only values greater than or less than a certain value.</p>
+                <h2><a name="r7">What if I want to create a dedicated field for something like "Completed Todo Items?"</a></h2>
+                <img src="../images/docs/MeasureFilter1.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
+                <p style="padding-top:20px;padding-bottom:15px">You can apply filters at an individual field level as well. For example, you might want to create a field which shows only those todo items where Completed = True. You can accomplish this goal by right clicking on the starting field (Todo Count) and choosing Copy Field. You'll be prompted with the usual field editor. You can change the field name to something more appropriate. Next, click on the Filters tab of the editor. Just as you create report wide filters, you can drag fields into this tab to create filters at a field level.</p>
+                <img src="../images/docs/MeasureFilter2.jpg" style="float:right;padding:10px;" alt="Display of Reports under My Data" />
+                <p style="padding-top:30px">Once you've created this new field, you can drag it into the report editor just as you work with any other field. For example, in the screenshot to the right, I've taken the newly created Completed Todo Count and added it to the report next to the standard Basecamp Todo Count measure.</p>
+                <h2><a name="r8">How do I show a summary row on a list?</a></h2>
+                <p>First, click on the "Edit List Properties..." button at the upper left corner of the list. Next, toggle the "Summarize Rows" checkbox. Upon saving changes to the list configuration, the report will refresh and display a summary row at the bottom of the list showing the rolled up values for all measures in the report.</p>
+                <h2><a name="r9">How do I look at different date aggregations?</a></h2>
+                <img src="../images/docs/DateOptions.jpg" style="float:right;padding:10px;" alt="Display of Reports under My Data" />
+                <p>Typically, dates will default to displaying at a Day level. You'll often find yourself wanting to look at a different date level. You can accomplish this goal by clicking the Edit button next to the date you've added to the report. You can choose a variety of options from the Date Level combo box. Year, Month - Year, Year - Month - Day, Year - Month - Day - Hour, Year - Month - Day - Hour - Minute, and Year - Week simply display the date values at those levels of aggregation. Month, Day of Year, Day of Week, and Week of Year display data as grouped up by that value alone--this view enables you to analyze in terms of questions like "What's my typical visitor traffic on Monday vs. Wednesday?" or "How does my order traffic vary with seasonality?"</p>
+                <h2><a name="r10">What are hierarchies and how do I use them?</a></h2>
+                <p>Hierarchies allow you to define a relationship between different groupings to enable rollup and drilldown. For example, you might define a hierarchy of Country -> State -> City or Industry -> Company -> Deal. You can define hierarchies from the report editor by clicking on the Create New Hierarchy button under the Data tab. From here, you'll have a list of available groupings. You can drag groupings from this list into the area to the right to define the hierarchy from top to bottom. You can reorder groupings within the hierarchy. You can also delete groupings by hitting the Delete key while you have the target level selected.</p>
+                <p>Once you've defined a hierarchy, you can use it in a report just as you use any other field. Certain reports, notably Trees and Tree Maps, require you to define a hierarchy. For other reports, you'll be able to drill through the hierarchy by right clicking or shift-left clicking on the hierarchy value and choosing Drill Down to navigate into the next level of the hierarchy.</p>
+                <h2><a name="r11">How do I use trees and tree maps?</a></h2>
+                <p>You'll need to define a hierarchy as mentioned above. Once that's done, you can drag the hierarchy into the "Drop Hierarchy Here" drop area of the report.</p>
+                <h2><a name="r12">How do I link to external URLs from a report?</a></h2>
+                <img src="../images/docs/URLLink.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
+                <p>You can define links to external URLs by editing a grouping and choosing the Links tab. Click on Create a Link. The default option allows you to associate groupings with external URLs. Fill in a Label for the URL Link--this is the value that will appear when you right click on the grouping in a report. For the URL, you can add dynamic elements to the URL, such as query parameters, by surrounding the field name you wish to add to the URL with brackets. You can add multiple fields to a given URL if necessary.</p>
+                <h2><a name="r13">How do I tie together reports through links?</a></h2>
+                <p>Drillthroughs enable you to connect multiple reports within a shared context. You can define drillthroughs by editing a grouping and choosing the Links tab. Click on Create a Link. Change the radio option to Drillthrough. Fill in a label for the drillthrough--this is the value that will appear when you right click on the grouping in a report. Choose another report as the target report. Any filters on the target report will automatically populate based on filters in the source report, as well as populating on the grouping you drill from. For example, if you have one report showing a list of suppliers and a chart showing detailed information filtered by supplier, connecting the two reports through drillthrough will automatically populate the appropriate supplier on the target report.</p>
+                <h2><a name="r14">How do I export a report to Excel?</a></h2>
+                <p>Change to the Export tab in the report editor and click on the Export to Excel button.</p>
+                <h2><a name="r15">How do I share a report with other users in my account?</a></h2>
+                <p>Change to the Sharing tab in the report editor and click on the Add Report to Group button. Choose the appropriate group from your account.</p>
+            </div>
+    		<!-- InstanceEndEditable -->
+<div id="footer" style="margin:0px;width:100%;height:60px">
+                <div id="linkLine"
+                        style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+                    <div style="float:left;padding-left:10px;">
+                        <a href="/documentation/toc.html">Documentation</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/pricing.html">Pricing</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/developers.html">Developers</a>
+                    </div>
+                    <div style="float:left;padding-left:35px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/privacy.html">Privacy Policy</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/tos.html">Terms of Service</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/partners.html">Partners</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/contactus.html">Contact Us</a>
+                    </div>
+                </div>
+                <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+                    Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+                </div>
+            </div>
+		</div>
+    </div>
+	<script type="text/javascript" src="/js/lightbox.js"></script>
+</body>
+<!-- InstanceEnd --></html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Easy Insight</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
+</head>
+<body style="width:100%;text-align:center;margin:0px auto;">
+    <div style="width:1000px;margin:0 auto;">
+    	<div id="topBar" style="width:100%;text-align:left;height:95px;position:relative;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;">
+        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+    <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+                <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
+
+        </div>
+	    <!-- InstanceBeginEditable name="submenu" -->
+    	<!-- InstanceEndEditable -->        
+        <div id="content" style="margin-top:10px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;background-color:#FFFFFF">
+		    <!-- InstanceBeginEditable name="content" -->
+            <div style="width:100%;background-color:#FFFFFF">
+                <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Data Sources</h1></div>
+                <h2><a href="toc.html">Table of Contents</a></h2>
+                <ul>
+                    <li><a href="datasources.html#r1">How do I upload a CSV or Excel file?</a></li>
+                    <li><a href="datasources.html#r2">How do I connect to a Google Spreadsheet?</a></li>
+                    <li><a href="datasources.html#r3">How do I connect to Basecamp?</a></li>
+                    <li><a href="datasources.html#r4">How do I connect to Highrise?</a></li>
+                    <li><a href="datasources.html#r5">How do I connect to Google Analytics?</a></li>
+                    <li><a href="datasources.html#r6">How do I connect to Salesforce?</a></li>
+                    <li><a href="datasources.html#r7">How do I connect to Sendgrid?</a></li>
+                    <li><a href="datasources.html#r8">How do I connect to Pivotal Tracker?</a></li>
+                    <li><a href="datasources.html#r9">How do I connect to Cloudwatch?</a></li>
+                    <li><a href="datasources.html#r10">How do I pull data from MySQL, SQL Server, or Oracle?</a></li>
+                    <li><a href="datasources.html#r11">How do I combine data sources?</a></li>
+                    <li><a href="datasources.html#r12">How do I use lookup tables?</a></li>
+                    <li><a href="datasources.html#r13">How do I administer a data source?</a></li>
+                </ul>
+                <h2><a name="r1">How do I upload a CSV or Excel file?</a></h2>
+                <p>Navigate to the Connections page of Easy Insight. Click on the Upload Excel or CSV button. Click on Upload a Spreadsheet, choose the file from your hard drive, and click Upload. Supported files are:</p>
+                <ul>
+                    <li>Excel 1997-2008</li>
+                    <li>Comma Separated Values</li>
+                    <li>Tab Separated Values</li>
+                    <li>Pipe Separated Values</li>
+                </ul>
+                <p>Once uploaded, you'll go through a wizard to name the data source and configure the discovered fields.</p>
+                <h2><a name="r2">How do I connect to a <a href="http://docs.google.com/">Google Spreadsheet?</a></a></h2>
+                <p>Navigate to the Connections page of Easy Insight. Click on the Google Spreadsheets button. Click Get Started Now. If this is the first time you've connected to Google, you'll be redirected to Google to authorize Easy Insight to access your documents. Grant access and you'll be redirected back to Easy Insight. The system will retrieve the set of available spreadsheets in your Google Docs account, which may take a minute. From the returned tree, you can choose a particular worksheet for the data source. Once you choose a worksheet, you'll go through a wizard to name the new data source and configure the discovered fields.</p>
+                <h2><a name="r3">How do I connect to <a href="http://basecamphq.com/">Basecamp?</a></a></h2>
+                <p>First, you'll need to enable API access to your Basecamp account. You can enable this access from the Account (Upgrade/Invoice) page of your Basecamp account. If this option is unavailable, you may need to contact your Basecamp administrator.</p>
+                <p>Once that's done, navigate to the Connections page of Easy Insight. Click on the Basecamp button, then click Get Started Now. You'll be prompted for your Basecamp path and your API token. You can find your API token under the My Info page on your Basecamp interface. Once you click Create, Easy Insight will begin synchronizing key aggregate data from your Basecamp account into the Easy Insight data warehouse. Depending on the size of your Basecamp instance, this process may take a while--if you have hundreds of projects and thousands of todo items, it might be several minutes to copy all of the necessary data across. Once synchronization is complete, a wizard will walk you through an initial scorecard and next steps with the data source.</p>
+                <h2><a name="r4">How do I connect to <a href="http://highrisehq.com/">Highrise?</a></a></h2>
+                <p>First, you'll need to enable API access to your Highrise account. You can enable this access from the Account (Upgrade/Invoice) page of your Highrise account. If this option is unavailable, you may need to contact your Highrise administrator.</p>
+                <p>Once that's done, navigate to the Connections page of Easy Insight. Click on the Highrise button, then click Get Started Now. You'll be prompted for your Highrise path and your API token. You can find your API token under the My Info page on your Highrise interface. Once you click Create, Easy Insight will begin synchronizing key aggregate data from your Highrise account into the Easy Insight data warehouse. Depending on the size of your Highrise instance, this process may take a while--if you have hundreds of deals and thousands of contacts,, it might be several minutes to copy all of the necessary data across. Once synchronization is complete, a wizard will walk you through an initial scorecard and next steps with the data source.</p>
+                <h2><a name="r5">How do I connect to <a href="http://google.com/analytics">Google Analytics?</a></a></h2>
+                <p>Navigate to the Connections page of Easy Insight. Click on the Google Analytics button. Click Get Started Now. If this is the first time you've connecte to Google Analytics, you'll be redirected to Google to authorize Easy Insight to access your analytics data. Grant access and you'll be redirected back to Easy Insight. Click Connect and after a moment you'll be presented with an initial scorecard of web analytics data. From here, a wizard will walk you through next steps with the data source.</p>
+                <h2><a name="r6">How do I connect to <a href="http://www.salesforce.com/">Salesforce?</a></a></h2>
+                <p>At the moment, the Easy Insight connection to Salesforce requires an Enterprise or higher account with Salesforce. Navigate to the Connections page of Easy Insight. Click on the Salesforce button. Click on Get Started Now and fill in your Salesforce.com user name, password, and security token value. After a moment you'll be presented with an initial scorecard of your CRM data. From here, a wizard will walk you through next steps with the data source.</p>
+                <h2><a name="r7">How do I connect to <a href="http://www.sendgrid.com/">Sendgrid?</a></a></h2>
+                <p>Navigate to the Connections page of Easy Insight. Click on the Sendgrid button. Click Get Started Now. Fill in your user name (email address) and password for your Sendgrid account. After a moment you'll be presented with an initial scorecard of your email delivery data. From here, a wizard will walk you through next steps with the data source.</p>
+                <h2><a name="r8">How do I connect to <a href="http://www.pivotaltracker.com/">Pivotal Tracker?</a></a></h2>
+                <p>Navigate to the Connections page of Easy Insight. Click on the Pivotal Tracker button. Click Get Started Now and fill in your user name and password for your Pivotal Tracker account. Once you click Create, Easy Insight will begin synchronizing key aggregate data from your Pivotal Tracker account into the Easy Insight data warehouse. Depending on the size of your Pivotal Tracker instance, this process may take a while--if you have hundreds of iterations and thousands of stories, it might be several minutes to copy all of the necessary data across. Once synchronization is complete, a wizard will walk you through an initial scorecard and next steps with the data source.</p>
+                <h2><a name="r9">How do I connect to <a href="http://aws.amazon.com/cloudwatch/">Cloudwatch?</a></a></h2>
+                <p>Navigate to the Connections page of Easy Insight. Click on the Cloudwatch button. Click Get Started now. Fill in your Amazon Web Services key and secret key. After a moment you'll be presented with an initial scorecard of your EC2 infrastructure data. From here, a wizard will walk you through next steps with the data source.</p>
+                <h2><a name="r10">How do I pull data from <a href="http://www.mysql.com/">MySQL</a>, <a href="http://www.microsoft.com/sqlserver/">SQL Server</a>, or <a href="http://www.oracle.com/">Oracle?</a></a></h2>
+                <p>Coming soon...</p>
+                <h2><a name="r11">How do I combine data sources?</a></h2>
+                <p>Easy Insight provides you with the capability to combine any data sources. The key is that you need some common field between the data sources which Easy Insight can use to join the data sources. For example, you could join Basecamp and Highrise data by connecting Responsible Party from Basecamp with Deal Owner from Highrise to create a dashboard of unified todo items and deal data by owner.</p>
+                <img src="../images/docs/DataMart.jpg" style="float:left;padding:10px;" alt="Display of Reports under My Data" />
+                <p style="padding-top:25px;padding-bottom:15px">When you combine data sources, you'll create a new data source which represents the federation of those joined data sources. This new data source is referred to as a Composite Data Source. Navigate to the My Data page of Easy Insight. Click on Combine Sources. This action opens up a new screen with a list of available data sources down the left and a canvas to the right. You can drag drata sources from the left list into the canvas to add them to the composite data source. Once added, you can join data sources by selecting two, right clicking on one, and clicking Create Join. You'll be prompted to choose the two fields for the join. You can right click on the line between the data sources to test the join and make sure it seems valid--if none of the rows match between the two data sources, it's a problem. You can also delete joins from that right click context menu. In the screenshot to the left, you see a sample composite data source from our internal Easy Insight data which combines data from our Reports, Data Sources, Users, Accounts, and Sendgrid data sources, along with a couple of data sources which simply act as join tables.</p>
+                <h2><a name="r12">How do I use lookup tables?</a></h2>
+                <p>You can add custom fields to any data source in Easy Insight through the use of a lookup table. For example, you can add Billable Rate to your time tracking data from Basecamp to create a real time calculator on your billing amounts for the month or tie different link sources in Google Analytics to categories to better segment your visitor traffic data.</p>
+                <p>Navigate to the My Data page and click on the Lookup Table button. You'll be prompted to choose a data source, an existing field, the name of the new field, and the type of the new field. For example, to do the above Billable Rate example, you could choose Basecamp as the data source, Person Name as the source grouping, Billable Rate as the new field name, and Measure as the new field type.</p>
+                <p>Once you've set these initial parameters, you'll enter a new screen with a list down the left side of the screen of all distinct values of the source grouping. At this poiny, you can go through and fill in the matching lookup values for each grouping. Once you save the lookup table, this new field becomes available to reports just as any other field which is intrinsically part of the data source.</p>
+                <h2><a name="r13">How do I administer a data source?</a></h2>
+                <p>Navigate to the My Data page and click on the Administer Data Source icon to the far right of the data source name. From here, you can alter or add custom fields to a data source just as you do with new fields in the report editor. For more information on these available operations, see the report editor documentation.</p>
+            </div>
+    		<!-- InstanceEndEditable -->
+<div id="footer" style="margin:0px;width:100%;height:60px">
+                <div id="linkLine"
+                        style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+                    <div style="float:left;padding-left:10px;">
+                        <a href="/documentation/toc.html">Documentation</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/pricing.html">Pricing</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/developers.html">Developers</a>
+                    </div>
+                    <div style="float:left;padding-left:35px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/privacy.html">Privacy Policy</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/tos.html">Terms of Service</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/partners.html">Partners</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/contactus.html">Contact Us</a>
+                    </div>
+                </div>
+                <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+                    Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
+                </div>
+            </div>
+		</div>
+    </div>
+	<script type="text/javascript" src="/js/lightbox.js"></script>
+</body>
+<!-- InstanceEnd --></html>
