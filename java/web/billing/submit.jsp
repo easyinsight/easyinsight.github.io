@@ -24,7 +24,7 @@
     String hashed = BillingUtil.MD5Hash(hashStr);
 
 
-    if(!hashed.equals(request.getParameter("hash")) || !request.getParameter("response").equals("1") || !request.getParameter("cvvresponse").equals("M") || !Arrays.asList("X", "Y", "D", "M", "W", "Z", "P", "L").contains(request.getParameter("avsresponse")))
+    if(!hashed.equals(request.getParameter("hash")) || !request.getParameter("response").equals("1") || !request.getParameter("cvvresponse").equals("M") || !Arrays.asList("X", "Y", "D", "M", "W", "Z", "P", "L", "G", "I").contains(request.getParameter("avsresponse")))
         response.sendRedirect("billing.jsp?error=true");
     else
     {
