@@ -121,10 +121,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        if (firstSize) {
+        /*if (firstSize) {
             DisplayObject(_controlBar).width = unscaledWidth;
             firstSize = false;
-        }
+        }*/
     }
 
     override protected function createChildren():void {
