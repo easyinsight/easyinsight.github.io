@@ -25,6 +25,10 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>http://www.easy-insight.com/pricing.html</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>http://www.easy-insight.com/services.html</loc>
         <priority>0.8</priority>
     </url>
@@ -57,6 +61,14 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>http://www.easy-insight.com/solutions/PivotalTracker.html</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>http://www.easy-insight.com/solutions/SendGrid.html</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>http://www.easy-insight.com/webanalytics.html</loc>
         <priority>0.8</priority>
     </url>
@@ -73,8 +85,36 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>http://www.easy-insight.com/documentation/toc.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>http://www.easy-insight.com/documentation/api.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>http://www.easy-insight.com/documentation/collaboration.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>http://www.easy-insight.com/documentation/coreconcepts.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>http://www.easy-insight.com/documentation/datasources.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>http://www.easy-insight.com/documentation/kpi.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>http://www.easy-insight.com/documentation/reportediting.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
         <loc>http://www.easy-insight.com/contactus.html</loc>
-        <priority>0.8</priority>
+        <priority>0.5</priority>
     </url>
     <url>
 		<loc>https://www.easy-insight.com/app</loc>
