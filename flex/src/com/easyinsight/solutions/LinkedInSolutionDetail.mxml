@@ -60,11 +60,11 @@
                     <mx:Spacer width="100%"/>
                 </mx:HBox>
                 <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" width="820" height="70" text="Want to see where you rank on your number of connections? How about LinkedIn reports by industry? One common data source that seemed at least halfway interesting to us was LinkedIn, so if you want a quick start with our reporting and analysis, here's your chance!" fontSize="14"/>
+                <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" width="820" height="70" text="Want to see where you rank on your number of connections? How about LinkedIn reports by industry? One common data source that seemed at least halfway interesting to us was LinkedIn, so if you want a quick start with our reporting and analysis, here's your chance!" fontSize="14"/>
                 <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10">
                     <mx:Image source="../assets/LinkedInReport.jpg"/>
                 </mx:HBox>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" width="820" height="40" text="Measure your connections and network. Analyze your network by company--how many of your former coworkers are still stuck at that horrible place you worked before? Share your results with friends!" fontSize="14"/>
+                <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" width="820" height="40" text="Measure your connections and network. Analyze your network by company--how many of your former coworkers are still stuck at that horrible place you worked before? Share your results with friends!" fontSize="14"/>
                 <mx:Box id="authBox"/>
                 <mx:VBox id="controlsBox" paddingTop="0" paddingBottom="10" width="100%" horizontalAlign="center">
                     <mx:Label text="Start Here:" fontSize="14" id="startHereLabel"/>

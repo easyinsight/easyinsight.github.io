@@ -42,11 +42,11 @@
                     <mx:Spacer width="100%"/>                                                                
                 </mx:HBox>
                 <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" width="820" height="70" text="Want the ability to perform custom Pivotal Tracker reporting? Whether it's simple reports on stories or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation." fontSize="14"/>                
+                <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820" height="70" text="Want the ability to perform custom Pivotal Tracker reporting? Whether it's simple reports on stories or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation." fontSize="14"/>
                 <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10">
                     <mx:Image source="../assets/PivotalTrackerTree.jpg"/>
                 </mx:HBox>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" width="820" height="50" text="Measure your story progress and iteration velocity. Filter by tags or story owner and view as lists, trees, charts, or more. Share the reports with your coworkers or embed them into iGoogle or another dashboard." fontSize="14"/>
+                <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820" height="50" text="Measure your story progress and iteration velocity. Filter by tags or story owner and view as lists, trees, charts, or more. Share the reports with your coworkers or embed them into iGoogle or another dashboard." fontSize="14"/>
                 <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
                     <mx:Button label="Get Started Now!" fontSize="14" click="installSolution()" styleName="blueButton"
                                id="installButton"/>
