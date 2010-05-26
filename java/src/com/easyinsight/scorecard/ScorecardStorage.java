@@ -398,7 +398,7 @@ public class ScorecardStorage {
             queryStmt.close();
             threshold = 1000 * 60 * 60 * 12;
         } else {
-            threshold = 1000 * 60 * 60;
+            threshold = 1000 * 60 * 60 * 12;
         }
         long time = System.currentTimeMillis() - threshold;
         if (kpiTime == 0 && kpi.getKpiOutcome() != null) {
