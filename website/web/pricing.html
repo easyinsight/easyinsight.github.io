@@ -5,7 +5,6 @@
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>Easy Insight</title>
 <!-- InstanceEndEditable -->
-        <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
 <!-- InstanceBeginEditable name="head" -->
     <style type="text/css">
         .pricingBox {
@@ -18,14 +17,14 @@
             border-width: 1px;
             border-color: #B7BABC;
             text-align:center;
-        }
-
-        #personal {
             float:left;
         }
 
+        #personal {
+
+        }
+
         #professional {
-            float:right;
         }
 
         h2 {
@@ -55,22 +54,38 @@
         }
     </style>
 <!-- InstanceEndEditable -->
-
+    <link type="text/css" rel="stylesheet" media="screen" href="css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <link rel="stylesheet" href="/css/lightbox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
-    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
-    	<div style="width:100%;text-align:left;height:70px;position:relative">
-        	<a href="/index.html"><img src="../images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
-            <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
-            <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
+    <div style="width:1000px;margin:0 auto;">
+    	<div id="topBar" style="width:100%;text-align:left;height:95px;position:relative;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;">
+        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+    <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+                <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
 
         </div>
 	    <!-- InstanceBeginEditable name="submenu" -->
-    	<!-- InstanceEndEditable -->
-        <div id="content">
-		    <!-- InstanceBe\ginEditable name="content" -->
+    	<!-- InstanceEndEditable -->        
+        <div id="content" style="margin-top:10px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;background-color:#FFFFFF">
+		    <!-- InstanceBeginEditable name="content" -->
             <div style="width:100%;background-color:#FFFFFF">
                 <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Pricing</h1></div>
+                <div style="height:450px">
+                <div id="personal" class="pricingBox">
+                    <h2>PERSONAL</h2>
+                    <p>Enhance your spreadsheets and explore public data</p>
+                    <h3>Not a cent!</h3>
+                    <ul>
+                        <li>Instant analytics accessible to anyone!</li>
+                        <li>Upload Excel spreadsheets, CSV files or import Google documents</li>
+                        <li>Easily create lists, charts, crosstabs, maps and more through the ad hoc report builder</li>
+                        <li>One user</li>
+                        <li>1 MB of storage</li>
+                    </ul>
+                </div>
                 <div id="basic" class="pricingBox">
                     <h2>BASIC</h2>
                     <p>Get started with full business intelligence power</p>
@@ -97,47 +112,58 @@
                         <li>500 MB of storage</li>
                     </ul>
                 </div>
-                <div id="personal" class="pricingBox">
-                    <h2>PERSONAL</h2>
-                    <p>Enhance your spreadsheets and explore public data</p>
-                    <h3>Not a cent!</h3>
-                    <ul>
-                        <li>Instant analytics accessible to anyone!</li>
-                        <li>Upload Excel spreadsheets, CSV files or import Google documents</li>
-                        <li>Easily create lists, charts, crosstabs, maps and more through the ad hoc report builder</li>
-                        <li>One user</li>
-                        <li>1 MB of storage</li>
-                    </ul>
-                </div>
+                    </div>
             </div>
     		<!-- InstanceEndEditable -->
-<div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
-            	<div style="float:right;padding-right:200px;">
-                    <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
-                    <ul>
-                        <li><a href="/terms.html">Terms of Service</a></li>
-                        <li><a href="/privacy.html">Privacy Policy</a></li>
-                    </ul>
+<div id="footer" style="margin:0px;width:100%;height:60px">
+                <div id="linkLine"
+                        style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+                    <div style="float:left;padding-left:10px;">
+                        <a href="/documentation/toc.html">Documentation</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/pricing.html">Pricing</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/developers.html">Developers</a>
+                    </div>
+                    <div style="float:left;padding-left:35px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/privacy.html">Privacy Policy</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/terms.html">Terms of Service</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/partners.html">Partners</a>
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        |
+                    </div>
+                    <div style="float:left;padding-left:40px;">
+                        <a href="/contactus.html">Contact Us</a>
+                    </div>
                 </div>
-                <div style="padding-left:180px;">
-					<span style="font-weight:bold;font-size:12px;">About</span>
-                    <ul>
-                        <li><a href="/company.html">Company Overview</a></li>
-                        <li><a href="/whoweare.html">Who We Are</a></li>
-                        <li><a href="/contactus.html">Contact Us</a></li>
-                    </ul>
+                <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
+                    Copyright ©2008-2010 Easy Insight, LLC. All rights reserved.
                 </div>
             </div>
-	    </div>
+		</div>
     </div>
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-
-<script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-8316271-1");
-pageTracker._trackPageview();
-</script>
+	<script type="text/javascript" src="/js/lightbox.js"></script>
 </body>
 <!-- InstanceEnd --></html>
