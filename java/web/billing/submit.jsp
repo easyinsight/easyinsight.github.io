@@ -50,39 +50,39 @@
               && !user.isAccountAdmin())
                 response.sendRedirect("access.jsp");
 
-            if(account.getAccountState() == Account.DELINQUENT) {
-                System.out.println("Creating account billing info...");
-                AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
-                info.setTransactionID(request.getParameter("transactionid"));
-                info.setAmount(request.getParameter("amount"));
-                info.setResponse(request.getParameter("response"));
-                info.setResponseCode(request.getParameter("response_code"));
-                info.setResponseString(request.getParameter("responsetext"));
-                info.setAccountId(account.getAccountID());
-                DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-                df.setTimeZone(TimeZone.getTimeZone("UTC"));
-                Date transTime = df.parse(request.getParameter("time"));
-                Calendar c = Calendar.getInstance();
-                c.setTime(transTime);
-                account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
-                info.setTransactionTime(transTime);
-                account.getBillingInfo().add(info);
-                s.save(info);
-                System.out.println("Saved account billing info.");
+            System.out.println("Creating account billing info...");
+            AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
+            info.setTransactionID(request.getParameter("transactionid"));
+            info.setAmount(request.getParameter("amount"));
+            info.setResponse(request.getParameter("response"));
+            info.setResponseCode(request.getParameter("response_code"));
+            info.setResponseString(request.getParameter("responsetext"));
+            info.setAccountId(account.getAccountID());
+            DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date transTime = df.parse(request.getParameter("time"));
+            Calendar c = Calendar.getInstance();
+            c.setTime(transTime);
+            info.setTransactionTime(transTime);
+            account.getBillingInfo().add(info);
+            s.save(info);
+            System.out.println("Saved account billing info.");
 
+            if(account.getAccountState() == Account.DELINQUENT) {
+                account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
             } else {
                 Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
                 if(trialEnd != null) {
                     System.out.println("Trial end date: " + trialEnd.toString());
                     if(trialEnd.after(new Date()) && account.getBillingDayOfMonth() == null) {
-                        Calendar c = Calendar.getInstance();
-                        c.setTime(trialEnd);
-                        System.out.println("Billing day of month: " + c.get(Calendar.DAY_OF_MONTH));
-                        account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(trialEnd);
+                        System.out.println("Billing day of month: " + cal.get(Calendar.DAY_OF_MONTH));
+                        account.setBillingDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
                     }
                     else {
-                        Calendar c = Calendar.getInstance();
-                        account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
+                        Calendar cal = Calendar.getInstance();
+                        account.setBillingDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
                     }
                 }
             }
