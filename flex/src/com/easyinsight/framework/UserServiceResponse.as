@@ -27,6 +27,7 @@ public class UserServiceResponse
     public var accountName:String;
     public var renewalOptionPossible:Boolean;
     public var personaID:int;
+    public var dateFormat:int;
 
     public function UserServiceResponse()
         {

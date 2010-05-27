@@ -37,7 +37,7 @@ public class Account {
     public static final int TRIAL = 9;
     public static final int CLOSING = 10;
 
-    public static final long FREE_MAX = 1000000;
+    public static final long FREE_MAX = 5000000;
     public static final long INDIVIDUAL_MAX = 100000000;
     public static final long GROUP_MAX = 500000000;
     public static final long PROFESSIONAL_MAX = 10000000000L;
@@ -104,6 +104,9 @@ public class Account {
     @Column(name="billing_day_of_month")
     private Integer billingDayOfMonth;
 
+    @Column(name="date_format")
+    private int dateFormat;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="account_id")
     private List<BandwidthUsage> historicBandwidthUsage = new ArrayList<BandwidthUsage>();
@@ -149,6 +152,8 @@ public class Account {
     public void setReportSharingEnabled(boolean reportSharingEnabled) {
         this.reportSharingEnabled = reportSharingEnabled;
     }
+
+
 
     public List<AccountCreditCardBillingInfo> getBillingInfo() {
         return billingInfo;
@@ -220,6 +225,14 @@ public class Account {
 
     public void setAccountID(long accountID) {
         this.accountID = accountID;
+    }
+
+    public int getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(int dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
     public List<User> getUsers() {

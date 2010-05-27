@@ -11,8 +11,17 @@ public class AccountSettings {
     private boolean marketplace;
     private boolean reportSharing;
     private long groupID;
+    private int dateFormat;
 
     public AccountSettings() {
+    }
+
+    public int getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(int dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
     public boolean isPublicData() {

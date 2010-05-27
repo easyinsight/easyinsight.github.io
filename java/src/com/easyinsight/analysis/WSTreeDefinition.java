@@ -44,6 +44,12 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
 
     public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("hierarchy", Arrays.asList(hierarchy), structure);
+        Collections.sort(items, new Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+            }
+        });
         addItems("items", items, structure);
     }
 

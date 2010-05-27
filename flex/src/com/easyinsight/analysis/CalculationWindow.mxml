@@ -30,9 +30,6 @@
         [Bindable]
         private var formattingConfiguration:FormattingConfiguration;
 
-        [Bindable]
-        private var measureConditionRange:MeasureConditionRange;
-
         private var analysisCalculation:AnalysisCalculation;
 
         [Bindable]
@@ -50,10 +47,6 @@
             }
             analysisCalculation.applyBeforeAggregation = applyBeforeCheckbox.selected;
             analysisCalculation.calculationString = calculationInput.text;
-            var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
-            if (measureConditionRange != null) {
-                analysisCalculation.measureConditionRange = measureRangeSelection.createMeasureConditionRange();
-            }
             analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
             analysisService.validateCalculation.send(analysisCalculation.calculationString, dataSourceID);
             return analysisCalculation;
@@ -88,7 +81,7 @@
             if (analysisCalculation != null) {
                 calcText = analysisCalculation.calculationString;
                 calcName = analysisCalculation.display;
-                measureConditionRange = analysisCalculation.measureConditionRange;
+
                 formattingConfiguration = analysisCalculation.formattingConfiguration;
                 applyBefore = analysisCalculation.applyBeforeAggregation;
             }
@@ -192,14 +185,11 @@
             </mx:FormItem>
             <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
                 <mx:TextArea id="calculationInput" dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)"
-                             width="100%" height="100"
+                             width="400" height="100"
                              text="{calcText}" borderStyle="solid" borderThickness="1"/>
             </mx:FormItem>
             <mx:FormItem label="Formatting: ">
                 <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
-            </mx:FormItem>
-            <mx:FormItem label="">
-                <analysis:ColorSelection id="measureRangeSelection" measureConditionRange="{measureConditionRange}"/>
             </mx:FormItem>
             <!--<mx:FormItem label="" direction="horizontal">
 				<mx:Button label="Save" click="save()"/>

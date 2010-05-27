@@ -15,6 +15,7 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
 import com.easyinsight.calculations.Resolver;
+import com.easyinsight.pipeline.IComponent;
 import org.hibernate.Session;
 
 /**
@@ -122,15 +123,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public void setLinks(List<Link> links) {
         this.links = links;
     }
-
-    /*public VirtualDimension getVirtualDimension() {
-        return virtualDimension;
-    }
-
-    public void setVirtualDimension(VirtualDimension virtualDimension) {
-        this.virtualDimension = virtualDimension;
-    }*/
-
+    
     public List<FilterDefinition> getFilters() {
         return filters;
     }
@@ -440,5 +433,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public boolean blocksDBAggregation() {
         return false;
+    }
+
+    public List<IComponent> createComponents() {
+        return new ArrayList<IComponent>();
     }
 }

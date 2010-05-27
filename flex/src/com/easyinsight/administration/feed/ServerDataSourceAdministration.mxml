@@ -12,7 +12,7 @@
 
         private function encryptedResults():void {
             var c:Credentials = uploadService.encryptCredentials.lastResult as Credentials;
-            if(User.getSharedObject() == null) {
+            if (User.getSharedObject() == null) {
                 Alert.show("You must enable local storage for easy-insight.com in order to save credentials to your computer.");
             }
             var def:FeedDefinitionData = _dataSourceDefinition as FeedDefinitionData;
@@ -31,9 +31,6 @@
         private var ready:Boolean;
 
         [Bindable]
-        private var credentialsSaved:Boolean;
-
-        [Bindable]
         private var refreshValue:int;
 
         [Bindable]
@@ -45,19 +42,11 @@
             dataSourceCreation = new _dataSourceClass();
             var def:FeedDefinitionData = _dataSourceDefinition as FeedDefinitionData;
             dataSourceCreation.dataSourceDefinition = def;
-            credentialsSaved = def.username != null;
+            if (dataSourceCreation.savesCredentials) {
+                credentialsIndex = 1;
+            }
             refreshValue = def.refreshDataInterval;
-            if(User.getSharedObject() != null && User.getSharedObject().data[def.dataFeedID.toString()] != null) {
-                /* This doesn't work, you get the encrypted strings, doh
-                var c:Credentials = new Credentials();
-                c.userName = User.getSharedObject().data[def.dataFeedID.toString()].username;
-                c.password = User.getSharedObject().data[def.dataFeedID.toString()].password;
-                dataSourceCreation.credentials = c;*/
-                clientCredentialsSaved = true;
-            }
-            else {
-                clientCredentialsSaved = false;
-            }
+            clientCredentialsSaved = User.getSharedObject() != null && User.getSharedObject().data[def.dataFeedID.toString()] != null;
             coreContent.addChild(dataSourceCreation as DisplayObject);
         }
 
@@ -76,7 +65,7 @@
         private function serverValidate():void {
             progressBar.visible = true;
             dataSourceCreation.updateDataSource(dataSourceDefinition as FeedDefinitionData);
-            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials);
+            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox != null ? saveCredentialsCheckbox.selected : false);
         }
 
         private function validated():void {
@@ -90,75 +79,37 @@
         }
 
         public function set dataSourceClass(value:Class):void {
-            _dataSourceClass = value;                   
+            _dataSourceClass = value;
         }
 
-        /*private function credentialClick():void {
-            credentialsSaved = !credentialsSaved;
-            if (!credentialsSaved) {
-                dailyRefresh.selected = false;
-//                refreshStepper.value = 0;
-            }
-        }*/
-
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            /*if (saveClientCredentialsCheckbox.selected) {
-
-                uploadService.encryptCredentials.send(dataSourceCreation.credentials);
-            }
-            else {
-                if(User.getSharedObject() != null) {
-
-                }
-            }*/
-
-
-            /*if (saveCredentialsCheckbox.selected) {
-//                feedDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
-                if(dailyRefresh.selected)
-                    feedDefinition.refreshDataInterval = 60*60*1000*24;
-                else
-                    feedDefinition.refreshDataInterval = 0;
-                var credentials:Credentials = dataSourceCreation.credentials;
-                feedDefinition.username = credentials.userName;
-                feedDefinition.password = credentials.password;
-            } else {*/
             feedDefinition.refreshDataInterval = 0;
             feedDefinition.username = null;
             feedDefinition.password = null;
-            /*if (saveClientCredentialsCheckbox.selected) {
-                if (User.getSharedObject() != null) {
-                    User.getSharedObject().data[feedDefinition.dataFeedID.toString()] = null;
-                    User.getSharedObject().flush();
-                }
-            }*/
-            //}
             dataSourceCreation.updateDataSource(feedDefinition);
         }
+
+        [Bindable]
+        private var credentialsIndex:int;
 
         public function validate():Boolean {
             return true;
         }]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
-        <mx:method name="validateCredentials" result="validated()"/>
-        <mx:method name="encryptCredentials" result="encryptedResults()" />
+        <mx:method name="validateCredentials" result="validated()" fault="Alert.show(event.fault.message)"/>
+        <mx:method name="encryptCredentials" result="encryptedResults()"  fault="Alert.show(event.fault.message)"/>
     </mx:RemoteObject>
-    <mx:Form>
+    <mx:VBox>
         <mx:Box id="coreContent"/>
-        <mx:FormItem label="" direction="vertical">
-            <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
-        </mx:FormItem>
-        <!--<mx:FormItem label="Save Credentials:" enabled="{ready}">
-            <mx:CheckBox id="saveCredentialsCheckbox" click="credentialClick()" selected="{credentialsSaved}"/>
-        </mx:FormItem>-->
-        <!--<mx:FormItem label="Save Credentials (On Client):" enabled="{ready}">
-            <mx:CheckBox id="saveClientCredentialsCheckbox" selected="{clientCredentialsSaved}" />
-        </mx:FormItem>-->
-        <!--<mx:FormItem label="Refresh Daily:" enabled="{credentialsSaved}">
-            <mx:CheckBox id="dailyRefresh" />
-        </mx:FormItem>-->
-        <mx:FormItem label="" direction="horizontal">
-            <mx:Button label="Validate" click="serverValidate()" enabled="{ready}"/>
-        </mx:FormItem>
-	</mx:Form>
+        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="Validating..."/>
+        <mx:ViewStack selectedIndex="{credentialsIndex}">
+            <mx:Box/>
+            <mx:HBox>
+                <mx:Label text="Save Credentials:"/>
+                <mx:CheckBox id="saveCredentialsCheckbox" selected="{clientCredentialsSaved}"/>
+                <mx:Label text="Security Note" fontSize="10" textDecoration="underline" toolTip="Your credentials will be saved in an encrypted form on your local system, so do not do this if you're using a public machine."/>
+            </mx:HBox>
+        </mx:ViewStack>
+        <mx:Button label="Validate" click="serverValidate()" enabled="{ready}"/>
+    </mx:VBox>
 </mx:Canvas>

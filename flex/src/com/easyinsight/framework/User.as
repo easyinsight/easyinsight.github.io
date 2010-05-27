@@ -33,6 +33,7 @@ public class User
     public var accountName:String;
     public var renewalOptionPossible:Boolean;
     public var personaID:int;
+    public var dateFormat:int;
 
     public function User() {
 
@@ -56,6 +57,7 @@ public class User
         _user.accountName = response.accountName;
         _user.renewalOptionPossible = response.renewalOptionPossible;
         _user.personaID = response.personaID;
+        _user.dateFormat = response.dateFormat;
         if (_user.firstLogin) {
             User.getEventNotifier().dispatchEvent(new Event("firstLogin"));
         } else if (response.renewalOptionPossible) {

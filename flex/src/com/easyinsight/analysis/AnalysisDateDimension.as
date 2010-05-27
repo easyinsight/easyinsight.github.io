@@ -1,6 +1,8 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.analysis.formatter.DimensionValueFormatter;
+import com.easyinsight.framework.User;
+
 import mx.formatters.DateFormatter;
 	import mx.formatters.Formatter;
 import mx.formatters.NumberFormatter;
@@ -32,19 +34,79 @@ import mx.formatters.NumberFormatter;
                         dateFormatter.formatString = "YYYY";
                         break;
                     case AnalysisItemTypes.MONTH_LEVEL:
-                        dateFormatter.formatString = "MM/YYYY";
+                        switch (User.getInstance().dateFormat) {
+                            case 0:
+                            case 3:
+                                dateFormatter.formatString = "MM/YYYY";
+                                break;
+                            case 1:
+                                dateFormatter.formatString = "YYYY-MM";
+                                break;
+                            case 2:
+                                dateFormatter.formatString = "MM-YYYY";
+                                break;
+                            case 4:
+                                dateFormatter.formatString = "MM.YYYY";
+                                break;
+                        }
                         break;
                     case AnalysisItemTypes.WEEK_LEVEL:
-                        dateFormatter.formatString = "MM/DD/YYYY";
-                        break;
                     case AnalysisItemTypes.DAY_LEVEL:
-                        dateFormatter.formatString = "MM/DD/YYYY";
+                        switch (User.getInstance().dateFormat) {
+                            case 0:
+                                dateFormatter.formatString = "MM/DD/YYYY";
+                                break;
+                            case 1:
+                                dateFormatter.formatString = "YYYY-MM-DD";
+                                break;
+                            case 2:
+                                dateFormatter.formatString = "DD-MM-YYYY";
+                                break;
+                            case 3:
+                                dateFormatter.formatString = "DD/MM/YYYY";
+                                break;
+                            case 4:
+                                dateFormatter.formatString = "DD.MM.YYYY";
+                                break;
+                        }
                         break;
                     case AnalysisItemTypes.HOUR_LEVEL:
-                        dateFormatter.formatString = "MM/DD/YYYY HH:00";
+                        switch (User.getInstance().dateFormat) {
+                            case 0:
+                                dateFormatter.formatString = "MM/DD/YYYY HH:00";
+                                break;
+                            case 1:
+                                dateFormatter.formatString = "YYYY-MM-DD HH:00";
+                                break;
+                            case 2:
+                                dateFormatter.formatString = "DD-MM-YYYY HH:00";
+                                break;
+                            case 3:
+                                dateFormatter.formatString = "DD/MM/YYYY HH:00";
+                                break;
+                            case 4:
+                                dateFormatter.formatString = "DD.MM.YYYY HH:00";
+                                break;
+                        }
                         break;
                     case AnalysisItemTypes.MINUTE_LEVEL:
-                        dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                        switch (User.getInstance().dateFormat) {
+                            case 0:
+                                dateFormatter.formatString = "MM/DD/YYYY HH:MM";
+                                break;
+                            case 1:
+                                dateFormatter.formatString = "YYYY-MM-DD HH:MM";
+                                break;
+                            case 2:
+                                dateFormatter.formatString = "DD-MM-YYYY HH:MM";
+                                break;
+                            case 3:
+                                dateFormatter.formatString = "DD/MM/YYYY HH:MM";
+                                break;
+                            case 4:
+                                dateFormatter.formatString = "DD.MM.YYYY HH:MM";
+                                break;
+                        }
                         break;
                 }
                 formatter = dateFormatter;

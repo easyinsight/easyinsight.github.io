@@ -2,6 +2,7 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
                     creationComplete="userService.getAccountSettings.send(); groupService.getAccountGroups.send()">
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -30,6 +31,7 @@
             publicDataEnabled = accountSettings.publicData;
             sharingEnabled = accountSettings.reportSharing;
             groupID = accountSettings.groupID;
+            dateFormat = accountSettings.dateFormat;
         }
 
         private function save():void {
@@ -38,7 +40,9 @@
             accountSettings.publicData = publicDataCheckbox.selected;
             accountSettings.reportSharing = sharingCheckbox.selected;
             accountSettings.groupID = groupBox.selectedItem.groupID;
+            accountSettings.dateFormat = dateBox.selectedItem.data;
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
+            User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
         }
 
@@ -53,6 +57,9 @@
         private function cancel():void {
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var dateFormat:int;
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountSettings" result="gotSettings()"/>
@@ -75,6 +82,19 @@
             </mx:FormItem>
             <mx:FormItem label="Report Sharing Outside of Account Enabled:">
                 <mx:CheckBox id="sharingCheckbox" selected="{sharingEnabled}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Date Formatting:">
+                <util:SmartComboBox id="dateBox" rowCount="6" selectedValue="{dateFormat}" selectedProperty="data">
+                    <util:dataProvider>
+                        <mx:Array>
+                            <mx:Object label="MM/DD/YYYY (04/26/2010)" data="0"/>
+                            <mx:Object label="YYYY-MM-DD (2010-26-04)" data="1"/>
+                            <mx:Object label="DD-MM-YYYY (26-04-2010)" data="2"/>
+                            <mx:Object label="DD/MM/YYYY (26/04/2010)" data="3"/>
+                            <mx:Object label="DD.MM.YYYY (26.04.2010)" data="4"/>
+                        </mx:Array>
+                    </util:dataProvider>
+                </util:SmartComboBox>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

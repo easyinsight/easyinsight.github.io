@@ -11,6 +11,7 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.HierarchyLevel;
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
+        import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
@@ -20,6 +21,7 @@
         import mx.collections.SummaryField;
         import mx.collections.SummaryRow;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+        import mx.controls.advancedDataGridClasses.SortInfo;
 
         [Bindable]
         private var myData:ArrayCollection;
@@ -58,11 +60,18 @@
             }
         }
 
+        private var treeDef:TreeDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (dataSet.length > 0) {
                 var treeDefinition:TreeDefinition = analysisDefinition as TreeDefinition;
+                this.treeDef = treeDefinition;
                 var hierarchy:AnalysisHierarchyItem = treeDefinition.hierarchy as AnalysisHierarchyItem;
                 var groupingColl:GroupingCollection = new GroupingCollection();
+                if (myData != null) {
+                    dataSet.sort = myData.sort;
+                    dataSet.refresh();
+                }
                 groupingColl.source = dataSet;
                 var columns:Array = [];
                 var analysisItems:Array = [];
@@ -115,6 +124,7 @@
                     var myHeader:AnalysisItem = analysisItems[k] as AnalysisItem;
                     //columnMap[myHeader.qualifiedName()] = myHeader;
                     var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                    //columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                     columnHeaderObject.headerText = myHeader.display;
                     //columnHeaderObject.headerText = "";
                     columnHeaderObject.dataField = myHeader.qualifiedName();
@@ -126,7 +136,9 @@
 
                     columns[k + 1] = columnHeaderObject;
                 }
+
                 myData = dataSet;
+
                 groupingColl.refresh();
                 coreGrid.dataProvider = groupingColl;
                 coreGrid.columns = columns;
@@ -142,6 +154,34 @@
         }
 
         public function updateExportMetadata():void {
+            for (var i:int = 0; i < treeDef.items.length; i++) {
+                var item:AnalysisItem = treeDef.items.getItemAt(i) as AnalysisItem;
+                var columnIndex:int = findColumnIndex(item.qualifiedName());
+                item.itemPosition = columnIndex;
+                var column:AdvancedDataGridColumn = coreGrid.columns[columnIndex];
+
+                var sortInfo:SortInfo = coreGrid.getFieldSortInfo(column);
+                if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
+
+                    if (sortInfo.descending) {
+                        item.sort = 2;
+                    } else {
+                        item.sort = 1;
+                    }
+                } else {
+                    item.sort = 0;
+                }
+            }
+        }
+
+        private function findColumnIndex(qualifiedName:String):int {
+            for (var i:int = 0; i < coreGrid.columns.length; i++) {
+                var column:AdvancedDataGridColumn = coreGrid.columns[i];
+                if (column.dataField == qualifiedName) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         public function preserveValues():Boolean {

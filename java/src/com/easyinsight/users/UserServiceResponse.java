@@ -31,6 +31,7 @@ public class UserServiceResponse {
     private String accountName;
     private boolean renewalOptionPossible;
     private long personaID;
+    private int dateFormat;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -42,7 +43,7 @@ public class UserServiceResponse {
                                boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
                                boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible,
-                               Long personaID) {
+                               Long personaID, int dateFormat) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -62,6 +63,15 @@ public class UserServiceResponse {
         this.accountName = accountName;
         this.renewalOptionPossible = renewalOptionPossible;
         this.personaID = personaID == null ? 0 : personaID;
+        this.dateFormat = dateFormat;
+    }
+
+    public int getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(int dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
     public long getPersonaID() {

@@ -617,6 +617,7 @@ public class UserAccountAdminService {
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
             Account account = (Account) results.get(0);
             account.setApiEnabled(accountSettings.isApiEnabled());
+            account.setDateFormat(accountSettings.getDateFormat());
             account.setGroupID(accountSettings.getGroupID() > 0 ? accountSettings.getGroupID() : null);
             account.setMarketplaceEnabled(accountSettings.isMarketplace());
             account.setPublicDataEnabled(accountSettings.isPublicData());
@@ -645,6 +646,7 @@ public class UserAccountAdminService {
             accountSettings.setGroupID(account.getGroupID() != null ? account.getGroupID() : 0);
             accountSettings.setMarketplace(account.isMarketplaceEnabled());
             accountSettings.setPublicData(account.isPublicDataEnabled());
+            accountSettings.setDateFormat(account.getDateFormat());
             accountSettings.setReportSharing(account.isReportSharingEnabled());
             session.getTransaction().commit();
         } catch (Exception e) {

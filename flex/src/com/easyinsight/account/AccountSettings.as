@@ -8,6 +8,7 @@ public class AccountSettings {
     public var marketplace:Boolean;
     public var reportSharing:Boolean;
     public var groupID:int;
+    public var dateFormat:int;
     
     public function AccountSettings() {
     }
