@@ -149,8 +149,8 @@ public class GoogleAnalyticsFeed extends Feed {
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
         try {
-            Collection<AnalysisDimension> dimensions = new ArrayList<AnalysisDimension>();
-            Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
+            Collection<AnalysisDimension> dimensions = new HashSet<AnalysisDimension>();
+            Collection<AnalysisMeasure> measures = new HashSet<AnalysisMeasure>();
             List<AnalysisItem> convertedItems = new ArrayList<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
                 for (AnalysisItem field : getFields()) {
@@ -240,7 +240,7 @@ public class GoogleAnalyticsFeed extends Feed {
                 "&metrics=ga:pageviews,ga:bounces,ga:timeOnPage,ga:visitors,ga:visits,ga:timeOnSite" +
                 "&start-date=2009-06-09&end-date=2009-06-11";*/
                 String next = urlBuilder.toString();
-
+                System.out.println(next);
                 
                 while (next != null) {
                     URL reportUrl = new URL(next);
