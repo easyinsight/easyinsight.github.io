@@ -91,7 +91,7 @@ public class EIAccountManagementService {
                 insertKeyStmt.setString(2, unsubscribeKey);
                 insertKeyStmt.execute();
             }
-            String emailBody = MessageFormat.format(htmlText, "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
+            String emailBody = htmlText.replace("{0}", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
             PreparedStatement userQueryStmt = conn.prepareStatement("SELECT email from USER where USER_ID = ?");
             userQueryStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet userRS = userQueryStmt.executeQuery();
@@ -190,7 +190,7 @@ public class EIAccountManagementService {
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded(),
                             !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                            user.getPersonaID());
+                            user.getPersonaID(), account.getDateFormat());
                     // FlexContext.getFlexSession().getRemoteCredentials();
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
