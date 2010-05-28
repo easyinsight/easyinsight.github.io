@@ -28,27 +28,58 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     public static final int LAST_FULL_WEEK = 13;
     public static final int LAST_FULL_MONTH = 14;
     public static final int LAST_FULL_QUARTER = 15;
+    public static final int LAST_YEAR = 16;
+    public static final int ALL_TIME = 17;
+    public static final int CUSTOM = 18;
 
     private long limitDate;
     private long endDate;
     private Date now;
     private int interval;
+    private int intervalType;
+    private int intervalAmount;
 
-    public MaterializedRollingFilterDefinition(AnalysisItem key, int interval, Date now) {
-        super(key);
-        this.interval = interval;
+    public MaterializedRollingFilterDefinition(RollingFilterDefinition rollingFilterDefinition, Date now) {
+        super(rollingFilterDefinition.getField());
         if (now == null) {
             now = new Date();
         }
         this.now = now;
-        limitDate = findStartDate(interval, now);
-        endDate = findEndDate(interval, now);
+        limitDate = findStartDate(rollingFilterDefinition, now);
+        endDate = findEndDate(rollingFilterDefinition, now);
     }
 
-    public static long findStartDate(int interval, Date now) {
+    public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
+        int interval = rollingFilterDefinition.getInterval();
+        int intervalAmount = -rollingFilterDefinition.getCustomIntervalAmount();
+        int intervalType = rollingFilterDefinition.getCustomIntervalType(); 
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
         switch (interval) {
+            case CUSTOM:
+                if (!rollingFilterDefinition.isCustomBeforeOrAfter()) {
+                    switch (intervalType) {
+                        case 0:
+                            cal.add(Calendar.MINUTE, intervalAmount);
+                            break;
+                        case 1:
+                            cal.add(Calendar.HOUR_OF_DAY, intervalAmount);
+                            break;
+                        case 2:
+                            cal.add(Calendar.DAY_OF_YEAR, intervalAmount);
+                            break;
+                        case 3:
+                            cal.add(Calendar.WEEK_OF_YEAR, intervalAmount);
+                            break;
+                        case 4:
+                            cal.add(Calendar.MONTH, intervalAmount);
+                            break;
+                        case 5:
+                            cal.add(Calendar.YEAR, intervalAmount);
+                            break;
+                    }
+                }
+                break;
             case DAY_TO_NOW:
                 cal.set(Calendar.HOUR_OF_DAY, 0);
                 cal.set(Calendar.MINUTE, 0);
@@ -122,6 +153,15 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
                 break;
+            case LAST_YEAR:
+                cal.add(Calendar.YEAR, -1);
+                cal.set(Calendar.MONTH, 0);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                break;
             case LAST_FULL_QUARTER:
                 // TODO: ?
                 break;
@@ -129,7 +169,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         return cal.getTimeInMillis();
     }
 
-    public static long findEndDate(int interval, Date now) {
+    public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
+        int interval = rollingFilterDefinition.getInterval();
+        int intervalAmount = rollingFilterDefinition.getCustomIntervalAmount();
+        int intervalType = rollingFilterDefinition.getCustomIntervalType();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
         switch (interval) {
@@ -143,7 +186,32 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             case MONTH:
             case YEAR:
             case QUARTER:
+            case ALL_TIME:
                 // do nothing, now is fine
+                break;
+            case CUSTOM:
+                if (rollingFilterDefinition.isCustomBeforeOrAfter()) {
+                    switch (intervalType) {
+                        case 0:
+                            cal.add(Calendar.MINUTE, intervalAmount);
+                            break;
+                        case 1:
+                            cal.add(Calendar.HOUR_OF_DAY, intervalAmount);
+                            break;
+                        case 2:
+                            cal.add(Calendar.DAY_OF_YEAR, intervalAmount);
+                            break;
+                        case 3:
+                            cal.add(Calendar.WEEK_OF_YEAR, intervalAmount);
+                            break;
+                        case 4:
+                            cal.add(Calendar.MONTH, intervalAmount);
+                            break;
+                        case 5:
+                            cal.add(Calendar.YEAR, intervalAmount);
+                            break;
+                    }
+                }
                 break;
             case LAST_FULL_DAY:
                 cal.add(Calendar.DAY_OF_YEAR, -1);
@@ -174,6 +242,15 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 cal.add(Calendar.MONTH, 1);
                 cal.add(Calendar.MILLISECOND, -1);
                 break;
+            case LAST_YEAR:
+                cal.add(Calendar.YEAR, -1);
+                cal.set(Calendar.MONTH, 0);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                break;
             case LAST_FULL_QUARTER:
                 // TODO: ?
                 break;
@@ -195,12 +272,5 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             }
         }
         return allowed;
-    }
-
-    public static void main(String[] args) {
-        Date date = new Date();
-        System.out.println(new Date(findStartDate(MaterializedRollingFilterDefinition.LAST_FULL_DAY, date)) + " to " + new Date(findEndDate(MaterializedRollingFilterDefinition.LAST_FULL_DAY, date)));
-        System.out.println(new Date(findStartDate(MaterializedRollingFilterDefinition.LAST_FULL_WEEK, date)) + " to " + new Date(findEndDate(MaterializedRollingFilterDefinition.LAST_FULL_WEEK, date)));
-        System.out.println(new Date(findStartDate(MaterializedRollingFilterDefinition.LAST_FULL_MONTH, date)) + " to " + new Date(findEndDate(MaterializedRollingFilterDefinition.LAST_FULL_MONTH, date)));
     }
 }

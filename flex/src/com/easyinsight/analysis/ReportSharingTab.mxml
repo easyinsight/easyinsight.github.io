@@ -109,8 +109,9 @@
         }
 
         private function addReportToGroup():void {
-            var window:AddInsightToGroupWindow = AddInsightToGroupWindow(PopUpManager.createPopUp(this, AddInsightToGroupWindow));
-            window.insightID = analysisDefinition.analysisID;
+            var window:GroupAssignWindow = new GroupAssignWindow();
+            window.reportID = analysisDefinition.analysisID;
+            PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
 
@@ -127,9 +128,9 @@
         }
 
         private function addFeedToGroup():void {
-            var window:AddFeedToGroupWindow = AddFeedToGroupWindow(PopUpManager.createPopUp(this, AddFeedToGroupWindow));
-            window.feedID = _dataService.dataFeedID;
-            //window.addEventListener(SubscriptionEvent.GROUP_TO_INSIGHT, addedToGroup);
+            var window:GroupDSAssignWindow = new GroupDSAssignWindow();
+            window.dataSourceID = analysisDefinition.dataFeedID;
+            PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
 
@@ -180,7 +181,7 @@
                 </mx:GridItem>
                 <mx:GridItem>
                 <mx:Button id="groupAddInsightButton" icon="@Embed(source='../../../../assets/users_into.png')"
-                       click="addReportToGroup()" toolTip="Add Report to Group" enabled="{reportSaveable}"/>
+                       click="addReportToGroup()" toolTip="Manage Report Groups" enabled="{reportSaveable}"/>
                 </mx:GridItem>
             </mx:GridRow>
         </mx:Grid>

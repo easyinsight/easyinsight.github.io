@@ -21,6 +21,39 @@ public class RollingFilterDefinition extends FilterDefinition {
     @Column(name="interval_value")
     private int interval;
 
+    @Column(name="before_or_after")
+    private boolean customBeforeOrAfter;
+
+    @Column(name="interval_type")
+    private int customIntervalType;
+
+    @Column(name="interval_amount")
+    private int customIntervalAmount;
+
+    public boolean isCustomBeforeOrAfter() {
+        return customBeforeOrAfter;
+    }
+
+    public void setCustomBeforeOrAfter(boolean customBeforeOrAfter) {
+        this.customBeforeOrAfter = customBeforeOrAfter;
+    }
+
+    public int getCustomIntervalType() {
+        return customIntervalType;
+    }
+
+    public void setCustomIntervalType(int customIntervalType) {
+        this.customIntervalType = customIntervalType;
+    }
+
+    public int getCustomIntervalAmount() {
+        return customIntervalAmount;
+    }
+
+    public void setCustomIntervalAmount(int customIntervalAmount) {
+        this.customIntervalAmount = customIntervalAmount;
+    }
+
     public int getInterval() {
         return interval;
     }
@@ -30,7 +63,7 @@ public class RollingFilterDefinition extends FilterDefinition {
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedRollingFilterDefinition(getField(), interval, insightRequestMetadata == null ? null : insightRequestMetadata.getNow());
+        return new MaterializedRollingFilterDefinition(this, insightRequestMetadata == null ? null : insightRequestMetadata.getNow());
     }
 
     public String toQuerySQL(String tableName) {
@@ -49,8 +82,8 @@ public class RollingFilterDefinition extends FilterDefinition {
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         if (interval != MaterializedRollingFilterDefinition.LAST_DAY) {
             Date now = insightRequestMetadata.getNow();
-            long startTime = MaterializedRollingFilterDefinition.findStartDate(interval, now);
-            long endTime = MaterializedRollingFilterDefinition.findEndDate(interval, now);
+            long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now);
+            long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now);
             preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startTime));
             preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endTime));
         }

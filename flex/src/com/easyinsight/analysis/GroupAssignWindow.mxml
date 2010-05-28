@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setup()" title="Assign Report to Groups">
+    <mx:Script><![CDATA[
+        import com.easyinsight.groups.GroupDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var availableGroups:ArrayCollection;
+
+        [Bindable]
+        private var sourceGroups:ArrayCollection;
+
+        private function assignGroups(allGroups:ArrayCollection, containedGroups:ArrayCollection):void {
+            availableGroups = new ArrayCollection();
+            sourceGroups = new ArrayCollection();
+            for each (var desc:GroupDescriptor in allGroups) {
+                var contained:Boolean = false;
+                for each (var dsGroup:GroupDescriptor in containedGroups) {
+                    if (dsGroup.groupID == desc.groupID) {
+                        contained = true;
+                        break;
+                    }
+                }
+                if (contained) {
+                    sourceGroups.addItem(desc);
+                } else {
+                    availableGroups.addItem(desc);
+                }
+            }
+        }
+
+        private var _reportID:int;
+
+        public function set reportID(value:int):void {
+            _reportID = value;
+        }
+
+        private function setup():void {
+            groupService.getMemberGroups.send();
+        }
+
+        private function gotGroups():void {
+            var groups:ArrayCollection = groupService.getMemberGroups.lastResult as ArrayCollection;
+            this.allGroups = groups;
+            groupService.getGroupsForReport.send(_reportID);
+        }
+
+        private var allGroups:ArrayCollection;
+
+        private function gotReportGroups():void {
+            var groups:ArrayCollection = groupService.getGroupsForReport.lastResult as ArrayCollection;
+            assignGroups(allGroups, groups);
+        }
+
+        private function gotDataSourceGroups():void {
+            var groups:ArrayCollection = groupService.getGroupsForDataSource.lastResult as ArrayCollection;
+            assignGroups(allGroups, groups);
+        }
+
+        private function save():void {
+            var owners:ArrayCollection = new ArrayCollection();
+            for each (var desc:GroupDescriptor in sourceList.dataProvider) {
+                owners.addItem(desc);
+            }
+            groupService.updateGroupsForReport.send(_reportID, owners);
+        }
+
+        private function updated():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="groupService" destination="groupService">
+        <mx:method name="getMemberGroups" result="gotGroups()"/>
+        <mx:method name="getGroupsForReport" result="gotReportGroups()"/>
+        <mx:method name="updateGroupsForReport" result="updated()"/>
+        <mx:method name="getGroupsForDataSource" result="gotDataSourceGroups()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+        <mx:HBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Label text="Available Groups"/>
+                <mx:List dataProvider="{availableGroups}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" labelField="name"
+                        width="180"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Label text="Report Groups"/>
+                <mx:List dataProvider="{sourceGroups}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" labelField="name"
+                        width="180" id="sourceList"/>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

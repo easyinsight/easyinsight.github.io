@@ -4,16 +4,21 @@ import com.easyinsight.analysis.AnalysisItem;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.geom.Point;
+
 
 import mx.collections.ArrayCollection;
+import mx.containers.Box;
 import mx.containers.HBox;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
 import mx.controls.Label;
+
 import mx.events.DropdownEvent;
 import mx.managers.PopUpManager;
+import mx.states.AddChild;
+import mx.states.State;
 
 public class RollingRangeFilter extends HBox implements IFilter
 {
@@ -56,6 +61,8 @@ public class RollingRangeFilter extends HBox implements IFilter
         rangeOptions.addItem(new RangeOption("Last Full Week", RollingDateRangeFilterDefinition.LAST_FULL_WEEK));
         rangeOptions.addItem(new RangeOption("Last Full Month", RollingDateRangeFilterDefinition.LAST_FULL_MONTH));
         rangeOptions.addItem(new RangeOption("Last Day of Data", RollingDateRangeFilterDefinition.LAST_DAY));
+        rangeOptions.addItem(new RangeOption("Last Day of Data", RollingDateRangeFilterDefinition.LAST_DAY));
+        rangeOptions.addItem(new RangeOption("Custom", RollingDateRangeFilterDefinition.CUSTOM));
     }
 
     private var _loadingFromReport:Boolean = false;
@@ -125,7 +132,7 @@ public class RollingRangeFilter extends HBox implements IFilter
         }
         if (comboBox == null) {
             comboBox = new ComboBox();
-            comboBox.rowCount = 14;
+            comboBox.rowCount = 16;
             comboBox.dataProvider = rangeOptions;
             comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
 
@@ -149,6 +156,19 @@ public class RollingRangeFilter extends HBox implements IFilter
             }
         }
         addChild(comboBox);
+        var customState:State = new State();
+        customState.name = "Custom";
+        var customRollingFilter:CustomRollingFilter = new CustomRollingFilter();
+        customRollingFilter.filter = rollingFilter;
+        customRollingFilter.addEventListener("customRollingFilterEvent", customFilter);
+        var targetBox:Box = new Box();
+        addChild(targetBox);
+        var addOp:AddChild = new AddChild(targetBox, customRollingFilter);
+        customState.overrides = [ addOp ];
+        this.states = [ customState ];
+        if (rollingFilter.interval == RollingDateRangeFilterDefinition.CUSTOM) {
+            currentState = "Custom";
+        }
         if (_filterEditable) {
             if (editButton == null) {
                 editButton = new Button();
@@ -172,8 +192,17 @@ public class RollingRangeFilter extends HBox implements IFilter
         }
     }
 
+    private function customFilter(event:Event):void {
+        dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, rollingFilter, null, this));
+    }
+
     private function filterValueChanged(event:DropdownEvent):void {
         var newValue:int = event.currentTarget.selectedItem.data;
+        if (newValue == RollingDateRangeFilterDefinition.CUSTOM) {
+            currentState = "Custom";
+        } else {
+            currentState = "";
+        }
         var currentValue:int = rollingFilter.interval;
         if (newValue != currentValue) {
             rollingFilter.interval = newValue;

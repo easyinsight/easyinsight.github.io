@@ -136,14 +136,14 @@
             </mx:ViewStack>
         </mx:VBox>
         <mx:VBox width="100%" height="50%" paddingBottom="5" paddingLeft="40" paddingRight="5" paddingTop="5" verticalAlign="middle">
-            <mx:HBox>
+            <mx:HBox width="100%">
                 <mx:Label text="Label: " width="100" fontFamily="Tahoma" fontWeight="bold"/>
                 <mx:TextInput id="labelInput" text="{linkLabel}" width="100%"/>
             </mx:HBox>
             <mx:ViewStack id="viewStack" resizeToContent="true" creationPolicy="all"
                           selectedIndex="{stackIndex}">
-                <mx:VBox>
-                    <mx:HBox>
+                <mx:VBox width="100%">
+                    <mx:HBox width="100%">
                         <mx:Label text="URL: " width="100" fontFamily="Tahoma" fontWeight="bold"/>
                         <mx:TextInput id="urlInput" text="{urlText}" width="100%"/>
                     </mx:HBox>

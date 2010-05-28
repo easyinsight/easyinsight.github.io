@@ -5,7 +5,7 @@ package com.easyinsight.analysis
 
 
 import com.easyinsight.pseudocontext.PseudoContextWindow;
-
+import com.easyinsight.pseudocontext.StandardContextWindow;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -117,6 +117,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 				}*/
 				this.text = "";
 			}
+            new StandardContextWindow(analysisItem, passThrough, this, value);
             invalidateProperties();
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
 		}

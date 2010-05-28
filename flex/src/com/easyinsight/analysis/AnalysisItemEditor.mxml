@@ -37,17 +37,6 @@
             </mx:AddChild>
         </mx:State>
 
-        <mx:State name="TemporalMeasure">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:TemporalMeasureDetailEditor addedToStage="detailEditor = temporalDetailEditor"
-                                                      id="temporalDetailEditor"
-                                                      dimensionFields="{dimensionFields}"
-                                                      dateDimensionFields="{dateFields}"
-                                                      measureObjects="{measureObjects}"
-                                                      analysisItem="{startingAnalysisItem}"/>
-            </mx:AddChild>
-        </mx:State>
-
         <mx:State name="Grouping">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:GroupingDetailEditor addedToStage="detailEditor = groupingDetailEditor"
@@ -118,7 +107,7 @@
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Alert;
+
         import mx.events.DropdownEvent;
 
         import com.easyinsight.analysis.options.OptionFactory;

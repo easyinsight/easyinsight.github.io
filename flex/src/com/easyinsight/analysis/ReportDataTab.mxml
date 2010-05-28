@@ -111,11 +111,6 @@
             PopUpUtil.centerPopUp(window);
         }
 
-
-        private function refresh():void {
-            dataView.retrieveData();
-        }
-
         private function createCalculation():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = CalculationWindow;
@@ -210,9 +205,6 @@
             removeChild(apiButton);
         }
         ]]></mx:Script>
-    <mx:Button id="refreshButton" toolTip="Refresh Data"
-               icon="@Embed(source='../../../../assets/refresh.png')"
-               click="refresh()"/>
     <mx:Button id="calculationButton" toolTip="Create Calculation"
                icon="@Embed(source='../../../../assets/text_formula.png')"
                click="createCalculation()"/>

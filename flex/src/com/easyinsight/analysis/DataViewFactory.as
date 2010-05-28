@@ -23,6 +23,8 @@ public class DataViewFactory extends VBox implements IRetrievable {
     private var _reportRendererModule:String;
     private var _newDefinition:Class;
     private var _reportDataService:Class;
+
+    private var _adHocMode:Boolean;
     
     private var _analysisDefinition:AnalysisDefinition;
 
@@ -47,6 +49,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
         this.percentWidth = 100;
     }
 
+
+    public function set adHocMode(value:Boolean):void {
+        _adHocMode = value;
+    }
 
     public function set dataSourceID(value:int):void {
         _dataSourceID = value;
@@ -226,13 +232,29 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function retrieveData(refreshAllSources:Boolean = false):void {
+        if (_adHocMode) {
+            if (_reportRenderer == null) {
+                pendingRequest = true;
+            } else {
+                _analysisDefinition = _controlBar.createAnalysisDefinition();
+                if (_controlBar.isDataValid()) {
+                    _analysisDefinition.createDefaultLimits();
+                    _dataService.retrieveData(_analysisDefinition, refreshAllSources);
+                } else {
+                    _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object(), null);
+                }
+            }
+        }
+    }
+
+    public function forceRetrieve():void {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
             if (_controlBar.isDataValid()) {
                 _analysisDefinition.createDefaultLimits();
-                _dataService.retrieveData(_analysisDefinition, refreshAllSources);
+                _dataService.retrieveData(_analysisDefinition, false);
             } else {
                 _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object(), null);
             }

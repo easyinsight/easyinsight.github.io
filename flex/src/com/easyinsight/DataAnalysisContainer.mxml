@@ -70,6 +70,8 @@
         import com.easyinsight.util.PNGEnc;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.binding.utils.BindingUtils;
+        import mx.binding.utils.ChangeWatcher;
         import mx.collections.Sort;
         import mx.events.DragEvent;
         import mx.events.ListEvent;
@@ -233,6 +235,7 @@
                 dataView.removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 dataView.removeEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
                 dataControlVBox.removeChild(dataView);
+                viewWatcher.unwatch();
             }
             if (analysisDefinition == null) {
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
@@ -248,9 +251,12 @@
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             dataView.addEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
+            viewWatcher = BindingUtils.bindProperty(dataViewFactory, "adHocMode", adHocButton, "adHoc");
             dataControlVBox.addChild(dataViewFactory);
             dataViewFactory.retrieveData();
         }
+
+        private var viewWatcher:ChangeWatcher;
 
         public function newAnalysis():void {
             var controller:IReportController = new ListController();
@@ -977,6 +983,11 @@
                        toolTip="Save" enabled="{!_previewMode}"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
                        toolTip="Save As" enabled="{saveAsEnabled}"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16"/>
+            <mx:Button id="refreshButton" toolTip="Refresh Data"
+               icon="@Embed(source='../../../assets/refresh.png')"
+               click="dataView.forceRetrieve()"/>
+            <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
                        icon="@Embed(source='../../../assets/table.png')" click="newReport()"/>

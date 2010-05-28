@@ -339,6 +339,40 @@ public class GroupService {
         }
     }
 
+    public List<GroupDescriptor> getGroupsForDataSource(long dataSourceID) {
+        try {
+            return groupStorage.getGroupsForDataSource(dataSourceID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateGroupsForDataSource(long dataSourceID, List<GroupDescriptor> groups) {
+        try {
+            groupStorage.updateGroupsForDataSource(dataSourceID, groups);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
+    public List<GroupDescriptor> getGroupsForReport(long reportID) {
+        try {
+            return groupStorage.getGroupsForReport(reportID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateGroupsForReport(long reportID, List<GroupDescriptor> groups) {
+        try {
+            groupStorage.updateGroupsForReport(reportID, groups);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
     public void removeGoalTreeFromGroup(long goalTreeID, long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
         try {

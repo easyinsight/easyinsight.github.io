@@ -654,4 +654,78 @@ public class GroupStorage {
         }
         return groupComments;
     }
+
+    public List<GroupDescriptor> getGroupsForReport(long reportID) throws SQLException {
+        List<GroupDescriptor> groups = new ArrayList<GroupDescriptor>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement groupStmt = conn.prepareStatement("SELECT group_id, community_group.name FROM group_to_insight, community_group where insight_id = ? and " +
+                    "community_group.community_group_id = group_to_insight.group_id");
+            groupStmt.setLong(1, reportID);
+            ResultSet rs = groupStmt.executeQuery();
+            while (rs.next()) {
+                long groupID = rs.getLong(1);
+                String name = rs.getString(2);
+                groups.add(new GroupDescriptor(name, groupID, 0, null));
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return groups;
+    }
+
+    public void updateGroupsForReport(long reportID, List<GroupDescriptor> groups) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM GROUP_TO_INSIGHT WHERE INSIGHT_ID = ?");
+            clearStmt.setLong(1, reportID);
+            clearStmt.executeUpdate();
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO GROUP_TO_INSIGHT (INSIGHT_ID, GROUP_ID, ROLE) VALUES (?, ?, ?)");
+            for (GroupDescriptor desc : groups) {
+                insertStmt.setLong(1, reportID);
+                insertStmt.setLong(2, desc.getGroupID());
+                insertStmt.setInt(3, Roles.OWNER);
+                insertStmt.execute();
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<GroupDescriptor> getGroupsForDataSource(long dataSourceID) throws SQLException {
+        List<GroupDescriptor> groups = new ArrayList<GroupDescriptor>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement groupStmt = conn.prepareStatement("SELECT group_id, community_group.name FROM upload_policy_groups, community_group where feed_id = ? and " +
+                    "community_group.community_group_id = upload_policy_groups.group_id");
+            groupStmt.setLong(1, dataSourceID);
+            ResultSet rs = groupStmt.executeQuery();
+            while (rs.next()) {
+                long groupID = rs.getLong(1);
+                String name = rs.getString(2);
+                groups.add(new GroupDescriptor(name, groupID, 0, null));
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return groups;
+    }
+
+    public void updateGroupsForDataSource(long dataSourceID, List<GroupDescriptor> groups) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM upload_policy_groups WHERE FEED_ID = ?");
+            clearStmt.setLong(1, dataSourceID);
+            clearStmt.executeUpdate();
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO upload_policy_groups (FEED_ID, GROUP_ID, ROLE) VALUES (?, ?, ?)");
+            for (GroupDescriptor desc : groups) {
+                insertStmt.setLong(1, dataSourceID);
+                insertStmt.setLong(2, desc.getGroupID());
+                insertStmt.setInt(3, Roles.OWNER);
+                insertStmt.execute();
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 }
