@@ -43,6 +43,8 @@ public class DataSourceCopyUtils {
 
         DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID, userName);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
+        clonedFeedDefinition.setDateCreated(new Date());
+        clonedFeedDefinition.setDateUpdated(new Date());
         if (newDataSourceName != null) {
             clonedFeedDefinition.setFeedName(newDataSourceName);
         }
