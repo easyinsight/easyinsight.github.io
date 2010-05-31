@@ -23,23 +23,43 @@
     String hashStr = request.getParameter("orderid") + "|" + request.getParameter("amount") + "|" + request.getParameter("response") + "|" + request.getParameter("transactionid") + "|" + request.getParameter("avsresponse") + "|" + request.getParameter("cvvresponse") + "|" + request.getParameter("customer_vault_id") + "|" + request.getParameter("time") + "|" + BillingUtil.getKey();
     String hashed = BillingUtil.MD5Hash(hashStr);
 
-
-    if(!hashed.equals(request.getParameter("hash")) || !request.getParameter("response").equals("1") || !request.getParameter("cvvresponse").equals("M") || !Arrays.asList("X", "Y", "D", "M", "W", "Z", "P", "L", "G", "I").contains(request.getParameter("avsresponse")))
-        response.sendRedirect("billing.jsp?error=true");
-    else
-    {
+    EIConnection conn = Database.instance().getConnection();
+    conn.setAutoCommit(false);
+    Session s = Database.instance().createSession(conn);
+    try {
         long accountID = (Long) request.getSession().getAttribute("accountID");
         long userID = (Long) request.getSession().getAttribute("userID");
         System.out.println("UserID: " + userID + " AccountID: " + accountID);
         Account account = null;
         User user = null;
-        EIConnection conn = Database.instance().getConnection();
-        conn.setAutoCommit(false);
-        Session s = Database.instance().createSession(conn);
-        try {
-            user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-            account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-            account.setBillingInformationGiven(true);
+
+        user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+        account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+
+        System.out.println("Creating account billing info...");
+        AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
+        info.setTransactionID(request.getParameter("transactionid"));
+        info.setAmount(request.getParameter("amount"));
+        info.setResponse(request.getParameter("response"));
+        info.setResponseCode(request.getParameter("response_code"));
+        info.setResponseString(request.getParameter("responsetext"));
+        info.setAccountId(account.getAccountID());
+        DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date transTime = df.parse(request.getParameter("time"));
+        Calendar c = Calendar.getInstance();
+        c.setTime(transTime);
+        info.setTransactionTime(transTime);
+        account.getBillingInfo().add(info);
+        s.save(info);
+        conn.commit();
+        System.out.println("Saved account billing info.");
+
+    if(!hashed.equals(request.getParameter("hash")) || !request.getParameter("response").equals("1") || !request.getParameter("cvvresponse").equals("M") || !Arrays.asList("X", "Y", "D", "M", "W", "Z", "P", "L", "G", "I").contains(request.getParameter("avsresponse")))
+        response.sendRedirect("billing.jsp?error=true");
+    else
+    {
+        account.setBillingInformationGiven(true);
 
             List l = s.createQuery("from BuyOurStuffTodo where userID = ?").setLong(0, userID).list();
             if(l.size() > 0) {
@@ -49,24 +69,6 @@
             if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
               && !user.isAccountAdmin())
                 response.sendRedirect("access.jsp");
-
-            System.out.println("Creating account billing info...");
-            AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
-            info.setTransactionID(request.getParameter("transactionid"));
-            info.setAmount(request.getParameter("amount"));
-            info.setResponse(request.getParameter("response"));
-            info.setResponseCode(request.getParameter("response_code"));
-            info.setResponseString(request.getParameter("responsetext"));
-            info.setAccountId(account.getAccountID());
-            DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-            df.setTimeZone(TimeZone.getTimeZone("UTC"));
-            Date transTime = df.parse(request.getParameter("time"));
-            Calendar c = Calendar.getInstance();
-            c.setTime(transTime);
-            info.setTransactionTime(transTime);
-            account.getBillingInfo().add(info);
-            s.save(info);
-            System.out.println("Saved account billing info.");
 
             if(account.getAccountState() == Account.DELINQUENT) {
                 account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
@@ -90,8 +92,8 @@
             s.save(account);
 
             s.flush();
-
             conn.commit();
+    }
         }
         catch(Exception e) {
             conn.rollback();
@@ -100,7 +102,7 @@
         finally {
           Database.closeConnection(conn);
         }
-    }
+
 
 %>
 <html>
