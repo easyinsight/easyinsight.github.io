@@ -21,6 +21,7 @@
         import mx.charts.LineChart;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.events.ChartItemEvent;
+        import mx.charts.renderers.CircleItemRenderer;
         import mx.charts.series.LineSeries;
         import mx.charts.series.items.LineSeriesItem;
         import mx.collections.ArrayCollection;
@@ -83,7 +84,7 @@
         }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
-            try {
+
             var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
 
             this.chartData = new ArrayCollection(dataSet.toArray());
@@ -200,6 +201,7 @@
                 for (i = 0; i < uniques.length; i++) {
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:LineSeries = new LineSeries();
+                    uniqueLineSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
                     uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
                         key = "[ No Value ]";
@@ -217,9 +219,6 @@
 
             legend.dataProvider = lineChart;
             legend.direction = "vertical";
-            } catch (e:Error) {
-                Alert.show(e.message);
-            }
         }
 
 
