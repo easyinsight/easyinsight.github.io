@@ -160,13 +160,15 @@ public class DataStorage {
         if (accountType == Account.ENTERPRISE) {
             allowed = Account.ENTERPRISE_MAX;
         } else if (accountType == Account.PREMIUM) {
-            allowed = Account.PROFESSIONAL_MAX;
+            allowed = Account.PREMIUM_MAX;
         } else if (accountType == Account.BASIC) {
-            allowed = Account.INDIVIDUAL_MAX;
+            allowed = Account.BASIC_MAX;
+        } else if (accountType == Account.PLUS) {
+            allowed = Account.PLUS_MAX;
         } else if (accountType == Account.PERSONAL) {
             allowed = Account.FREE_MAX;
         } else if (accountType == Account.PROFESSIONAL) {
-            allowed = Account.GROUP_MAX;
+            allowed = Account.PROFESSIONAL_MAX;
         } else if (accountType == Account.ADMINISTRATOR) {
             allowed = Account.ADMINISTRATOR_MAX;           
         } else {
@@ -604,7 +606,7 @@ public class DataStorage {
         if (groupByItems.size() > 0) {
             for (Key key : groupByItems) {
                 String columnName = key.toSQL();
-                groupByBuilder.append(columnName);
+                groupByBuilder.append("binary(" + columnName + ")");
                 groupByBuilder.append(",");
             }
             groupByBuilder = groupByBuilder.deleteCharAt(groupByBuilder.length() - 1);
