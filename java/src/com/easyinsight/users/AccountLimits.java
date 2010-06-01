@@ -18,7 +18,7 @@ public class AccountLimits {
             account.setMaxSize(Account.BASIC_MAX);
         } else if (account.getAccountType() == Account.PERSONAL) {
             account.setMaxUsers(1);
-            account.setMaxSize(Account.PERSONAL);
+            account.setMaxSize(Account.PERSONAL_MAX);
         } else if (account.getAccountType() == Account.PROFESSIONAL) {
             account.setMaxUsers(500);
             account.setMaxSize(Account.PROFESSIONAL_MAX);

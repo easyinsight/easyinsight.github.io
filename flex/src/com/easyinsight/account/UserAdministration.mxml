@@ -152,22 +152,7 @@
                 <mx:Box width="100%" backgroundColor="#DEDEDE" horizontalAlign="center">
                     <mx:Label text="Users" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
                 </mx:Box>
-                <mx:ViewStack resizeToContent="true" width="100%" selectedIndex="{userIndex}">
-                    <mx:Box width="100%">
-                        <mx:DataGrid dataProvider="{users}" width="100%">
-                            <mx:columns>
-                                <mx:DataGridColumn dataField="userName" headerText="User Name"
-                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                                <mx:DataGridColumn dataField="firstName" headerText="First Name"
-                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                                <mx:DataGridColumn dataField="name" headerText="Last Name"
-                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                                <mx:DataGridColumn dataField="userName" width="100" headerText=""
-                                                   itemRenderer="{userButtonFactory}" sortable="false"/>
-                            </mx:columns>
-                        </mx:DataGrid>
-                    </mx:Box>
-                    <mx:Box width="100%">
+
                         <mx:DataGrid dataProvider="{users}" width="100%">
                             <mx:columns>
                                 <mx:DataGridColumn dataField="userName" headerText="User Name"
@@ -181,9 +166,7 @@
                                 <mx:DataGridColumn dataField="userName" width="100" headerText=""
                                                    itemRenderer="{userButtonFactory}" sortable="false"/>
                             </mx:columns>
-                        </mx:DataGrid>
-                    </mx:Box>
-                </mx:ViewStack>
+                        </mx:DataGrid>                    
             </mx:VBox>
         </mx:VBox>
     </mx:VBox>

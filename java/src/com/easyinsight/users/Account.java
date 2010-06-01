@@ -38,7 +38,7 @@ public class Account {
     public static final int TRIAL = 9;
     public static final int CLOSING = 10;
 
-    public static final long FREE_MAX = 5000000;
+    public static final long PERSONAL_MAX = 5000000;
     public static final long BASIC_MAX = 35000000;
     public static final long PLUS_MAX = 90000000;
     public static final long PROFESSIONAL_MAX = 250000000;
@@ -335,7 +335,7 @@ public class Account {
     public static long getMaxCount(int tier) {
         switch(tier) {
             case Account.PERSONAL:
-                return FREE_MAX;
+                return PERSONAL_MAX;
             case Account.BASIC:
                 return BASIC_MAX;
             case Account.PLUS:

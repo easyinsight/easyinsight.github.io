@@ -9,6 +9,7 @@
                 bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIProgressBar">
     <mx:Script>
 		<![CDATA[        
+        import com.easyinsight.account.Account;
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.bugreports.BugReportWindow;
@@ -402,11 +403,15 @@
         private function sessionCheck():void {
             var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
             if (authResult != null) {
-                quietLogin(authResult, false);
-                toMain();
+                if (authResult.accountState == Account.DELINQUENT) {
+                    toLogin(1);
+                } else {
+                    quietLogin(authResult, false);
+                    toMain();
+                }
             } else {
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
-                toLogin();
+                toLogin(0);
             }
             browserManager = BrowserManager.getInstance();
             browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);
@@ -440,7 +445,7 @@
         private function loginEvent(event:LoginEvent):void {
             loggedIn = event.type == LoginEvent.LOGIN;
             if (event.type == LoginEvent.LOGOUT) {
-                toLogin();
+                toLogin(0);
             }
         }
 
@@ -449,9 +454,10 @@
             doAnalyze(event.source);
         }
 
-        private function toLogin():void {
+        private function toLogin(initState:int):void {
             masterCanvas.removeAllChildren();
             var loginPage:LoginPage = new LoginPage();
+            loginPage.initState = initState;
             loginPage.percentWidth = 100;
             loginPage.percentHeight = 100;
             loginPage.addEventListener(LoginEvent.LOGIN, login);
@@ -484,7 +490,7 @@
             headerBar.setStyle("paddingRight", 10);
             headerBar.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
             headerBar.addEventListener(LaunchQuickSearchEvent.LAUNCH_QUICK_SEARCH, launchQuickSearchWindow);
-            headerBar.addEventListener(ListingChangeEvent.LISTING_CHANGE, launchBugReportWindow);
+            headerBar.addEventListener(ReportBugEvent.REPORT_BUG, launchBugReportWindow);
             masterCanvas.addChild(headerBar);
             var box:Box = new Box();
             box.percentWidth = 100;

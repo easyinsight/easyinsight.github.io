@@ -2,6 +2,7 @@
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="setupNodes()" width="100%" horizontalAlign="center">
     <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
         import com.easyinsight.framework.User;
 
         import mx.collections.ArrayCollection;
@@ -79,6 +80,9 @@
 
         private function saved():void {
             var id:int = preferencesService.savePersona.lastResult as int;
+            if (User.getInstance().getAccountType() == Account.PERSONAL) {
+                User.getInstance().personaID = id;
+            }
             _persona.personaID = id;
             if (newPersona) {
                 dispatchEvent(new PersonaEvent(PersonaEvent.NEW_PERSONA, _persona));

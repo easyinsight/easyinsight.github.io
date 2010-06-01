@@ -4,6 +4,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.users.Account;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,6 +105,12 @@ public class PreferencesService {
             insertSettingStmt.setBoolean(2, setting.isSelected());
             insertSettingStmt.setLong(3, persona.getPersonaID());
             insertSettingStmt.execute();
+        }
+        if (SecurityUtil.getAccountTier() == Account.PERSONAL) {
+            PreparedStatement updateUserStmt = conn.prepareStatement("UPDATE USER SET PERSONA_ID = ? WHERE USER_ID = ?");
+            updateUserStmt.setLong(1, persona.getPersonaID());
+            updateUserStmt.setLong(2, SecurityUtil.getUserID());
+            updateUserStmt.executeUpdate();
         }
         return persona.getPersonaID();
     }

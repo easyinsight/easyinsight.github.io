@@ -10,6 +10,7 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.core.Container;
         import mx.events.ItemClickEvent;
         import mx.managers.PopUpManager;
@@ -60,7 +61,8 @@
                         if (User.getInstance().accountAdmin) {
                             // user profile information, option to ugprade, option to cancel, billing link, general account settings?
                             toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()),
-                                new AccountOption("User Administration", new UserAdministration())]);
+                                new AccountOption("User Administration", new UserAdministration()),
+                                new AccountOption("Persona", new PersonaManagement())]);
                             showToggle = true;
                         } else {
                             toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);

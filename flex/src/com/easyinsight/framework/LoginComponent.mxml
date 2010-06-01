@@ -149,7 +149,6 @@
             } else {
                 stackIndex = 0;
                 failureMessage = authResult.failureMessage;
-                authService.isAccountDelinquentOrClosed.send(userName.text);
             }
         }
 
@@ -232,6 +231,5 @@
     <mx:RemoteObject id="authService" destination="login">
         <mx:method name="authenticate" result="handleAuthentication()" fault="failureMessage = event.fault.faultString"/>
         <mx:method name="remindPassword" result="reset()"  fault="emailFailure = event.fault.faultString"/>
-        <mx:method name="isAccountDelinquentOrClosed" result="delinquentAccount()" />
     </mx:RemoteObject>
 </mx:Box>

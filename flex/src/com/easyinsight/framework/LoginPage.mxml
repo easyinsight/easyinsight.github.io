@@ -2,7 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
            xmlns:framework="com.easyinsight.framework.*" xmlns:account="com.easyinsight.account.*"
            xmlns:kpi="com.easyinsight.kpi.*" xmlns:customupload="com.easyinsight.customupload.*"
-           backgroundColor="#FFFFFF">
+           backgroundColor="#FFFFFF" creationComplete="setup()">
     <mx:Metadata>
         [Event(name="loginEvent2", type="com.easyinsight.framework.LoginEvent")]
         [Event(name="quietLogin", type="com.easyinsight.framework.LoginEvent")]
@@ -48,6 +48,12 @@
             dispatchEvent(new Event("solutionIDChanged"));
         }
 
+        private function setup():void {
+            if (_initState == 1) {
+                 panelIndex = 4;
+            }
+        }
+
         [Bindable]
         private var setupData:AccountSetupData = new AccountSetupData();
 
@@ -69,6 +75,8 @@
                     configWindow.onlyDataSource = true;
                     configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
                     configWindow.addEventListener("later", onLater, false, 0, true);
+                    configWindow.setStyle("hideEffect", leftEffect);
+                    configWindow.setStyle("showEffect", leftEffect);
                     viewStack.addChild(configWindow);
                     panelIndex = viewStack.getChildIndex(configWindow);
                 }
@@ -95,23 +103,23 @@
         }
 
         private function accountCreated(event:LoginEvent):void {
-            //User.getInstance().changeSettings(Persona(setupData.personas.getItemAt(setupData.myPersona)).uiSettings);
+            dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
+            panelIndex++;
+        }
+
+        private function remaining():void {
+            userService.applySetupData.send(setupData);
+        }
+
+        private function applied():void {
+            User.getInstance().changeSettings(Persona(setupData.personas.getItemAt(setupData.myPersona)).uiSettings);
             if (accountType >= _requiredTier && int(_solutionID) > 0) {
-                dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
                 ProgressAlert.alert(this, "Establishing connection...", null, solutionService.retrieveSolution, solutionService.installSolution);
                 solutionService.retrieveSolution.send(int(_solutionID));
             } else {
-                dispatchEvent(event);
+                dispatchEvent(new Event("allDone"));
             }
         }
-
-        /*private function remaining():void {
-         userService.applySetupData.send(setupData);
-         }
-
-         private function applied():void {
-
-         }*/
 
         [Bindable]
         private var accountType:int;
@@ -130,6 +138,25 @@
             dispatchEvent(new Event("requiredTierChanged"));
         }
 
+        private function toBilling():void {
+            navigateToURL(new URLRequest('billing/billing.jsp'), '_self');
+        }
+
+        private function loginHandler(event:LoginEvent):void {
+            if (event.authResponse.accountState == Account.DELINQUENT) {
+                panelIndex = 4;
+            } else {
+                dispatchEvent(event);
+            }
+        }
+
+        private var _initState:int;
+
+
+        public function set initState(value:int):void {
+            _initState = value;
+        }
+
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
@@ -137,19 +164,19 @@
         [Bindable]
         [Embed(source="../../../../assets/chart_area_x48.png")]
         public var connectionsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/credit_card_x48.png")]
+        public var moneyIcon:Class;
         ]]></mx:Script>
     <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="installSolution" result="installed()"/>
         <mx:method name="retrieveSolution" result="gotSolution()"/>
     </mx:RemoteObject>
-    <!--<mx:RemoteObject destination="login" id="userService">
+    <mx:RemoteObject destination="login" id="userService">
         <mx:method name="applySetupData" result="applied()"/>
-    </mx:RemoteObject>-->
-    <mx:VBox width="100%" height="100%" verticalGap="0">
-        <mx:Box height="50%" width="100%" backgroundColor="0x000000"/>
-        <mx:Box height="50%" width="100%" backgroundColor="0xAAAAAA"/>
-    </mx:VBox>
+    </mx:RemoteObject>
     <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
         <mx:VBox width="1000" verticalGap="0" borderStyle="solid" borderThickness="1" borderColor="#DDDDDD"
                  backgroundColor="#FFFFFF" paddingBottom="0"
@@ -166,10 +193,10 @@
             <mx:ViewStack selectedIndex="{panelIndex}"
                           id="viewStack" resizeToContent="true" width="100%" height="440"
                           backgroundColor="0xFFFFFF" paddingTop="10">
-                <mx:HBox width="100%" verticalAlign="middle" height="100%">
+                <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
                     <!-- login page -->
                     <mx:VBox width="50%" horizontalAlign="center">
-                        <framework:LoginComponent loginEvent2="dispatchEvent(event)"/>
+                        <framework:LoginComponent loginEvent2="loginHandler(event)"/>
                     </mx:VBox>
                     <mx:VBox width="50%" horizontalAlign="center">
                         <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
@@ -181,27 +208,42 @@
                                  mouseChildren="false">
                             <mx:Image source="{connectionsIcon}"/>
                             <mx:Text text="No Account Yet?" fontSize="24" selectable="false"/>
-                            <mx:TextArea text="Click here to sign up for a new account and start analyzing your data now!"
-                                         fontSize="18" backgroundAlpha="0" editable="false" selectable="false"
-                                         height="80"
-                                         width="310" textAlign="center"/>
+                            <mx:TextArea
+                                    text="Click here to sign up for a new account and start analyzing your data now!"
+                                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false"
+                                    height="80"
+                                    width="310" textAlign="center"/>
                         </mx:VBox>
                     </mx:VBox>
                 </mx:HBox>
-                <mx:VBox>
+                <mx:VBox hideEffect="leftEffect" showEffect="leftEffect">
                     <!-- account wizard -->
-                    <account:AccountCreationWizard cancel="panelIndex = 0" pro="accountType = Account.PRO; panelIndex = 2"
-                            plus="accountType = Account.PLUS; panelIndex = 2" basic="accountType = Account.BASIC; panelIndex = 2"
-                            free="accountType = Account.PERSONAL; panelIndex = 2" requiredTier="{requiredTier}"/>
+                    <account:AccountCreationWizard cancel="panelIndex = 0"
+                                                   pro="accountType = Account.PRO; panelIndex = 2"
+                                                   plus="accountType = Account.PLUS; panelIndex = 2"
+                                                   basic="accountType = Account.BASIC; panelIndex = 2"
+                                                   free="accountType = Account.PERSONAL; panelIndex = 2"
+                                                   requiredTier="{requiredTier}"/>
                 </mx:VBox>
-                <mx:VBox>
+                <mx:VBox hideEffect="leftEffect" showEffect="leftEffect">
                     <!-- profile creation page -->
-                    <account:ProfessionalAccountLoginCreation cancel="panelIndex = 1" loginEvent2="accountCreated(event)" accountType="{accountType}"/>
+                    <account:ProfessionalAccountLoginCreation cancel="panelIndex = 1"
+                                                              loginEvent2="accountCreated(event)"
+                                                              accountType="{accountType}"/>
                 </mx:VBox>
-                <!--<mx:VBox>
+                <mx:VBox hideEffect="leftEffect" showEffect="leftEffect">
                     <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
                                                  kpiTutorialNext="remaining()" accountType="{accountType}"/>
-                </mx:VBox>-->
+                </mx:VBox>
+                <!-- welcome back panel -->
+                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle" hideEffect="leftEffect" showEffect="leftEffect">
+                    <mx:Image source="{moneyIcon}"/>
+                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0" fontSize="18"
+                                 text="Your trial has expired. You'll need to enter billing information to continue using Easy Insight."
+                            width="350" height="80"/>
+                    <mx:Button label="Enter Billing" click="toBilling()" fontSize="18"/>
+                </mx:VBox>
+                <!-- delinquent panel -->
             </mx:ViewStack>
             <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
         </mx:VBox>
