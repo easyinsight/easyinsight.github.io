@@ -3,6 +3,7 @@ package com.easyinsight.groups;
 import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.goals.GoalTreeNode;
 import com.easyinsight.security.*;
@@ -398,6 +399,7 @@ public class GroupService {
         SecurityUtil.authorizeFeed(feedID, Roles.SHARER);
         try {
             groupStorage.addFeedToGroup(feedID, groupID, Roles.SUBSCRIBER);
+            FeedRegistry.instance().flushCache(feedID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
