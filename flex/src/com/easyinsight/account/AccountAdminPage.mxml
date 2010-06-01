@@ -14,6 +14,9 @@
                 <account:AccountAPIUse accountInfo="{accountInfo}"/>
                 <account:AccountState accountInfo="{accountInfo}"/>
                 <account:AccountTrialDate accountInfo="{accountInfo}"/>
+                <!--<mx:FormItem label="">
+                    <mx:Button label="Initial Account Setup..." click="setupWizard()"/>
+                </mx:FormItem>-->
                 <mx:FormItem label="Account Settings: " fontFamily="Tahoma" fontWeight="bold">
                     <mx:Button label="Edit Account Settings..." click="editAccountSettings()"/>
                 </mx:FormItem>
@@ -28,6 +31,7 @@
     </mx:VBox>
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.preferences.PreferencesWindow;
         import com.easyinsight.util.PopUpUtil;
 
@@ -42,6 +46,10 @@
 
         [Bindable]
         private var showUpgrade:Boolean;
+
+        private function setupWizard():void {
+            dispatchEvent(new AnalyzeEvent(new AccountSetupWizardSource()));
+        }
 
         private function onCreationComplete():void {
             showUpgrade = User.getInstance().getAccountType() != Account.ENTERPRISE;

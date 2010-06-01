@@ -36,6 +36,8 @@ public class SalesEmail implements Runnable {
             accountType = "Personal";
         } else if (account.getAccountType() == Account.BASIC) {
             accountType = "Basic";
+        }  else if (account.getAccountType() == Account.PLUS) {
+            accountType = "Plus";
         } else if (account.getAccountType() == Account.PROFESSIONAL) {
             accountType = "Professional";
         } else if (account.getAccountType() == Account.PREMIUM) {

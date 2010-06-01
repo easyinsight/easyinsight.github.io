@@ -53,6 +53,9 @@ public class AbstractViewFactory extends VBox implements IRetrievable {
         _reportID = val;
     }
 
+    public function loadRenderer():void {
+        
+    }
 
     public function set dataSourceID(value:int):void {
         _dataSourceID = value;

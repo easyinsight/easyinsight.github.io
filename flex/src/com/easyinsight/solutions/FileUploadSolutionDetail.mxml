@@ -3,24 +3,6 @@
                                   xmlns:solutions="com.easyinsight.solutions.*"
          width="100%" height="100%" paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0"
          verticalGap="0" backgroundColor="#818285" horizontalAlign="center">
-    <solutions:states>
-        <mx:State name="NotLoggedIn">
-            <mx:RemoveChild target="{installButton}"/>
-            <mx:AddChild relativeTo="{controlsBox}">
-                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
-                    <mx:VBox verticalGap="0">
-                        <mx:Label text="You'll need to create an account at any tier or log in"/>
-                        <mx:Label text="before uploading a file."/>
-                    </mx:VBox>
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Button label="Create Account" styleName="blueButton" click="createAccount()"/>
-                        <mx:Spacer width="20"/>
-                        <mx:Button label="Log in" styleName="blueButton" click="login()"/>
-                    </mx:HBox>
-                </mx:VBox>
-            </mx:AddChild>
-        </mx:State>
-    </solutions:states>
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UserUpload;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -31,10 +13,6 @@
         [Bindable]
         [Embed(source="../../../../assets/excelexample.PNG")]
         private var excelImage:Class;
-
-        override protected function toNotLoggedInState():void {
-            currentState = "NotLoggedIn";
-        }
                 
         private function install():void {
             var userUpload:UserUpload = UserUpload(PopUpManager.createPopUp(this, UserUpload, true));

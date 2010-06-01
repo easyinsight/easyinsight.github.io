@@ -81,14 +81,10 @@
             BrowserManager.getInstance().setTitle("Easy Insight - Account");
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
-            var user:User = User.getInstance();
-            if (user != null) {
-                stackIndex = 2;
-                accountSummary.gotFocus();
-            } else {
-                stackIndex = 1;                
-                accountWizard.gotFocus();
-            }
+
+            stackIndex = 1;
+            accountSummary.gotFocus();
+
         }
 
         [Bindable]
@@ -127,8 +123,6 @@
                  paddingRight="20" paddingTop="5" paddingBottom="20" id="coreContent" backgroundColor="#FFFFFF" creationPolicy="all"
                     selectedIndex="{stackIndex}">
                 <mx:Box/>
-                <account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)" destinationURL="{destinationURL}"
-                        requiredTier="{requiredTier}" connectionName="{connectionName}"/>
                 <account:AccountSummary id="accountSummary"/>
              </mx:ViewStack>
         </mx:VBox>

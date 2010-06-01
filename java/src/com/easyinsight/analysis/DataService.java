@@ -369,13 +369,7 @@ public class DataService {
                 }
             }
             DataResults results;
-
-            /*Set<Long> ids = validate(analysisDefinition, feed);
-            if (ids.size() > 0) {
-                results = new ListDataResults();
-                results.setInvalidAnalysisItemIDs(ids);
-                results.setFeedMetadata(getFeedMetadata(analysisDefinition.getDataFeedID(), false));
-            } else {*/
+            
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
                 allFields.addAll(analysisDefinition.getAddedItems());

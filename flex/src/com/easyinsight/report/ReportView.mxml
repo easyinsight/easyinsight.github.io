@@ -5,7 +5,8 @@
                             xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
                             width="100%" height="100%"
                             creationComplete="onCreation()"
-                            implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.framework.IFullScreenPage">
+                            implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.framework.IFullScreenPage"
+        backgroundColor="#222222">
     <easyinsight:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBar}"/>
@@ -13,7 +14,6 @@
         </mx:State>
     </easyinsight:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.LoginDialog;
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -34,7 +34,6 @@
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.EIErrorEvent;
-        import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
@@ -107,12 +106,7 @@
         }
 
         private function bookmark():void {
-            if (User.getInstance() == null) {
-                var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
-                PopUpUtil.centerPopUp(loginDialog);
-            } else {
-                analysisService.subscribeToAnalysis.send(_reportID);
-            }
+            analysisService.subscribeToAnalysis.send(_reportID);
         }
 
         private function onCreation():void {
@@ -121,8 +115,9 @@
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            viewFactory.loadRenderer();
         }
-
+        
         private function onRollup(event:HierarchyRollupEvent):void {
 
             var overrideObj:HierarchyOverride = new HierarchyOverride();
@@ -366,75 +361,95 @@
         private var report:AnalysisDefinition;
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
-            if (event.credentialRequirements != null) {
-                CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
-            } else {
-                report = event.analysisDefinition;
-                dataSource = event.dataSourceInfo;
-                reportName = report.name;
-                var nf:NumberFormatter = new NumberFormatter();
-                if (_originReportID > 0) {
-                    _score = _originReportScore;
-                    _placeHolderID = _originReportID;
+            try {
+                if (event.credentialRequirements != null) {
+                    CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
                 } else {
-                    _score = event.ratingsAverage;
-                    _placeHolderID = _dataSourceID;
-                }
-                reportRatingCount = nf.format(event.ratingsCount);
-                reportRating = nf.format(event.ratingsAverage);
-                reportViews = String(report.viewCount);
-                description = report.description;
-                attribution = event.attribution;
-                tags = "";
-                if (report.tagCloud != null && report.tagCloud.length > 0) {
-                    for each (var tag:Tag in report.tagCloud) {
-                        tags += tag.tagName;
-                        tags += ",";
+                    report = event.analysisDefinition;
+                    dataSource = event.dataSourceInfo;
+                    reportName = report.name;
+                    var nf:NumberFormatter = new NumberFormatter();
+                    if (_originReportID > 0) {
+                        _score = _originReportScore;
+                        _placeHolderID = _originReportID;
+                    } else {
+                        _score = event.ratingsAverage;
+                        _placeHolderID = _dataSourceID;
                     }
-                    tags = tags.substring(0, tags.length - 1);
-                }
-                admin = event.dataSourceAccessible;
+                    reportRatingCount = nf.format(event.ratingsCount);
+                    reportRating = nf.format(event.ratingsAverage);
+                    reportViews = String(report.viewCount);
+                    description = report.description;
+                    attribution = event.attribution;
+                    tags = "";
+                    if (report.tagCloud != null && report.tagCloud.length > 0) {
+                        for each (var tag:Tag in report.tagCloud) {
+                            tags += tag.tagName;
+                            tags += ",";
+                        }
+                        tags = tags.substring(0, tags.length - 1);
+                    }
+                    admin = event.dataSourceAccessible;
 
-                if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                    filterDefinitions = report.filterDefinitions;
-                    showFilters = true;
-                } else {
-                    filterDefinitions = new ArrayCollection();
-                    if (filterBox.contains(adjustFiltersbutton)) {
-                        filterBox.removeChild(adjustFiltersbutton);
+                    if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                        filterDefinitions = report.filterDefinitions;
+                        showFilters = true;
+                    } else {
+                        filterDefinitions = new ArrayCollection();
+                        if (filterBox.contains(adjustFiltersbutton)) {
+                            filterBox.removeChild(adjustFiltersbutton);
+                        }
                     }
-                }
 
-                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                if (!admin) {
-                    if (leftButtonBar.contains(editReportButton)) {
-                        leftButtonBar.removeChild(editReportButton);
+                    transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+                    if (!admin) {
+                        if (leftButtonBar.contains(editReportButton)) {
+                            leftButtonBar.removeChild(editReportButton);
+                        }
+                        showReportEditor = false;
                     }
-                    showReportEditor = false;
+                    ownerName = report.authorName;
+                    var dateFormatter:DateFormatter = new DateFormatter();
+                    switch (User.getInstance().dateFormat) {
+                        case 0:
+                            dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                            break;
+                        case 1:
+                            dateFormatter.formatString = "YYYY-MM-DD HH:NN";
+                            break;
+                        case 2:
+                            dateFormatter.formatString = "DD-MM-YYYY HH:NN";
+                            break;
+                        case 3:
+                            dateFormatter.formatString = "DD/MM/YYYY HH:NN";
+                            break;
+                        case 4:
+                            dateFormatter.formatString = "DD.MM.YYYY HH:NN";
+                            break;
+                    }
+                    reportDate = dateFormatter.format(report.dateCreated);
+                    // lastDataTime = dateFormatter.format(event.lastDataTime);
+                    if (!_embedded && _updateURL && !_showAddBar) {
+                        var feedFragmentObject:Object = new Object();
+                        feedFragmentObject.reportID = report.urlKey;
+                        var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                        BrowserManager.getInstance().setFragment(feedFragmentString);
+                        BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                    } else if (_showAddBar) {
+                        var templateFragmentObject:Object = new Object();
+                        templateFragmentObject.reportTemplateID = _templateUrlKey;
+                        var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
+                        BrowserManager.getInstance().setFragment(templateFragmentString);
+                        BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                    }
+                    loading = false;
+                    overlayIndex = 0;
+                    receivedData = true;
+                    dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+                    retrievedDataOnce = true;
                 }
-                ownerName = report.authorName;
-                var dateFormatter:DateFormatter = new DateFormatter();
-                dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-                reportDate = dateFormatter.format(report.dateCreated);
-                // lastDataTime = dateFormatter.format(event.lastDataTime);
-                if (!_embedded && _updateURL && !_showAddBar) {
-                    var feedFragmentObject:Object = new Object();
-                    feedFragmentObject.reportID = report.urlKey;
-                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                    BrowserManager.getInstance().setFragment(feedFragmentString);
-                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                } else if (_showAddBar) {
-                    var templateFragmentObject:Object = new Object();
-                    templateFragmentObject.reportTemplateID = _templateUrlKey;
-                    var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
-                    BrowserManager.getInstance().setFragment(templateFragmentString);
-                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                }
-                loading = false;
-                overlayIndex = 0;
-                receivedData = true;
-                dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
-                retrievedDataOnce = true;
+            } catch(e:Error) {
+                Alert.show(e.message);
             }
         }
 
@@ -489,17 +504,7 @@
         }
 
         public function refreshData():void {
-            /*var window:RefreshReportSourceWindow = new RefreshReportSourceWindow();
-             window.dataSourceID = _dataSourceID;
-             window.reportID = _reportID;
-             window.embeddedViewFactory = viewFactory;
-             if (transformContainer != null) {
-             window.filterDefinitions = transformContainer.getFilterDefinitions();
-             }
-             PopUpManager.addPopUp(window, this, true);
-             PopUpUtil.centerPopUp(window);*/
             viewFactory.retrieveData(false);
-            //viewFactory.retrieveData(false);
         }
 
         public function canRefresh():Boolean {
@@ -592,99 +597,93 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            if (!_showLogo) {
-                buttonBar.removeChild(logoImage);
-            }
-            if (!_showBack) {
-                leftButtonBar.removeChild(backButton);
-            } else {
-                if (_origin == ReportAnalyzeSource.ORIGIN_EXCHANGE) {
-                    var idx1:int = leftButtonBar.getChildIndex(backButton);
-                    leftButtonBar.removeChild(backButton);
-                    var exchangeButton:Button = new Button();
-                    exchangeButton.label = "More Reports";
-                    exchangeButton.labelPlacement = "bottom";
-                    exchangeButton.setStyle("icon", exchangeIcon);
-                    exchangeButton.addEventListener(MouseEvent.CLICK, toExchange);
-                    leftButtonBar.addChildAt(exchangeButton, idx1);
-                } else if (_origin == ReportAnalyzeSource.ORIGIN_MY_DATA) {
-                    var idx2:int = leftButtonBar.getChildIndex(backButton);
-                    leftButtonBar.removeChild(backButton);
-                    var myDataButton:Button = new Button();
-                    myDataButton.label = "My Data";
-
-                    myDataButton.labelPlacement = "bottom";
-                    myDataButton.setStyle("icon", myDataIcon);
-                    myDataButton.addEventListener(MouseEvent.CLICK, toMyData);
-                    leftButtonBar.addChildAt(myDataButton, idx2);
+            try {
+                if (!_showLogo) {
+                    buttonBar.removeChild(logoImage);
                 }
-            }
-            if (!_showFullScreen) {
-                leftButtonBar.removeChild(fullScreenButton);
-            }
-            if (!_showBookmark || _showAddBar) {
-                leftButtonBar.removeChild(bookmarkButton);
-            }
-            if (!_showExport) {
-                leftButtonBar.removeChild(exportButton);
-            }
-            if (!_showFilters) {
-                filterBox.removeChild(adjustFiltersbutton);
-            }
-            if (!_showReportEditor || _showAddBar) {
-                leftButtonBar.removeChild(editReportButton);
-            }
-            if (!_showMetadata) {
-                coreBox.removeChild(reportMetadata);
-            }
-            if (!_showBrowser) {
-                leftButtonBar.removeChild(browserButton);
-            }
-            if (!_showRefresh) {
-                leftButtonBar.removeChild(refreshButton);
-            }
+                if (!_showBack) {
+                    leftButtonBar.removeChild(backButton);
+                } else {
+                    if (_origin == ReportAnalyzeSource.ORIGIN_EXCHANGE) {
+                        var idx1:int = leftButtonBar.getChildIndex(backButton);
+                        leftButtonBar.removeChild(backButton);
+                        var exchangeButton:Button = new Button();
+                        exchangeButton.label = "More Reports";
+                        exchangeButton.labelPlacement = "bottom";
+                        exchangeButton.setStyle("icon", exchangeIcon);
+                        exchangeButton.addEventListener(MouseEvent.CLICK, toExchange);
+                        leftButtonBar.addChildAt(exchangeButton, idx1);
+                    } else if (_origin == ReportAnalyzeSource.ORIGIN_MY_DATA) {
+                        var idx2:int = leftButtonBar.getChildIndex(backButton);
+                        leftButtonBar.removeChild(backButton);
+                        var myDataButton:Button = new Button();
+                        myDataButton.label = "My Data";
 
-            if (_showAddBar) {
-                var addLabel:Label = new Label();
-                addLabel.text = "Want to save this report permanently?";
-                addReportBox.addChild(addLabel);
-                var addButton:Button = new Button();
-                addButton.label = "Save to My Data";
-                addButton.id = "myDataButton";
-                addButton.addEventListener(MouseEvent.CLICK, saveReport);
-                addReportBox.addChild(addButton);
+                        myDataButton.labelPlacement = "bottom";
+                        myDataButton.setStyle("icon", myDataIcon);
+                        myDataButton.addEventListener(MouseEvent.CLICK, toMyData);
+                        leftButtonBar.addChildAt(myDataButton, idx2);
+                    }
+                }
+                if (!_showFullScreen) {
+                    leftButtonBar.removeChild(fullScreenButton);
+                }
+                if (!_showBookmark || _showAddBar) {
+                    leftButtonBar.removeChild(bookmarkButton);
+                }
+                if (!_showExport) {
+                    leftButtonBar.removeChild(exportButton);
+                }
+                if (!_showFilters) {
+                    filterBox.removeChild(adjustFiltersbutton);
+                }
+                if (!_showReportEditor || _showAddBar) {
+                    leftButtonBar.removeChild(editReportButton);
+                }
+                if (!_showMetadata) {
+                    coreBox.removeChild(reportMetadata);
+                }
+                if (!_showBrowser) {
+                    leftButtonBar.removeChild(browserButton);
+                }
+                if (!_showRefresh) {
+                    leftButtonBar.removeChild(refreshButton);
+                }
+
+                if (_showAddBar) {
+                    var addLabel:Label = new Label();
+                    addLabel.text = "Want to save this report permanently?";
+                    addReportBox.addChild(addLabel);
+                    var addButton:Button = new Button();
+                    addButton.label = "Save to My Data";
+                    addButton.id = "myDataButton";
+                    addButton.addEventListener(MouseEvent.CLICK, saveReport);
+                    addReportBox.addChild(addButton);
+                }
+
+                viewFactory.reportID = _reportID;
+                viewFactory.prefix = _prefix;
+                viewFactory.dataSourceID = _dataSourceID;
+                BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
+                viewFactory.drillthroughFilters = _parameterFilters;
+                reportBox.addChild(viewFactory);
+                 viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
+                 viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
+                 viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+                 viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
+                 viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
+                 viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
+
+                 if (!_embedded) {
+                 loading = true;
+                 }
+
+                 // if filters were passed in
+                 overlayIndex = 1;
+                 viewFactory.retrieveData(false);
+            } catch(e:Error) {
+                Alert.show(e.message);
             }
-
-            if (User.getInstance() == null) {
-                var signUpLabel:Label = new Label();
-                signUpLabel.text = "Want to publish your own data or save your own reports?";
-                addReportBox.addChild(signUpLabel);
-                var signUpButton:Button = new Button();
-                signUpButton.label = "Free account signup";
-                signUpButton.addEventListener(MouseEvent.CLICK, signup);
-                addReportBox.addChild(signUpButton);
-            }
-
-            viewFactory.reportID = _reportID;
-            viewFactory.prefix = _prefix;
-            viewFactory.dataSourceID = _dataSourceID;
-            BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
-            viewFactory.drillthroughFilters = _parameterFilters;
-            reportBox.addChild(viewFactory);
-            viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
-            viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
-            viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
-            viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
-            viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
-            viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
-
-            if (!_embedded) {
-                loading = true;
-            }
-
-            // if filters were passed in
-            overlayIndex = 1;
-            viewFactory.retrieveData(false);
         }
 
         private function onError(event:EIErrorEvent):void {
@@ -716,7 +715,7 @@
         }
 
         override public function cleanup():void {
-            reportBox.removeChild(viewFactory);
+            //reportBox.removeChild(viewFactory);
         }
 
         [Bindable]
@@ -731,7 +730,7 @@
             <mx:Image source="{logo}" id="logoImage"
                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
             <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10">
-                <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"
+                <mx:Button label="My Data" click="toMyData(event)" icon="{myDataIcon}" labelPlacement="bottom" id="backButton"
                            paddingTop="10"/>
                 <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
                            id="fullScreenButton" paddingTop="10"/>
@@ -775,9 +774,6 @@
                     </mx:FormItem>
                     <mx:FormItem label="Tags:">
                         <mx:Label text="{tags}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Data Attribution:">
-                        <mx:Label text="{attribution}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
                     <mx:FormItem label="Report Rating:">
                         <analysis:ReportRating reportID="{_placeHolderID}" score="{_score}" rateable="true"/>

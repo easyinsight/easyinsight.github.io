@@ -293,16 +293,17 @@
 
         private function setState():void {
             switch (User.getInstance().getAccountType()) {
-                case Account.PROFESSIONAL:
+                case Account.PREMIUM:
                     currentState = "Professional";
                     break;
-                case Account.GROUP:
+                case Account.PRO:
                     currentState = "Group";
                     break;
-                case Account.INDIVIDUAL:
+                case Account.BASIC:
+                case Account.PLUS:
                     currentState = "Individual";
                     break;
-                case Account.FREE:
+                case Account.PERSONAL:
                     currentState = "Free";
                     break;
             }
@@ -559,7 +560,7 @@
         }
 
         private function gotCredentialRequirements():void {
-            var requirements:ArrayCollection = detailService.getCredentialRequirements.lastResult as ArrayCollection;            
+            var requirements:ArrayCollection = detailService.getCredentialRequirements.lastResult as ArrayCollection;
             CredentialsCache.getCache().obtainCredentials(this, requirements, onCredentials);
         }
 
@@ -643,34 +644,29 @@
 
         private function save():void {
             var user:User = User.getInstance();
-            if (user == null) {
-                var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
-                PopUpUtil.centerPopUp(loginDialog);
-            } else {
-                if (analysisDefinition.canSaveDirectly) {
-                    var results:Array = reportMetadataTab.updateReport();
-                    reportSharingTab.updateReport();
-                    var valid:Boolean = results.length == 0;
-                    if (valid) {
-                        if (dataView.isDataValid()) {
-                            dataView.updateExportMetadata();
-                            var ba:ByteArray = null;
-                            if (analysisDefinition.solutionVisible) {
-                                var bd:BitmapData = new BitmapData(dataView.getCoreView().width, dataView.getCoreView().height);
-                                bd.draw(dataView.getCoreView());
-                                ba = PNGEnc.encode(bd);
-                            }
-                            ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
-                            analysisService.saveAnalysisDefinition(analysisDefinition, ba);
-                        } else {
-                            Alert.show("You need to configure the fields of this report before you can saving.");
+            if (analysisDefinition.canSaveDirectly) {
+                var results:Array = reportMetadataTab.updateReport();
+                reportSharingTab.updateReport();
+                var valid:Boolean = results.length == 0;
+                if (valid) {
+                    if (dataView.isDataValid()) {
+                        dataView.updateExportMetadata();
+                        var ba:ByteArray = null;
+                        if (analysisDefinition.solutionVisible) {
+                            var bd:BitmapData = new BitmapData(dataView.getCoreView().width, dataView.getCoreView().height);
+                            bd.draw(dataView.getCoreView());
+                            ba = PNGEnc.encode(bd);
                         }
+                        ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
+                        analysisService.saveAnalysisDefinition(analysisDefinition, ba);
                     } else {
-                        tabNavigator.selectedIndex = 0;
+                        Alert.show("You need to configure the fields of this report before you can saving.");
                     }
                 } else {
-                    Alert.show("You are not allowed to directly modify this report--use Save As instead.");
+                    tabNavigator.selectedIndex = 0;
                 }
+            } else {
+                Alert.show("You are not allowed to directly modify this report--use Save As instead.");
             }
         }
 
@@ -688,17 +684,11 @@
 
         private function saveAs():void {
             // if we're in admin mode, this should be disabled...
-            var user:User = User.getInstance();
-            if (user == null) {
-                var loginContainer:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
-                PopUpUtil.centerPopUp(loginContainer);
-            } else {
-                var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
-                dataView.updateExportMetadata();
-                saveDialog.analysisDefinition = analysisDefinition;
-                saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
-                PopUpUtil.centerPopUp(saveDialog);
-            }
+            var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
+            dataView.updateExportMetadata();
+            saveDialog.analysisDefinition = analysisDefinition;
+            saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
+            PopUpUtil.centerPopUp(saveDialog);
         }
 
         private function savedAnalysis(event:SavedAnalysisEvent):void {
@@ -742,7 +732,7 @@
             if (dataService != null) {
                 dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
-                dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);                
+                dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             }
             if (transformContainer != null) {
                 transformContainer.removeEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
@@ -770,8 +760,6 @@
                 dispatchEvent(new AnalysisCloseEvent(this));
             }
         }
-
-
 
 
         [Bindable]
@@ -807,7 +795,7 @@
 
         private function onFieldUpdate(event:AddedItemUpdateEvent):void {
             availableFields.removeItemAt(availableFields.getItemIndex(event.wrapper));
-            availableFields.addItem(event.wrapper);            
+            availableFields.addItem(event.wrapper);
             analysisDefinition.addedItems.removeItemAt(analysisDefinition.addedItems.getItemIndex(event.previousItem));
             analysisDefinition.addedItems.addItem(event.newItem);
         }
@@ -944,7 +932,7 @@
         private function tutorial():void {
             var window:ReportEditorHelp = new ReportEditorHelp();
             PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);        
+            PopUpUtil.centerPopUp(window);
         }
 
         private function editToggle():void {

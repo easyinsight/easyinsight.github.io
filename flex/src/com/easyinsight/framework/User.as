@@ -5,11 +5,12 @@ import com.easyinsight.preferences.UIConfiguration;
 import com.easyinsight.preferences.UISettings;
 
 import flash.events.Event;
+import flash.events.EventDispatcher;
 import flash.net.SharedObject;
 
 import mx.controls.Alert;
 
-public class User
+public class User extends EventDispatcher
 {
     private var name:String;
     private var email:String;
@@ -19,7 +20,7 @@ public class User
     static private var sharedObject:SharedObject;
     public var commercialEnabled:Boolean;
     public var spaceAllowed:int;
-    public var userName:String;
+    private var _userName:String;
     public var accountAdmin:Boolean;
     public var userID:int;
     public var activated:Boolean;
@@ -34,6 +35,18 @@ public class User
     public var renewalOptionPossible:Boolean;
     public var personaID:int;
     public var dateFormat:int;
+
+
+    [Bindable(event="userNameChanged")]
+    public function get userName():String {
+        return _userName;
+    }
+
+    public function set userName(value:String):void {
+        if (_userName == value) return;
+        _userName = value;
+        dispatchEvent(new Event("userNameChanged"));
+    }
 
     public function User() {
 

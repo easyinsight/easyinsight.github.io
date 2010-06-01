@@ -21,16 +21,19 @@ public class AccountTypeRenderer extends HBox{
     override public function set data(val:Object):void {
         this.account = val as AccountAdminTO;
         switch (account.accountType) {
-            case Account.FREE:
+            case Account.PERSONAL:
                 typeLabel.text = "Personal";
                 break;
-            case Account.INDIVIDUAL:
+            case Account.BASIC:
                 typeLabel.text = "Basic";
                 break;
-            case Account.GROUP:
+            case Account.PLUS:
+                typeLabel.text = "Plus";
+                break;
+            case Account.PRO:
                 typeLabel.text = "Professional";
                 break;
-            case Account.PROFESSIONAL:
+            case Account.PREMIUM:
                 typeLabel.text = "Premium";
                 break;
             case Account.ENTERPRISE:

@@ -5,27 +5,12 @@
                                   paddingRight="0" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
                                   verticalGap="0" backgroundColor="#818285" horizontalAlign="center">
     <solutions:states>
-        <mx:State name="NotLoggedIn">
-            <mx:RemoveChild target="{installButton}"/>
-            <mx:AddChild relativeTo="{controlsBox}">
-                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
-                    <mx:VBox verticalGap="0">
-                        <mx:Text text="You'll need to create an account at the Basic or&#13;higher tier or log in before installing the&#13;connection." fontSize="16" selectable="false"/>                       
-                    </mx:VBox>
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Button label="Create Account" styleName="blueButton" click="createAccount()" fontSize="20"/>
-                        <mx:Spacer width="20"/>
-                        <mx:Button label="Log in" styleName="blueButton" click="login()" fontSize="20"/>
-                    </mx:HBox>
-                </mx:VBox>
-            </mx:AddChild>
-        </mx:State>
         <mx:State name="AccountBelowRequired">
             <mx:RemoveChild target="{installButton}"/>
             <mx:AddChild relativeTo="{controlsBox}">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
                     <mx:VBox verticalGap="0">
-                        <mx:Label text="This solution requires a higher account" fontSize="16"/>
+                        <mx:Label text="This connection requires a higher account" fontSize="16"/>
                         <mx:Label text="tier than what your current subscription." fontSize="16"/>
                     </mx:VBox>
                     <mx:Button label="Upgrade Account" styleName="blueButton" click="upgrade()"/>
@@ -40,9 +25,6 @@
         import mx.managers.PopUpManager;
 
         
-        override protected function toNotLoggedInState():void {
-            currentState = "NotLoggedIn";
-        }
 
         override protected function toAccountBelowRequiredState():void {
             currentState = "AccountBelowRequired";

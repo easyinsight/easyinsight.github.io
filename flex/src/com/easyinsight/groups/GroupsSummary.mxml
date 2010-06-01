@@ -74,10 +74,10 @@
                 if (currentState != "") {
                     currentState = "";
                 }
-                if (User.getInstance().getAccountType() == Account.FREE) {
+                if (User.getInstance().getAccountType() == Account.PERSONAL) {
                     groupAddIndex = 1;
                 } else {
-                    groupService.canCreateGroup.send();    
+                    groupService.canCreateGroup.send();
                 }
                 stackIndex = 0;
                 groupService.getMemberGroups.send();
@@ -95,8 +95,8 @@
         }
 
         private function onNewGroup(event:GroupSelectedEvent):void {
-            if (User.getInstance().getAccountType() == Account.INDIVIDUAL) {
-                groupAddIndex = 2; 
+            if (User.getInstance().getAccountType() == Account.BASIC) {
+                groupAddIndex = 2;
             }
             var groupDetail:GroupDetail = new GroupDetail();
             groupDetail.groupID = event.groupID;

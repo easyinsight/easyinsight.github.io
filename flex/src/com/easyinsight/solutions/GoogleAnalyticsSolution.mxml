@@ -332,7 +332,7 @@
                     dataSources++;
                     dataSourceItems.addItem(solInstall.descriptor);
                 } else if (solInstall.descriptor.getType() == EIDescriptor.GOAL_TREE) {
-                    if (User.getInstance().getAccountType() >= Account.GROUP) {
+                    if (User.getInstance().getAccountType() >= Account.PRO) {
                         goalTrees++;
                         items.addItem(solInstall.descriptor);
                     }

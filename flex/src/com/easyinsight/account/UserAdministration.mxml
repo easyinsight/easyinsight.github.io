@@ -46,7 +46,7 @@
             usersAvailableString = String(accountInfo.accountStats.availableUsers);
             usersUsed = accountInfo.accountStats.currentUsers;
             usersAvailable = accountInfo.accountStats.availableUsers;
-            if (User.getInstance().getAccountType() >= Account.GROUP) {
+            if (User.getInstance().getAccountType() >= Account.PLUS) {
                 preferencesService.getPersonas.send();
                 userIndex = 1;
             }
@@ -163,7 +163,7 @@
                                 <mx:DataGridColumn dataField="name" headerText="Last Name"
                                                    headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                                 <mx:DataGridColumn dataField="userName" width="100" headerText=""
-                                                   itemRenderer="{userButtonFactory}"/>
+                                                   itemRenderer="{userButtonFactory}" sortable="false"/>
                             </mx:columns>
                         </mx:DataGrid>
                     </mx:Box>
@@ -179,7 +179,7 @@
                                 <mx:DataGridColumn dataField="userName" width="150" headerText=""
                                                    itemRenderer="{personaFactory}"/>
                                 <mx:DataGridColumn dataField="userName" width="100" headerText=""
-                                                   itemRenderer="{userButtonFactory}"/>
+                                                   itemRenderer="{userButtonFactory}" sortable="false"/>
                             </mx:columns>
                         </mx:DataGrid>
                     </mx:Box>

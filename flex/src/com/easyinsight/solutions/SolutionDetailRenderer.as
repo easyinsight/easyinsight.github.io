@@ -1,5 +1,5 @@
 package com.easyinsight.solutions {
-import com.easyinsight.LoginDialog;
+
 import com.easyinsight.account.Account;
 import com.easyinsight.account.BasicUpgradeWindow;
 import com.easyinsight.account.UpgradeEvent;
@@ -73,9 +73,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
 
     private function determineInitialState():void {
         currentState = "";
-        if (User.getInstance() == null) {
-            toNotLoggedInState();
-        } else if (User.getInstance().getAccountType() < _solution.solutionTier) {
+        if (User.getInstance().getAccountType() < _solution.solutionTier) {
             toAccountBelowRequiredState();
         } else {
             customInitialState();
@@ -105,10 +103,6 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
 
     }
 
-    protected function toNotLoggedInState():void {
-
-    }
-
     protected function toAccountBelowRequiredState():void {
 
     }
@@ -133,7 +127,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
                 dataSources++;
                 dataSourceItems.addItem(solInstall.descriptor);
             } else if (solInstall.descriptor.getType() == EIDescriptor.GOAL_TREE) {
-                if (User.getInstance().getAccountType() >= Account.GROUP) {
+                if (User.getInstance().getAccountType() >= Account.PRO) {
                     goalTrees++;
                     items.addItem(solInstall.descriptor);
                 }
@@ -204,16 +198,6 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
     protected function installSolution():void {
         ProgressAlert.alert(this, "Installing connection...", null, solutionService.alreadyHasConnection);
         solutionService.alreadyHasConnection.send(_solution.solutionID);
-    }
-
-    protected function login():void {
-        var login:LoginDialog = new LoginDialog();
-        login.additionalInfo = "You need to be logged in before you can install this connection.";
-        var urlObject:Object = new Object();
-        urlObject.solutionID = _solution.solutionID;
-        login.targetURL = URLUtil.objectToString(urlObject);
-        PopUpManager.addPopUp(login, this, true);
-        PopUpUtil.centerPopUp(login);
     }
 
     public function get solution():Solution {

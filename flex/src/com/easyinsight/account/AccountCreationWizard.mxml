@@ -2,45 +2,15 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*"
          top="0">
     <mx:Metadata>
-        [Event(name="accountCreated", type="com.easyinsight.account.AccountWizardResultEvent")]
+        [Event(name="cancel", type="flash.events.Event")]
+        [Event(name="pro", type="flash.events.Event")]
+        [Event(name="basic", type="flash.events.Event")]
+        [Event(name="plus", type="flash.events.Event")]
+        [Event(name="free", type="flash.events.Event")]
     </mx:Metadata>
-    <mx:states>
-        <mx:State name="ContactUs">
-            <mx:RemoveChild target="{initialContent}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <account:TypeContactUs previousPage="onPreviousPage(event)"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="UserInfo">
-            <mx:RemoveChild target="{initialContent}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <account:LoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)"
-                                       account="{account}"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="ProAccountUserInfo">
-            <mx:RemoveChild target="{initialContent}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <account:ProfessionalAccountLoginCreation userDefined="postUserInfo(event)"
-                                                          previousPage="onPreviousPage(event)" account="{account}"/>
-            </mx:AddChild>
-        </mx:State>
-
-    </mx:states>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.framework.LoginComponent;
-        import com.easyinsight.framework.LoginEvent;
-        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.UserTransferObject;
-        import com.easyinsight.framework.User;
-
-        import com.easyinsight.util.BuyOurStuffWindow;
-        import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
-
-        import mx.controls.Alert;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var account:Account;
@@ -52,101 +22,28 @@
         private var _destinationURL:String;
 
 
-        public function set destinationURL(value:String):void {
-            _destinationURL = value;
-        }
-
-        private function signup(accountType:int):void {
-            this.account = new Account();
-            account.accountType = accountType;
-            if (accountType == Account.FREE || accountType == Account.INDIVIDUAL) {
-                this.currentState = "UserInfo";
-            } else {
-                this.currentState = "ProAccountUserInfo";
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_requiredTier > Account.PERSONAL) {
+                stackIndex = 1;
             }
         }
 
         private var _requiredTier:int;
 
-
         public function set requiredTier(value:int):void {
             _requiredTier = value;
+            invalidateProperties();
+        }
+
+        public function set destinationURL(value:String):void {
+            _destinationURL = value;
         }
 
         private var _connectionName:String;
 
         public function set connectionName(value:String):void {
             _connectionName = value;
-        }
-
-        public function gotFocus():void {            
-            if (_requiredTier >= Account.INDIVIDUAL) {
-                recommendationText = "You'll need an account of Basic or higher to access " + _connectionName + ".";
-                accountIndex = 2;
-
-            } else {
-                accountIndex = 1;
-            }
-        }
-
-        private function onPreviousPage(event:PreviousPageEvent):void {
-            switch (this.currentState) {
-                case "UserInfo":
-                case "ProAccountUserInfo":
-                case "ContactUs":
-                    currentState = "";
-                    break;
-            }
-        }
-
-        private function postUserInfo(event:UserDefinitionEvent):void {
-            this.user = event.user;
-            this.password = event.password;
-            ProgressAlert.alert(this, "Creating account...", null, creationService.createAccount);
-            attemptAccountCreation();
-        }
-
-        private function contactUs():void {
-            currentState = "ContactUs";
-        }
-
-        private function attemptAccountCreation():void {
-            creationService.createAccount(user, account, password, null);
-        }
-
-        private function onLogin(event:LoginEvent):void {
-            if (User.getInstance().getAccountType() != Account.FREE) {
-                var window:BuyOurStuffWindow = new BuyOurStuffWindow();
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            }
-            if (_destinationURL != null) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent(_destinationURL));
-            } else {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("Help"));
-            }
-            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
-        }
-
-        private function createdAccount():void {
-            var resultID:int = creationService.createAccount.lastResult as int;
-            var c:LoginComponent = new LoginComponent();
-            c.targetURL = _destinationURL;
-            c.newAccount = true;
-            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
-            c.signon(user.userName, password);            
-        }
-
-        private function showSecurityStatement():void {
-            var window:SecurityStatement = new SecurityStatement();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function showTermsOfService():void {
-            var window:TermsOfService = new TermsOfService();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         [Bindable]
@@ -159,185 +56,82 @@
         private var _accountType:int;
 
         [Bindable]
+        private var stackIndex:int;
+
+        [Bindable]
         private var accountIndex:int;
 		]]>
 	</mx:Script>
     <mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">
         <mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
-            <mx:HBox verticalAlign="middle">
-                <mx:Label text="30 day free trial" fontSize="24" fontWeight="bold"/>
-            </mx:HBox>
-            <mx:Label text="Sign up in a couple of clicks, no billing information required!" fontSize="18"/>
-            <!--<mx:Spacer height="15"/>
-            <mx:HBox>
-                <mx:Spacer width="100%"/>
-                <mx:LinkButton label="Detailed Comparison Grid" textDecoration="underline" fontSize="14"
-                        click="PopUpManager.createPopUp(this, DetailedComparisonWindow)"/>
-            </mx:HBox>-->
-            <mx:Spacer height="15"/>
-            <mx:ViewStack width="100%" resizeToContent="true" selectedIndex="{accountIndex}">
-                <mx:Box/>
-                <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2">
+                
+                <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2" horizontalGap="15">
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
                              width="280" paddingTop="5" paddingBottom="10">
-                        <mx:Label text="PERSONAL" fontSize="20" fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Enhance your spreadsheets&#13;and explore public data"
-                                 color="#3A3A3A"/>
-                        <mx:Label text="Not a cent!" color="#D42525" fontWeight="bold" fontSize="14"/>
-                        <mx:Button label="Sign Up Now" click="signup(Account.FREE)" styleName="blueButton"
-                                   fontSize="16"/>
+                        <mx:Label text="PROFESSIONAL" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="Starting at $200/month" color="#D42525" fontWeight="bold" fontSize="18"/>
                         <mx:HRule width="100%"/>
-                        <mx:VBox width="100%">
-                            <mx:Text selectable="false"
-                                     text="Instant analytics accessible to anyone!"/>
-                            <mx:Text selectable="false"
-                                     text="Upload Excel spreadsheets, CSV files or import&#13;Google documents"/>
-                            <mx:Text selectable="false"
-                                     text="Easily create lists, charts, crosstabs, maps and&#13;more through the ad hoc report builder"/>
-                            <mx:Text selectable="false"
-                                     text="Browse public data sets added by other users&#13;and build your own reports"/>
-                            <mx:Text selectable="false" text="One user"/>
-                            <mx:Text selectable="false" text="1 MB of storage"/>
+                        <mx:VBox>
+                            <mx:Text selectable="false" text="Unlimited users" fontSize="16"/>
+                            <mx:Text selectable="false" text="Starting at 250 MB of storage" fontSize="16"/>
                         </mx:VBox>
+                        <mx:HRule width="100%"/>
+                        <mx:Text text="Looking to upload a lot of custom&#13;data? This option gives you the&#13;power of full SaaS BI. Flexible pricing&#13;scales with your storage needs."
+                                fontSize="14"/>
+                        <mx:Button label="30 Day Free Trial" click="dispatchEvent(new Event('pro'))" styleName="blueButton"
+                                   fontSize="16"/>
                     </mx:VBox>
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
                              width="280" paddingTop="5" paddingBottom="10">
-                        <mx:Label text="BASIC" fontSize="20" fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Get started with full&#13;business intelligence power"
-                                 color="#3A3A3A"/>
-                        <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                        <mx:Button label="30 Day Free Trial" click="signup(Account.INDIVIDUAL)" styleName="blueButton"
-                                   fontSize="16"/>
+                        <mx:Label text="PLUS" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="$75/month" color="#D42525" fontWeight="bold" fontSize="20"/>
                         <mx:HRule width="100%"/>
-                        <mx:VBox width="100%">
-                            <mx:Text selectable="false" text="Includes everything in PERSONAL, plus..."
-                                     fontWeight="bold"/>
-                            <mx:Text selectable="false"
-                                     text="Connect to Google Analytics, Highrise,&#13;Basecamp, and other SaaS solutions"/>
-                            <mx:Text selectable="false"
-                                     text="Establish connections to databases and&#13;existing data warehouses"/>
-                            <mx:Text selectable="false" text="Use the API to publish your own&#13;custom data"/>
-                            <mx:Text selectable="false" text="5 users"/>
-                            <mx:Text selectable="false" text="100 MB of storage"/>
+                        <mx:VBox>
+                            <mx:Text selectable="false" text="Unlimited users" fontSize="16"/>
+                            <mx:Text selectable="false" text="90 MB of storage" fontSize="16"/>
                         </mx:VBox>
+                        <mx:HRule width="100%"/>
+                        <mx:Text text="Have a large organization with the&#13;need to report and analyze data&#13;from other SaaS applications such as&#13;Basecamp and Highrise?"
+                                fontSize="14"/>
+                        <mx:Button label="30 Day Free Trial" click="dispatchEvent(new Event('plus'))" styleName="blueButton"
+                                   fontSize="16"/>
                     </mx:VBox>
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
                              width="280" paddingTop="5" paddingBottom="10">
-                        <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight"
-                                 color="#3A3A3A"/>
-                        <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                        <mx:Button label="30 Day Free Trial" click="signup(Account.GROUP)" styleName="blueButton"
-                                   fontSize="16"/>
+                        <mx:Label text="BASIC" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="20"/>
                         <mx:HRule width="100%"/>
-                        <mx:VBox width="100%">
-                            <mx:Text selectable="false" text="Includes everything in BASIC, plus..."
-                                     fontWeight="bold"/>
-                            <mx:Text selectable="false"
-                                     text="Build visibility across all the business silos&#13;from accounting and R&amp;D to sales and&#13;marketing"/>
-                            <mx:Text selectable="false"
-                                     text="Data level security to ensure your users see&#13;only what they should see"/>
-                            <mx:Text selectable="false"
-                                     text="Customize the interface on a user role basis"/>
-                            <mx:Text selectable="false" text="50 users"/>
-                            <mx:Text selectable="false" text="500 MB of storage"/>
+                        <mx:VBox>
+                            <mx:Text selectable="false" text="Five users" fontSize="16"/>
+                            <mx:Text selectable="false" text="35 MB of storage" fontSize="16"/>
                         </mx:VBox>
+                        <mx:HRule width="100%"/>
+                        <mx:Text text="Quickly get a small organization&#13;started with reports and analysis on&#13;other SaaS applications such as&#13;Basecamp and Google Analytics."
+                                fontSize="14"/>
+                        <mx:Button label="30 Day Free Trial" click="dispatchEvent(new Event('basic'))" styleName="blueButton"
+                                   fontSize="16"/>
                     </mx:VBox>
                 </mx:HBox>
-                <mx:VBox width="100%">
-                    <mx:HBox>
-                        <mx:Spacer width="380"/>
-                        <mx:Box>
-                            <mx:Label text="{recommendationText}" fontSize="14"/>
-                        </mx:Box>
-                    </mx:HBox>
-                    <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2">
-                        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
-                                 backgroundColor="#DFDFDF"
-                                 width="280" paddingTop="5" paddingBottom="10">
-                            <mx:Label text="PERSONAL" fontSize="20" fontWeight="bold"/>
-                            <mx:Text selectable="false" text="Enhance your spreadsheets&#13;and explore public data"
-                                     color="#3A3A3A"/>
-                            <mx:Label text="Not a cent!" color="#D42525" fontWeight="bold" fontSize="14"/>
-                            <mx:Button label="Sign Up Now" click="signup(Account.FREE)" styleName="blueButton"
-                                       fontSize="16"/>
-                            <mx:HRule width="100%"/>
-                            <mx:VBox width="100%">
-                            <mx:Text selectable="false"
-                                     text="Instant analytics accessible to anyone!"/>
-                            <mx:Text selectable="false"
-                                     text="Upload Excel spreadsheets, CSV files or import&#13;Google documents"/>
-                            <mx:Text selectable="false"
-                                     text="Easily create lists, charts, crosstabs, maps and&#13;more through the ad hoc report builder"/>
-                            <mx:Text selectable="false"
-                                     text="Browse public data sets added by other users&#13;and build your own reports"/>
-                            <mx:Text selectable="false" text="One user"/>
-                            <mx:Text selectable="false" text="1 MB of storage"/>
-                        </mx:VBox>
-                        </mx:VBox>
-                        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
-                                 backgroundColor="#FFFFFF"
-                                 width="280" paddingTop="5" paddingBottom="10">
-                            <mx:Label text="BASIC" fontSize="20" fontWeight="bold"/>
-                            <mx:Text selectable="false" text="Get started with full&#13;business intelligence power"
-                                     color="#3A3A3A"/>
-                            <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                            <mx:Button label="30 Day Free Trial" click="signup(Account.INDIVIDUAL)"
-                                       styleName="blueButton" fontSize="16"/>
-                            <mx:HRule width="100%"/>
-                            <mx:VBox width="100%">
-                            <mx:Text selectable="false" text="Includes everything in PERSONAL, plus..."
-                                     fontWeight="bold"/>
-                            <mx:Text selectable="false"
-                                     text="Connect to Google Analytics, Highrise,&#13;Basecamp, and other SaaS solutions"/>
-                            <mx:Text selectable="false"
-                                     text="Establish connections to databases and&#13;existing data warehouses"/>
-                            <mx:Text selectable="false" text="Use the API to publish your own&#13;custom data"/>
-                            <mx:Text selectable="false" text="5 users"/>
-                            <mx:Text selectable="false" text="100 MB of storage"/>
-                        </mx:VBox>
-                        </mx:VBox>
-                        <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
-                                 backgroundColor="#FFFFFF"
-                                 width="280" paddingTop="5" paddingBottom="10">
-                            <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
-                            <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight"
-                                     color="#3A3A3A"/>
-                            <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                            <mx:Button label="30 Day Free Trial" click="signup(Account.GROUP)" styleName="blueButton"
-                                       fontSize="16"/>
-                            <mx:HRule width="100%"/>
-                            <mx:VBox width="100%">
-                                <mx:Text selectable="false" text="Includes everything in BASIC, plus..."
-                                         fontWeight="bold"/>
-                                <mx:Text selectable="false"
-                                         text="Build visibility across all the business silos&#13;from accounting and R&amp;D to sales and&#13;marketing"/>
-                                <mx:Text selectable="false"
-                                         text="Data level security to ensure your users see&#13;only what they should see"/>
-                                <mx:Text selectable="false"
-                                         text="Customize the interface on a user role basis"/>
-                                <mx:Text selectable="false" text="50 users"/>
-                                <mx:Text selectable="false" text="500 MB of storage"/>
-                            </mx:VBox>
-                        </mx:VBox>
-                    </mx:HBox>
-                </mx:VBox>
+            <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
+                <mx:HBox verticalAlign="middle" horizontalGap="0">
+                    <mx:Label text="We also offer a"/>
+                    <mx:LinkButton textDecoration="underline" label="free plan" click="dispatchEvent(new Event('free'))" paddingLeft="0" paddingRight="0"/>
+                    <mx:Label text=": 1 user, 5 MB storage"/>
+                </mx:HBox>
+                <mx:HBox verticalAlign="middle" horizontalGap="0">
+                    <mx:Label text="We do offer a" paddingLeft="0" paddingRight="0" left="0" right="0"/>
+                    <mx:LinkButton textDecoration="underline" label="free plan" click="dispatchEvent(new Event('free'))" paddingLeft="0" paddingRight="0"
+                            left="0" right="0"/>
+                    <mx:Label text=", but it does not support the connection you're looking to report against."
+                            paddingLeft="0" paddingRight="0" left="0" right="0"/>
+                </mx:HBox>
             </mx:ViewStack>
-            <mx:Spacer height="20"/>
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:LinkButton textDecoration="underline" label="Security Statement" click="showSecurityStatement()"
-                               fontSize="16"/>
-                <mx:Spacer width="20"/>
-                <mx:LinkButton textDecoration="underline" label="Terms of Service" click="showTermsOfService()"
-                               fontSize="16"/>
-            </mx:HBox>
+            <mx:Spacer height="100%"/>
+            <mx:LinkButton textDecoration="underline" label="Cancel" fontSize="16" click="dispatchEvent(new Event('cancel'))"/>
+            <mx:Spacer height="100%"/>
         </mx:VBox>
     </mx:VBox>
-    <mx:RemoteObject id="creationService" destination="login">
-        <mx:method name="createAccount" result="createdAccount()"/>
-        <!--<mx:method name="authenticate" result="gotUserInfo()"/>-->
-    </mx:RemoteObject>
 </mx:VBox>

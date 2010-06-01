@@ -191,7 +191,36 @@ public class UserAccountAdminService {
     }
 
     @Nullable
-    public String doesUserExist(String userName, String email) {
+    public String doesUserExist(String userName, String email, String accountName) {
+        Session session = Database.instance().createSession();
+        String message = null;
+        List results;
+        try {
+            session.beginTransaction();
+            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            if (results.size() > 0) {
+                message = "A user already exists by that name.";
+            } else {
+                results = session.createQuery("from User where email = ?").setString(0, email).list();
+                if (results.size() > 0) {
+                    message = "That email address is already used.";
+                } results = session.createQuery("from Account where name = ?").setString(0, accountName).list();
+                    if (results.size() > 0) {
+                        message = "That company name is already used.";
+                    }
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return message;
+    }
+
+    @Nullable
+    private String doesUserExist(String userName, String email) {
         Session session = Database.instance().createSession();
         String message = null;
         List results;
@@ -263,14 +292,7 @@ public class UserAccountAdminService {
             } finally {
                 session.close();
             }
-            if (user != null && account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE
-                    || account.getAccountType() == Account.ADMINISTRATOR) {
-                try {
-                    new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);
-                } catch (Exception e) {
-                    LogClass.error(e);
-                }
-            } else if (user != null && account.getAccountType() == Account.BASIC) {
+            if (user != null && account.getAccountType() != Account.PERSONAL) {
                 try {
                     if (account.getGroupID() != null) {
                         new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);

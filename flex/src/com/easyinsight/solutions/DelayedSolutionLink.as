@@ -15,11 +15,13 @@ public class DelayedSolutionLink extends EventDispatcher{
     private var solutionID:int;
     private var solutionService:RemoteObject;
     private var auth:Boolean;
+    private var properties:Object;
 
-    public function DelayedSolutionLink(solutionID:int, auth:Boolean = false) {
+    public function DelayedSolutionLink(solutionID:int, auth:Boolean = false, properties:Object = null) {
         super();
         this.solutionID = solutionID;
         this.auth = auth;
+        this.properties = properties;
         solutionService = new RemoteObject();
         solutionService.destination = "solutionService";
         solutionService.retrieveSolution.addEventListener(ResultEvent.RESULT, gotSolution);
@@ -33,7 +35,12 @@ public class DelayedSolutionLink extends EventDispatcher{
         var result:Solution = solutionService.retrieveSolution.lastResult as Solution;
         if (result != null) {
             //var solutionDetail:RevisedSolutionDetail = new RevisedSolutionDetail();
-            var box:IPerspective = SolutionDetailFactory.createDetailPage(result, auth);            
+            var box:IPerspective = SolutionDetailFactory.createDetailPage(result, auth);
+            if (properties != null) {
+                for (var propKey:String in properties) {
+                    box[propKey] = properties[propKey];
+                }
+            }
             dispatchEvent(new ListingChangeEvent(box));
             //dispatchEvent(new AnalyzeEvent(new SolutionAnalyzeSource(result)));
         }

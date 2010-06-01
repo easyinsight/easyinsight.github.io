@@ -26,13 +26,6 @@ import flash.events.MouseEvent;
 		}
 
 
-    protected override function commitProperties():void {
-        super.commitProperties();
-        if (_perspective == null && _perspectiveClass != null) {
-            _perspective = new _perspectiveClass();
-        }
-    }
-
     private function listingChange(event:MouseEvent):void {
             dispatchEvent(new ListingChangeEvent(perspective));
         }
@@ -58,7 +51,11 @@ import flash.events.MouseEvent;
     public function get displayName():String {
             return _displayName;
         }
+
         public function get perspective():IPerspective {
+            if (_perspective == null && _perspectiveClass != null) {
+                _perspective = new _perspectiveClass();
+            }
             return _perspective;
         }
         /*override protected function createChildren():void {

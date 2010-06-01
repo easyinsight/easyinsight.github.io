@@ -52,15 +52,15 @@
                 if (lastAccountType != User.getInstance().getAccountType()) {
                     lastAccountType = accountInfo.accountType;
                     coreBox.removeAllChildren();
-                    if (accountInfo.accountType == Account.FREE) {
+                    if (accountInfo.accountType == Account.PERSONAL) {
                         // user profile information, option to upgrade, option to cancel
                         toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new FreeAccountSettings()) ]);
                         showToggle = false;
-                    } else if (accountInfo.accountType == Account.INDIVIDUAL) {
+                    } else if (accountInfo.accountType == Account.BASIC) {
                         if (User.getInstance().accountAdmin) {
                             // user profile information, option to ugprade, option to cancel, billing link, general account settings?
                             toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()),
-                                        new AccountOption("User Administration", new UserAdministration())]);
+                                new AccountOption("User Administration", new UserAdministration())]);
                             showToggle = true;
                         } else {
                             toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);
@@ -102,7 +102,7 @@
 
         private function choseButton(event:ItemClickEvent):void {
             var accountOption:AccountOption = event.item as AccountOption;
-            this.index = toggleOptions.getItemIndex(accountOption);                        
+            this.index = toggleOptions.getItemIndex(accountOption);
         }
 
         private function showSecurityStatement():void {

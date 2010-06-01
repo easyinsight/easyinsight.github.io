@@ -7,7 +7,7 @@ public class AccountSetupData {
 
     public var myPersona:int;
     public var personas:ArrayCollection;
-    public var users:ArrayCollection;
+    public var users:ArrayCollection = new ArrayCollection();
 
     public function AccountSetupData() {
     }

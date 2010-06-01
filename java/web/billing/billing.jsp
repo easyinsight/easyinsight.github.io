@@ -81,6 +81,9 @@
           case Account.BASIC:
               accountInfoString = "Basic";
               break;
+          case Account.PLUS:
+              accountInfoString = "Plus";
+              break;
           case Account.PROFESSIONAL:
               accountInfoString = "Professional";
               break;

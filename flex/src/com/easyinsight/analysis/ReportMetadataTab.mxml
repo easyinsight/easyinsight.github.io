@@ -92,16 +92,17 @@
 
         private function setState():void {
             switch (User.getInstance().getAccountType()) {
-                case Account.PROFESSIONAL:
+                case Account.PREMIUM:
                     currentState = "Professional";
                     break;
-                case Account.GROUP:
+                case Account.PRO:
                     currentState = "Group";
                     break;
-                case Account.INDIVIDUAL:
+                case Account.BASIC:
+                case Account.PLUS:
                     currentState = "Individual";
                     break;
-                case Account.FREE:
+                case Account.PERSONAL:
                     currentState = "Free";
                     break;
             }
@@ -116,7 +117,7 @@
             if (_analysisDefinition == value) return;
             _analysisDefinition = value;
             labelNameField = analysisDefinition.name;
-            tags = TagCloud.toString(analysisDefinition.tagCloud);            
+            tags = TagCloud.toString(analysisDefinition.tagCloud);
             dispatchEvent(new Event("analysisDefinitionChanged"));
         }
 

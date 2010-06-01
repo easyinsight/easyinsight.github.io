@@ -42,7 +42,7 @@ public class UserService implements IUserService {
             User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
             Account account = admin.getAccount();
             boolean tooManyUsers = false;
-            if (account.getMaxUsers() <= account.getUsers().size() + accountSetupData.getUsers().size()) {
+            if (account.getMaxUsers() < account.getUsers().size() + accountSetupData.getUsers().size()) {
                 tooManyUsers = true;
             }
             boolean problem = isProblem(accountSetupData, conn);
@@ -119,10 +119,7 @@ public class UserService implements IUserService {
                     new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password);
                 }
             }).start();
-            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE
-                    || account.getAccountType() == Account.ADMINISTRATOR) {
-                new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER, conn);
-            } else if (account.getAccountType() == Account.BASIC) {
+            if (user != null && account.getAccountType() != Account.PERSONAL) {
                 if (account.getGroupID() != null) {
                     new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER, conn);
                 }
@@ -536,8 +533,7 @@ public class UserService implements IUserService {
             session.save(account);
             user.setAccount(account);
             session.update(user);
-            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE ||
-                    account.getAccountType() == Account.BASIC) {
+            if (account.getAccountType() != Account.PERSONAL) {
                 Group group = new Group();
                 group.setName(account.getName());
                 group.setPubliclyVisible(false);

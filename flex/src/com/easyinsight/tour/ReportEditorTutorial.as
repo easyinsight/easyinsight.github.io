@@ -20,12 +20,8 @@ public class ReportEditorTutorial extends TutorialFramework {
         //notes.addItem(new SetNoteProperty("coreVBox", "enabled", false));
         notes.addItem(new ActionTutorialElement(new NavigationEvent("My Data")));
         notes.addItem(new ScreenNoteAnchor("The My Data page is where you'll find a list of your data sources and reports. You can access the report editor from here, as well as opening any reports you may have created.", "center", 150));
-        notes.addItem(new ActionTutorialElement(new NavigationEvent("Exchange")));
-        notes.addItem(new ScreenNoteAnchor("The Exchange provides you with the community for sharing data and reports.", "center", 80));
-        notes.addItem(new ActionTutorialElement(new NavigationEvent("Exchange", null, {viewMode: 1, displayMode: 0})));
-        notes.addItem(new ScreenNoteAnchor("Particularly relevant to this tutorial is the Connection Exchange. This screen is where you'll find report templates contributed by other users against data sources.", "center", 150));
         notes.addItem(new ActionTutorialElement(new NavigationEvent("Exchange", null, {viewMode: 1, displayMode: 0, solution: _solution})));
-        notes.addItem(new NoteAnchor("solutionBox", "Restricting the view to those reports created against " + _solution.name + ", you can see a variety of report options for you. Clicking on the name of one of the reports in this list will open it up, applying that report template to your data."));
+        notes.addItem(new ScreenNoteAnchor("The Exchange provides you with the community for sharing data and reports.", "center", 80));                
         notes.addItem(new InstallReportTutorialElement(_solution.solutionID));
         notes.addItem(new ScreenNoteAnchor("What you see here is the report view, displaying the report template chosen a moment ago against your data set.", "center", 100));
         notes.addItem(new ScreenNoteAnchor("You can export the report to a variety of locations, view in full screen for demonstration purposes, or adjust any filters on the report.", "center", 120));

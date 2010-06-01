@@ -6,18 +6,20 @@ package com.easyinsight.framework
 	{
 		public static const LOGIN:String = "loginEvent2";
 		public static const LOGOUT:String = "logout";
+		public static const QUIET_LOGIN:String = "quietLogin";
 
         public var targetURL:String;
         public var newAccount:Boolean;
+
+        public var authResponse:UserServiceResponse;
 		
-		public function LoginEvent(type:String, targetURL:String = null, newAccount:Boolean = false) {
-			super(type, true);
-            this.targetURL = targetURL;
-            this.newAccount = newAccount;
+		public function LoginEvent(type:String, authResponse:UserServiceResponse = null) {
+			super(type);
+            this.authResponse = authResponse;
 		}
 		
 		override public function clone():Event {
-            return new LoginEvent(type, targetURL, newAccount);
+            return new LoginEvent(type, authResponse);
         }
 	}
 }

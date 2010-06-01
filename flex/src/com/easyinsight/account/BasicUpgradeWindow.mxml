@@ -14,21 +14,37 @@
         private var basicEnabled:Boolean = false;
 
         private function setup():void {
-            basicEnabled = User.getInstance().getAccountType() == Account.FREE;
+            basicEnabled = User.getInstance().getAccountType() == Account.PERSONAL;
         }
 
         private function toBasic():void {
-            if (User.getInstance().getAccountType() == Account.FREE) {
+            if (User.getInstance().getAccountType() == Account.PERSONAL) {
                 if (User.getInstance().freeUpgradePossible) {
-                    windowIndex = 1;    
+                    windowIndex = 1;
                 } else {
                     Alert.show("You'll need to contact EI support to upgrade.");
                 }
             }
         }
 
+        private function toPlus():void {
+            if (User.getInstance().getAccountType() == Account.PERSONAL) {
+                if (User.getInstance().freeUpgradePossible) {
+                    windowIndex = 7;
+                } else {
+                    Alert.show("You'll need to contact EI support to upgrade.");
+                }
+            } else {
+                if (User.getInstance().accountState == Account.TRIAL) {
+                    windowIndex = 6;
+                } else {
+                    windowIndex = 5;
+                }
+            }
+        }
+
         private function toPro():void {
-            if (User.getInstance().getAccountType() == Account.FREE) {
+            if (User.getInstance().getAccountType() == Account.PERSONAL) {
                 if (User.getInstance().freeUpgradePossible) {
                     windowIndex = 4;
                 } else {
@@ -66,50 +82,56 @@
         <mx:method name="upgradeAccount" result="upgradedAccount()"/>
     </mx:RemoteObject>
     <mx:VBox verticalGap="20">
-        <mx:ViewStack selectedIndex="{windowIndex}" width="600">
+        <mx:ViewStack selectedIndex="{windowIndex}" width="900">
             <mx:VBox width="100%" verticalGap="20">
-                <mx:HBox horizontalAlign="center" width="100%" horizontalGap="20">
+                <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2" horizontalGap="15">
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
-                             width="280" paddingTop="5" paddingBottom="10" borderThickness="5" borderColor="#666666" enabled="{basicEnabled}">
-                        <mx:Label text="BASIC" fontSize="20" fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Get started with full&#13;business intelligence power"
-                                 color="#3A3A3A"/>
-                        <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                        <mx:Button label="Upgrade to Basic!" click="toBasic()"
-                                   styleName="blueButton"
-                                   fontSize="16"/>
+                             width="280" paddingTop="5" paddingBottom="10">
+                        <mx:Label text="PROFESSIONAL" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="Starting at $200/month" color="#D42525" fontWeight="bold" fontSize="18"/>
                         <mx:HRule width="100%"/>
-                        <mx:VBox width="100%">
-                            <mx:Text selectable="false"
-                                     text="Connect to Google Analytics, Highrise,&#13;Basecamp, and other SaaS solutions"/>
-                            <mx:Text selectable="false"
-                                     text="Establish connections to databases and&#13;existing data warehouses"/>
-                            <mx:Text selectable="false" text="Use the API to publish your own&#13;custom data"/>
-                            <mx:Text selectable="false" text="5 users"/>
-                            <mx:Text selectable="false" text="100 MB of storage"/>
+                        <mx:VBox>
+                            <mx:Text selectable="false" text="Unlimited users" fontSize="16"/>
+                            <mx:Text selectable="false" text="Starting at 250 MB of storage" fontSize="16"/>
                         </mx:VBox>
+                        <mx:HRule width="100%"/>
+                        <mx:Text text="Looking to upload a lot of custom&#13;data? This option gives you the&#13;power of full SaaS BI. Flexible pricing&#13;scales with your storage needs."
+                                fontSize="14"/>
+                        <mx:Button label="Upgrade!" click="toPro()" styleName="blueButton"
+                                   fontSize="16"/>
                     </mx:VBox>
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
-                             width="280" paddingTop="5" paddingBottom="10" borderThickness="5" borderColor="#AAAAAA">
-                        <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
-                        <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight"
-                                 color="#3A3A3A"/>
-                        <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
-                        <mx:Button label="Upgrade To Professional!" click="toPro()" styleName="blueButton"
-                                   fontSize="16"/>
+                             width="280" paddingTop="5" paddingBottom="10">
+                        <mx:Label text="PLUS" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="$75/month" color="#D42525" fontWeight="bold" fontSize="20"/>
                         <mx:HRule width="100%"/>
-                        <mx:VBox width="100%">
-                            <mx:Text selectable="false"
-                                     text="Build visibility across all the business silos&#13;from accounting and R&amp;D to sales and&#13;marketing"/>
-                            <mx:Text selectable="false"
-                                     text="Data level security to ensure your users see&#13;only what they should see"/>
-                            <mx:Text selectable="false"
-                                     text="Customize the interface on a user role basis"/>
-                            <mx:Text selectable="false" text="50 users"/>
-                            <mx:Text selectable="false" text="500 MB of storage"/>
+                        <mx:VBox>
+                            <mx:Text selectable="false" text="Unlimited users" fontSize="16"/>
+                            <mx:Text selectable="false" text="90 MB of storage" fontSize="16"/>
                         </mx:VBox>
+                        <mx:HRule width="100%"/>
+                        <mx:Text text="Have a large organization with the&#13;need to report and analyze data&#13;from other SaaS applications such as&#13;Basecamp and Highrise?"
+                                fontSize="14"/>
+                        <mx:Button label="Upgrade!" click="toPlus()" styleName="blueButton"
+                                   fontSize="16"/>
+                    </mx:VBox>
+                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
+                             backgroundColor="#FFFFFF"
+                             width="280" paddingTop="5" paddingBottom="10">
+                        <mx:Label text="BASIC" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="20"/>
+                        <mx:HRule width="100%"/>
+                        <mx:VBox>
+                            <mx:Text selectable="false" text="Five users" fontSize="16"/>
+                            <mx:Text selectable="false" text="35 MB of storage" fontSize="16"/>
+                        </mx:VBox>
+                        <mx:HRule width="100%"/>
+                        <mx:Text text="Quickly get a small organization&#13;started with reports and analysis on&#13;other SaaS applications such as&#13;Basecamp and Google Analytics."
+                                fontSize="14"/>
+                        <mx:Button label="Upgrade!" click="toBasic()" styleName="blueButton"
+                                   fontSize="16"/>
                     </mx:VBox>
                 </mx:HBox>
                 <mx:HBox width="100%" horizontalAlign="center">
@@ -124,7 +146,7 @@
                     <mx:Text text="After thirty days, you'll need to pay&#13;$25/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.INDIVIDUAL)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.BASIC)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
@@ -136,7 +158,7 @@
                     <mx:Text text="You'll be billed $200/month on your next&#13;monthly bill." fontSize="18"/>                    
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.GROUP)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PRO)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
@@ -149,7 +171,7 @@
                     <mx:Text text="At the end of the trial period, you'll need&#13;to pay $200/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.GROUP)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PRO)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
@@ -162,7 +184,7 @@
                     <mx:Text text="After thirty days, you'll need to pay&#13;$200/month for the account." fontSize="18"/>
                     <mx:Spacer height="20"/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.GROUP)"/>
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PRO)"/>
                         <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
                     </mx:HBox>
                 </mx:VBox>
@@ -178,7 +200,45 @@
                     </mx:HBox>
                 </mx:VBox>
             </mx:Box>
-
+            <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+                <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
+                        borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
+                    <mx:Text text="Just to confirm, you'll be upgrading your&#13;account to the Plus level." fontSize="18"/>
+                    <mx:Text text="You're currently in the thirty day trial&#13;period on your account. This upgrade will not&#13;change that trial period." fontSize="18"/>
+                    <mx:Text text="At the end of the trial period, you'll need&#13;to pay $75/month for the account." fontSize="18"/>
+                    <mx:Spacer height="20"/>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PLUS)"/>
+                        <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+                <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
+                        borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10">
+                    <mx:Text text="Just to confirm, you'll be upgrading your&#13;account to the Plus level." fontSize="18"/>
+                    <mx:Text text="You're upgrading from a Personal account,&#13;so you'll get a new thirty day trial period&#13;for your account." fontSize="18"/>
+                    <mx:Text text="After thirty days, you'll need to pay&#13;$75/month for the account." fontSize="18"/>
+                    <mx:Spacer height="20"/>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PLUS)"/>
+                        <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+                <mx:VBox backgroundColor="#FFFFFF" borderStyle="solid" dropShadowEnabled="true" cornerRadius="8"
+                        borderThickness="5" borderColor="#AAAAAA" paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" enabled="{basicEnabled}">
+                    <mx:Text text="Just to confirm, you'll be upgrading your&#13;account to the Plus level." fontSize="18"/>
+                    <mx:Text text="You're upgrading from a Personal account,&#13;so you'll get a new thirty day trial period&#13;for your account." fontSize="18"/>
+                    <mx:Text text="After thirty days, you'll need to pay&#13;$75/month for the account." fontSize="18"/>
+                    <mx:Spacer height="20"/>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:Button label="Upgrade me!" fontSize="18" styleName="blueButton" click="upgrade(Account.PLUS)"/>
+                        <mx:LinkButton label="Cancel" fontSize="16" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:Box>
         </mx:ViewStack>
 
     </mx:VBox>

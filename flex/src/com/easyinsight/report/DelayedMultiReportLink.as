@@ -1,19 +1,12 @@
 package com.easyinsight.report {
-import com.easyinsight.LoginDialog;
 import com.easyinsight.analysis.FeedResponse;
 import com.easyinsight.framework.LoginEvent;
 
 import com.easyinsight.genredata.AnalyzeEvent;
 
-import com.easyinsight.util.PopUpUtil;
-
-import flash.display.DisplayObject;
-
 import flash.events.EventDispatcher;
 
 import mx.controls.Alert;
-import mx.core.Application;
-import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -43,10 +36,6 @@ public class DelayedMultiReportLink extends EventDispatcher {
         var feedResponse:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
         if (feedResponse.status == FeedResponse.SUCCESS) {
             dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(feedResponse.feedDescriptor.dataFeedID)));
-        } else if (feedResponse.status == FeedResponse.NEED_LOGIN) {
-            var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
-            loginDialog.addEventListener(LoginEvent.LOGIN, delayedFeed);
-            PopUpUtil.centerPopUp(loginDialog);
         } else {
             // tried to access a data source they don't have rights to, silently fail
         }

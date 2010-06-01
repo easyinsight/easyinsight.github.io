@@ -53,6 +53,9 @@
             var uiSettings:UISettings = new UISettings();
             var uiConfig:UIConfiguration = new UIConfiguration();
             uiConfig.getNodes();
+            if (_accountType == Account.PERSONAL) {
+                uiConfig.toggle(UIConfiguration.SHOW_GROUPS, false);
+            }
             var map:Object = new Object();
             recurseOptions(uiConfig.getRoots(), map);
             var options:ArrayCollection = new ArrayCollection();
@@ -72,6 +75,9 @@
             uiConfig.getNodes();
             uiConfig.toggle(UIConfiguration.SHOW_KPIS, false);
             uiConfig.toggle(UIConfiguration.SHOW_CREATE_PACKAGE, false);
+            if (_accountType == Account.PERSONAL) {
+                uiConfig.toggle(UIConfiguration.SHOW_GROUPS, false);
+            }
             var map:Object = new Object();
             recurseOptions(uiConfig.getRoots(), map);
             var options:ArrayCollection = new ArrayCollection();
@@ -94,6 +100,9 @@
             uiConfig.toggle(UIConfiguration.SHOW_REPORT_EDITOR_API, false);
             uiConfig.toggle(UIConfiguration.SHOW_DLS, false);
             uiConfig.toggle(UIConfiguration.SHOW_TEXT_REPLACES, false);
+            if (_accountType == Account.PERSONAL) {
+                uiConfig.toggle(UIConfiguration.SHOW_GROUPS, false);
+            }
             var map:Object = new Object();
             recurseOptions(uiConfig.getRoots(), map);
             var options:ArrayCollection = new ArrayCollection();
@@ -136,37 +145,43 @@
             return false;
         }
 
+        private var _accountType:int;
+
+        public function set accountType(value:int):void {
+            _accountType = value;
+        }
+
         public function gotFocus():void {
         }]]></mx:Script>
     <mx:Text fontSize="18" text="Which of the roles below best describes&#13;your comfort level with reporting and analytics?" textAlign="center"/>
     <mx:HBox width="100%" paddingLeft="10" paddingRight="10">
-        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="180"
+        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="160"
                 width="350" cornerRadius="8" buttonMode="true" id="bizUserBox" mouseOver="bizUserBox.setStyle('backgroundColor', 0xDDDDDD)"
                 mouseOut="bizUserBox.setStyle('backgroundColor', 0xFFFFFF)" click="bizUser()"
                 mouseChildren="false">
             <mx:Image source="{businessWoman}"/>
-            <mx:Text text="Business User" fontSize="24" selectable="false"/>
+            <mx:Text text="Business User" fontSize="20" selectable="false"/>
             <mx:TextArea text="Want a minimal, simple set of options to start with? This role will give you the easiest starting point."
-                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="80" width="310" textAlign="center"/>
+                    fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="65" width="310" textAlign="center"/>
         </mx:VBox>
         <mx:Spacer width="100%"/>
-        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="180"
+        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="160"
                 width="350" cornerRadius="8" buttonMode="true" id="developerBox" mouseOver="developerBox.setStyle('backgroundColor', 0xDDDDDD)"
                 mouseOut="developerBox.setStyle('backgroundColor', 0xFFFFFF)" click="developer()"
                 mouseChildren="false">
             <mx:Image source="{coder}"/>
-            <mx:Text text="Developer" fontSize="24" selectable="false"/>
+            <mx:Text text="Developer" fontSize="20" selectable="false"/>
             <mx:TextArea text="Savvy around web services and software development? Start coding quickly with this role."
-                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="80" width="310" textAlign="center"/>
+                    fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="65" width="310" textAlign="center"/>
         </mx:VBox>
     </mx:HBox>
-    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="180"
+    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true" backgroundColor="#FFFFFF" height="160"
                 width="350" cornerRadius="8" buttonMode="true" id="biExpertBox" mouseOver="biExpertBox.setStyle('backgroundColor', 0xDDDDDD)"
                 mouseOut="biExpertBox.setStyle('backgroundColor', 0xFFFFFF)" click="biGuru()"
                 mouseChildren="false">
             <mx:Image source="{genius}"/>
-            <mx:Text text="BI Expert" fontSize="24" selectable="false"/>
+            <mx:Text text="BI Expert" fontSize="20" selectable="false"/>
             <mx:TextArea text="If you're already a business intelligence guru, this role will turn on every available option."
-                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="80" width="310" textAlign="center"/>
+                    fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="65" width="310" textAlign="center"/>
         </mx:VBox>
 </mx:VBox>

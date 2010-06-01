@@ -1,19 +1,11 @@
 package com.easyinsight.analysis
 {
-	import com.easyinsight.LoginDialog;
 	import com.easyinsight.framework.LoginEvent;
 
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.ReportAnalyzeSource;
-
-import com.easyinsight.util.PopUpUtil;
-
-import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
-	
-	import mx.core.Application;
-	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 	
@@ -42,10 +34,6 @@ import flash.display.DisplayObject;
                 } else {
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightResponse.insightDescriptor)));
                 }
-        	} else if (insightResponse.status == InsightResponse.NEED_LOGIN) {
-        		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
-        		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);
-                PopUpUtil.centerPopUp(loginDialog);
         	} else {
                 // silently fail, user trying to spoof an ID
             }

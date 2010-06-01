@@ -18,12 +18,12 @@
         }
 
         private function toBasic():void {
-            _welcomeBackInfo.accountTier = Account.INDIVIDUAL;
+            _welcomeBackInfo.accountTier = Account.BASIC;
             dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
         }
 
         private function toPro():void {
-            _welcomeBackInfo.accountTier = Account.GROUP;
+            _welcomeBackInfo.accountTier = Account.PRO;
             dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
         }
 

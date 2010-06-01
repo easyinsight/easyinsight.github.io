@@ -7,112 +7,112 @@
 		<![CDATA[
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserTransferObject;
-            import com.easyinsight.preferences.Persona;
+        import com.easyinsight.preferences.Persona;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
-            import mx.validators.Validator;
-			import mx.managers.PopUpManager;
-			
-			private var validators:Array;
+        import mx.validators.Validator;
+        import mx.managers.PopUpManager;
 
-            [Bindable]
-            private var userName:String;
-            [Bindable]
-            private var email:String;
-            [Bindable]
-            private var fullName:String;
+        private var validators:Array;
+
+        [Bindable]
+        private var userName:String;
+        [Bindable]
+        private var email:String;
+        [Bindable]
+        private var fullName:String;
         [Bindable]
         private var firstName:String;
         [Bindable]
         private var userTitle:String;
-            [Bindable]
-            private var accountAdmin:Boolean;
-            private var userID:int;
+        [Bindable]
+        private var accountAdmin:Boolean;
+        private var userID:int;
 
-            [Bindable]
-            private var createLabel:String = "Create User";
+        [Bindable]
+        private var createLabel:String = "Create User";
 
-            public function set user(userTransferObject:UserTransferObject):void {
-                this.userID = userTransferObject.userID;
-                this.userName = userTransferObject.userName;
-                this.email = userTransferObject.email;
-                this.fullName = userTransferObject.name;
-                this.accountAdmin = userTransferObject.accountAdmin;
-                this.firstName = userTransferObject.firstName;
-                this.personaID = userTransferObject.personaID;
-                createLabel = "Update User";
-            }
+        public function set user(userTransferObject:UserTransferObject):void {
+            this.userID = userTransferObject.userID;
+            this.userName = userTransferObject.userName;
+            this.email = userTransferObject.email;
+            this.fullName = userTransferObject.name;
+            this.accountAdmin = userTransferObject.accountAdmin;
+            this.firstName = userTransferObject.firstName;
+            this.personaID = userTransferObject.personaID;
+            createLabel = "Update User";
+        }
 
-			private function created():void {
-				var userCreationResponse:UserCreationResponse = creationService.addUserToAccount.lastResult as UserCreationResponse;
-				if (userCreationResponse.successful) {
-					dispatchEvent(new RefreshAccountEvent());
-					PopUpManager.removePopUp(this);
-				} else {
-					failureMessageLabel.text = userCreationResponse.failureMessage;
-				}				
-			}
-
-            private function updated():void {
+        private function created():void {
+            var userCreationResponse:UserCreationResponse = creationService.addUserToAccount.lastResult as UserCreationResponse;
+            if (userCreationResponse.successful) {
                 dispatchEvent(new RefreshAccountEvent());
                 PopUpManager.removePopUp(this);
+            } else {
+                failureMessageLabel.text = userCreationResponse.failureMessage;
             }
-			
-			private function initHandlers():void {
-            	validators = [ emailValidator, userNameValidator, fullNameValidator ];
-                if (User.getInstance().getAccountType() >= Account.GROUP) {
-                    showPersonaOption = true;
-                    preferencesService.getPersonas.send();
+        }
+
+        private function updated():void {
+            dispatchEvent(new RefreshAccountEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        private function initHandlers():void {
+            validators = [ emailValidator, userNameValidator, fullNameValidator ];
+            if (User.getInstance().getAccountType() >= Account.PRO) {
+                showPersonaOption = true;
+                preferencesService.getPersonas.send();
+            }
+        }
+
+        private function save():void {
+            var results:Array = Validator.validateAll(validators);
+            if (results.length > 0) {
+                failureMessageLabel.text = "There are one or more problems with the fields above.";
+            } else {
+                failureMessageLabel.text = "";
+                var user:UserTransferObject = new UserTransferObject();
+                user.userID = userID;
+                user.email = emailInput.text;
+                user.userName = userNameInput.text;
+                user.name = fullNameInput.text;
+                user.firstName = firstNameInput.text;
+                if (showPersonaOption) {
+                    var persona:Object = personaComboBox.selectedItem;
+                    if (persona != Persona.EMPTY_PERSONA) {
+                        user.personaID = persona.personaID;
+                    }
+                }
+                user.accountAdmin = accountAdminCheckbox.selected;
+                /*user.insightCreator = insightCreatorCheckbox.selected;
+                 user.dataSourceCreator = dataSourceCreatorCheckbox.selected;*/
+                if (userID == 0) {
+                    ProgressAlert.alert(this, "Adding user to account...", null, creationService.addUserToAccount);
+                    creationService.addUserToAccount.send(user);
+                } else {
+                    ProgressAlert.alert(this, "Updating user...", null, creationService.updateUser);
+                    creationService.updateUser.send(user);
                 }
             }
-            
-            private function save():void {
-            	var results:Array = Validator.validateAll(validators);
-            	if (results.length > 0) {
-                    failureMessageLabel.text = "There are one or more problems with the fields above.";
-            	} else {
-            		failureMessageLabel.text = "";
-            		var user:UserTransferObject = new UserTransferObject();
-                    user.userID = userID;
-            		user.email = emailInput.text;
-            		user.userName = userNameInput.text;
-            		user.name = fullNameInput.text;
-                    user.firstName = firstNameInput.text;
-                    if (showPersonaOption) {
-                        var persona:Object = personaComboBox.selectedItem;
-                        if (persona != Persona.EMPTY_PERSONA) {
-                            user.personaID = persona.personaID;
-                        }
-                    }
-                    user.accountAdmin = accountAdminCheckbox.selected;
-                    /*user.insightCreator = insightCreatorCheckbox.selected;
-                    user.dataSourceCreator = dataSourceCreatorCheckbox.selected;*/
-                    if (userID == 0) {
-                        ProgressAlert.alert(this, "Adding user to account...", null, creationService.addUserToAccount);
-                        creationService.addUserToAccount.send(user);
-                    } else {
-                        ProgressAlert.alert(this, "Updating user...", null, creationService.updateUser);
-                        creationService.updateUser.send(user);
-                    }
-	            }
-            }
-			
-			private function cancel():void {
-				PopUpManager.removePopUp(this);
-			}
+        }
 
-            [Bindable]
-            private var showPersonaOption:Boolean;
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
 
-            [Bindable]
-            private var personas:ArrayCollection;
+        [Bindable]
+        private var showPersonaOption:Boolean;
 
-            private function gotPersonas():void {
-                var personas:ArrayCollection = preferencesService.getPersonas.lastResult as ArrayCollection;
-                personas.addItemAt(Persona.EMPTY_PERSONA, 0);
-                this.personas = personas;
-            }
+        [Bindable]
+        private var personas:ArrayCollection;
+
+        private function gotPersonas():void {
+            var personas:ArrayCollection = preferencesService.getPersonas.lastResult as ArrayCollection;
+            personas.addItemAt(Persona.EMPTY_PERSONA, 0);
+            this.personas = personas;
+        }
 
         [Bindable]
         private var personaID:int;

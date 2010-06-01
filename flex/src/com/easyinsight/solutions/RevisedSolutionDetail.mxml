@@ -4,21 +4,6 @@
         verticalGap="0"
         backgroundColor="#818285" horizontalAlign="center" implements="com.easyinsight.listing.IPerspective">
     <mx:states>
-        <mx:State name="NotLoggedIn">
-            <mx:AddChild relativeTo="{controlsBox}">
-                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
-                    <mx:VBox verticalGap="0">
-                        <mx:Label text="You'll need to create an account or log"/>
-                        <mx:Label text="in before installing the solution."/>
-                    </mx:VBox>
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Button label="Create Account" styleName="blueButton" click="createAccount()"/>
-                        <mx:Spacer width="20"/>
-                        <mx:Button label="Log in" styleName="blueButton" click="login()"/>
-                    </mx:HBox>
-                </mx:VBox>
-            </mx:AddChild>
-        </mx:State>
         <mx:State name="AccountBelowRequired">
             <mx:AddChild relativeTo="{controlsBox}">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
@@ -26,7 +11,7 @@
                         <mx:Label text="This solution requires a higher account"/>
                         <mx:Label text="tier than what your current subscription."/>    
                     </mx:VBox>
-                    <mx:Button label="Upgrade Account" styleName="blueButton" click="login()"/>
+                    <!--<mx:Button label="Upgrade Account" styleName="blueButton" click="login()"/>-->
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>
@@ -51,7 +36,6 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.LoginDialog;
         import com.easyinsight.account.Account;
         import com.easyinsight.customupload.ConfigureDataSource;
         import com.easyinsight.customupload.DataSourceConfiguredEvent;
@@ -278,15 +262,6 @@
             dispatchEvent(event);
         }
 
-        private function login():void {
-            var login:LoginDialog = new LoginDialog();
-            login.additionalInfo = "You need to be logged in before you can install this solution.";
-            var urlObject:Object = new Object();
-            urlObject.solutionID = solutionID;
-            login.targetURL = URLUtil.objectToString(urlObject);
-            PopUpManager.addPopUp(login, this, true);
-            PopUpUtil.centerPopUp(login);
-        }
 
         private function install():void {
             if (User.getInstance() != null && _solution.accessible) {
@@ -325,7 +300,7 @@
                     dataSources++;
                     dataSourceItems.addItem(solInstall.descriptor);
                 } else if (solInstall.descriptor.getType() == EIDescriptor.GOAL_TREE) {
-                    if (User.getInstance().getAccountType() >= Account.GROUP) {
+                    if (User.getInstance().getAccountType() >= Account.PRO) {
                         goalTrees++;
                         items.addItem(solInstall.descriptor);
                     }

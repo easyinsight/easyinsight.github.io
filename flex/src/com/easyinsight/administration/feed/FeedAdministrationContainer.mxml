@@ -169,7 +169,6 @@
         }
 
         private function save():void {
-            trace("saving");
             var results:Array = Validator.validateAll(generalValidators);
             var detailValidated:Boolean = true;
             if (feedAdminDetail != null) {
@@ -203,11 +202,9 @@
                 if (feedAdminDetail != null) {
                     feedAdminDetail.updateDataSource(feedDefinition);
                 }
-                trace("sending save");
                 ProgressAlert.alert(this, "Updating data source...", "Updated data source!", feedService.updateFeedDefinition);
                 feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text);
                 this.unsavedChanges = false;
-                trace("sent save");
             }
         }
 

@@ -50,11 +50,6 @@ public class FragmentParser {
                 goalLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 goalLink.execute();
             }),
-            new FragmentTester("activationID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("Home"));
-                var accountActivator:AccountActivator = new AccountActivator(key, workspace);
-                accountActivator.activate();
-            }),
             new FragmentTester("solutionID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var solutionLink:DelayedSolutionLink = new DelayedSolutionLink(Number(key));
                 solutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, workspace.changePerspective);

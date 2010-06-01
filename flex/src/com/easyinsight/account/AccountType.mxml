@@ -8,16 +8,19 @@
         protected override function commitProperties():void {
             super.commitProperties();
             switch (accountInfo.accountType) {
-                case Account.FREE:
+                case Account.PERSONAL:
                     accountType = "Personal";
                     break;
-                case Account.INDIVIDUAL:
+                case Account.BASIC:
                     accountType = "Basic";
                     break;
-                case Account.GROUP:
+                case Account.PLUS:
+                    accountType = "Plus";
+                    break;
+                case Account.PRO:
                     accountType = "Professional";
                     break;
-                case Account.PROFESSIONAL:
+                case Account.PREMIUM:
                     accountType = "Premium";
                     break;
                 case Account.ENTERPRISE:

@@ -9,19 +9,22 @@ public class AccountLimits {
     public static void configureAccount(Account account) {
         if (account.getAccountType() == Account.ENTERPRISE) {
             account.setMaxUsers(500);
-            account.setMaxSize(1000000000);
+            account.setMaxSize(Account.ENTERPRISE_MAX);
         } else if (account.getAccountType() == Account.PREMIUM) {
             account.setMaxUsers(50);
-            account.setMaxSize(500000000);
+            account.setMaxSize(Account.PREMIUM_MAX);
         } else if (account.getAccountType() == Account.BASIC) {
             account.setMaxUsers(5);
-            account.setMaxSize(100000000);
+            account.setMaxSize(Account.BASIC_MAX);
         } else if (account.getAccountType() == Account.PERSONAL) {
             account.setMaxUsers(1);
-            account.setMaxSize(1000000);
+            account.setMaxSize(Account.PERSONAL);
         } else if (account.getAccountType() == Account.PROFESSIONAL) {
-            account.setMaxUsers(50);
-            account.setMaxSize(500000000);
+            account.setMaxUsers(500);
+            account.setMaxSize(Account.PROFESSIONAL_MAX);
+        }  else if (account.getAccountType() == Account.PLUS) {
+            account.setMaxUsers(500);
+            account.setMaxSize(Account.PLUS_MAX);
         }
     }
 }

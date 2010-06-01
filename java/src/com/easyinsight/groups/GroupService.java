@@ -42,7 +42,7 @@ public class GroupService {
                 queryStmt.setLong(1, SecurityUtil.getAccountID());
                 ResultSet rs = queryStmt.executeQuery();
                 return !rs.next();
-            } else if (SecurityUtil.getAccountTier() >= Account.PROFESSIONAL && SecurityUtil.isAccountAdmin()) {
+            } else if (SecurityUtil.getAccountTier() >= Account.PLUS && SecurityUtil.isAccountAdmin()) {
                 return true;
             }
         } catch (Exception e) {

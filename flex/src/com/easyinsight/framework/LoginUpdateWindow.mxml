@@ -47,7 +47,7 @@
 
         protected override function commitProperties():void {
             super.commitProperties();
-            if (User.getInstance().getAccountType() == Account.FREE) {
+            if (User.getInstance().getAccountType() == Account.PERSONAL) {
                 var panel:AccountTypeUpdatePanel = new AccountTypeUpdatePanel();
                 panel.addEventListener(KPITutorialEvent.NEXT, next);
                 BindingUtils.bindProperty(panel, "welcomeBackInfo", this, "welcomeBackInfo");

@@ -115,7 +115,7 @@
         }
 
         private function about(event:Event):void {
-            
+
         }
 
         override protected function createChildren():void {
@@ -131,11 +131,10 @@
             }
 
 
-
             reportsMenu = new NativeMenu();
             baseMenu.addSubmenu(reportsMenu, "Reports");
 
-            if (User.getInstance().getAccountType() >= Account.GROUP) {
+            if (User.getInstance().getAccountType() >= Account.PRO) {
                 goalsMenu = new NativeMenu();
                 baseMenu.addSubmenu(goalsMenu, "Goals");
                 var myGoalsItem:NativeMenuItem = new NativeMenuItem("My Goals");
@@ -146,10 +145,10 @@
             }
 
             /*var uploadMenu:NativeMenu = new NativeMenu();
-            baseMenu.addSubmenu(uploadMenu, "Uploads");
-            var fileUploadItem:NativeMenuItem = new NativeMenuItem("Upload Spreadsheet or CSV");
-            fileUploadItem.addEventListener(Event.SELECT, onUpload);
-            uploadMenu.addItem(fileUploadItem);*/
+             baseMenu.addSubmenu(uploadMenu, "Uploads");
+             var fileUploadItem:NativeMenuItem = new NativeMenuItem("Upload Spreadsheet or CSV");
+             fileUploadItem.addEventListener(Event.SELECT, onUpload);
+             uploadMenu.addItem(fileUploadItem);*/
 
             var helpMenu:NativeMenu = new NativeMenu();
             defaultScreen = new AirIntroDescriptor();
@@ -177,7 +176,7 @@
             window.open(true);
             //window.nativeWindow.x = this.application.nativeWindow.x;
             //window.nativeWindow.y = this.application.nativeWindow.y;
-            
+
         }
 
         private function logout():void {
@@ -210,7 +209,7 @@
                      reportMenuItem.addEventListener(Event.SELECT, onReport);
                      reportMenuItem.data = descriptor;*/
                     descriptors.addItem(descriptor);
-                } else if (User.getInstance().getAccountType() >= Account.GROUP && descriptor.getType() == EIDescriptor.GOAL_TREE) {
+                } else if (User.getInstance().getAccountType() >= Account.PRO && descriptor.getType() == EIDescriptor.GOAL_TREE) {
                     goalSort.addItem(descriptor);
                     /*var goalsMenuItem:NativeMenuItem = new NativeMenuItem(descriptor.name);
                      goalsMenu.addItem(goalsMenuItem);
@@ -236,7 +235,7 @@
                 reportMenuItem.addEventListener(Event.SELECT, onReport);
                 reportMenuItem.data = reportDescriptor;
             }
-            if (User.getInstance().getAccountType() >= Account.GROUP) {
+            if (User.getInstance().getAccountType() >= Account.PRO) {
                 for each (var goalDescriptor:EIDescriptor in goalSort) {
                     var goalsMenuItem:NativeMenuItem = new NativeMenuItem(goalDescriptor.name);
                     goalsMenu.addItem(goalsMenuItem);

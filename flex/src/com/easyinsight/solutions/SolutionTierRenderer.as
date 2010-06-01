@@ -23,16 +23,19 @@ public class SolutionTierRenderer extends HBox{
     override public function set data(obj:Object):void {
         solution = obj as Solution;
         switch (solution.solutionTier) {
-            case Account.FREE:
+            case Account.PERSONAL:
                 tierLabel.text = "Free";
                 break;
-            case Account.INDIVIDUAL:
+            case Account.BASIC:
                 tierLabel.text = "Individual";
                 break;
-            case Account.GROUP:
+            case Account.PLUS:
+                tierLabel.text = "Plus";
+                break;
+            case Account.PRO:
                 tierLabel.text = "Group";
                 break;
-            case Account.PROFESSIONAL:
+            case Account.PREMIUM:
                 tierLabel.text = "Professional";
                 break;
             case Account.ENTERPRISE:

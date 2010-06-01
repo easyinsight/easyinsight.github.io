@@ -1,7 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
-        creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyedSignon); focusManager.setFocus(userName)"
-         backgroundImage="{background2}" backgroundSize="100%">
+        creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyedSignon); focusManager.setFocus(userName)">
     <mx:Metadata>
         [Event(name="loginEvent2", type="com.easyinsight.framework.LoginEvent")]
         [Event(name="loginClose", type="flash.events.Event")]
@@ -68,30 +67,11 @@
         [Bindable]
         private var _cancelVisible:Boolean;
 
-        private var _newAccount:Boolean;
-
-
-        public function get newAccount():Boolean {
-            return _newAccount;
-        }
-
-        public function set newAccount(value:Boolean):void {
-            _newAccount = value;
-        }
-
         [Bindable]
         private var resetResult:String;
 
         [Bindable]
-        private var _targetURL:String;
-
-        [Bindable]
         private var emailFailure:String;
-
-
-        public function set targetURL(value:String):void {
-            _targetURL = value;
-        }
 
         public function set additionalInfo(value:String):void {
             _additionalInfo = value;
@@ -110,10 +90,6 @@
                 currentState = "AdditionalInfo";
             }
         }
-
-        [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
 
         public function set cancelVisible(value:Boolean):void {
             _cancelVisible = value;
@@ -152,10 +128,10 @@
                         function (event:ResultEvent, token:Object = null):void {
                             switch (event.result) {
                                 case "success":
-                                    User.initializeUser(authResult);
-                                    User.getInstance().userName = authResult.userName;
-                                    dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
-                                    User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
+                                    /*User.initializeUser(authResult);
+                                    User.getInstance().userName = authResult.userName;*/
+                                    dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
+                                    //User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
                                     break;
                                 default:
                                     trace(event.result);
@@ -213,11 +189,6 @@
             signon(userName.text, password.text);
         }
 
-        private function createNewAccount():void {
-            User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS));
-            dispatchEvent(new Event("loginClose"));
-        }
-
         [Bindable]
         private var failureMessage:String = "";
 
@@ -247,13 +218,8 @@
         <mx:Spacer height="10"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Sign In" click="defaultSignon()" tabIndex="3"/>
-            <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}" tabIndex="4"/>
         </mx:HBox>
         <mx:Spacer height="10"/>
-        <mx:HBox>
-            <mx:Label text="Don't have an account yet?" id="noAccount"/>
-            <mx:Button label="Create Account" click="createNewAccount()"/>
-        </mx:HBox>
         </mx:VBox>
         <mx:Spacer height="10"/>
         <mx:HBox width="100%" horizontalAlign="center">

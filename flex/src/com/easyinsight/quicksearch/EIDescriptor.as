@@ -20,6 +20,7 @@ public class EIDescriptor {
     public var id:int;
     public var name:String;
     public var icon:Class;
+    public var urlKey:String;
     
     public function EIDescriptor() {
     }

@@ -21,10 +21,11 @@ public class Account {
 
     public static final int PERSONAL = 1;
     public static final int BASIC = 2;
-    public static final int PROFESSIONAL = 3;
-    public static final int PREMIUM = 4;
-    public static final int ENTERPRISE = 5;
-    public static final int ADMINISTRATOR = 6;
+    public static final int PLUS = 3;
+    public static final int PROFESSIONAL = 4;
+    public static final int PREMIUM = 5;
+    public static final int ENTERPRISE = 6;
+    public static final int ADMINISTRATOR = 7;
 
     public static final int INACTIVE = 1;
     public static final int ACTIVE = 2;
@@ -38,9 +39,10 @@ public class Account {
     public static final int CLOSING = 10;
 
     public static final long FREE_MAX = 5000000;
-    public static final long INDIVIDUAL_MAX = 100000000;
-    public static final long GROUP_MAX = 500000000;
-    public static final long PROFESSIONAL_MAX = 10000000000L;
+    public static final long BASIC_MAX = 35000000;
+    public static final long PLUS_MAX = 90000000;
+    public static final long PROFESSIONAL_MAX = 250000000;
+    public static final long PREMIUM_MAX = 10000000000L;
     public static final long ENTERPRISE_MAX = 1000000000;
     public static final long ADMINISTRATOR_MAX = Long.MAX_VALUE;
 
@@ -119,6 +121,7 @@ public class Account {
     private boolean optInEmail;
 
     private static final double GROUP_BILLING_AMOUNT = 200.00;
+    private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
 
     public boolean isUpgraded() {
@@ -334,11 +337,13 @@ public class Account {
             case Account.PERSONAL:
                 return FREE_MAX;
             case Account.BASIC:
-                return INDIVIDUAL_MAX;
+                return BASIC_MAX;
+            case Account.PLUS:
+                return PLUS_MAX;
             case Account.PROFESSIONAL:
                 return PROFESSIONAL_MAX;
             case Account.PREMIUM:
-                return PROFESSIONAL_MAX;
+                return PREMIUM_MAX;
             case Account.ENTERPRISE:
                 return ENTERPRISE_MAX;
             case Account.ADMINISTRATOR:
@@ -394,6 +399,8 @@ public class Account {
 
     public double monthlyCharge() {
         switch(getAccountType()) {
+            case Account.PLUS:
+                return Account.PLUS;
             case Account.BASIC:
                 return INDIVIDUAL_BILLING_AMOUNT;
             case Account.PROFESSIONAL:

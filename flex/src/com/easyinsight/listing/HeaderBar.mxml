@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="*" xmlns:listing="com.easyinsight.listing.*"
          width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="25" verticalAlign="middle" backgroundColor="0xF0F0F0"
-        creationComplete="setup()">
+        creationComplete="setup()" height="68">
     <mx:Metadata>
-        [Event(name="triggerAnalyze", type="com.easyinsight.listing.TriggerAnalyzeEvent")]
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
         [Event(name="launchQuickSearch", type="com.easyinsight.listing.LaunchQuickSearchEvent")]
         [Event(name="reportBug", type="com.easyinsight.listing.ReportBugEvent")]
@@ -24,7 +22,6 @@
         import com.easyinsight.genredata.GenreDataProvider;
         import com.easyinsight.intro.IntroPanel;
 
-        import mx.controls.Alert;
         import mx.states.RemoveChild;
         import mx.states.State;
 
@@ -32,10 +29,12 @@
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
             User.getEventNotifier().addEventListener("uiChange", uiChangeEvent);
+            if (User.getInstance().uiConfiguration != null) {
+                createState(User.getInstance().uiConfiguration);
+            }
         }
 
-        private function loginEvent(event:LoginEvent):void {
-            stackIndex = event.type == LoginEvent.LOGIN ? 1 : 0;
+        private function loginEvent(event:LoginEvent):void {            
             if (event.type == LoginEvent.LOGIN) {
                 if (User.getInstance().uiConfiguration != null) {
                     createState(User.getInstance().uiConfiguration);
@@ -44,11 +43,11 @@
         }
 
         private function uiChangeEvent(event:Event):void {
-            createState(User.getInstance().uiConfiguration);
+            if (User.getInstance().uiConfiguration != null) {
+                createState(User.getInstance().uiConfiguration);
+            }
         }
 
-        [Bindable]
-        private var stackIndex:int = 0;
 
         [Bindable]
         [Embed(source="../../../../assets/find.png")]
@@ -214,15 +213,8 @@
         <mx:Image source="{helpIcon}" id="helpImage"/>
         <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" resizeToContent="true">
-        <mx:HBox width="100%" horizontalAlign="center">
-            <easyinsight:AnonymousLogonStatus/>
-        </mx:HBox>
-        <mx:HBox verticalAlign="middle">
-            <mx:Spacer width="100%"/>
-            <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug"/>
-            <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)"/>
-            <easyinsight:LoggedOnStatus/>
-        </mx:HBox>
-    </mx:ViewStack>
+    <mx:Spacer width="100%"/>
+    <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug"/>
+    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)"/>
+    <easyinsight:LoggedOnStatus/>
 </mx:HBox>

@@ -1,0 +1,210 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+         creationComplete="setupListeners()"
+         paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" horizontalAlign="center"
+        verticalAlign="middle">
+    <mx:Metadata>
+        [Event(name="connectionConfigured", type="flash.events.Event")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.CredentialsResponse;
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        import com.easyinsight.datasources.IServerDataSourceDefinition;
+        import com.easyinsight.framework.EIMessageListener;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.scorecard.DataSourceAsyncEvent;
+        import com.easyinsight.scorecard.DataSourceMessageEvent;
+
+        import mx.controls.Alert;
+        import mx.rpc.events.FaultEvent;
+
+        private function updateFault(event:FaultEvent):void {
+            Alert.show(event.fault.faultString);
+        }
+
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                validate();
+            }
+        }
+
+        private function setupListeners():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
+            EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
+        }
+
+        private var _dataSourceClass:Class;
+        private var dataSourceCreation:IServerDataSourceCreation;
+        private var _dataSourceID:int;
+        private var _dataSourceDefinition:FeedDefinitionData;
+
+        private var _onlyDataSource:Boolean;
+
+        [Bindable]
+        private var ready:Boolean;
+
+
+        private var _credentialsSaved:Boolean = false;
+
+        [Bindable(event="credentialsSavedChanged")]
+        public function get credentialsSaved():Boolean {
+            return _credentialsSaved;
+        }
+
+        public function set credentialsSaved(value:Boolean):void {
+            if (_credentialsSaved == value) return;
+            _credentialsSaved = value;
+            dispatchEvent(new Event("credentialsSavedChanged"));
+        }
+
+        public function set onlyDataSource(value:Boolean):void {
+            _onlyDataSource = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_dataSourceDefinition == null) {
+                feedService.getFeedDefinition.send(_dataSourceID);
+            } else {
+                ready = true;
+                dataSourceCreation = new _dataSourceClass();
+                if (dataSourceCreation.savesCredentials) {
+                    credentialsIndex = 1;
+                }
+                coreContent.addChild(dataSourceCreation as DisplayObject);
+            }
+        }
+
+        private function gotDataSource():void {
+            dataSourceDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            ready = true;
+            var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
+            dataSourceCreation = new configClass();
+            if (dataSourceCreation.savesCredentials) {
+                credentialsIndex = 1;
+            }
+            var dispObject:DisplayObject = dataSourceCreation as DisplayObject;
+            coreContent.addChild(dispObject);
+
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return _dataSourceDefinition;
+        }
+
+        public function set dataSourceDefinition(value:FeedDefinitionData):void {
+            _dataSourceDefinition = value;
+        }
+
+        private function validate():void {
+            ready = false;
+            progressBar.visible = true;
+            dataSourceCreation.updateDataSource(dataSourceDefinition);
+            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox != null ? saveCredentialsCheckbox.selected : false);
+        }
+
+        private function validated():void {
+            var validation:CredentialsResponse = uploadService.validateCredentials.lastResult as CredentialsResponse;
+            if (validation.successful) {
+                if (validation.encryptedResponse) {
+                    User.saveCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
+                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
+                } else {
+                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials);
+                }
+                //dataSourceDefinition.refreshDataInterval = (dailyRefresh.selected ? 1 : 0) * 24 * 1000 * 60 * 60;
+                dataSourceCreation.updateDataSource(dataSourceDefinition);
+                feedService.updateFeedDefinition.send(dataSourceDefinition, "");
+            } else {
+                ready = true;
+                progressBar.visible = false;
+                Alert.show(validation.failureMessage);
+            }
+        }
+
+        private var lastMessage:Date;
+
+        private function onMessage(event:DataSourceMessageEvent):void {
+            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
+            if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
+                lastMessage = scorecardEvent.timestamp;
+                if (scorecardEvent.dataSourceID == dataSourceDefinition.dataFeedID) {
+                    if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
+                        asyncLabel = scorecardEvent.dataSourceName;
+                        if (scorecardEvent.max > 0 && progressBar != null) {
+                            progressBar.maximum = scorecardEvent.max;
+                            progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
+                        }
+                    } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
+                        asyncLabel = scorecardEvent.dataSourceName;
+                    }
+                }
+            }
+        }
+
+        private function created():void {
+            uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
+        }
+
+        private function refreshed():void {
+            progressBar.visible = false;
+            var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+            if (response.successful) {
+                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
+                descriptor.name = dataSourceDefinition.feedName;
+                dispatchEvent(new DataSourceConfiguredEvent(descriptor));
+                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            } else {
+                ready = true;
+                Alert.show(response.failureMessage);
+            }
+        }
+
+        public function set dataSourceClass(value:Class):void {
+            _dataSourceClass = value;
+        }
+
+        [Bindable]
+        private var asyncLabel:String = "Retrieving data, this may take a few minutes...";
+
+        [Bindable]
+        private var credentialsIndex:int;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="validateCredentials" result="validated()"/>
+        <mx:method name="refreshData" result="refreshed()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)"/>
+        <mx:method name="getFeedDefinition" result="gotDataSource()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:Label text="Now we can install and configure a connection to your external system:" fontSize="14"/>
+        <mx:Box id="coreContent"/>
+        <mx:ProgressBar id="progressBar" indeterminate="false" mode="manual" visible="false" label="{asyncLabel}"/>
+        <mx:ViewStack selectedIndex="{credentialsIndex}">
+            <mx:Box/>
+            <mx:HBox>
+                <mx:Label text="Save Credentials:"/>
+                <mx:CheckBox id="saveCredentialsCheckbox"/>
+                <mx:Label text="Security Note" fontSize="10" textDecoration="underline"
+                          toolTip="Your credentials will be saved in an encrypted form on your local system, so do not do this if you're using a public machine."/>
+            </mx:HBox>
+        </mx:ViewStack>
+        <!--<mx:FormItem label="Daily Refresh:" enabled="{credentialsSaved}">
+            <mx:CheckBox id="dailyRefresh"/>
+        </mx:FormItem>-->
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Create Connection" click="validate()" enabled="{ready}"/>
+            <mx:Button label="I'll Do It Later" click="dispatchEvent(new Event('later'))" enabled="{ready}"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:VBox>

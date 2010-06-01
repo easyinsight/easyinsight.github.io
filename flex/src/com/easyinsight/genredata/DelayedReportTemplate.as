@@ -1,7 +1,6 @@
 package com.easyinsight.genredata {
-import com.easyinsight.LoginDialog;
+
 import com.easyinsight.framework.LoginEvent;
-import com.easyinsight.framework.User;
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
@@ -33,13 +32,7 @@ public class DelayedReportTemplate extends EventDispatcher {
     }
 
     public function execute():void {
-        if (User.getInstance == null) {
-            var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
-            loginDialog.addEventListener(LoginEvent.LOGIN, delayedLogin);
-            PopUpUtil.centerPopUp(loginDialog);
-        } else {
-            solutionService.determineDataSourceForURLKey.send(urlKey);
-        }
+        solutionService.determineDataSourceForURLKey.send(urlKey);
     }
 
     private function delayedLogin(event:LoginEvent):void {

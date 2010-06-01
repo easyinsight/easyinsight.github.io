@@ -135,9 +135,9 @@
 
         private function onDividerRelease(event:DividerEvent):void {
             /*if (User.getSharedObject() != null) {
-                User.getSharedObject().data.goalSliderPos = dataBoxes.getDividerAt(0).y + event.delta;
-                User.getSharedObject().flush();
-            }*/
+             User.getSharedObject().data.goalSliderPos = dataBoxes.getDividerAt(0).y + event.delta;
+             User.getSharedObject().flush();
+             }*/
         }
 
         private function onCreation():void {
@@ -180,13 +180,13 @@
             if (user == null) {
                 currentState = "notLoggedIn";
             } else {
-                if (User.getInstance().getAccountType() == Account.FREE) {
+                if (User.getInstance().getAccountType() == Account.PERSONAL) {
                     currentState = "functionalityUnavailable";
                 } else {
                     if (currentState != "") {
                         currentState = "";
                     }
-                    addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.GROUP;
+                    addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.PRO;
                     goalService.getGoalTrees.send();
                     kpiService.getKPIs.send();
                     //myGoalsGrid.gotFocus();
@@ -218,18 +218,18 @@
             goalTrees = goalService.getGoalTrees.lastResult as ArrayCollection;
             kpiTreeCount = Math.min(10, goalTrees.length);
             if (goalTrees.length == 0) {
-                if (User.getInstance().getAccountType() == Account.INDIVIDUAL) {
+                if (User.getInstance().getAccountType() == Account.BASIC) {
                     currentState = "noGoalsIndividual";
                 } else {
                     currentState = "noGoalsPro";
                 }
             }
             /*try {
-                if (User.getSharedObject().data.goalSliderPos != null) {
-                    dataBoxes.getDividerAt(0).y = User.getSharedObject().data.goalSliderPos;
-                }
-            } catch(e:Error) {
-            }*/
+             if (User.getSharedObject().data.goalSliderPos != null) {
+             dataBoxes.getDividerAt(0).y = User.getSharedObject().data.goalSliderPos;
+             }
+             } catch(e:Error) {
+             }*/
         }
 
         private function gridDoubleClick(event:ListEvent):void {

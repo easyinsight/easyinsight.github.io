@@ -3,8 +3,7 @@
         paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="200" horizontalAlign="center">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-
-        import com.easyinsight.framework.User;
+        
         import com.easyinsight.listing.ListingChangeEvent;
         import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
@@ -89,17 +88,13 @@
         }
 
         private function addReport():void {
-            if (User.getInstance() != null) {
-                if (_item.exchangeData is ExchangeReportData) {
-                    ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSource);
-                    solutionService.determineDataSource.send(dataSourceID);
-                } else if (_item.exchangeData is ExchangePackageData) {
-                    ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.determineDataSourceForPackage);
-                    var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
-                    solutionService.determineDataSourceForPackage.send(packageData.packageID);
-                }
-            } else {
-                
+            if (_item.exchangeData is ExchangeReportData) {
+                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSource);
+                solutionService.determineDataSource.send(dataSourceID);
+            } else if (_item.exchangeData is ExchangePackageData) {
+                ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.determineDataSourceForPackage);
+                var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
+                solutionService.determineDataSourceForPackage.send(packageData.packageID);
             }
         }
         
