@@ -56,6 +56,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="display_name")
     private String displayName;
 
+    @Column(name="sort_sequence")
+    private int sortSequence;
+
     @Column(name="sort")
     private int sort;
 
@@ -106,6 +109,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setLookupTableID(Long lookupTableID) {
         this.lookupTableID = lookupTableID;
+    }
+
+    public int getSortSequence() {
+        return sortSequence;
+    }
+
+    public void setSortSequence(int sortSequence) {
+        this.sortSequence = sortSequence;
     }
 
     public String qualifiedName() {

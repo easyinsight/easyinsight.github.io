@@ -201,6 +201,7 @@
                     if (o.requiredTier != null && o.requiredTier != "") {
                         requiredTier = int(o.requiredTier);
                     }
+                    configureInline = !(o.configureInline != null && o.configureInline != "");
                 }
             }
         }
@@ -466,6 +467,7 @@
             loginPage.addEventListener(ConnectionGoEvent.CONNECTION_GO, onConnect);
             BindingUtils.bindProperty(loginPage, "solutionID", this, "solutionID");
             BindingUtils.bindProperty(loginPage, "requiredTier", this, "requiredTier");
+            BindingUtils.bindProperty(loginPage, "configureInline", this, "configureInline");
             masterCanvas.addChild(loginPage);
         }
 
@@ -473,6 +475,20 @@
             toMain();
             var o:Object = URLUtil.stringToObject(currentFragment, "&");
             parseFragmentObject(o, currentFragment);
+        }
+
+        private var _configureInline:Boolean;
+
+
+        [Bindable(event="configureInlineChanged")]
+        public function get configureInline():Boolean {
+            return _configureInline;
+        }
+
+        public function set configureInline(value:Boolean):void {
+            if (_configureInline == value) return;
+            _configureInline = value;
+            dispatchEvent(new Event("configureInlineChanged"));
         }
 
         private function toMain():void {

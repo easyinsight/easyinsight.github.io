@@ -34,19 +34,19 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
 
     private long limitDate;
     private long endDate;
-    private Date now;
     private int interval;
     private int intervalType;
     private int intervalAmount;
+    private int mode;
 
     public MaterializedRollingFilterDefinition(RollingFilterDefinition rollingFilterDefinition, Date now) {
         super(rollingFilterDefinition.getField());
         if (now == null) {
             now = new Date();
         }
-        this.now = now;
         limitDate = findStartDate(rollingFilterDefinition, now);
         endDate = findEndDate(rollingFilterDefinition, now);
+        mode = rollingFilterDefinition.getCustomBeforeOrAfter();
     }
 
     public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
@@ -57,7 +57,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         cal.setTime(now);
         switch (interval) {
             case CUSTOM:
-                if (!rollingFilterDefinition.isCustomBeforeOrAfter()) {
+                if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
+                        rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
                     switch (intervalType) {
                         case 0:
                             cal.add(Calendar.MINUTE, intervalAmount);
@@ -190,7 +191,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 // do nothing, now is fine
                 break;
             case CUSTOM:
-                if (rollingFilterDefinition.isCustomBeforeOrAfter()) {
+                if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.NEXT ||
+                        rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.BEFORE) {
                     switch (intervalType) {
                         case 0:
                             cal.add(Calendar.MINUTE, intervalAmount);
@@ -264,11 +266,23 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             allowed = true;
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
-            allowed = limitDate < dateValue.getDate().getTime() && dateValue.getDate().getTime() <= endDate;
+            if (mode == RollingFilterDefinition.AFTER) {
+                allowed = limitDate < dateValue.getDate().getTime();
+            } else if (mode == RollingFilterDefinition.BEFORE) {
+                allowed = dateValue.getDate().getTime() <= endDate;
+            } else {
+                allowed = limitDate < dateValue.getDate().getTime() && dateValue.getDate().getTime() <= endDate;
+            }
         } else {
             DateValue originalValue = (DateValue) value.getOriginalValue();
             if (originalValue != null) {
-                allowed = limitDate < originalValue.getDate().getTime() && originalValue.getDate().getTime() <= endDate;
+                if (mode == RollingFilterDefinition.AFTER) {
+                    allowed = limitDate < originalValue.getDate().getTime();
+                } else if (mode == RollingFilterDefinition.BEFORE) {
+                    allowed = originalValue.getDate().getTime() <= endDate;
+                } else {
+                    allowed = limitDate < originalValue.getDate().getTime() && originalValue.getDate().getTime() <= endDate;    
+                }
             }
         }
         return allowed;

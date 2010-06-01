@@ -19,6 +19,7 @@ import mx.formatters.Formatter;
 		public var hidden:Boolean = false;
 		public var formattingConfiguration:FormattingConfiguration = new FormattingConfiguration();
 		public var sort:int = 0;
+		public var sortSequence:int = 0;
 		public var displayName:String;
         public var width:int = 0;
         public var concrete:Boolean;        

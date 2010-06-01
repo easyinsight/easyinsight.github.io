@@ -24,7 +24,7 @@ public class CustomRollingFilter extends HBox {
     protected override function createChildren():void {
         super.createChildren();
         var beforeComboBox:ComboBox = new ComboBox();
-        beforeComboBox.dataProvider = new ArrayCollection([ "Last", "Next" ]);
+        beforeComboBox.dataProvider = new ArrayCollection([ "Last", "Next", "Before", "After" ]);
         BindingUtils.bindProperty(beforeComboBox, "selectedItem", this, "beforeItem");
         beforeComboBox.addEventListener(Event.CHANGE, onLastChange);
         addChild(beforeComboBox);
@@ -44,10 +44,14 @@ public class CustomRollingFilter extends HBox {
 
     protected override function commitProperties():void {
         super.commitProperties();
-        if (_filter.customBeforeOrAfter) {
+        if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.LAST) {
             beforeItem = "Next";
-        } else {
+        } else if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.NEXT) {
             beforeItem = "Last";
+        } else if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.BEFORE) {
+            beforeItem = "Before";
+        } else if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.AFTER) {
+            beforeItem = "After";
         }
         intervalAmountString = String(_filter.customIntervalAmount);
         if (_filter.customIntervalType == 0) {
@@ -111,7 +115,15 @@ public class CustomRollingFilter extends HBox {
 
     private function onLastChange(event:Event):void {
         var comboBox:ComboBox = event.currentTarget as ComboBox;
-        _filter.customBeforeOrAfter = comboBox.selectedItem != "Last";
+        if (comboBox.selectedItem == "Before") {
+            _filter.customBeforeOrAfter = RollingDateRangeFilterDefinition.BEFORE;
+        } else if (comboBox.selectedItem == "After") {
+            _filter.customBeforeOrAfter = RollingDateRangeFilterDefinition.AFTER;
+        } if (comboBox.selectedItem == "Last") {
+            _filter.customBeforeOrAfter = RollingDateRangeFilterDefinition.LAST;
+        } if (comboBox.selectedItem == "Next") {
+            _filter.customBeforeOrAfter = RollingDateRangeFilterDefinition.NEXT;
+        }
         changed();
     }
 

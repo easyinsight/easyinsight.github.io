@@ -479,7 +479,7 @@ public class GroupStorage {
                 long existingID = existingRS.getLong(1);
                 PreparedStatement updateLinkStmt = conn.prepareStatement("UPDATE GROUP_TO_INSIGHT SET ROLE = ? WHERE " +
                         "GROUP_TO_INSIGHT_ID = ?");
-                updateLinkStmt.setLong(1, Roles.SUBSCRIBER);
+                updateLinkStmt.setLong(1, Roles.OWNER);
                 updateLinkStmt.setLong(2, existingID);
                 updateLinkStmt.executeUpdate();
             } else {
@@ -487,7 +487,7 @@ public class GroupStorage {
                         "VALUES (?, ?, ?)");
                 insightReportStmt.setLong(1, groupID);
                 insightReportStmt.setLong(2, reportID);
-                insightReportStmt.setLong(3, Roles.SUBSCRIBER);
+                insightReportStmt.setLong(3, Roles.OWNER);
                 insightReportStmt.execute();
             }
             ReportToGroupNotification notification = new ReportToGroupNotification();

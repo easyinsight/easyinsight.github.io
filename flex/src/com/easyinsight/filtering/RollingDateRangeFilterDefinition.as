@@ -18,10 +18,15 @@ package com.easyinsight.filtering
 		public static const LAST_FULL_DAY:int = 12;
 		public static const LAST_FULL_WEEK:int = 13;
 		public static const LAST_FULL_MONTH:int = 14;        
-		public static const CUSTOM:int = 18;        
+		public static const CUSTOM:int = 18;
+
+        public static const LAST:int = 0;
+        public static const NEXT:int = 1;
+        public static const BEFORE:int = 2;
+        public static const AFTER:int = 3; 
 
 		public var interval:int = DAY;
-        public var customBeforeOrAfter:Boolean;
+        public var customBeforeOrAfter:int;
         public var customIntervalType:int = 2;
         public var customIntervalAmount:int = 1;
 		

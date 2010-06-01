@@ -18,11 +18,16 @@ import java.util.Date;
 @PrimaryKeyJoinColumn(name="filter_id")
 public class RollingFilterDefinition extends FilterDefinition {
 
+    public static final int LAST = 0;
+    public static final int NEXT = 1;
+    public static final int BEFORE = 2;
+    public static final int AFTER = 3;
+
     @Column(name="interval_value")
     private int interval;
 
     @Column(name="before_or_after")
-    private boolean customBeforeOrAfter;
+    private int customBeforeOrAfter;
 
     @Column(name="interval_type")
     private int customIntervalType;
@@ -30,11 +35,11 @@ public class RollingFilterDefinition extends FilterDefinition {
     @Column(name="interval_amount")
     private int customIntervalAmount;
 
-    public boolean isCustomBeforeOrAfter() {
+    public int getCustomBeforeOrAfter() {
         return customBeforeOrAfter;
     }
 
-    public void setCustomBeforeOrAfter(boolean customBeforeOrAfter) {
+    public void setCustomBeforeOrAfter(int customBeforeOrAfter) {
         this.customBeforeOrAfter = customBeforeOrAfter;
     }
 
@@ -71,10 +76,18 @@ public class RollingFilterDefinition extends FilterDefinition {
         if (interval == MaterializedRollingFilterDefinition.LAST_DAY) {
             queryBuilder.append("date(").append(getField().toKeySQL()).append(") = (select max(date(").append(getField().toKeySQL()).append(")) from ").append(tableName).append(")");
         } else {
-            queryBuilder.append(getField().toKeySQL());
-            queryBuilder.append(" >= ? AND ");
-            queryBuilder.append(getField().toKeySQL());
-            queryBuilder.append(" <= ?");
+            if (customBeforeOrAfter == RollingFilterDefinition.AFTER) {
+                queryBuilder.append(getField().toKeySQL());
+                queryBuilder.append(" >= ?");
+            } else if (customBeforeOrAfter == RollingFilterDefinition.BEFORE) {
+                queryBuilder.append(getField().toKeySQL());
+                queryBuilder.append(" <= ?");
+            } else {
+                queryBuilder.append(getField().toKeySQL());
+                queryBuilder.append(" >= ? AND ");
+                queryBuilder.append(getField().toKeySQL());
+                queryBuilder.append(" <= ?");
+            }
         }
         return queryBuilder.toString();
     }
@@ -84,8 +97,14 @@ public class RollingFilterDefinition extends FilterDefinition {
             Date now = insightRequestMetadata.getNow();
             long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now);
             long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now);
-            preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startTime));
-            preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endTime));
+            if (customBeforeOrAfter == RollingFilterDefinition.AFTER) {
+                preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startTime));
+            } else if (customBeforeOrAfter == RollingFilterDefinition.BEFORE) {
+                preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endTime));
+            } else {
+                preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startTime));
+                preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endTime));
+            }
         }
         return start;
     }

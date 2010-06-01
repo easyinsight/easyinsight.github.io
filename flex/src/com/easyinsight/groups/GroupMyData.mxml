@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" width="100%" height="100%">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" width="100%" height="100%" doubleClickEnabled="true">
     <mx:Script><![CDATA[
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.AnalyzeSource;

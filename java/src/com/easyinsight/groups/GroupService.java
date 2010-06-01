@@ -398,7 +398,7 @@ public class GroupService {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         SecurityUtil.authorizeFeed(feedID, Roles.SHARER);
         try {
-            groupStorage.addFeedToGroup(feedID, groupID, Roles.SUBSCRIBER);
+            groupStorage.addFeedToGroup(feedID, groupID, Roles.OWNER);
             FeedRegistry.instance().flushCache(feedID);
         } catch (Exception e) {
             LogClass.error(e);

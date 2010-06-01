@@ -9,7 +9,6 @@ import flash.events.MouseEvent;
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.HBox;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
