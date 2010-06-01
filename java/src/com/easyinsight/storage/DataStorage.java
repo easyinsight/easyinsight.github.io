@@ -166,7 +166,7 @@ public class DataStorage {
         } else if (accountType == Account.PLUS) {
             allowed = Account.PLUS_MAX;
         } else if (accountType == Account.PERSONAL) {
-            allowed = Account.FREE_MAX;
+            allowed = Account.PERSONAL_MAX;
         } else if (accountType == Account.PROFESSIONAL) {
             allowed = Account.PROFESSIONAL_MAX;
         } else if (accountType == Account.ADMINISTRATOR) {
