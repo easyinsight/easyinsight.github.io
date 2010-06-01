@@ -92,19 +92,19 @@ import mx.formatters.NumberFormatter;
                     case AnalysisItemTypes.MINUTE_LEVEL:
                         switch (User.getInstance().dateFormat) {
                             case 0:
-                                dateFormatter.formatString = "MM/DD/YYYY HH:MM";
+                                dateFormatter.formatString = "MM/DD/YYYY HH:NN";
                                 break;
                             case 1:
-                                dateFormatter.formatString = "YYYY-MM-DD HH:MM";
+                                dateFormatter.formatString = "YYYY-MM-DD HH:NN";
                                 break;
                             case 2:
-                                dateFormatter.formatString = "DD-MM-YYYY HH:MM";
+                                dateFormatter.formatString = "DD-MM-YYYY HH:NN";
                                 break;
                             case 3:
-                                dateFormatter.formatString = "DD/MM/YYYY HH:MM";
+                                dateFormatter.formatString = "DD/MM/YYYY HH:NN";
                                 break;
                             case 4:
-                                dateFormatter.formatString = "DD.MM.YYYY HH:MM";
+                                dateFormatter.formatString = "DD.MM.YYYY HH:NN";
                                 break;
                         }
                         break;

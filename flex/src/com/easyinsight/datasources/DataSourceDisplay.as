@@ -2,6 +2,7 @@ package com.easyinsight.datasources {
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.EIMessageListener;
+import com.easyinsight.framework.User;
 import com.easyinsight.scorecard.DataSourceAsyncEvent;
 import com.easyinsight.scorecard.DataSourceMessageEvent;
 import com.easyinsight.util.AutoSizeTextArea;
@@ -69,7 +70,23 @@ public class DataSourceDisplay extends VBox {
         _dataSource = value;
         if (_dataSource != null) {
             var dateFormatter:DateFormatter = new DateFormatter();
-            dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+            switch (User.getInstance().dateFormat) {
+                case 0:
+                    dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                    break;
+                case 1:
+                    dateFormatter.formatString = "YYYY-MM-DD HH:NN";
+                    break;
+                case 2:
+                    dateFormatter.formatString = "DD-MM-YYYY HH:NN";
+                    break;
+                case 3:
+                    dateFormatter.formatString = "DD/MM/YYYY HH:NN";
+                    break;
+                case 4:
+                    dateFormatter.formatString = "DD.MM.YYYY HH:NN";
+                    break;
+            }
             var dateString:String = dateFormatter.format(value.lastDataTime);
             if (_dataSource.type == DataSourceInfo.STORED_PUSH) {
                 if (dataSource.originName == null) {

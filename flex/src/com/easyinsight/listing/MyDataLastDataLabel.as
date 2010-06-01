@@ -1,6 +1,8 @@
 package com.easyinsight.listing
 {
+import com.easyinsight.framework.User;
 
+import mx.controls.Alert;
 import mx.controls.Label;
 import mx.formatters.DateFormatter;
 
@@ -14,7 +16,23 @@ import mx.formatters.DateFormatter;
 			super();
             if (formatter == null) {
                 formatter = new DateFormatter();
-                formatter.formatString = "MM/DD/YYYY HH:NN";
+                switch (User.getInstance().dateFormat) {
+                    case 0:
+                        formatter.formatString = "MM/DD/YYYY HH:NN";
+                        break;
+                    case 1:
+                        formatter.formatString = "YYYY-MM-DD HH:NN";
+                        break;
+                    case 2:
+                        formatter.formatString = "DD-MM-YYYY HH:NN";
+                        break;
+                    case 3:
+                        formatter.formatString = "DD/MM/YYYY HH:NN";
+                        break;
+                    case 4:
+                        formatter.formatString = "DD.MM.YYYY HH:NN";
+                        break;
+                }
             }
 		}
 		
