@@ -67,6 +67,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
         do {
 
             try {
+                System.out.println("basecamp request");
                 client.executeMethod(restMethod);
                 //System.out.println(restMethod.getResponseBodyAsString());
                 doc = builder.build(restMethod.getResponseBodyAsStream());
@@ -96,6 +97,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
                 } else if ("HTTP/1.1 503 Service Temporarily Unavailable".equals(statusLine)) {
+                    System.out.println("basecamp 503, retrying");
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
                         try {

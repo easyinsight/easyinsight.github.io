@@ -7,6 +7,7 @@ import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -78,6 +79,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         Document doc = null;
         do {
             try {
+                System.out.println("retrieving highrise data");
                 client.executeMethod(restMethod);
                 doc = builder.build(restMethod.getResponseBodyAsStream());                
                 String rootValue = doc.getRootElement().getValue();
@@ -85,12 +87,23 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                     throw new BaseCampDataException("You need to enable API access to your Highrise account--you can do this under Account (Upgrade/Invoice), Highrise API in the Highrise user interface.");
                 }
                 successful = true;
+            } catch (IOException e) {
+                retryCount++;
+                if (e.getMessage().contains("503")) {
+                    try {
+                        Thread.sleep(20000);
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    throw new RuntimeException(e);
+                }
             } catch (nu.xom.ParsingException e) {
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new HighRiseLoginException("Could not locate a Highrise instance at " + url);
                 } else if ("HTTP/1.1 503 Service Temporarily Unavailable".equals(statusLine)) {
+                    System.out.println("Highrise 503, retrying");
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
                         try {
