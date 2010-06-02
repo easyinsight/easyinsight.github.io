@@ -161,7 +161,9 @@
                 descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
                 dispatchEvent(new DataSourceConfiguredEvent(descriptor));
-                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+                if (stage != null) {
+                    stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+                }
             } else {
                 ready = true;
                 Alert.show(response.failureMessage);
