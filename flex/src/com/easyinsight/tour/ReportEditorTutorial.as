@@ -27,8 +27,7 @@ public class ReportEditorTutorial extends TutorialFramework {
         notes.addItem(new ScreenNoteAnchor("You can export the report to a variety of locations, view in full screen for demonstration purposes, or adjust any filters on the report.", "center", 120));
         notes.addItem(new ScreenNoteAnchor("If you feel like a particular report helps provide you with meaningful insight, you can add it to your own My Data page for future reference, as well as enabling you to change it however you like. Clicking on the Add to My Data button here will accomplish this task.", "center", 200));
         notes.addItem(new ActionTutorialElement(new NavigationEvent("Home")));
-        notes.addItem(new ScreenNoteAnchor("Here, we've returned to the Home page, which now shows you the scorecard we created. As you add reports, you can access those reports from the popup menu that appears when you left click on a KPI.", "center", 150, "Close Tutorial"));
-        notes.addItem(new SetNoteProperty("coreVBox", "enabled", true));
+        notes.addItem(new ScreenNoteAnchor("Here, we've returned to the Home page, which now shows you the scorecard we created. As you add reports, you can access those reports from the popup menu that appears when you left click on a KPI.", "center", 150, "Close Tutorial"));        
 
         /*notes.addItem(new NoteAnchor("tabNavigator", "The metadata tab provides settings around saving and sharing the report with others."));
         notes.addItem(new NoteAnchor("tabNavigator", "The data tab focuses around the data fields of the report."));
