@@ -81,10 +81,10 @@
                     configWindow.onlyDataSource = true;
                     configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
                     configWindow.addEventListener("later", onLater, false, 0, true);
-                    configWindow.setStyle("hideEffect", leftEffect);
-                    configWindow.setStyle("showEffect", leftEffect);
+                    /*configWindow.setStyle("hideEffect", leftEffect);
+                    configWindow.setStyle("showEffect", leftEffect);*/
                     viewStack.addChild(configWindow);
-                    panelIndex = viewStack.getChildIndex(configWindow);
+                    panelIndex = 5;
                 }
             }
         }
@@ -237,7 +237,7 @@
                                                               loginEvent2="accountCreated(event)"
                                                               accountType="{accountType}"/>
                 </mx:VBox>
-                <mx:VBox hideEffect="leftEffect" showEffect="leftEffect">
+                <mx:VBox showEffect="leftEffect">
                     <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
                                                  kpiTutorialNext="remaining()" accountType="{accountType}"/>
                 </mx:VBox>
