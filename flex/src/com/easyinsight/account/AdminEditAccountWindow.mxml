@@ -82,6 +82,7 @@
                             <mx:Array>
                                 <mx:String>Personal</mx:String>
                                 <mx:String>Basic</mx:String>
+                                <mx:String>Plus</mx:String>
                                 <mx:String>Professional</mx:String>
                                 <mx:String>Premium</mx:String>
                                 <mx:String>Enterprise</mx:String>
