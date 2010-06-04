@@ -89,6 +89,26 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         try {
             int offset = 0;
             int contactCount;
+            Map<String, List<String>> tagMap = new HashMap<String, List<String>>();
+            Document tagDoc = runRestRequest("/tags.xml", client, builder, url, true);
+            Nodes tagNodes = tagDoc.query("/tags/tag");
+            for (int i = 0; i < tagNodes.size(); i++) {
+                Node tagNode = tagNodes.get(i);
+                String tag = queryField(tagNode, "name/text()");
+                String id = queryField(tagNode, "id/text()");
+                Document ppl = runRestRequest("/tags/" + id + ".xml", client, builder, url, false);
+                Nodes pplNodes = ppl.query("/people/person");
+                for (int j = 0; j < pplNodes.size(); j++) {
+                    Node person = pplNodes.get(j);
+                    String personID = queryField(person, "id/text()");
+                    List<String> tags = tagMap.get(personID);
+                    if (tags == null) {
+                        tags = new ArrayList<String>();
+                        tagMap.put(personID, tags);
+                    }
+                    tags.add(tag);
+                }
+            }
             do {
                 Document companies;
                 if (offset == 0) {
@@ -122,15 +142,12 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     String responsiblePartyName = retrieveUserInfo(client, builder, peopleCache, personId, url);
                     row.addValue(OWNER, responsiblePartyName);
 
-                    Document tags = runRestRequest("/people/"+id+"/tags.xml", client, builder, url, false);
-                    Nodes tagNodes = tags.query("/tags/tag");
-                    StringBuilder tagBuilder = new StringBuilder();
-                    for (int j = 0; j < tagNodes.size(); j++) {
-                        Node tagNode = tagNodes.get(j);
-                        String tagName = queryField(tagNode, "name/text()");
-                        tagBuilder.append(tagName).append(",");
-                    }
-                    if (tagBuilder.length() > 0) {
+                    List<String> tagList = tagMap.get(id);
+                    if (tagList != null) {
+                        StringBuilder tagBuilder = new StringBuilder();
+                        for (String tag : tagList) {
+                            tagBuilder.append(tag).append(",");
+                        }
                         String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
                         row.addValue(TAGS, tagString);
                     }
