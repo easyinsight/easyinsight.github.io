@@ -10,7 +10,6 @@
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import mx.collections.ArrayCollection;
-        import mx.events.ItemClickEvent;
         import mx.events.ListEvent;
         import mx.managers.PopUpManager;
 

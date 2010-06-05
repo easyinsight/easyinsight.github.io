@@ -91,6 +91,7 @@ public class AnalysisDefinitionFactory {
         }
         analysisDefinitionState.setId(wsAnalysisDefinition.getReportStateID());
         AnalysisDefinition analysisDefinition = new AnalysisDefinition();
+        analysisDefinition.setProperties(wsAnalysisDefinition.createProperties());
         analysisDefinition.setUrlKey(wsAnalysisDefinition.getUrlKey());
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
         analysisDefinition.setDescription(wsAnalysisDefinition.getDescription());

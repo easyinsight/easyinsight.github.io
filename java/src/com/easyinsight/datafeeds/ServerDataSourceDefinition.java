@@ -165,6 +165,15 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
+    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn) {
+        try {
+            refreshData(credentials, accountID, now, conn, null);
+            return new CredentialsResponse(true, getDataFeedID());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         DataStorage dataStorage = null;
         try {

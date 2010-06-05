@@ -1,12 +1,11 @@
 package com.easyinsight.analysis.definitions;
 
+import com.easyinsight.analysis.ReportProperty;
+import com.easyinsight.analysis.ReportStringProperty;
 import com.easyinsight.analysis.WSChartDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 
-import java.util.Map;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -60,5 +59,50 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         columnList.add(xaxis);
         columnList.add(yaxis);
         return columnList;
+    }
+
+    private String form;
+    private String baseAtZero;
+    private String interpolateValues;
+
+    public String getForm() {
+        return form;
+    }
+
+    public void setForm(String form) {
+        this.form = form;
+    }
+
+    public String getBaseAtZero() {
+        return baseAtZero;
+    }
+
+    public void setBaseAtZero(String baseAtZero) {
+        this.baseAtZero = baseAtZero;
+    }
+
+    public String getInterpolateValues() {
+        return interpolateValues;
+    }
+
+    public void setInterpolateValues(String interpolateValues) {
+        this.interpolateValues = interpolateValues;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        form = findStringProperty(properties, "form", "segment");
+        baseAtZero = findStringProperty(properties, "baseAtZero", "true");
+        interpolateValues = findStringProperty(properties, "interpolateValues", "false");
+    }
+
+    @Override
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportStringProperty("form", form));
+        properties.add(new ReportStringProperty("baseAtZero", baseAtZero));
+        properties.add(new ReportStringProperty("interpolateValues", interpolateValues));
+        return properties;
     }
 }

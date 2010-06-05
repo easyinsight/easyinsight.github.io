@@ -8,6 +8,7 @@
         import com.easyinsight.analysis.AnalysisItemUpdateEvent;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.ListLimitsMetadata;
+        import com.easyinsight.analysis.ReportFormItem;
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
@@ -54,7 +55,14 @@
                 }
                 limitsBox.selectedItem = matchedEntry;
             }
+            reportItems = new ArrayCollection();
+            for each (var formItem:ReportFormItem in definition.createFormItems()) {
+                form.addChild(formItem);
+                reportItems.addItem(formItem);
+            }
         }
+
+        private var reportItems:ArrayCollection;
 
         public function set fields(fields:ArrayCollection):void {
             availableFields = new ArrayCollection();
@@ -81,6 +89,9 @@
                 limitsEntry.toLimitsMetadata(limitsMetadata);
             }
             definition.listLimitsMetadata = limitsMetadata;
+            for each (var reportFormItem:ReportFormItem in reportItems) {
+                reportFormItem.save();
+            }
             dispatchEvent(new AnalysisItemUpdateEvent());
             PopUpManager.removePopUp(this);
         }
@@ -99,7 +110,8 @@
         }
 		]]>
     </mx:Script>
-    <mx:Form styleName="TitleWindowContents">
+    <mx:VBox paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
+    <mx:Form id="form" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
         <mx:FormItem label="Row Numbers: " direction="horizontal">
             <mx:CheckBox id="rowNumbersOn" selected="{rowNumbersSelected}"/>
         </mx:FormItem>
@@ -127,10 +139,10 @@
                 </mx:FormItem>
             </mx:Form>
         </mx:FormItem>
-
-        <mx:FormItem label="" direction="horizontal">
+    </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>
             <mx:Button label="Cancel" click="cancel()"/>
-        </mx:FormItem>
-    </mx:Form>
+        </mx:HBox>
+    </mx:VBox>
 </util:EITitleWindow>

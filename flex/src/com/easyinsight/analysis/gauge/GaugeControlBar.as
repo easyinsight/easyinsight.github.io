@@ -46,6 +46,7 @@ public class GaugeControlBar extends ReportControlBar implements IReportControlB
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA, false));
     }
 
+
     override protected function createChildren():void {
         super.createChildren();
         /*var gaugeLabel:Label = new Label();

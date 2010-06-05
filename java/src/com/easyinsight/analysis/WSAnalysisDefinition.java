@@ -72,6 +72,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String description;
     private boolean temporaryReport;
 
+    private String fontName = "Tahoma";
+    private int fontSize = 12;
+
     public String getUrlKey() {
         return urlKey;
     }
@@ -369,6 +372,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public abstract void populateFromReportStructure(Map<String, AnalysisItem> structure);
 
+
+
     @Nullable
     protected AnalysisItem firstItem(String key, Map<String, AnalysisItem> structure) {
         String compositeKey = key + "-" + 0;
@@ -442,5 +447,52 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public List<IComponent> createComponents() {
         return new ArrayList<IComponent>();
+    }
+
+    public void populateProperties(List<ReportProperty> properties) {
+        fontName = findStringProperty(properties, "fontName", "Tahoma");
+        fontSize = (int) findNumberProperty(properties, "fontSize", 12);
+    }
+
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = new ArrayList<ReportProperty>();
+        properties.add(new ReportStringProperty("fontName", fontName));
+        return properties;
+    }
+
+    protected String findStringProperty(List<ReportProperty> properties, String property, String defaultValue) {
+        for (ReportProperty reportProperty : properties) {
+            if (reportProperty.getPropertyName().equals(property)) {
+                ReportStringProperty reportStringProperty = (ReportStringProperty) reportProperty;
+                return reportStringProperty.getValue() != null ? reportStringProperty.getValue() : defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
+    protected double findNumberProperty(List<ReportProperty> properties, String property, double defaultValue) {
+        for (ReportProperty reportProperty : properties) {
+            if (reportProperty.getPropertyName().equals(property)) {
+                ReportNumericProperty reportNumericProperty = (ReportNumericProperty) reportProperty;
+                return reportNumericProperty.getValue();
+            }
+        }
+        return defaultValue;
+    }
+
+    public String getFontName() {
+        return fontName;
+    }
+
+    public void setFontName(String fontName) {
+        this.fontName = fontName;
+    }
+
+    public int getFontSize() {
+        return fontSize;
+    }
+
+    public void setFontSize(int fontSize) {
+        this.fontSize = fontSize;
     }
 }

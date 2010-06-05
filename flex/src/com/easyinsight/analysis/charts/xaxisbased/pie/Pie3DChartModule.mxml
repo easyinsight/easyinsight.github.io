@@ -8,6 +8,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.charts.Chart3DVisuals;
         import com.easyinsight.filtering.FilterRawData;
 
@@ -70,6 +71,20 @@
                 visuals.rotationAngle = pieChartDef.rotationAngle;
             }
             graphData = dataSet;
+            labelPosition = pieChartDef.labelPosition;
+            pieChart.setStyle("fontFamily", pieChartDef.fontName);
+            pieChart.setStyle("fontSize", pieChartDef.fontSize);
+            pieSeries.setStyle("fontFamily", pieChartDef.fontName);
+            pieSeries.setStyle("fontSize", pieChartDef.fontSize);
+            if (pieChartDef.colorScheme == FillProvider.spectral) {
+                pieSeries.setStyle("fills", FillProvider.createSpectralColors());
+            } else if (pieChartDef.colorScheme == FillProvider.highContrast) {
+                pieSeries.setStyle("fills", FillProvider.createSAPColors());
+            } else if (pieChartDef.colorScheme == FillProvider.warmColors) {
+                pieSeries.setStyle("fills", FillProvider.createWarmColors());
+            } else {
+                pieSeries.setStyle("fills", FillProvider.createSampleGradient());
+            }
             if (dataSet.length > 0) {
                 this.measureFormatter = pieChartDef.measure.getFormatter();
                 measureName = pieChartDef.measure.qualifiedName();
@@ -77,6 +92,9 @@
                 this.dimensionItem = pieChartDef.xaxis;
             }
         }
+
+        [Bindable]
+        private var labelPosition:String;
 
         private function chartSelection(event:ChartItemEvent):void {
             for (var j:int = 0; j < graphData.length; j++) {
@@ -127,8 +145,8 @@
                               paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" depth="5" showDataTips="true"
                 itemClick="onClick(event)">
             <ilog:series>
-                <ilog:PieSeries3D field="{measureName}" nameField="{dimension}" labelPosition="inside"
-                                  labelFunction="renderPieLabel">
+                <ilog:PieSeries3D field="{measureName}" nameField="{dimension}" labelPosition="{labelPosition}"
+                                  labelFunction="renderPieLabel" id="pieSeries">
                 </ilog:PieSeries3D>
             </ilog:series>
         </ilog:PieChart3D>

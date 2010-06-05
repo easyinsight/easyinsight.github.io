@@ -1,10 +1,18 @@
 package com.easyinsight.analysis.charts.twoaxisbased.area {
+import com.easyinsight.analysis.ComboBoxReportFormItem;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
+
+import mx.collections.ArrayCollection;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSAreaChartDefinition")]
 public class AreaChartDefinition extends TwoAxisDefinition{
+
+    public var stackingType:String = "overlaid";
+
+
     public function AreaChartDefinition() {
         super();
     }
@@ -19,6 +27,13 @@ public class AreaChartDefinition extends TwoAxisDefinition{
 
     override public function getChartFamily():int {
         return ChartTypes.AREA_FAMILY;
+    }
+
+    override public function createFormItems():ArrayCollection {
+        var items:ArrayCollection = super.createFormItems();
+        items.addItem(new ComboBoxReportFormItem("Form", "form", form,
+                this, ["segment", "step", "reverseStep", "horizontal", "curve"]));
+        return items;
     }
 }
 }

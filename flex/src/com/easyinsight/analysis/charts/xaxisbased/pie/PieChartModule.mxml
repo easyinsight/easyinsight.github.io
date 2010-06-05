@@ -7,6 +7,7 @@
 
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
@@ -42,6 +43,21 @@
             var pieChartDef:PieChartDefinition = analysisDefinition as PieChartDefinition;
             graphData = dataSet;
             if (dataSet.length > 0) {
+                labelPosition = pieChartDef.labelPosition;
+                pieChart.setStyle("fontFamily", pieChartDef.fontName);
+                pieChart.setStyle("fontSize", pieChartDef.fontSize);
+                pieSeries.setStyle("fontFamily", pieChartDef.fontName);
+                pieSeries.setStyle("fontSize", pieChartDef.fontSize);
+                if (pieChartDef.colorScheme == FillProvider.spectral) {
+                    pieSeries.setStyle("fills", FillProvider.createSpectralColors());
+                } else if (pieChartDef.colorScheme == FillProvider.highContrast) {
+                    pieSeries.setStyle("fills", FillProvider.createSAPColors());
+                } else if (pieChartDef.colorScheme == FillProvider.warmColors) {
+                    pieSeries.setStyle("fills", FillProvider.createWarmColors());
+                } else {
+                    pieSeries.setStyle("fills", FillProvider.createSampleGradient());
+                }
+                //StyleManager.getStyleDeclaration("UITextField");
                 this.measureFormatter = pieChartDef.measure.getFormatter();
                 measureName = pieChartDef.measure.qualifiedName();
                 dimension = pieChartDef.xaxis.qualifiedName();
@@ -107,15 +123,85 @@
         public function preserveValues():Boolean {
             return false;
         }
+
+        [Bindable]
+        private var labelPosition:String;
 		]]>
-	</mx:Script>
+	</mx:Script><!--
+    <mx:Array id="spectral">
+        <mx:SolidColor color="0x9E0142" alpha="1"/>
+        <mx:SolidColor color="0xE6F598" alpha="1"/>
+        <mx:SolidColor color="0xD53E4F" alpha="1"/>
+        <mx:SolidColor color="0xABDDA4" alpha="1"/>
+        <mx:SolidColor color="0xF46D43" alpha="1"/>
+        <mx:SolidColor color="0xFDAE61" alpha="1"/>
+        <mx:SolidColor color="0x66C2A5" alpha="1"/>
+        <mx:SolidColor color="0xFEE08B" alpha="1"/>
+        <mx:SolidColor color="0x3288BD" alpha="1"/>
+        <mx:SolidColor color="0xFFFFBF" alpha="1"/>
+
+
+
+
+
+        <mx:SolidColor color="0x5E4FA2" alpha="1"/>
+    </mx:Array>
+    <mx:Array id="fills">
+        <mx:SolidColor id="sc1" color="#F0B400" alpha="1"/>
+        <mx:SolidColor id="sc2" color="#1E6C0B" alpha="1"/>
+        <mx:SolidColor id="sc3" color="#00488C" alpha="1"/>
+        <mx:SolidColor id="sc4" color="#332600" alpha="1"/>
+        <mx:SolidColor id="sc5" color="#D84000" alpha="1"/>
+        <mx:SolidColor id="sc6" color="#434C43" alpha="1"/>
+        <mx:SolidColor id="sc7" color="#B00023" alpha="1"/>
+
+        <mx:SolidColor id="sc8" color="#F3C01C" alpha="1"/>
+        <mx:SolidColor id="sc15" color="#F8D753" alpha="1"/>
+        <mx:SolidColor id="sc22" color="#FAE16B" alpha="1"/>
+        <mx:SolidColor id="sc29" color="#FFF8A3" alpha="1"/>
+
+        <mx:SolidColor id="sc9" color="#3D8128" alpha="1"/>
+        <mx:SolidColor id="sc16" color="#5C9746" alpha="1"/>
+        <mx:SolidColor id="sc23" color="#82B16A" alpha="1"/>
+        <mx:SolidColor id="sc30" color="#A9CC8F" alpha="1"/>
+
+
+        <mx:SolidColor id="sc10" color="#205F9A" alpha="1"/>
+        <mx:SolidColor id="sc17" color="#3E75A7" alpha="1"/>
+        <mx:SolidColor id="sc24" color="#779DBF" alpha="1"/>
+        <mx:SolidColor id="sc31" color="#B2C8D9" alpha="1"/>
+
+
+        <mx:SolidColor id="sc11" color="#63522B" alpha="1"/>
+        <mx:SolidColor id="sc18" color="#7A653E" alpha="1"/>
+        <mx:SolidColor id="sc25" color="#907A52" alpha="1"/>
+        <mx:SolidColor id="sc32" color="#BEA37A" alpha="1"/>
+
+
+        <mx:SolidColor id="sc12" color="#DC5313" alpha="1"/>
+        <mx:SolidColor id="sc19" color="#E1662A" alpha="1"/>
+        <mx:SolidColor id="sc26" color="#EB8953" alpha="1"/>
+        <mx:SolidColor id="sc33" color="#F3AA79" alpha="1"/>
+
+
+        <mx:SolidColor id="sc13" color="#5D645A" alpha="1"/>
+        <mx:SolidColor id="sc20" color="#74796F" alpha="1"/>
+        <mx:SolidColor id="sc27" color="#8A8D82" alpha="1"/>
+        <mx:SolidColor id="sc34" color="#B5B5A9" alpha="1"/>
+
+
+        <mx:SolidColor id="sc14" color="#BC1C39" alpha="1"/>
+        <mx:SolidColor id="sc21" color="#C4384F" alpha="1"/>
+        <mx:SolidColor id="sc28" color="#D6707B" alpha="1"/>
+        <mx:SolidColor id="sc35" color="#E6A5A4" alpha="1"/>
+    </mx:Array>-->
     <mx:HBox width="100%" height="100%">
         <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
 					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="onClick(event)"
-                showDataTips="true">
+                showDataTips="true" fontFamily="Tahoma" fontSize="14">
             <mx:series>
-                <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="insideWithCallout"
-                    labelFunction="renderPieLabel">
+                <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="{labelPosition}"
+                    labelFunction="renderPieLabel" id="pieSeries">
                 </mx:PieSeries>
             </mx:series>
         </mx:PieChart>

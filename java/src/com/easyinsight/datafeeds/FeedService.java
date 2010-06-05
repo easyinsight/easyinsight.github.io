@@ -535,7 +535,7 @@ public class FeedService implements IDataFeedService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-        EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
+        //EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
     }
 
 

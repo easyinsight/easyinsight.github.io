@@ -5,6 +5,10 @@ import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WS3DLineChartDefinition")]
 public class Line3DChartDefinition extends TwoAxisDefinition{
+
+    public var autoScale:Boolean = true;
+    public var autoScaled:Boolean = true;
+
     public function Line3DChartDefinition() {
         super();
     }

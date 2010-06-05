@@ -1,8 +1,10 @@
 package com.easyinsight.analysis
 {
 	import com.easyinsight.analysis.charts.ChartTypes;
-	
-	[Bindable]
+
+import mx.collections.ArrayCollection;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.WSChartDefinition")]
 	public class ChartDefinition extends AnalysisDefinition
 	{

@@ -6,7 +6,9 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedService;
+import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
@@ -40,16 +42,110 @@ public class ExportService {
     public static final String CURRENCY_STYLE = "currency";
     public static final String GENERIC_STYLE = "generic";
 
-    public void addOrUpdateSchedule(ReportSchedule reportSchedule) {
-        
+    public void addOrUpdateSchedule(ScheduledActivity scheduledActivity, int utcOffset) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            scheduledActivity.save(conn, utcOffset);
+            scheduledActivity.setup(conn);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
     }
 
-    public ReportSchedule getSchedule(long reportID) {
-        return null;
+    public List<FeedDescriptor> getRefreshableDataSources(ScheduledActivity scheduledActivity) {
+        List<FeedDescriptor> validSources = new ArrayList<FeedDescriptor>();
+        List<FeedDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();
+        for (FeedDescriptor fd : dataSources) {
+            if (isRefreshable(fd.getFeedType())) {
+                validSources.add(fd);
+            }
+        }
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_TYPE, scheduled_account_activity.scheduled_account_activity_id FROM " +
+                    "DATA_FEED, SCHEDULED_DATA_SOURCE_REFRESH, scheduled_account_activity WHERE " +
+                    "DATA_FEED.data_feed_id = SCHEDULED_DATA_SOURCE_REFRESH.data_source_id and " +
+                    "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id and " +
+                    "scheduled_account_activity.account_id = ?");
+            queryStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                int feedType = rs.getInt(1);
+                long id = rs.getLong(2);
+                if (scheduledActivity != null && id == scheduledActivity.getScheduledActivityID()) continue;
+                Iterator<FeedDescriptor> descIter = validSources.iterator();
+                while (descIter.hasNext()) {
+                    FeedDescriptor fd = descIter.next();
+                    if (fd.getFeedType() == feedType) {
+                        descIter.remove();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return validSources;
     }
 
-    public void deleteSchedule(long scheduleID) {
-        
+    private boolean isRefreshable(int feedType) {
+        return (feedType == FeedType.BASECAMP_MASTER.getType() || feedType == FeedType.HIGHRISE_COMPOSITE.getType());
+    }
+
+    public List<ScheduledActivity> getScheduledActivities(int utcOffset) {
+        EIConnection conn = Database.instance().getConnection();
+        List<ScheduledActivity> activities = new ArrayList<ScheduledActivity>();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCHEDULED_ACCOUNT_ACTIVITY.scheduled_account_activity_id," +
+                    "SCHEDULED_ACCOUNT_ACTIVITY.activity_type FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE ACCOUNT_ID = ?");
+            queryStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long activityID = rs.getLong(1);
+                int activityType = rs.getInt(2);
+                activities.add(ScheduledActivity.createActivity(activityType, activityID, conn, utcOffset));
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return activities;
+    }
+
+
+
+    public void deleteSchedule(long scheduledActivityID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
+                    "scheduled_account_activity_id = ?");
+            deleteStmt.setLong(1, scheduledActivityID);
+            deleteStmt.executeUpdate();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
     }
 
     public long exportDataSourceToCSV(long dataSourceID) {

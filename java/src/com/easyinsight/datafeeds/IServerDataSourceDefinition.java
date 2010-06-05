@@ -105,4 +105,6 @@ public interface IServerDataSourceDefinition {
     Key getField(String sourceKey);
 
     List<AnalysisItem> getFields();
+
+    CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn);
 }

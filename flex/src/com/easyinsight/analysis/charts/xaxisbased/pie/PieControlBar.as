@@ -22,6 +22,7 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.events.FlexEvent;
@@ -46,8 +47,16 @@ public class PieControlBar extends ReportControlBar implements IReportControlBar
         setStyle("verticalAlign", "middle");
     }
 
+    [Embed(source="../../../../../../../assets/table_edit.png")]
+    public var tableEditIcon:Class;
+
     override protected function createChildren():void {
         super.createChildren();
+        var pieEditButton:Button = new Button();
+        pieEditButton.setStyle("icon", tableEditIcon);
+        pieEditButton.toolTip = "Edit Chart Properties...";
+        pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
+        addChild(pieEditButton);
         var measureLabel:Label = new Label();
         measureLabel.text = "Measure:";
         measureLabel.setStyle("fontSize", 14);
@@ -69,6 +78,10 @@ public class PieControlBar extends ReportControlBar implements IReportControlBar
         limitLabel.addEventListener(MouseEvent.CLICK, editLimits);
         BindingUtils.bindProperty(limitLabel, "label", this, "limitText");
         addChild(limitLabel);
+    }
+
+    private function editChart(event:MouseEvent):void {
+        
     }
 
     private var _limitText:String;

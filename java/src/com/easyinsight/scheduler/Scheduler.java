@@ -92,12 +92,13 @@ public class Scheduler {
             try {
                 Date now = new Date();
                 // retrieve the task generators
-                Session session = Database.instance().createSession();
+                EIConnection conn = Database.instance().getConnection();
+                Session session = Database.instance().createSession(conn);
                 try {
-                    session.getTransaction().begin();
+                    conn.setAutoCommit(false);
                     List<TaskGenerator> taskGenerators = retrieveTaskGenerators(session);
                     for (TaskGenerator taskGenerator : taskGenerators) {
-                        List<ScheduledTask> tasks = taskGenerator.generateTasks(now);
+                        List<ScheduledTask> tasks = taskGenerator.generateTasks(now, conn);
                         for (ScheduledTask task : tasks) {
                             LogClass.info("Scheduling " + task.getClass().getName() + " for execution on " + task.getExecutionDate());
                             session.save(task);
@@ -105,13 +106,17 @@ public class Scheduler {
                         if (!tasks.isEmpty()) {
                             taskGenerator.setLastTaskDate(now);                            
                         }
+                        session.update(taskGenerator);
                     }
-                    session.getTransaction().commit();
+                    session.flush();
+                    conn.commit();
                 } catch (Exception e) {
                     LogClass.error(e);
-                    session.getTransaction().rollback();
+                    conn.rollback();
                 } finally {
                     session.close();
+                    conn.setAutoCommit(true);
+                    Database.closeConnection(conn);
                 }
             } finally {
                 releaseLock();
@@ -133,7 +138,7 @@ public class Scheduler {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -148,7 +153,7 @@ public class Scheduler {
         } catch (SQLException e) {
             LogClass.debug("Failed to obtain distributed lock, assuming another app server has it.");
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return locked;
     }

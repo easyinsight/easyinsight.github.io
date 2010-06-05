@@ -284,9 +284,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
             
     private function reportLoadHandler(event:ModuleEvent):void {
-        moduleInfo.removeEventListener(ModuleEvent.READY, reportLoadHandler);
-        moduleInfo.removeEventListener(ModuleEvent.ERROR, reportFailureHandler);
-        _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
+        if (moduleInfo != null) {
+            moduleInfo.removeEventListener(ModuleEvent.READY, reportLoadHandler);
+            moduleInfo.removeEventListener(ModuleEvent.ERROR, reportFailureHandler);
+            _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
+        }
         //moduleInfo = null;
         if (_reportRenderer != null) {
             _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded, false, 0, true);

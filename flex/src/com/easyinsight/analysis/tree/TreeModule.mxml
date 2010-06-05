@@ -11,6 +11,7 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.HierarchyLevel;
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
+        import com.easyinsight.analysis.OrderedSortField;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.filtering.FilterRawData;
 
@@ -18,8 +19,11 @@
         import mx.collections.Grouping;
         import mx.collections.GroupingCollection;
         import mx.collections.GroupingField;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.collections.SummaryField;
         import mx.collections.SummaryRow;
+        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
 
@@ -62,6 +66,8 @@
 
         private var treeDef:TreeDefinition;
 
+        private var firstLoad:Boolean = true;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (dataSet.length > 0) {
                 var treeDefinition:TreeDefinition = analysisDefinition as TreeDefinition;
@@ -73,11 +79,8 @@
                     }
                 }
                 var hierarchy:AnalysisHierarchyItem = treeDefinition.hierarchy as AnalysisHierarchyItem;
+                var existingGrouping:GroupingCollection = coreGrid.dataProvider as GroupingCollection;
                 var groupingColl:GroupingCollection = new GroupingCollection();
-                if (myData != null) {
-                    dataSet.sort = myData.sort;
-                    dataSet.refresh();
-                }
                 groupingColl.source = dataSet;
                 var columns:Array = [];
                 var analysisItems:Array = [];
@@ -117,12 +120,13 @@
                 }
                 grouping.fields = groupingFields;
                 groupingColl.grouping = grouping;
+                myData = dataSet;
                 for each (var item:AnalysisItem in treeDefinition.items) {
                     analysisItems.push(item);
                 }
                 var hierarchyColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 hierarchyColumn.headerText = hierarchy.display;
-                hierarchyColumn.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, hierarchyColumn.sortDescending);
+                //hierarchyColumn.sortCompareFunction = SortFunctionFactory.createSortFunction(hierarchy, hierarchyColumn.sortDescending);
                 hierarchyColumn.dataField = hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName();
                 if (explicitWidth) hierarchyColumn.width = hierarchy.width;
                 hierarchyColumn.headerRenderer = new ListViewHeaderRendererFactory(hierarchy.display);
@@ -131,6 +135,7 @@
                     var myHeader:AnalysisItem = analysisItems[k] as AnalysisItem;
                     //columnMap[myHeader.qualifiedName()] = myHeader;
                     var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+
                     if (explicitWidth) columnHeaderObject.width = myHeader.width;
                     columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                     columnHeaderObject.headerText = myHeader.display;
@@ -145,10 +150,37 @@
                     columns[k + 1] = columnHeaderObject;
                 }
 
-                myData = dataSet;
-
                 groupingColl.refresh();
                 coreGrid.dataProvider = groupingColl;
+                if (firstLoad) {
+                    var existingSort:Sort = new Sort();
+                    var sortFields:ArrayCollection = new ArrayCollection();
+                    for (var l:int = 0; l < treeDefinition.getFields().length; l++) {
+                        var sortHeader:AnalysisItem = treeDefinition.getFields().getItemAt(l) as AnalysisItem;
+                        if (sortHeader.sort > 0) {
+                            var sortField:OrderedSortField = new OrderedSortField();
+                            sortField.descending = sortHeader.sort == 2;
+                            sortField.name = sortHeader.qualifiedName();
+                            sortField.order = sortHeader.sortSequence;
+                            sortFields.addItem(sortField);
+                        }
+                    }
+                    var sortOfSorts:Sort = new Sort();
+                    sortOfSorts.fields = [ new SortField("order", false, false) ];
+                    sortFields.sort = sortOfSorts;
+                    sortFields.refresh();
+                    existingSort.fields = sortFields.toArray();
+                    coreGrid.dataProvider.sort = existingSort;
+                    coreGrid.dataProvider.refresh();
+                    firstLoad = false;
+                } else {
+                    /*if (existingGrouping != null) {
+                        var sort:Sort = existingGrouping.sort;
+                        myData = dataSet;
+                        myData.sort = sort;
+                        myData.refresh();
+                    }*/
+                }
                 coreGrid.columns = columns;
                 coreGrid.visible = true;
             } else {
@@ -197,7 +229,7 @@
 
             var sortInfo:SortInfo = coreGrid.getFieldSortInfo(column);
             if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
-
+                item.sortSequence = sortInfo.sequenceNumber;
                 if (sortInfo.descending) {
                     item.sort = 2;
                 } else {

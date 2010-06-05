@@ -27,6 +27,8 @@ import com.easyinsight.analysis.timeline.TimelineEmbeddedController;
 import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
 
+import mx.controls.Alert;
+
 public class EmbeddedControllerLookup {
 
     public function EmbeddedControllerLookup() {

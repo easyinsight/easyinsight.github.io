@@ -23,6 +23,7 @@
         import com.easyinsight.reportpackage.PackageEvent;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.reportpackage.ReportPackageWindow;
+        import com.easyinsight.schedule.ScheduleManagement;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -88,6 +89,10 @@
         [Bindable]
         [Embed(source="../../../../assets/tablesx48.png")]
         public var tablesAddIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/calendarx48.png")]
+        public var calendarIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/tables.png")]
@@ -489,6 +494,12 @@
             dispatchEvent(event);
         }
 
+        private function toScheduling():void {
+            var window:ScheduleManagement = new ScheduleManagement();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         /*private function createTheme():void {
             var editor:StyleEditor = new StyleEditor();
             PopUpManager.addPopUp(editor, this, true);
@@ -528,6 +539,8 @@
                label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>-->
             <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton" icon="{tablesAddIcon}"
                label="Lookup Table" labelPlacement="bottom" visible="{showLookupTable}"/>
+                        <mx:Button toolTip="Scheduling..." click="toScheduling()" id="schedulingButton" icon="{calendarIcon}"
+               label="Scheduling" labelPlacement="bottom" visible="{showLookupTable}"/>
             <!--<mx:Button toolTip="Create theme..." click="createTheme()" id="styleAddButton" icon="{themeAddIcon}"
                label="Create Theme" labelPlacement="bottom"/>-->
             <mx:ProgressBar indeterminate="true" visible="{showLoading}"/>

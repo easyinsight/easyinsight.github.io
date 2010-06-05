@@ -3,8 +3,6 @@ package com.easyinsight.datafeeds.composite;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
-import com.easyinsight.eventing.MessageUtils;
-import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
 import com.easyinsight.users.Account;
@@ -192,6 +190,16 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
     public void setCredentialsDefinition(int i) {
 
+    }
+
+
+    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn) {
+        try {
+            refreshData(credentials, accountID, now, conn, null);
+            return new CredentialsResponse(true, getDataFeedID());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition) {

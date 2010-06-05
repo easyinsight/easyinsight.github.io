@@ -11,8 +11,12 @@ import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
+
+import flash.events.MouseEvent;
+
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Button;
 import mx.controls.Label;
 public class TreeControlBar extends ReportControlBar implements IReportControlBar {
     private var hierarchyGrouping:ListDropAreaGrouping;
@@ -31,8 +35,20 @@ public class TreeControlBar extends ReportControlBar implements IReportControlBa
         itemGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
     }
 
+    [Embed(source="../../../../../assets/table_edit.png")]
+    public var tableEditIcon:Class;
+
+    private function editLimits(event:MouseEvent):void {
+
+    }
+
     override protected function createChildren():void {
         super.createChildren();
+        var pieEditButton:Button = new Button();
+        pieEditButton.setStyle("icon", tableEditIcon);
+        pieEditButton.toolTip = "Edit Tree Properties...";
+        pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
+        addChild(pieEditButton);
         var groupingLabel:Label = new Label();
         groupingLabel.text = "Hierarchy:";
         groupingLabel.setStyle("fontSize", 14);

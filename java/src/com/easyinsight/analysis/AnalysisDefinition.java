@@ -108,6 +108,12 @@ public class AnalysisDefinition implements Cloneable {
     private String description;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "report_to_report_property",
+            joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "report_property_id", nullable = false))
+    private List<ReportProperty> properties = new ArrayList<ReportProperty>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapKey(columns = @Column(name = "structure_key"))
     @JoinTable(name = "report_structure",
             joinColumns = @JoinColumn(name = "analysis_id"),
@@ -152,6 +158,14 @@ public class AnalysisDefinition implements Cloneable {
 
     public void setTemporaryReport(boolean temporaryReport) {
         this.temporaryReport = temporaryReport;
+    }
+
+    public List<ReportProperty> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(List<ReportProperty> properties) {
+        this.properties = properties;
     }
 
     public Map<String, AnalysisItem> getReportStructure() {
@@ -427,13 +441,18 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setUserBindings(new ArrayList<UserToAnalysisBinding>());
         List<Tag> clonedTags = new ArrayList<Tag>();
         for (Tag tag : tags) {
-            clonedTags.add(tag);
+            clonedTags.add(tag.clone());
         }
         analysisDefinition.setTags(clonedTags);
+        List<ReportProperty> clonedProperties = new ArrayList<ReportProperty>();
+        for (ReportProperty reportProperty : this.properties) {
+            clonedProperties.add(reportProperty.clone());
+        }
+        analysisDefinition.setProperties(clonedProperties);
         List<DataScrub> dataScrubs = new ArrayList<DataScrub>();
         for (DataScrub dataScrub : this.dataScrubs) {
-            dataScrub.setDataScrubID(0);
-            dataScrubs.add(dataScrub);
+            DataScrub clonedScrub = dataScrub.clone();
+            dataScrubs.add(clonedScrub);
         }
         analysisDefinition.setDataScrubs(dataScrubs);
         analysisDefinition.setTemporaryReport(temporaryReport);
@@ -467,6 +486,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromPersistableFilters(filterDefinitions));
         analysisDefinition.setPolicy(analysisPolicy);
         analysisDefinition.setRootDefinition(rootDefinition);
+        analysisDefinition.populateProperties(properties);
         for (AnalysisItem analysisItem : reportStructure.values()) {
             analysisItem.afterLoad();
             /*if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {

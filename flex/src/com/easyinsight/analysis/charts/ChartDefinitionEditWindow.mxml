@@ -8,7 +8,7 @@
         import com.easyinsight.analysis.ChartDefinition;
         import com.easyinsight.analysis.LimitsMetadata;
         import com.easyinsight.analysis.ListLimitsMetadata;
-
+        import com.easyinsight.analysis.ReportFormItem;
 
         import mx.managers.PopUpManager;
 
@@ -49,7 +49,14 @@
                 }
                 limitsBox.selectedItem = matchedEntry;
             }
+            reportItems = new ArrayCollection();
+            for each (var formItem:ReportFormItem in definition.createFormItems()) {
+                form.addChild(formItem);
+                reportItems.addItem(formItem);
+            }
         }
+
+        private var reportItems:ArrayCollection;
 
         public function save():void {
 
@@ -64,6 +71,9 @@
                 limitsEntry.toLimitsMetadata(limitsMetadata);
             }
             definition.limitsMetadata = limitsMetadata;
+            for each (var reportFormItem:ReportFormItem in reportItems) {
+                reportFormItem.save();
+            }
             dispatchEvent(new AnalysisItemUpdateEvent());
             PopUpManager.removePopUp(this);
         }
@@ -92,7 +102,8 @@
             <analysis:LimitsEntry id="bottomN" name="Bottom N" top="true"/>
         </mx:Array>
     </mx:ArrayCollection>
-    <mx:Form styleName="TitleWindowContents">
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+    <mx:Form id="form" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
         <mx:FormItem label="Limits: " direction="horizontal">
             <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0">
                 <mx:FormItem direction="horizontal" label="Enabled: ">
@@ -106,10 +117,10 @@
                 </mx:FormItem>
             </mx:Form>
         </mx:FormItem>
-
-        <mx:FormItem label="" direction="horizontal">
+    </mx:Form>
+        <mx:HBox horizontalAlign="center" width="100%">
             <mx:Button label="Save" click="save()"/>
             <mx:Button label="Cancel" click="cancel()"/>
-        </mx:FormItem>
-    </mx:Form>
+        </mx:HBox>
+    </mx:VBox>
 </util:EITitleWindow>

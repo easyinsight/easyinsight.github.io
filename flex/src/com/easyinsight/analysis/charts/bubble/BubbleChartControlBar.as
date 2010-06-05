@@ -21,6 +21,7 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.events.FlexEvent;
@@ -55,8 +56,16 @@ public class BubbleChartControlBar extends ReportControlBar implements IReportCo
         setStyle("verticalAlign", "middle");
     }
 
+    [Embed(source="../../../../../../assets/table_edit.png")]
+    public var tableEditIcon:Class;
+
     override protected function createChildren():void {
         super.createChildren();
+        var pieEditButton:Button = new Button();
+        pieEditButton.setStyle("icon", tableEditIcon);
+        pieEditButton.toolTip = "Edit Chart Properties...";
+        pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
+        addChild(pieEditButton);
         var groupingLabel:Label = new Label();
         groupingLabel.text = "Grouping:";
         groupingLabel.setStyle("fontSize", 14);

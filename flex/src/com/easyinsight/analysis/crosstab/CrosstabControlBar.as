@@ -11,11 +11,15 @@ import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
+
+import flash.events.MouseEvent;
+
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.Grid;
 import mx.containers.GridItem;
 import mx.containers.GridRow;
+import mx.controls.Button;
 import mx.controls.Label;
 import mx.events.FlexEvent;
 public class CrosstabControlBar extends ReportControlBar implements IReportControlBar {
@@ -40,8 +44,20 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
     }
 
+    [Embed(source="../../../../../assets/table_edit.png")]
+    public var tableEditIcon:Class;
+
+    private function editLimits(event:MouseEvent):void {
+        
+    }
+
     override protected function createChildren():void {
         super.createChildren();
+        var pieEditButton:Button = new Button();
+        pieEditButton.setStyle("icon", tableEditIcon);
+        pieEditButton.toolTip = "Edit Chart Properties...";
+        pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
+        addChild(pieEditButton);
         var grid:Grid = new Grid();
         var topRow:GridRow = new GridRow();
         var emptyGridItem:GridItem = new GridItem();

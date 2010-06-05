@@ -62,7 +62,9 @@ package com.easyinsight.analysis
         public var description:String;
         public var solutionVisible:Boolean;
         public var temporaryReport:Boolean;
-		
+        public var fontName:String = "Tahoma";
+        public var fontSize:int = 12;
+
 		public function AnalysisDefinition()
 		{
 			reportType = type;
@@ -94,6 +96,14 @@ package com.easyinsight.analysis
 
         public function createDefaultLimits():void {
             
+        }
+
+        public function createFormItems():ArrayCollection {
+            var items:ArrayCollection = new ArrayCollection();
+            items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", fontName, this, ["Arial", "Arial Black", "Comic Sans MS",
+                "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
+            items.addItem(new NumericReportFormItem("Font Size", "fontSize", fontSize, this, 8, 48));
+            return items;
         }
 	}
 }
