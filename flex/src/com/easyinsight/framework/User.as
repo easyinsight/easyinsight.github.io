@@ -36,6 +36,27 @@ public class User extends EventDispatcher
     public var personaID:int;
     public var dateFormat:int;
 
+    public function getDateFormat():String {
+        var formatString:String;
+        switch (dateFormat) {
+            case 0:
+                formatString = "MM/DD/YYYY HH:NN";
+                break;
+            case 1:
+                formatString = "YYYY-MM-DD HH:NN";
+                break;
+            case 2:
+                formatString = "DD-MM-YYYY HH:NN";
+                break;
+            case 3:
+                formatString = "DD/MM/YYYY HH:NN";
+                break;
+            case 4:
+                formatString = "DD.MM.YYYY HH:NN";
+                break;
+        }
+        return formatString;
+    }
 
     [Bindable(event="userNameChanged")]
     public function get userName():String {
