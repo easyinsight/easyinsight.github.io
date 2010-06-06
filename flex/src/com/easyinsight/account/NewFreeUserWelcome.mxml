@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:twitter="com.easyinsight.twitter.*"
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
         xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
         paddingTop="0" top="0" implements="com.easyinsight.listing.IPerspective">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.help.ScreencastWindow;
-        import com.easyinsight.tour.TourWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.BrowserManager;
@@ -48,12 +47,6 @@
         [Bindable]
         [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
         private var banner:Class;
-
-        private function lesson1():void {
-            var tourWindow:TourWindow = new TourWindow();
-            PopUpManager.addPopUp(tourWindow, this);
-            PopUpUtil.centerPopUp(tourWindow);
-        }
 
         private function basecamp():void {
             var window:ScreencastWindow = new ScreencastWindow();
