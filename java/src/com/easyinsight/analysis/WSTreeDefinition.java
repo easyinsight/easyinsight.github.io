@@ -67,4 +67,28 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         columnList.addAll(items);
         return columnList;
     }
+
+    public void updateMetadata() {
+        int position = 0;
+        AnalysisHierarchyItem item = (AnalysisHierarchyItem) hierarchy;
+        for (HierarchyLevel level : item.getHierarchyLevels()) {
+            level.getAnalysisItem().setItemPosition(position++);
+        }
+        for (AnalysisItem otherItem : items) {
+            otherItem.setItemPosition(position + otherItem.getItemPosition());
+        }
+        int hierarchySortSequence = item.getSortSequence();
+        if (hierarchySortSequence > 0) {
+            int newSortSequence = hierarchySortSequence;
+            for (HierarchyLevel level : item.getHierarchyLevels()) {
+                level.getAnalysisItem().setSortSequence(newSortSequence++);
+                level.getAnalysisItem().setWidth(item.getWidth());
+            }
+            for (AnalysisItem otherItem : items) {
+                if (otherItem.getSortSequence() > hierarchySortSequence) {
+                    otherItem.setSortSequence(newSortSequence + otherItem.getSortSequence());
+                }
+            }
+        }
+    }
 }

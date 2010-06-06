@@ -274,6 +274,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.dataFeedID = dataFeedID;
     }
 
+    public void updateMetadata() {
+        
+    }
+
     public abstract Set<AnalysisItem> getAllAnalysisItems();
 
     public List<Key> getColumnKeys(List<AnalysisItem> allItems) {

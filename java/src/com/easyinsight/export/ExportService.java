@@ -24,6 +24,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Font;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -181,6 +182,7 @@ public class ExportService {
         SecurityUtil.authorizeInsight(reportID);
         try {
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            analysisDefinition.updateMetadata();
             if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
@@ -220,6 +222,7 @@ public class ExportService {
     public byte[] exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
         try {
+            analysisDefinition.updateMetadata();
             ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
             return toExcel(analysisDefinition, listDataResults);
         } catch (Exception e) {
@@ -275,7 +278,9 @@ public class ExportService {
         for (AnalysisItem analysisItem : listDataResults.getHeaders()) {
             int headerPosition = positionMap.get(analysisItem);
             if (analysisItem.getWidth() > 0) {
-                sheet.setColumnWidth(headerPosition, (short) (analysisItem.getWidth() / 10 * 256));
+                sheet.setColumnWidth(headerPosition, (short) (analysisItem.getWidth() / 15 * 256));
+            } else {
+                sheet.setColumnWidth(headerPosition, 7000);
             }
             HSSFCell headerCell = headerRow.createCell(headerPosition);
             String displayName;
@@ -285,7 +290,13 @@ public class ExportService {
                 displayName = analysisItem.getDisplayName();
             }
             headerCell.setCellValue(new HSSFRichTextString(displayName));
+            Font font = workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            HSSFCellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setFont(font);
+            headerCell.setCellStyle(cellStyle);
         }
+
         int i = 1;
         for (ListRow listRow : listDataResults.getRows()) {
             HSSFRow row = sheet.createRow(i);
