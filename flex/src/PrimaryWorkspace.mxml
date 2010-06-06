@@ -22,8 +22,7 @@
         import com.easyinsight.framework.LoginPage;
         import com.easyinsight.framework.UserName;
         import com.easyinsight.framework.WebCredentialsCache;
-        import com.easyinsight.goals.GoalDataAnalyzeSource;
-        import com.easyinsight.intro.WelcomeScreen;
+        import com.easyinsight.goals.GoalDataAnalyzeSource;        
         import com.easyinsight.FullScreenPage;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.HeaderBar;
@@ -287,8 +286,6 @@
                         case "account":
                             navigation(new NavigationEvent("Accounts"));
                             break;
-                        case "welcome":
-                            navigation(new NavigationEvent(null, new WelcomeScreen()));
                     }
                 } else {
                     navigation(new NavigationEvent("Home"));
