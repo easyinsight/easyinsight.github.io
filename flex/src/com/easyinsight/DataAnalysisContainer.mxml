@@ -488,12 +488,39 @@
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            try {
+                var hints:String = User.getSharedObject().data["reportHints"];
+                if (hints == null || hints == "y") {
+                    fieldIndex = 1;
+                } else {
+                    fieldIndex = 0;
+                }
+            } catch(e:Error) {
+            }
             startLoading(null);
             if (_reportID > 0) {
                 analysisService.openAnalysisDefinition.send(_reportID);
             } else {
                 initializeState();
             }
+        }
+
+        private function hideHints():void {
+            try {
+                User.getSharedObject().data["reportHints"] = "n";
+                User.getSharedObject().flush();
+            } catch(e:Error) {
+            }
+            fieldIndex = 0;
+        }
+
+        private function restoreHints(event:Event):void {
+            try {
+                User.getSharedObject().data["reportHints"] = "y";
+                User.getSharedObject().flush();
+            } catch(e:Error) {
+            }
+            fieldIndex = 1;
         }
 
         private function uiConfig():void {
@@ -931,6 +958,7 @@
 
         private function tutorial():void {
             var window:ReportEditorHelp = new ReportEditorHelp();
+            window.addEventListener("restoreHints", restoreHints, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -944,6 +972,9 @@
                 fieldsIndex = 0;
             }
         }
+
+        [Bindable]
+        private var fieldIndex:int = 0;
 
         [Bindable]
         private var rendererFactory:IFactory;
@@ -1026,7 +1057,14 @@
                     <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center" verticalAlign="middle" height="28">
                         <mx:Label text="{dataSourceName}" color="0xFFFFFF"/>
                     </mx:Box>
-
+                    <mx:ViewStack selectedIndex="{fieldIndex}" resizeToContent="true" width="100%">
+                        <mx:Box/>
+                        <mx:VBox width="100%" horizontalAlign="center" backgroundColor="#FFFFFF" verticalGap="0">
+                            <mx:TextArea width="100%" editable="false" selectable="false" borderStyle="none" backgroundAlpha="0" height="80"
+                                         text="You can drag the fields below into the report areas to the right. You can click on the arrow to the left of folders to see more fields. You can also right click on the fields to add to the report or create new filters."/>
+                            <mx:LinkButton label="Hide" textDecoration="underline" fontSize="12" click="hideHints()"/>
+                        </mx:VBox>
+                    </mx:ViewStack>
                     <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
                                  id="fieldGrid" backgroundColor="#FFFFFF"
                                  alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
