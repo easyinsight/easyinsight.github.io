@@ -39,7 +39,6 @@ public class WeeklyScheduleType extends ScheduleType {
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
         if (dayOfWeek == this.dayOfWeek) {
             if (cal.getTime().getTime() > lastTime.getTime() && cal.getTime().getTime() < now.getTime()) {
-                System.out.println("last time = " + lastTime + ", new time = " + cal.getTime() + ", now = " + now);
                 return cal.getTime();
             } else {
                 return null;

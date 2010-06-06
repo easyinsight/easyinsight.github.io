@@ -21,7 +21,6 @@ public class DailyScheduleType extends ScheduleType {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, getHour());
         cal.set(Calendar.MINUTE, getMinute());
-        System.out.println("last time = " + lastTime + ", new time = " + cal.getTime() + ", now = " + now);
         if (cal.getTime().getTime() > lastTime.getTime() && cal.getTime().getTime() < now.getTime()) {
             return cal.getTime();
         }

@@ -730,7 +730,7 @@
             <mx:Image source="{logo}" id="logoImage"
                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
             <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10">
-                <mx:Button label="My Data" click="toMyData(event)" icon="{myDataIcon}" labelPlacement="bottom" id="backButton"
+                <mx:Button label="Close" click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"
                            paddingTop="10"/>
                 <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
                            id="fullScreenButton" paddingTop="10"/>

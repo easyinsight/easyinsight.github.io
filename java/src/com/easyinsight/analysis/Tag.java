@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(name="analysis_tags")
-public class Tag implements Serializable {
+public class Tag implements Serializable, Cloneable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="analysis_tags_id")
