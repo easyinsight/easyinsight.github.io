@@ -62,7 +62,7 @@ public class SortComponent implements IComponent {
 
     private int getComparison(AnalysisItem field, IRow row1, IRow row2) {
         int comparison = 0;
-        int ascending = field.getSort() == 2 ? 1 : -1;
+        int ascending = field.getSort() == 2 ? -1 : 1;
         Value value1 = row1.getValue(field);
         Value value2 = row2.getValue(field);
 
