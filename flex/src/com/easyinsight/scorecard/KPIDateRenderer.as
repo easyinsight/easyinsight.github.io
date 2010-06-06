@@ -1,4 +1,5 @@
 package com.easyinsight.scorecard {
+import com.easyinsight.framework.User;
 import com.easyinsight.kpi.KPI;
 
 import mx.containers.HBox;
@@ -29,6 +30,7 @@ public class KPIDateRenderer extends HBox{
         this.kpi = val as KPI;
         if (this.kpi.kpiOutcome != null) {
             var dateFormatter:DateFormatter = new DateFormatter();
+            dateFormatter.formatString = User.getInstance().getDateFormat();
             dateLabel.text = dateFormatter.format(kpi.kpiOutcome.evaluationDate);
         }
     }

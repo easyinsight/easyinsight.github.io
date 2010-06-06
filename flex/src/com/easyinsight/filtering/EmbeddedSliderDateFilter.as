@@ -5,7 +5,7 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 
 import com.easyinsight.framework.CredentialsCache;
-
+import com.easyinsight.framework.User;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
@@ -66,6 +66,7 @@ import mx.rpc.events.ResultEvent;
         private function dataTipFormatter(value:Number):String {
             var date:Date = new Date(lowDate.valueOf() + delta * (value / 100));
             var df:DateFormatter = new DateFormatter();
+            df.formatString = User.getInstance().getDateFormat();
             return df.format(date);
             
         }

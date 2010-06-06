@@ -84,8 +84,12 @@
                 kpiData.dayWindow = _kpi.dayWindow;
                 kpiData.measure = _kpi.analysisMeasure;
                 kpiData.filters = _kpi.filters;
+                existingKPI = true;
             }
         }
+
+        [Bindable]
+        private var existingKPI:Boolean = false;
 
         private function finish():void {
             var newKPI:Boolean = false;
@@ -101,6 +105,7 @@
             _kpi.dayWindow = kpiData.dayWindow;
             _kpi.analysisMeasure = kpiData.measure;
             _kpi.filters = kpiData.filters;
+            originalDataSourceID = kpiData.dataSourceID;
             if (_kpi.kpiUsers == null) {
                 _kpi.kpiUsers = new ArrayCollection();
                 var user:KPIUser = new KPIUser();
@@ -122,6 +127,16 @@
             } else {
                 ProgressAlert.alert(this, "Saving the KPI...", null, kpiService.saveKPI);
                 kpiService.saveKPI(_kpi, CredentialsCache.getCache().createCredentials());
+            }
+        }
+
+        private var originalDataSourceID:int;
+
+        private function clearFilters():void {
+            if (originalDataSourceID > 0) {
+                if (kpiData.dataSourceID != originalDataSourceID) {
+                    kpiData.filters = new ArrayCollection();
+                }
             }
         }
 
@@ -149,35 +164,35 @@
                   id="viewStack" resizeToContent="true" width="100%" height="100%" creationPolicy="all">
         <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPIDataSourceTutorialPanel kpiData="{kpiData}" id="panel1" width="100%" height="100%" groupID="{groupID}"/>
-            <kpi:TutorialButtons backEnabled="false" nextEnabled="true" finishEnabled="false"
+            <kpi:TutorialButtons backEnabled="false" nextEnabled="true" finishEnabled="{existingKPI}"
                                  kpiTutorialCancel="onCancel()"
                                  kpiTutorialNext="slideEffect = rightEffect; panelIndex = 1" tutorialPanel="{panel1}"
                                  expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
         <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPIMeasureTutorialPanel kpiData="{kpiData}" id="panel2" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false"
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="{existingKPI}"
                                  kpiTutorialCancel="onCancel()"
-                                 kpiTutorialNext="slideEffect = rightEffect; panelIndex = 2" kpiTutorialPrevious="slideEffect = leftEffect; panelIndex = 0"
+                                 kpiTutorialNext="clearFilters(); slideEffect = rightEffect; panelIndex = 2" kpiTutorialPrevious="slideEffect = leftEffect; panelIndex = 0"
                                  tutorialPanel="{panel2}" expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
         <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPIFilterTutorialPanel kpiData="{kpiData}" id="panel3" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false"
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="{existingKPI}"
                                  kpiTutorialCancel="onCancel()"
                                  kpiTutorialNext="slideEffect = rightEffect; panelIndex = 3" kpiTutorialPrevious="slideEffect = leftEffect; panelIndex = 1"
                                  tutorialPanel="{panel3}" expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
         <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPIHighLowTutorialPanel kpiData="{kpiData}" id="panel4" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false"
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="{existingKPI}"
                                  kpiTutorialCancel="onCancel()"
                                  kpiTutorialNext="slideEffect = rightEffect; panelIndex = 4" kpiTutorialPrevious="slideEffect = leftEffect;panelIndex = 2"
                                  tutorialPanel="{panel4}" expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
         <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPICompareTutorialPanel kpiData="{kpiData}" id="panel5" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false"
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="{existingKPI}"
                                  kpiTutorialCancel="onCancel()"
                                  kpiTutorialNext="slideEffect = rightEffect; panelIndex = 5" kpiTutorialPrevious="slideEffect = leftEffect; panelIndex = 3"
                                  tutorialPanel="{panel5}" expertMode="dispatchEvent(event)"/>

@@ -2,6 +2,8 @@
 <account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
         label="Trial End Date:" visible="{trialDateVisible}">
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
         import mx.formatters.DateFormatter;
 
         [Bindable]
@@ -15,6 +17,7 @@
             switch (accountInfo.accountState) {
                 case (Account.TRIAL):
                     var dateFormatter:DateFormatter = new DateFormatter();
+                    dateFormatter.formatString = User.getInstance().getDateFormat();
                     trialEndDate = dateFormatter.format(accountInfo.trialEndDate);
                     trialDateVisible = true;
                     break;

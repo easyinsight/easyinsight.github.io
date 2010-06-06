@@ -1,4 +1,6 @@
 package com.easyinsight.genredata {
+import com.easyinsight.framework.User;
+
 import mx.controls.Label;
 import mx.formatters.DateFormatter;
 
@@ -10,7 +12,7 @@ public class ReportDateRenderer extends Label {
     public function ReportDateRenderer() {
         super();
         dateFormatter = new DateFormatter();
-        dateFormatter.formatString = "MM/DD/YYYY";
+        dateFormatter.formatString = User.getInstance().getDateFormat();
     }
 
     override public function set data(val:Object):void {

@@ -3,7 +3,7 @@
         paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="200" horizontalAlign="center">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-        
+        import com.easyinsight.framework.User;
         import com.easyinsight.listing.ListingChangeEvent;
         import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
@@ -260,6 +260,7 @@
 
                 score = _item.ratingAverage;
                 var df:DateFormatter = new DateFormatter();
+                df.formatString = User.getInstance().getDateFormat();
                 if (_item.dateAdded == null) {
                     dateCreated = null;
                 } else {

@@ -1,5 +1,6 @@
 package com.easyinsight.scorecard {
 import com.easyinsight.analysis.formatter.PercentageNumberFormatter;
+import com.easyinsight.framework.User;
 import com.easyinsight.kpi.KPI;
 
 import mx.containers.HBox;
@@ -36,6 +37,7 @@ public class KPIChangeRenderer extends UIComponent implements IListItemRenderer 
             formatter.precision = 2;
             valueLabel.text = formatter.format(kpi.kpiOutcome.percentChange);
             var df:DateFormatter = new DateFormatter();
+            df.formatString = User.getInstance().getDateFormat();
             var timeString:String;
             var time:int = kpi.dayWindow;
             if (time == 1) {
