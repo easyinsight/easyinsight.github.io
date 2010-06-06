@@ -13,26 +13,31 @@ import java.util.*;
  * Time: 2:05:09 PM
  */
 public class TagTransformComponent implements IComponent {
+
+    private AnalysisList analysisItem;
+
+    public TagTransformComponent(AnalysisList analysisList) {
+        this.analysisItem = analysisList;
+    }
+
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         List<IRow> rows = new ArrayList<IRow>(dataSet.getRows());
-        for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
-            if (analysisItem.isMultipleTransform()) {
-                List<IRow> tempRows = new ArrayList<IRow>();
-                for (IRow row : rows) {
-                    Value value = row.getValue(analysisItem);
-                    Value[] transformedValues = analysisItem.transformToMultiple(value);
-                    Map<Key, Value> existingContents = row.getValues();
-                    for (Value multipleVal : transformedValues) {
-                        Map<Key, Value> newRowContents = new HashMap<Key, Value>(existingContents);
-                        newRowContents.put(analysisItem.createAggregateKey(), multipleVal);
-                        IRow tempRow = new Row();
-                        tempRow.addValues(newRowContents);
-                        tempRows.add(tempRow);
-                    }
-                }
-                rows = tempRows;
+        
+        List<IRow> tempRows = new ArrayList<IRow>();
+        for (IRow row : rows) {
+            Value value = row.getValue(analysisItem);
+            Value[] transformedValues = analysisItem.transformToMultiple(value);
+            Map<Key, Value> existingContents = row.getValues();
+            for (Value multipleVal : transformedValues) {
+                Map<Key, Value> newRowContents = new HashMap<Key, Value>(existingContents);
+                newRowContents.put(analysisItem.createAggregateKey(), multipleVal);
+                IRow tempRow = new Row();
+                tempRow.addValues(newRowContents);
+                tempRows.add(tempRow);
             }
         }
+        rows = tempRows;
+
         return new DataSet(rows);
     }
 

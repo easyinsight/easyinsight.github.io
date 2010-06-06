@@ -12,7 +12,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.eventing.*;
-import com.easyinsight.twitter.TwitterTimer;
 import com.easyinsight.scorecard.LongKPIRefreshEvent;
 import com.easyinsight.scorecard.LongKPIRefreshListener;
 
@@ -46,7 +45,6 @@ public class DMSServlet extends HttpServlet {
                 migrationManager.setDataSourceTypeRegistry(dataSourceTypeRegistry);
                 migrationManager.migrate();
                 FeedRegistry.initialize();
-                TwitterTimer.start();
                 new APIManager().start();
                 scheduler = Scheduler.instance();
                 EventDispatcher.instance().start();
@@ -69,7 +67,6 @@ public class DMSServlet extends HttpServlet {
         Database.instance().shutdown();
         DatabaseManager.instance().shutdown();
         EventDispatcher.instance().setRunning(false);
-        TwitterTimer.stop();
         EventDispatcher.instance().interrupt();
         scheduler.stop();
         super.destroy();

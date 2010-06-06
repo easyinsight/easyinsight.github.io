@@ -67,21 +67,16 @@ public class StandardReportPipeline extends Pipeline {
         }
 
         components.add(new DataScrubComponent());
-        components.add(new TagTransformComponent());
+        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
+            AnalysisList analysisList = (AnalysisList) tag;
+            if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
+        }
+
 
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
-        //components.add(new VirtualDimensionComponent());
         components.add(new TypeTransformComponent());
-
-        // for each filtered measure, apply an additional filtering component
-
-        // 
-
-        // then join them back together
-
-
 
         components.add(new FilterComponent(true));
         components.add(new FilterPipelineCleanupComponent(true));
@@ -106,7 +101,6 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
             components.add(new StepTransformComponent((AnalysisStep) step));
         }
-        boolean temporalAdded = false;
         if (filters != null) {
             for (FilterDefinition filterDefinition : filters) {
                 if (filterDefinition instanceof LastValueFilter) {
@@ -114,9 +108,6 @@ public class StandardReportPipeline extends Pipeline {
                 }
             }
         }
-
-        //if (!temporalAdded) {
-            //components.add(new BroadAggregationComponent());
         components.add(new AggregationComponent());
 
         // TODO: if a calculation is based on second calculation, populate results with the first calculation first
@@ -127,11 +118,6 @@ public class StandardReportPipeline extends Pipeline {
             if (!calculation.isApplyBeforeAggregation()) {
                 components.add(new CalculationComponent(calculation));
             }
-        }
-
-        for (AnalysisItem temporal : items(AnalysisItemTypes.TEMPORAL_MEASURE, reportItems)) {
-            temporalAdded = true;
-            components.add(new TemporalComponent((TemporalAnalysisMeasure) temporal));
         }
 
         components.add(new AggregationComponent(AggregationTypes.RANK));

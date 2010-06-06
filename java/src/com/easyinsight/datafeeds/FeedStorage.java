@@ -106,7 +106,7 @@ public class FeedStorage {
         feedDefinition.setDataFeedID(feedID);
         savePolicy(conn, feedID, feedDefinition.getUploadPolicy());
         feedDefinition.setDataFeedID(feedID);
-        saveFields(feedID, conn, feedDefinition.getFields(), feedDefinition.getVirtualDimensions());
+        saveFields(feedID, conn, feedDefinition.getFields());
         saveFolders(feedID, conn, feedDefinition.getFolders());
         saveTags(feedID, conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
@@ -326,7 +326,7 @@ public class FeedStorage {
         }
     }
 
-    private void saveFields(long feedID, Connection conn, List<AnalysisItem> analysisItems, List<VirtualDimension> virtualDimensions) throws SQLException {
+    private void saveFields(long feedID, Connection conn, List<AnalysisItem> analysisItems) throws SQLException {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
         deleteStmt.setLong(1, feedID);
         deleteStmt.executeUpdate();
@@ -583,7 +583,7 @@ public class FeedStorage {
         }
         updateDataFeedStmt.close();
         savePolicy(conn, feedDefinition.getDataFeedID(), feedDefinition.getUploadPolicy());
-        saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields(), feedDefinition.getVirtualDimensions());
+        saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
         saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
