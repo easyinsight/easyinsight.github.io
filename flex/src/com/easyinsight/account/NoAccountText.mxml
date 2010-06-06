@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
-	<mx:TextArea width="100%" height="100%" backgroundAlpha="0" borderStyle="none"
-		text="Creating an account with Easy Insight is quick and easy! We offer three different account types to best meet your needs. Browse the feature comparison below and choose an account type to get started."/>
-</mx:Canvas>
