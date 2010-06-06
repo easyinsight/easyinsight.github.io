@@ -12,9 +12,9 @@ import java.util.List;
  */
 public class AccountSetupData {
 
-    public static final int BIZ_USER = 1;
-    public static final int DEVELOPER = 2;
-    public static final int BI_GURU = 3;
+    public static final int BIZ_USER = 0;
+    public static final int DEVELOPER = 1;
+    public static final int BI_GURU = 2;
 
     private int myPersona;
     private List<Persona> personas = new ArrayList<Persona>();

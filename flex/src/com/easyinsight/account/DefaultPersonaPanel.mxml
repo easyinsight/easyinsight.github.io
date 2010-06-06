@@ -34,7 +34,7 @@
         }
 
         private function bizUser():void {
-            _setupData.myPersona = 1;
+            _setupData.myPersona = 0;
             _setupData.personas = createPersonas();
             dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
         }
@@ -127,13 +127,13 @@
         }
 
         private function developer():void {
-            _setupData.myPersona = 2;
+            _setupData.myPersona = 1;
             _setupData.personas = createPersonas();
             dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
         }
 
         private function biGuru():void {
-            _setupData.myPersona = 3;
+            _setupData.myPersona = 2;
             _setupData.personas = createPersonas();
             dispatchEvent(new KPITutorialEvent(KPITutorialEvent.NEXT));
         }

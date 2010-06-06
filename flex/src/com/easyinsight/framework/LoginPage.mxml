@@ -51,6 +51,8 @@
         private function setup():void {
             if (_initState == 1) {
                 panelIndex = 4;
+            } else {
+                loginComponent.setupFocus();
             }
         }
 
@@ -202,7 +204,7 @@
                 <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
                     <!-- login page -->
                     <mx:VBox width="50%" horizontalAlign="center">
-                        <framework:LoginComponent loginEvent2="loginHandler(event)"/>
+                        <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent"/>
                     </mx:VBox>
                     <mx:VBox width="50%" horizontalAlign="center">
                         <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"

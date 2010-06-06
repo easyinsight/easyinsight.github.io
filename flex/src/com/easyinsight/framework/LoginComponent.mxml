@@ -83,6 +83,10 @@
                 navigateToURL(new URLRequest("billing/login.jsp"), "_self");
         }
 
+        public function setupFocus():void {
+            focusManager.setFocus(userName);
+        }
+
         private function toBaseState():void {
             if (_additionalInfo == null) {
                 currentState = "";
