@@ -1,0 +1,36 @@
+<project default="SnapLogicConnector" basedir="." name="SnapLogicConnector">
+    <property file="../../flex/build/local.build.properties"/>
+
+    <property name="out.path" value="../out"/>
+    <property name="out.classes.path" value="../out/classes"/>
+    <target name="SnapLogicPackage" depends="SnapLogicConnector">
+        <mkdir dir="${out.path}" />
+        <mkdir dir="${out.path}/package" />
+        <copy todir="${out.path}/package">
+            <fileset dir="../package" />
+        </copy>
+        <copy todir="${out.path}/package/easyinsight-easyinsight-1.00/components/easyinsight/easyinsight">
+            <fileset dir="../lib/metro" />
+            <fileset file="${out.path}/eisnaplogic.jar" />
+        </copy>
+        <zip file="${out.path}/easyinsight-easyinsight-1.00.zip" basedir="${out.path}/package/" />
+    </target>
+    <target name="SnapLogicConnector">
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${out.classes.path}"/>
+        <javac destdir="${out.classes.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**"/>
+            <exclude name="tags/**"/>
+        </javac>
+        <jar destfile="${out.path}/eisnaplogic.jar" baseDir="${out.classes.path}" manifest="../manifest.txt"/>
+    </target>
+</project>
