@@ -2,7 +2,7 @@ drop table if exists scheduled_account_activity;
 create table scheduled_account_activity (
   scheduled_account_activity_id bigint(20) auto_increment not null,
   account_id bigint(20) not null,
-  activity_type integer not null;
+  activity_type integer not null,
   primary key(scheduled_account_activity_id),
   constraint scheduled_user_activity_ibfk1 foreign key (account_id) references account (account_id) on delete cascade
 );
@@ -53,5 +53,5 @@ create table data_activity_task_generator (
   scheduled_activity_id bigint(20) not null,
   primary key (data_activity_task_generator_id),
   constraint data_activity_task_generator_ibfk1 foreign key (task_generator_id) references task_generator (task_generator_id) on delete cascade,
-  constraint data_activity_task_generator_ibfk2 foreign key (scheduled_activity_id) references scheduled_activity (scheduled_activity_id) on delete cascade
+  constraint data_activity_task_generator_ibfk2 foreign key (scheduled_activity_id) references scheduled_account_activity (scheduled_account_activity_id) on delete cascade
 );
