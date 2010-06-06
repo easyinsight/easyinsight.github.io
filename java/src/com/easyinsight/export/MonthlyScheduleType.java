@@ -37,7 +37,7 @@ public class MonthlyScheduleType extends ScheduleType {
         cal.set(Calendar.HOUR_OF_DAY, getHour());
         cal.set(Calendar.MINUTE, getMinute());
         int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-        if (dayOfMonth >= this.dayOfMonth) {
+        if (dayOfMonth == this.dayOfMonth) {
             if (cal.getTime().getTime() > lastTime.getTime() && cal.getTime().getTime() < now.getTime()) {
                 return cal.getTime();
             } else {
