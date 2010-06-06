@@ -4,6 +4,7 @@ import com.easyinsight.genredata.ExchangeReportData;
 import com.easyinsight.genredata.SolutionReportExchangeItem;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
+import com.easyinsight.util.ProgressAlert;
 
 import mx.collections.ArrayCollection;
 import mx.rpc.events.ResultEvent;
@@ -27,6 +28,8 @@ public class InstallReportTutorialElement extends TutorialElement {
     }
 
     override public function forwardExecute():void {
+        ProgressAlert.alert(this, "Installing report into your account...", null, solutionService.getSolutionReports,
+                solutionService.determineDataSource, solutionService.installReport);
         solutionService.getSolutionReports.send();
     }
 
