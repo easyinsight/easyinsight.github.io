@@ -72,10 +72,7 @@
         <mapping class="com.easyinsight.analysis.TreeMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeDefinitionState"/>
         <mapping class="com.easyinsight.analysis.SixSigmaMeasure"/>
-        <mapping class="com.easyinsight.analysis.VirtualDimension"/>
-        <mapping class="com.easyinsight.analysis.VirtualTransform"/>
         <mapping class="com.easyinsight.analysis.AnalysisStep"/>
-        <mapping class="com.easyinsight.analysis.TemporalAnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.LastValueFilter"/>
         <mapping class="com.easyinsight.analysis.Link"/>
         <mapping class="com.easyinsight.analysis.URLLink"/>
@@ -85,8 +82,6 @@
         <mapping class="com.easyinsight.analysis.ReportNumericProperty"/>              
 
         <mapping class="com.easyinsight.scrubbing.DataScrub"/>
-        <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>
-        <mapping class="com.easyinsight.scrubbing.LookupTablePair"/>
         <mapping class="com.easyinsight.scrubbing.TextReplaceScrub"/>
 
         <mapping class="com.easyinsight.scheduler.TaskGenerator"/>
@@ -112,11 +107,6 @@
 
         <mapping class="com.easyinsight.conditions.MeasureConditionRange"/>
         <mapping class="com.easyinsight.conditions.MeasureCondition"/>
-
-        <mapping class="com.easyinsight.stores.Merchant"/>
-        <mapping class="com.easyinsight.stores.UserMerchantBinding"/>
-        <mapping class="com.easyinsight.stores.Payment"/>
-        <mapping class="com.easyinsight.stores.Purchase"/>
 
         <mapping class="com.easyinsight.core.Key"/>
         <mapping class="com.easyinsight.core.NamedKey"/>

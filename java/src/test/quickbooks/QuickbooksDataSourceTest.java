@@ -14,7 +14,6 @@ import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.contrib.ssl.AuthSSLProtocolSocketFactory;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -29,7 +28,7 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
  * To change this template use File | Settings | File Templates.
  */
 public class QuickbooksDataSourceTest extends TestCase {
-    public void testGetTicket() {
+    /*public void testGetTicket() {
         Database.initialize();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -70,5 +69,5 @@ public class QuickbooksDataSourceTest extends TestCase {
         finally {
             Database.closeConnection(conn);
         }
-    }
+    }*/
 }
