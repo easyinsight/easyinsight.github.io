@@ -46,11 +46,13 @@ public class TutorialFramework extends EventDispatcher {
     }
 
     private function execute(element:TutorialElement):void {
-        element.forwardExecute();
-        if (!element.staysOnScreen()) {
-            var nextElement:TutorialElement = getNextElement();
-            if (nextElement != null) {
-                execute(nextElement);
+        if (element != null) {
+            element.forwardExecute();
+            if (!element.staysOnScreen()) {
+                var nextElement:TutorialElement = getNextElement();
+                if (nextElement != null) {
+                    execute(nextElement);
+                }
             }
         }
     }
