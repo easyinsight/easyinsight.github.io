@@ -83,12 +83,18 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
-        Map<String, String> peopleCache = new HashMap<String, String>();
         try {
-           /* EIPageInfo info = new EIPageInfo();
-            info.currentPage = 1;
-            do {*/
-                Document companies = runRestRequest("/companies.xml", client, builder, url, true);
+            HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
+            int offset = 0;
+            int companyCount;
+            do {
+                companyCount = 0;
+                Document companies;
+                if (offset == 0) {
+                    companies = runRestRequest("/companies.xml?", client, builder, url, true);
+                } else {
+                    companies = runRestRequest("/companies.xml?n=" + offset, client, builder, url, true);
+                }
                 Nodes companyNodes = companies.query("/companies/company");
                 loadingProgress(0, 1, "Synchronizing with companies...", true);
                 for (int i = 0; i < companyNodes.size(); i++) {
@@ -103,11 +109,19 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     row.addValue(COUNT, new NumericValue(1));
                     String personId = queryField(companyNode, "owner-id/text()");
-                    String responsiblePartyName = retrieveUserInfo(client, builder, peopleCache, personId, url);
+                    String responsiblePartyName = highriseCache.getUserName(personId);
                     row.addValue(OWNER, responsiblePartyName);
 
-                    Document tags = runRestRequest("/companies/"+id+"/tags.xml", client, builder, url, false);
-                    Nodes tagNodes = tags.query("/tags/tag");
+                    List<String> tagList = highriseCache.getContactTagMap().get(id);
+                    if (tagList != null) {
+                        StringBuilder tagBuilder = new StringBuilder();
+                        for (String tag : tagList) {
+                            tagBuilder.append(tag).append(",");
+                        }
+                        String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
+                        row.addValue(TAGS, tagString);
+                    }
+                    /*Nodes tagNodes = tags.query("/tags/tag");
                     StringBuilder tagBuilder = new StringBuilder();
                     for (int j = 0; j < tagNodes.size(); j++) {
                         Node tagNode = tagNodes.get(j);
@@ -117,14 +131,23 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     if (tagBuilder.length() > 0) {
                         String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
                         row.addValue(TAGS, tagString);
-                        
-                    }
-                }
-            //} while(info.currentPage++ < info.MaxPages);
 
+                    }*/
+                    companyCount++;
+                }
+                if (dataStorage != null) {
+                    dataStorage.insertData(ds);
+                    ds = new DataSet();
+                }
+                offset += 500;
+            } while (companyCount == 500);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        return ds;
+        if (dataStorage == null) {
+            return ds;
+        } else {
+            return null;
+        }
     }
 }

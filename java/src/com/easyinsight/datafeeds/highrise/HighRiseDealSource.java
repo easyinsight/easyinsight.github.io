@@ -133,13 +133,19 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
-        Map<String, String> peopleCache = new HashMap<String, String>();
-        Map<String, String> userCache = new HashMap<String, String>();
+
         Map<String, String> categoryCache = new HashMap<String, String>();
         try {
-            EIPageInfo info = new EIPageInfo();
-            info.currentPage = 1;
+            HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
             //do {
+            Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true);
+            Nodes dealCategoryDoc = userDoc.query("/deal-catgories/deal-category");
+            for (int i = 0; i < dealCategoryDoc.size(); i++) {
+                Node categoryNode = dealCategoryDoc.get(i);
+                String categoryName = queryField(categoryNode, "name/text()");
+                String categoryID = queryField(categoryNode, "id/text()");
+                categoryCache.put(categoryID, categoryName);
+            }
                 Document deals = runRestRequest("/deals.xml", client, builder, url, true);
                 loadingProgress(0, 1, "Synchronizing with deals...", true);
                 Nodes dealNodes = deals.query("/deals/deal");
@@ -181,9 +187,9 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                         row.addValue(TOTAL_DEAL_VALUE, new NumericValue(totalDealValue));
 
                         String personID = queryField(currDeal, "owner-id/text()");
-                        row.addValue(DEAL_OWNER, retrieveUserInfo(client, builder, userCache, personID, url));
+                        row.addValue(DEAL_OWNER, highriseCache.getUserName(personID));
                         String responsibleParty = queryField(currDeal, "responsible-party-id/text()");
-                        row.addValue(RESPONSIBLE_PARTY, retrieveUserInfo(client, builder, userCache, responsibleParty, url));
+                        row.addValue(RESPONSIBLE_PARTY, highriseCache.getUserName(responsibleParty));
                         String categoryID = queryField(currDeal, "category-id/text()");
                         row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
                         row.addValue(COUNT, new NumericValue(1));

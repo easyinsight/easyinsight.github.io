@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import nu.xom.ParsingException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -36,8 +37,18 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     private String url;
 
+    private transient HighriseCache highriseCache;
+
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    public HighriseCache getOrCreateCache(HttpClient httpClient) throws HighRiseLoginException, ParsingException {
+        if (highriseCache == null) {
+            highriseCache = new HighriseCache();
+            highriseCache.populateCaches(httpClient, getUrl());
+        }
+        return highriseCache;
     }
 
     @Override

@@ -85,30 +85,10 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
-        Map<String, String> peopleCache = new HashMap<String, String>();
         try {
+            HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
             int offset = 0;
             int contactCount;
-            Map<String, List<String>> tagMap = new HashMap<String, List<String>>();
-            Document tagDoc = runRestRequest("/tags.xml", client, builder, url, true);
-            Nodes tagNodes = tagDoc.query("/tags/tag");
-            for (int i = 0; i < tagNodes.size(); i++) {
-                Node tagNode = tagNodes.get(i);
-                String tag = queryField(tagNode, "name/text()");
-                String id = queryField(tagNode, "id/text()");
-                Document ppl = runRestRequest("/tags/" + id + ".xml", client, builder, url, false);
-                Nodes pplNodes = ppl.query("/people/person");
-                for (int j = 0; j < pplNodes.size(); j++) {
-                    Node person = pplNodes.get(j);
-                    String personID = queryField(person, "id/text()");
-                    List<String> tags = tagMap.get(personID);
-                    if (tags == null) {
-                        tags = new ArrayList<String>();
-                        tagMap.put(personID, tags);
-                    }
-                    tags.add(tag);
-                }
-            }
             do {
                 Document companies;
                 if (offset == 0) {
@@ -139,10 +119,10 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     row.addValue(COUNT, new NumericValue(1));
                     String personId = queryField(companyNode, "owner-id/text()");
-                    String responsiblePartyName = retrieveUserInfo(client, builder, peopleCache, personId, url);
+                    String responsiblePartyName = highriseCache.getUserName(personId);
                     row.addValue(OWNER, responsiblePartyName);
 
-                    List<String> tagList = tagMap.get(id);
+                    List<String> tagList = highriseCache.getContactTagMap().get(id);
                     if (tagList != null) {
                         StringBuilder tagBuilder = new StringBuilder();
                         for (String tag : tagList) {
@@ -154,11 +134,19 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     contactCount++;
                 }
                 offset += 500;
+                if (dataStorage != null) {
+                    dataStorage.insertData(ds);
+                    ds = new DataSet();
+                }
             } while(contactCount == 500);
 
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        return ds;
+        if (dataStorage == null) {
+            return ds;
+        } else {
+            return null;
+        }
     }
 }
