@@ -82,8 +82,8 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
-        Map<String, String> peopleCache = new HashMap<String, String>();
         try {
+            BaseCampCache basecampCache = baseCampCompositeSource.getOrCreateCache(client);
             Document projects = runRestRequest("/projects.xml", client, builder, url, null, true);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
@@ -111,7 +111,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                                 String timeHours = queryField(todoListNode, "hours/text()");
                                 String timeDescription = queryField(todoListNode, "description/text()");
                                 String todoItemID = queryField(todoListNode, "todo-item-id/text()");
-                                String personName = retrieveContactInfo(client, builder, peopleCache, personID, url);
+                                String personName = basecampCache.getUserName(personID);
                                 Date date = deadlineFormat.parse(queryField(todoListNode, "date/text()"));
 
                                 IRow row = ds.createRow();

@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import nu.xom.ParsingException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -40,6 +41,16 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     private boolean includeArchived;
     private boolean includeInactive;
     private boolean includeComments;
+
+    private transient BaseCampCache basecampCache;
+
+    public BaseCampCache getOrCreateCache(HttpClient httpClient) throws ParsingException, BaseCampLoginException {
+        if (basecampCache == null) {
+            basecampCache = new BaseCampCache();
+            basecampCache.populateCaches(httpClient, getUrl());
+        }
+        return basecampCache;
+    }
 
     public boolean isIncludeInactive() {
         return includeInactive;

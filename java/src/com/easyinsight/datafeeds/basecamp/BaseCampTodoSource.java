@@ -58,6 +58,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
     public static final String PROJECTNAME = "Project Name";
     public static final String PROJECTSTATUS = "Project Status";
     public static final String PROJECTID = "Project ID";
+    public static final String ANNOUNCEMENT = "Project Announcement";
 
     public static final String TODOLISTDESC = "To-do List Description";
     public static final String TODOLISTID = "To-do List ID";
@@ -104,16 +105,15 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
-        Map<String, String> peopleCache = new HashMap<String, String>();
         try {
-
+            BaseCampCache basecampCache = source.getOrCreateCache(client);
             Document projects = runRestRequest("/projects.xml", client, builder, url, null, true);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectName = queryField(curProject, "name/text()");
+                String announcement = queryField(curProject, "announcement/text()"); 
                 loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", false);
-                System.out.println("project = " + projectName);
                 String projectStatus = queryField(curProject, "status/text()");
                 if (!source.isIncludeArchived() && "archived".equals(projectStatus)) {
                     continue;
@@ -172,7 +172,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                             }
                             String responsiblePartyId = queryField(milestoneNode, "responsible-party-id/text()");
                             if (responsiblePartyId != null) {
-                                milestoneOwner = retrieveContactInfo(client, builder, peopleCache, responsiblePartyId, url);
+                                milestoneOwner = basecampCache.getUserName(responsiblePartyId);
                             }
                         }
 
@@ -185,11 +185,11 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                                 for(int k = 0;k < todoItemNodes.size();k++) {
                                     Node todoItem = todoItemNodes.get(k);
                                     String responsiblePartyId = queryField(todoItem, "responsible-party-id/text()");
-                                    String responsiblePartyName = retrieveContactInfo(client, builder, peopleCache, responsiblePartyId, url);
+                                    String responsiblePartyName = basecampCache.getUserName(responsiblePartyId);
                                     String creatorId = queryField(todoItem, "creator-id/text()");
-                                    String creatorName = retrieveContactInfo(client, builder, peopleCache, creatorId, url);
+                                    String creatorName = basecampCache.getUserName(creatorId);
                                     String completerId = queryField(todoItem, "completer-id/text()");
-                                    String completerName = retrieveContactInfo(client, builder, peopleCache, completerId, url);
+                                    String completerName = basecampCache.getUserName(completerId);
                                     String createdDateString = queryField(todoItem, "created-on/text()");
                                     Date createdDate = null;
                                     if(createdDateString != null )
@@ -217,6 +217,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                                     row.addValue(keys.get(ITEMID), queryField(todoItem, "id/text()"));
                                     row.addValue(keys.get(CONTENT), queryField(todoItem, "content/text()"));
                                     row.addValue(keys.get(COMPLETED), queryField(todoItem, "completed/text()").toLowerCase());
+                                    row.addValue(keys.get(ANNOUNCEMENT), announcement);
                                     row.addValue(keys.get(RESPONSIBLEPARTYID), responsiblePartyId);
                                     row.addValue(keys.get(RESPONSIBLEPARTYNAME), responsiblePartyName);
                                     row.addValue(keys.get(CREATORID), creatorId);
@@ -236,6 +237,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                             } else {
                                 IRow row = ds.createRow();
                                 row.addValue(keys.get(PROJECTNAME), projectName);
+                                row.addValue(keys.get(ANNOUNCEMENT), announcement);
                                 row.addValue(keys.get(PROJECTSTATUS), projectStatus);
                                 row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
                                 row.addValue(keys.get(MILESTONENAME), milestoneName);
@@ -295,7 +297,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 RESPONSIBLEPARTYID, CONTENT, COMPLETED, CREATEDDATE, COMPLETEDDATE,
                 TODOLISTNAME, MILESTONENAME, DEADLINE, PROJECTNAME, PROJECTSTATUS,
                 PROJECTID, TODOLISTDESC, TODOLISTID, TODOLISTPRIVATE, COMPLETERNAME, COMPLETERID, COUNT, ITEMCYCLE, MILESTONE_LAST_COMMENT, DUEON,
-                MILESTONE_CREATED_ON, MILESTONE_OWNER, MILESTONE_OWNER);
+                MILESTONE_CREATED_ON, MILESTONE_OWNER, MILESTONE_OWNER, ANNOUNCEMENT);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
@@ -317,6 +319,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         AnalysisDateDimension milestoneCompletedOnDim = new AnalysisDateDimension(keys.get(MILESTONE_COMPLETED_ON), true, AnalysisDateDimension.DAY_LEVEL);
         analysisItems.add(milestoneCompletedOnDim);
         analysisItems.add(new AnalysisDimension(keys.get(TODOLISTNAME), true));
+        analysisItems.add(new AnalysisDimension(keys.get(ANNOUNCEMENT), true));
         analysisItems.add(new AnalysisDimension(keys.get(MILESTONENAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(MILESTONE_OWNER), true));
         analysisItems.add(new AnalysisDimension(keys.get(MILESTONE_LAST_COMMENT), true));
@@ -337,11 +340,12 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
     @Override
     public int getVersion() {
-        return 4;
+        return 5;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new BaseCampTodo1To2(this), new BaseCampTodo2To3(this), new BaseCampTodo3To4(this));
+        return Arrays.asList(new BaseCampTodo1To2(this), new BaseCampTodo2To3(this), new BaseCampTodo3To4(this),
+                new BaseCampTodo4To5(this));
     }
 }
