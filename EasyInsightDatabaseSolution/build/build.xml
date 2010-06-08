@@ -15,9 +15,6 @@
                 <fileset dir="../lib">
                     <include name="**/*.jar"/>
                 </fileset>
-                <fileset dir="../../lib">
-                    <include name="**/*.jar"/>
-                </fileset>
                 <fileset file="../../java/lib/core/servlet-api.jar"/>
             </classpath>
             <include name="**"/>
@@ -25,7 +22,6 @@
         </javac>
         <war destfile="${out.path}/eidbsolution.war">
             <lib dir="../lib" />
-            <lib dir="../../lib" />
             <classes dir="${out.classes.path}" />
             <fileset dir="../web" />
             <classes file="../src/hibernate.cfg.xml" />
