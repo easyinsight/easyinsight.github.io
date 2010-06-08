@@ -22,7 +22,7 @@
         import com.easyinsight.framework.LoginPage;
         import com.easyinsight.framework.UserName;
         import com.easyinsight.framework.WebCredentialsCache;
-        import com.easyinsight.goals.GoalDataAnalyzeSource;        
+        import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.FullScreenPage;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.HeaderBar;
@@ -37,6 +37,7 @@
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.tour.TutorialFramework;
+        import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.BindingUtils;
@@ -107,6 +108,32 @@
 
         private function applicationListeners():void {
             stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+            if (loaderInfo.hasOwnProperty("uncaughtErrorEvents")) {
+                IEventDispatcher(loaderInfo["uncaughtErrorEvents"]).addEventListener("uncaughtError", handlerFunction);
+            }
+        }
+
+        private function handlerFunction(event:Event):void {
+            if (event["error"] is Error)
+            {
+                var error:Error = event["error"] as Error;
+                var errorWindow:ErrorReportView = new ErrorReportView();
+                errorWindow.error = error;
+                PopUpManager.addPopUp(errorWindow, this, true);
+                PopUpUtil.centerPopUp(errorWindow);
+                // do something with the error
+            }
+            else if (event["error"] is ErrorEvent)
+            {
+                var errorEvent:ErrorEvent = event["error"] as ErrorEvent;
+                Alert.show("error " + errorEvent.text);
+                // do something with the error
+            }
+            else
+            {
+                // a non-Error, non-ErrorEvent type was thrown and uncaught
+            }
+
         }
 
         private function onKeyDown(event:KeyboardEvent):void {

@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var errorMessage:String;
+
+        [Bindable]
+        private var stackTrace:String;
+
+        [Bindable]
+        private var index:int;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_error != null) {
+                errorMessage = _error.message;
+                stackTrace = _error.getStackTrace();
+            }
+        }
+
+        private var _error:Error;
+
+        public function set error(value:Error):void {
+            _error = value;
+        }
+
+        private function reportToEasyInsight():void {
+            ProgressAlert.alert(this, "Reporting the bug...", null, bugService.reportFlexError);
+            bugService.reportFlexError.send(errorMessage, stackTrace);
+        }
+
+        private function reported():void {
+            PopUpManager.removePopUp(this);
+        }
+    ]]>
+    </mx:Script>
+    <mx:RemoteObject id="bugService" destination="bugReportService">
+        <mx:method name="reportFlexError" result="reported()"/>
+    </mx:RemoteObject>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{index}">
+        <mx:VBox horizontalAlign="center">
+            <mx:Label text="Oops, something went wrong!" fontSize="20"/>
+            <mx:Button label="Show Error Details" fontSize="12" click="index = 1"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button label="Report to Easy Insight" fontSize="14" click="reportToEasyInsight()"/>
+                <mx:Button label="Close" fontSize="14"/>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:VBox horizontalAlign="center" creationComplete="PopUpUtil.centerPopUp(this)">
+            <mx:Text text="{errorMessage}" fontSize="14" selectable="true"/>
+            <mx:TextArea text="{stackTrace}" width="700" height="200" editable="false" selectable="true"
+                    borderStyle="inset" borderThickness="1"/>
+            <mx:Button label="Hide Error Details" fontSize="12" click="index = 0"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button label="Report to Easy Insight" fontSize="14" click="reportToEasyInsight()"/>
+                <mx:Button label="Close" fontSize="14" click="PopUpManager.removePopUp(this)"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:ViewStack>
+</util:EITitleWindow>

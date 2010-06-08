@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" showCloseButton="true" close="PopUpManager.removePopUp(this);" creationComplete="onCreationComplete()">
         <mx:Script><![CDATA[
+            import com.easyinsight.util.ProgressAlert;
+
             import mx.controls.Alert;
             import mx.events.CloseEvent;
             import mx.events.ValidationResultEvent;
@@ -22,6 +24,7 @@
 
                 if(Validator.validateAll(validators).length > 0)
                     return;
+                ProgressAlert.alert(this, "Reporting the bug...", null, bugService.reportBug);
                 bugService.reportBug.send(bugArea.selectedItem, bugDescription.text);
                 progress.visible = true;
             }
