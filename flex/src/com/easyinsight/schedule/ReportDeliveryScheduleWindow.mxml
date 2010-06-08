@@ -1,0 +1,281 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setup()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.AddUserToFeedWindow;
+        import com.easyinsight.administration.feed.UserLinkEvent;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        private var _activity:ReportDelivery;
+
+        [Bindable]
+        private var reportID:int;
+
+        private function setup():void {
+            addEventListener(RecipientEvent.DELETE_RECIPIENT, deleteRecipient);
+            analysisService.getInsightDescriptors.send();
+        }
+
+        private function deleteRecipient(event:RecipientEvent):void {
+            recipients.removeItemAt(recipients.getItemIndex(event.user));
+        }
+
+        public function set activity(value:ScheduledActivity):void {
+            _activity = value as ReportDelivery;
+            invalidateProperties();
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_activity != null) {
+                recipients = _activity.users; 
+                reportID = _activity.reportID;
+                hour = _activity.scheduleType.hour;
+                minute = _activity.scheduleType.minute;
+                body = _activity.body;
+                subjectLine = _activity.subject;
+                if (_activity.scheduleType is DailyScheduleType) {
+                    scheduleType = "Daily";
+                } else if (_activity.scheduleType is WeekdayScheduleType) {
+                    scheduleType = "Every Weekday";
+                } else if (_activity.scheduleType is MWFScheduleType) {
+                    scheduleType = "Monday/Wednesday/Friday";
+                } else if (_activity.scheduleType is TRScheduleType) {
+                    scheduleType = "Tuesday/Thursday";
+                } else if (_activity.scheduleType is WeeklyScheduleType) {
+                    scheduleType = "Weekly";
+                    extraScheduleConfig = true;
+                    extraLabel = "Day of Week";
+                    selectedDayOfWeek = WeeklyScheduleType(_activity.scheduleType).dayOfWeek;
+                    scheduleIndex = 1;
+                } else if (_activity.scheduleType is MonthlyScheduleType) {
+                    scheduleType = "Monthly";
+                    extraScheduleConfig = true;
+                    extraLabel = "Day of Month";
+                    selectedDayOfMonth = String(MonthlyScheduleType(_activity.scheduleType).dayOfMonth);
+                    scheduleIndex = 2;
+                }
+            }
+        }
+
+        private var newActivity:Boolean;
+
+        private function save():void {
+            newActivity = _activity == null;
+            if (_activity == null) {
+                _activity = new ReportDelivery();
+            }
+            if (scheduleBox.selectedItem == "Daily") {
+                _activity.scheduleType = new DailyScheduleType();
+            } else if (scheduleBox.selectedItem == "Every Weekday") {
+                _activity.scheduleType = new WeekdayScheduleType();
+            } else if (scheduleBox.selectedItem == "Monday/Wednesday/Friday") {
+                _activity.scheduleType = new MWFScheduleType();
+            } else if (scheduleBox.selectedItem == "Tuesday/Thursday") {
+                _activity.scheduleType = new TRScheduleType();
+            } else if (scheduleBox.selectedItem == "Weekly") {
+                _activity.scheduleType = new WeeklyScheduleType();
+                WeeklyScheduleType(_activity.scheduleType).dayOfWeek = dayOfWeekBox.selectedItem.data;
+            } else if (scheduleBox.selectedItem == "Monthly") {
+                _activity.scheduleType = new MonthlyScheduleType();
+                var dayOfMonth:int = int(dayInput.text);
+                if (dayOfMonth == 0 || dayOfMonth > 31) {
+                    dayInput.errorString = "Please enter a value between 1 and 31.";
+                    return;
+                }
+                MonthlyScheduleType(_activity.scheduleType).dayOfMonth = int(dayInput.text);
+            }
+            _activity.users = recipients;
+
+            _activity.reportID = reportComboBox.selectedItem.id;
+            _activity.body = bodyTextInput.text;
+            _activity.subject = subjectInput.text;
+            _activity.scheduleType.hour = hourStepper.value;
+            _activity.scheduleType.minute = minuteStepper.value;
+            var utcOffset:int = new Date().getTimezoneOffset();
+            exportService.addOrUpdateSchedule.send(_activity, utcOffset);
+        }
+
+        private function saved():void {
+            if (newActivity) {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.NEW_ACTIVITY, _activity));
+            } else {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.EDIT_ACTIVITY, _activity));
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var extraScheduleConfig:Boolean = false;
+
+        [Bindable]
+        private var hour:int;
+
+        [Bindable]
+        private var minute:int;
+
+        [Bindable]
+        private var scheduleIndex:int;
+
+        private function changeSchedule():void {
+            var item:String = scheduleBox.selectedItem as String;
+            if (item == "Weekly") {
+                extraScheduleConfig = true;
+                extraLabel = "Day of Week";
+                scheduleIndex = 1;
+            } else if (item == "Monthly") {
+                extraScheduleConfig = true;
+                extraLabel = "Day of Month";
+                scheduleIndex = 2;
+            } else {
+                extraScheduleConfig = false;
+                extraLabel = "";
+                scheduleIndex = 0;
+            }
+        }
+
+        [Bindable]
+        private var extraLabel:String;
+
+        [Bindable]
+        private var body:String;
+
+        [Bindable]
+        private var subjectLine:String;
+
+        [Bindable]
+        private var selectedDayOfWeek:int = 2;
+
+        [Bindable]
+        private var selectedDayOfMonth:String;
+
+        [Bindable]
+        private var scheduleType:String = "Daily";
+
+        [Bindable]
+        private var recipients:ArrayCollection = new ArrayCollection();
+
+        private function gotReports():void {
+            reports = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+        }
+
+        private function addRecipient():void {
+            var window:AddUserToFeedWindow = new AddUserToFeedWindow();
+            window.addEventListener(UserLinkEvent.ADD_USER_LINK, onAddUser, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAddUser(event:UserLinkEvent):void {
+            recipients.addItem(event.userStub);
+        }
+
+        [Bindable]
+        private var formatValue:int;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="exportService" id="exportService">
+        <mx:method name="addOrUpdateSchedule" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getInsightDescriptors" result="gotReports()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:HBox>
+            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="Report:">
+                    <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
+                            id="reportComboBox" labelField="name"/>
+                </mx:FormItem>
+                <mx:FormItem label="Output Format:">
+                    <util:SmartComboBox id="outputFormatBox" selectedValue="{formatValue}" selectedProperty="data"
+                            labelField="label">
+                        <util:dataProvider>
+                            <mx:ArrayCollection>
+                                <mx:Array>
+                                    <mx:Object label="Excel" data="1"/>
+                                </mx:Array>
+                            </mx:ArrayCollection>
+                        </util:dataProvider>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="Schedule Type:">
+                    <mx:ComboBox rowCount="6" id="scheduleBox" change="changeSchedule()" selectedItem="{scheduleType}">
+                        <mx:dataProvider>
+                            <mx:ArrayCollection>
+                                <mx:Array>
+                                    <mx:String>Daily</mx:String>
+                                    <mx:String>Every Weekday</mx:String>
+                                    <mx:String>Monday/Wednesday/Friday</mx:String>
+                                    <mx:String>Tuesday/Thursday</mx:String>
+                                    <mx:String>Weekly</mx:String>
+                                    <mx:String>Monthly</mx:String>
+                                </mx:Array>
+                            </mx:ArrayCollection>
+                        </mx:dataProvider>
+                    </mx:ComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="{extraLabel}" enabled="{extraScheduleConfig}">
+                    <mx:ViewStack selectedIndex="{scheduleIndex}">
+                        <mx:Box/>
+                        <mx:Box>
+                            <util:SmartComboBox id="dayOfWeekBox" selectedProperty="data" labelField="label"
+                                    selectedValue="{selectedDayOfWeek}" rowCount="7">
+                                <util:dataProvider>
+                                    <mx:ArrayCollection>
+                                        <mx:Array>
+                                            <mx:Object label="Monday" data="2"/>
+                                            <mx:Object label="Tuesday" data="3"/>
+                                            <mx:Object label="Wednesday" data="4"/>
+                                            <mx:Object label="Thursday" data="5"/>
+                                            <mx:Object label="Friday" data="6"/>
+                                            <mx:Object label="Saturday" data="7"/>
+                                            <mx:Object label="Sunday" data="1"/>
+                                        </mx:Array>
+                                    </mx:ArrayCollection>
+                                </util:dataProvider>
+                            </util:SmartComboBox>
+                        </mx:Box>
+                        <mx:Box>
+                            <mx:TextInput id="dayInput" text="{selectedDayOfMonth}"/>
+                        </mx:Box>
+                    </mx:ViewStack>
+                </mx:FormItem>
+                <mx:FormItem label="Time:" direction="horizontal">
+                    <mx:NumericStepper value="{hour}" minimum="0" maximum="23" id="hourStepper"/>
+                    <mx:Label text=":"/>
+                    <mx:NumericStepper value="{minute}" minimum="0" maximum="59" id="minuteStepper"/>
+                </mx:FormItem>
+                <mx:FormItem label="Recipients:">
+                    <mx:VBox>
+                        <mx:Button label="Add Recipient..." click="addRecipient()"/>
+                        <mx:DataGrid dataProvider="{recipients}" rowHeight="28">
+                            <mx:columns>
+                                <util:EIDataGridColumn headerText="User" dataField="displayName" width="300"/>
+                                <util:EIDataGridColumn headerText="" dataField="displayName" itemRenderer="com.easyinsight.schedule.RecipientControls" width="50"
+                                        sortable="false"/>
+                            </mx:columns>
+                        </mx:DataGrid>
+                    </mx:VBox>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Form>
+                <mx:FormItem label="Subject Line:">
+                    <mx:TextInput width="400" id="subjectInput" text="{subjectLine}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Email Body:">
+                    <mx:TextArea id="bodyTextInput" text="{body}" width="400" height="300" borderStyle="inset" borderThickness="1"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

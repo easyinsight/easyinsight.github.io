@@ -632,7 +632,7 @@ public class UserService implements IUserService {
             List results = session.createQuery("from User where userName = ?").setString(0, userName).list();
             if (results.size() > 0) {
                 User user = (User) results.get(0);
-                userStub = new UserStub(user.getUserID(), user.getUserName(), user.getEmail(), user.getName(), user.getAccount().getAccountID());
+                userStub = new UserStub(user.getUserID(), user.getUserName(), user.getEmail(), user.getName(), user.getAccount().getAccountID(), user.getFirstName());
             }
             session.getTransaction().commit();
         } catch (Exception e) {

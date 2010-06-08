@@ -358,15 +358,12 @@ public class UserAccountAdminService {
             if (!user.isRenewalOptionAvailable()) {
                 throw new RuntimeException();
             }
-            user.setRenewalOptionAvailable(false);
+            user.setRenewalOptionAvailable(true);
             user.setFirstName(welcomeBackInfo.getFirstName());
             user.setName(welcomeBackInfo.getLastName());
             user.setAccountAdmin(true);
             Account account = user.getAccount();
             account.setName(welcomeBackInfo.getAccountName());
-            if (welcomeBackInfo.getAccountTier() != SecurityUtil.getAccountTier()) {
-                updateAccount(welcomeBackInfo.getAccountTier(), conn, session, account, user);
-            }
             session.update(user);
             session.flush();
             conn.commit();

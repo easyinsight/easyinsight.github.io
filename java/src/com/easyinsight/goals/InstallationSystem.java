@@ -95,7 +95,7 @@ public class InstallationSystem {
     private long duplicateTree(long goalTreeID, long solutionID) throws Exception {
         GoalTree goalTree = new GoalStorage().retrieveGoalTree(goalTreeID, conn);
         GoalTree clonedTree = goalTree.clone();
-        FeedConsumer feedConsumer = new UserStub(userID, null, null, null, accountID);
+        FeedConsumer feedConsumer = new UserStub(userID, null, null, null, accountID, null);
         clonedTree.setAdministrators(Arrays.asList(feedConsumer));
         duplicateGoalDataSources(goalTree, solutionID);
         installDataSourcesAndReports(clonedTree);

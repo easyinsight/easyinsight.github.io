@@ -168,7 +168,10 @@ public class FilterValueDefinition extends FilterDefinition {
                 preparedStatement.setDouble(start++, value.toDouble());
             }
         } else if (type == Value.DATE) {
-            // TODO: ???
+            for (Value value : valueSet) {
+                DateValue dateValue = (DateValue) value;
+                preparedStatement.setTimestamp(start++, new java.sql.Timestamp(dateValue.getDate().getTime()));
+            }
         } else if (type == Value.STRING) {
             for (Value value : valueSet) {
                 preparedStatement.setString(start++, value.toString());

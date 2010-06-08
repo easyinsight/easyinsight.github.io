@@ -66,8 +66,16 @@ public class ActivityControls extends UIComponent implements IListItemRenderer {
     }
 
     private function editActivity(event:MouseEvent):void {
-        ProgressAlert.alert(this, "Retrieving information...", null, exportService.getRefreshableDataSources);
-        exportService.getRefreshableDataSources.send(activity);
+        if (activity is DataSourceRefreshActivity) {
+            ProgressAlert.alert(this, "Retrieving information...", null, exportService.getRefreshableDataSources);
+            exportService.getRefreshableDataSources.send(activity);    
+        } else {
+            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
+            window.activity = activity;
+            window.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, editActivity, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
     }
 
     private function onResult(event:ResultEvent):void {

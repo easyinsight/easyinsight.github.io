@@ -10,6 +10,7 @@ import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
@@ -201,10 +202,24 @@ public class ExportService {
         return null;
     }
 
+    public void testDeliver(long reportID, String reportName) {
+        try {
+            WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            analysisDefinition.updateMetadata();
+            ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, new InsightRequestMetadata());
+            byte[] bytes = toExcel(analysisDefinition, listDataResults);
+            new SendGridEmail().sendAttachmentEmail("jboe99@gmail.com", reportName, "Here's your weekly run of " + reportName + ". If you want to view the" +
+                    "latest data of the report, you can follow this link: <a href=\"http://www.easy-insight.com\">View Report in Easy Insight</a>. Enjoy!", bytes, reportName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
     public byte[] exportReportIDToExcel(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeInsight(reportID);
         try {
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            analysisDefinition.updateMetadata();
             if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
@@ -231,7 +246,7 @@ public class ExportService {
         }
     }
 
-    private byte[] toExcel(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) throws IOException, SQLException {
+    public byte[] toExcel(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) throws IOException, SQLException {
         EIConnection conn = Database.instance().getConnection();
         int dateFormat;
         try {

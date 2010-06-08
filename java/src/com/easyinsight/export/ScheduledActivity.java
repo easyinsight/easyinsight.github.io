@@ -19,6 +19,8 @@ public abstract class ScheduledActivity {
     private long scheduledActivityID;
 
     public static final int DATA_SOURCE_REFRESH = 1;
+    public static final int REPORT_DELIVERY = 2;
+    public static final int SCORECARD_DELIVERY = 3;
 
     public abstract int retrieveType();
 
@@ -75,6 +77,9 @@ public abstract class ScheduledActivity {
         switch (activityType) {
             case ScheduledActivity.DATA_SOURCE_REFRESH:
                 scheduledActivity = new DataSourceRefreshActivity();
+                break;
+            case ScheduledActivity.REPORT_DELIVERY:
+                scheduledActivity = new ReportDelivery();
                 break;
             default:
                 throw new RuntimeException();

@@ -2,65 +2,56 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" keyDown="submitted(event)" creationComplete="onCreationComplete()" xmlns:yahoo="http://www.yahoo.com/astra/2006/mxml">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.administration.sharing.UserStub;
-			import mx.collections.ArrayCollection;
-			import mx.managers.PopUpManager;
-			
-			[Bindable]
-			private var userStubs:ArrayCollection;
-			
-			private function onCreationComplete():void {
-				focusManager.setFocus(userIDInput);
-				shareService.getUserStubs.send();				
-			}
-			
-			private function gotUserStubs():void {
-				this.userStubs = shareService.getUserStubs.lastResult as ArrayCollection;
-			}			
-								
-			private function validate():void {
-				if (userIDInput.text.length > 0) {					
-					loginService.getUserStub.send(userIDInput.text);	
-				}			
-			}
-			
-			private function validationResult():void {
-				var userStub:UserStub = loginService.getUserStub.lastResult as UserStub;
-				failureMessage.visible = userStub == null;
-				if (userStub != null) {					
-					dispatchEvent(new UserLinkEvent(UserLinkEvent.ADD_USER_LINK, userStub));
-					PopUpManager.removePopUp(this);						
-				}
-			}
-			
-			private function submitted(event:KeyboardEvent):void {
-            	if (event.keyCode == Keyboard.ENTER) {
-            		validate();	
-            	}
+        import com.easyinsight.administration.sharing.UserStub;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var userStubs:ArrayCollection;
+
+        private function onCreationComplete():void {
+            focusManager.setFocus(userIDInput);
+            shareService.getUserStubs.send(_includeUser);
+        }
+
+        private function gotUserStubs():void {
+            this.userStubs = shareService.getUserStubs.lastResult as ArrayCollection;
+        }
+
+        private function save():void {
+            dispatchEvent(new UserLinkEvent(UserLinkEvent.ADD_USER_LINK, userIDInput.selectedItem as UserStub));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function submitted(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                save();
             }
-			
-			private function cancel():void {
-				PopUpManager.removePopUp(this);
-			}
-			
-			
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private var _includeUser:Boolean = false;
+
+        public function set includeUser(value:Boolean):void {
+            _includeUser = value;
+        }	
 		]]>
 	</mx:Script>
 	<mx:RemoteObject id="shareService" destination="share">
 		<mx:method name="getUserStubs" result="gotUserStubs()"/>			
 	</mx:RemoteObject>
-	<mx:RemoteObject id="loginService" destination="login">
-		<mx:method name="getUserStub" result="validationResult()"/>
-	</mx:RemoteObject>
-	<yahoo:AutoCompleteManager id="autoCompleteManager" target="{userIDInput}" dataProvider="{userStubs}" labelField="name" minCharsForCompletion="1"/>
 	<mx:VBox styleName="TitleWindowContents">
 		<mx:Label text="Enter the name of the user:"/>
 		<mx:Form width="100%">
 			<mx:FormItem label="User" direction="horizontal">
-				<mx:TextInput id="userIDInput"/>
+                <mx:ComboBox id="userIDInput" dataProvider="{userStubs}" labelField="displayName"/>				
 			</mx:FormItem>		
 			<mx:FormItem label="" direction="horizontal">
-				<mx:Button label="Add" click="validate()"/>
+				<mx:Button label="Add" click="save()"/>
 				<mx:Button label="Cancel" click="cancel()"/>
 			</mx:FormItem>
 			<mx:FormItem label="Could not find that user." id="failureMessage" visible="false"/>

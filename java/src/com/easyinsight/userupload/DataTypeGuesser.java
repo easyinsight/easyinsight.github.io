@@ -15,6 +15,8 @@ import java.text.ParseException;
 public class DataTypeGuesser implements IDataTypeGuesser {
 
     private static SimpleDateFormat[] dateFormats = new SimpleDateFormat[] {
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz"),
+            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z"),
             new SimpleDateFormat("yyyy-MM-dd"),
             new SimpleDateFormat("MM-dd-yy"),
             new SimpleDateFormat("MM-dd-yyyy"),
@@ -67,7 +69,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                     } catch (NumberFormatException e) {
                         SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
                         if (dateFormat != null) {
-                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, dateFormat.toPattern());
+                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.DAY_LEVEL, dateFormat.toPattern());
                         } else {
                             newGuess = new AnalysisDimension(tag, true);
                         }
@@ -79,7 +81,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
         } else {
             switch (value.type()) {
                 case Value.DATE:
-                    newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL);
+                    newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.DAY_LEVEL);
                     break;
                 case Value.NUMBER:
                     NumericValue numericValue = (NumericValue) value;

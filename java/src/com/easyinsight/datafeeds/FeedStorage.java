@@ -554,7 +554,8 @@ public class FeedStorage {
         }
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
-                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ? WHERE DATA_FEED_ID = ?");
+                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
+                "CREATE_DATE = ?, UPDATE_DATE = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
         updateDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -576,6 +577,8 @@ public class FeedStorage {
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isVisible());
         updateDataFeedStmt.setLong(i++, feedDefinition.getParentSourceID());
         updateDataFeedStmt.setLong(i++, feedDefinition.getVersion());
+        updateDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getDateCreated().getTime()));
+        updateDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getDateUpdated().getTime()));
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -999,7 +1002,7 @@ public class FeedStorage {
         uploadPolicy.setMarketplaceVisible(marketplaceVisible);
         List<FeedConsumer> owners = new ArrayList<FeedConsumer>();
         List<FeedConsumer> viewers = new ArrayList<FeedConsumer>();
-        PreparedStatement policyUserStmt = conn.prepareStatement("SELECT USER.USER_ID, ROLE, USER.NAME, USER.USERNAME, USER.EMAIL, USER.ACCOUNT_ID FROM UPLOAD_POLICY_USERS, USER WHERE FEED_ID = ? AND " +
+        PreparedStatement policyUserStmt = conn.prepareStatement("SELECT USER.USER_ID, ROLE, USER.NAME, USER.USERNAME, USER.EMAIL, USER.ACCOUNT_ID, USER.FIRST_NAME FROM UPLOAD_POLICY_USERS, USER WHERE FEED_ID = ? AND " +
                 "UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID");
         policyUserStmt.setLong(1, feedID);
         ResultSet usersRS = policyUserStmt.executeQuery();
@@ -1010,7 +1013,8 @@ public class FeedStorage {
             String userName = usersRS.getString(4);
             String email = usersRS.getString(5);
             long accountID = usersRS.getLong(6);
-            UserStub userStub = new UserStub(userID, userName, email, name, accountID);
+            String firstName = usersRS.getString(7);
+            UserStub userStub = new UserStub(userID, userName, email, name, accountID, firstName);
             if (role == Roles.OWNER) {
                 owners.add(userStub);
             } else {

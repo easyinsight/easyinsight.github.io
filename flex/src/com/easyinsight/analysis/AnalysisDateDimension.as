@@ -14,7 +14,7 @@ import mx.formatters.NumberFormatter;
 		public var dateLevel:int;
 		public var customDateFormat:String;
 		
-		public function AnalysisDateDimension(dateLevel:int = AnalysisItemTypes.YEAR_LEVEL, 
+		public function AnalysisDateDimension(dateLevel:int = AnalysisItemTypes.DAY_LEVEL, 
 			customDateFormat:String = "yyyy-MM-dd") {				
 			super();
 			this.dateLevel = dateLevel;

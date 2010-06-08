@@ -16,15 +16,12 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
-import java.sql.Connection;
 
 /**
  * User: James Boe
@@ -33,10 +30,14 @@ import java.sql.Connection;
  */
 public class EIAccountManagementService {
 
-    public void specialOffer(Date date) {
+    public void specialOffer() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 30);
         Date newDate = cal.getTime();
+        Calendar previous = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, 0);
+        Date oldTime = previous.getTime();
+        Timestamp oldTimestamp = new Timestamp(oldTime.getTime());
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -61,15 +62,29 @@ public class EIAccountManagementService {
             // week 4 email:
             //  
 
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT state_change_time FROM ACCOUNT_TIMED_STATE WHERE " +
-                    "date(state_change_time) > ? and account_state = ?");
-
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_TIMED_STATE.account_id FROM ACCOUNT_TIMED_STATE, ACCOUNT WHERE " +
+                    "state_change_time < ? and ACCOUNT_TIMED_STATE.account_state = ? AND ACCOUNT_TIMED_STATE.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND " +
+                    "ACCOUNT.account_state = ?");
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ?, RENEWAL_OPTION_AVAILABLE = ? WHERE ACCOUNT_ID = ?");
+            queryStmt.setTimestamp(1, oldTimestamp);
+            queryStmt.setInt(2, Account.ACTIVE);
+            queryStmt.setInt(3, Account.DELINQUENT);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long accountID = rs.getLong(1);
+                new AccountActivityStorage().updateTrialTime(accountID, conn, newDate);
+                updateStmt.setInt(1, Account.TRIAL);
+                updateStmt.setBoolean(2, true);
+                updateStmt.setLong(3, accountID);
+                updateStmt.executeUpdate();
+            }
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }

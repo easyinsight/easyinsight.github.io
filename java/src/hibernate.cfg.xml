@@ -91,6 +91,8 @@
         <mapping class="com.easyinsight.scheduler.ServerRefreshScheduledTask" />
         <mapping class="com.easyinsight.scheduler.FileProcessCreateScheduledTask" />
         <mapping class="com.easyinsight.scheduler.FileProcessUpdateScheduledTask" />
+        <mapping class="com.easyinsight.export.DeliveryTaskGenerator" />
+        <mapping class="com.easyinsight.export.DeliveryScheduledTask" />
         <mapping class="com.easyinsight.users.AccountTimeTask"/>
         <mapping class="com.easyinsight.users.AccountTimeScheduler"/>
         <mapping class="com.easyinsight.users.AccountBillingTask"/>

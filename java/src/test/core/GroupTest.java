@@ -36,7 +36,7 @@ public class GroupTest extends TestCase {
         group.setPubliclyVisible(false);
         List<Tag> tagList = Arrays.asList(new Tag("Test"), new Tag("Group"));
         group.setTags(tagList);
-        GroupUser groupUser = new GroupUser(userID, null, null, null, Roles.OWNER);
+        GroupUser groupUser = new GroupUser(userID, null, null, null, Roles.OWNER, null);
         group.setGroupUsers(Arrays.asList(groupUser));
         Group retrieved = groupService.addGroup(group);
         long groupID = retrieved.getGroupID();

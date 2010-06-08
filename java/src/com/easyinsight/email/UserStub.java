@@ -12,20 +12,31 @@ public class UserStub extends FeedConsumer {
     private String fullName;
     private String email;
     private long accountID;
+    private String firstName;
 
     public UserStub() {
     }
 
-    public UserStub(long userID, String userName, String email, String fullName, long accountID) {
+    public UserStub(long userID, String userName, String email, String fullName, long accountID,
+                    String firstName) {
         super(userName);
         this.userID = userID;
         this.fullName = fullName;
         this.email = email;
         this.accountID = accountID;
+        this.firstName = firstName;
     }
 
     public int type() {
         return FeedConsumer.USER;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public long getAccountID() {

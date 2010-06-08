@@ -4,8 +4,12 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
+import javax.mail.util.ByteArrayDataSource;
 import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -34,16 +38,26 @@ public class SendGridEmail {
                 "http://www.easy-insight.com/<br>" +
                 "(720)-220-8085 ";
     
-    public static final String BASIC_OR_PRO_EMAIL_WELCOME = "Hi {0},<br><br>" +
-                "Welcome to Easy Insight! I&#39;m available as your point of contact for any issues, questions, or other comments you may have in using the service. If you want to chat for a few minutes on the phone or drop me an email around what you're looking to do in Easy Insight, I&#39;d love to see how we can help you out.<br><br>" +
-                "Here are a couple of introductory screencasts you can start with:<br><br><br>" +
-                "<a href=\"http://www.youtube.com/watch?v=6Xd5sfnEwBQ\">Connecting Easy Insight to Basecamp</a><br>"+
-                "<a href=\"http://www.youtube.com/watch?v=GrUqJpWl8c4\">Building Your Own Reports</a><br><br>" +
-                "Thanks for your interest in Easy Insight. We are looking forward to your business!<br><br><br>" +
-                "James Boe<br>" +
-                "CEO, Easy Insight<br>" +
-                "http://www.easy-insight.com/<br>" +
-                "(720)-220-8085";
+    public static final String BASIC_OR_PRO_EMAIL_WELCOME = "Hi {0},<br>" +
+            "<br>" +
+            "Welcome to Easy Insight! I'm available as your point of contact for any issues, questions, or other comments you may have in using the service. If you want to chat for a few minutes on the phone or drop me an email around what you're looking to do, I'd love to see how we can help you out. We take great pride in our ability to quickly meet customer feature requests and get you past any stumbling points.<br>" +
+            "<br>" +
+            "Introductory screencasts are available at http://www.youtube.com/user/easyinsight. In particular, you might find the following screencasts helpful as starting points:<br>" +
+            " <br>" +
+            "Connecting Easy Insight to Basecamp<br>" +
+            "Building Your Own Reports<br>" +
+            "Uploading Flat Files to Easy Insight<br>" +
+            "Creating KPIs in Easy Insight<br>" +
+            "<br>" +
+            "Documentation is available at http://www.easy-insight.com/documentation/toc.html.<br>" +
+            "<br>" +
+            "Thanks for your interest in Easy Insight. Feel free to reach out to me!<br>" +
+            "<br>" +
+            "James Boe<br>" +
+            "CEO, Easy Insight<br>" +
+            "http://www.easy-insight.com/<br>" +
+            "(720)-220-8085" +
+            "Twitter: @easyinsight";
     
     public static final String BASIC_OR_PRO_EMAIL_WELCOME_TEXT = "Hi {0}," +
                 "Welcome to Easy Insight! I&#39;m available as your point of contact for any issues, questions, or other comments you may have in using the service. If you want to chat for a few minutes on the phone or drop me an email around what you're looking to do in Easy Insight, I&#39;d love to see how we can help you out." +
@@ -94,6 +108,56 @@ public class SendGridEmail {
         long id = Database.instance().getAutoGenKey(insertStmt);
         sendEmail(emailAddress, header, body, id);
 
+    }
+
+    public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String reportName) throws MessagingException, UnsupportedEncodingException {
+
+
+        // Then add to your message:
+        //messageContent.addBodyPart(bodyPart);
+        Properties props = new Properties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.host", SMTP_HOST_NAME);
+        props.put("mail.smtp.auth", "true");
+        props.put("vendor", "SendGrid");
+
+        Authenticator auth = new SMTPAuthenticator();
+        Session mailSession = Session.getInstance(props, auth);
+        // uncomment for debugging infos to stdout
+        // mailSession.setDebug(true);
+        Transport transport = mailSession.getTransport();
+
+        MimeMessage message = new MimeMessage(mailSession);
+
+        BodyPart bodyPart = new MimeBodyPart();
+        DataSource source = new ByteArrayDataSource(file, "application/excel");
+        bodyPart.setDataHandler(new DataHandler(source));
+        bodyPart.setFileName(reportName + ".xls");
+        bodyPart.setDisposition(Part.ATTACHMENT);
+
+        Multipart multipart = new MimeMultipart();
+
+        message.setSubject(subject);
+
+        /*BodyPart part1 = new MimeBodyPart();
+        part1.setText(body);*/
+
+        BodyPart part2 = new MimeBodyPart();
+        part2.setContent(htmlBody, "text/html");
+
+        //multipart.addBodyPart(part1);
+        multipart.addBodyPart(part2);
+
+        multipart.addBodyPart(bodyPart);
+
+        message.setContent(multipart);
+
+        message.setFrom(new InternetAddress("sales@easy-insight.com", "Easy Insight"));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
+
+        transport.connect();
+        transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+        transport.close();
     }
 
     private void sendEmail(String emailAddress, String subject, String htmlBody, long auditID) throws MessagingException, UnsupportedEncodingException {

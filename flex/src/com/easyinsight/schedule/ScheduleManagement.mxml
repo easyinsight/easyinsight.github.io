@@ -56,6 +56,13 @@
             exportService.getRefreshableDataSources.send(null);
         }
 
+        private function newReportDelivery():void {
+            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
+            window.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, newActivity, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         private function gotActivities():void {
             this.activities = exportService.getScheduledActivities.lastResult as ArrayCollection;
         }
@@ -71,7 +78,10 @@
         <mx:method name="getRefreshableDataSources" result="gotDataSources()"/>
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Button label="Add New Data Source Refresh..." click="newDataSource()"/>
+        <mx:HBox>
+            <mx:Button label="Add New Data Source Refresh..." click="newDataSource()"/>
+            <mx:Button label="Add Report Delivery..." click="newReportDelivery()"/>
+        </mx:HBox>
         <mx:DataGrid dataProvider="{activities}" width="550" rowHeight="28">
             <mx:columns>
                 <util:EIDataGridColumn dataField="activityDisplay" headerText="Activity"/>

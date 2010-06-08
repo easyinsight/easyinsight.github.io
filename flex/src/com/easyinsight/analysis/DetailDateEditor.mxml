@@ -5,9 +5,6 @@
         [Bindable]
         private var dateLevel:int;
 
-        [Bindable]
-        private var dateFormatEntry:String = "yyyy-MM-dd";
-
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
             return new AnalysisDateDimension();
         }
@@ -17,7 +14,6 @@
             if (val is AnalysisDateDimension) {
                 var date:AnalysisDateDimension = val as AnalysisDateDimension;
                 dateLevel = date.dateLevel - 1;
-                dateFormatEntry = date.customDateFormat;
             }
         }
 
@@ -25,7 +21,6 @@
             super.save(analysisItem);
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             date.dateLevel = dateBox.selectedItem.data;
-            date.customDateFormat = dateFormat.text;
         }
         ]]></mx:Script>
     <mx:FormItem label="Date Level:" direction="horizontal">
@@ -46,23 +41,5 @@
             </mx:ArrayCollection>
         </mx:ComboBox>
     </mx:FormItem>
-    <mx:FormItem label="Date Format:" direction="vertical">
-        <mx:TextArea editable="false" borderStyle="none" borderThickness="0" fontSize="10" width="300"
-                     text="The date format is specified by a pattern string. Within the pattern, letters are interpreted as the components of the date string. The following pattern letters are supported:"/>
-        <mx:DataGrid fontSize="10" rowCount="3">
-            <mx:ArrayCollection>
-                <mx:Array>
-                    <mx:Object letter="y" meaning="Year" example="2008; 08"/>
-                    <mx:Object letter="M" meaning="Month in Year" example="July; Jul; 07"/>
-                    <mx:Object letter="d" meaning="Day in month" example="10"/>
-                </mx:Array>
-            </mx:ArrayCollection>
-            <mx:columns>
-                <mx:DataGridColumn dataField="letter" width="48" headerText="Letter"/>
-                <mx:DataGridColumn dataField="meaning" headerText="Date Component"/>
-                <mx:DataGridColumn dataField="example" headerText="Examples"/>
-            </mx:columns>
-        </mx:DataGrid>
-        <mx:TextInput id="dateFormat" text="{dateFormatEntry}"/>
-    </mx:FormItem>
+
 </analysis:AnalysisItemDetailEditor>
