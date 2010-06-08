@@ -238,6 +238,42 @@
         table tr td {
             padding: 10px 5px;
         }
+
+        #queryResults {
+            width: 100%;
+        }
+
+        #queryResults div {
+            width: 100%;
+            padding: 0px;
+            margin: 0px;
+            overflow:auto;
+        }
+
+        #queryResults table tbody tr td {
+            background-color: #FFFFFF;
+            border-width:1px;
+            border-style:solid;
+            border-left-style:none;
+            border-top-style:none;
+            border-color: #666666;
+        }
+
+        #queryResults table tbody tr td:first-child {
+            border-left-style:solid;
+        }
+
+        #queryResults table thead tr th {
+            border-width:1px;
+            border-style:solid;
+            border-left-style:none;
+            border-color: #666666;
+        }
+
+        #queryResults table thead tr th:first-child {
+            border-left-style:solid;
+        }
+
     </style>
     <link rel="stylesheet" href="css/jquery-ui.css" media="screen" />
   </head>
@@ -347,26 +383,29 @@
             <input type="hidden" name="id" value="" />
             Query Name: <input type="text" name="queryName" /><br />
             Connection: <select name="queryConnection"></select><br />
-            Query: <input type="text" name="queryValue" /><br />
             Data Source Name: <input type="text" name="queryDataSource" /><br />
             Schedule? <input type="checkbox" name="schedule" /><br />
             Replace or Append Existing Data?<br />
             <input name="uploadType" type="radio" value="replace" checked="checked" /> Replace<br />
             <input name="uploadType" type="radio" value="append" /> Append<br />
+            Query:<br />
+            <textarea name="queryValue" rows="6" cols="80"></textarea><br />
             <button onclick="testQuery('#editQuery')">Test</button><button onclick="updateQuery('#editQuery')">Update</button><button onclick="$('#editQuery')[0].reset();$('#editQuery').hide();$('#newQueryButton').show();">Cancel</button>
+            <hr />
         </form>
         <button id="newQueryButton" onclick="$('#newQueryButton').hide();$('#createQuery')[0].reset();$('#editQuery')[0].reset();$('#editQuery').hide();$('#createQuery').show();">New Query...</button>
         <form id="createQuery" action="query/create.jsp" onsubmit="return false;">
             Query Name: <input type="text" name="queryName" /><br />
             Connection: <select name="queryConnection"></select><br />
-            Query: <input type="text" name="queryValue" /><br />
-            Data Source Name: <input type="text" name="queryDataSource" /><br />
+            Data Source Name: <input type="text" name="queryDataSource" /><br />                      
             Schedule? <input type="checkbox" name="schedule" /><br />
             Replace or Append Existing Data?<br />
             <input name="uploadType" type="radio" value="replace" checked="checked" /> Replace<br />
-            <input name="up
-            loadType" type="radio" value="append" /> Append<br />
+            <input name="uploadType" type="radio" value="append" /> Append<br />
+            Query: <br />
+            <textarea name="queryValue" rows="6" cols="80"></textarea><br />
             <button onclick="testQuery('#createQuery')">Test</button><button onclick="createQuery('#createQuery')">Create</button><button onclick="$('#createQuery')[0].reset();$('#createQuery').hide();$('#newQueryButton').show()">Cancel</button>
+            <hr />
         </form>
         <div id="queryResults"></div>
       </div>

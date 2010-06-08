@@ -14,7 +14,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" session="true" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
+        %><jsp:include page="../error.jsp" /><%
     }
     try {
     Query q = null;
@@ -34,32 +34,36 @@
         conn.setAutoCommit(false);
         ResultSet rs = q.executeQuery(conn, 5);
         %>
-        <table>
-            <thead>
-                <%
-                    for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
-                        %>
-                        <th>
-                            <%= rs.getMetaData().getColumnName(column) %>
-                        </th>
-                        <%
-                    }
-                %>
-            </thead>
-        <%
-        while(rs.next()) {
-        %>
-            <tr>
-                <% for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) { %>
-                <td>
-                    <%= String.valueOf(rs.getObject(column)) %>
-                </td>
-                <% } %>
-            </tr>
-        <%
-        }
-        %>
-        </table>
+        <h2>Test Results</h2>
+        <div>
+            <table cellspacing="0">
+                <thead>
+                    <%
+                        for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
+                            %>
+                            <th>
+                                <%= rs.getMetaData().getColumnName(column) %>
+                            </th>
+                            <%
+                        }
+                    %>
+                </thead>
+            <%
+            while(rs.next()) {
+            %>
+                <tr>
+                    <% for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) { %>
+                    <td>
+                        <%= String.valueOf(rs.getObject(column)) %>
+                    </td>
+                    <% } %>
+                </tr>
+            <%
+            }
+            %>
+            </table>
+        </div>
+        <button onclick="$('#queryResults').html('');">Clear</button>
         <%
     }
     finally {
