@@ -11,8 +11,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" session="true" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-    }
+        %><jsp:include page="../error.jsp" /><%
+    } else {
     List<ConnectionInfo> connections = ConnectionInfo.all();
 if(connections.size() == 0) { %>
     There are no connections yet. Make your first connection below!
@@ -29,4 +29,5 @@ if(connections.size() == 0) { %>
     <% } %>
         </tbody>
     </table>
-<% } %>
+<% }
+}%>

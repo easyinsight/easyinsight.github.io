@@ -11,8 +11,8 @@
 <%@ page import="org.hibernate.Transaction" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-    }
+        %><jsp:include page="../error.jsp" /><%
+    } else {
     Session dataSession = DataConnection.getSession();
     Transaction trans = dataSession.getTransaction();
     try {
@@ -32,4 +32,5 @@
     } finally {
         dataSession.close();
     }
+}
 %>

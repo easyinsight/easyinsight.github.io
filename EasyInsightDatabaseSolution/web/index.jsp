@@ -161,7 +161,7 @@
                     $("form#editQuery input[name=id]")[0].value = result.id;
                     $("form#editQuery input[name=queryName]")[0].value = result.name;
                     $("form#editQuery select[name=queryConnection]")[0].value = result.connectionId;
-                    $("form#editQuery input[name=queryValue]")[0].value = result.query;
+                    $("form#editQuery textarea[name=queryValue]")[0].value = result.query;
                     $("form#editQuery input[name=queryDataSource]")[0].value = result.dataSource;
                     $("form#editQuery input[name=schedule]")[0].checked = result.schedule;
                     if(result.append)
@@ -214,6 +214,7 @@
         });
 
     </script>
+    <link rel="stylesheet" href="css/jquery-ui.css" media="screen" />
     <style type="text/css">
         span.success {
             color: #44FF44;
@@ -268,14 +269,62 @@
             border-style:solid;
             border-left-style:none;
             border-color: #666666;
+            background-color: #EEEEEE;
         }
 
         #queryResults table thead tr th:first-child {
             border-left-style:solid;
         }
 
+        .queryParam {
+            display: inline-block;
+            width: 15em;
+        }
+
+        .queryInput {
+            width: 15em;
+        }
+
+        .ui-widget-content {
+            background-color: #FFFFFF;
+        }
+
+        .ui-widget-content {
+            background-image: none;
+        }
+
+        .ui-widget-header {
+            background-image:url('css/images/ui-bg_gloss-wave_345_f6a828_500x100.png');
+            background-color: #F4295C;
+            border-color: #E50940;
+        }
+        .ui-state-active, .ui-widget-content ui-state-active {
+            border-color: #F94F7A;
+        }
+        .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+            color: #EA003A;
+        }
+        .ui-state-highlight {
+            background-image:url('css/images/ui-bg_highlight-soft_75_ffe345c_1x100.png');
+        }
+        .ui-state-highlight a {
+            color: #EA003A;
+        }
+
+        .ui-state-hover {
+            border-color: #F74F5D;
+        }
+
+        .ui-state-hover a, .ui-state-hover a:hover {
+            color: #EA003A;
+        }
+
+        .ui-state-active, .ui-widget-content .ui-state-active {
+            border-color: #F74F5D;
+        }
+
+        
     </style>
-    <link rel="stylesheet" href="css/jquery-ui.css" media="screen" />
   </head>
   <body>
   <div id="mainTabs">
@@ -381,10 +430,10 @@
         <form id="editQuery" action="query/update.jsp" onsubmit="return false;">
             <input type="hidden" name="edit" value="edit" /> 
             <input type="hidden" name="id" value="" />
-            Query Name: <input type="text" name="queryName" /><br />
-            Connection: <select name="queryConnection"></select><br />
-            Data Source Name: <input type="text" name="queryDataSource" /><br />
-            Schedule? <input type="checkbox" name="schedule" /><br />
+            <span class="queryParam">Query Name:</span> <input type="text" name="queryName" /><br />
+            <span class="queryParam">Connection: </span> <select name="queryConnection"></select><br />
+            <span class="queryParam">Data Source Name: </span> <input type="text" name="queryDataSource" /><br />
+            <span class="queryParam">Schedule? </span><input type="checkbox" name="schedule" /><br />
             Replace or Append Existing Data?<br />
             <input name="uploadType" type="radio" value="replace" checked="checked" /> Replace<br />
             <input name="uploadType" type="radio" value="append" /> Append<br />
@@ -395,10 +444,10 @@
         </form>
         <button id="newQueryButton" onclick="$('#newQueryButton').hide();$('#createQuery')[0].reset();$('#editQuery')[0].reset();$('#editQuery').hide();$('#createQuery').show();">New Query...</button>
         <form id="createQuery" action="query/create.jsp" onsubmit="return false;">
-            Query Name: <input type="text" name="queryName" /><br />
-            Connection: <select name="queryConnection"></select><br />
-            Data Source Name: <input type="text" name="queryDataSource" /><br />                      
-            Schedule? <input type="checkbox" name="schedule" /><br />
+            <span class="queryParam">Query Name:</span> <input class="queryInput" type="text" name="queryName" /><br />
+            <span class="queryParam">Connection:</span> <select class="queryInput" name="queryConnection"></select><br />
+            <span class="queryParam">Data Source Name:</span> <input class="queryInput" type="text" name="queryDataSource" /><br />
+            <span class="queryParam">Schedule?</span> <input type="checkbox" name="schedule" /><br />
             Replace or Append Existing Data?<br />
             <input name="uploadType" type="radio" value="replace" checked="checked" /> Replace<br />
             <input name="uploadType" type="radio" value="append" /> Append<br />

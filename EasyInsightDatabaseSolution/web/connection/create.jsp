@@ -11,8 +11,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" session="true" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-    }
+        %><jsp:include page="../error.jsp" /><%
+    } else {
     ConnectionInfo conn = ConnectionInfo.createConnectionInfo(request.getParameterMap());
     if(conn != null) {
         Session dataSession = DataConnection.getSession();
@@ -33,4 +33,5 @@
             dataSession.close();
         }
     }
+}
 %>

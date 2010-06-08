@@ -15,7 +15,7 @@
 <%
     if(session.getAttribute("user") == null) {
         %><jsp:include page="../error.jsp" /><%
-    }
+    } else {
     try {
     Query q = null;
     Session dataSession = DataConnection.getSession();
@@ -74,4 +74,5 @@
     <div id="errorDiv">
         There was an error: <%= e.getMessage() %>
     </div>
-    <% } %>
+    <% }
+    }%>

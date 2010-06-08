@@ -10,8 +10,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" session="true" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-    }
+        %><jsp:include page="../error.jsp" /><%
+    } else {
     List<Query> queries = Query.all();
 if(queries.size() == 0) { %>
     There are no queries yet. Make your first query below!
@@ -28,4 +28,6 @@ if(queries.size() == 0) { %>
     <% } %>
         </tbody>
     </table>
-<% } %>
+<% }
+} 
+%>

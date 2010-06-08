@@ -12,8 +12,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" session="true" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-    }
+        %><jsp:include page="../error.jsp" /><%
+    } else {
     SecurityUser user = (SecurityUser) session.getAttribute("user");
     if(!request.getParameter("newPassword").equals(request.getParameter("confirmPassword"))) {
       %>
@@ -43,5 +43,5 @@
             s.close();
         }
     }
-
+    }
 %>

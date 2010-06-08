@@ -11,15 +11,16 @@
 <%@ page contentType="application/json;charset=UTF-8" language="java" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-    }
-    Session dataSession = DataConnection.getSession();
-    try {
-        ConnectionInfo c = (ConnectionInfo) dataSession.get(ConnectionInfo.class, Long.parseLong(request.getParameter("id")));
-        %>
-            <%= c.toJSON() %>
-        <%
-    } finally {
-        dataSession.close();
+        %><jsp:include page="../error.jsp" /><%
+    } else {
+        Session dataSession = DataConnection.getSession();
+        try {
+            ConnectionInfo c = (ConnectionInfo) dataSession.get(ConnectionInfo.class, Long.parseLong(request.getParameter("id")));
+            %>
+                <%= c.toJSON() %>
+            <%
+        } finally {
+            dataSession.close();
+        }
     }
 %>

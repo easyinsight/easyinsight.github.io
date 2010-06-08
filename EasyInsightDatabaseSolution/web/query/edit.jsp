@@ -11,8 +11,8 @@
 <%@ page contentType="application/json;charset=UTF-8" language="java" session="true" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-    }
+        %><jsp:include page="../error.jsp" /><%
+    } else {
     Session dataSession = DataConnection.getSession();
     try {
         Query q = (Query) dataSession.get(Query.class, Long.parseLong(request.getParameter("id")));
@@ -30,4 +30,5 @@
     } finally {
         dataSession.close();
     }
+}
 %>

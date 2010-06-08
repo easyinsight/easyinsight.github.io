@@ -13,8 +13,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" session="true" %>
   <%
       if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-      }
+        %><jsp:include page="../error.jsp" /><%
+      } else {
       Query q = new Query(request.getParameterMap());
       Session dataSession = DataConnection.getSession();
       Transaction trans = dataSession.getTransaction();
@@ -33,4 +33,5 @@
       } finally {
           dataSession.close();
       }
+    }
   %>

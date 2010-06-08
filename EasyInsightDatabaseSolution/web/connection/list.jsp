@@ -9,9 +9,9 @@
 <%@ page contentType="application/json;charset=UTF-8" language="java" session="true" %>
 <%
     if(session.getAttribute("user") == null) {
-        response.sendRedirect("login.jsp");
-    }
+        %><jsp:include page="../error.jsp" /><%
+    } else {
     boolean first = true; %>
 [<% for(ConnectionInfo conn: ConnectionInfo.all()) { %><%= first ? "" : ", "%> <%= conn.toJSON() %><%
         first = false;
-    } %>]
+    } %>] <% } %>
