@@ -42,6 +42,10 @@ public class DataService {
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials, int utfOffset) {
         SecurityUtil.authorizeFeedAccess(feedID);
+        if (analysisItem == null) {
+            LogClass.error("Received null analysis item from feed " + feedID);
+            return null;
+        }
         try {
             Feed feed = feedRegistry.getFeed(feedID);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
