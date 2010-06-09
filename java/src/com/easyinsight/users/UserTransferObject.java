@@ -13,6 +13,7 @@ public class UserTransferObject {
     private String email;
     private String name;
     private Date lastLoginDate;
+    private boolean defaultReportSharing;
 
     private long personaID;
 

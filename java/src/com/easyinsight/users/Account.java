@@ -100,6 +100,9 @@ public class Account {
     @Column(name="report_share_enabled")
     private boolean reportSharingEnabled;
 
+    @Column(name="default_reporting_sharing")
+    private boolean defaultReportSharing;
+
     @Column(name="creation_date")
     private Date creationDate;
 
@@ -156,7 +159,13 @@ public class Account {
         this.reportSharingEnabled = reportSharingEnabled;
     }
 
+    public boolean isDefaultReportSharing() {
+        return defaultReportSharing;
+    }
 
+    public void setDefaultReportSharing(boolean defaultReportSharing) {
+        this.defaultReportSharing = defaultReportSharing;
+    }
 
     public List<AccountCreditCardBillingInfo> getBillingInfo() {
         return billingInfo;

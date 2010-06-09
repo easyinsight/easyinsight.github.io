@@ -618,7 +618,7 @@ public class UserService implements IUserService {
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                     user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                    user.getPersonaID(), account.getDateFormat());
+                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -685,7 +685,7 @@ public class UserService implements IUserService {
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat());
+                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing());
 
                         userServiceResponse.setActivated(account.isActivated());
 
@@ -760,7 +760,7 @@ public class UserService implements IUserService {
                         (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                         user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                         !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                        user.getPersonaID(), account.getDateFormat());
+                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing());
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);

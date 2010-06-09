@@ -32,6 +32,7 @@ public class UserServiceResponse {
     private boolean renewalOptionPossible;
     private long personaID;
     private int dateFormat;
+    private boolean defaultReportSharing;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -43,7 +44,7 @@ public class UserServiceResponse {
                                boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
                                boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible,
-                               Long personaID, int dateFormat) {
+                               Long personaID, int dateFormat, boolean defaultReportSharing) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -64,6 +65,15 @@ public class UserServiceResponse {
         this.renewalOptionPossible = renewalOptionPossible;
         this.personaID = personaID == null ? 0 : personaID;
         this.dateFormat = dateFormat;
+        this.defaultReportSharing = defaultReportSharing;
+    }
+
+    public boolean isDefaultReportSharing() {
+        return defaultReportSharing;
+    }
+
+    public void setDefaultReportSharing(boolean defaultReportSharing) {
+        this.defaultReportSharing = defaultReportSharing;
     }
 
     public int getDateFormat() {

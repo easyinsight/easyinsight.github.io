@@ -205,7 +205,7 @@ public class EIAccountManagementService {
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded(),
                             !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                            user.getPersonaID(), account.getDateFormat());
+                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing());
                     // FlexContext.getFlexSession().getRemoteCredentials();
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
