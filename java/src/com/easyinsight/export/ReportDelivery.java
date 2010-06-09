@@ -2,7 +2,6 @@ package com.easyinsight.export;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.scheduler.DataSourceTaskGenerator;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
@@ -22,6 +21,15 @@ public class ReportDelivery extends ScheduledDelivery {
     private String reportName;
     private String subject;
     private String body;
+    private boolean htmlEmail;
+
+    public boolean isHtmlEmail() {
+        return htmlEmail;
+    }
+
+    public void setHtmlEmail(boolean htmlEmail) {
+        this.htmlEmail = htmlEmail;
+    }
 
     public String getReportName() {
         return reportName;
@@ -75,21 +83,22 @@ public class ReportDelivery extends ScheduledDelivery {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY (REPORT_ID, delivery_format, subject, body, " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID) VALUES (?, ?, ?, ?, ?)");
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email) VALUES (?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, reportID);
         insertStmt.setInt(2, reportFormat);
         insertStmt.setString(3, subject);
         insertStmt.setString(4, body);
         insertStmt.setLong(5, getScheduledActivityID());
+        insertStmt.setBoolean(6, htmlEmail);
         insertStmt.execute();
         insertStmt.close();
     }
 
     protected void customLoad(EIConnection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY FROM " +
-                "REPORT_DELIVERY WHERE " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, ANALYSIS.TITLE FROM " +
+                "REPORT_DELIVERY, ANALYSIS WHERE " +
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND REPORT_DELIVERY.REPORT_ID = ANALYSIS.ANALYSIS_ID");
         queryStmt.setLong(1, getScheduledActivityID());
         ResultSet rs = queryStmt.executeQuery();
         rs.next();
@@ -97,6 +106,8 @@ public class ReportDelivery extends ScheduledDelivery {
         reportID = rs.getLong(2);
         subject = rs.getString(3);
         body = rs.getString(4);
+        htmlEmail = rs.getBoolean(5);
+        reportName = rs.getString(6);
         queryStmt.close();
     }
 

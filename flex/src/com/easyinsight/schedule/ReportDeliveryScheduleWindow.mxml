@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="setup()">
+                    xmlns:schedule="com.easyinsight.schedule.*"
+                    creationComplete="setup()">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.AddUserToFeedWindow;
         import com.easyinsight.administration.feed.UserLinkEvent;
@@ -34,7 +35,8 @@
         protected override function commitProperties():void {
             super.commitProperties();
             if (_activity != null) {
-                recipients = _activity.users; 
+                htmlEmail = _activity.htmlEmail;
+                recipients = _activity.users;
                 reportID = _activity.reportID;
                 hour = _activity.scheduleType.hour;
                 minute = _activity.scheduleType.minute;
@@ -92,7 +94,7 @@
                 MonthlyScheduleType(_activity.scheduleType).dayOfMonth = int(dayInput.text);
             }
             _activity.users = recipients;
-
+            _activity.htmlEmail = htmlEmailCheckbox.selected;
             _activity.reportID = reportComboBox.selectedItem.id;
             _activity.body = bodyTextInput.text;
             _activity.subject = subjectInput.text;
@@ -122,6 +124,14 @@
 
         [Bindable]
         private var scheduleIndex:int;
+
+        [Bindable]
+        private var htmlEmail:Boolean = true;
+
+        private function insertReportLink():void {
+            var url:String = "<a href=\"https://www.easy-insight.com/app/#reportID=" + reportComboBox.selectedItem.urlKey + "\">View the Report in Easy Insight</a>";
+            bodyTextInput.insertTextAtCursor(url);
+        }
 
         private function changeSchedule():void {
             var item:String = scheduleBox.selectedItem as String;
@@ -190,11 +200,11 @@
             <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
                 <mx:FormItem label="Report:">
                     <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
-                            id="reportComboBox" labelField="name"/>
+                                        id="reportComboBox" labelField="name"/>
                 </mx:FormItem>
                 <mx:FormItem label="Output Format:">
                     <util:SmartComboBox id="outputFormatBox" selectedValue="{formatValue}" selectedProperty="data"
-                            labelField="label">
+                                        labelField="label">
                         <util:dataProvider>
                             <mx:ArrayCollection>
                                 <mx:Array>
@@ -225,7 +235,7 @@
                         <mx:Box/>
                         <mx:Box>
                             <util:SmartComboBox id="dayOfWeekBox" selectedProperty="data" labelField="label"
-                                    selectedValue="{selectedDayOfWeek}" rowCount="7">
+                                                selectedValue="{selectedDayOfWeek}" rowCount="7">
                                 <util:dataProvider>
                                     <mx:ArrayCollection>
                                         <mx:Array>
@@ -257,21 +267,32 @@
                         <mx:DataGrid dataProvider="{recipients}" rowHeight="28">
                             <mx:columns>
                                 <util:EIDataGridColumn headerText="User" dataField="displayName" width="300"/>
-                                <util:EIDataGridColumn headerText="" dataField="displayName" itemRenderer="com.easyinsight.schedule.RecipientControls" width="50"
-                                        sortable="false"/>
+                                <util:EIDataGridColumn headerText="" dataField="displayName"
+                                                       itemRenderer="com.easyinsight.schedule.RecipientControls"
+                                                       width="50"
+                                                       sortable="false"/>
                             </mx:columns>
                         </mx:DataGrid>
                     </mx:VBox>
                 </mx:FormItem>
             </mx:Form>
-            <mx:Form>
-                <mx:FormItem label="Subject Line:">
-                    <mx:TextInput width="400" id="subjectInput" text="{subjectLine}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Email Body:">
-                    <mx:TextArea id="bodyTextInput" text="{body}" width="400" height="300" borderStyle="inset" borderThickness="1"/>
-                </mx:FormItem>
-            </mx:Form>
+            <mx:VBox horizontalAlign="center">
+                <mx:Label text="How do you want to set up the report email?"/>
+                <mx:HBox>
+                    <mx:CheckBox label="HTML Email" selected="{htmlEmail}" id="htmlEmailCheckbox"/>
+                    <mx:Button toolTip="Insert Report Link" click="insertReportLink()"
+                               icon="@Embed(source='../../../../assets/link.png')"/>
+                </mx:HBox>
+                <mx:Form>
+                    <mx:FormItem label="Subject Line:">
+                        <mx:TextInput width="400" id="subjectInput" text="{subjectLine}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Email Body:">
+                        <schedule:CursorTextArea id="bodyTextInput" text="{body}" width="400" height="300"
+                                                 borderStyle="inset" borderThickness="1"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>

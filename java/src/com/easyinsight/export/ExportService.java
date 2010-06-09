@@ -202,19 +202,6 @@ public class ExportService {
         return null;
     }
 
-    public void testDeliver(long reportID, String reportName) {
-        try {
-            WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
-            analysisDefinition.updateMetadata();
-            ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, new InsightRequestMetadata());
-            byte[] bytes = toExcel(analysisDefinition, listDataResults);
-            new SendGridEmail().sendAttachmentEmail("jboe99@gmail.com", reportName, "Here's your weekly run of " + reportName + ". If you want to view the" +
-                    "latest data of the report, you can follow this link: <a href=\"http://www.easy-insight.com\">View Report in Easy Insight</a>. Enjoy!", bytes, reportName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-    }
-
     public byte[] exportReportIDToExcel(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeInsight(reportID);
         try {

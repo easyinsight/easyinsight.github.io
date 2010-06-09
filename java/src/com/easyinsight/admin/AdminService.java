@@ -81,7 +81,7 @@ public class AdminService {
     private void cleanOrphanItems(EIConnection conn) throws SQLException {
         PreparedStatement query = conn.prepareStatement("select report_structure_id, analysis.analysis_id, analysis_item.analysis_item_id " +
                     "from report_structure left join analysis on report_structure.analysis_id = analysis.analysis_id left join analysis_item on " +
-                    "report_structure.analysis_item_id = analysis_item.analysis_item_id and analysis.analysis_id is null and " +
+                    "report_structure.analysis_item_id = analysis_item.analysis_item_id WHERE analysis.analysis_id is null and " +
                     "analysis_item.analysis_item_id is null");
         PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM REPORT_STRUCTURE WHERE REPORT_STRUCTURE_ID = ?");
         ResultSet rs = query.executeQuery();

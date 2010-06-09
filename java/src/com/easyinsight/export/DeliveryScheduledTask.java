@@ -38,7 +38,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
     }
 
     protected void execute(Date now, EIConnection conn) throws Exception {
-        PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ?");
+        PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? and " +
+                "delivery_to_user.user_id = user.user_id");
         List<UserInfo> userStubs = new ArrayList<UserInfo>();
         userStmt.setLong(1, activityID);
         ResultSet rs = userStmt.executeQuery();
@@ -49,7 +50,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             userStubs.add(new UserInfo(email, firstName, lastName));
         }
 
-        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         if (deliveryInfoRS.next()) {
@@ -57,6 +58,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             long reportID = deliveryInfoRS.getLong(2);
             String subjectLine = deliveryInfoRS.getString(3);
             String body = deliveryInfoRS.getString(4);
+            boolean htmlEmail = deliveryInfoRS.getBoolean(5);
             long ownerID;
             PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT USER_ID FROM user_to_analysis where analysis_id = ?");
 
@@ -88,7 +90,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 byte[] bytes = new ExportService().toExcel(analysisDefinition, listDataResults);
                 String reportName = analysisDefinition.getName();
                 for (UserInfo userInfo : userStubs) {
-                    new SendGridEmail().sendAttachmentEmail(userInfo.email, subjectLine, body, bytes, reportName);
+                    new SendGridEmail().sendAttachmentEmail(userInfo.email, subjectLine, body, bytes, reportName, htmlEmail);
                 }
             }
         }

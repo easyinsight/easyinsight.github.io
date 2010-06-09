@@ -110,7 +110,8 @@ public class SendGridEmail {
 
     }
 
-    public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String reportName) throws MessagingException, UnsupportedEncodingException {
+    public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String reportName, boolean htmlEmail)
+            throws MessagingException, UnsupportedEncodingException {
 
 
         // Then add to your message:
@@ -139,14 +140,15 @@ public class SendGridEmail {
 
         message.setSubject(subject);
 
-        /*BodyPart part1 = new MimeBodyPart();
-        part1.setText(body);*/
-
-        BodyPart part2 = new MimeBodyPart();
-        part2.setContent(htmlBody, "text/html");
-
-        //multipart.addBodyPart(part1);
-        multipart.addBodyPart(part2);
+        if (htmlEmail) {
+            BodyPart part2 = new MimeBodyPart();
+            part2.setContent(htmlBody, "text/html");
+            multipart.addBodyPart(part2);
+        } else {
+            BodyPart part1 = new MimeBodyPart();
+            part1.setText(htmlBody);
+            multipart.addBodyPart(part1);
+        }
 
         multipart.addBodyPart(bodyPart);
 

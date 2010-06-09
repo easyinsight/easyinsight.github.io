@@ -80,7 +80,7 @@
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:HBox>
             <mx:Button label="Add New Data Source Refresh..." click="newDataSource()"/>
-            <!--<mx:Button label="Add Report Delivery..." click="newReportDelivery()"/>-->
+            <mx:Button label="Add Report Delivery..." click="newReportDelivery()"/>
         </mx:HBox>
         <mx:DataGrid dataProvider="{activities}" width="550" rowHeight="28">
             <mx:columns>

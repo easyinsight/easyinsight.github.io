@@ -231,7 +231,7 @@ public class AnalysisStorage {
         Collection<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
                     "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? and root_definition = ? AND temporary_report = ?");
             queryStmt.setLong(1, userID);
             queryStmt.setBoolean(2, false);
@@ -239,8 +239,7 @@ public class AnalysisStorage {
             
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                // TODO: Add urlKey
-                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), null));
+                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5)));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

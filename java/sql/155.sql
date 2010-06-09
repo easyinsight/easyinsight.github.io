@@ -1,0 +1,1 @@
+alter table report_delivery add html_email tinyint(4) not null default 1;

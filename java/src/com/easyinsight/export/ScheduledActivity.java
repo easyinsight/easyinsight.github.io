@@ -20,7 +20,6 @@ public abstract class ScheduledActivity {
 
     public static final int DATA_SOURCE_REFRESH = 1;
     public static final int REPORT_DELIVERY = 2;
-    public static final int SCORECARD_DELIVERY = 3;
 
     public abstract int retrieveType();
 
