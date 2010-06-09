@@ -95,6 +95,7 @@
             }
             _activity.users = recipients;
             _activity.htmlEmail = htmlEmailCheckbox.selected;
+            _activity.reportName = reportComboBox.selectedItem.urlKey;
             _activity.reportID = reportComboBox.selectedItem.id;
             _activity.body = bodyTextInput.text;
             _activity.subject = subjectInput.text;

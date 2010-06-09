@@ -226,7 +226,7 @@
             this.dataSourceInfo = event.dataSource;
         }
 
-        private function loadController(controller:IReportController):void {
+        private function loadController(controller:IReportController, shareDataSourceSettings:Boolean = false):void {
             var dataViewFactory:DataViewFactory = controller.createDataView();
             dataViewFactory.availableFields = wrappers;
             if (dataView != null) {
@@ -240,6 +240,7 @@
             if (analysisDefinition == null) {
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
                 analysisDefinition.canSaveDirectly = true;
+                analysisDefinition.visibleAtFeedLevel = shareDataSourceSettings;
                 analysisDefinition.dataFeedID = dataService.dataFeedID;
             } else {
                 analysisDefinition = dataViewFactory.fromExistingDefinition(analysisDefinition);
@@ -258,9 +259,9 @@
 
         private var viewWatcher:ChangeWatcher;
 
-        public function newAnalysis():void {
+        public function newAnalysis(shareDataSourceSettings:Boolean):void {
             var controller:IReportController = new ListController();
-            loadController(controller);
+            loadController(controller, shareDataSourceSettings);
         }
 
 
@@ -367,7 +368,7 @@
 
             if (analysisDefinition == null) {
                 saveAsEnabled = false;
-                newAnalysis();
+                newAnalysis(User.getInstance().defaultReportSharing);
                 for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
                     transformContainer.addFilterDefinition(filter);
                 }
@@ -499,6 +500,7 @@
             }
             startLoading(null);
             if (_reportID > 0) {
+                ProgressAlert.alert(this, "Retrieving the report...", null, analysisService.openAnalysisDefinition);
                 analysisService.openAnalysisDefinition.send(_reportID);
             } else {
                 initializeState();
@@ -572,8 +574,10 @@
 
         private function initializeState():void {
             if (analysisDefinition != null) {
+                ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForInsight, detailService.getCredentialRequirements);
                 analysisService.getUserCapabilitiesForInsight.send(dataService.dataFeedID, analysisDefinition.analysisID);
             } else {
+                ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForFeed, detailService.getCredentialRequirements);
                 analysisService.getUserCapabilitiesForFeed.send(dataService.dataFeedID);
             }
             // need to identify credential requirements at this point...

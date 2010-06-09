@@ -46,7 +46,7 @@
             <mx:Button label="Show Error Details" fontSize="12" click="index = 1"/>
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Button label="Report to Easy Insight" fontSize="14" click="reportToEasyInsight()"/>
-                <mx:Button label="Close" fontSize="14"/>
+                <mx:Button label="Close" fontSize="14" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>
         <mx:VBox horizontalAlign="center" creationComplete="PopUpUtil.centerPopUp(this)">

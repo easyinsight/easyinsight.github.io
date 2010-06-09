@@ -3,8 +3,10 @@ package com.easyinsight.framework
 	import com.easyinsight.analysis.AnalysisDefinition;
 	import com.easyinsight.analysis.FeedMetadata;
 	import com.easyinsight.analysis.ListDataResults;
-	
-	import flash.events.Event;
+import com.easyinsight.util.ProgressAlert;
+
+import flash.display.DisplayObject;
+import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
 	import mx.collections.ArrayCollection;
@@ -52,6 +54,7 @@ package com.easyinsight.framework
 			this.onMetadata = functionToCall;
 			this.onMetadataCaller = caller;
 			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
+            ProgressAlert.alert(DisplayObject(caller), "Retrieving data source metadata...", null, dataRemoteSource.getFeedMetadata);
 			var call:Object = dataRemoteSource.getFeedMetadata.send(dataFeedID);
 			call.marker = _dataFeedID;				
 		}

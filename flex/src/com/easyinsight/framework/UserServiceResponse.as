@@ -28,6 +28,7 @@ public class UserServiceResponse
     public var renewalOptionPossible:Boolean;
     public var personaID:int;
     public var dateFormat:int;
+    public var defaultReportSharing:Boolean;
 
     public function UserServiceResponse()
         {
