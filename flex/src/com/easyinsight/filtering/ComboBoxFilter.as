@@ -224,7 +224,7 @@ public class ComboBoxFilter extends HBox implements IFilter
 			var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as 
 				AnalysisDimensionResultMetadata;
 			var strings:ArrayCollection = new ArrayCollection();
-            if (analysisDimensionResultMetadata.values != null) {
+            if (analysisDimensionResultMetadata != null && analysisDimensionResultMetadata.values != null) {
                 for each (var value:Value in analysisDimensionResultMetadata.values) {
                     var string:String = String(value.getValue());
 

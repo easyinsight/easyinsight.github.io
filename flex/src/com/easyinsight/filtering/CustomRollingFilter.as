@@ -45,9 +45,9 @@ public class CustomRollingFilter extends HBox {
     protected override function commitProperties():void {
         super.commitProperties();
         if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.LAST) {
-            beforeItem = "Next";
-        } else if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.NEXT) {
             beforeItem = "Last";
+        } else if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.NEXT) {
+            beforeItem = "Next";
         } else if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.BEFORE) {
             beforeItem = "Before";
         } else if (_filter.customBeforeOrAfter == RollingDateRangeFilterDefinition.AFTER) {
