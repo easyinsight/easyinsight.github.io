@@ -480,7 +480,7 @@ public class AnalysisService {
             ResultSet analysisCountRS = analysisCount.executeQuery();
             analysisCountRS.next();
             hasReports = analysisCountRS.getInt(1) > 0;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
@@ -505,7 +505,7 @@ public class AnalysisService {
             if (rs.next()) {
                 userCapabilities.setAnalysisRole(rs.getInt(1));
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
