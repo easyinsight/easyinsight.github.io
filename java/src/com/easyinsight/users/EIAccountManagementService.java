@@ -127,8 +127,11 @@ public class EIAccountManagementService {
         SendGridEmail sendGridEmail = new SendGridEmail();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL, USER.USER_ID FROM USER WHERE USER.opt_in_email = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL, USER.USER_ID FROM USER, ACCOUNT WHERE USER.opt_in_email = ? AND " +
+                    "USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND ACCOUNT.account_state != ? AND ACCOUNT.account_state != ?");
             queryStmt.setBoolean(1, true);
+            queryStmt.setInt(2, Account.CLOSING);
+            queryStmt.setInt(3, Account.CLOSED);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 String email = rs.getString(1);
