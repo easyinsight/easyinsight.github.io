@@ -55,12 +55,12 @@ public abstract class ScheduleType {
 
     public void timeToGMT(int utcOffset) {
         int hours = utcOffset / 60;
-        this.hour = hour + hours;        
+        this.hour = (hour + hours) % 24;
     }
 
     public void timeFromGMT(int utcOffset) {
         int hours = utcOffset / 60;
-        this.hour = hour - hours;
+        this.hour = Math.abs((hour - hours) % 24);
     }
 
     public long save(EIConnection conn, int utcOffset, long scheduledActivityID) throws SQLException {
