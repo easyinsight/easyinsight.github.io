@@ -36,8 +36,8 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
             insertStmt.setLong(1, userStub.getUserID());
             insertStmt.setLong(2, getScheduledActivityID());
             insertStmt.execute();
-            insertStmt.close();
         }
+        insertStmt.close();
     }
 
     protected void customLoad(EIConnection conn) throws SQLException {
