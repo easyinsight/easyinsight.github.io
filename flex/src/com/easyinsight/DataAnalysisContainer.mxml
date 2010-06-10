@@ -67,6 +67,7 @@
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PNGEnc;
         import com.easyinsight.util.PopUpUtil;
 
@@ -326,90 +327,97 @@
         }
 
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
-            if (User.getInstance() == null) {
-                currentState = "NotLoggedIn";
-                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
-            } else {
-                setState();
-            }
-
-            dataSourceID = feedMetadata.dataFeedID;
-            this.feedMetadata = feedMetadata;
-            dataSourceInfo = feedMetadata.dataSourceInfo;
-            this.originSolution = feedMetadata.originSolution;
-            this.admin = feedMetadata.dataSourceAdmin;
-            dataSourceName = this.feedMetadata.dataSourceName;
-            availableFields = new ArrayCollection();
-            wrappers = new ArrayCollection();
-            for each (var feedNode:FeedNode in feedMetadata.fieldHierarchy) {
-                var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(feedNode);
-                if (!analysisWrapper.hidden) {
-                    availableFields.addItem(analysisWrapper);
-                }
-            }
-            for each (var listItem:AnalysisItem in feedMetadata.fields) {
-                var analysisNode:AnalysisItemNode = new AnalysisItemNode();
-                analysisNode.analysisItem = listItem;
-                var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisNode);
-                wrappers.addItem(wrapper);
-            }
-
-            if (analysisDefinition == null || analysisDefinition.analysisID == 0) {
-                var fragmentObject:Object = new Object();
-                fragmentObject.feedID = String(feedMetadata.urlKey);
-                var fragmentString:String = URLUtil.objectToString(fragmentObject);
-                BrowserManager.getInstance().setFragment(fragmentString);
-            } else {
-                var feedFragmentObject:Object = new Object();
-                feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
-            }
-
-            if (analysisDefinition == null) {
-                saveAsEnabled = false;
-                newAnalysis(User.getInstance().defaultReportSharing);
-                for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
-                    transformContainer.addFilterDefinition(filter);
+            try {
+                if (User.getInstance() == null) {
+                    currentState = "NotLoggedIn";
+                    User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+                } else {
+                    setState();
                 }
 
-
-            } else {
-                //this.title = analysisDefinition.name;
-                saveAsEnabled = !_previewMode;
-                var controllerClass:Class = ControllerLookup.controllerForType(analysisDefinition.type);
-                var controller:IReportController = new controllerClass();
-                loadController(controller);
-
-                analysisState.selectedLabel = analysisDefinition.type;
-
-
-                if (analysisDefinition.filterDefinitions == null) {
-                    analysisDefinition.filterDefinitions = new ArrayCollection();
-                }
-                if (filterOverrides != null) {
-                    analysisDefinition.filterDefinitions = filterOverrides;
-                }
-                createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
-
-                // add the fields which are specifically added in the context of the report, such as
-                // calculations and hierarchies
-                if (analysisDefinition.addedItems != null) {
-                    for each (var item:AnalysisItem in analysisDefinition.addedItems) {
-                        var analysisItemNode:AnalysisItemNode = new AnalysisItemNode();
-                        analysisItemNode.analysisItem = item;
-                        var addedWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItemNode);
-                        availableFields.addItem(addedWrapper);
-                        wrappers.addItem(addedWrapper);
+                dataSourceID = feedMetadata.dataFeedID;
+                this.feedMetadata = feedMetadata;
+                dataSourceInfo = feedMetadata.dataSourceInfo;
+                this.originSolution = feedMetadata.originSolution;
+                this.admin = feedMetadata.dataSourceAdmin;
+                dataSourceName = this.feedMetadata.dataSourceName;
+                availableFields = new ArrayCollection();
+                wrappers = new ArrayCollection();
+                for each (var feedNode:FeedNode in feedMetadata.fieldHierarchy) {
+                    var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(feedNode);
+                    if (!analysisWrapper.hidden) {
+                        availableFields.addItem(analysisWrapper);
                     }
-                    sortFields();
                 }
-            }
-            dataView.availableFields = wrappers;
-            loading = false;
-            stopLoading(null);
-            if (_tutorialOnStart > 0) {
-                tutorial();
+                for each (var listItem:AnalysisItem in feedMetadata.fields) {
+                    var analysisNode:AnalysisItemNode = new AnalysisItemNode();
+                    analysisNode.analysisItem = listItem;
+                    var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisNode);
+                    wrappers.addItem(wrapper);
+                }
+
+                if (analysisDefinition == null || analysisDefinition.analysisID == 0) {
+                    var fragmentObject:Object = new Object();
+                    fragmentObject.feedID = String(feedMetadata.urlKey);
+                    var fragmentString:String = URLUtil.objectToString(fragmentObject);
+                    BrowserManager.getInstance().setFragment(fragmentString);
+                } else {
+                    var feedFragmentObject:Object = new Object();
+                    feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                }
+
+                if (analysisDefinition == null) {
+                    saveAsEnabled = false;
+                    newAnalysis(User.getInstance().defaultReportSharing);
+                    for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
+                        transformContainer.addFilterDefinition(filter);
+                    }
+
+
+                } else {
+                    //this.title = analysisDefinition.name;
+                    saveAsEnabled = !_previewMode;
+                    var controllerClass:Class = ControllerLookup.controllerForType(analysisDefinition.type);
+                    var controller:IReportController = new controllerClass();
+                    loadController(controller);
+
+                    analysisState.selectedLabel = analysisDefinition.type;
+
+
+                    if (analysisDefinition.filterDefinitions == null) {
+                        analysisDefinition.filterDefinitions = new ArrayCollection();
+                    }
+                    if (filterOverrides != null) {
+                        analysisDefinition.filterDefinitions = filterOverrides;
+                    }
+                    createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
+
+                    // add the fields which are specifically added in the context of the report, such as
+                    // calculations and hierarchies
+                    if (analysisDefinition.addedItems != null) {
+                        for each (var item:AnalysisItem in analysisDefinition.addedItems) {
+                            var analysisItemNode:AnalysisItemNode = new AnalysisItemNode();
+                            analysisItemNode.analysisItem = item;
+                            var addedWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItemNode);
+                            availableFields.addItem(addedWrapper);
+                            wrappers.addItem(addedWrapper);
+                        }
+                        sortFields();
+                    }
+                }
+                dataView.availableFields = wrappers;
+                loading = false;
+                stopLoading(null);
+                if (_tutorialOnStart > 0) {
+                    tutorial();
+                }
+            } catch(e:Error) {
+                var errorWindow:ErrorReportView = new ErrorReportView();
+                errorWindow.error = e;
+                PopUpManager.addPopUp(errorWindow, this, true);
+                PopUpUtil.centerPopUp(errorWindow);
             }
         }
 
@@ -468,42 +476,49 @@
 
 
         public function initializeForWorksheet():void {
-            loading = true;
-            uiConfig();
-            rendererFactory = new ClassFactory(AvailableFieldRenderer);
-            commandProcessor = new CommandProcessor();
-            addEventListener(ReportEditorFieldEvent.ITEM_ADD_TO_REPORT, addFieldToReport);
-            addEventListener(ReportEditorFieldEvent.ITEM_COPY, fieldEventHandler.copyField);
-            addEventListener(ReportEditorFieldEvent.ITEM_DELETE, fieldEventHandler.deleteField);
-            addEventListener(ReportEditorFieldEvent.ITEM_EDIT, fieldEventHandler.editField);
-            addEventListener(ReportEditorFieldEvent.ITEM_FILTER, filterField);
-            addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
-            addEventListener(AddedItemUpdateEvent.UPDATE, onFieldUpdate);
-            addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
-            addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
-            addEventListener(CommandEvent.COMMAND, onCommand);
-            stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
-            addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
-            addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
-            dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
-            dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
-            transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             try {
-                var hints:String = User.getSharedObject().data["reportHints"];
-                if (hints == null || hints == "y") {
-                    fieldIndex = 1;
+                loading = true;
+                uiConfig();
+                rendererFactory = new ClassFactory(AvailableFieldRenderer);
+                commandProcessor = new CommandProcessor();
+                addEventListener(ReportEditorFieldEvent.ITEM_ADD_TO_REPORT, addFieldToReport);
+                addEventListener(ReportEditorFieldEvent.ITEM_COPY, fieldEventHandler.copyField);
+                addEventListener(ReportEditorFieldEvent.ITEM_DELETE, fieldEventHandler.deleteField);
+                addEventListener(ReportEditorFieldEvent.ITEM_EDIT, fieldEventHandler.editField);
+                addEventListener(ReportEditorFieldEvent.ITEM_FILTER, filterField);
+                addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
+                addEventListener(AddedItemUpdateEvent.UPDATE, onFieldUpdate);
+                addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
+                addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
+                addEventListener(CommandEvent.COMMAND, onCommand);
+                stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
+                addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
+                addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+                dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
+                dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+                dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
+                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+                try {
+                    var hints:String = User.getSharedObject().data["reportHints"];
+                    if (hints == null || hints == "y") {
+                        fieldIndex = 1;
+                    } else {
+                        fieldIndex = 0;
+                    }
+                } catch(e:Error) {
+                }
+                startLoading(null);
+                if (_reportID > 0) {
+                    ProgressAlert.alert(this, "Retrieving the report...", null, analysisService.openAnalysisDefinition);
+                    analysisService.openAnalysisDefinition.send(_reportID);
                 } else {
-                    fieldIndex = 0;
+                    initializeState();
                 }
             } catch(e:Error) {
-            }
-            startLoading(null);
-            if (_reportID > 0) {
-                ProgressAlert.alert(this, "Retrieving the report...", null, analysisService.openAnalysisDefinition);
-                analysisService.openAnalysisDefinition.send(_reportID);
-            } else {
-                initializeState();
+                var errorWindow:ErrorReportView = new ErrorReportView();
+                errorWindow.error = e;
+                PopUpManager.addPopUp(errorWindow, this, true);
+                PopUpUtil.centerPopUp(errorWindow);
             }
         }
 
@@ -526,32 +541,35 @@
         }
 
         private function uiConfig():void {
-            if (User.getInstance().uiConfiguration != null) {
-                var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
-                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected) {
-                    controlBar.removeChild(adminButton);
+            try {
+                if (User.getInstance().uiConfiguration != null) {
+                    var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected) {
+                        controlBar.removeChild(adminButton);
+                    }
+                    if (uiConfig.getConfiguration(UIConfiguration.SHOW_DATA_TAB).selected) {
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CALCULATION).selected) reportDataTab.removeCalculationButton();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_HIERARCHY).selected) reportDataTab.removeHierarchy();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_REPORT_EDITOR_API).selected) reportDataTab.removeAPI();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_TEXT_REPLACES).selected) reportDataTab.removeScrubs();
+                    } else {
+                        tabNavigator.removeChild(reportDataTab);
+                    }
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_FILTER_BUTTONS).selected) {
+                        transformContainer.removeChild(filterButton);
+                        transformContainer.removeChild(excludeButton);
+                    }
+                    if (uiConfig.getConfiguration(UIConfiguration.SHOW_EXPORT).selected) {
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_DLS).selected) exportTab.removeDLS();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_PNG).selected) exportTab.removePNG();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_NETVIBES).selected) exportTab.removeNetvibes();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_IGOOGLE).selected) exportTab.removeIGoogle();
+                    } else {
+                        tabNavigator.removeChild(exportTab);
+                    }
                 }
-                if (uiConfig.getConfiguration(UIConfiguration.SHOW_DATA_TAB).selected) {
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CALCULATION).selected) reportDataTab.removeCalculationButton();
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_HIERARCHY).selected) reportDataTab.removeHierarchy();
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_REPORT_EDITOR_API).selected) reportDataTab.removeAPI();
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_TEXT_REPLACES).selected) reportDataTab.removeScrubs();
-                } else {
-                    tabNavigator.removeChild(reportDataTab);
-                }
-                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_FILTER_BUTTONS).selected) {
-                    transformContainer.removeChild(filterButton);
-                    transformContainer.removeChild(excludeButton);
-                }
-                if (uiConfig.getConfiguration(UIConfiguration.SHOW_EXPORT).selected) {
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_DLS).selected) exportTab.removeDLS();
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_PNG).selected) exportTab.removePNG();
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_NETVIBES).selected) exportTab.removeNetvibes();
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_IGOOGLE).selected) exportTab.removeIGoogle();
-                } else {
-                    tabNavigator.removeChild(exportTab);
-                }
+            } catch(e:Error) {
             }
         }
 
