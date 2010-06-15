@@ -1,6 +1,9 @@
 package com.easyinsight.datafeeds.composite;
 
+import com.easyinsight.core.Key;
+import com.easyinsight.datafeeds.CompositeFeedConnection;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 
 /**
  * User: James Boe
@@ -50,5 +53,12 @@ public class ChildConnection {
 
     public void setTargetKey(String targetKey) {
         this.targetKey = targetKey;
+    }
+
+    public CompositeFeedConnection createConnection(IServerDataSourceDefinition sourceDef, IServerDataSourceDefinition targetDef) {
+        Key sourceKey = sourceDef.getField(getSourceKey());
+        Key targetKey = targetDef.getField(getTargetKey());
+        return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
+                    sourceKey, targetKey);
     }
 }

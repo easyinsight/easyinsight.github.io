@@ -116,51 +116,7 @@ public class DataSet implements Serializable {
 
         }
         return listTransform;
-    }
-
-    public DataSet merge(DataSet dataSet, Key myJoinDimension, Key fromJoinDimension) {
-        System.out.println("Merging data set on " + myJoinDimension.toKeyString() + " to " + fromJoinDimension.toKeyString());
-        Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
-        Collection<IRow> unjoinedRows = new ArrayList<IRow>();
-        for (IRow row : rows) {
-            Value joinDimensionValue = row.getValue(myJoinDimension);
-            if (joinDimensionValue == null) {
-                LogClass.debug("bad bad bad");
-            } else {
-                List<IRow> rows = index.get(joinDimensionValue);
-                if (rows == null){
-                    rows = new ArrayList<IRow>();
-                    index.put(joinDimensionValue, rows);
-                }
-                rows.add(row);
-            }
-        }
-        Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
-        List<IRow> compositeRows = new LinkedList<IRow>();
-        for (IRow row : dataSet.rows) {
-            Value joinDimensionValue = row.getValue(fromJoinDimension);
-            if (joinDimensionValue == null) {
-                LogClass.debug("bad bad bad");
-            } else {
-                indexCopy.remove(joinDimensionValue);
-                List<IRow> sourceRows = index.get(joinDimensionValue);
-                if (sourceRows == null) {
-                    unjoinedRows.add(row);
-                } else {
-                    for (IRow sourceRow : sourceRows) {
-                        compositeRows.add(sourceRow.merge(row));
-                    }
-                }
-            }
-        }
-        for (List<IRow> rows : indexCopy.values()) {
-            compositeRows.addAll(rows);
-        }
-        compositeRows.addAll(unjoinedRows);
-        DataSet compositeDataSet = new DataSet();
-        compositeDataSet.rows = compositeRows;
-        return compositeDataSet;
-    }
+    }    
 
     public void addRow(IRow row) {
         rows.add(row);

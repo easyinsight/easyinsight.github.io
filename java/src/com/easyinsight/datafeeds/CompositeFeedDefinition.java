@@ -54,6 +54,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
         populateFields(conn);    
     }
 
+    public List<CompositeFeedConnection> obtainChildConnections() throws SQLException {
+        return connections;
+    }
+
     public void customStorage(Connection conn) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM COMPOSITE_FEED WHERE DATA_FEED_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
@@ -109,7 +113,11 @@ public class CompositeFeedDefinition extends FeedDefinition {
     }
 
     public Feed createFeedObject() {
-        return new CompositeFeed(compositeFeedNodes, connections);
+        try {
+            return new CompositeFeed(compositeFeedNodes, obtainChildConnections());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private Key getKey(Connection conn, long targetJoinID) {

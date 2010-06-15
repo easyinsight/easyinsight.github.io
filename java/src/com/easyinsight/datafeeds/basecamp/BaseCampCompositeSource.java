@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
+import com.easyinsight.datafeeds.composite.MultiChildConnection;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.security.SecurityUtil;
@@ -203,6 +204,15 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.BASECAMP,  FeedType.BASECAMP_TIME, BaseCampTodoSource.ITEMID,  BaseCampTimeSource.TODOID),
+                new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID, BaseCampCompanyProjectJoinSource.PROJECT_ID),
+                new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID));
+    }
+
+    protected Collection<ChildConnection> getLiveChildConnections() {
+        return Arrays.asList(new MultiChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_TIME, Arrays.asList(BaseCampTodoSource.ITEMID, BaseCampTodoSource.PROJECTID),
+                Arrays.asList(BaseCampTimeSource.TODOID, BaseCampTimeSource.PROJECTID), Arrays.asList(Arrays.asList(BaseCampTodoSource.TODOLISTNAME,
+                        BaseCampTodoSource.TODOLISTID, BaseCampTodoSource.CONTENT, BaseCampTodoSource.ITEMID), new ArrayList<String>()),
+                Arrays.asList(Arrays.asList(BaseCampTimeSource.TODOID), new ArrayList<String>())),
                 new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID, BaseCampCompanyProjectJoinSource.PROJECT_ID),
                 new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID));
     }

@@ -44,6 +44,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     protected abstract Set<FeedType> getFeedTypes();
 
     protected abstract Collection<ChildConnection> getChildConnections();
+
+    protected Collection<ChildConnection> getLiveChildConnections() {
+        return getChildConnections();
+    }
     
     public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
         return needsCredentials(existingCredentials, SecurityUtil.getUserID());
@@ -109,6 +113,23 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             }
         }
         return dataSources;
+    }
+
+    public List<CompositeFeedConnection> obtainChildConnections() throws SQLException {
+        Map<FeedType, IServerDataSourceDefinition> feedMap = new HashMap<FeedType, IServerDataSourceDefinition>();
+        for (CompositeFeedNode child : getCompositeFeedNodes()) {
+            FeedDefinition childDef = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
+            feedMap.put(childDef.getFeedType(), (IServerDataSourceDefinition) childDef);
+        }
+        List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
+            for (ChildConnection childConnection : getLiveChildConnections()) {
+            IServerDataSourceDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
+            IServerDataSourceDefinition targetDef = feedMap.get(childConnection.getTargetFeedType());
+            
+            CompositeFeedConnection connection = childConnection.createConnection(sourceDef, targetDef);
+            connections.add(connection);
+        }
+        return connections;
     }
 
     public void newDefinition(IServerDataSourceDefinition definition, EIConnection conn, Credentials credentials, String userName, UploadPolicy uploadPolicy) throws SQLException {

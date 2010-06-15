@@ -232,11 +232,19 @@ public class CompositeFeed extends Feed {
                 QueryStateNode exists = neededNodes.get(targetNode.feedID);
                 if (exists != null) {
                     if (queryStateIsSource) {
-                        queryStateNode.addKey(localEdge.connection.getSourceJoin());
-                        targetNode.addKey(localEdge.connection.getTargetJoin());
+                        for (Key join : localEdge.connection.getSourceJoins()) {
+                            queryStateNode.addKey(join);
+                        }
+                        for (Key join : localEdge.connection.getTargetJoins()) {
+                            targetNode.addKey(join);
+                        }
                     } else {
-                        queryStateNode.addKey(localEdge.connection.getTargetJoin());
-                        targetNode.addKey(localEdge.connection.getSourceJoin());
+                        for (Key join : localEdge.connection.getTargetJoins()) {
+                            queryStateNode.addKey(join);
+                        }
+                        for (Key join : localEdge.connection.getSourceJoins()) {
+                            targetNode.addKey(join);
+                        }
                     }
                 }
             }
@@ -262,21 +270,10 @@ public class CompositeFeed extends Feed {
         for (Edge edge : edgeSet) {
             QueryStateNode sourceNode = neededNodes.get(edge.connection.getSourceFeedID());
             QueryStateNode targetNode = neededNodes.get(edge.connection.getTargetFeedID());
-            Key sourceJoin = null;
-            for (AnalysisItem item :sourceNode.neededItems) {
-                if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(edge.connection.getSourceJoin().toKeyString())) {
-                    sourceJoin = item.createAggregateKey();
-                }
-            }
-            Key targetJoin = null;
-            for (AnalysisItem item : targetNode.neededItems) {
-                if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(edge.connection.getTargetJoin().toKeyString())) {
-                    targetJoin = item.createAggregateKey();
-                }
-            }
             //Key sourceJoin = new DerivedKey(edge.connection.getSourceJoin(), edge.connection.getSourceFeedID());
             //Key targetJoin = new DerivedKey(edge.connection.getTargetJoin(), edge.connection.getTargetFeedID());
-            dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
+            dataSet = edge.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems);
+            //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
             sourceNode.myDataSet = dataSet;
             targetNode.myDataSet = dataSet;
         }
