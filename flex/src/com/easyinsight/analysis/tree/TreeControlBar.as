@@ -11,13 +11,17 @@ import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
+import com.easyinsight.analysis.list.TreeDefinitionEditWindow;
+import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
+
 import mx.controls.Button;
 import mx.controls.Label;
+import mx.managers.PopUpManager;
+
 public class TreeControlBar extends ReportControlBar implements IReportControlBar {
     private var hierarchyGrouping:ListDropAreaGrouping;
     private var itemGrouping:ListDropAreaGrouping;
@@ -39,7 +43,15 @@ public class TreeControlBar extends ReportControlBar implements IReportControlBa
     public var tableEditIcon:Class;
 
     private function editLimits(event:MouseEvent):void {
+        var window:TreeDefinitionEditWindow = new TreeDefinitionEditWindow();
+        window.treeDefinition = treeDefinition;
+        window.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, onUpdate);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+    }
 
+    private function onUpdate(event:AnalysisItemUpdateEvent):void {
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     override protected function createChildren():void {

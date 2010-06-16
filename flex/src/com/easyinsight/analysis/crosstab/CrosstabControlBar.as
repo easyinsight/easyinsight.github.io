@@ -11,6 +11,8 @@ import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
+import com.easyinsight.analysis.list.CrosstabDefinitionEditWindow;
+import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
 
@@ -22,6 +24,8 @@ import mx.containers.GridRow;
 import mx.controls.Button;
 import mx.controls.Label;
 import mx.events.FlexEvent;
+import mx.managers.PopUpManager;
+
 public class CrosstabControlBar extends ReportControlBar implements IReportControlBar {
     private var rowGrouping:ListDropAreaGrouping;
     private var columnGrouping:ListDropAreaGrouping;
@@ -48,7 +52,15 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
     public var tableEditIcon:Class;
 
     private function editLimits(event:MouseEvent):void {
-        
+        var window:CrosstabDefinitionEditWindow = new CrosstabDefinitionEditWindow();
+        window.crosstabDefinition = xAxisDefinition;
+        window.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, onUpdate);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+    }
+
+    private function onUpdate(event:AnalysisItemUpdateEvent):void {
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     override protected function createChildren():void {

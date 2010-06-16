@@ -142,7 +142,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
                         calendar.set(Calendar.MONTH, 0);
-                        calendar.set(Calendar.DAY_OF_YEAR, 1);
+                        calendar.set(Calendar.DAY_OF_YEAR, 2);
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);

@@ -9,7 +9,8 @@ import mx.collections.ArrayCollection;
 		public var columns:ArrayCollection;
 		public var measures:ArrayCollection;
 		public var rows:ArrayCollection;
-		public var crosstabDefinitionID:Number;		
+		public var crosstabDefinitionID:Number;
+        public var summaryTotal:Boolean;
 		
 		public function CrosstabDefinition()
 		{			

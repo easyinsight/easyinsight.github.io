@@ -18,6 +18,8 @@
         public function renderReport(data:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (data.length > 0) {
                 var crosstabDefinition:CrosstabDefinition = analysisDefinition as CrosstabDefinition;
+                dataSet.setStyle("fontFamily", crosstabDefinition.fontName);
+                dataSet.setStyle("fontSize", crosstabDefinition.fontSize);
                 dimension1 = crosstabDefinition.rows.getItemAt(0) as AnalysisItem;
                 var cube:Cube = new Cube();
                 cube.populate(crosstabDefinition, data, dataSet);

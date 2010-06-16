@@ -65,6 +65,8 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (dataSet.length > 0) {
                 var treeDefinition:TreeDefinition = analysisDefinition as TreeDefinition;
+                coreGrid.setStyle("fontFamily", treeDefinition.fontName);
+                coreGrid.setStyle("fontSize", treeDefinition.fontSize);
                 this.treeDef = treeDefinition;
                 var explicitWidth:Boolean = true;
                 for each (var treeItem:AnalysisItem in treeDef.getFields()) {
