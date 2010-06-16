@@ -137,6 +137,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         Value resultValue;
         if (tempDate != null) {
             Calendar calendar = Calendar.getInstance();
+            calendar.setTime(tempDate);
             if (insightRequestMetadata.getUtcOffset() != 0) {
                 int hours = insightRequestMetadata.getUtcOffset() / 60;
                 // int minutes = Math.abs(insightRequestMetadata.getUtcOffset() % 60);
@@ -150,7 +151,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 calendar.setTimeZone(timeZone);
             }
 
-            calendar.setTime(tempDate);
+
             if (dateLevel <= WEEK_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
@@ -193,7 +194,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
-                calendar.setTimeZone(TimeZone.getDefault());
+                //calendar.setTimeZone(TimeZone.getDefault());
                 finalDate = calendar.getTime();
                 resultValue = new DateValue(finalDate);
             } else {
@@ -306,6 +307,19 @@ public class AnalysisDateDimension extends AnalysisDimension {
         int result = super.hashCode();
         result = 31 * result + dateLevel;
         return result;
+    }
+
+    public static void main(String[] args) throws ParseException {
+        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2010-04-09");
+        Calendar calendar = Calendar.getInstance();
+        TimeZone timeZone = TimeZone.getTimeZone("GMT-8");
+        calendar.setTime(date);
+        calendar.setTimeZone(timeZone);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        System.out.println(calendar.getTime());
     }
 
     /*@Override
