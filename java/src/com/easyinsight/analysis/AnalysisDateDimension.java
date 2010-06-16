@@ -193,6 +193,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
+                calendar.setTimeZone(TimeZone.getDefault());
                 finalDate = calendar.getTime();
                 resultValue = new DateValue(finalDate);
             } else {
