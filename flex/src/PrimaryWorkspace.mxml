@@ -37,8 +37,7 @@
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.tour.TutorialFramework;
-        import com.easyinsight.util.DiagnosticsWindow;
+        import com.easyinsight.tour.TutorialFramework;        
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
 
@@ -153,12 +152,12 @@
         }
 
         private function launchBugReportWindow(event:ReportBugEvent):void {
-            /*var window:BugReportWindow = new BugReportWindow();
+            var window:BugReportWindow = new BugReportWindow();
             PopUpManager.addPopUp(window, this, false);
-            PopUpUtil.centerPopUp(window);*/
-            var window:DiagnosticsWindow = new DiagnosticsWindow();
+            PopUpUtil.centerPopUp(window);
+            /*var window:DiagnosticsWindow = new DiagnosticsWindow();
              PopUpManager.addPopUp(window, this, true);
-             PopUpUtil.centerPopUp(window);
+             PopUpUtil.centerPopUp(window);*/
         }
 
 
