@@ -138,7 +138,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         if (tempDate != null) {
             Calendar calendar = Calendar.getInstance();
             System.out.println("starting with " + tempDate);
-            if (insightRequestMetadata.getUtcOffset() != 0) {
+            /*if (insightRequestMetadata.getUtcOffset() != 0) {
                 int hours = (insightRequestMetadata.getUtcOffset() * 60 * 1000) / 60;
                 // int minutes = Math.abs(insightRequestMetadata.getUtcOffset() % 60);
                 String timeZoneString;
@@ -150,10 +150,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 TimeZone timeZone = TimeZone.getTimeZone(timeZoneString);
                 calendar.setTimeZone(timeZone);
 
-            }
+            }*/
 
             calendar.setTime(tempDate);
-            calendar.add(Calendar.MILLISECOND, -(insightRequestMetadata.getUtcOffset() * 60 * 1000));
+
             System.out.println("cal date = " + calendar.getTime());
             if (dateLevel <= WEEK_LEVEL) {
                 switch (dateLevel) {
@@ -197,7 +197,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
-                finalDate = new Date(calendar.getTimeInMillis() + (insightRequestMetadata.getUtcOffset() * 60 * 1000));
+                //finalDate = new Date(calendar.getTimeInMillis() + (insightRequestMetadata.getUtcOffset() * 60 * 1000));
+                calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
+                finalDate = calendar.getTime();
                 System.out.println("and finishing with " + finalDate);
                 resultValue = new DateValue(finalDate);
             } else {
