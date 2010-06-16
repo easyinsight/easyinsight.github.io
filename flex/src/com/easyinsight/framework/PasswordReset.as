@@ -1,6 +1,7 @@
 package com.easyinsight.framework {
 import com.easyinsight.listing.PasswordResetWindow;
 import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.util.ProgressAlert;
 
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
@@ -21,6 +22,7 @@ public class PasswordReset {
     }
 
     public function reset():void {
+        ProgressAlert.alert(workspace, "Verifying password reset...", null, userService.verifyPasswordReset);
         userService.verifyPasswordReset.send(passwordResetValue);
     }
 

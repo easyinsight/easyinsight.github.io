@@ -98,11 +98,11 @@ public class FragmentParser {
                 var properties:Object = new Object();
                 properties["token"] = token;
                 properties["secret"] = secret;
-            }),
+            })/*,
             new FragmentTester("resetPassword", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 new PasswordReset(key, workspace).reset();
                 workspace.navigation(new NavigationEvent("Home"));
-            })
+            })*/
         ];
     }
 
