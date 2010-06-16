@@ -2,8 +2,6 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisDateDimension;
 
 import java.util.Date;
 
@@ -52,7 +50,12 @@ public class AnalysisDateDimensionResultMetadata extends AnalysisItemResultMetad
                     latestDate = date;
                 }
             }
-
+        }
+        if (earliestDate != null) {
+            earliestDate = new Date(earliestDate.getTime() + insightRequestMetadata.getUtcOffset() * 60 * 1000);
+        }
+        if (latestDate != null) {
+            latestDate = new Date(latestDate.getTime() + insightRequestMetadata.getUtcOffset() * 60 * 1000);
         }
     }
 }

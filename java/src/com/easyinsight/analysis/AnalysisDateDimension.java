@@ -137,25 +137,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         Value resultValue;
         if (tempDate != null) {
             Calendar calendar = Calendar.getInstance();
-            System.out.println("utc offset = " + insightRequestMetadata.getUtcOffset());
-            System.out.println("starting with " + tempDate);
-            /*if (insightRequestMetadata.getUtcOffset() != 0) {
-                int hours = (insightRequestMetadata.getUtcOffset() * 60 * 1000) / 60;
-                // int minutes = Math.abs(insightRequestMetadata.getUtcOffset() % 60);
-                String timeZoneString;
-                if (hours > 0) {
-                    timeZoneString = "GMT-" + String.valueOf(hours);
-                } else {
-                    timeZoneString = "GMT+" + String.valueOf(hours);
-                }
-                TimeZone timeZone = TimeZone.getTimeZone(timeZoneString);
-                calendar.setTimeZone(timeZone);
-
-            }*/
-
             calendar.setTime(tempDate);
-
-            System.out.println("cal date = " + calendar.getTime());
             if (dateLevel <= WEEK_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
@@ -198,11 +180,8 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
-                //finalDate = new Date(calendar.getTimeInMillis() + (insightRequestMetadata.getUtcOffset() * 60 * 1000));
-                System.out.println("post-set date = " + calendar.getTime());
                 calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
                 finalDate = calendar.getTime();
-                System.out.println("and finishing with " + finalDate);
                 resultValue = new DateValue(finalDate);
             } else {
                 switch (dateLevel) {
