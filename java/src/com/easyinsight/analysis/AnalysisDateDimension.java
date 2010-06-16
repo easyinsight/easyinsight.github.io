@@ -137,6 +137,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         Value resultValue;
         if (tempDate != null) {
             Calendar calendar = Calendar.getInstance();
+            System.out.println("utc offset = " + insightRequestMetadata.getUtcOffset());
             System.out.println("starting with " + tempDate);
             /*if (insightRequestMetadata.getUtcOffset() != 0) {
                 int hours = (insightRequestMetadata.getUtcOffset() * 60 * 1000) / 60;
@@ -166,14 +167,14 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         calendar.set(Calendar.MILLISECOND, 0);
                         break;
                     case MONTH_LEVEL:
-                        calendar.set(Calendar.DAY_OF_MONTH, 0);
+                        calendar.set(Calendar.DAY_OF_MONTH, 1);
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
                         calendar.set(Calendar.MILLISECOND, 0);
                         break;
                     case WEEK_LEVEL:
-                        calendar.set(Calendar.DAY_OF_WEEK, 0);
+                        calendar.set(Calendar.DAY_OF_WEEK, 1);
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
@@ -198,6 +199,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         throw new RuntimeException();
                 }
                 //finalDate = new Date(calendar.getTimeInMillis() + (insightRequestMetadata.getUtcOffset() * 60 * 1000));
+                System.out.println("post-set date = " + calendar.getTime());
                 calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
                 finalDate = calendar.getTime();
                 System.out.println("and finishing with " + finalDate);
