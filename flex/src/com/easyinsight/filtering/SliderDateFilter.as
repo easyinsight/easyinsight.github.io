@@ -155,10 +155,12 @@ import mx.rpc.events.ResultEvent;
 			hslider.values = [0, 100];
 			hslider.addEventListener(SliderEvent.THUMB_RELEASE, thumbRelease);
 			lowField = new DateField();
+            lowField.formatString = User.getInstance().getDateFormat();
 			lowField.selectedDate = dateMetadata.earliestDate;
 			lowField.addEventListener(CalendarLayoutChangeEvent.CHANGE, lowDateChange);
 			highField = new DateField();
 			highField.selectedDate = dateMetadata.latestDate;
+            highField.formatString = User.getInstance().getDateFormat();
 			highField.addEventListener(CalendarLayoutChangeEvent.CHANGE, highDateChange);
             //if (!_filterEditable) {
             var checkbox:CheckBox = new CheckBox();
