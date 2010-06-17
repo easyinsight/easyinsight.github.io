@@ -161,6 +161,6 @@
             </mx:HBox>
         </mx:VBox>
     </mx:VBox>
-    <mx:StringValidator id="linkNameValidator" property="text" source="{labelInput}" minLength="3" maxLength="50"/>
-    <mx:StringValidator id="urlValidator" property="text" source="{urlInput}" minLength="3" maxLength="50"/>
+    <mx:StringValidator id="linkNameValidator" property="text" source="{labelInput}" minLength="3" maxLength="200"/>
+    <mx:StringValidator id="urlValidator" property="text" source="{urlInput}" minLength="3" maxLength="200"/>
 </util:EITitleWindow>

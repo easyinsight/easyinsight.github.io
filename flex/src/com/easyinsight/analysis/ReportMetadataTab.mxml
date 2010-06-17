@@ -159,5 +159,5 @@
     </mx:Form>
     <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay"/>
     <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"
-                        maxLength="80"/>
+                        maxLength="100"/>
 </mx:HBox>

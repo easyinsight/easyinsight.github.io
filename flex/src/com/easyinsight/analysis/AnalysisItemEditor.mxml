@@ -274,9 +274,9 @@
                     var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
                     analysisItem.concrete = startingAnalysisItem.concrete;
                     analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
-                    if (analysisItem.getType() == existingType) {
+                    /*if (analysisItem.getType() == existingType) {
                         analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
-                    }
+                    }*/
                     analysisItem.displayName = fieldNameInput.text;
                     analysisItem.key = key;
                     analysisItem.hidden = hiddenCheckbox.selected;

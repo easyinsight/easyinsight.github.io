@@ -471,7 +471,7 @@
         <mx:method name="addKPIToScorecard" result="addedKPI()"/>
         <mx:method name="updateKPI" result="updatedKPI()"/>
     </mx:RemoteObject>
-    <mx:StringValidator id="nameValidator" source="{kpiNameInput}" property="text" minLength="3" maxLength="50"/>
+    <mx:StringValidator id="nameValidator" source="{kpiNameInput}" property="text" minLength="3" maxLength="100"/>
     <mx:HBox paddingTop="10" width="100%" paddingLeft="10" paddingRight="10">
         <mx:Form width="50%" paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0">
             <mx:FormItem label="KPI Name:">
