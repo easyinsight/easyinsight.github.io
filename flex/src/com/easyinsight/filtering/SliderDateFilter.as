@@ -154,13 +154,31 @@ import mx.rpc.events.ResultEvent;
 			hslider.maximum = 100;
 			hslider.values = [0, 100];
 			hslider.addEventListener(SliderEvent.THUMB_RELEASE, thumbRelease);
+            var formatString:String;
+            switch (User.getInstance().dateFormat) {
+                case 0:
+                    formatString = "MM/DD/YYYY";
+                    break;
+                case 1:
+                    formatString = "YYYY-MM-DD";
+                    break;
+                case 2:
+                    formatString = "DD-MM-YYYY";
+                    break;
+                case 3:
+                    formatString = "DD/MM/YYYY";
+                    break;
+                case 4:
+                    formatString = "DD.MM.YYYY";
+                    break;
+            }
 			lowField = new DateField();
-            lowField.formatString = User.getInstance().getDateFormat();
+            lowField.formatString = formatString;
 			lowField.selectedDate = dateMetadata.earliestDate;
 			lowField.addEventListener(CalendarLayoutChangeEvent.CHANGE, lowDateChange);
 			highField = new DateField();
 			highField.selectedDate = dateMetadata.latestDate;
-            highField.formatString = User.getInstance().getDateFormat();
+            highField.formatString = formatString;
 			highField.addEventListener(CalendarLayoutChangeEvent.CHANGE, highDateChange);
             //if (!_filterEditable) {
             var checkbox:CheckBox = new CheckBox();

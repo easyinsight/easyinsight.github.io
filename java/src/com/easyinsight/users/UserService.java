@@ -119,7 +119,7 @@ public class UserService implements IUserService {
                     new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password);
                 }
             }).start();
-            if (user != null && account.getAccountType() != Account.PERSONAL) {
+            if (account.getAccountType() != Account.PERSONAL) {
                 if (account.getGroupID() != null) {
                     new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER, conn);
                 }
@@ -189,20 +189,11 @@ public class UserService implements IUserService {
             stmt.setString(1,passwordResetValidation);
             stmt.setDate(2, new java.sql.Date(c.getTimeInMillis()));
             ResultSet rs = stmt.executeQuery();
-            if(rs.next() && rs.getString(2).equals(passwordResetValidation)) {
-
-                List l = s.createQuery("from User where userName = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
-                if(l.size() == 1) {
-                    User u = (User) l.get(0);
-                    u.setPassword(PasswordService.getInstance().encrypt(password));
-                    s.update(u);
-                    success = true;
-                    PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
-                    deleteStatement.setString(1, passwordResetValidation);
-                    deleteStatement.executeUpdate();
-                } else if (l.size() == 0) {
-                    l = s.createQuery("from User where email = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
-                    if (l.size() == 1) {
+            while (rs.next()) {
+                String verifiedResetString = rs.getString(2);
+                if (passwordResetValidation.equals(verifiedResetString)) {
+                    List l = s.createQuery("from User where userName = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
+                    if(l.size() == 1) {
                         User u = (User) l.get(0);
                         u.setPassword(PasswordService.getInstance().encrypt(password));
                         s.update(u);
@@ -210,6 +201,19 @@ public class UserService implements IUserService {
                         PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
                         deleteStatement.setString(1, passwordResetValidation);
                         deleteStatement.executeUpdate();
+                        break;
+                    } else if (l.size() == 0) {
+                        l = s.createQuery("from User where email = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
+                        if (l.size() == 1) {
+                            User u = (User) l.get(0);
+                            u.setPassword(PasswordService.getInstance().encrypt(password));
+                            s.update(u);
+                            success = true;
+                            PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
+                            deleteStatement.setString(1, passwordResetValidation);
+                            deleteStatement.executeUpdate();
+                            break;
+                        }
                     }
                 }
             }
@@ -218,7 +222,7 @@ public class UserService implements IUserService {
             s.flush();
             conn.commit();
             s.close();
-        } catch(SQLException e) {
+        } catch(Exception e) {
             conn.rollback();
             LogClass.error(e);
             throw new RuntimeException(e);

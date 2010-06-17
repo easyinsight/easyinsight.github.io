@@ -6,7 +6,6 @@ import com.easyinsight.logging.LogClass;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.util.ByteArrayDataSource;
@@ -195,6 +194,43 @@ public class SendGridEmail {
         message.setContent(multipart);
 
         message.setFrom(new InternetAddress("sales@easy-insight.com", "Easy Insight"));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
+
+        transport.connect();
+        transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+        transport.close();
+    }
+
+    public void sendEmail(String emailAddress, String subject, String body, String from) throws MessagingException, UnsupportedEncodingException {
+        Properties props = new Properties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.host", SMTP_HOST_NAME);
+        props.put("mail.smtp.auth", "true");
+        props.put("vendor", "SendGrid");
+
+        Authenticator auth = new SMTPAuthenticator();
+        Session mailSession = Session.getInstance(props, auth);
+        // uncomment for debugging infos to stdout
+        // mailSession.setDebug(true);
+        Transport transport = mailSession.getTransport();
+
+        MimeMessage message = new MimeMessage(mailSession);
+
+        Multipart multipart = new MimeMultipart();
+
+        message.setSubject(subject);
+
+        BodyPart part1 = new MimeBodyPart();
+        part1.setText(body);
+
+        /*BodyPart part2 = new MimeBodyPart();
+        part2.setContent(htmlBody, "text/html");*/
+
+        multipart.addBodyPart(part1);
+
+        message.setContent(multipart);
+
+        message.setFrom(new InternetAddress(from, "Easy Insight"));
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
 
         transport.connect();

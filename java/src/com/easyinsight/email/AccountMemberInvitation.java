@@ -92,7 +92,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(resetPasswordText, password);
         String subject = "Easy Insight Password Reset";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+            new SendGridEmail().sendEmail(to, subject, body, "donotreply@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
