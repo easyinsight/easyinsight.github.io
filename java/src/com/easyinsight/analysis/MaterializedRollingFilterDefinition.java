@@ -92,14 +92,14 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 cal.set(Calendar.MINUTE, 0);
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
-                cal.set(Calendar.DAY_OF_WEEK, 0);
+                cal.set(Calendar.DAY_OF_WEEK, 1);
                 break;
             case MONTH_TO_NOW:
                 cal.set(Calendar.HOUR_OF_DAY, 0);
                 cal.set(Calendar.MINUTE, 0);
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
-                cal.set(Calendar.DAY_OF_MONTH, 0);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
                 break;
             case QUARTER_TO_NOW:
                 cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -133,7 +133,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 break;
             case LAST_FULL_DAY:
                 cal.add(Calendar.DAY_OF_YEAR, -1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.HOUR_OF_DAY, 0);   
                 cal.set(Calendar.MINUTE, 0);
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
@@ -156,7 +156,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 break;
             case LAST_YEAR:
                 cal.add(Calendar.YEAR, -1);
-                cal.set(Calendar.MONTH, 0);
+                cal.set(Calendar.MONTH, Calendar.JANUARY);
                 cal.set(Calendar.DAY_OF_MONTH, 1);
                 cal.set(Calendar.HOUR_OF_DAY, 0);
                 cal.set(Calendar.MINUTE, 0);
