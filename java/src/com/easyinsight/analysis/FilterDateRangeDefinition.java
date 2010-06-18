@@ -150,8 +150,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         System.out.println(insightRequestMetadata.getUtcOffset());
-        Date workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
-        Date workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        Date workingEndDate = new Date(endDate.getTime());
+        Date workingStartDate = new Date(startDate.getTime());
         System.out.println(workingStartDate);
         System.out.println(workingEndDate);
         return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, sliding);
@@ -182,8 +182,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         Date workingEndDate;
         Date workingStartDate;
-        workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
-        workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        workingEndDate = new Date(endDate.getTime());
+        workingStartDate = new Date(startDate.getTime());
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate.getTime()));
         return start;
