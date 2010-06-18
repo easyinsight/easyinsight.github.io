@@ -150,6 +150,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         System.out.println(insightRequestMetadata.getUtcOffset());
+        // but now it's in the app transformed into the user time!
         Date workingEndDate = new Date(endDate.getTime());
         Date workingStartDate = new Date(startDate.getTime());
         System.out.println(workingStartDate);
@@ -182,8 +183,9 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         Date workingEndDate;
         Date workingStartDate;
-        workingEndDate = new Date(endDate.getTime());
-        workingStartDate = new Date(startDate.getTime());
+        // scale the query time back to UTC because it's in the database as UTC
+        workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate.getTime()));
         return start;
