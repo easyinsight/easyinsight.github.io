@@ -67,6 +67,7 @@ public class ExcelCreator {
             report = definition;
             var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
             insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
+            insightMetadata.utcOffset = new Date().getTimezoneOffset();
             ProgressAlert.alert(parent, "Generating the Excel spreadsheet...", null, upload.exportToExcel);
 			upload.exportToExcel.send(definition, insightMetadata);
 		}
@@ -74,6 +75,7 @@ public class ExcelCreator {
         public function exportReportIDToExcel(reportID:int, filters:ArrayCollection, hierarchies:ArrayCollection, parent:UIComponent):void {
             var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
             insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
+            insightMetadata.utcOffset = new Date().getTimezoneOffset();
             ProgressAlert.alert(parent, "Generating the Excel spreadsheet...", null, upload.exportReportIDToExcel);
             upload.exportReportIDToExcel.send(reportID, filters, hierarchies, insightMetadata);    
         }

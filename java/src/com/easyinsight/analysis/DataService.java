@@ -14,9 +14,6 @@ import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
 
 import java.util.*;
-import java.io.Serializable;
-
-import org.apache.jcs.JCS;
 
 
 /**
@@ -27,18 +24,11 @@ import org.apache.jcs.JCS;
 
 public class DataService {
 
-    private JCS reportCache = getCache("embeddedReports");
+
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
-    private JCS getCache(String cacheName) {
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
+
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials, int utfOffset) {
         SecurityUtil.authorizeFeedAccess(feedID);
@@ -143,42 +133,6 @@ public class DataService {
         return invalidIDs;
     }
 
-    private static class EmbeddedCacheKey implements Serializable {
-
-        private Collection<FilterDefinition> filters;
-        private List<FilterDefinition> drillThroughFilters;
-        private long reportID;
-
-        private EmbeddedCacheKey(Collection<FilterDefinition> filters, long reportID, List<FilterDefinition> drillThroughFilters) {
-            this.filters = filters;
-            this.reportID = reportID;
-            this.drillThroughFilters = drillThroughFilters;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            EmbeddedCacheKey that = (EmbeddedCacheKey) o;
-
-            if (reportID != that.reportID) return false;
-            if (drillThroughFilters != null ? !drillThroughFilters.equals(that.drillThroughFilters) : that.drillThroughFilters != null)
-                return false;
-            if (filters != null ? !filters.equals(that.filters) : that.filters != null) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = filters != null ? filters.hashCode() : 0;
-            result = 31 * result + (drillThroughFilters != null ? drillThroughFilters.hashCode() : 0);
-            result = 31 * result + (int) (reportID ^ (reportID >>> 32));
-            return result;
-        }
-    }
-
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
         SecurityUtil.authorizeInsight(reportID);
@@ -200,9 +154,9 @@ public class DataService {
             }
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID, drillThroughFilters);
             Map<EmbeddedCacheKey, EmbeddedResults> resultsCache = null;
-            if (!insightRequestMetadata.isNoCache() && reportCache != null) {
+            if (!insightRequestMetadata.isNoCache()) {
                 //noinspection unchecked
-                resultsCache = (Map<EmbeddedCacheKey, EmbeddedResults>) reportCache.get(dataSourceID);
+                resultsCache = ReportCache.instance().getReports(dataSourceID);
                 if (resultsCache != null) {
                     EmbeddedResults results = resultsCache.get(key);
                     if (results != null) {
@@ -304,7 +258,7 @@ public class DataService {
             results.setAttribution(feed.getAttribution());
             if (resultsCache != null) {
                 resultsCache.put(key, results);
-                reportCache.put(dataSourceID, resultsCache);
+                ReportCache.instance().storeResults(dataSourceID, resultsCache);
             }
             //}
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);

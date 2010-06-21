@@ -1,5 +1,6 @@
 package com.easyinsight.servlet;
 
+import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.migration.Migrations;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
@@ -45,6 +46,7 @@ public class DMSServlet extends HttpServlet {
                 migrationManager.setDataSourceTypeRegistry(dataSourceTypeRegistry);
                 migrationManager.migrate();
                 FeedRegistry.initialize();
+                ReportCache.initialize();
                 new APIManager().start();
                 scheduler = Scheduler.instance();
                 EventDispatcher.instance().start();

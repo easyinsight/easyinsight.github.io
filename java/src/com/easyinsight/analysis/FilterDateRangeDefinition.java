@@ -148,13 +148,10 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         this.endDate = endDate;
     }
 
-    public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        System.out.println(insightRequestMetadata.getUtcOffset());
+    public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {        
         // but now it's in the app transformed into the user time!
         Date workingEndDate = new Date(endDate.getTime());
         Date workingStartDate = new Date(startDate.getTime());
-        System.out.println(workingStartDate);
-        System.out.println(workingEndDate);
         return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, sliding);
     }
 

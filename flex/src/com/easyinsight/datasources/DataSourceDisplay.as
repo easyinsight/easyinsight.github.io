@@ -23,6 +23,7 @@ import mx.controls.ProgressBar;
 import mx.controls.ProgressBarMode;
 import mx.controls.TextArea;
 import mx.formatters.DateFormatter;
+import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -161,13 +162,18 @@ public class DataSourceDisplay extends VBox {
         button.label = "Refresh the data source";
         button.addEventListener(MouseEvent.CLICK, onClick);
         outOfDateBox.addChild(button);
-        var asyncBox:Box = new Box();
+        var asyncBox:VBox = new VBox();
         progressBar = new ProgressBar();
         progressBar.indeterminate = false;
         progressBar.mode = ProgressBarMode.MANUAL;
+        progressBar.label = "";
+        progressBar.labelPlacement = "right";
+        var progressLabel:Label = new Label();
+        progressLabel.maxWidth = 200;
         //progressBar.indeterminate = true;
-        BindingUtils.bindProperty(progressBar, "label", this, "asyncLabel");
+        BindingUtils.bindProperty(progressLabel, "text", this, "asyncLabel");
         asyncBox.addChild(progressBar);
+        asyncBox.addChild(progressLabel);
         var doneBox:HBox = new HBox();
         var doneLabel:Label = new Label();
         doneLabel.text = "New data is available:";
@@ -234,7 +240,12 @@ public class DataSourceDisplay extends VBox {
         feedService = new RemoteObject();
         feedService.destination = "feeds";
         feedService.launchAsyncRefresh.addEventListener(ResultEvent.RESULT, onResult);
+        feedService.launchAsyncRefresh.addEventListener(FaultEvent.FAULT, onFault);
         feedService.launchAsyncRefresh.send(_dataSource.dataSourceID, CredentialsCache.getCache().createCredentials());
+    }
+
+    private function onFault(event:FaultEvent):void {
+        Alert.show(event.fault.faultString);
     }
 
     private function onResult(event:ResultEvent):void {

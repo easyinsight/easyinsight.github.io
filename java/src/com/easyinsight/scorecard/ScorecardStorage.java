@@ -1,5 +1,6 @@
 package com.easyinsight.scorecard;
 
+import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -248,7 +249,7 @@ public class ScorecardStorage {
                     info.setDataSourceID(dataSourceID);
                     info.setType(DataSourceRefreshEvent.DONE);
                     info.setUserId(userID);
-                    System.out.println("*** Sending done notification");
+                    ReportCache.instance().flushResults(dataSourceID);
                     MessageUtils.sendMessage("generalNotifications", info);
                 } catch (Exception e) {
                     LogClass.error(e);

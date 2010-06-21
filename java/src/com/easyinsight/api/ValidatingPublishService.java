@@ -10,6 +10,7 @@ import com.easyinsight.datafeeds.FeedStorage;
 
 import javax.xml.ws.WebServiceContext;
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.Connection;
@@ -69,7 +70,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -81,7 +82,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             FeedDefinition feedDefinition = getFeedDefinition(getUserID(), dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
-            DataSet dataSet = dataTransformation.toDataSet(rows);
+            DataSet dataSet = dataTransformation.toDataSet(Arrays.asList(rows));
             dataStorage.insertData(dataSet);
             dataStorage.commit();
             conn.commit();
@@ -104,7 +105,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -116,7 +117,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             FeedDefinition feedDefinition = getFeedDefinition(getUserID(), dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
-            DataSet dataSet = dataTransformation.toDataSet(rows);
+            DataSet dataSet = dataTransformation.toDataSet(Arrays.asList(rows));
             dataStorage.truncate();
             dataStorage.insertData(dataSet);
             dataStorage.commit();
@@ -140,7 +141,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -201,7 +202,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -213,7 +214,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             FeedDefinition feedDefinition = getFeedDefinition(getUserID(), dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
-            DataSet dataSet = dataTransformation.toDataSet(rows);
+            DataSet dataSet = dataTransformation.toDataSet(Arrays.asList(rows));
             dataStorage.updateData(dataSet, createWheres(where));
             dataStorage.commit();
             conn.commit();
@@ -236,7 +237,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

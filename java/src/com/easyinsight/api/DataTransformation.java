@@ -7,6 +7,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -31,7 +32,7 @@ public class DataTransformation {
         return dataSet;
     }
 
-    public final DataSet toDataSet(Row[] rows) {
+    public final DataSet toDataSet(List<Row> rows) {
         DataSet dataSet = new DataSet();
         for (Row row : rows) {
             dataSet.addRow(toRow(row));

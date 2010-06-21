@@ -6,6 +6,8 @@ import com.easyinsight.api.dynamic.APIPasswordCallback;
 import com.easyinsight.api.basicauth.BasicAuthUncheckedPublishService;
 import com.easyinsight.api.basicauth.BasicAuthAuthorizationInterceptor;
 import com.easyinsight.api.basicauth.BasicAuthValidatingPublishService;
+import com.easyinsight.api.v2.BasicAuthEIV2API;
+import com.easyinsight.api.v2.EIV2API;
 import com.easyinsight.api.wsdeathstar.WSDeathStarUncheckedPublishService;
 import com.easyinsight.api.wsdeathstar.WSDeathStarValidatingPublishService;
 import com.easyinsight.database.Database;
@@ -21,8 +23,6 @@ import java.sql.ResultSet;
 
 import org.apache.cxf.jaxws.EndpointImpl;
 import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
-import org.apache.cxf.transports.http.QueryHandlerRegistry;
-import org.apache.cxf.BusFactory;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.WSConstants;
 
@@ -42,10 +42,19 @@ public class APIManager implements IAPIManager {
             instance = this;
             createUncheckedSOAPAPI();
             createdValidatedSOAPAPI();
+            createV2API();
             go();
         } catch (Exception e) {
             LogClass.error(e);
         }
+    }
+
+    private void createV2API() {
+        EIV2API basicAuthPublishService = new BasicAuthEIV2API();
+        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.create(basicAuthPublishService);
+        basicAuthEndpoint.setPublishedEndpointUrl("https://www.easy-insight.com/app/services/EIDataV2");
+        basicAuthEndpoint.publish("/EIDataV2");
+        configureBasicAuth(basicAuthEndpoint);
     }
 
     private void createdValidatedSOAPAPI() {        
@@ -106,7 +115,7 @@ public class APIManager implements IAPIManager {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
