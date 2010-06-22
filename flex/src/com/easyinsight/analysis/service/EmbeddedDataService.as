@@ -85,6 +85,7 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.refreshAllSources = refreshAll;
+        insightRequestMetadata.utcOffset = new Date().getTimezoneOffset();
         insightRequestMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         insightRequestMetadata.noCache = noCache;
         insightRequestMetadata.hierarchyOverrides = hierarchyOverrides;
