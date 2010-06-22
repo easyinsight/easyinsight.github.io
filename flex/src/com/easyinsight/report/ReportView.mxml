@@ -721,7 +721,7 @@
                         <mx:Button click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
                                    id="browserButton"/>
                         <mx:Spacer width="100%"/>
-                        <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="180" fontSize="14"/>
+                        <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350" fontSize="14"/>
                         <mx:Spacer width="100%"/>
                     </mx:HBox>
                     <util:AutoSizeTextArea text="{description}" visible="true" fontSize="14" width="720"
