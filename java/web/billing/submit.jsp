@@ -11,6 +11,7 @@
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="com.easyinsight.users.AccountActivityStorage" %>
 <%@ page import="com.easyinsight.outboundnotifications.TodoBase" %>
+<%@ page import="com.easyinsight.logging.LogClass" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -97,6 +98,7 @@
         }
         catch(Exception e) {
             conn.rollback();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
         finally {
