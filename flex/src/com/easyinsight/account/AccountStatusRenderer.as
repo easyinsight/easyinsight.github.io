@@ -31,6 +31,9 @@ public class AccountStatusRenderer extends HBox{
             case Account.DELINQUENT:
                 statusLabel.text = "Delinquent";
                 break;
+            case Account.CLOSING:
+                statusLabel.text = "Closing";
+                break;
             case Account.CLOSED:
                 statusLabel.text = "Closed";
                 break;
