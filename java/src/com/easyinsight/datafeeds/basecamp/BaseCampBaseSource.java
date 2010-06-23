@@ -67,7 +67,6 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
         do {
 
             try {
-                System.out.println("basecamp request");
                 client.executeMethod(restMethod);
                 //System.out.println(restMethod.getResponseBodyAsString());
                 doc = builder.build(restMethod.getResponseBodyAsStream());
