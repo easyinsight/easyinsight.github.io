@@ -161,6 +161,8 @@ public class FallthroughConnection extends CompositeFeedConnection {
             sourceRows = mergeResults.unmergedSourceRows;
             targetRows = mergeResults.unmergedTargetRows;
         }
+        compositeRows.addAll(sourceRows);
+        compositeRows.addAll(targetRows);
         return new DataSet(compositeRows);
     }
 
