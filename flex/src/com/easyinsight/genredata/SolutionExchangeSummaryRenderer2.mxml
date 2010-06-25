@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" paddingTop="5" paddingBottom="5"
-        paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="200" horizontalAlign="center">
+        paddingLeft="0" paddingRight="0" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="181" horizontalAlign="center"
+        mouseChildren="false" useHandCursor="true" buttonMode="true" click="addReport()" toolTip="{reportDescription}">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.framework.User;
@@ -284,13 +285,14 @@
         <mx:method name="installReport" result="installedReport()"/>
         <mx:method name="installPackage" result="installedPackage()"/>
     </mx:RemoteObject>
-    <mx:Box borderStyle="solid" borderThickness="1" backgroundColor="#FFFFFF" verticalAlign="middle" horizontalAlign="center" backgroundAlpha="1" height="180">
-        <mx:VBox horizontalAlign="center">
-            <mx:LinkButton label="{reportName}" textDecoration="underline" click="addReport()" fontSize="13" fontFamily="Tahoma" fontWeight="bold" maxWidth="180"
-                    toolTip="View This Report"/>
+
+        <mx:VBox borderStyle="solid" borderThickness="1" backgroundColor="#FFFFFF" verticalAlign="middle" horizontalAlign="center" backgroundAlpha="1" height="180">
+            <mx:LinkButton label="{reportName}" textDecoration="underline" fontSize="12" fontFamily="Tahoma" fontWeight="bold" maxWidth="160"
+                    toolTip="View This Report" paddingLeft="0" paddingRight="0"/>
             <mx:Image source="{reportImage}"/>
             <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" selectable="false"
-                         text="{reportDescription}" width="100%" maxChars="250" verticalScrollPolicy="off" toolTip="{reportDescription}" height="80"/>
+                         text="{reportDescription}" width="100%" maxChars="350" verticalScrollPolicy="off" toolTip="{reportDescription}" height="90"
+                    fontSize="10"/>
         </mx:VBox>
-    </mx:Box>
+
 </mx:HBox>

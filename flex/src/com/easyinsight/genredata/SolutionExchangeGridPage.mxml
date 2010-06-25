@@ -2,59 +2,12 @@
 <genredata:ExchangePage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:genredata="com.easyinsight.genredata.*"
                         xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%">
     <mx:Script><![CDATA[
-        import com.easyinsight.solutions.Solution;
-
-        import mx.collections.ArrayCollection;
-
-        private function onTagFocus(event:TagFocusEvent):void {
-            selectedTag = event.tag;
-        }
-
-        private function changeSolution():void {
-            solution = solutionBox.selectedItem;
-        }
-
-        [Bindable(event="solutionChanged")]
-        public function get solution():Object {
-            return _solution;
-        }
-
-        public function set solution(value:Object):void {
-            if (_solution == value) return;
-            _solution = value;
-            dispatchEvent(new Event("solutionChanged"));
-        }
 
         private var _solution:Object;
 
-
-        [Bindable(event="solutionsChanged")]
-        public function get solutions():ArrayCollection {
-            return _solutions;
-        }
-
-        public function set solutions(value:ArrayCollection):void {
-            if (_solutions == value) return;
-            _solutions = value;
-            dispatchEvent(new Event("solutionsChanged"));
-        }
-
-        private var _solutions:ArrayCollection;
         ]]></mx:Script>
-    <mx:HBox width="100%" height="100%">
-        <mx:VBox height="100%">
-            <mx:HBox>
-                <mx:Label text="Connection:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" rowCount="15" selectedItem="{solution}"/>
-            </mx:HBox>
-            <genredata:ConnectionSummaryRenderer solution="{solution}"/>
-            <mx:Spacer height="30"/>
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Label text="Popular Tags" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-            </mx:HBox>
-            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" solution="true" height="100%"/>
-        </mx:VBox>
-        <mx:DataGrid dataProvider="{dataProvider2}" width="100%" height="100%">
+
+    <mx:DataGrid dataProvider="{dataProvider2}" width="100%" height="100%">
         <mx:columns>
             <mx:DataGridColumn headerText="Report Name" dataField="name"/>
             <mx:DataGridColumn headerText="Connection" dataField="solutionName" width="160"/>
@@ -67,6 +20,5 @@
                                itemRenderer="com.easyinsight.genredata.SolutionGridActionRenderer" width="50"/>
         </mx:columns>
     </mx:DataGrid>
-    </mx:HBox>
 
 </genredata:ExchangePage>

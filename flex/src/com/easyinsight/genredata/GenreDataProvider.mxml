@@ -9,7 +9,7 @@
         import com.easyinsight.solutions.Solution;
 
         import mx.binding.utils.BindingUtils;
-
+        import mx.collections.ArrayCollection;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
 
@@ -17,11 +17,9 @@
         [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
         private var banner:Class;
 
-        [Bindable]
-        private var introText:String;
-
         private function setupListeners():void {
-            BindingUtils.bindProperty(this, "solution", solutionDataController, "solution");
+            solutionService.getSolutions.send();
+            BindingUtils.bindProperty(solutionDataController, "solution", this, "solution");
             BindingUtils.bindProperty(displayTypeBar, "selectedIndex", this, "displayMode");
 
         }
@@ -29,9 +27,7 @@
         private function toState(index:int):void {
             viewMode = index;
             listsBox.removeAllChildren();
-                exchangeController = solutionDataController;
-
-            introText = exchangeController.text;
+            exchangeController = solutionDataController;
             updateDisplayMode2();
             updateURL();
             listsBox.addChild(exchangeController.selectedPage);
@@ -57,10 +53,6 @@
             return source.split(find).join(replacement);
         }
 
-        private function search():void {
-            exchangeController.keyword = searchText.text;
-        }
-
         private function updateDisplayMode2():void {
             displayMode = displayTypeBar.selectedIndex;
             if (displayTypeBar.selectedIndex == 1) {
@@ -84,13 +76,7 @@
 
         public function gotFocus():void {
             BrowserManager.getInstance().setTitle("Easy Insight - Exchange");
-            exchangeController = solutionDataController;
-            /*if (viewMode == 1) {
-                exchangeController = solutionDataController;
-            } else {
-                exchangeController = publicDataController;
-            }*/
-            introText = exchangeController.text;
+            exchangeController = solutionDataController;            
             if (displayMode == 1) {
                 exchangeController.displayMode = "grid";
             } else if (displayMode == 2) {
@@ -177,43 +163,91 @@
         public function cleanup():void {
         }
 
+        [Bindable]
+        private var solutionRows:int;
+
+        [Bindable(event="solutionsChanged")]
+        public function get solutions():ArrayCollection {
+            return _solutions;
+        }
+
+        public function set solutions(value:ArrayCollection):void {
+            if (_solutions == value) return;
+            _solutions = value;
+            dispatchEvent(new Event("solutionsChanged"));
+        }
+
+        private var _solutions:ArrayCollection;
+
+        private function changeSolution():void {
+            solution = solutionBox.selectedItem;    
+        }
+
+        private function gotSolutions():void {
+            var solutions:ArrayCollection = solutionService.getSolutions.lastResult as ArrayCollection;
+            var myConnections:Object = new Object();
+            myConnections["name"] = "[ My Connections ]";
+            var ph:Object = new Object();
+            ph["name"] = "[ All Connections ]";
+            var solutionTemp:ArrayCollection = new ArrayCollection();
+            for each (var solu:Solution in solutions) {
+                if (solu.installable) {
+                    solutionTemp.addItem(solu);
+                }
+            }
+            this.solutions = solutionTemp;
+            this.solutions.addItemAt(myConnections, 0);
+            this.solutions.addItemAt(ph, 1);
+            solutionRows = solutions.length;
+            if (subTopicID > 0) {
+                for each (var solObj:Object in this.solutions) {
+                    if (solObj is Solution) {
+                        var sol:Solution = solObj as Solution;
+                        if (sol.solutionID == subTopicID) {
+                            solution = sol;
+                        }
+                    }
+                }
+            }
+            if (solution == null) {
+                solution = this.solutions.getItemAt(0);
+            }
+        }
+
                 ]]>
 	</mx:Script>
-
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+        <mx:method name="getSolutions" result="gotSolutions()"/>
+    </mx:RemoteObject>
     <!--<genredata:PublicDataController id="publicDataController" changeView="onChangeView(event)"/>-->
     <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)" solution="{solution}" updateURL="updateURL()"/>
-    <mx:VBox id="centerBox" width="100%" height="100%" paddingBottom="10"
-             paddingLeft="0" paddingRight="0" paddingTop="0" backgroundColor="#FFFFFF" verticalGap="0">
+    <mx:HBox width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
+            <mx:VBox id="centerBox" width="1000" height="100%" paddingBottom="10"
+                 paddingLeft="0" paddingRight="0" paddingTop="0" backgroundColor="#FFFFFF" verticalGap="0" horizontalAlign="center">
 
-        <mx:HBox verticalAlign="middle" horizontalAlign="center"
-                                         width="100%" backgroundImage="{banner}" backgroundSize="100%" paddingTop="5" paddingBottom="5">
-            <mx:Label text="Connection Reports" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
-        </mx:HBox>
-        
-        <mx:HBox width="100%" verticalAlign="middle" paddingTop="5" paddingBottom="5" paddingLeft="20" paddingRight="20">
-            <mx:TextArea color="0x323232" borderStyle="none" editable="false" selectable="false" backgroundAlpha="0" width="400" 
-                    text="{introText}"/>
-            <mx:Spacer width="100%"/>
+            <mx:HBox verticalAlign="middle" horizontalAlign="center"
+                                             width="100%" backgroundImage="{banner}" backgroundSize="100%" paddingTop="5" paddingBottom="5">
+                <mx:Label text="Connection Reports" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+            </mx:HBox>
+
+            <mx:HBox width="1000" verticalAlign="middle" paddingTop="20" paddingBottom="20" paddingLeft="20" paddingRight="20">
+                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" selectedItem="{solution}"
+                        rowCount="{solutionRows}"/>
+                <mx:Spacer width="100%"/>
+                <mx:TextArea color="0x323232" borderStyle="none" editable="false" selectable="false" backgroundAlpha="0" width="600"
+                        text="Click on reports below to try them out with your data. If you just need a starting point, take one of the reports and modify it to meet your needs." fontSize="16"/>
+                <mx:Spacer width="100%"/>
                 <mx:ToggleButtonBar itemClick="updateDisplayMode2()" id="displayTypeBar">
                     <mx:dataProvider>
                         <mx:Array>
                             <mx:String>Summary</mx:String>
                             <mx:String>Grid</mx:String>
-                            <!--<mx:String>Detail</mx:String>-->                                
+                            <!--<mx:String>Detail</mx:String>-->
                         </mx:Array>
                     </mx:dataProvider>
                 </mx:ToggleButtonBar>
-            <mx:Spacer width="100%"/>
-            <mx:VBox>
-                <mx:HBox horizontalAlign="right">
-                    <mx:TextInput id="searchText"/>
-                    <mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton"
-                            click="search()"/>
-                </mx:HBox>
-                <mx:Label fontSize="10" text="Enter data source or report name or tags"/>
-            </mx:VBox>
-        </mx:HBox>
-        <mx:Spacer height="20" id="topSpacer"/>
-        <mx:HBox width="100%" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20" paddingRight="20"/>            
-    </mx:VBox>
+            </mx:HBox>
+            <mx:HBox width="1000" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20" paddingRight="20"/>
+        </mx:VBox>
+    </mx:HBox>
 </mx:Canvas>

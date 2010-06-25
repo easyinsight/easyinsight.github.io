@@ -1,35 +1,15 @@
 <?xml version="1.0" ?>
 <genredata:ExchangePage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:genredata="com.easyinsight.genredata.*"
-                        xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%">
+                        xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%" paddingLeft="1" paddingRight="2">
     <mx:Script><![CDATA[
 
-        import mx.collections.Sort;
-        import mx.collections.SortField;
 
-        private function changeSolution():void {
-            solution = solutionBox.selectedItem;
-        }
-
-        private function onTagFocus(event:TagFocusEvent):void {
-            selectedTag = event.tag;
-        }
 
         [Bindable]
         private var _itemRenderer:IFactory;
 
         public function set itemRenderer(value:IFactory):void {
             _itemRenderer = value;
-        }
-
-        [Bindable(event="solutionChanged")]
-        public function get solution():Object {
-            return _solution;
-        }
-
-        public function set solution(value:Object):void {
-            if (_solution == value) return;
-            _solution = value;
-            dispatchEvent(new Event("solutionChanged"));
         }
 
         override protected function commitProperties():void {
@@ -41,84 +21,17 @@
             }
         }
 
-        private var _solution:Object;
-
-
-        [Bindable(event="solutionsChanged")]
-        public function get solutions():ArrayCollection {
-            return _solutions;
-        }
-
-        public function set solutions(value:ArrayCollection):void {
-            if (_solutions == value) return;
-            _solutions = value;
-            dispatchEvent(new Event("solutionsChanged"));
-        }
-
-        private var _solutions:ArrayCollection;
-
-        private function changeSort():void {
-            var index:int = sortBox.selectedIndex;
-            var sort:Sort = new Sort();
-            var sortField:SortField = new SortField();
-            if (index == 0) {
-                sortField.name = "ratingAverage";
-                sortField.descending = true;
-            } else if (index == 1) {
-                sortField.name = "ratingAverage";
-                sortField.descending = false;
-            } else if (index == 2) {
-                sortField.name = "dateAdded";
-                sortField.descending = true;
-            } else if (index == 3) {
-                sortField.name = "dateAdded";
-                sortField.descending = false;
-            }
-            sort.fields = [ sortField ];
-            dataProvider2.sort = sort;
-            dataProvider2.refresh();
-        }
-
         [Bindable]
         private var summaryIndex:int = 0;
         ]]>
     </mx:Script>
-    <mx:HBox width="100%" height="100%" id="listsBox">
-        <mx:VBox height="100%">
-            <mx:HBox>
-                <mx:Label text="Connection:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" selectedItem="{solution}"/>
-            </mx:HBox>
-            <genredata:ConnectionSummaryRenderer solution="{solution}"/>
-            <mx:HBox>
-                <mx:Label text="Sort By:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:ComboBox id="sortBox" change="changeSort()">
-                    <mx:dataProvider>
-                        <mx:ArrayCollection>
-                            <mx:Array>
-                                <mx:String>Rating (Best)</mx:String>
-                                <mx:String>Rating (Worst)</mx:String>
-                                <mx:String>Date Added (Newest)</mx:String>
-                                <mx:String>Date Added (Oldest)</mx:String>
-                            </mx:Array>
-                        </mx:ArrayCollection>
-                    </mx:dataProvider>
-                </mx:ComboBox>
-            </mx:HBox>
-            <mx:Spacer height="30"/>
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Label text="Popular Tags" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-            </mx:HBox>
-            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" solution="true" height="100%"/>
-        </mx:VBox>
-        <mx:ViewStack width="100%" height="100%" selectedIndex="{summaryIndex}">
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                <mx:ProgressBar indeterminate="true" label="Loading the available reports..."/>
-            </mx:Box>
-            <mx:Box width="100%" height="100%">
-                <mx:TileList dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%" rowHeight="200" columnWidth="200"/>
-            </mx:Box>
-        </mx:ViewStack>
-
-    </mx:HBox>
+    <mx:ViewStack width="100%" height="100%" selectedIndex="{summaryIndex}">
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ProgressBar indeterminate="true" label="Loading the available reports..."/>
+        </mx:Box>
+        <mx:Canvas width="100%" height="100%">
+            <mx:TileList dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%" rowHeight="200" columnWidth="182"
+                    />
+        </mx:Canvas>
+    </mx:ViewStack>
 </genredata:ExchangePage>

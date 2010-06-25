@@ -3,12 +3,10 @@ import com.easyinsight.solutions.Solution;
 
 import flash.events.Event;
 
-import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 import mx.core.ClassFactory;
 import mx.core.IFactory;
-import mx.rpc.events.FaultEvent;
+
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -17,19 +15,30 @@ public class SolutionExchangeController extends ExchangeController{
     private var exchangeService:RemoteObject;
     private var _solution:Object;
 
-    private var _solutions:ArrayCollection;
-
     public function SolutionExchangeController() {
         super();
         exchangeService = new RemoteObject();
         exchangeService.destination = "solutionService";
         exchangeService.getSolutionReports.addEventListener(ResultEvent.RESULT, onData);
-        exchangeService.getSolutions.addEventListener(ResultEvent.RESULT, gotSolutions);
+        exchangeService.getInstalledConnections.addEventListener(ResultEvent.RESULT, gotInstalledConnections);
     }
+
+    private var _initializedData:Boolean = false;
     
     override public function initBehavior():void {
-        if (_solutions == null) {
-            exchangeService.getSolutions.send();
+        if (!_initializedData) {
+            _initializedData = true;
+            exchangeService.getInstalledConnections.send();
+        }
+    }
+
+    private var installedConnections:Object;
+
+    private function gotInstalledConnections(event:ResultEvent):void {
+        var connections:ArrayCollection = exchangeService.getInstalledConnections.lastResult as ArrayCollection;
+        installedConnections = new Object();
+        for each (var solutionID:int in connections) {
+            installedConnections[String(solutionID)] = solutionID;
         }
     }
 
@@ -37,46 +46,8 @@ public class SolutionExchangeController extends ExchangeController{
         return "This page enables you to take advantage of reports built by the community and apply them to your own connection data sources.";
     }
 
-    private function gotSolutions(event:ResultEvent):void {
-        var solutions:ArrayCollection = exchangeService.getSolutions.lastResult as ArrayCollection;
-        var ph:Object = new Object();
-        ph["name"] = "[ All Connections ]";
-        var solutionTemp:ArrayCollection = new ArrayCollection();
-        for each (var solu:Solution in solutions) {
-            if (solu.installable) {
-                solutionTemp.addItem(solu);
-            }
-        }
-        this.solutions = solutionTemp;
-        this.solutions.addItemAt(ph, 0);
-        if (subTopicID > 0) {            
-            for each (var solObj:Object in this.solutions) {
-                if (solObj is Solution) {
-                    var sol:Solution = solObj as Solution;
-                    if (sol.solutionID == subTopicID) {
-                        solution = sol;
-                    }
-                }
-            }
-        }
-        if (solution == null) {
-            solution = this.solutions.getItemAt(0);
-        }
-    }
-
-    [Bindable(event="solutionsChanged")]
-    public function get solutions():ArrayCollection {
-        return _solutions;
-    }
-
     override public function set subTopicID(value:int):void {
         super.subTopicID = value;
-    }
-
-    public function set solutions(value:ArrayCollection):void {
-        if (_solutions == value) return;
-        _solutions = value;
-        dispatchEvent(new Event("solutionsChanged"));
     }
 
     [Bindable(event="solutionChanged")]
@@ -99,9 +70,6 @@ public class SolutionExchangeController extends ExchangeController{
 
     override protected function createExchangedGridPage():ExchangePage {
         var page:SolutionExchangeGridPage = new SolutionExchangeGridPage();
-        BindingUtils.bindProperty(page, "solutions", this, "solutions");
-        BindingUtils.bindProperty(page, "solution", this, "solution");
-        BindingUtils.bindProperty(this, "solution", page, "solution");
 
 
         return page;
@@ -111,9 +79,6 @@ public class SolutionExchangeController extends ExchangeController{
         var summary:SolutionExchangeSummaryPage = new SolutionExchangeSummaryPage();
         summary.id = "connectionSummary";
         summary.itemRenderer = summaryItemRenderer();
-        BindingUtils.bindProperty(summary, "solutions", this, "solutions");
-        BindingUtils.bindProperty(summary, "solution", this, "solution");
-        BindingUtils.bindProperty(this, "solution", summary, "solution");
 
 
         return summary;
@@ -135,9 +100,14 @@ public class SolutionExchangeController extends ExchangeController{
 
     override protected function filterData(object:Object):Boolean {
         var reportExchangeItem:SolutionReportExchangeItem = object as SolutionReportExchangeItem;
+        if (solution == null) {
+            return false;
+        }
         var matched:Boolean = true;
         if (solution is Solution) {
             matched = reportExchangeItem.solutionID == solution.solutionID;
+        } else if (solution.name == "[ My Connections ]") {
+            matched = installedConnections[String(reportExchangeItem.solutionID)] != null;
         }
         if (selectedTag != null) {
             matched = reportExchangeItem.tags.getItemIndex(selectedTag) != -1;

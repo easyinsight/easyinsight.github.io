@@ -160,6 +160,7 @@ public class DataSourceDisplay extends VBox {
         outOfDateBox.setStyle("horizontalAlign", "center");
         var button:Button = new Button();
         button.label = "Refresh the data source";
+        button.styleName = "blueButton";
         button.addEventListener(MouseEvent.CLICK, onClick);
         outOfDateBox.addChild(button);
         var asyncBox:VBox = new VBox();
@@ -178,6 +179,7 @@ public class DataSourceDisplay extends VBox {
         var doneLabel:Label = new Label();
         doneLabel.text = "New data is available:";
         var refreshButton:Button = new Button();
+        refreshButton.styleName = "blueButton";
         refreshButton.addEventListener(MouseEvent.CLICK, refreshReport);
         refreshButton.label = "Refresh Report";
         doneBox.addChild(doneLabel);

@@ -55,7 +55,7 @@
         }
 
         private function confirmedKeep():void {
-            addReportBox.removeAllChildren();
+            exchangeIndex = 0;
             leftButtonBar.addChildAt(editReportButton, 4);
         }
 
@@ -627,14 +627,7 @@
                 }
 
                 if (_showAddBar) {
-                    var addLabel:Label = new Label();
-                    addLabel.text = "Want to save this report permanently?";
-                    addReportBox.addChild(addLabel);
-                    var addButton:Button = new Button();
-                    addButton.label = "Save to My Data";
-                    addButton.id = "myDataButton";
-                    addButton.addEventListener(MouseEvent.CLICK, saveReport);
-                    addReportBox.addChild(addButton);
+                    exchangeIndex = 1;
                 }
 
                 viewFactory.reportID = _reportID;
@@ -667,6 +660,10 @@
             overlayIndex = 3;
         }
 
+        private var _previousReport:ReportHandle;
+
+        private var _nextReport:ReportHandle;
+
         [Bindable]
         private var overlayIndex:int;
 
@@ -698,42 +695,88 @@
         private var stackTrace:String;
 
         [Bindable]
+        private var exchangeIndex:int;
+
+        [Bindable]
         private var showingFilters:Boolean = false;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow_left_blue.png")]
+        private var previousReportArrow:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow_right_blue.png")]
+        private var nextReportArrow:Class;
+
+        private function toPreviousReport():void {
+
+        }
+
+        private function toNextReport():void {
+            
+        }
 
         ]]></mx:Script>
 
-        <mx:VBox width="1000" borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF">
+        <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF">
             <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5">
-                <mx:VBox>
-                    <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
-                        <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
-                        <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
-                                   id="fullScreenButton"/>
-                        <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
-                                   id="refreshButton"/>
-                        <mx:Button click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
-                                   id="bookmarkButton"/>
-                        <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
-                                   labelPlacement="bottom"
-                                   id="exportButton"/>
-                        <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
-                                   labelPlacement="bottom" id="editReportButton"/>
-                        <mx:Button click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
-                                   id="browserButton"/>
-                        <mx:Spacer width="100%"/>
-                        <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350" fontSize="14"/>
-                        <mx:Spacer width="100%"/>
+                <mx:ViewStack resizeToContent="true">
+                    <mx:Box/>
+                    <mx:HBox>
+                        <mx:Button icon="{previousReportArrow}" toolTip="Previous Report" click="toPreviousReport()"/>
+                        <mx:VRule height="50"/>
                     </mx:HBox>
-                    <util:AutoSizeTextArea text="{description}" visible="true" fontSize="14" width="720"
-                                        editable="false" backgroundAlpha="0"/>
-                </mx:VBox>
-                <mx:Spacer width="100%"/>
-                <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"/>
+                </mx:ViewStack>
+                <mx:HBox width="1000" verticalAlign="middle">
+                    <mx:VBox>
+                        <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
+                            <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
+                            <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
+                                       id="fullScreenButton"/>
+                            <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
+                                       id="refreshButton"/>
+                            <mx:Button click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
+                                       id="bookmarkButton"/>
+                            <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
+                                       labelPlacement="bottom"
+                                       id="exportButton"/>
+                            <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
+                                       labelPlacement="bottom" id="editReportButton"/>
+                            <mx:Button click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
+                                       id="browserButton"/>
+                            <mx:Spacer width="100%"/>
+                            <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350" fontSize="14"/>
+                            <mx:Spacer width="100%"/>
+                        </mx:HBox>
+                        <util:AutoSizeTextArea text="{description}" visible="true" fontSize="14" width="720"
+                                            editable="false" backgroundAlpha="0"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"/>
+                </mx:HBox>
+                <mx:ViewStack resizeToContent="true">
+                    <mx:Box/>
+                    <mx:HBox>
+                        <mx:VRule height="50"/>
+                        <mx:Button icon="{nextReportArrow}" toolTip="Next Report" click="toNextReport()"/>
+                    </mx:HBox>
+                </mx:ViewStack>
             </mx:HBox>
             <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
         </mx:VBox>
             <mx:VBox width="100%" height="100%">
-                <mx:HBox width="100%" id="addReportBox" horizontalAlign="center" verticalAlign="middle"/>
+                <mx:ViewStack resizeToContent="true" selectedIndex="{exchangeIndex}" width="100%">
+                    <mx:Box/>
+                    <mx:VBox paddingTop="15" width="100%" horizontalAlign="center">
+                        <mx:HBox id="addReportBox" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF" borderColor="#CCCCCC"
+                            borderThickness="1" cornerRadius="5" dropShadowEnabled="true" borderStyle="solid" paddingLeft="5" paddingRight="5" horizontalGap="20">
+                            <mx:TextArea text="Want to save this report to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
+                                editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0" fontSize="14"/>
+                            <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton" click="saveReport(event)"/>
+                        </mx:HBox>
+                    </mx:VBox>
+                </mx:ViewStack>
+
                 <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
                     <mx:Box/>
                     <mx:Box width="100%" horizontalAlign="center">
