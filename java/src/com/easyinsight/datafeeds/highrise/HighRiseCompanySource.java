@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
@@ -37,18 +38,23 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
     public static final String CREATED_AT = "Created At";
     public static final String COUNT = "Count";
 
+    public static final String ZIP_CODE = "Company Zip Code";
+    public static final String BACKGROUND = "Company Background";
+
     public HighRiseCompanySource() {
         setFeedName("Company");
     }
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(COMPANY_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT);
+        return Arrays.asList(COMPANY_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, ZIP_CODE, BACKGROUND);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_NAME), true));
+        analysisItems.add(new AnalysisZipCode(keys.get(ZIP_CODE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(BACKGROUND), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
         analysisItems.add(new AnalysisList(keys.get(TAGS), false, ","));
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
@@ -91,9 +97,9 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                 companyCount = 0;
                 Document companies;
                 if (offset == 0) {
-                    companies = runRestRequest("/companies.xml?", client, builder, url, true);
+                    companies = runRestRequest("/companies.xml?", client, builder, url, true, false);
                 } else {
-                    companies = runRestRequest("/companies.xml?n=" + offset, client, builder, url, true);
+                    companies = runRestRequest("/companies.xml?n=" + offset, client, builder, url, true, false);
                 }
                 Nodes companyNodes = companies.query("/companies/company");
                 loadingProgress(0, 1, "Synchronizing with companies...", true);
@@ -105,6 +111,15 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
 
                     String id = queryField(companyNode, "id/text()");
                     row.addValue(COMPANY_ID, id);
+                    String background = queryField(companyNode, "background/text()");
+                    row.addValue(BACKGROUND, background);
+
+                    Nodes contactDataNodes = companyNode.query("contact-data/addresses/address");
+                    if (contactDataNodes.size() > 0) {
+                        Node contactDataNode = contactDataNodes.get(0);
+                        String zip = queryField(contactDataNode, "zip/text()");
+                        row.addValue(ZIP_CODE, zip);
+                    }
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     row.addValue(COUNT, new NumericValue(1));
@@ -149,5 +164,15 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new HighRiseCompany1To2(this));
     }
 }

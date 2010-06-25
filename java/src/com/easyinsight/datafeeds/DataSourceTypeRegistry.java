@@ -68,8 +68,9 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.SENDGRID, SendGridDataSource.class);
         registerType(FeedType.MEETUP, MeetupDataSource.class);
         registerType(FeedType.LINKEDIN, LinkedInDataSource.class);
-        //registerType(FeedType.HIGHRISE_CASES, HighRiseCaseSource.class);
-        //registerType(FeedType.HIGHRISE_TASKS, HighRiseTaskSource.class);
+        registerType(FeedType.HIGHRISE_CASES, HighRiseCaseSource.class);
+        registerType(FeedType.HIGHRISE_TASKS, HighRiseTaskSource.class);
+        registerType(FeedType.HIGHRISE_EMAILS, HighRiseEmailSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

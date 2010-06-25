@@ -34,7 +34,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false);
+                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false, false);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -53,7 +53,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/users/" + contactId, client, builder, url, false);
+                    Document contactInfo = runRestRequest("/users/" + contactId, client, builder, url, false, false);
                     contactName = queryField(contactInfo, "/user/name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -66,7 +66,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError) throws HighRiseLoginException, ParsingException {
+    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError, boolean logRequest) throws HighRiseLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
         try {
             Thread.sleep(150);
@@ -79,8 +79,10 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         Document doc = null;
         do {
             try {
-                System.out.println("retrieving highrise data");
                 client.executeMethod(restMethod);
+                if (logRequest) {
+                    System.out.println(restMethod.getResponseBodyAsString());
+                }
                 doc = builder.build(restMethod.getResponseBodyAsStream());                
                 String rootValue = doc.getRootElement().getValue();
                 if ("The API is not available to this account".equals(rootValue)) {
@@ -98,6 +100,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                     throw new RuntimeException(e);
                 }
             } catch (nu.xom.ParsingException e) {
+                e.printStackTrace();
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {

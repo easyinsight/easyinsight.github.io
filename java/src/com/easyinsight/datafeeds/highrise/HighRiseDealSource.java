@@ -33,6 +33,7 @@ import com.easyinsight.datafeeds.FeedType;
 public class HighRiseDealSource extends HighRiseBaseSource {
 
     public static final String DEAL_NAME = "Deal Name";
+    public static final String DEAL_ID = "Deal ID";
     public static final String COMPANY_ID = "Company ID";
     public static final String PRICE = "Price";
     public static final String DURATION = "Duration";
@@ -53,12 +54,13 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(DEAL_NAME, COMPANY_ID, PRICE, DURATION, PRICE_TYPE, DEAL_OWNER,
-                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY);
+                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_NAME), true));
+        analysisItems.add(new AnalysisDimension(keys.get(DEAL_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_OWNER), true));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE_PARTY), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
@@ -90,7 +92,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             if(categoryID != null) {
                 contactName = categoryCache.get(categoryID);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url, false);
+                    Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url, false, false);
                     Nodes dealNodes = contactInfo.query("/deal-category");
                     if (dealNodes.size() > 0) {
                         Node deal = dealNodes.get(0);
@@ -138,7 +140,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         try {
             HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
             //do {
-            Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true);
+            Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true, false);
             Nodes dealCategoryDoc = userDoc.query("/deal-catgories/deal-category");
             for (int i = 0; i < dealCategoryDoc.size(); i++) {
                 Node categoryNode = dealCategoryDoc.get(i);
@@ -146,7 +148,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 String categoryID = queryField(categoryNode, "id/text()");
                 categoryCache.put(categoryID, categoryName);
             }
-                Document deals = runRestRequest("/deals.xml", client, builder, url, true);
+                Document deals = runRestRequest("/deals.xml", client, builder, url, true, false);
                 loadingProgress(0, 1, "Synchronizing with deals...", true);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
@@ -155,6 +157,8 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                         Node currDeal = dealNodes.get(i);
                         String dealName = queryField(currDeal, "name/text()");
                         row.addValue(DEAL_NAME, dealName);
+                        String dealID = queryField(currDeal, "id/text()");
+                        row.addValue(DEAL_ID, dealID);
                         String price = queryField(currDeal, "price/text()");
                         row.addValue(PRICE, price);
                         String status = queryField(currDeal, "status/text()");
@@ -216,11 +220,11 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 3;
+        return 4;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new HighRise1To2(this), new HighRiseDeal2To3(this));
+        return Arrays.asList(new HighRise1To2(this), new HighRiseDeal2To3(this), new HighRiseDeal3To4(this));
     }
 }

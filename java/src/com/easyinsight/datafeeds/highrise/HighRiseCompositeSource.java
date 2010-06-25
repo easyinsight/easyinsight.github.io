@@ -2,6 +2,10 @@ package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.basecamp.BaseCampCompanyProjectJoinSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampCompanySource;
+import com.easyinsight.datafeeds.basecamp.BaseCampTimeSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.kpi.KPI;
@@ -36,6 +40,7 @@ import nu.xom.Builder;
 public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     private String url;
+    private boolean includeEmails;
 
     private transient HighriseCache highriseCache;
 
@@ -73,6 +78,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.HIGHRISE_COMPANY);
         feedTypes.add(FeedType.HIGHRISE_DEAL);
         feedTypes.add(FeedType.HIGHRISE_CONTACTS);
+        feedTypes.add(FeedType.HIGHRISE_TASKS);
+        feedTypes.add(FeedType.HIGHRISE_CASES);
+        feedTypes.add(FeedType.HIGHRISE_EMAILS);
         return feedTypes;
     }
 
@@ -166,22 +174,37 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     }
 
     protected Collection<ChildConnection> getChildConnections() {
-        return Arrays.asList(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
+        return Arrays.asList(
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
                 HighRiseDealSource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
-                        HighRiseContactSource.COMPANY_ID));
+                    HighRiseContactSource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_TASKS, HighRiseCompanySource.COMPANY_ID,
+                    HighRiseTaskSource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CONTACTS, HighRiseCaseSource.OWNER,
+                        HighRiseContactSource.OWNER));
     }
 
-    protected IServerDataSourceDefinition createForFeedType(FeedType feedType) {
-        if (feedType.equals(FeedType.HIGHRISE_COMPANY)) {
-            return new HighRiseCompanySource();
-        } else if (feedType.equals(FeedType.HIGHRISE_DEAL)) {
-            return new HighRiseDealSource();
-        } else if (feedType.equals(FeedType.HIGHRISE_CONTACTS)) {
-            return new HighRiseContactSource();
-        } else {
-            throw new RuntimeException();
-        }
+    protected Collection<ChildConnection> getLiveChildConnections() {
+        return Arrays.asList(
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
+                HighRiseDealSource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
+                    HighRiseContactSource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_TASKS, HighRiseCompanySource.COMPANY_ID,
+                    HighRiseTaskSource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CONTACTS, HighRiseCaseSource.OWNER,
+                        HighRiseContactSource.OWNER),
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CONTACTS, HighRiseTaskSource.OWNER,
+                        HighRiseContactSource.OWNER),
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CASES, HighRiseTaskSource.CASE_ID,
+                        HighRiseCaseSource.CASE_ID),
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_DEAL, HighRiseTaskSource.DEAL_ID,
+                        HighRiseDealSource.DEAL_ID),
+                new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_COMPANY, HighRiseTaskSource.COMPANY_ID,
+                        HighRiseCompanySource.COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_EMAILS, HighRiseContactSource.CONTACT_ID,
+                        HighRiseEmailSource.EMAIL_CONTACT_ID));
     }
 
     public String getUrl() {
@@ -198,6 +221,14 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         this.url = url;
     }
 
+    public boolean isIncludeEmails() {
+        return includeEmails;
+    }
+
+    public void setIncludeEmails(boolean includeEmails) {
+        this.includeEmails = includeEmails;
+    }
+
     @Override
     public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
         HighRiseCompositeSource dataSource = (HighRiseCompositeSource) super.clone(conn);
@@ -211,20 +242,22 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL) VALUES (?, ?)");
+        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL, INCLUDE_EMAILS) VALUES (?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
+        basecampStmt.setBoolean(3, includeEmails);
         basecampStmt.execute();
         basecampStmt.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL FROM HIGHRISE WHERE FEED_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_EMAILS FROM HIGHRISE WHERE FEED_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
             this.setUrl(rs.getString(1));
+            this.setIncludeEmails(rs.getBoolean(2));
         }
         loadStmt.close();
     }
@@ -275,11 +308,11 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList((DataSourceMigration) new HighRiseComposite1To2(this));
+        return Arrays.asList(new HighRiseComposite1To2(this), new HighRiseComposite2To3(this));
     }
 }

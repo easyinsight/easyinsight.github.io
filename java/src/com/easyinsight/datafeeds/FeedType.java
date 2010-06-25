@@ -45,6 +45,7 @@ public class FeedType {
     public static final FeedType TEAMWORKPM = new FeedType(37);
     public static final FeedType MEETUP = new FeedType(38);
     public static final FeedType LINKEDIN = new FeedType(39);
+    public static final FeedType HIGHRISE_EMAILS = new FeedType(40);
 
     private int type;
 

@@ -5,6 +5,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
@@ -37,6 +38,9 @@ public class HighRiseContactSource extends HighRiseBaseSource {
     public static final String CREATED_AT = "Created At";
     public static final String COUNT = "Count";
 
+    public static final String BACKGROUND = "Contact Background";
+    public static final String ZIP_CODE = "Contact Zip Code";
+
     public HighRiseContactSource() {
         setFeedName("Contact");
     }
@@ -49,6 +53,8 @@ public class HighRiseContactSource extends HighRiseBaseSource {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_NAME), true));
+        analysisItems.add(new AnalysisZipCode(keys.get(ZIP_CODE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(BACKGROUND), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(TITLE), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
@@ -92,9 +98,9 @@ public class HighRiseContactSource extends HighRiseBaseSource {
             do {
                 Document companies;
                 if (offset == 0) {
-                    companies = runRestRequest("/people.xml?", client, builder, url, true);
+                    companies = runRestRequest("/people.xml?", client, builder, url, true, false);
                 } else {
-                    companies = runRestRequest("/people.xml?n=" + offset, client, builder, url, true);
+                    companies = runRestRequest("/people.xml?n=" + offset, client, builder, url, true, false);
                 }
                 Nodes companyNodes = companies.query("/people/person");
                 loadingProgress(0, 1, "Synchronizing with contacts...", true);
@@ -110,6 +116,16 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     row.addValue(TITLE, title);
 
                     row.addValue(CONTACT_NAME, name);
+
+                    String background = queryField(companyNode, "background/text()");
+                    row.addValue(BACKGROUND, background);
+
+                    Nodes contactDataNodes = companyNode.query("contact-data/addresses/address");
+                    if (contactDataNodes.size() > 0) {
+                        Node contactDataNode = contactDataNodes.get(0);
+                        String zip = queryField(contactDataNode, "zip/text()");
+                        row.addValue(ZIP_CODE, zip);
+                    }
 
                     String id = queryField(companyNode, "id/text()");
                     row.addValue(CONTACT_ID, id);
@@ -148,5 +164,15 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new HighRiseContact1To2(this));
     }
 }

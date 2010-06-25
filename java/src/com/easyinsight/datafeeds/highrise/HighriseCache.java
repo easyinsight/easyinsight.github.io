@@ -21,14 +21,14 @@ public class HighriseCache extends HighRiseBaseSource {
 
     public void populateCaches(HttpClient client, String url) throws HighRiseLoginException, ParsingException {
         Builder builder = new Builder();
-        Document tagDoc = runRestRequest("/tags.xml", client, builder, url, true);
+        Document tagDoc = runRestRequest("/tags.xml", client, builder, url, true, false);
         Nodes tagNodes = tagDoc.query("/tags/tag");
         for (int i = 0; i < tagNodes.size(); i++) {
             loadingProgress(i, tagNodes.size(), "Synchronizing with tags...", true);
             Node tagNode = tagNodes.get(i);
             String tag = queryField(tagNode, "name/text()");
             String id = queryField(tagNode, "id/text()");
-            Document ppl = runRestRequest("/tags/" + id + ".xml", client, builder, url, false);
+            Document ppl = runRestRequest("/tags/" + id + ".xml", client, builder, url, false, false);
             Nodes pplNodes = ppl.query("/people/person");
             for (int j = 0; j < pplNodes.size(); j++) {
                 Node person = pplNodes.get(j);
@@ -52,7 +52,7 @@ public class HighriseCache extends HighRiseBaseSource {
                 tags.add(tag);
             }
         }
-        Document userDoc = runRestRequest("/users.xml", client, builder, url, true);
+        Document userDoc = runRestRequest("/users.xml", client, builder, url, true, false);
         Nodes usersDoc = userDoc.query("/users/user");
         for (int i = 0; i < usersDoc.size(); i++) {
             Node userNode = usersDoc.get(i);

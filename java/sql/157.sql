@@ -1,0 +1,1 @@
+alter table highrise add include_emails tinyint(4) not null default 0; 

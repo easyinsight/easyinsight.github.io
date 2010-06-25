@@ -20,11 +20,13 @@
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:HighRiseDataSource = new HighRiseDataSource();
             obj.url = urlInput.text;
+            obj.includeEmails = emailsCheckbox.selected;
             return obj;
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:HighRiseDataSource = feedDefinition as HighRiseDataSource;
+            includeEmails = ds.includeEmails;
             CredentialsCache.getCache().nukeCredentials(ds.dataFeedID);
             url = ds.url;
             usernameInputText = ds.username;
@@ -34,6 +36,7 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:HighRiseDataSource = feedDefinition as HighRiseDataSource;
             ds.url = urlInput.text;
+            ds.includeEmails = emailsCheckbox.selected;
         }
 
         public function get credentials():Credentials {
@@ -47,6 +50,9 @@
             usernameInputText = c.userName;
             passwordText = c.password;
         }
+
+        [Bindable]
+        private var includeEmails:Boolean;
 
 
         public function get savesCredentials():Boolean {
@@ -65,5 +71,9 @@
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>
 		</mx:FormItem>
         <mx:FormItem label="You can find the token on your Highrise page under My Info - API Token." fontSize="10"/>
+        <mx:FormItem label="Include Emails:" direction="horizontal">
+            <mx:CheckBox id="emailsCheckbox" selected="{includeEmails}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="We haven't figured out a really efficient way to synchronize with email data on Highrise yet, so unless you absolutely need to report on emails, we recommend you leave this setting off."/>
+        </mx:FormItem>
 	</mx:Form>
 </mx:VBox>
