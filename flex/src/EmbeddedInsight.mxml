@@ -17,7 +17,6 @@
             import com.easyinsight.analysis.PopupMenuFactory;
 
         import com.easyinsight.analysis.SixSigmaMeasure;
-        import com.easyinsight.analysis.TemporalAnalysisMeasure;
         import com.easyinsight.framework.CredentialsCache;
             import com.easyinsight.framework.WebCredentialsCache;
             [Bindable]
@@ -46,7 +45,6 @@
                 var analysisDate:AnalysisDateDimension;
                 var dim:AnalysisDimension;
                 var measure:AnalysisMeasure;
-                var temporal:TemporalAnalysisMeasure;
                 var complex:ComplexAnalysisMeasure;
                 var range:AnalysisRangeDimension;
                 var list:AnalysisList;
