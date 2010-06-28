@@ -90,24 +90,6 @@
         [Bindable]
         private var stackIndex:int = 0;
 
-        public function lostFocus():void {
-        }
-
-        public function getDefaultAnalyzeState():Boolean {
-            return false;
-        }
-
-        public function isKeywordSearchInstant():Boolean {
-            return false;
-        }
-
-        private function accountCreated(event:AccountWizardResultEvent):void {
-            //currentState = "loggedIn";
-            /*User.initializeUser(event.user.userID, event.account.accountID, event.user.userName, event.user.email,
-             event.account.accountType, event.account.accountType.getSpaceAllowed(), event.user.permissions);
-             User.getEventNotifier().dispatchEvent(new LoginEvent());*/
-        }
-
         public function cleanup():void {
         }
 		]]>

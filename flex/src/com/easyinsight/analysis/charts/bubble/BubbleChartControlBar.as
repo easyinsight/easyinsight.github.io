@@ -19,8 +19,6 @@ import com.easyinsight.util.PopUpUtil;
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
-import mx.collections.ArrayCollection;
-import mx.containers.HBox;
 import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;

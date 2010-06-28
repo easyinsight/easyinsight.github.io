@@ -1,8 +1,0 @@
-<?xml version="1.0" ?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
-        close="PopUpManager.removePopUp(this)" showCloseButton="true">
-    <account:AccountTypeComparison/>
-    <mx:Script><![CDATA[
-        import mx.managers.PopUpManager;
-        ]]></mx:Script>
-</util:EITitleWindow>

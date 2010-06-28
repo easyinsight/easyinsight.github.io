@@ -26,7 +26,6 @@ import java.util.*;
 public class GoalService {
 
     private GoalStorage goalStorage = new GoalStorage();
-    private GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
 
     public long canAccessGoalTree(String urlKey) {
         try {

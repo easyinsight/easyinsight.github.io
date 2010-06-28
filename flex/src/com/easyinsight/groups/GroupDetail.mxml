@@ -7,19 +7,15 @@
          creationComplete="setup()" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*">
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.discussion.MessagePostedEvent;
-        import com.easyinsight.discussion.NewMessageWindow;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DeleteDataSourceEvent;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
         import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
-        import mx.managers.PopUpManager;
 
         import com.easyinsight.help.HelpWindow;
         import com.easyinsight.framework.User;
@@ -72,20 +68,7 @@
         private var numberMembersText:String;
 
         [Bindable]
-        private var goals:ArrayCollection;
-
-        [Bindable]
-        private var goalTrees:ArrayCollection;
-
-        [Bindable]
         private var _group:Group;
-
-        [Bindable]
-        private var reportItemFactory:ClassFactory = new ClassFactory(GroupReportItem);
-        [Bindable]
-        private var dataSourceItemFactory:ClassFactory = new ClassFactory(GroupDataSourceItem);
-        [Bindable]
-        private var goalTreeFactory:ClassFactory = new ClassFactory(GoalTreeNameRenderer);
 
 
         private function setup():void {
@@ -177,11 +160,6 @@
                 }
             }
 
-            reportItemFactory = new ClassFactory(GroupReportItem);
-            reportItemFactory.properties = { admin: adminEnabled };
-            dataSourceItemFactory = new ClassFactory(GroupDataSourceItem);
-            dataSourceItemFactory.properties = { admin: adminEnabled };
-
             if (!foundUser) {
                 joinEnabled = true;
             }
@@ -212,21 +190,6 @@
 
         private function gotGroupMessages():void {
             this.messages = groupService.getGroupMessages.lastResult as ArrayCollection;
-        }
-
-        private function newMessage():void {
-            var newMessageWindow:NewMessageWindow = new NewMessageWindow();
-            newMessageWindow.addEventListener(MessagePostedEvent.MESSAGE_POSTED, onMessagePost);
-            PopUpManager.addPopUp(newMessageWindow, this);
-            PopUpUtil.centerPopUp(newMessageWindow);
-        }
-
-        private function onMessagePost(event:MessagePostedEvent):void {
-            var groupComment:GroupComment = new GroupComment();
-            groupComment.message = event.message;
-            groupComment.timestamp = new Date();
-            groupComment.groupID = _group.groupID;
-            groupService.addGroupComment.send(groupComment);
         }
 
         private function addedComment():void {

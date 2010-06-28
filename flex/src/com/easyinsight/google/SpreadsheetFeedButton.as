@@ -45,7 +45,7 @@ import mx.controls.Button;
         }
 
         [Embed(source="../../../../assets/media_play_green.png")]
-    	public var dataIcon:Class;	
+    	public var dataIcon:Class;
 		
 		public function SpreadsheetFeedButton()
 		{

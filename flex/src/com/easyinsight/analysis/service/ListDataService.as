@@ -13,8 +13,11 @@ import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.framework.InvalidFieldsEvent;
+
+import flash.display.DisplayObject;
 import flash.events.EventDispatcher;
 import mx.collections.ArrayCollection;
+import mx.core.Application;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -50,9 +53,6 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
     }
 
     public function translate(listData:ListDataResults):ServiceData {
-        if (obfuscate) {
-            new Obfuscator().obfuscate(listData);
-        }
         var clientProcessorMap:Object = new Object();
         var headers:ArrayCollection = new ArrayCollection(listData.headers);
         for each (var analysisItem:AnalysisItem in headers) {
@@ -92,13 +92,17 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
             dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
         }
         if (listData.credentialRequirements != null && listData.credentialRequirements.length > 0) {
-            
+            CredentialsCache.getCache().obtainCredentials(DisplayObject(Application.application), listData.credentialRequirements, retrieve);
         }
         var serviceData:ServiceData = translate(listData);
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data, serviceData.clientProcessorMap,
                 listData.dataSourceInfo, listData.additionalProperties, listData.limitedResults, listData.maxResults,
                 listData.limitResults));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+    }
+
+    private function retrieve():void {
+        
     }
 
     public function retrieveData(definition:AnalysisDefinition, refreshAllSources:Boolean):void {

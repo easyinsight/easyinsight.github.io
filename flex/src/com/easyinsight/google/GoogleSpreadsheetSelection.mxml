@@ -7,15 +7,6 @@
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
 		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
 	</mx:Metadata>
-	<mx:states>
-		<mx:State name="notLoggedIn">
-			<mx:RemoveChild target="{coreHBox}"/>
-			<mx:RemoveChild target="{spreadsheetTree}"/>
-			<mx:AddChild relativeTo="{coreContent}">
-				<listing:GottaLoginPage loginEvent2="currentState=''; retrieveSpreadsheets()"/>
-			</mx:AddChild>
-		</mx:State>
-	</mx:states>
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.genredata.AnalyzeEvent;

@@ -3,8 +3,6 @@ import com.easyinsight.listing.IPerspective;
 
 import flash.utils.getDefinitionByName;
 
-import mx.containers.Box;
-
 public class SolutionDetailFactory {
     public function SolutionDetailFactory() {
     }

@@ -3,14 +3,6 @@
          xmlns:listing="com.easyinsight.listing.*" xmlns:util="com.easyinsight.util.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
          creationComplete="setupListeners()" verticalGap="0">
-    <mx:states>
-        <mx:State name="notLoggedIn">
-            <mx:RemoveChild target="{apiListing}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <listing:GottaLoginPage/>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.account.APIUserAdmin;
         import com.easyinsight.account.AccountAPISettings;
@@ -87,17 +79,9 @@
             fragmentObject.page = "apis";
             BrowserManager.getInstance().setTitle("Easy Insight - API Management");
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
-            BrowserManager.getInstance().setFragment(fragmentString);
-            var user:User = User.getInstance();
-            if (user == null) {
-                currentState = "notLoggedIn";
-            } else {
-                if (currentState != "") {
-                    currentState = "";
-                }
-                apiService.getDataSourceAPIs.send();
-                userService.getAccountAPISettings.send();
-            }
+            BrowserManager.getInstance().setFragment(fragmentString);            
+            apiService.getDataSourceAPIs.send();
+            userService.getAccountAPISettings.send();
         }
 
         public function getDefaultAnalyzeState():Boolean {

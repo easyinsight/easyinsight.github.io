@@ -6,22 +6,12 @@
          creationComplete="initListeners()" xmlns:listing="com.easyinsight.listing.*"
          paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" verticalGap="0"
          backgroundColor="#818285" horizontalAlign="center">
-    <mx:states>
-        <mx:State name="notLoggedIn">
-            <mx:RemoveChild target="{topBox}"/>
-            <mx:RemoveChild target="{groupStack}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <listing:GottaLoginPage/>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>
     <mx:Script>
 		<![CDATA[
 
         import com.easyinsight.account.Account;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Alert;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
 
@@ -67,22 +57,14 @@
             BrowserManager.getInstance().setTitle("Easy Insight - Groups");
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
-            var user:User = User.getInstance();
-            if (user == null) {
-                currentState = "notLoggedIn";
+            if (User.getInstance().getAccountType() == Account.PERSONAL) {
+                groupAddIndex = 1;
             } else {
-                if (currentState != "") {
-                    currentState = "";
-                }
-                if (User.getInstance().getAccountType() == Account.PERSONAL) {
-                    groupAddIndex = 1;
-                } else {
-                    groupService.canCreateGroup.send();
-                }
-                stackIndex = 0;
-                groupService.getMemberGroups.send();
-                //groupService.getPublicGroups.send();
+                groupService.canCreateGroup.send();
             }
+            stackIndex = 0;
+            groupService.getMemberGroups.send();
+            //groupService.getPublicGroups.send();
         }
 
         public function lostFocus():void {

@@ -69,10 +69,6 @@
         public var connectionsIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/monitor2.png")]
-        public var monitorIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/chart_column.png")]
         public var crosstabIcon:Class;
 
@@ -88,10 +84,6 @@
         [Embed(source="../../../../assets/package_add.png")]
         public var packageAddIcon:Class;
 
-        /*[Bindable]
-        [Embed(source="../../../../assets/palette2.png")]
-        public var themeAddIcon:Class;
-*/
         [Bindable]
         [Embed(source="../../../../assets/tablesx48.png")]
         public var tablesAddIcon:Class;
@@ -103,14 +95,6 @@
         [Bindable]
         [Embed(source="../../../../assets/tables.png")]
         public var tablesIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/application_enterprise.png")]
-        public var apiIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/helpx48.png")]
-        public var helpIcon:Class;
 
         [Bindable]
         private var displayTreeData:ArrayCollection;
@@ -287,10 +271,9 @@
             }
         }
 
-        public static const GOTTA_LOGIN:int = 1;
-        public static const NO_DATA:int = 2;
-        public static const LOADING_DATA:int = 3;
-        public static const MY_DATA:int = 4;
+        public static const NO_DATA:int = 1;
+        public static const LOADING_DATA:int = 2;
+        public static const MY_DATA:int = 3;
 
         public function gotFocus():void {
             var fragmentObject:Object = new Object();
@@ -298,19 +281,15 @@
             BrowserManager.getInstance().setTitle("Easy Insight - My Data");
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
-            var user:User = User.getInstance();
-            if (user == null) {
-                stackIndex = GOTTA_LOGIN;
+            if (stackIndex == 0) {
+                stackIndex = LOADING_DATA;
             } else {
-                if (stackIndex == 0 || stackIndex == GOTTA_LOGIN) {
-                    stackIndex = LOADING_DATA;
-                } else {
-                    showLoading = true;
-                }
-
-                uiChangeEvent(null);
-                uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+                showLoading = true;
             }
+
+            uiChangeEvent(null);
+            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+
         }
 
         private function uiChangeEvent(event:Event):void {
@@ -567,7 +546,6 @@
 
 	<mx:ViewStack id="coreContent" height="100%" width="100%" verticalGap="10" selectedIndex="{stackIndex}" creationPolicy="all">
         <mx:Box width="100%" height="100%"/>
-        <listing:GottaLoginPage/>
         <listing:MyNoData/>
         <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:ProgressBar label="Loading your data..." indeterminate="true"/>
