@@ -28,11 +28,11 @@
         private var panelIndex:int;
 
         [Bindable]
-        [Embed(source="../../../../assets/banner4.png")]
+        [Embed(source="../../../../assets/banner4.jpg")]
         public var backImage:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/banner5.png")]
+        [Embed(source="../../../../assets/banner5.jpg")]
         public var topImage:Class;
 
         private var _solutionID:String;
