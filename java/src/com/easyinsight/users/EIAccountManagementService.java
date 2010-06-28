@@ -9,15 +9,10 @@ import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.email.AccountMemberInvitation;
-import com.easyinsight.groups.Group;
-import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 
-import javax.mail.MessagingException;
-import java.io.UnsupportedEncodingException;
 import java.sql.*;
-import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -229,25 +224,6 @@ public class EIAccountManagementService {
         return userServiceResponse;
     }
 
-    public void eiApproveConsultant(long consultantID) {
-        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from Consultant where guestUserID = ?").setLong(0, consultantID).list();
-            Consultant consultant = (Consultant) results.get(0);
-            consultant.setState(Consultant.ACTIVE);
-            session.update(consultant);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
-
     public void adminUpdate(AccountAdminTO accountTO) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
@@ -331,33 +307,6 @@ public class EIAccountManagementService {
             Database.closeConnection(conn);
         }
         return accounts;
-    }
-
-
-    public List<EIConsultant> getPendingConsultants() {
-        SecurityUtil.authorizeAccountAdmin();
-        List<EIConsultant> consultants = new ArrayList<EIConsultant>();
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from Consultant where state = ?").setInteger(0, Consultant.PENDING_EI_APPROVAL).list();
-            for (Object obj : results) {
-                Consultant consultant = (Consultant) obj;
-                EIConsultant eiConsultant = consultant.toEIConsultant();
-                Account account = consultant.getUser().getAccount();
-                eiConsultant.setAccountName(account.getName());
-                eiConsultant.setAccountID(account.getAccountID());
-                consultants.add(eiConsultant);
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-        return consultants;
     }
 
 }
