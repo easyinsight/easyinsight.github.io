@@ -176,10 +176,6 @@
         private var packageIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/report/data.png")]
-        private var dataIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/report/control_panel2.png")]
         private var gaugeIcon:Class;
 

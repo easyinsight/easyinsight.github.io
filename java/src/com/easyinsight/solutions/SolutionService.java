@@ -35,6 +35,39 @@ import org.hibernate.Session;
  */
 public class SolutionService {
 
+    public List<Long> getInstalledConnections() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            Set<Long> connectionIDs = new HashSet<Long>();
+            PreparedStatement connUserStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.SOLUTION_ID FROM SOLUTION_INSTALL, UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND UPLOAD_POLICY_USERS.feed_id = SOLUTION_INSTALL.installed_data_source_id AND " +
+                    "SOLUTION_INSTALL.installed_data_source_id = DATA_FEED.DATA_FEED_ID AND DATA_FEED.VISIBLE = ?");
+            connUserStmt.setLong(1, SecurityUtil.getUserID());
+            connUserStmt.setBoolean(2, true);
+            ResultSet userRS = connUserStmt.executeQuery();
+            while (userRS.next()) {
+                long connectionID = userRS.getLong(1);
+                connectionIDs.add(connectionID);
+            }
+            PreparedStatement connGroupStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.SOLUTION_ID FROM SOLUTION_INSTALL, UPLOAD_POLICY_GROUPS," +
+                    "GROUP_TO_USER_JOIN, DATA_FEED WHERE GROUP_TO_USER_JOIN.USER_ID = ? AND GROUP_TO_USER_JOIN.group_id = UPLOAD_POLICY_GROUPS.group_id AND " +
+                    "UPLOAD_POLICY_GROUPS.feed_id = SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID AND SOLUTION_INSTALL.installed_data_source_id = DATA_FEED.DATA_FEED_ID AND DATA_FEED.VISIBLE = ?");
+            connGroupStmt.setLong(1, SecurityUtil.getUserID());
+            connGroupStmt.setBoolean(2, true);
+            ResultSet groupRS = connGroupStmt.executeQuery();
+            while (groupRS.next()) {
+                long connectionID = groupRS.getLong(1);
+                connectionIDs.add(connectionID);
+            }
+            return new ArrayList<Long>(connectionIDs);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public boolean alreadyHasConnection(long connectionID) {
         List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
         EIConnection conn = Database.instance().getConnection();

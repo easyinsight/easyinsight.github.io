@@ -19,8 +19,8 @@ import flash.events.MouseEvent;
             setStyle("horizontalAlign", "center");
             setStyle("verticalAlign", "middle");
             addEventListener(MouseEvent.CLICK, listingChange);
-            addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
-            addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+            addEventListener(MouseEvent.ROLL_OVER, onMouseOver);
+            addEventListener(MouseEvent.ROLL_OUT, onMouseOut);
             useHandCursor = true;
             buttonMode = true;
 		}

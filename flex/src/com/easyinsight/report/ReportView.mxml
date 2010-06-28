@@ -47,7 +47,7 @@
         import mx.utils.URLUtil;
 
         [Bindable]
-        [Embed(source="../../../../assets/banner4.png")]
+        [Embed(source="../../../../assets/banner4.jpg")]
         public var backImage:Class;
 
         public function forceRefresh():void {

@@ -23,7 +23,6 @@ public class SizeRenderer extends Label{
                 case DataFeedDescriptor.SENDGRID:
                 case DataFeedDescriptor.GOOGLE:
                 case DataFeedDescriptor.TWITTER:
-                case DataFeedDescriptor.GNIP:
                 case DataFeedDescriptor.CLOUD_WATCH:
                     this.text = "( Live )";
                     break;

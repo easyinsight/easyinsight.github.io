@@ -11,6 +11,9 @@ import com.easyinsight.etl.LookupTableSource;
 import com.easyinsight.framework.Credentials;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.goals.GoalDataAnalyzeSource;
+import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
+import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
@@ -274,6 +277,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                     break;
                 case DataFeedDescriptor.BASECAMP:
                 case DataFeedDescriptor.HIGHRISE:
+                case DataFeedDescriptor.PIVOTAL_TRACKER:
                     refreshData(feedDescriptor);
                     break;
             }
@@ -296,6 +300,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor)));
         } else if (obj is LookupTableDescriptor) {
             dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(obj).id)));
+        } else if (obj is GoalTreeDescriptor) {
+            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(GoalTreeDescriptor(obj).id)));
         }
     }
 
@@ -380,6 +386,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             window.reportPackageID = packageDescriptor.id;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        } else if (obj is GoalTreeDescriptor) {
+            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(GoalTreeDescriptor(obj).id)));
         }
     }
 
@@ -418,6 +426,10 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         } else if (value is LookupTableDescriptor) {
             refreshVisible = false;
             adminVisible = false;
+            copyVisible = false;
+        } else if (value is GoalTreeDescriptor) {
+            refreshVisible = false;
+            adminVisible = true;
             copyVisible = false;
         }
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));

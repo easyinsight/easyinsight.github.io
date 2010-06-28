@@ -66,10 +66,6 @@
         }
 
         [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var backgroundImage:Class;
-
-        [Bindable]
         private var changesIndex:int;
 
         [Bindable]
@@ -89,7 +85,7 @@
 		<mx:method name="updateGroupUsers" result="savedChanges()"/>
 	</mx:RemoteObject>
     <mx:VBox width="100%" horizontalAlign="center">
-        <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+        <mx:Box width="100%" horizontalAlign="center" backgroundSize="#848080"
                 paddingTop="5"
                 paddingBottom="5">
             <mx:Label text="Group Members" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>

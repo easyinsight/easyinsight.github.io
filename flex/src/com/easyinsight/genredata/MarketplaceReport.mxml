@@ -101,10 +101,6 @@
         private var grid:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/report/data.png")]
-        private var dataIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/report/film.png")]
         private var film:Class;
 

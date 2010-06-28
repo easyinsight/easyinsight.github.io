@@ -100,14 +100,6 @@ import com.easyinsight.filtering.FilterRawData;
         [Embed(source="../../../../../../../assets/water4.JPG")]
         private var standardFill:Class;
 
-        [Bindable]
-        [Embed(source="../../../../../../../assets/magenta.jpg")]
-        private var selectedFill:Class;
-
-        [Bindable]
-        [Embed(source="../../../../../../../assets/darkwater.jpg")]
-        private var rolloverFill:Class;
-
         override protected function createChildren():void {
             super.createChildren();
             bgFills = [];

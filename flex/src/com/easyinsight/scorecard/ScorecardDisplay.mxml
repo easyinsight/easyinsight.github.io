@@ -297,10 +297,6 @@
         private var groupText:String = "";
 
         [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var backgroundImage:Class;
-
-        [Bindable]
         private var sideBarControlsIndex:int = 0;
 
         protected function retrieveScorecards():void {
@@ -331,7 +327,7 @@
     <viewStackEffects:Slide id="leftEffect" direction="left"/>
     <viewStackEffects:Slide id="rightEffect" direction="right"/>
     <mx:VBox verticalGap="0" width="100%">
-        <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+        <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
                 paddingTop="5"
                 paddingBottom="5">
             <mx:Label text="Scorecards" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>

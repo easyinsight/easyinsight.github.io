@@ -21,10 +21,9 @@ import com.easyinsight.notifications.UserToDataSourceNotification;
 import com.easyinsight.notifications.NotificationBase;
 import com.easyinsight.notifications.DataSourceToGroupNotification;
 import com.easyinsight.users.User;
-import com.easyinsight.eventing.EventDispatcher;
-import com.easyinsight.eventing.TodoCompletedEvent;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
@@ -44,6 +43,120 @@ public class FeedService implements IDataFeedService {
 
     public FeedService() {
         // this goes into a different data provider        
+    }
+
+    public HomeState determineHomeState() {
+        // has a data source been successfully defined?
+        // have any reports been successfully created?
+        Map<Long, DataSourceDescriptor> dataSourceMap = new HashMap<Long, DataSourceDescriptor>();
+        Map<Long, InsightDescriptor> reportMap = new HashMap<Long, InsightDescriptor>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            Map<Long, ExtraDataSourceInfo> infos = new HashMap<Long, ExtraDataSourceInfo>();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, DATA_FEED.feed_name, DATA_FEED.feed_type, DATA_FEED.create_date" +
+                    " FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE VISIBLE = ? AND " +
+                    "UPLOAD_POLICY_USERS.user_id = ? AND UPLOAD_POLICY_USERS.feed_id = data_feed.data_feed_id");
+            queryStmt.setBoolean(1, true);
+            queryStmt.setLong(2, SecurityUtil.getUserID());
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long dataSourceID = rs.getLong(1);
+                String name = rs.getString(2);
+                int feedType = rs.getInt(3);
+                Date creationDate = new Date(rs.getTimestamp(4).getTime());
+                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID);
+                infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
+                dataSourceMap.put(dataSourceID, dataSourceDescriptor);
+            }
+            PreparedStatement queryGroupStmt = conn.prepareStatement("SELECT DATA_FEED_ID, DATA_FEED.feed_name, DATA_FEED.feed_type," +
+                    "DATA_FEED.create_date FROM DATA_FEED, UPLOAD_POLICY_GROUPS, group_to_user_join WHERE " +
+                    "DATA_FEED.data_feed_id = upload_policy_groups.feed_id and group_to_user_join.group_id = upload_policy_groups.group_id and " +
+                    "group_to_user_join.user_id = ? AND DATA_FEED.VISIBLE = ?");
+            queryGroupStmt.setLong(1, SecurityUtil.getUserID());
+            queryGroupStmt.setBoolean(2, true);
+            ResultSet groupRS = queryGroupStmt.executeQuery();
+            while (groupRS.next()) {
+                long dataSourceID = groupRS.getLong(1);
+                String name = groupRS.getString(2);
+                int feedType = rs.getInt(3);
+                Date creationDate = new Date(rs.getTimestamp(4).getTime());
+                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID);
+                infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
+                dataSourceMap.put(dataSourceID, dataSourceDescriptor);
+            }
+            for (DataSourceDescriptor dataSource : dataSourceMap.values()) {
+                describe(dataSource, infos.get(dataSource.getId()), conn);
+            }
+            PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.data_feed_id, analysis.title, analysis.report_type," +
+                    "analysis.url_key FROM " +
+                        "USER_TO_ANALYSIS, ANALYSIS WHERE " +
+                        "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and analysis.temporary_report = ? and user_to_analysis.user_id = ?");
+            reportQueryStmt.setBoolean(1, false);
+            reportQueryStmt.setLong(2, SecurityUtil.getUserID());
+            ResultSet queryRS = reportQueryStmt.executeQuery();
+            while (queryRS.next()) {
+                long reportID = queryRS.getLong(1);
+                long dataSourceID = queryRS.getLong(2);
+                String reportName = queryRS.getString(3);
+                int reportType = queryRS.getInt(4);
+                String urlKey = queryRS.getString(5);
+                reportMap.put(reportID, new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey));
+            }
+            PreparedStatement groupReportStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.data_feed_id, analysis.title, analysis.report_type," +
+                    "analysis.url_key FROM " +
+                        "group_to_insight, analysis, group_to_user_join WHERE " +
+                            "GROUP_TO_INSIGHT.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and " +
+                            "group_to_insight.insight_id = analysis.analysis_id and analysis.temporary_report = ?");
+            groupReportStmt.setLong(1, SecurityUtil.getUserID());
+            groupReportStmt.setBoolean(2, false);
+            ResultSet groupReportRS = groupReportStmt.executeQuery();
+            while (groupReportRS.next()) {
+                long reportID = groupReportRS.getLong(1);
+                long dataSourceID = groupReportRS.getLong(2);
+                String reportName = groupReportRS.getString(3);
+                int reportType = groupReportRS.getInt(4);
+                String urlKey = groupReportRS.getString(5);
+                reportMap.put(reportID, new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey));
+            }            
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return new HomeState(new ArrayList<DataSourceDescriptor>(dataSourceMap.values()), new ArrayList<InsightDescriptor>(reportMap.values()));
+    }
+
+    private static class ExtraDataSourceInfo {
+        private Date creationDate;
+        private int feedType;
+
+        private ExtraDataSourceInfo(Date creationDate, int feedType) {
+            this.creationDate = creationDate;
+            this.feedType = feedType;
+        }
+    }
+
+    private void describe(DataSourceDescriptor descriptor, ExtraDataSourceInfo extraInfo, EIConnection conn) throws SQLException {
+        PreparedStatement queryReportCountStmt = conn.prepareStatement("SELECT COUNT(ANALYSIS_ID) FROM ANALYSIS WHERE " +
+                "ANALYSIS.data_feed_id = ? AND ANALYSIS.temporary_report = ?");            
+        String description;
+        queryReportCountStmt.setLong(1, descriptor.getId());
+        queryReportCountStmt.setBoolean(2, false);
+        ResultSet rs = queryReportCountStmt.executeQuery();
+        int count = 0;
+        if (rs.next()) {
+            count = rs.getInt(1);
+        }
+        String dateString = SimpleDateFormat.getDateInstance().format(extraInfo.creationDate);
+        if (count == 0) {
+            description = "this data source was created on " + dateString + " and has no reports.";
+        } else if (count == 1) {
+            description = "this data source was created on " + dateString + " and has 1 report.";
+        } else {
+            description = "this data source was created on " + dateString + " and has " + count + " reports.";
+        }
+        descriptor.setDescription(description);
     }
 
     public boolean needsConfig(long dataSourceID) {

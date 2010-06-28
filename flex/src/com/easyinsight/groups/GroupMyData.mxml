@@ -118,10 +118,6 @@
             gotFocus();
         }
 
-        [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var backgroundImage:Class;
-
         private var _groupAdmin:Boolean;
 
         [Bindable]
@@ -161,7 +157,7 @@
     <mx:ViewStack selectedIndex="{adminIndex}" creationPolicy="all" resizeToContent="true" height="100%">
         <mx:HBox height="100%">
             <mx:VBox height="100%">
-                <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+                <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
                         paddingTop="5"
                         paddingBottom="5">
                     <mx:Label text="Group Data" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
@@ -187,7 +183,7 @@
         </mx:HBox>
         <mx:HBox height="100%">
             <mx:VBox height="100%">
-                <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+                <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
                         paddingTop="5"
                         paddingBottom="5">
                     <mx:Label text="Group Data" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>

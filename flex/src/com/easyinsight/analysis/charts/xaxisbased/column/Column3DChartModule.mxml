@@ -79,14 +79,6 @@
         private var standardFill:Class;
 
         [Bindable]
-        [Embed(source="../../../../../../../assets/magenta.jpg")]
-        private var selectedFill:Class;
-
-        [Bindable]
-        [Embed(source="../../../../../../../assets/darkwater.jpg")]
-        private var rolloverFill:Class;
-
-        [Bindable]
         public function get xField():String {
             return _xField;
         }

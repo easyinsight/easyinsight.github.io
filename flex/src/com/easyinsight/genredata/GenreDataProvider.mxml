@@ -2,7 +2,8 @@
 <mx:Canvas xmlns:listing="com.easyinsight.listing.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
                       height="100%"
                       xmlns:genredata="com.easyinsight.genredata.*"
-                      implements="com.easyinsight.listing.IPerspective" creationComplete="setupListeners()">
+                      implements="com.easyinsight.listing.IPerspective" creationComplete="setupListeners()"
+        backgroundColor="#818285">
     <mx:Script>
 		<![CDATA[
 
@@ -12,10 +13,6 @@
         import mx.collections.ArrayCollection;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
-
-        [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var banner:Class;
 
         private function setupListeners():void {
             solutionService.getSolutions.send();
@@ -221,14 +218,9 @@
     </mx:RemoteObject>
     <!--<genredata:PublicDataController id="publicDataController" changeView="onChangeView(event)"/>-->
     <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)" solution="{solution}" updateURL="updateURL()"/>
-    <mx:HBox width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
+    <mx:HBox width="100%" height="100%" horizontalAlign="center">
             <mx:VBox id="centerBox" width="1000" height="100%" paddingBottom="10"
                  paddingLeft="0" paddingRight="0" paddingTop="0" backgroundColor="#FFFFFF" verticalGap="0" horizontalAlign="center">
-
-            <mx:HBox verticalAlign="middle" horizontalAlign="center"
-                                             width="100%" backgroundImage="{banner}" backgroundSize="100%" paddingTop="5" paddingBottom="5">
-                <mx:Label text="Connection Reports" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
-            </mx:HBox>
 
             <mx:HBox width="1000" verticalAlign="middle" paddingTop="20" paddingBottom="20" paddingLeft="20" paddingRight="20">
                 <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" selectedItem="{solution}"

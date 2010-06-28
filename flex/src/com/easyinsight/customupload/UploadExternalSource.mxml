@@ -40,8 +40,7 @@
                                     <mx:String>Google Spreadsheet</mx:String>
                                     <mx:String>Google Analytics</mx:String>
                                     <mx:String>JIRA</mx:String>
-                                    <mx:String>BaseCamp</mx:String>
-                                    <mx:String>Gnip</mx:String>
+                                    <mx:String>BaseCamp</mx:String>                                    
                                     <mx:String>Salesforce</mx:String>
                                     <mx:String>Admin Server Stats</mx:String>
                                     <mx:String>Wesabe</mx:String>
@@ -76,10 +75,6 @@
                                 userConfigCancel="cancel(event)"/>
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.BaseCampDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.GnipDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)"/>
                         <customupload:ExternalDataSourceCreation

@@ -13,10 +13,6 @@
         import mx.collections.ArrayCollection;
 
         [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var backgroundImage:Class;
-
-        [Bindable]
         private var dataSources:ArrayCollection;
         [Bindable]
         private var userName:String;
@@ -92,7 +88,7 @@
             PopUpUtil.centerPopUp(window);
         }
         ]]></mx:Script>
-    <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+    <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
             paddingTop="5" paddingBottom="5">
         <mx:Label text="Account Settings" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
     </mx:Box>

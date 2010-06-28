@@ -1,0 +1,260 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" verticalGap="0" width="100%" height="100%"
+         implements="com.easyinsight.listing.IPerspective" backgroundColor="#818285" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        [Bindable]
+        [Embed(source="../../../../assets/landing/arrow_up_green.png")]
+        public var connectionsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/landing/chart_pie2.png")]
+        public var openReportIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/landing/chart_area.png")]
+        public var accountReportIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/landing/table_add.png")]
+        public var newReportIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/landing/help.png")]
+        public var helpIcon:Class;
+
+        public function gotFocus():void {
+            var fragmentObject:Object = new Object();
+            fragmentObject.page = "home";
+            BrowserManager.getInstance().setTitle("Easy Insight - Home");
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+            feedService.determineHomeState.send();
+        }
+
+        public function cleanup():void {
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        private function gotState():void {
+            var homeState:HomeState = feedService.determineHomeState.lastResult as HomeState;
+            this.dataSources = homeState.dataSources;
+            if (homeState.reports.length > 0) {
+                stackIndex = 3;
+            } else if (homeState.dataSources.length > 0) {
+                stackIndex = 2;
+            } else {
+                stackIndex = 1;
+            }
+        }
+
+        private var reports:ArrayCollection;
+        private var dataSources:ArrayCollection;
+
+        private function newReport():void {
+            if (dataSources.length == 1) {
+                var ds:DataSourceDescriptor = dataSources.getItemAt(0) as DataSourceDescriptor;
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(ds.id, ds.name)));
+            } else {
+                var window:NewReportWindow = new NewReportWindow();
+                window.addEventListener(AnalyzeEvent.ANALYZE, toAnalyze, false, 0, true);
+                window.dataSources = dataSources;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
+
+        private function toAnalyze(event:AnalyzeEvent):void {
+            dispatchEvent(event);
+        }
+
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="determineHomeState" result="gotState()"/>
+    </mx:RemoteObject>
+    <mx:HBox width="1000" height="100%" backgroundColor="#FFFFFF">
+        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}">
+            <mx:Box/>
+            <mx:VBox>
+                <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                         backgroundColor="#FFFFFF" height="240"
+                         width="350" cornerRadius="8" buttonMode="true" id="connectionsBox"
+                         mouseOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
+                         mouseOut="connectionsBox.setStyle('backgroundColor', 0xFFFFFF)"
+                         click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Connections'))"
+                         mouseChildren="false">
+                    <mx:Image source="{connectionsIcon}"/>
+                    <mx:Text text="Add Your Own Data" fontSize="24" selectable="false"/>
+                    <mx:TextArea
+                            text="Want to connect to Basecamp, Google Analytics, Salesforce, or more? Upload an Excel spreadsheet or a CSV? Pull in data from a relational database?"
+                            fontSize="18" backgroundAlpha="0" editable="false" selectable="false" height="140"
+                            width="310" textAlign="center"/>
+                </mx:VBox>
+            </mx:VBox>
+            <mx:VBox width="100%" height="100%">
+                <mx:HBox width="100%" height="50%" verticalAlign="middle">
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="addReportBox"
+                             mouseOver="addReportBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="addReportBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="newReport()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{newReportIcon}"/>
+                        <mx:Text text="Create a New Report" fontSize="24" selectable="false"/>
+                        <mx:TextArea
+                                text="Ready to build your own lists, crosstabs, charts, or maps? You can create new reports here"
+                                fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="70"
+                                width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="openReportBox"
+                             mouseOver="openReportBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="openReportBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Exchange'))"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{openReportIcon}"/>
+                        <mx:Text text="Prebuilt Reports" fontSize="24" selectable="false"/>
+                        <mx:TextArea
+                                text="Need help getting started? Take advantage of other reports built by the community"
+                                fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="70"
+                                width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                </mx:HBox>
+                <mx:HBox width="100%" height="50%" verticalAlign="middle">
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="scorecardBox"
+                             mouseOver="scorecardBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="scorecardBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Scorecards'))"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{connectionsIcon}"/>
+                        <mx:Text text="Key Metrics" fontSize="24" selectable="false"/>
+                        <mx:TextArea
+                                text="Measure your top level business numbers and goals through executive scorecards"
+                                fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="70"
+                                width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="findReportsBox"
+                             mouseOver="findReportsBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="findReportsBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Help'))"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{helpIcon}"/>
+                        <mx:Text text="Help!" fontSize="24" selectable="false"/>
+                        <mx:TextArea text="Documentation and screencasts to explain our many features"
+                                     fontSize="14" backgroundAlpha="0" editable="false" selectable="false"
+                                     height="70" width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                </mx:HBox>
+            </mx:VBox>
+            <mx:VBox width="100%" height="100%">
+                <mx:HBox width="100%" height="50%" verticalAlign="middle">
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="addReportBox2"
+                             mouseOver="addReportBox2.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="addReportBox2.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="newReport()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{newReportIcon}"/>
+                        <mx:Text text="Create a New Report" fontSize="24" selectable="false"/>
+                        <mx:TextArea
+                                text="Ready to build your own lists, crosstabs, charts, or maps? You can create new reports here"
+                                fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="70"
+                                width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="openAccountReportBox"
+                             mouseOver="openAccountReportBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="openAccountReportBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="User.getEventNotifier().dispatchEvent(new NavigationEvent('My Data'))"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{accountReportIcon}"/>
+                        <mx:Text text="Open a Report" fontSize="24" selectable="false"/>
+                        <mx:TextArea
+                                text="Open up a report that you or someone else in your account has previously created"
+                                fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="70"
+                                width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="openReportBox2"
+                             mouseOver="openReportBox2.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="openReportBox2.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Exchange'))"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{openReportIcon}"/>
+                        <mx:Text text="Prebuilt Reports" fontSize="24" selectable="false"/>
+                        <mx:TextArea
+                                text="Need help getting started? Take advantage of other reports built by the community"
+                                fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="70"
+                                width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                </mx:HBox>
+                <mx:HBox width="100%" height="50%" verticalAlign="middle">
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="scorecardBox2"
+                             mouseOver="scorecardBox2.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="scorecardBox2.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Scorecards'))"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{connectionsIcon}"/>
+                        <mx:Text text="Key Metrics" fontSize="24" selectable="false"/>
+                        <mx:TextArea
+                                text="Measure your top level business numbers and goals through executive scorecards"
+                                fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="70"
+                                width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="175"
+                             width="280" cornerRadius="8" buttonMode="true" id="findReportsBox2"
+                             mouseOver="findReportsBox2.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="findReportsBox2.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Help'))"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{helpIcon}"/>
+                        <mx:Text text="Help!" fontSize="24" selectable="false"/>
+                        <mx:TextArea text="Documentation and screencasts to explain our many features"
+                                     fontSize="14" backgroundAlpha="0" editable="false" selectable="false"
+                                     height="70" width="250" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                </mx:HBox>
+            </mx:VBox>
+
+        </mx:ViewStack>
+    </mx:HBox>
+
+
+</mx:VBox>

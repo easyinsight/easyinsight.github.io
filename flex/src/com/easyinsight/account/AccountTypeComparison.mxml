@@ -24,7 +24,6 @@
                     new AccountComparisonIcon("TeamCity Integration", false, true, true, true, true),
                     new AccountComparisonIcon("SWF Analysis", true, true, true, true, true),
                     new AccountComparisonIcon("Database Solution", false, false, true, true, true),
-                    new AccountComparisonIcon("Gnip Integration", false, false, true, true, true),                        
                     new AccountComparisonIcon("Google Analytics Integration", false, true, true, true, true),
                     new AccountComparisonIcon("Template Goal Trees", false, false, true, true, true),
                     new AccountComparisonIcon("Custom Goal Trees", false, false, false, true, true),

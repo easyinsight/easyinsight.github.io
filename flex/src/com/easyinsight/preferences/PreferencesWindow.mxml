@@ -10,62 +10,6 @@
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/house.png")]
-        private var homeIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/chart_area.png")]
-        private var myDataIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/shopping_bag.png")]
-        private var catalogIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/users2.png")]
-        private var groupsIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/components.png")]
-        private var solutionsIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/branch.png")]
-        private var goalsIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/user.png")]
-        private var accountIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/application_enterprise.png")]
-        private var apiIcon:Class;
-
-        [Bindable]
-        private var homeIconSelected:Boolean;
-
-        [Bindable]
-        private var myDataSelected:Boolean;
-
-        [Bindable]
-        private var marketplaceSelected:Boolean;
-
-        [Bindable]
-        private var groupsSelected:Boolean;
-
-        [Bindable]
-        private var solutionsSelected:Boolean;
-
-        [Bindable]
-        private var goalsSelected:Boolean;
-
-        [Bindable]
-        private var accountSelected:Boolean;
-
-        [Bindable]
-        private var apiSelected:Boolean;
-
         private function gotDataSources():void {
             var dataSources:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
             for each (var desc:DataFeedDescriptor in dataSources) {

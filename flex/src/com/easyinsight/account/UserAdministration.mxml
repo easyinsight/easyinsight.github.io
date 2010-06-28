@@ -32,10 +32,6 @@
         private var usersAvailable:int;
         private var usersUsed:int;
 
-        [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var backgroundImage:Class;
-
         public function gotFocus():void {
             addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
             addEventListener(DeleteUserEvent.DELETE_USER, deleteUser);
@@ -120,7 +116,7 @@
     </mx:RemoteObject>
     <account:PersonaComboBoxFactory id="personaFactory" personas="{personas}"/>
     <mx:VBox width="100%" height="100%" horizontalAlign="center">
-        <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+        <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
                 paddingTop="5"
                 paddingBottom="5">
             <mx:Label text="User Administration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>

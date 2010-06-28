@@ -15,8 +15,6 @@
     </solutions:states>
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
-        import com.easyinsight.customupload.UploadExternalSource;
-        import com.easyinsight.customupload.UserUpload;
         import com.easyinsight.framework.AuthorizationRequirement;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.google.AuthSubNavWindow;
@@ -25,12 +23,7 @@
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Alert;
         import mx.managers.PopUpManager;
-
-        [Bindable]
-        [Embed(source="../../../../assets/excelexample.PNG")]
-        private var excelImage:Class;
 
         [Bindable]
         private var startButtonText:String = "Get Started Now!";
@@ -107,7 +100,7 @@
                 <mx:HRule width="100%" strokeColor="#3370ce"/>
                 <mx:TextArea text="You can connect Easy Insight to Google Spreadsheets. The file should have a header row, with data in the subsequent cells, as shown below:" borderThickness="0"
                     width="480" height="65" backgroundAlpha="0" editable="false" fontSize="14"/>
-            <mx:Image source="{excelImage}"/>
+            <mx:Image source="../assets/excelexample.PNG"/>
             <mx:TextArea width="480" height="50" text="You may experience unexpected results if the data does not match that pattern." borderThickness="0" backgroundAlpha="0" editable="false"
                     fontSize="14"/>
             </mx:VBox>

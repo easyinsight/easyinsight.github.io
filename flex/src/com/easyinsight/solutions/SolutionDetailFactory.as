@@ -22,38 +22,6 @@ public class SolutionDetailFactory {
             detail.solution = solution;
             page = detail;
         }
-        /*switch (solution.solutionID) {
-            case 12:
-                var gSol:GoogleAnalyticsSolutionDetail = new GoogleAnalyticsSolutionDetail();
-                gSol.solution = solution;
-                gSol.newAuth = auth;
-                page = gSol;
-                break;
-            case 8:
-                var bSol:BasecampSolutionDetail = new BasecampSolutionDetail();
-                bSol.solution = solution;
-                page = bSol;
-                break;
-            case 19:
-                var hSol:HighriseSolutionDetail = new HighriseSolutionDetail();
-                hSol.solution = solution;
-                page = hSol;
-                break;
-            case 1:
-                var file:FileUploadSolutionDetail = new FileUploadSolutionDetail();
-                file.solution = solution;
-                page = file;
-                break;
-            case 3:
-                var gsds:GoogleSpreadsheetSolutionDetail = new GoogleSpreadsheetSolutionDetail();
-                gsds.solution = solution;
-                page = gsds;
-                break;
-            default:
-                var detail:RevisedSolutionDetail = new RevisedSolutionDetail();
-                detail.solution = solution;
-                page = detail;
-        }*/
         return page;
     }
 

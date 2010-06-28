@@ -3,10 +3,6 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisItemEditor;
-
-        import com.easyinsight.util.PopUpUtil;
-
-        import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 

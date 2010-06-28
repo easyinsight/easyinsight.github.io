@@ -7,11 +7,6 @@
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
-
-        [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var backgroundImage:Class;
-
         [Bindable]
         private var personas:ArrayCollection;
 
@@ -49,7 +44,7 @@
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getPersonas" result="gotPersonas()"/>
     </mx:RemoteObject>
-    <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+    <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
             paddingTop="5" paddingBottom="5">
         <mx:Label text="Persona Configuration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
     </mx:Box>

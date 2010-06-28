@@ -4,10 +4,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.TagCloud;
 
-        [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var backgroundImage:Class;
-
         private var _groupID:int;
 
         [Bindable]
@@ -104,7 +100,7 @@
 		<mx:method name="updateGroup" result="updatedGroup()"/>
 	</mx:RemoteObject>
     <mx:VBox width="100%" horizontalAlign="center">
-        <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+        <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
                 paddingTop="5"
                 paddingBottom="5">
             <mx:Label text="Group Info" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>

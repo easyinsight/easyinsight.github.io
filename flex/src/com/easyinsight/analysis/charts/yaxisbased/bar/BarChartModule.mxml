@@ -82,14 +82,6 @@ import mx.events.FlexEvent;
         [Embed(source="../../../../../../../assets/water4.JPG")]
         private var standardFill:Class;
 
-        /*[Bindable]
-        [Embed(source="../../../../../../../assets/magenta.jpg")]
-        private var selectedFill:Class;
-
-        [Bindable]
-        [Embed(source="../../../../../../../assets/darkwater.jpg")]
-        private var rolloverFill:Class;*/
-
         [Bindable]
         public function get yField():String {
             return _yField;

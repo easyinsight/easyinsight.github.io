@@ -284,8 +284,8 @@
                         case "myData":
                             navigation(new NavigationEvent("My Data"));
                             break;
-                        case "myGoals":
-                            navigation(new NavigationEvent("Goals"));
+                        case "kpis":
+                            navigation(new NavigationEvent("Scorecards"));
                             break;
                         case "exchange":
                             var view:int = int(o.view);
@@ -300,7 +300,7 @@
                             navigation(new NavigationEvent("Help"));
                             break;
                         case "apis":
-                            navigation(new NavigationEvent("API"));
+                            navigation(new NavigationEvent("Developers"));
                             break;
                         case "home":
                         case "intro":

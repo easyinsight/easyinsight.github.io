@@ -12,7 +12,23 @@ public class ReportDateRenderer extends Label {
     public function ReportDateRenderer() {
         super();
         dateFormatter = new DateFormatter();
-        dateFormatter.formatString = User.getInstance().getDateFormat();
+        switch (User.getInstance().dateFormat) {
+            case 0:
+                dateFormatter.formatString = "MM/DD/YYYY";
+                break;
+            case 1:
+                dateFormatter.formatString = "YYYY-MM-DD";
+                break;
+            case 2:
+                dateFormatter.formatString = "DD-MM-YYYY";
+                break;
+            case 3:
+                dateFormatter.formatString = "DD/MM/YYYY";
+                break;
+            case 4:
+                dateFormatter.formatString = "DD.MM.YYYY";
+                break;
+        }
     }
 
     override public function set data(val:Object):void {

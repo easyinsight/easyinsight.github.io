@@ -11,11 +11,18 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
+        import mx.managers.BrowserManager;
+        import mx.utils.URLUtil;
 
         public function gotFocus():void {
             /*if (currentState == "noData") {
                 scorecardDisplay.gotFocus();
             }*/
+            var fragmentObject:Object = new Object();
+            fragmentObject.page = "kpis";
+            BrowserManager.getInstance().setTitle("Easy Insight - KPIs");
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
             scorecardDisplay.gotFocus();
         }
 

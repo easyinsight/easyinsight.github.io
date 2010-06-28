@@ -1,7 +1,4 @@
 package com.easyinsight.tour {
-import com.easyinsight.DataAnalysisContainer;
-
-import flash.events.Event;
 import flash.events.EventDispatcher;
 
 import mx.collections.ArrayCollection;
@@ -102,21 +99,6 @@ public class TutorialFramework extends EventDispatcher {
         previousExecute(element);
     }
 
-    private var _reportEditor:DataAnalysisContainer;
-
-    [Bindable(event="reportEditorChanged")]
-    public function get reportEditor():DataAnalysisContainer {
-        return _reportEditor;
-    }
-
-    public function set reportEditor(value:DataAnalysisContainer):void {
-        if (_reportEditor == value) return;
-        _reportEditor = value;
-        /*for each (var note:TutorialElement in notes) {
-            note.baseObject = _reportEditor;
-        }*/
-        dispatchEvent(new Event("reportEditorChanged"));
-    }
 
 }
 }

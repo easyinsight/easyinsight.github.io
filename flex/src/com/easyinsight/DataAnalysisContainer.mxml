@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <core:FullScreenPage xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-                     xmlns:analysis="com.easyinsight.analysis.*" xmlns:mxeffects="com.adobe.ac.mxeffects.*"
+                     xmlns:analysis="com.easyinsight.analysis.*"
                      xmlns:datasources="com.easyinsight.datasources.*"
-                     creationComplete="initializeForWorksheet()" xmlns:ns1="com.easyinsight.analysis.*" width="100%"
+                     creationComplete="initializeForWorksheet()" width="100%"
                      height="100%"
-                     xmlns:transforms="com.easyinsight.transforms.*"
-                     xmlns:util="com.easyinsight.util.*" xmlns:map="com.easyinsight.map.*"
+                     xmlns:util="com.easyinsight.util.*"
                      xmlns:filtering="com.easyinsight.filtering.*"
                      xmlns:feed="com.easyinsight.administration.feed.*" doubleClickEnabled="true"
                      backgroundImage="{background2}" backgroundSize="100%"
@@ -16,10 +15,6 @@
         <mx:State name="NotLoggedIn">
             <mx:RemoveChild target="{saveButton}"/>
             <mx:RemoveChild target="{saveAsButton}"/>
-            <!--<mx:RemoveChild target="{sharingSettingsBox}"/>
-            <mx:RemoveChild target="{createFeedButton}"/>
-            <mx:SetProperty target="{analysisNameInput}" name="editable" value="false"/>
-            <mx:SetProperty target="{analysisTagsInput}" name="editable" value="false"/>-->
         </mx:State>
         <mx:State name="Professional">
 

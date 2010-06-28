@@ -4,9 +4,7 @@ import com.easyinsight.DataAnalysisContainer;
 import com.easyinsight.FullScreenPage;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.framework.DataService;
-import com.easyinsight.solutions.InsightDescriptor;
 
-import mx.collections.ArrayCollection;
 import mx.managers.BrowserManager;
 
 	public class ReportEditorAnalyzeSource implements AnalyzeSource

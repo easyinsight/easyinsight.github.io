@@ -94,10 +94,6 @@
         private function initListeners():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             addEventListener(SolutionSelectionEvent.SOLUTION_SELECTION, onSelection);
-            /*BindingUtils.bindProperty(this, "saas", saasCheckbox, "selected");
-            BindingUtils.bindProperty(this, "client", clientCheckbox, "selected");
-            BindingUtils.bindProperty(this, "learning", trainingCheckbox, "selected");
-            BindingUtils.bindProperty(this, "biz", bizCheckbox, "selected");*/
         }
 
         private function onSelection(event:SolutionSelectionEvent):void {
@@ -116,10 +112,6 @@
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
             if (defaultView > 0) {
-                /*saas = (Solution.SAAS & defaultView == Solution.SAAS);
-                 client = (Solution.CLIENT & defaultView == Solution.CLIENT);
-                 learning = (Solution.LEARNING & defaultView == Solution.LEARNING);
-                 biz = (Solution.BIZ & defaultView == Solution.BIZ);*/
                 defaultView = 0;
             }
             stackIndex = 0;

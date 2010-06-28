@@ -21,32 +21,8 @@
         private var catalogIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/logos/film.png")]
-        private var filmIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/users2.png")]
-        private var groupsIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/headericons/components.png")]
         private var solutionsIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/branch.png")]
-        private var goalsIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/headericons/application_enterprise.png")]
-        private var apiIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
-        private var banner:Class;
 
         private function basecamp():void {
             var window:ScreencastWindow = new ScreencastWindow();
@@ -72,7 +48,7 @@
     <mx:HBox width="100%" height="100%" horizontalAlign="center" backgroundColor="#818285">
         <mx:VBox height="100%" backgroundColor="#FFFFFF" width="1000" verticalGap="0">
             <mx:HBox verticalAlign="middle" horizontalAlign="center"
-                                         width="100%" backgroundImage="{banner}" backgroundSize="100%" paddingTop="10" paddingBottom="10">
+                                         width="100%" backgroundColor="#848080" paddingTop="10" paddingBottom="10">
                 <mx:Label text="Getting Started with Easy Insight" fontSize="18" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
             </mx:HBox>
             <mx:HBox width="100%" height="260">
