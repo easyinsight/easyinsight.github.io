@@ -297,7 +297,6 @@
                 var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
                 showComposite = uiConfig.getConfiguration(UIConfiguration.SHOW_COMBINE_SOURCES).selected;
                 showPackage = uiConfig.getConfiguration(UIConfiguration.SHOW_CREATE_PACKAGE).selected;
-                showWidget = uiConfig.getConfiguration(UIConfiguration.SHOW_DESKTOP_WIDGET).selected;
                 showConnections = uiConfig.getConfiguration(UIConfiguration.SHOW_CONNECTIONS).selected;
                 showLookupTable = uiConfig.getConfiguration(UIConfiguration.SHOW_LOOKUP_TABLE).selected;
             }       
