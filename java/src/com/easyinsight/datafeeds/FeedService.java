@@ -78,8 +78,8 @@ public class FeedService implements IDataFeedService {
             while (groupRS.next()) {
                 long dataSourceID = groupRS.getLong(1);
                 String name = groupRS.getString(2);
-                int feedType = rs.getInt(3);
-                Date creationDate = new Date(rs.getTimestamp(4).getTime());
+                int feedType = groupRS.getInt(3);
+                Date creationDate = new Date(groupRS.getTimestamp(4).getTime());
                 DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID);
                 infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
                 dataSourceMap.put(dataSourceID, dataSourceDescriptor);
