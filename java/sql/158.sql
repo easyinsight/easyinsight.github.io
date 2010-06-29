@@ -1,0 +1,1 @@
+alter table account add manual_invoicing tinyint(4) not null default 0;

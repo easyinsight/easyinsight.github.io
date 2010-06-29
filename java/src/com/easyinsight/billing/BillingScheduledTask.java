@@ -57,7 +57,7 @@ public class BillingScheduledTask extends ScheduledTask {
         c.setTime(now);
         int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
         LogClass.info("Finding all accounts with day of month on " + dayOfMonth);
-        String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR;
+        String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR + " AND manualInvoicing = false";
 
         if(dayOfMonth == c.getActualMaximum(Calendar.DAY_OF_MONTH)) {
             queryString += " and billingDayOfMonth >= ?";

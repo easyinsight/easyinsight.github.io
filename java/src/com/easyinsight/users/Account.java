@@ -51,6 +51,9 @@ public class Account {
     @Column(name="account_id")
     private long accountID;
 
+    @Column(name="manual_invoicing")
+    private boolean manualInvoicing;
+
     @JoinColumn(name="account_id")
     @OneToMany (cascade = CascadeType.ALL)
     private List<User> users = new ArrayList<User>();
@@ -126,6 +129,14 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public boolean isManualInvoicing() {
+        return manualInvoicing;
+    }
+
+    public void setManualInvoicing(boolean manualInvoicing) {
+        this.manualInvoicing = manualInvoicing;
+    }
 
     public boolean isUpgraded() {
         return upgraded;
