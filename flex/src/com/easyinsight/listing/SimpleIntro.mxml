@@ -15,6 +15,10 @@
 
         [Bindable]
         [Embed(source="../../../../assets/landing/arrow_up_green.png")]
+        public var scorecardIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/components_x_48.png")]
         public var connectionsIcon:Class;
 
         [Bindable]
@@ -87,7 +91,7 @@
     <mx:HBox width="1000" height="100%" backgroundColor="#FFFFFF">
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}">
             <mx:Box/>
-            <mx:VBox>
+            <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
                 <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                          backgroundColor="#FFFFFF" height="240"
                          width="350" cornerRadius="8" buttonMode="true" id="connectionsBox"
@@ -146,7 +150,7 @@
                              mouseOut="scorecardBox.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Scorecards'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                        <mx:Image source="{connectionsIcon}"/>
+                        <mx:Image source="{scorecardIcon}"/>
                         <mx:Text text="Key Metrics" fontSize="24" selectable="false"/>
                         <mx:TextArea
                                 text="Measure your top level business numbers and goals through executive scorecards"
@@ -228,7 +232,7 @@
                              mouseOut="scorecardBox2.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Scorecards'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                        <mx:Image source="{connectionsIcon}"/>
+                        <mx:Image source="{scorecardIcon}"/>
                         <mx:Text text="Key Metrics" fontSize="24" selectable="false"/>
                         <mx:TextArea
                                 text="Measure your top level business numbers and goals through executive scorecards"
