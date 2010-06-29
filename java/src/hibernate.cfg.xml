@@ -114,8 +114,6 @@
         <mapping class="com.easyinsight.core.NamedKey"/>
         <mapping class="com.easyinsight.core.DerivedKey"/>
         <mapping class="com.easyinsight.users.Account"/>
-        <mapping class="com.easyinsight.users.SubscriptionLicense"/>
-        <mapping class="com.easyinsight.users.Consultant"/>
         <mapping class="com.easyinsight.users.BandwidthUsage" />
         <mapping class="com.easyinsight.users.AccountCreditCardBillingInfo" />
 
