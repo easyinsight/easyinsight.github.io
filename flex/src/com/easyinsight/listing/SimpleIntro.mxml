@@ -98,7 +98,7 @@
                          mouseOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
                          mouseOut="connectionsBox.setStyle('backgroundColor', 0xFFFFFF)"
                          click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Connections'))"
-                         mouseChildren="false">
+                         mouseChildren="false" dropShadowEnabled="true">
                     <mx:Image source="{connectionsIcon}"/>
                     <mx:Text text="Add Your Own Data" fontSize="24" selectable="false"/>
                     <mx:TextArea
