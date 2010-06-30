@@ -695,14 +695,8 @@
                 if (valid) {
                     if (dataView.isDataValid()) {
                         dataView.updateExportMetadata();
-                        var ba:ByteArray = null;
-                        if (analysisDefinition.solutionVisible) {
-                            var bd:BitmapData = new BitmapData(dataView.getCoreView().width, dataView.getCoreView().height);
-                            bd.draw(dataView.getCoreView());
-                            ba = PNGEnc.encode(bd);
-                        }
                         ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
-                        analysisService.saveAnalysisDefinition(analysisDefinition, ba);
+                        analysisService.saveAnalysisDefinition(analysisDefinition);
                     } else {
                         Alert.show("You need to configure the fields of this report before you can saving.");
                     }
