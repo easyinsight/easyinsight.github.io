@@ -196,8 +196,10 @@
         <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)" />
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Label text="Now that you've installed this connection, you need to configure it:" fontSize="14"/>
+    <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="Let's configure your connection to the external system:" fontSize="16"/>
+        </mx:HBox>
         <mx:Box id="coreContent"/>
         <mx:ProgressBar id="progressBar" indeterminate="false" mode="manual" visible="false" label="{asyncLabel}"/>
         <mx:ViewStack selectedIndex="{credentialsIndex}">
