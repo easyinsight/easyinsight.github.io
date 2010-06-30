@@ -1,10 +1,13 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*" width="100%" height="100%" horizontalAlign="center"
-        backgroundColor="#818285">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*" width="100%"
+         height="100%">
     <mx:Metadata>
         [Event(name="connectionProgression", type="flash.events.Event")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
@@ -14,7 +17,7 @@
         import com.easyinsight.tour.ReportEditorTutorial;
         import com.easyinsight.util.Callout;
 
-        import mx.collections.ArrayCollection;        
+        import mx.collections.ArrayCollection;
 
         private var _dataSourceDescriptor:DataSourceDescriptor;
 
@@ -26,6 +29,9 @@
 
         public function set dataSourceDescriptor(value:DataSourceDescriptor):void {
             _dataSourceDescriptor = value;
+            dsLabel = dsLabel + value.name;
+            kpiLabel = kpiLabel + value.name + " data to create executive scorecards";
+            reportLabel = reportLabel + value.name + " data";
         }
 
         private var _kpis:ArrayCollection;
@@ -86,20 +92,22 @@
 
         private function installed():void {
             added = true;
-            stackIndex = 4;
+            kpiLinkStart();
+            stackIndex = 3;
         }
 
         private function esInstalled():void {
             added = true;
+            kpiLinkStart();
             stackIndex = 3;
         }
 
         private function backFromLast():void {
-            
+
         }
 
         private function kpiLinkStart():void {
-            linksEnabled = true;
+            //linksEnabled = true;
             callout = scorecardRenderer.firstRenderer(_kpis.getItemAt(0) as KPI);
 
         }
@@ -121,7 +129,7 @@
             tutorial.startTutorial();
 
             /*var reportAnalyzeSource:ReportEditorAnalyzeSource = event.analyzeSource as ReportEditorAnalyzeSource;
-            reportAnalyzeSource.tutorialMode = 1;*/
+             reportAnalyzeSource.tutorialMode = 1;*/
 
         }
 
@@ -129,12 +137,12 @@
             var scorecardList:ScorecardList = scorecardService.getScorecardDescriptors.lastResult as ScorecardList;
             if (scorecardList.scorecardDescriptors.length == 0) {
                 userHasKPIs = false;
+                backIndex = 1;
                 stackIndex = 1;
-
             } else {
                 userHasKPIs = true;
+                backIndex = 2;
                 stackIndex = 2;
-
             }
         }
 
@@ -155,12 +163,55 @@
 
         private var userHasKPIs:Boolean = false;
 
+        private var jumpOffIndex:int;
+
         [Bindable]
         private var linksEnabled:Boolean = false;
 
         private var backIndex:int;
 
         private var added:Boolean = false;
+
+        [Bindable]
+        private var topIndex:int = 0;
+
+        private function addDataSourceToGroup():void {
+            if (visibleGroup.selectedValue == "others")
+                groupService.addDataSourceToDefaultGroup.send(_dataSourceDescriptor.id);
+            else
+                dispatchEvent(new NavigationEvent("Home"));
+        }
+
+        private function addedDataSourceToGroup():void {
+            dispatchEvent(new NavigationEvent("Home"));
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/data.png")]
+        private var dataIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/landing/arrow_up_green.png")]
+        private var kpiIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/landing/chart_area.png")]
+        private var reportIcon:Class;
+
+        private function kpiDone():void {
+            if (User.getInstance().getAccountType() == Account.PERSONAL) {
+                dispatchEvent(new NavigationEvent("Home"));
+            } else {
+                topIndex = 2;
+            }
+        }
+
+        [Bindable]
+        private var dsLabel:String = "What you've just created and configured is a Data Source containing data from ";
+        [Bindable]
+        private var kpiLabel:String = "Top level numbers produced from your ";
+        [Bindable]
+        private var reportLabel:String = "Lists, charts, crosstabs, maps, gauges, and more based on your ";
         ]]></mx:Script>
     <mx:RemoteObject id="kpiService" destination="kpiService">
         <mx:method name="installKPIsToScorecard" result="installed()"/>
@@ -171,86 +222,131 @@
     <mx:RemoteObject id="scorecardService" destination="scorecardService">
         <mx:method name="getScorecardDescriptors" result="gotScorecards()"/>
     </mx:RemoteObject>
-    <mx:VBox width="1000" height="100%" verticalGap="0">
-        <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF">
-            <scorecard:ScorecardRenderer scorecard="{scorecard}" contextMenuAvailable="{linksEnabled}" id="scorecardRenderer"
-                    analyze="onReport(event)"/>
-        </mx:Box>
-        <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#404041">
-            <mx:ViewStack width="100%" selectedIndex="{stackIndex}">
-                <mx:VBox width="100%" horizontalAlign="center" data="0">
-                    <mx:TextArea text="Now that you have a connection, we can take a look at a few Key Performance Indicators or KPIs. These are simple, high level metrics about your business."
-                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
-                                 color="#FFFFFF"/>
-                    <mx:HBox>
-                        <mx:Button label="Next" fontSize="24" click="scorecardService.getScorecardDescriptors.send(false); backIndex = 0"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center" data="1">
-                    <mx:TextArea text="Together, these KPIs form a scorecard, providing quick, high level visibility into how things are going. This scorecard will be available to you under your Home page. There, you can easily create custom KPIs of your own."
-                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
+    <mx:RemoteObject id="groupService" destination="groupService">
+        <mx:method name="addDataSourceToDefaultGroup" result="addedDataSourceToGroup()"/>
+    </mx:RemoteObject>
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Canvas width="100%" height="50%" backgroundColor="#FFFFFF"/>
+            <mx:Canvas width="100%" height="50%" backgroundColor="#404041"/>
+        </mx:VBox>
+    <mx:VBox width="100%" height="100%" horizontalAlign="center">
+        <mx:ViewStack width="1000" height="100%" selectedIndex="{topIndex}">
+            <mx:VBox width="100%" height="100%" verticalGap="0">
+                <mx:HBox verticalAlign="middle" horizontalAlign="center" height="50%" width="100%">
+                    <mx:VBox horizontalAlign="center">
+                        <mx:Image source="{dataIcon}"/>
+                        <mx:Label text="Data Source" fontSize="24"/>
+                        <mx:TextArea text="{dsLabel}" borderStyle="none" backgroundAlpha="0" width="200" fontSize="18"
+                                     height="150"
+                                     textAlign="center"/>
+                    </mx:VBox>
+                    <mx:VRule height="180"/>
+                    <mx:VBox horizontalAlign="center">
+                        <mx:Image source="{kpiIcon}"/>
+                        <mx:Label text="KPIs" fontSize="24"/>
+                        <mx:TextArea text="{kpiLabel}" borderStyle="none" backgroundAlpha="0" width="200" fontSize="18"
+                                     height="150"
+                                     textAlign="center"/>
+                    </mx:VBox>
+                    <mx:VRule height="180"/>
+                    <mx:VBox horizontalAlign="center">
+                        <mx:Image source="{reportIcon}"/>
+                        <mx:Label text="Reports" fontSize="24"/>
+                        <mx:TextArea text="{reportLabel}" borderStyle="none" backgroundAlpha="0" width="200"
+                                     fontSize="18" height="150"
+                                     textAlign="center"/>
+                    </mx:VBox>
+                </mx:HBox>
+                <mx:VBox height="50%" width="100%" horizontalAlign="center"
+                         verticalAlign="middle">
+                    <mx:TextArea
+                            text="You've now created what Easy Insight refers to as a Data Source. You can use this data source to track top level metrics (KPIs) and create lists, charts, maps, and more (Reports)."
+                            editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24"
+                            height="200"
                             color="#FFFFFF"/>
                     <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="stackIndex = 0"/>
-                        <mx:Button label="Next" fontSize="24" click="addToNew()"/>
+                        <mx:Button label="Next" fontSize="24" click="topIndex = 1"/>
                     </mx:HBox>
                 </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center" data="2">
-                    <mx:TextArea text="You already have a scorecard defined, so we can add these KPIs to that existing scorecard, add them to a new scorecard, or just skip them entirely."
-                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
-                            color="#FFFFFF"/>
+            </mx:VBox>
+            <mx:VBox width="1000" height="100%" verticalGap="0">
+                <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle">
+                    <scorecard:ScorecardRenderer scorecard="{scorecard}" contextMenuAvailable="{linksEnabled}"
+                                                 id="scorecardRenderer"
+                                                 analyze="onReport(event)"/>
+                </mx:Box>
+                <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ViewStack width="100%" selectedIndex="{stackIndex}">
+                        <mx:VBox width="100%" horizontalAlign="center" data="0">
+                            <mx:TextArea
+                                    text="Let's start with a few Key Performance Indicators or KPIs. These are simple, high level metrics about your business. What you see above are default KPIs that Easy Insight has automatically created for your data source."
+                                    editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24"
+                                    height="200"
+                                    color="#FFFFFF"/>
+                            <mx:HBox>
+                                <mx:Button label="Back" fontSize="24" click="topIndex = 0"/>
+                                <mx:Button label="Next" fontSize="24"
+                                           click="scorecardService.getScorecardDescriptors.send(false)"/>
+                            </mx:HBox>
+                        </mx:VBox>
+                        <mx:VBox width="100%" horizontalAlign="center" data="1">
+                            <mx:TextArea
+                                    text="Together, these KPIs form a scorecard, providing quick, high level visibility into how things are going. This scorecard will be available to you under your Scorecards page. There, you can easily create custom KPIs of your own."
+                                    editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24"
+                                    height="200"
+                                    color="#FFFFFF"/>
+                            <mx:HBox>
+                                <mx:Button label="Back" fontSize="24" click="stackIndex = 0"/>
+                                <mx:Button label="Next" fontSize="24" click="addToNew()"/>
+                            </mx:HBox>
+                        </mx:VBox>
+                        <mx:VBox width="100%" horizontalAlign="center" data="2">
+                            <mx:TextArea
+                                    text="You already have a scorecard defined, so we can add these KPIs to that existing scorecard, add them to a new scorecard, or just skip them entirely."
+                                    editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24"
+                                    height="200"
+                                    color="#FFFFFF"/>
+                            <mx:HBox>
+                                <mx:Button label="Back" fontSize="24" click="stackIndex = 0"/>
+                                <mx:Button label="Add to Existing Scorecard" fontSize="24" click="esAddToExisting()"/>
+                                <mx:Button label="Add to New Scorecard" fontSize="24" click="esAddToNew()"/>
+                                <mx:Button label="Just Skip Them" fontSize="24" click="kpiLinkStart(); stackIndex = 3"/>
+                            </mx:HBox>
+                        </mx:VBox>
+                        <mx:VBox width="100%" horizontalAlign="center" data="6">
+                            <mx:TextArea
+                                    text="You can click on KPI names to pull up context menus and navigate into the data to explore what's beneath the numbers."
+                                    editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24"
+                                    height="200"
+                                    color="#FFFFFF"/>
+                            <mx:HBox>
+                                <mx:Button label="Back" fontSize="24" click="kpiLinkBack(); stackIndex = backIndex"/>
+                                <mx:Button label="Next" fontSize="24" click="kpiLinkBack(); kpiDone()"/>
+                            </mx:HBox>
+                        </mx:VBox>
+                    </mx:ViewStack>
+                </mx:Box>
+            </mx:VBox>
+            <mx:VBox width="100%" height="100%" verticalGap="0">
+                <mx:VBox verticalAlign="middle" horizontalAlign="center" height="50%" width="100%">
+                    <mx:RadioButtonGroup id="visibleGroup"/>
+                    <mx:VBox>
+                        <mx:RadioButton label="Visible to Other Users" groupName="visibleGroup" selected="true"
+                                        value="others" fontSize="24"/>
+                        <mx:RadioButton label="Just Visible To Me" groupName="visibleGroup" value="justMe"
+                                        fontSize="24"/>
+                    </mx:VBox>
+                </mx:VBox>
+                <mx:VBox height="50%" width="100%" backgroundColor="#404041" horizontalAlign="center" verticalAlign="middle">
+                    <mx:Text text="Should this data source be visible to other users in the account?" fontSize="24"
+                             color="#FFFFFF" height="200"/>
                     <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="stackIndex = 0"/>
-                        <mx:Button label="Add to Existing Scorecard" fontSize="24" click="esAddToExisting()"/>
-                        <mx:Button label="Add to New Scorecard" fontSize="24" click="esAddToNew()"/>
-                        <mx:Button label="Just Skip Them" fontSize="24" click="stackIndex = 3"/>
+                        <mx:Button label="Back" fontSize="24" click="kpiLinkStart(); topIndex = 1"/>
+                        <mx:Button label="Finish" fontSize="24" click="addDataSourceToGroup()"/>
                     </mx:HBox>
                 </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center" data="3">
-                    <mx:TextArea text="It looks like you may have seen this tutorial already--do you want to continue with the tutorial or just jump over to your new data source?"
-                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
-                            color="#FFFFFF"/>
-                    <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="stackIndex = 2"/>
-                        <mx:Button label="Continue with Tutorial" fontSize="24" click="stackIndex = 4"/>
-                        <mx:Button label="Just Go to the Data Source" fontSize="24" click="done()"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center" data="4">
-                    <mx:TextArea text="Next, you need to be able to dig deeper into the numbers--find the insights underlying those measures."
-                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
-                            color="#FFFFFF"/>
-                    <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="stackIndex = 1"/>
-                        <mx:Button label="Next" fontSize="24" click="stackIndex = 7; kpiLinkStart()"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center" data="5">
-                    <mx:TextArea text="Next, you need to be able to dig deeper into the numbers--find the insights underlying those measures."
-                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
-                            color="#FFFFFF"/>
-                    <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="stackIndex = 3"/>
-                        <mx:Button label="Next" fontSize="24" click="stackIndex = 6; kpiLinkStart()"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center" data="6">
-                    <mx:TextArea text="You can click on a KPI name to pull up a context menu with options for diving into the data. Go ahead and click the first option, Analyze the KPI, to pull up the report editor."
-                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
-                                 color="#FFFFFF"/>
-                    <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="kpiLinkBack(); stackIndex = 5"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center" data="7">
-                    <mx:TextArea text="You can click on a KPI name to pull up a context menu with options for diving into the data. Go ahead and click the first option, Analyze the KPI, to pull up the report editor."
-                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
-                                 color="#FFFFFF"/>
-                    <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="kpiLinkBack(); stackIndex = 4"/>
-                    </mx:HBox>
-                </mx:VBox>
-            </mx:ViewStack>
-        </mx:Box>
+            </mx:VBox>
+        </mx:ViewStack>
+
     </mx:VBox>
-</mx:HBox>
+</mx:Canvas>

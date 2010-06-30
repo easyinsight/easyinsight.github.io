@@ -70,30 +70,49 @@ public class MarketoApiTest extends TestCase {
             cal = (GregorianCalendar) GregorianCalendar.getInstance();
             cal.set(2010, 0, 1);
             timestamp = fac.newXMLGregorianCalendar(cal);
-            /*params.setLastUpdatedAt(timestamp);
+            params.setLastUpdatedAt(timestamp);
             SuccessGetMultipleLeads leads = port.getMultipleLeads(params);
             JAXBElement<ArrayOfLeadRecord> elements = leads.getResult().getLeadRecordList();
             List<LeadRecord> records = elements.getValue().getLeadRecord();
+            int i = 0;
             for (LeadRecord leadRecord : records) {
                 JAXBElement<String> element = leadRecord.getEmail();
                 String email = element.getValue();
                 System.out.println(email);
-                JAXBElement<ArrayOfAttribute> attributes = leadRecord.getLeadAttributeList();
+                ParamsGetLeadActivity leadActivityParams = new ParamsGetLeadActivity();
+                LeadKey leadKey = new LeadKey();
+                leadKey.setKeyType(LeadKeyRef.EMAIL);
+                leadKey.setKeyValue(email);
+                leadActivityParams.setLeadKey(leadKey);
+                SuccessGetLeadActivity activities = port.getLeadActivity(leadActivityParams);
+                List<ActivityRecord> activityRecords = activities.getLeadActivityList().getActivityRecordList().getValue().getActivityRecord();
+                for (ActivityRecord activityRecord : activityRecords) {
+                    System.out.println("\tcampaign = " + activityRecord.getCampaign().getValue());
+                    System.out.println("\tcampaign = " + activityRecord.getActivityType());
+                    for (Attribute attribute : activityRecord.getActivityAttributes().getValue().getAttribute()) {
+                        System.out.println("\t\t" + attribute.getAttrName() + " - " + attribute.getAttrValue());
+                    }
+                }
+                /*JAXBElement<ArrayOfAttribute> attributes = leadRecord.getLeadAttributeList();
                 ArrayOfAttribute array = attributes.getValue();
                 List<Attribute> attributeList = array.getAttribute();
                 for (Attribute attribute : attributeList) {
                     System.out.println("\t" + attribute.getAttrName() + "\t" + attribute.getAttrValue());
+                }*/
+                if (i++ == 5) {
+                    break;
                 }
-            }*/
-            ParamsGetCampaignsForSource campaignParams = new ParamsGetCampaignsForSource();
-            campaignParams.setSource(ReqCampSourceType.MKTOWS);
+            }
+            /*ParamsGetCampaignsForSource campaignParams = new ParamsGetCampaignsForSource();
+            campaignParams.setSource(ReqCampSourceType.SALES);
             SuccessGetCampaignsForSource campaigns = port.getCampaignsForSource(campaignParams);
             List<CampaignRecord> campaignRecords = campaigns.getResult().getCampaignRecordList().getValue().getCampaignRecord();
             for (CampaignRecord campaignRecord : campaignRecords) {
                 String campaignName = campaignRecord.getName();
                 System.out.println(campaignName);
-
-            }
+                System.out.println(campaignRecord.getId());
+                System.out.println(campaignRecord.getDescription());
+            }*/
             } catch (DatatypeConfigurationException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (InvalidKeyException e) {
