@@ -47,7 +47,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(CONTACT_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, TITLE, CONTACT_ID);
+        return Arrays.asList(CONTACT_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, TITLE, CONTACT_ID, ZIP_CODE, BACKGROUND);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
