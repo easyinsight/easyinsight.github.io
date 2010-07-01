@@ -62,9 +62,17 @@
 
         private var treeDef:TreeDefinition;
 
+        private var fieldLength:int;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (dataSet.length > 0) {
+                stackIndex = 0;
                 var treeDefinition:TreeDefinition = analysisDefinition as TreeDefinition;
+                var fieldsChanged:Boolean = false;
+                if (treeDef != null) {
+                    fieldsChanged = fieldLength != treeDefinition.items.length;
+                }
+                this.fieldLength = treeDefinition.items.length;
                 coreGrid.setStyle("fontFamily", treeDefinition.fontName);
                 coreGrid.setStyle("fontSize", treeDefinition.fontSize);
                 this.treeDef = treeDefinition;
@@ -126,17 +134,28 @@
                 hierarchyColumn.headerText = hierarchy.display;
                 //hierarchyColumn.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, hierarchyColumn.sortDescending);
                 hierarchyColumn.dataField = hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName();
-                if (explicitWidth) hierarchyColumn.width = hierarchy.width;
+                var existingHierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
+                if (!fieldsChanged && existingHierarchyIndex != -1) {
+                    var existingHierarchyColumn:AdvancedDataGridColumn = coreGrid.columns[existingIndex];
+                    hierarchyColumn.width = existingHierarchyColumn.width;
+                } else if (explicitWidth) {
+                    hierarchyColumn.width = hierarchy.width;
+                }
                 hierarchyColumn.headerRenderer = new ListViewHeaderRendererFactory(hierarchy.display);
                 columns[0] = hierarchyColumn;
                 for (var k:int = 0; k < analysisItems.length; k++) {
                     var myHeader:AnalysisItem = analysisItems[k] as AnalysisItem;
-                    //columnMap[myHeader.qualifiedName()] = myHeader;
                     var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                    if (explicitWidth) columnHeaderObject.width = myHeader.width;
+                    var existingIndex:int = findColumnIndex(myHeader.qualifiedName());
+                    if (!fieldsChanged && existingIndex != -1) {
+                        var existingColumn:AdvancedDataGridColumn = coreGrid.columns[existingIndex];
+                        columnHeaderObject.width = existingColumn.width;
+                        columnHeaderObject.sortDescending = existingColumn.sortDescending;
+                    } else if (explicitWidth) {
+                        columnHeaderObject.width = myHeader.width;
+                    }
                     columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                     columnHeaderObject.headerText = myHeader.display;
-                    //columnHeaderObject.headerText = "";
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     columnHeaderObject.headerRenderer = new ListViewHeaderRendererFactory(myHeader.display);
 
@@ -152,10 +171,9 @@
                 groupingColl.refresh();
                 coreGrid.dataProvider = groupingColl;
                 coreGrid.columns = columns;
-                coreGrid.visible = true;
             } else {
                 myData = new ArrayCollection();
-                coreGrid.visible = false;
+                stackIndex = 1;
             }
         }
 
@@ -164,6 +182,17 @@
         }
 
         public function updateExportMetadata():void {
+            var hierarchy:AnalysisHierarchyItem = treeDef.hierarchy as AnalysisHierarchyItem;
+            var hierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
+            updateItem(hierarchy, hierarchyIndex);
+            for (var i:int = 0; i < treeDef.items.length; i++) {
+                var item:AnalysisItem = treeDef.items.getItemAt(i) as AnalysisItem;
+                var columnIndex:int = findColumnIndex(item.qualifiedName());
+                updateItem(item, columnIndex);
+            }
+        }
+
+        private function onStretch(event:Event):void {
             var hierarchy:AnalysisHierarchyItem = treeDef.hierarchy as AnalysisHierarchyItem;
             var hierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
             updateItem(hierarchy, hierarchyIndex);
@@ -208,8 +237,18 @@
             } else {
                 item.sort = 0;
             }
-        }]]></mx:Script>
-    <mx:Box width="100%" height="100%">
-        <mx:AdvancedDataGrid id="coreGrid" width="100%" height="100%" visible="true" fontFamily="Tahoma"/>
-    </mx:Box>
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+        ]]></mx:Script>
+    <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all">
+        <mx:Box width="100%" height="100%">
+            <mx:AdvancedDataGrid id="coreGrid" width="100%" height="100%" visible="true" fontFamily="Tahoma" columnStretch="onStretch(event)"/>
+        </mx:Box>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:Label fontSize="20" text="No data was found for the fields and filters you have selected."/>
+        </mx:Box>
+    </mx:ViewStack>
+
 </mx:Module>
