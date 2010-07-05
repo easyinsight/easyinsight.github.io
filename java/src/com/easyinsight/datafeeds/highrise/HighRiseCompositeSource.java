@@ -2,9 +2,6 @@ package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.datafeeds.basecamp.BaseCampCompanyProjectJoinSource;
-import com.easyinsight.datafeeds.basecamp.BaseCampCompanySource;
-import com.easyinsight.datafeeds.basecamp.BaseCampTimeSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -314,5 +311,88 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     @Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList(new HighRiseComposite1To2(this), new HighRiseComposite2To3(this));
+    }
+
+    public void decorateLinks(List<AnalysisItem> analysisItems) {
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem.getLinks() == null) {
+                analysisItem.setLinks(new ArrayList<Link>());
+            }
+            if (isContactLinkable(analysisItem)) {
+                URLLink urlLink = new URLLink();
+                urlLink.setUrl(getUrl() + "/people/["+HighRiseContactSource.CONTACT_ID+"]");
+                urlLink.setLabel("View Contact in Highrise...");
+                analysisItem.getLinks().add(urlLink);
+            } else if (isCompanyLinkable(analysisItem)) {
+                URLLink urlLink = new URLLink();
+                urlLink.setUrl(getUrl() + "/companies/["+HighRiseCompanySource.COMPANY_ID+"]");
+                urlLink.setLabel("View Company in Highrise...");
+                analysisItem.getLinks().add(urlLink);
+            } else if (isDealLinkable(analysisItem)) {
+                URLLink urlLink = new URLLink();
+                urlLink.setUrl(getUrl() + "/deals/["+HighRiseDealSource.DEAL_ID+"]");
+                urlLink.setLabel("View Deal in Highrise...");
+                analysisItem.getLinks().add(urlLink);
+            } else if (isCaseLinkable(analysisItem)) {
+                URLLink urlLink = new URLLink();
+                urlLink.setUrl(getUrl() + "/kases/["+HighRiseCaseSource.CASE_ID+"]");
+                urlLink.setLabel("View Case in Highrise...");
+                analysisItem.getLinks().add(urlLink);
+            } else if (isTaskLinkable(analysisItem)) {
+                URLLink upcomingTasks = new URLLink();
+                upcomingTasks.setUrl(getUrl() + "/tasks");
+                upcomingTasks.setLabel("View Upcoming Tasks in Highrise...");
+                analysisItem.getLinks().add(upcomingTasks);
+                URLLink completedTasks = new URLLink();
+                completedTasks.setUrl(getUrl() + "/tasks?collection=completed");
+                completedTasks.setLabel("View Completed Tasks in Highrise...");
+                analysisItem.getLinks().add(completedTasks);
+                URLLink assignedTasks = new URLLink();
+                assignedTasks.setUrl(getUrl() + "/tasks?collection=assigned");
+                assignedTasks.setLabel("View Assigned Tasks in Highrise...");
+                analysisItem.getLinks().add(assignedTasks);
+            }
+
+        }
+    }
+
+    private boolean isContactLinkable(AnalysisItem analysisItem) {
+        String keyString = analysisItem.getKey().toKeyString();
+        if (HighRiseContactSource.CONTACT_NAME.equals(keyString)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isCompanyLinkable(AnalysisItem analysisItem) {
+        String keyString = analysisItem.getKey().toKeyString();
+        if (HighRiseCompanySource.COMPANY_NAME.equals(keyString)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isDealLinkable(AnalysisItem analysisItem) {
+        String keyString = analysisItem.getKey().toKeyString();
+        if (HighRiseDealSource.DEAL_NAME.equals(keyString)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isCaseLinkable(AnalysisItem analysisItem) {
+        String keyString = analysisItem.getKey().toKeyString();
+        if (HighRiseCaseSource.CASE_NAME.equals(keyString)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isTaskLinkable(AnalysisItem analysisItem) {
+        String keyString = analysisItem.getKey().toKeyString();
+        if (HighRiseTaskSource.BODY.equals(keyString)) {
+            return true;
+        }
+        return false;
     }
 }
