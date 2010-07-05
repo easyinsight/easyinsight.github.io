@@ -41,13 +41,26 @@ public class HighRiseContactSource extends HighRiseBaseSource {
     public static final String BACKGROUND = "Contact Background";
     public static final String ZIP_CODE = "Contact Zip Code";
 
+    public static final String CONTACT_WORK_EMAIL = "Contact Work Email";
+    public static final String CONTACT_HOME_EMAIL = "Contact Home Email";
+    public static final String CONTACT_MOBILE_PHONE = "Contact Mobile Phone";
+    public static final String CONTACT_OFFICE_PHONE = "Contact Work Phone";
+    public static final String CONTACT_HOME_PHONE = "Contact Home Phone";
+    public static final String CONTACT_FAX_PHONE = "Contact Fax Phone";
+    public static final String CONTACT_STREET = "Contact Street";
+    public static final String CONTACT_CITY = "Contact City";
+    public static final String CONTACT_STATE = "Contact State";
+    public static final String CONTACT_COUNTRY = "Contact Country";
+
     public HighRiseContactSource() {
         setFeedName("Contact");
     }
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(CONTACT_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, TITLE, CONTACT_ID, ZIP_CODE, BACKGROUND);
+        return Arrays.asList(CONTACT_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, TITLE, CONTACT_ID, ZIP_CODE, BACKGROUND,
+                CONTACT_WORK_EMAIL, CONTACT_MOBILE_PHONE, CONTACT_OFFICE_PHONE, CONTACT_HOME_PHONE, CONTACT_FAX_PHONE,
+                CONTACT_STREET, CONTACT_CITY, CONTACT_STATE, CONTACT_COUNTRY);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
@@ -58,6 +71,15 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(TITLE), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_WORK_EMAIL), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_HOME_EMAIL), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_MOBILE_PHONE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_OFFICE_PHONE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_FAX_PHONE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_STREET), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_CITY), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_STATE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_COUNTRY), true));
         analysisItems.add(new AnalysisList(keys.get(TAGS), false, ","));
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
@@ -125,10 +147,44 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                         Node contactDataNode = contactDataNodes.get(0);
                         String zip = queryField(contactDataNode, "zip/text()");
                         row.addValue(ZIP_CODE, zip);
+                        row.addValue(CONTACT_CITY, queryField(contactDataNode, "city/text()"));
+                        row.addValue(CONTACT_STATE, queryField(contactDataNode, "state/text()"));
+                        row.addValue(CONTACT_COUNTRY, queryField(contactDataNode, "country/text()"));
+                        row.addValue(CONTACT_STREET, queryField(contactDataNode, "street/text()"));
+                    }
+
+                    Nodes emailNodes = companyNode.query("contact-data/email-addresses/email-address");
+                    for (int j = 0; j < emailNodes.size(); j++) {
+                        Node emailNode = emailNodes.get(j);
+                        String location = queryField(emailNode, "location/text()");
+                        String email = queryField(emailNode, "address/text()");
+                        if ("Work".equals(location)) {
+                            row.addValue(CONTACT_WORK_EMAIL, email);
+                        } else if ("Home".equals(location)) {
+                            row.addValue(CONTACT_HOME_EMAIL, email);
+                        }
+                    }
+
+                    Nodes phoneNodes = companyNode.query("contact-data/phone-numbers/phone-number");
+                    for (int j = 0; j < phoneNodes.size(); j++) {
+                        Node phoneNode = phoneNodes.get(j);
+                        String phoneNumber = queryField(phoneNode, "number/text()");
+                        String location = queryField(phoneNode, "location/text()");
+                        System.out.println("location = " + location);
+                        if ("Mobile".equals(location)) {
+                            row.addValue(CONTACT_MOBILE_PHONE, phoneNumber);
+                        } else if ("Work".equals(location)) {
+                            row.addValue(CONTACT_OFFICE_PHONE, phoneNumber);
+                        } else if ("Fax".equals(location)) {
+                            row.addValue(CONTACT_FAX_PHONE, phoneNumber);
+                        } else if ("Home".equals(location)) {
+                            row.addValue(CONTACT_HOME_PHONE, phoneNumber);
+                        }
                     }
 
                     String id = queryField(companyNode, "id/text()");
                     row.addValue(CONTACT_ID, id);
+
                     String companyID = queryField(companyNode, "company-id/text()");
                     row.addValue(COMPANY_ID, companyID);
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
@@ -168,11 +224,11 @@ public class HighRiseContactSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList((DataSourceMigration) new HighRiseContact1To2(this));
+        return Arrays.asList(new HighRiseContact1To2(this), new HighRiseContact2To3(this));
     }
 }
