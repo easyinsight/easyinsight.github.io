@@ -33,7 +33,8 @@ public class StandardContextWindow {
     private var passthroughObject:InteractiveObject;
     private var data:Object;
 
-    public function StandardContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:InteractiveObject, data:Object) {
+    public function StandardContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:InteractiveObject, data:Object,
+                                          includeDrills:Boolean = true) {
         super();
         this.analysisItem = analysisItem;
         this.passthroughFunction = passthroughFunction;
@@ -42,16 +43,26 @@ public class StandardContextWindow {
         items = [];
         if (analysisItem is AnalysisHierarchyItem) {
             var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
-            var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
-            if (index < (hierarchy.hierarchyLevels.length - 1)) {
-                var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown");
-                drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, drill);
-                items.push(drilldownContextItem);
+            if (includeDrills) {
+                var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
+                if (index < (hierarchy.hierarchyLevels.length - 1)) {
+                    var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown");
+                    drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, drill);
+                    items.push(drilldownContextItem);
+                }
+                if (index > 0) {
+                    var rollupItem:ContextMenuItem = new ContextMenuItem("Rollup");
+                    rollupItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
+                    items.push(rollupItem);
+                }
             }
-            if (index > 0) {
-                var rollupItem:ContextMenuItem = new ContextMenuItem("Rollup");
-                rollupItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-                items.push(rollupItem);
+            for each (var level:HierarchyLevel in hierarchy.hierarchyLevels) {
+                var childItem:AnalysisItem = level.analysisItem;
+                if (data[childItem.qualifiedName()]) {
+                    for each (var hierarchyLink:Link in childItem.links) {
+                        composeLink(hierarchyLink);
+                    }
+                }
             }
         }
         var copyItem:ContextMenuItem = new ContextMenuItem("Copy Value");
@@ -59,37 +70,41 @@ public class StandardContextWindow {
         items.push(copyItem);
         if (analysisItem.links.length > 0) {
             for each (var link:Link in analysisItem.links) {
-                if (link is URLLink) {
-                    var url:URLLink = link as URLLink;
-                    var urlContextItem:ContextMenuItem = new ContextMenuItem(url.label);
-                    urlContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-                        
-                        var url:String = data[link.label + "_link"];
-                        navigateToURL(new URLRequest(url), "_blank");
-                    });
-                    items.push(urlContextItem);
-                } else if (link is DrillThrough) {
-                    var drillThrough:DrillThrough = link as DrillThrough;
-                    var drillContextItem:ContextMenuItem = new ContextMenuItem(drillThrough.label);
-                    drillContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-
-        var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-        filterDefinition.field = analysisItem;
-        filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
-        filterDefinition.enabled = true;
-        filterDefinition.inclusive = true;
-        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough.reportID, new ArrayCollection([ filterDefinition ]));
-        executor.addEventListener(ReportNavigationEvent.TO_REPORT, onReport);
-        executor.send();
-    });
-                    items.push(drillContextItem);
-                }
+                composeLink(link);
             }
         }
         var menu:ContextMenu = new ContextMenu();
         menu.hideBuiltInItems();
         menu.customItems = items;
         passthroughObject.contextMenu = menu;
+    }
+
+    private function composeLink(link:Link):void {
+        if (link is URLLink) {
+            var url:URLLink = link as URLLink;
+            var urlContextItem:ContextMenuItem = new ContextMenuItem(url.label);
+            urlContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+
+                var url:String = data[link.label + "_link"];
+                navigateToURL(new URLRequest(url), "_blank");
+            });
+            items.push(urlContextItem);
+        } else if (link is DrillThrough) {
+            var drillThrough:DrillThrough = link as DrillThrough;
+            var drillContextItem:ContextMenuItem = new ContextMenuItem(drillThrough.label);
+            drillContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+
+                var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
+                filterDefinition.field = analysisItem;
+                filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
+                filterDefinition.enabled = true;
+                filterDefinition.inclusive = true;
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough.reportID, new ArrayCollection([ filterDefinition ]));
+                executor.addEventListener(ReportNavigationEvent.TO_REPORT, onReport);
+                executor.send();
+            });
+            items.push(drillContextItem);
+        }
     }
 
     private function onRollup(event:ContextMenuEvent):void {
