@@ -45,6 +45,7 @@
                     <li><a href="datasources.html#r11">How do I combine data sources?</a></li>
                     <li><a href="datasources.html#r12">How do I use lookup tables?</a></li>
                     <li><a href="datasources.html#r13">How do I administer a data source?</a></li>
+                    <li><a href="datasources.html#r14">How do I schedule a data source to automatically refresh?</a></li>
                 </ul>
                 <h2><a name="r1">How do I upload a CSV or Excel file?</a></h2>
                 <p>Navigate to the Connections page of Easy Insight. Click on the Upload Excel or CSV button. Click on Upload a Spreadsheet, choose the file from your hard drive, and click Upload. Supported files are:</p>
@@ -85,6 +86,8 @@
                 <p>Once you've set these initial parameters, you'll enter a new screen with a list down the left side of the screen of all distinct values of the source grouping. At this poiny, you can go through and fill in the matching lookup values for each grouping. Once you save the lookup table, this new field becomes available to reports just as any other field which is intrinsically part of the data source.</p>
                 <h2><a name="r13">How do I administer a data source?</a></h2>
                 <p>Navigate to the My Data page and click on the Administer Data Source icon to the far right of the data source name. From here, you can alter or add custom fields to a data source just as you do with new fields in the report editor. For more information on these available operations, see the report editor documentation.</p>
+                <h2><a name="r14">How do I schedule a data source to automatically refresh?</a></h2>
+                <p>Since Basecamp, Highrise, and Pivotal Tracker synchronize data into Easy Insight to provide quick ad hoc reports, you may find it helpful to set up an automatic refresh of the data source. You can schedule automatic data source refresh by going to My Data, clicking on Scheduling, and defining a new data source refresh. To minimize server impact, your account is limited to one refresh of each data source type--i.e. if you have multiple Basecamp data sources, you may only automatically refresh one. Available refresh intervals are Daily, Weekdays (Monday -> Friday, sorry, no business calendars yet), Monday/Wednesday/Friday, Tuesday/Thursday, Day of Week, and Day of Month. We encourage you to choose the minimal refresh interval for your reporting needs--depending on use of this functionality, we may have to gradually enforce additional throttling to ensure we don't present an adverse server load to the target servers. Refresh times are defined in terms of your locale time zone, so if your computer is running in Eastern Standard Time, you will define the refresh in terms of Eastern Standard Time. Times are presented on a 24 hour clock.</p>
             </div>
     		<!-- InstanceEndEditable -->
 <div id="footer" style="margin:0px;width:100%;height:60px">
