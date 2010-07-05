@@ -335,29 +335,42 @@ public class ExportService {
                 CreationHelper createHelper = wb.getCreationHelper();
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
                 if (dateDim.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
-                    cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("y"));
+                    cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy"));
                 } else if (dateDim.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
                     if (dateFormat == 0 || dateFormat == 3) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/y"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/yyyy"));
                     } else if (dateFormat == 1) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("y-m"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-m"));
                     } else if (dateFormat == 2) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m-y"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m-yyyy"));
                     } else if (dateFormat == 4) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m.y"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m.yyyy"));
                     }
                 } else if (dateDim.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL ||
                         dateDim.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
                     if (dateFormat == 0) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/d/y"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/d/yyyy"));
                     } else if (dateFormat == 1) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("y-m-d"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-m-d"));
                     } else if (dateFormat == 2) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d-m-y"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d-m-yyyy"));
                     } else if (dateFormat == 3) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d/m/y"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d/m/yyyy"));
                     } else if (dateFormat == 4) {
-                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d.m.y"));
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d.m.yyyy"));
+                    }
+                } else if (dateDim.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL ||
+                        dateDim.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                    if (dateFormat == 0) {
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/d/yyyy hh:mm"));
+                    } else if (dateFormat == 1) {
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-m-d hh:mm"));
+                    } else if (dateFormat == 2) {
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d-m-yyyy hh:mm"));
+                    } else if (dateFormat == 3) {
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d/m/yyyy hh:mm"));
+                    } else if (dateFormat == 4) {
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("d.m.yyyy hh:mm"));
                     }
                 } else {
                     cellStyle = styleMap.get(GENERIC_STYLE);
