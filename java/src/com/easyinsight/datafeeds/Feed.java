@@ -169,18 +169,29 @@ public abstract class Feed implements Serializable {
     }
 
     public DataSourceInfo createSourceInfo(EIConnection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.last_data_time FROM DATA_FEED," +
-                "FEED_PERSISTENCE_METADATA WHERE DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.feed_id AND " +
+        PreparedStatement versionStmt = conn.prepareStatement("SELECT MAX(FEED_PERSISTENCE_METADATA.VERSION) FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE " +
+                "DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.feed_id AND " +
                 "(DATA_FEED.DATA_FEED_ID = ? OR DATA_FEED.PARENT_SOURCE_ID = ?)");
-        stmt.setLong(1, getFeedID());
-        stmt.setLong(2, getFeedID());
-        DataSourceInfo dataSourceInfo = new DataSourceInfo();
+        versionStmt.setLong(1, getFeedID());
+        versionStmt.setLong(2, getFeedID());
+        int version = 0;
         Date date = null;
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            Date dataDate = new Date(rs.getTimestamp(1).getTime());
-            date = dataDate;
+        ResultSet versionRS = versionStmt.executeQuery();
+        if (versionRS.next()) {
+            version = versionRS.getInt(1);
+            PreparedStatement stmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.last_data_time FROM DATA_FEED," +
+                "FEED_PERSISTENCE_METADATA WHERE DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.feed_id AND " +
+                "(DATA_FEED.DATA_FEED_ID = ? OR DATA_FEED.PARENT_SOURCE_ID = ?) AND FEED_PERSISTENCE_METADATA.VERSION = ?");
+            stmt.setLong(1, getFeedID());
+            stmt.setLong(2, getFeedID());
+            stmt.setInt(3, version);
+            
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                date = new Date(rs.getTimestamp(1).getTime());
+            }
         }
+        DataSourceInfo dataSourceInfo = new DataSourceInfo();
         dataSourceInfo.setLastDataTime(date);
         return dataSourceInfo;
     }
