@@ -131,6 +131,9 @@
                     analysisItems.push(item);
                 }
                 var hierarchyColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                var hierarchyFactory:ClassFactory = new ClassFactory(CustomTreeRenderer);
+                hierarchyFactory.properties = { analysisItem: hierarchy };
+                coreGrid.groupItemRenderer = hierarchyFactory;
                 hierarchyColumn.headerText = hierarchy.display;
                 //hierarchyColumn.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, hierarchyColumn.sortDescending);
                 hierarchyColumn.dataField = hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName();

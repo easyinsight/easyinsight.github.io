@@ -24,7 +24,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 		private var URL:String;
 		private var _analysisItem:AnalysisItem;
 		private var _renderer:ConditionRenderer;
-        private var linkable:Boolean = false;
 
 
 		//private var defaultLabel:Label;
@@ -56,7 +55,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 
         public function set analysisItem(val:AnalysisItem):void {
             _analysisItem = val;
-            linkable = val.hasType(AnalysisItemTypes.HIERARCHY);
         }
 
         public function get renderer():ConditionRenderer {

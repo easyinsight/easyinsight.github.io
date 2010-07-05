@@ -5,9 +5,7 @@ import mx.controls.advancedDataGridClasses.AdvancedDataGridGroupItemRenderer;
 import mx.core.IUITextField;
 
 public class AvailableFieldRenderer extends AdvancedDataGridGroupItemRenderer {
-
-    private var wrapper:Object;
-
+    
     public function AvailableFieldRenderer() {
         super();
         mouseEnabled = true;

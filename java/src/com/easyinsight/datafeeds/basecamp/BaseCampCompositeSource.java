@@ -216,20 +216,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID, BaseCampCompanyProjectJoinSource.PROJECT_ID),
                 new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID));
     }
-
-    protected IServerDataSourceDefinition createForFeedType(FeedType feedType) {
-        if (feedType.equals(FeedType.BASECAMP)) {
-            return new BaseCampTodoSource();
-        } else if (feedType.equals(FeedType.BASECAMP_TIME)) {
-            return new BaseCampTimeSource();
-        } else if (feedType.equals(FeedType.BASECAMP_COMPANY)) {
-            return new BaseCampCompanySource();
-        } else if (feedType.equals(FeedType.BASECAMP_COMPANY_PROJECT_JOIN)) {
-            return new BaseCampCompanyProjectJoinSource();
-        }
-        throw new RuntimeException();
-    }
-
+    
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM BASECAMP WHERE DATA_FEED_ID = ?");
@@ -320,5 +307,41 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     public boolean isLongRefresh() {
         return true;
+    }
+
+    public void decorateLinks(List<AnalysisItem> analysisItems) {
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem.getLinks() == null) {
+                analysisItem.setLinks(new ArrayList<Link>());
+            }
+            if (isProjectLinkable(analysisItem)) {
+                URLLink urlLink = new URLLink();
+                urlLink.setUrl(getUrl() + "/projects/["+BaseCampTodoSource.PROJECTID+"]");
+                urlLink.setLabel("View Project in Basecamp...");
+                analysisItem.getLinks().add(urlLink);
+            } else if (isTodoListLinkable(analysisItem)) {
+                URLLink urlLink = new URLLink();
+                urlLink.setUrl(getUrl() + "/projects/["+BaseCampTodoSource.PROJECTID+"]/todo_lists/[" + BaseCampTodoSource.TODOLISTID + "]");
+                urlLink.setLabel("View Todo List in Basecamp...");
+                analysisItem.getLinks().add(urlLink);
+            }
+        }
+    }
+
+    private boolean isProjectLinkable(AnalysisItem analysisItem) {
+        String keyString = analysisItem.getKey().toKeyString();
+        if (BaseCampTodoSource.PROJECTNAME.equals(keyString) ||
+                BaseCampTimeSource.PROJECTNAME.equals(keyString)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isTodoListLinkable(AnalysisItem analysisItem) {
+        String keyString = analysisItem.getKey().toKeyString();
+        if (BaseCampTodoSource.TODOLISTNAME.equals(keyString)) {
+            return true;
+        }
+        return false;
     }
 }

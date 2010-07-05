@@ -378,6 +378,7 @@ public class FeedDefinition implements Cloneable, Serializable {
             });
         feed.setFieldHierarchy(feedNodes);
         feed.setUrlKey(getApiKey());
+        decorateLinks(clones);
         feed.setFields(clones);
         feed.setName(getFeedName());
         feed.setVisible(isVisible());
@@ -620,5 +621,9 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void beforeSave(EIConnection conn) {
 
+    }
+
+    public void decorateLinks(List<AnalysisItem> analysisItems) {
+        
     }
 }
