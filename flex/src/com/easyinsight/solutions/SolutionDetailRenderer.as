@@ -229,19 +229,28 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
     private var fileRef:FileReference;
 
     private function complete(event:Event):void {
-        Alert.show("Solution files copied!");
+        Alert.show("Connection files saved!");
     }
 
     protected function download():void {
+        ProgressAlert.alert(this, "Downloading connection files...", null, solutionService.getSolutionArchive);
         solutionService.getSolutionArchive.send(_solution.solutionID);
     }
 
     private function gotSolutionArchive(event:ResultEvent):void {
-        var bytes:ByteArray = solutionService.getSolutionAchive.lastResult as ByteArray;
-        fileRef = new FileReference();
-        fileRef.addEventListener(Event.COMPLETE, complete);
-        FileAlert.alert(this, "Downloading...", null, fileRef);
-        fileRef.save(bytes);
+        bytes = solutionService.getSolutionArchive.lastResult as ByteArray;
+        var msg:String = "Click to save the connection files.";
+        Alert.show(msg, "Alert", Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+    }
+
+    private var bytes:ByteArray;
+
+    private function alertListener(event:CloseEvent):void {
+        if (event.detail == Alert.OK) {
+            fileRef = new FileReference();
+            fileRef.addEventListener(Event.COMPLETE, complete);
+            fileRef.save(bytes, _solution.solutionArchiveName);
+        }
     }
 
     private function doEvent(event:Event):void {

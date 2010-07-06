@@ -25,65 +25,24 @@
         ]]></mx:Script>
     <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
              paddingRight="20" paddingTop="20" paddingBottom="20">
-        <mx:VBox horizontalAlign="center" height="100%">
-            <mx:Image source="{logo}" click="toVendorPage()"/>
-            <mx:Spacer height="100%"/>
-            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="5" paddingBottom="5" horizontalAlign="center">
-                <mx:Box height="190" verticalAlign="middle" paddingLeft="10" paddingRight="20">
-                    <mx:TextArea width="370" backgroundAlpha="0" borderStyle="none" selectable="false"
-                             borderThickness="0" editable="false" height="170" fontSize="16"
-                             text="Want instant insight and reporting on your project management? You can get started with Easy Insight in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation. The full power of enterprise business intelligence is yours for the taking, all delivered with incredible ease of use."/>
+        <mx:VBox width="900" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
+                    paddingTop="20" paddingBottom="20" paddingLeft="20" paddingRight="20">
+                <mx:HBox verticalAlign="middle" width="100%">
+                    <mx:Image source="{logo}" click="toVendorPage()"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="Why Use Easy Insight with relational databases?" fontSize="18"/>
+                    <mx:Spacer width="100%"/>
+                </mx:HBox>
+                <mx:HRule width="100%" strokeColor="#3370ce"/>
+                <mx:Label selectable="false" textAlign="center" width="820" text="Have application data locked away in a relational database? Get visibility into that data now with Easy Insight!" fontSize="14"/>
+                <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10">
+                    <mx:Image source="../assets/EIDB.png"/>
+                </mx:HBox>
+                <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820" height="80" text="Since your relational database is hopefully running within your enterprise rather than as something Software-as-a-Service accessible, you'll need to download a client application to pull that data out into Easy Insight. The client is a Java web application which can be run in any application server or servlet container. No setup is required--just drop it into the server and go!" fontSize="14"/>
+                <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
+                    <mx:Button label="Get Started Now!" fontSize="14" click="download()" styleName="blueButton"
+                               id="installButton"/>
                 </mx:Box>
-                <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:VBox horizontalAlign="center">
-                    <mx:Label text="Looking for tips, tricks, and documentation?" fontSize="16"/>
-                    <mx:LinkButton label="Look at Basecamp blog posts" fontSize="16" textDecoration="underline" click="navigateToURL(new URLRequest('http://jamesboe.blogspot.com/search/label/Google%20Analytics'), '_blank')"/>
-                </mx:VBox>
-                <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:Box id="authBox"/>
-                <mx:VBox id="controlsBox" paddingTop="25" paddingBottom="30">
-                    <mx:Button label="Get Started Now!" fontSize="24" click="download()" styleName="blueButton" id="installButton"/>
-                </mx:VBox>
             </mx:VBox>
-            <mx:Spacer height="100%"/>
-        </mx:VBox>
-        <mx:Spacer width="100%"/>
-        <mx:VBox width="530" height="100%">
-            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="5" paddingBottom="5">
-                <mx:HBox horizontalAlign="center" width="100%" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:Label text="Why Use Easy Insight with Basecamp?" fontSize="18"/>
-                </mx:HBox>
-                <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <!--<mx:HBox width="100%" horizontalAlign="center">
-                    <mx:Label text="Easy Data Exploration" fontSize="16"/>
-                </mx:HBox>-->
-                <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
-                    <mx:Image source="../assets/GA2.png" maxWidth="200" maxHeight="120"/>
-                    <mx:VBox>
-                        <mx:Text text="Ad hoc reporting on your todos and time &#13;tracking" fontSize="14"/>
-                        <mx:Text text="Improve your software life cycle &#13;management" fontSize="14"/>
-                        <mx:Text text="Track your engineering and billing trends" fontSize="14"/>                        
-                    </mx:VBox>
-                </mx:HBox>
-            </mx:VBox>
-            <mx:Spacer height="100%"/>
-            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="5" paddingBottom="5" horizontalAlign="center">
-                <mx:HBox width="100%" horizontalAlign="center">
-                    <mx:Label text="Installation Instructions" fontSize="16"/>
-                </mx:HBox>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" selectable="false"
-                             borderThickness="0" editable="false" height="120" fontSize="12" width="90%"
-                        text="First, if not already enabled, you need to enable API access of your Basecamp account. Once that's done, click the button to the left to install the Basecamp solution into your account. After installing the data source, you'll be prompted for your Basecamp URL and credentials. Once you hit Create with a valid URL and credentials, Easy Insight will pull over key aggregate data from your Basecamp installation through the API. This process may take a little time, depending on the size of your installation."/>
-            </mx:VBox>
-            <mx:Spacer height="100%"/>
-            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="5" paddingBottom="5" horizontalAlign="center">
-                <mx:Text text="Basecamp and 37signals are registered trademarks of 37signals, LLC."/>
-                <mx:Text text="Easy Insight is in no way affiliated with 37signals nor Basecamp"/>
-            </mx:VBox>
-        </mx:VBox>
     </mx:HBox>
 </solutions:SolutionDetailRenderer>

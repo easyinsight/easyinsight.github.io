@@ -32,7 +32,7 @@ public class SolutionDetailFactory {
         var f:LinkedInSolutionDetail;
         var g:PivotalTrackerSolutionDetail;
         var h:SendGridSolutionDetail;
-
+        var i:MySQLSolutionDetail;
     }
 }
 }

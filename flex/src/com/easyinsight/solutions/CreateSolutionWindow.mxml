@@ -274,6 +274,7 @@
                                 <mx:String>com.easyinsight.solutions.LinkedInSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.PivotalTrackerSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.SendGridSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.MySQLSolutionDetail</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>
