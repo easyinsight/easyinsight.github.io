@@ -348,12 +348,12 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
     @Override
     public int getVersion() {
-        return 6;
+        return 5;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList(new BaseCampTodo1To2(this), new BaseCampTodo2To3(this), new BaseCampTodo3To4(this),
-                new BaseCampTodo4To5(this), new BaseCampTodo5To6(this));
+                new BaseCampTodo4To5(this));
     }
 }
