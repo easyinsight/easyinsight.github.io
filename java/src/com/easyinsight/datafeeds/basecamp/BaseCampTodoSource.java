@@ -58,7 +58,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
     public static final String PROJECTNAME = "Project Name";
     public static final String PROJECTSTATUS = "Project Status";
     public static final String PROJECTID = "Project ID";
-    public static final String PROJECT_CREATION_DATE = "Project Created On";
+    //public static final String PROJECT_CREATION_DATE = "Project Created On";
     public static final String ANNOUNCEMENT = "Project Announcement";
 
     public static final String TODOLISTDESC = "To-do List Description";
@@ -210,7 +210,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                                     IRow row = ds.createRow();
                                     row.addValue(keys.get(PROJECTNAME), projectName);
                                     row.addValue(keys.get(PROJECTSTATUS), projectStatus);
-                                    row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
+                                    //row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
                                     row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
                                     row.addValue(keys.get(MILESTONENAME), milestoneName);
                                     row.addValue(keys.get(DEADLINE), new DateValue(milestoneDeadline));
@@ -244,7 +244,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                                 row.addValue(keys.get(ANNOUNCEMENT), announcement);
                                 row.addValue(keys.get(PROJECTSTATUS), projectStatus);
                                 row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
-                                row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
+                                //row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
                                 row.addValue(keys.get(MILESTONENAME), milestoneName);
                                 row.addValue(keys.get(DEADLINE), new DateValue(milestoneDeadline));
                                 row.addValue(keys.get(TODOLISTDESC), todoListDesc);
@@ -260,7 +260,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                             IRow row = ds.createRow();
                             row.addValue(keys.get(PROJECTNAME), projectName);
                             row.addValue(keys.get(PROJECTSTATUS), projectStatus);
-                            row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
+                            //row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
                             row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
                             row.addValue(keys.get(MILESTONENAME), milestoneName);
                             row.addValue(keys.get(DEADLINE), new DateValue(milestoneDeadline));
@@ -279,7 +279,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     row.addValue(keys.get(PROJECTNAME), projectName);
                     row.addValue(keys.get(PROJECTSTATUS), projectStatus);
                     row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
-                    row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
+                    //row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
                 }
 
                 if (dataStorage != null) {
@@ -304,7 +304,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 RESPONSIBLEPARTYID, CONTENT, COMPLETED, CREATEDDATE, COMPLETEDDATE,
                 TODOLISTNAME, MILESTONENAME, DEADLINE, PROJECTNAME, PROJECTSTATUS, MILESTONE_COMPLETED_ON,
                 PROJECTID, TODOLISTDESC, TODOLISTID, TODOLISTPRIVATE, COMPLETERNAME, COMPLETERID, COUNT, ITEMCYCLE, MILESTONE_LAST_COMMENT, DUEON,
-                MILESTONE_CREATED_ON, MILESTONE_OWNER, MILESTONE_OWNER, ANNOUNCEMENT, PROJECT_CREATION_DATE);
+                MILESTONE_CREATED_ON, MILESTONE_OWNER, MILESTONE_OWNER, ANNOUNCEMENT);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
@@ -340,7 +340,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(TODOLISTPRIVATE), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPLETERNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPLETERID), true));
-        analysisItems.add(new AnalysisDateDimension(keys.get(PROJECT_CREATION_DATE), true, AnalysisDateDimension.DAY_LEVEL));
+        //analysisItems.add(new AnalysisDateDimension(keys.get(PROJECT_CREATION_DATE), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisStep(keys.get(ITEMCYCLE), true, AnalysisDateDimension.DAY_LEVEL, createdDim, completedDim, itemDim));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         return analysisItems;
