@@ -2,7 +2,6 @@ package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.kpi.KPI;
@@ -38,6 +37,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     private String url;
     private boolean includeEmails;
+    private boolean joinDealsToContacts;
+
+    public boolean isJoinDealsToContacts() {
+        return joinDealsToContacts;
+    }
+
+    public void setJoinDealsToContacts(boolean joinDealsToContacts) {
+        this.joinDealsToContacts = joinDealsToContacts;
+    }
 
     private transient HighriseCache highriseCache;
 
@@ -183,9 +191,8 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     }
 
     protected Collection<ChildConnection> getLiveChildConnections() {
-        return Arrays.asList(
-                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
-                HighRiseDealSource.COMPANY_ID),
+        List<ChildConnection> connections = new ArrayList<ChildConnection>(Arrays.asList(
+
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
                     HighRiseContactSource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_TASKS, HighRiseCompanySource.COMPANY_ID,
@@ -201,7 +208,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_COMPANY, HighRiseTaskSource.COMPANY_ID,
                         HighRiseCompanySource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_EMAILS, HighRiseContactSource.CONTACT_ID,
-                        HighRiseEmailSource.EMAIL_CONTACT_ID));
+                        HighRiseEmailSource.EMAIL_CONTACT_ID)));
+        if (joinDealsToContacts) {
+            connections.add(new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_CONTACTS, HighRiseDealSource.COMPANY_ID,
+                   HighRiseContactSource.CONTACT_ID));
+        } else {
+            connections.add(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
+                HighRiseDealSource.COMPANY_ID));
+        }
+        return connections;
     }
 
     public String getUrl() {
@@ -239,22 +254,24 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL, INCLUDE_EMAILS) VALUES (?, ?, ?)");
+        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL, INCLUDE_EMAILS, join_deals_to_contacts) VALUES (?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
         basecampStmt.setBoolean(3, includeEmails);
+        basecampStmt.setBoolean(4, joinDealsToContacts);
         basecampStmt.execute();
         basecampStmt.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_EMAILS FROM HIGHRISE WHERE FEED_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_EMAILS, join_deals_to_contacts FROM HIGHRISE WHERE FEED_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
             this.setUrl(rs.getString(1));
             this.setIncludeEmails(rs.getBoolean(2));
+            this.setJoinDealsToContacts(rs.getBoolean(3));
         }
         loadStmt.close();
     }

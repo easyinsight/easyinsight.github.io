@@ -1,0 +1,1 @@
+alter table highrise add join_deals_to_contacts tinyint(4) not null default 0; 

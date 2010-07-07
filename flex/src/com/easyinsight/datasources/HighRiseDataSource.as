@@ -8,6 +8,7 @@ public class HighRiseDataSource extends CompositeServerDataSource {
 
     public var url:String;
     public var includeEmails:Boolean;
+    public var joinDealsToContacts:Boolean;
 
     public function HighRiseDataSource() {
         super();
