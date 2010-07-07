@@ -161,6 +161,12 @@ public class FilterValueDefinition extends FilterDefinition {
             } else {
                 throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
             }
+            if (value instanceof StringValue) {
+                StringValue stringValue = (StringValue) value;
+                if ("(No Value)".equals(stringValue.getValue())) {
+                    value = new EmptyValue();
+                }
+            }
             valueSet.add(value);
         }
         if (type == Value.NUMBER) {
@@ -213,6 +219,12 @@ public class FilterValueDefinition extends FilterDefinition {
                 value = (Value) valueObject;
             } else {
                 throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+            }
+            if (value instanceof StringValue) {
+                StringValue stringValue = (StringValue) value;
+                if ("(No Value)".equals(stringValue.getValue())) {
+                    value = new EmptyValue();
+                }
             }
             valueSet.add(value);
         }
