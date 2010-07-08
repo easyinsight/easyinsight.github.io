@@ -35,6 +35,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     public static final String DEAL_NAME = "Deal Name";
     public static final String DEAL_ID = "Deal ID";
     public static final String COMPANY_ID = "Company ID";
+    public static final String CONTACT_ID = "Contact ID";
     public static final String PRICE = "Price";
     public static final String DURATION = "Duration";
     public static final String PRICE_TYPE = "Price Type";
@@ -54,13 +55,14 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(DEAL_NAME, COMPANY_ID, PRICE, DURATION, PRICE_TYPE, DEAL_OWNER,
-                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID);
+                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID, CONTACT_ID);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_ID), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTACT_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_OWNER), true));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE_PARTY), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
@@ -148,7 +150,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 String categoryID = queryField(categoryNode, "id/text()");
                 categoryCache.put(categoryID, categoryName);
             }
-                Document deals = runRestRequest("/deals.xml", client, builder, url, true, false);
+                Document deals = runRestRequest("/deals.xml", client, builder, url, true, true);
                 loadingProgress(0, 1, "Synchronizing with deals...", true);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
@@ -200,6 +202,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
                         String partyID = queryField(currDeal, "party-id/text()");
                         row.addValue(COMPANY_ID, partyID);
+                        row.addValue(CONTACT_ID, partyID);
                         String createdAt = queryField(currDeal, "created-at/text()");
                         row.addValue(CREATED_AT, new DateValue(deadlineFormat.parse(createdAt)));
                         String statusChangedOn = queryField(currDeal, "status-changed-on/text()");
@@ -220,11 +223,12 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 4;
+        return 5;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new HighRise1To2(this), new HighRiseDeal2To3(this), new HighRiseDeal3To4(this));
+        return Arrays.asList(new HighRise1To2(this), new HighRiseDeal2To3(this), new HighRiseDeal3To4(this),
+                new HighRiseDeal4To5(this));
     }
 }
