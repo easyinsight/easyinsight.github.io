@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.kpi.KPI;
@@ -191,8 +192,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     }
 
     protected Collection<ChildConnection> getLiveChildConnections() {
-        List<ChildConnection> connections = new ArrayList<ChildConnection>(Arrays.asList(
-
+        List<ChildConnection> connections = Arrays.asList(
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
+                HighRiseDealSource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
                     HighRiseContactSource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_TASKS, HighRiseCompanySource.COMPANY_ID,
@@ -208,14 +210,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_COMPANY, HighRiseTaskSource.COMPANY_ID,
                         HighRiseCompanySource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_EMAILS, HighRiseContactSource.CONTACT_ID,
-                        HighRiseEmailSource.EMAIL_CONTACT_ID)));
-        if (joinDealsToContacts) {
+                        HighRiseEmailSource.EMAIL_CONTACT_ID));
+        /*if (joinDealsToContacts) {
             connections.add(new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_CONTACTS, HighRiseDealSource.COMPANY_ID,
                    HighRiseContactSource.CONTACT_ID));
         } else {
-            connections.add(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
-                HighRiseDealSource.COMPANY_ID));
-        }
+            connections.add(;
+        }*/
         return connections;
     }
 
