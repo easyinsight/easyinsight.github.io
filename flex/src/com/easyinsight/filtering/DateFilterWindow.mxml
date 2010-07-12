@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#DCE2F8" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
         borderStyle="solid">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisItem;
@@ -36,12 +36,39 @@
         }
 
         ]]></mx:Script>
-    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
-        <mx:Label text="Do you want to create an absolute, rolling, or last value date range filter?"/>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Absolute" click="addAbsolute()"/>
-            <mx:Button label="Rolling" click="addRolling()"/>
-            <mx:Button label="Last Value" click="addLastValue()"/>
+    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center">
+        <mx:Label text="What type of filter do you want to create?" fontSize="16"/>
+        <mx:HBox width="100%">
+            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addAbsolute()" mouseChildren="false"
+                    buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                    id="singleValueBox"
+                    rollOver="singleValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                    mouseOut="singleValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                <mx:Label text="Absolute" fontSize="14"/>
+                <mx:TextArea text="Restrict this field to a date within a certain fixed time range"
+                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                        textAlign="center"/>
+            </mx:VBox>
+            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addRolling()" mouseChildren="false"
+                    buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                    id="multiValueBox"
+                    rollOver="multiValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                    mouseOut="multiValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                <mx:Label text="Rolling" fontSize="14"/>
+                <mx:TextArea text="Restrict this field to a rolling time window"
+                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                        textAlign="center"/>
+            </mx:VBox>
+            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addLastValue()" mouseChildren="false"
+                    buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                    id="patternValueBox"
+                    rollOver="patternValueBox.setStyle('backgroundColor', 0xDDDDDD)"
+                    mouseOut="patternValueBox.setStyle('backgroundColor', 0xFFFFFF)">
+                <mx:Label text="Last Value" fontSize="14"/>
+                <mx:TextArea text="Restrict this field to the most recent date"
+                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                        textAlign="center"/>
+            </mx:VBox>
         </mx:HBox>
     </mx:VBox>
 </mx:Canvas>
