@@ -1,11 +1,9 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.Key;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -14,7 +12,7 @@ import java.util.Set;
  */
 public class CompositeReportPipeline extends Pipeline {
     @Override
-    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report) {
+    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap) {
         List<IComponent> components = new ArrayList<IComponent>();
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));

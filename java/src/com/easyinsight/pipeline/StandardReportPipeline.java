@@ -1,7 +1,9 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedService;
+import com.easyinsight.etl.LookupTable;
 
 import java.util.*;
 
@@ -18,7 +20,7 @@ public class StandardReportPipeline extends Pipeline {
         private AnalysisLatitude analysisLatitude;
     }
 
-    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report) {
+    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap) {
 
         // current problematic scenarios
         // a measure filter on a calculation
@@ -27,8 +29,6 @@ public class StandardReportPipeline extends Pipeline {
         // 
 
         List<IComponent> components = new ArrayList<IComponent>();
-
-        //components.add(new ReportPreHandleComponent());
 
         Map<String, PointPopulation> map = new HashMap<String, PointPopulation>();
         for (AnalysisItem coordinate : items(AnalysisItemTypes.LONGITUDE, allNeededAnalysisItems)) {
@@ -60,9 +60,13 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new CoordinateComponent(pointPopulation.analysisZipCode, pointPopulation.analysisLatitude, pointPopulation.analysisLongitude));
         }
 
+        // we need to track in some different form here, because things aren't saving quite correctly as it stands
+        // 
+
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
-                components.add(new LookupTableComponent(new FeedService().getLookupTable(analysisItem.getLookupTableID())));
+                LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
+                components.add(new LookupTableComponent(lookupTable, refMap.get(lookupTable.getSourceField().createAggregateKey())));
             }
         }
 

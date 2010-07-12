@@ -1,6 +1,7 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
 
@@ -19,14 +20,14 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
-        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report);
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getRefMap());
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
         return this;
     }
 
-    protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report);
+    protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap);
          
     private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
 
@@ -38,7 +39,7 @@ public abstract class Pipeline {
         Set<AnalysisItem> allRequestedAnalysisItems = report.getAllAnalysisItems();
         allRequestedAnalysisItems.remove(null);
 
-        Map<AnalysisItem, Integer> refMap = new HashMap<AnalysisItem, Integer>();
+        Map<Key, Integer> refMap = new HashMap<Key, Integer>();
 
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         if (report.retrieveFilterDefinitions() != null) {
@@ -70,22 +71,24 @@ public abstract class Pipeline {
         return allNeededAnalysisItems;
     }
 
-    private void updateCount(AnalysisItem analysisItem, Map<AnalysisItem, Integer> refMap) {
-        Integer count = refMap.get(analysisItem);
+    private void updateCount(AnalysisItem analysisItem, Map<Key, Integer> refMap) {
+        Key key = analysisItem.createAggregateKey();
+        Integer count = refMap.get(key);
         if (count == null) {
-            refMap.put(analysisItem, 1);
+            refMap.put(key, 1);
         } else {
-            refMap.put(analysisItem, count + 1);
+            refMap.put(key, count + 1);
         }
     }
 
-    private void updateCount(Collection<AnalysisItem> analysisItems, Map<AnalysisItem, Integer> refMap) {
+    private void updateCount(Collection<AnalysisItem> analysisItems, Map<Key, Integer> refMap) {
         for (AnalysisItem analysisItem : analysisItems) {
-            Integer count = refMap.get(analysisItem);
+            Key key = analysisItem.createAggregateKey();
+            Integer count = refMap.get(key);
             if (count == null) {
-                refMap.put(analysisItem, 1);
+                refMap.put(key, 1);
             } else {
-                refMap.put(analysisItem, count + 1);
+                refMap.put(key, count + 1);
             }
         }
     }

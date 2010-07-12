@@ -22,7 +22,6 @@ public class FilterPipelineCleanupComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems());
         if (pipelineData.getReport().retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : pipelineData.getReport().retrieveFilterDefinitions()) {
                 if ((before && filterDefinition.isApplyBeforeAggregation()) || (!before && !filterDefinition.isApplyBeforeAggregation())) {
