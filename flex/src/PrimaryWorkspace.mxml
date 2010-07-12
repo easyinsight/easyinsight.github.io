@@ -520,7 +520,7 @@
             loggedIn = true;
             User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
-            if (navigate) {
+            if (navigate && currentFragment != null) {
                 var o:Object = URLUtil.stringToObject(currentFragment, "&");
                 parseFragmentObject(o, currentFragment);
             }
