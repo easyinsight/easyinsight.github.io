@@ -4,6 +4,7 @@
 		<![CDATA[
 			import com.easyinsight.framework.LoginEvent;
             import com.easyinsight.framework.UserName;
+            import com.easyinsight.util.CookieUtil;
 
             import mx.messaging.config.ServerConfig;
             import com.easyinsight.framework.User;
@@ -13,6 +14,7 @@
 
             public function logout():void {
                 User.destroy();
+                CookieUtil.deleteCookie("eisession");
                 ServerConfig.getChannelSet(authService.destination).logout();
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
             }

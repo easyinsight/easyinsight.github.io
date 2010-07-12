@@ -185,7 +185,7 @@
                     function (event:ResultEvent, token:Object = null):void {
                         switch (event.result) {
                             case "success":
-                                authService.authenticate.send(usernameStr, passwordStr);
+                                authService.authenticate.send(usernameStr, passwordStr, false);
                                 break;
                             default:
                                 trace(event.result);

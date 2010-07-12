@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DelayedDeepLink;
 import com.easyinsight.analysis.DelayedFeedAdminLink;
 import com.easyinsight.analysis.DelayedFeedLink;
 import com.easyinsight.analysis.DelayedReportLink;
+import com.easyinsight.etl.DelayedLookupTableLink;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.genredata.DelayedReportTemplate;
 import com.easyinsight.goals.DelayedGoalAdminLink;
@@ -74,6 +75,11 @@ public class FragmentParser {
                 var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(key);
                 delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedGoalAdminLink.execute();
+            }),
+            new FragmentTester("lookupTableID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var delayedLookupTableLink:DelayedLookupTableLink = new DelayedLookupTableLink(key);
+                delayedLookupTableLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                delayedLookupTableLink.execute();
             }),
             new FragmentTester("reportTemplateID", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
                 var delayedTemplate:DelayedReportTemplate = new DelayedReportTemplate(key);

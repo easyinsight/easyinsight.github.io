@@ -29,6 +29,8 @@ public class UserServiceResponse
     public var personaID:int;
     public var dateFormat:int;
     public var defaultReportSharing:Boolean;
+    public var sessionCookie:String;
+    public var nonCookieLogin:Boolean;
 
     public function UserServiceResponse()
         {

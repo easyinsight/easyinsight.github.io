@@ -9,11 +9,11 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.PasswordStorage;
+
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.TodoCompletedEvent;
-import com.easyinsight.users.Credentials;
+
 import com.easyinsight.users.Account;
 
 import java.sql.*;
@@ -112,6 +112,23 @@ public class FeedStorage {
         feedDefinition.customStorage(conn);
         insertDataFeedStmt.close();
         return feedID;
+    }
+
+    private List<AnalysisItem> itemsFromFolders(List<FeedFolder> folders) {
+        FolderItemVisitor visitor = new FolderItemVisitor();
+        visitor.visit(folders);
+        return visitor.items;
+    }
+
+    private static class FolderItemVisitor {
+        private List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+
+        public void visit(List<FeedFolder> folders) {
+            for (FeedFolder folder : folders) {
+                items.addAll(folder.getChildItems());
+                if (folder.getChildFolders() != null) visit(folder.getChildFolders());
+            }
+        }
     }
 
     private void saveFolders(long feedID, Connection conn, List<FeedFolder> folders) throws SQLException {
@@ -361,14 +378,6 @@ public class FeedStorage {
                 insertLinkStmt.execute();
             }
             insertLinkStmt.close();
-        }
-    }
-
-    public void setPasswordCredentials(Connection conn, IServerDataSourceDefinition ds) throws SQLException {
-        Credentials c = PasswordStorage.getPasswordCredentials(ds.getDataFeedID(), conn);
-        if (c != null) {
-            ds.setUsername(c.getUserName());
-            ds.setPassword(c.getPassword());
         }
     }
 

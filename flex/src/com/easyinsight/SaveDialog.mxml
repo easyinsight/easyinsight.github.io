@@ -25,6 +25,9 @@
                 ProgressAlert.alert(this, "Saving report...", null, analysisService.saveAs);
                 analysisService.saveAs(analysisDefinition, analysisName.text);
                 PopUpManager.removePopUp(this);
+            } else {
+                analysisName.setFocus();
+                analysisName.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             }
         }
 

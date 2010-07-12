@@ -56,18 +56,8 @@
         public var helpIcon:Class;
 
         private function setupListeners():void {
-            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
-            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, onLogOut);
             factory = new DataSourceAPIEditControlsFactory(this);
             servicesGrid.addEventListener(ServiceDefinitionEvent.SERVICE_REMOVED, serviceRemoved);
-        }
-
-        private function onLogin(loginEvent:LoginEvent):void {
-            currentState = "";
-        }
-
-        private function onLogOut(loginEvent:LoginEvent):void {
-            currentState = "notLoggedIn";
         }
 
         public function analyze():AnalyzeSource {
@@ -127,9 +117,6 @@
             navigateToURL(new URLRequest("https://www.easy-insight.com/app/services/EIDataV2?wsdl"), "_blank");
         }
 
-        [Bindable]
-        [Embed(source="../../../../../assets/data_add_x64.png")]
-        public var addIcon:Class;
 
         private function createEmptyFeed():void {
             var userUpload:SimpleFeedWindow = SimpleFeedWindow(PopUpManager.createPopUp(this, SimpleFeedWindow, true));
@@ -162,8 +149,6 @@
                 <mx:HBox width="100%" verticalAlign="middle">
                     <mx:TextArea text="The Easy Insight API gives you a SOAP interface to publish in your data. You can access the API with an account level of Basic or higher."
                              borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="300" height="50"/>
-                    <mx:Button toolTip="Create a new data source for the API..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
-				        label="New API Source" labelPlacement="bottom"/>
                     <mx:VBox horizontalAlign="center">
                         <mx:Label text="{apiLabel}"/>
                         <mx:Button label="My API Information..." click="apiInformation()" styleName="redButton"/>
@@ -202,15 +187,9 @@
                                      id="servicesGrid" rowHeight="28">
                             <mx:columns>
                                 <util:EIDataGridColumn headerText="Data Source Name" dataField="name"/>
-                                <util:EIDataGridColumn headerText="API Key" width="120" dataField="apiKey"/>
+                                <util:EIDataGridColumn headerText="Unique API Key" width="120" dataField="apiKey"/>
                                 <util:EIDataGridColumn headerText="" width="50" dataField="apiKey" sortable="false"
                                         itemRenderer="com.easyinsight.customupload.api.CopyAPIButton"/>
-                                <util:EIDataGridColumn headerText="Unchecked API" dataField="uncheckedEnabled"
-                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"
-                                                   width="120"/>
-                                <util:EIDataGridColumn headerText="Validated API" dataField="validatedEnabled"
-                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"
-                                                   width="120"/>
                                 <util:EIDataGridColumn headerText="" width="60" dataField="feedName"
                                                    itemRenderer="{factory}" sortable="false"/>
                             </mx:columns>

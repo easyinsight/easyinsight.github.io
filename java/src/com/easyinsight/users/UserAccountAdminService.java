@@ -28,41 +28,19 @@ import java.sql.SQLException;
  */
 public class UserAccountAdminService {
 
-    public void regenerateAccountSecretKey() {
-        long accountID = SecurityUtil.getAccountID();
-        Session session = Database.instance().createSession();
+    public String regenerateAccountSecretKey() {
         try {
-            session.getTransaction().begin();
-            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-            String accountSecretKey = RandomTextGenerator.generateText(16);
-            account.setAccountSecretKey(accountSecretKey);
-            session.save(account);
-            session.getTransaction().commit();
+            return RandomTextGenerator.generateText(16);
         } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
             throw new RuntimeException(e);
-        } finally {
-            session.close();
         }
     }
 
-    public void regenerateUserSecretKey() {
-        long userID = SecurityUtil.getUserID();
-        Session session = Database.instance().createSession();
+    public String regenerateUserSecretKey() {
         try {
-            session.getTransaction().begin();
-            User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-            String accountSecretKey = RandomTextGenerator.generateText(16);
-            user.setUserSecretKey(accountSecretKey);
-            session.save(user);
-            session.getTransaction().commit();
+            return RandomTextGenerator.generateText(16);
         } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
             throw new RuntimeException(e);
-        } finally {
-            session.close();
         }
     }
 
@@ -489,6 +467,31 @@ public class UserAccountAdminService {
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();
+        } finally {
+            session.close();
+        }
+    }
+
+    public void saveAccountAPISettings(AccountAPISettings accountAPISettings) {
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
+            Account account = (Account) results.get(0);
+            account.setApiEnabled(accountAPISettings.isApiEnabled());
+            account.setAccountKey(accountAPISettings.getAccountKey());
+            account.setAccountSecretKey(accountAPISettings.getAccountSecretKey());
+            List userResults = session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
+            User user = (User) userResults.get(0);
+            user.setUserKey(accountAPISettings.getUserKey());
+            user.setUserSecretKey(accountAPISettings.getUserSecretKey());
+            session.update(user);
+            session.update(account);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
         } finally {
             session.close();
         }

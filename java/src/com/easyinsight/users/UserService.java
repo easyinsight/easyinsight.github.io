@@ -16,6 +16,7 @@ import com.easyinsight.groups.GroupStorage;
 import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.outboundnotifications.BuyOurStuffTodo;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -32,7 +33,7 @@ import flex.messaging.FlexContext;
  * Date: Jan 2, 2008
  * Time: 5:34:56 PM
  */
-public class UserService implements IUserService {
+public class UserService {
 
     public AccountSetupData applySetupData(AccountSetupData accountSetupData) {
         EIConnection conn = Database.instance().getConnection();
@@ -47,7 +48,7 @@ public class UserService implements IUserService {
             }
             boolean problem = isProblem(accountSetupData, conn);
             if (!problem && !tooManyUsers) {
-
+                account.setDateFormat(accountSetupData.getDateFormat());
                 Map<Integer, Long> personaMap = new HashMap<Integer, Long>();
                 personaMap.put(AccountSetupData.BIZ_USER, null);
                 personaMap.put(AccountSetupData.DEVELOPER, null);
@@ -622,10 +623,64 @@ public class UserService implements IUserService {
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                     user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing());
+                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
             response.setActivated(account.isActivated());
             return response;
         }
+    }
+
+    public UserServiceResponse sessionCookieCheck(String cookie, String userName, boolean clearCookie) {
+        UserServiceResponse userServiceResponse = null;
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID FROM USER_SESSION, USER WHERE USER_SESSION.user_id = user.user_id and " +
+                    "user_session.session_number = ? AND user.username = ?");
+            queryStmt.setString(1, cookie);
+            queryStmt.setString(2, userName);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long userID = rs.getLong(1);
+                List results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
+                if (results.size() > 0) {
+                    User user = (User) results.get(0);
+                    Account account = user.getAccount();
+                    if (user.getPersonaID() != null) {
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+                    }
+                    userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                         user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                            (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
+                            !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
+                    userServiceResponse.setActivated(account.isActivated());
+                    user.setLastLoginDate(new Date());
+                    session.update(user);
+                    if (clearCookie) {
+                        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SESSION WHERE USER_ID = ? AND SESSION_NUMBER = ?");
+                        clearStmt.setLong(1, user.getUserID());
+                        clearStmt.setString(2, cookie);
+                        clearStmt.executeUpdate();
+                    }
+                } else {
+                    userServiceResponse = null;
+                }
+            }
+            /**/
+            session.flush();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException();
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
+        }
+        return userServiceResponse;
     }
 
     public UserStub getUserStub(String userName) {
@@ -689,7 +744,7 @@ public class UserService implements IUserService {
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing());
+                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
 
                         userServiceResponse.setActivated(account.isActivated());
 
@@ -713,7 +768,7 @@ public class UserService implements IUserService {
     }
 
     @NotNull
-    public UserServiceResponse authenticate(String userName, String password) {
+    public UserServiceResponse authenticate(String userName, String password, boolean rememberMe) {
 
         UserServiceResponse userServiceResponse;
         EIConnection conn = Database.instance().getConnection();
@@ -725,11 +780,29 @@ public class UserService implements IUserService {
             if (results.size() > 0) {
                 User user = (User) results.get(0);
                 userServiceResponse = getUser(password, session, user, conn);
+                if (rememberMe) {
+                    String sessionCookie = RandomTextGenerator.generateText(30);
+                    PreparedStatement saveCookieStmt = conn.prepareStatement("INSERT INTO USER_SESSION (USER_ID, SESSION_NUMBER," +
+                            "USER_SESSION_DATE) VALUES (?, ?, ?)");
+                    saveCookieStmt.setLong(1, user.getUserID());
+                    saveCookieStmt.setString(2, sessionCookie);
+                    saveCookieStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                    saveCookieStmt.execute();
+                    //user.setSessionCookie(sessionCookie);
+                    userServiceResponse.setSessionCookie(sessionCookie);
+                    session.update(user);
+                }
             } else {
                 results = session.createQuery("from User where email = ?").setString(0, userName).list();
                 if (results.size() > 0) {
                     User user = (User) results.get(0);
                     userServiceResponse = getUser(password, session, user, conn);
+                    if (rememberMe) {
+                        String sessionCookie = RandomTextGenerator.generateText(30);
+                        //user.setSessionCookie(sessionCookie);
+                        userServiceResponse.setSessionCookie(sessionCookie);
+                        session.update(user);
+                    }
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
                 }
@@ -764,7 +837,7 @@ public class UserService implements IUserService {
                         (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                         user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                         !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing());
+                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);

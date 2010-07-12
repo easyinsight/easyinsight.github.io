@@ -1,19 +1,25 @@
 <?xml version="1.0" ?>
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                            xmlns:filtering="com.easyinsight.filtering.*"
                             implements="com.easyinsight.framework.IFullScreenPage" width="100%" height="100%"
-        horizontalAlign="center" backgroundColor="#000000">
+                            horizontalAlign="center" backgroundColor="#000000" creationComplete="setup()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
-        import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.StringValue;
         import com.easyinsight.analysis.Value;
-        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
+        import mx.managers.BrowserManager;
+        import mx.utils.URLUtil;
 
         private var _lookupTable:LookupTable;
         private var _lookupTableID:int;
@@ -21,11 +27,22 @@
         public function set lookupTableID(value:int):void {
             _lookupTableID = value;
         }
-        
+
         protected override function commitProperties():void {
             super.commitProperties();
             ProgressAlert.alert(this, "Retrieving details...", null, etlService.getLookupTable);
             etlService.getLookupTable.send(_lookupTableID);
+        }
+        
+        private function setup():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+        }
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
         }
 
         private var sourceItem:AnalysisItem;
@@ -36,6 +53,7 @@
 
         private function gotLookupTable():void {
             _lookupTable = etlService.getLookupTable.lastResult as LookupTable;
+            feedID = _lookupTable.dataSourceID;
             sourceItem = _lookupTable.sourceField;
             targetItem = _lookupTable.targetField;
             if (_lookupTable.targetField.hasType(AnalysisItemTypes.DATE)) {
@@ -48,21 +66,38 @@
             tableName = _lookupTable.name;
             sourceFieldName = sourceItem.display;
             targetFieldName = targetItem.display;
+            masterLookupTable = new Object();
             lookupMap = new Object();
+            var valueStrings:ArrayCollection = new ArrayCollection();
             for each (var pair:LookupPair in _lookupTable.lookupPairs) {
                 lookupMap[String(pair.sourceValue.getValue())] = pair;
+                masterLookupTable[String(pair.sourceValue.getValue())] = pair;
+                valueStrings.addItem(String(pair.sourceValue.getValue()));
             }
-            for each (var lookupPair:LookupPair in _lookupTable.lookupPairs) {
+            valueStrings.sort = new Sort();
+            valueStrings.refresh();
+            for each (var valueString:String in valueStrings) {
+                var lookupPair:LookupPair = masterLookupTable[valueString];
+                lookupMap[valueString] = lookupPair;
                 var row:LookupTableRow = new LookupTableRow();
-                row.mode = rowType;
                 row.pair = lookupPair;
+                row.mode = rowType;
                 lookupTableBox.addChild(row);
                 editors.addItem(row);
             }
-            dataService.getAnalysisItemMetadata.send(_lookupTable.dataSourceID, _lookupTable.sourceField, CredentialsCache.getCache().createCredentials(), 0);
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.lookupTableID = _lookupTable.urlKey;
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + _lookupTable.name);
+            ProgressAlert.alert(this, "Retrieving possible values for the lookup table...", null, dataService.getFeedMetadata);
+            //dataService.getAnalysisItemMetadata.send(_lookupTable.dataSourceID, _lookupTable.sourceField, CredentialsCache.getCache().createCredentials(), 0);
+            dataService.getFeedMetadata.send(_lookupTable.dataSourceID);
         }
 
         private var rowType:String;
+
+        private var changed:Boolean = false;
 
         private function updated():void {
 
@@ -75,33 +110,56 @@
         [Bindable]
         private var targetFieldName:String;
 
-        private function gotMetadata():void {
+        [Bindable]
+        private var feedID:int;
+        [Bindable]
+        private var availableDimensions:ArrayCollection;
+        [Bindable]
+        private var allFields:ArrayCollection;
 
-            // okay, so lookup tables should be intrinsic parts of the data source 
+        private var masterLookupTable:Object = new Object();
 
-            var results:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisDimensionResultMetadata;
+        private function gotPairs():void {
+            for each (var existingRow:LookupTableRow in editors) {
+                var existingPair:LookupPair = existingRow.save();
+                masterLookupTable[String(existingPair.sourceValue.getValue())] = existingPair;                
+            }
+            lookupTableBox.removeAllChildren();
+            lookupMap = new Object();
+            var values:ArrayCollection = etlService.getLookupTablePairs.lastResult as ArrayCollection;
             var sort:Sort = new Sort();
             var valueStrings:ArrayCollection = new ArrayCollection();
-            for each (var val:Value in results.values) {
+            for each (var val:Value in values) {
                 valueStrings.addItem(String(val.getValue()));
             }
             valueStrings.sort = sort;
             valueStrings.refresh();
             for each (var valueString:String in valueStrings) {
-                var pair:LookupPair = lookupMap[valueString];
-                if (pair == null) {
-                    pair = new LookupPair();
-                    var stringValue:StringValue = new StringValue();
-                    stringValue.value = valueString;
-                    pair.sourceValue = stringValue;
-                    lookupMap[valueString] = pair;
-                    var row:LookupTableRow = new LookupTableRow();
-                    row.pair = pair;
-                    row.mode = rowType;
-                    lookupTableBox.addChild(row);
-                    editors.addItem(row);
-                }
+                var pair:LookupPair = masterLookupTable[valueString];
+                lookupMap[valueString] = pair;
+                var row:LookupTableRow = new LookupTableRow();
+                row.pair = pair;
+                row.mode = rowType;
+                lookupTableBox.addChild(row);
+                editors.addItem(row);
             }
+        }
+
+        private function gotDefinition():void {
+            var feedDefinition:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+            // allFields = new ArrayCollection();
+
+            allFields = new ArrayCollection();
+            var dimensions:ArrayCollection = new ArrayCollection();
+            for each (var analysisItem:AnalysisItem in feedDefinition.fields) {
+                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    dimensions.addItem(analysisItem);
+                }
+                var aNode:AnalysisItemNode = new AnalysisItemNode();
+                aNode.analysisItem = analysisItem;
+                allFields.addItem(new AnalysisItemWrapper(aNode));
+            }
+            this.availableDimensions = dimensions;            
         }
 
         private function cancel():void {
@@ -112,54 +170,75 @@
 
         private function save():void {
             var pairs:ArrayCollection = new ArrayCollection();
-            for each (var row:LookupTableRow in editors) {
-                pairs.addItem(row.save());
-            }
+            for each (var pair:LookupPair in masterLookupTable) {
+                for each (var row:LookupTableRow in editors) {
+                    var savePair:LookupPair = row.save();
+                    if (String(savePair.sourceValue.getValue()) == String(pair.sourceValue.getValue())) {
+                        pair.targetValue = savePair.targetValue;
+                    }
+                }
+                pairs.addItem(pair);
+            }            
             _lookupTable.lookupPairs = pairs;
             ProgressAlert.alert(this, "Saving...", null, etlService.updateLookupTable);
             etlService.updateLookupTable.send(_lookupTable);
+        }
+
+        private function retrieve():void {
+
+        }
+
+        private function onFilterChange(event:Event):void {
+            etlService.getLookupTablePairs.send(_lookupTable.lookupTableID, transformContainer.getFilterDefinitions());
         }
 
         [Bindable]
         private var stackIndex:int = 0;
         ]]></mx:Script>
     <mx:RemoteObject destination="feeds" id="etlService">
-        <mx:method name="getLookupTable" result="gotLookupTable()"/>                           
+        <mx:method name="getLookupTable" result="gotLookupTable()"/>
         <mx:method name="updateLookupTable" result="updated()"/>
+        <mx:method name="getLookupTablePairs" result="gotPairs()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="data" id="dataService">
-        <mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>
+        <!--<mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>-->
+        <mx:method name="getFeedMetadata" result="gotDefinition()"/>
     </mx:RemoteObject>
     <mx:VBox width="1000" height="100%" horizontalAlign="center" paddingTop="5" backgroundColor="#FFFFFF">
         <mx:HBox width="100%" paddingLeft="15">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
                        toolTip="Close"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                           toolTip="Save"/>
-            <!--<mx:Spacer width="100%"/>
-            <mx:ToggleButtonBar id="toggleBar">
-                <mx:dataProvider>
-                    <mx:ArrayCollection>
-                        <mx:Array>
-                            <mx:String>Lookup Table Properties</mx:String>
-                            <mx:String>Additional Fields</mx:String>
-                            <mx:String>Filters</mx:String>
-                        </mx:Array>
-                    </mx:ArrayCollection>
-                </mx:dataProvider>
-            </mx:ToggleButtonBar>
-            <mx:Spacer width="100%"/>-->
-		</mx:HBox>
+                       toolTip="Save"/>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="Lookup Table Name: " fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Label text="{tableName}"/>
+            <mx:Label text="Source Field" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Label text="{sourceFieldName}"/>
+            <mx:Label text="Target Field" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Label text="{targetFieldName}"/>
+        </mx:HBox>
+        <mx:Label text="Too many values for this field? Create filters by dragging fields into the canvas to the right." fontSize="14"/>
+        <mx:HBox width="100%">
+
+            <mx:List dataProvider="{availableDimensions}" labelField="display"
+                     dragEnabled="true"
+                     dragMoveEnabled="false" width="30%"
+                     height="100%"/>
+            <mx:Canvas width="70%" height="100%">
+                <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                              borderStyle="solid"
+                                              borderThickness="1" backgroundColor="#ffffff"
+                                              backgroundAlpha=".1" feedID="{feedID}"
+                                              analysisItems="{allFields}"
+                                              showLabel="true"
+                                              paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                              paddingTop="5" updatedTransforms="onFilterChange(event)"/>
+            </mx:Canvas>
+        </mx:HBox>
         <!--<mx:ViewStack width="100%" selectedIndex="{toggleBar.selectedIndex}" resizeToContent="true">-->
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Label text="Lookup Table Name: " fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:Label text="{tableName}"/>
-                <mx:Label text="Source Field" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:Label text="{sourceFieldName}"/>
-                <mx:Label text="Target Field" fontFamily="Tahoma" fontWeight="bold"/>
-                <mx:Label text="{targetFieldName}"/>
-            </mx:HBox>
-            <!--<mx:HBox>
+        <!--<mx:HBox>
                 <mx:Label text="Fill in additional fields content"/>
             </mx:HBox>
             <mx:HBox width="100%">

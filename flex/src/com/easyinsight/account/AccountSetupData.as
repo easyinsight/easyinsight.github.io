@@ -8,6 +8,7 @@ public class AccountSetupData {
     public var myPersona:int;
     public var personas:ArrayCollection;
     public var users:ArrayCollection = new ArrayCollection();
+    public var dateFormat:int;
 
     public function AccountSetupData() {
     }

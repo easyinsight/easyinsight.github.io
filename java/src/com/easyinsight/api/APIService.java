@@ -67,7 +67,7 @@ public class APIService {
                 LogClass.error(e);
             }
             session.close();
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return dynamicServiceID;
     }
@@ -118,7 +118,7 @@ public class APIService {
             throw new RuntimeException(e);
         } finally {
             session.close();
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return apiDescriptor;
     }
@@ -162,7 +162,7 @@ public class APIService {
             throw new RuntimeException(e);
         } finally {
             session.close();
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return apis;
     }
@@ -190,7 +190,7 @@ public class APIService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptors;
     }
@@ -220,7 +220,7 @@ public class APIService {
             throw new RuntimeException(e);
         } finally {
             session.close();
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return dynamicServiceDescriptors;
     }
@@ -276,7 +276,7 @@ public class APIService {
             return getDynamicServiceDefinition(feedID, conn, session);
         } finally {
             session.close();
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -348,7 +348,7 @@ public class APIService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

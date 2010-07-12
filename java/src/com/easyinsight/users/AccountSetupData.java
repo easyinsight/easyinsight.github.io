@@ -19,6 +19,15 @@ public class AccountSetupData {
     private int myPersona;
     private List<Persona> personas = new ArrayList<Persona>();
     private List<UserPersonaObject> users = new ArrayList<UserPersonaObject>();
+    private int dateFormat;
+
+    public int getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(int dateFormat) {
+        this.dateFormat = dateFormat;
+    }
 
     public List<Persona> getPersonas() {
         return personas;

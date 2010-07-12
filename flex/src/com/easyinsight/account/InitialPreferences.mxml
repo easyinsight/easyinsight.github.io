@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" xmlns:kpi="com.easyinsight.kpi.*"
+         implements="com.easyinsight.kpi.ITutorialPanel" horizontalAlign="center"
+
+         width="100%" height="100%" verticalGap="20" paddingTop="80" paddingBottom="80">
+    <mx:Metadata>
+        [Event(name="kpiTutorialFinish", type="com.easyinsight.kpi.KPITutorialEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+        import com.easyinsight.kpi.KPITutorialEvent;
+
+
+        private var _setupData:AccountSetupData;
+
+        public function set setupData(value:AccountSetupData):void {
+            _setupData = value;
+        }
+
+        public function saveValues():void {
+            _setupData.dateFormat = dateBox.selectedItem.data;
+            User.getInstance().dateFormat = dateBox.selectedItem.dateFormat;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        private var _accountType:int;
+
+        public function set accountType(value:int):void {
+            _accountType = value;
+        }
+
+        public function gotFocus():void {
+        }]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Which format do you prefer for dates?" fontSize="18">
+            <util:SmartComboBox id="dateBox" rowCount="6" selectedProperty="data" fontSize="18">
+                <util:dataProvider>
+                    <mx:Array>
+                        <mx:Object label="MM/DD/YYYY (04/26/2010)" data="0"/>
+                        <mx:Object label="YYYY-MM-DD (2010-26-04)" data="1"/>
+                        <mx:Object label="DD-MM-YYYY (26-04-2010)" data="2"/>
+                        <mx:Object label="DD/MM/YYYY (26/04/2010)" data="3"/>
+                        <mx:Object label="DD.MM.YYYY (26.04.2010)" data="4"/>
+                    </mx:Array>
+                </util:dataProvider>
+            </util:SmartComboBox>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:Spacer height="100%"/>
+    <mx:Button label="Finish" fontSize="18" click="saveValues(); dispatchEvent(new KPITutorialEvent(KPITutorialEvent.FINISH))"/>
+</mx:VBox>

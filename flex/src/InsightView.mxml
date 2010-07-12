@@ -162,7 +162,7 @@
             		function (event:ResultEvent, token:Object = null):void {
             			switch (event.result) {
             				case "success":
-            					authService.authenticate.send(userName.text, password.text);
+            					authService.authenticate.send(userName.text, password.text, false);
             					break;
         					default:
         						trace(event.result);					

@@ -4,6 +4,7 @@
 	xmlns:customupload="com.easyinsight.customupload.*" doubleClickEnabled="true" backgroundColor="#DCE2F8">
 	<mx:Script>
 		<![CDATA[        
+        import com.easyinsight.account.Account;
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.etl.LookupTableDescriptor;
         import com.easyinsight.etl.LookupTableSource;
@@ -124,21 +125,11 @@
 
         private function initListeners():void {
             addEventListener(KeyboardEvent.KEY_UP, keyHit);
-            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
-            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, onLogout);
             User.getEventNotifier().addEventListener("uiChange", uiChangeEvent);
             addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
             messageListener = EIMessageListener.instance();
             BindingUtils.bindProperty(this, "includeGroups", groupInclude, "selected");
-        }
-
-        private function onLogout(event:LoginEvent):void {
-            gotFocus();
-        }
-
-        private function onLogin(event:LoginEvent):void {
-            gotFocus();
         }
 
         private function keyHit(event:KeyboardEvent):void {
@@ -299,6 +290,7 @@
                 showPackage = uiConfig.getConfiguration(UIConfiguration.SHOW_CREATE_PACKAGE).selected;
                 showConnections = uiConfig.getConfiguration(UIConfiguration.SHOW_CONNECTIONS).selected;
                 showLookupTable = uiConfig.getConfiguration(UIConfiguration.SHOW_LOOKUP_TABLE).selected;
+                addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.PRO;
             }       
         }
 

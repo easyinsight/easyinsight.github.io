@@ -56,6 +56,8 @@
         public function gotFocus():void {
             
         }]]></mx:Script>
+    <mx:TextArea text="Welcome back to Easy Insight! As part of a special offer, we've offered you an additional 30 days on your trial account."
+                 fontSize="20" editable="false" selectable="false"/>
     <mx:Label text="Here's our most recent information about your account." fontSize="20"/>
     <mx:Label text="Please correct anything that may have changed." fontSize="20"/>
     <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">

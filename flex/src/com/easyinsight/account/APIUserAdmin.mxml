@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="retrieveData()" width="100%" height="100%">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="retrieveData()" width="100%" height="100%"
+        title="API Settings">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.managers.PopUpManager;
 
@@ -32,6 +34,9 @@
         [Bindable]
         private var accountAdmin:Boolean;
 
+        [Bindable]
+        private var apiEnabled:Boolean;
+
         private function showSecretAccountKey():void {
             if (showingSecretAccountKey) {
                 showingSecretAccountKey = false;
@@ -57,8 +62,12 @@
             adminService.getAccountAPISettings.send();
         }
 
-        private function regenerated():void {
-            adminService.getAccountAPISettings.send();
+        private function regeneratedUserKey():void {
+            userAPISecretKey = adminService.regenerateUserSecretKey.lastResult as String;
+        }
+
+        private function regeneratedAccountKey():void {
+            accountAPISecretKey = adminService.regenerateAccountSecretKey.lastResult as String;
         }
 
         private function gotSettings():void {
@@ -67,6 +76,7 @@
             accountAPISecretKey = accountAPISettings.accountSecretKey;
             userAPIKey = accountAPISettings.userKey;
             userAPISecretKey = accountAPISettings.userSecretKey;
+            apiEnabled = accountAPISettings.apiEnabled;
         }
 
         private function copyKeyToClipboard():void {
@@ -84,14 +94,31 @@
         private function copyUserSecretKeyToClipboard():void {
             System.setClipboard(userAPISecretKey);
         }
+
+        private function save():void {
+            var settings:AccountAPISettings = new AccountAPISettings();
+            settings.apiEnabled = apiEnabledCheckbox.selected;
+            settings.userKey = userAPIKey;
+            settings.userSecretKey = userAPISecretKey;
+            settings.accountKey = accountAPIKey;
+            settings.accountSecretKey = accountAPISecretKey;
+            ProgressAlert.alert(this, "Saving settings...", null, adminService.saveAccountAPISettings);
+            adminService.saveAccountAPISettings.send(settings);
+        }
+
+        private function saved():void {
+            PopUpManager.removePopUp(this);
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="adminService">
         <mx:method name="getAccountAPISettings" result="gotSettings()"/>
-        <mx:method name="regenerateUserSecretKey" result="regenerated()"/>
-        <mx:method name="regenerateAccountSecretKey" result="regenerated()"/>
+        <mx:method name="saveAccountAPISettings" result="saved()"/>
+        <mx:method name="regenerateUserSecretKey" result="regeneratedUserKey()"/>
+        <mx:method name="regenerateAccountSecretKey" result="regeneratedAccountKey()"/>
     </mx:RemoteObject>
     <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
-        <mx:VBox id="accountSettingsBox" paddingLeft="20" paddingRight="20" paddingTop="20" paddingBottom="20">
+        <mx:VBox id="accountSettingsBox">
+            <mx:CheckBox label="API Enabled for Account" id="apiEnabledCheckbox" enabled="{accountAdmin}" selected="{apiEnabled}" fontSize="16"/>
             <mx:Label text="The keys below are your personal credentials for publishing data into Easy Insight through the API."/>
             <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">                
                 <mx:FormItem label="API Key: " direction="horizontal">
@@ -122,7 +149,8 @@
         </mx:VBox>
         <mx:HRule width="100%"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
 </util:EITitleWindow>

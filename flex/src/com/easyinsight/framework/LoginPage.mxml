@@ -116,6 +116,10 @@
         }
 
         private function remaining():void {
+            panelIndex++;
+        }
+
+        private function finishAccountSetup():void {
             userService.applySetupData.send(setupData);
         }
 
@@ -152,7 +156,7 @@
 
         private function loginHandler(event:LoginEvent):void {
             if (event.authResponse.accountState == Account.DELINQUENT) {
-                panelIndex = 4;
+                panelIndex = 5;
             } else {
                 dispatchEvent(event);
             }
@@ -239,10 +243,19 @@
                                                               loginEvent2="accountCreated(event)"
                                                               accountType="{accountType}"/>
                 </mx:VBox>
-                <mx:VBox showEffect="leftEffect">
+                <mx:VBox showEffect="leftEffect" hideEffect="leftEffect">
                     <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
                                                  kpiTutorialNext="remaining()" accountType="{accountType}"/>
                 </mx:VBox>
+                <mx:VBox showEffect="leftEffect">
+                    <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
+                                                 kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"/>
+                </mx:VBox>
+
+                <!--
+                    additional emails 
+                -->
+
                 <!-- welcome back panel -->
                 <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle" hideEffect="leftEffect" showEffect="leftEffect">
                     <mx:Image source="{moneyIcon}"/>

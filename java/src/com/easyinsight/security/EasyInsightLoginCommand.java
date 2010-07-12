@@ -30,7 +30,7 @@ public class EasyInsightLoginCommand implements LoginCommand {
 
     public Principal doAuthentication(String userName, Object credentials) {
         String password = (String) credentials;
-        UserServiceResponse userServiceResponse = userService.authenticate(userName, password);
+        UserServiceResponse userServiceResponse = userService.authenticate(userName, password, false);
         if (userServiceResponse.isSuccessful()) {
             HttpSession session = FlexContext.getHttpRequest().getSession();
             session.setAttribute("userID", userServiceResponse.getUserID());
@@ -38,9 +38,22 @@ public class EasyInsightLoginCommand implements LoginCommand {
             session.setAttribute("userName", userServiceResponse.getUserName());
             session.setAttribute("accountType", userServiceResponse.getAccountType());
             session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
+            session.setAttribute("nonCookieLogin", true);
             return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
                     userServiceResponse.isAccountAdmin());
         } else {
+            userServiceResponse = userService.sessionCookieCheck(password, userName, true);
+            if (userServiceResponse != null) {
+                HttpSession session = FlexContext.getHttpRequest().getSession();
+                session.setAttribute("userID", userServiceResponse.getUserID());
+                session.setAttribute("accountID", userServiceResponse.getAccountID());
+                session.setAttribute("userName", userServiceResponse.getUserName());
+                session.setAttribute("accountType", userServiceResponse.getAccountType());
+                session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
+                session.setAttribute("nonCookieLogin", false);
+                return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
+                    userServiceResponse.isAccountAdmin());
+            }
             return null;
         }
     }

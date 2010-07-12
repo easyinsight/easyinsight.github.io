@@ -38,6 +38,9 @@
         }
 
         private function editProfile():void {
+            if (!User.getInstance().nonCookieLogin) {
+                
+            }
             var window:UserProfileEditor = new UserProfileEditor();
             window.emailText = email;
             window.userNameText = userName;

@@ -420,6 +420,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void reportSave(Session session) {
         beforeSave();
+        if (getKey().getKeyID() == 0) {
+            session.save(getKey());
+        }
         for (FilterDefinition filterDefinition : getFilters()) {
             filterDefinition.getField().reportSave(session);
         }

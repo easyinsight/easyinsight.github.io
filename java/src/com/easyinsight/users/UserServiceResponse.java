@@ -33,6 +33,8 @@ public class UserServiceResponse {
     private long personaID;
     private int dateFormat;
     private boolean defaultReportSharing;
+    private String sessionCookie;
+    private boolean cookieLogin;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -44,7 +46,7 @@ public class UserServiceResponse {
                                boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
                                boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible,
-                               Long personaID, int dateFormat, boolean defaultReportSharing) {
+                               Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -66,6 +68,15 @@ public class UserServiceResponse {
         this.personaID = personaID == null ? 0 : personaID;
         this.dateFormat = dateFormat;
         this.defaultReportSharing = defaultReportSharing;
+        this.cookieLogin = cookieLogin;
+    }
+
+    public String getSessionCookie() {
+        return sessionCookie;
+    }
+
+    public void setSessionCookie(String sessionCookie) {
+        this.sessionCookie = sessionCookie;
     }
 
     public boolean isDefaultReportSharing() {
@@ -74,6 +85,14 @@ public class UserServiceResponse {
 
     public void setDefaultReportSharing(boolean defaultReportSharing) {
         this.defaultReportSharing = defaultReportSharing;
+    }
+
+    public boolean isCookieLogin() {
+        return cookieLogin;
+    }
+
+    public void setCookieLogin(boolean cookieLogin) {
+        this.cookieLogin = cookieLogin;
     }
 
     public int getDateFormat() {

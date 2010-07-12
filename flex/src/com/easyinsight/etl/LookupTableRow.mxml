@@ -49,7 +49,7 @@
                 addChild(dateField);
             } else if (_mode == "measure") {
                 numberInput = new TextInput();
-                numberInput.text = targetText;
+                numberInput.text = targetNumber;
                 addChild(numberInput);
             }
         }

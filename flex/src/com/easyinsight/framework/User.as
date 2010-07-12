@@ -8,8 +8,6 @@ import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.net.SharedObject;
 
-import mx.controls.Alert;
-
 public class User extends EventDispatcher
 {
     private var name:String;
@@ -20,6 +18,7 @@ public class User extends EventDispatcher
     static private var sharedObject:SharedObject;
     public var commercialEnabled:Boolean;
     public var spaceAllowed:int;
+    public var nonCookieLogin:Boolean;
     private var _userName:String;
     public var accountAdmin:Boolean;
     public var userID:int;
@@ -91,6 +90,7 @@ public class User extends EventDispatcher
         _user.firstLogin = response.firstLogin;
         _user.accountName = response.accountName;
         _user.renewalOptionPossible = response.renewalOptionPossible;
+        _user.nonCookieLogin = response.nonCookieLogin;
         _user.personaID = response.personaID;
         _user.dateFormat = response.dateFormat;
         _user.defaultReportSharing = response.defaultReportSharing;

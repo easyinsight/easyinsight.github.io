@@ -5,6 +5,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.etl.LookupTableDescriptor;
+import com.easyinsight.etl.LookupTableUtil;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.userupload.UploadPolicy;
@@ -68,6 +69,7 @@ public class FeedService implements IDataFeedService {
                 infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
                 dataSourceMap.put(dataSourceID, dataSourceDescriptor);
             }
+            queryStmt.close();
             PreparedStatement queryGroupStmt = conn.prepareStatement("SELECT DATA_FEED_ID, DATA_FEED.feed_name, DATA_FEED.feed_type," +
                     "DATA_FEED.create_date FROM DATA_FEED, UPLOAD_POLICY_GROUPS, group_to_user_join WHERE " +
                     "DATA_FEED.data_feed_id = upload_policy_groups.feed_id and group_to_user_join.group_id = upload_policy_groups.group_id and " +
@@ -87,6 +89,7 @@ public class FeedService implements IDataFeedService {
             for (DataSourceDescriptor dataSource : dataSourceMap.values()) {
                 describe(dataSource, infos.get(dataSource.getId()), conn);
             }
+            queryGroupStmt.close();
             PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.data_feed_id, analysis.title, analysis.report_type," +
                     "analysis.url_key FROM " +
                         "USER_TO_ANALYSIS, ANALYSIS WHERE " +
@@ -102,6 +105,7 @@ public class FeedService implements IDataFeedService {
                 String urlKey = queryRS.getString(5);
                 reportMap.put(reportID, new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey));
             }
+            reportQueryStmt.close();
             PreparedStatement groupReportStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.data_feed_id, analysis.title, analysis.report_type," +
                     "analysis.url_key FROM " +
                         "group_to_insight, analysis, group_to_user_join WHERE " +
@@ -117,7 +121,8 @@ public class FeedService implements IDataFeedService {
                 int reportType = groupReportRS.getInt(4);
                 String urlKey = groupReportRS.getString(5);
                 reportMap.put(reportID, new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey));
-            }            
+            }
+            groupReportStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -157,6 +162,7 @@ public class FeedService implements IDataFeedService {
             description = "this data source was created on " + dateString + " and has " + count + " reports.";
         }
         descriptor.setDescription(description);
+        queryReportCountStmt.close();
     }
 
     public boolean needsConfig(long dataSourceID) {
@@ -769,7 +775,7 @@ public class FeedService implements IDataFeedService {
         try {
             conn.setAutoCommit(false);
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, LOOKUP_TABLE_NAME, SOURCE_ITEM_ID," +
-                    "TARGET_ITEM_ID FROM LOOKUP_TABLE WHERE LOOKUP_TABLE_ID = ?");
+                    "TARGET_ITEM_ID, URL_KEY FROM LOOKUP_TABLE WHERE LOOKUP_TABLE_ID = ?");
             queryStmt.setLong(1, lookupTableID);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
@@ -777,6 +783,15 @@ public class FeedService implements IDataFeedService {
                 String name = rs.getString(2);
                 long sourceItemID = rs.getLong(3);
                 long targetItemID = rs.getLong(4);
+                String urlKey = rs.getString(5);
+                if (urlKey == null) {
+                    urlKey = RandomTextGenerator.generateText(20);
+                    PreparedStatement updateURLStmt = conn.prepareStatement("UPDATE LOOKUP_TABLE SET URL_KEY = ? WHERE " +
+                            "LOOKUP_TABLE_ID = ?");
+                    updateURLStmt.setString(1, urlKey);
+                    updateURLStmt.setLong(2, lookupTableID);
+                    updateURLStmt.execute();
+                }
                 AnalysisItem sourceItem = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, sourceItemID).list().get(0);
                 sourceItem.afterLoad();
                 AnalysisItem targetItem = (AnalysisItem) session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, targetItemID).list().get(0);
@@ -786,6 +801,7 @@ public class FeedService implements IDataFeedService {
                 lookupTable.setDataSourceID(dataSourceID);
                 lookupTable.setSourceField(sourceItem);
                 lookupTable.setTargetField(targetItem);
+                lookupTable.setUrlKey(urlKey);
                 lookupTable.setLookupTableID(lookupTableID);
                 PreparedStatement getPairsStmt = conn.prepareStatement("SELECT SOURCE_VALUE, TARGET_VALUE, target_date_value, target_measure FROM " +
                         "LOOKUP_PAIR WHERE LOOKUP_TABLE_ID = ?");
@@ -834,6 +850,30 @@ public class FeedService implements IDataFeedService {
         return lookupTable;
     }
 
+    public long openLookupTableIfPossible(String urlKey) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT LOOKUP_TABLE_ID, DATA_SOURCE_ID FROM LOOKUP_TABLE WHERE " +
+                    "URL_KEY = ?");
+            queryStmt.setString(1, urlKey);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long lookupTableID = rs.getLong(1);
+                long dataSourceID = rs.getLong(2);
+                SecurityUtil.authorizeFeedAccess(dataSourceID);
+                return lookupTableID;
+            }
+        } catch (SecurityException se) {
+            return 0;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return 0;
+    }
+
     public long saveNewLookupTable(LookupTable lookupTable) {
         long id;
         SecurityUtil.authorizeFeed(lookupTable.getDataSourceID(), Roles.OWNER);
@@ -844,11 +884,12 @@ public class FeedService implements IDataFeedService {
             dataSource.getFields().add(lookupTable.getTargetField());
             new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
             PreparedStatement insertTableStmt = conn.prepareStatement("INSERT INTO LOOKUP_TABLE (DATA_SOURCE_ID," +
-                    "LOOKUP_TABLE_NAME, SOURCE_ITEM_ID, TARGET_ITEM_ID) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "LOOKUP_TABLE_NAME, SOURCE_ITEM_ID, TARGET_ITEM_ID, URL_KEY) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             insertTableStmt.setLong(1, lookupTable.getDataSourceID());
             insertTableStmt.setString(2, lookupTable.getName());
             insertTableStmt.setLong(3, lookupTable.getSourceField().getAnalysisItemID());
             insertTableStmt.setLong(4, lookupTable.getTargetField().getAnalysisItemID());
+            insertTableStmt.setString(5, RandomTextGenerator.generateText(20));
             insertTableStmt.execute();
             id = Database.instance().getAutoGenKey(insertTableStmt);
             lookupTable.getTargetField().setLookupTableID(id);
@@ -921,6 +962,7 @@ public class FeedService implements IDataFeedService {
             updateStmt.setLong(2, lookupTable.getLookupTableID());
             updateStmt.executeUpdate();
             savePairs(lookupTable.getLookupTableID(), lookupTable.getTargetField(), lookupTable.getLookupPairs(), conn);
+            FeedRegistry.instance().flushCache(lookupTable.getDataSourceID());
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -929,6 +971,16 @@ public class FeedService implements IDataFeedService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+    }
+
+    public List<Value> getLookupTablePairs(long lookupTableID, List<FilterDefinition> filters) {
+        try {
+            LookupTable lookupTable = getLookupTable(lookupTableID);
+            return LookupTableUtil.getValues(lookupTable, filters);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 }
