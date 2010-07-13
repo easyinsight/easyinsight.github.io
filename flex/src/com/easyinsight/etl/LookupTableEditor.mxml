@@ -90,9 +90,10 @@
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             BrowserManager.getInstance().setTitle("Easy Insight - " + _lookupTable.name);
-            ProgressAlert.alert(this, "Retrieving possible values for the lookup table...", null, dataService.getFeedMetadata);
+            ProgressAlert.alert(this, "Retrieving possible values for the lookup table...", null, dataService.getFeedMetadata, etlService.getLookupTablePairs);
             //dataService.getAnalysisItemMetadata.send(_lookupTable.dataSourceID, _lookupTable.sourceField, CredentialsCache.getCache().createCredentials(), 0);
             dataService.getFeedMetadata.send(_lookupTable.dataSourceID);
+            etlService.getLookupTablePairs.send(_lookupTable.lookupTableID, new ArrayCollection());
         }
 
         private var rowType:String;
@@ -136,6 +137,13 @@
             valueStrings.refresh();
             for each (var valueString:String in valueStrings) {
                 var pair:LookupPair = masterLookupTable[valueString];
+                if (pair == null) {
+                    pair = new LookupPair();
+                    var strValue:StringValue = new StringValue();
+                    strValue.value = valueString;
+                    pair.sourceValue = strValue;
+                    masterLookupTable[valueString] = pair;
+                }
                 lookupMap[valueString] = pair;
                 var row:LookupTableRow = new LookupTableRow();
                 row.pair = pair;

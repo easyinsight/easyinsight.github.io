@@ -47,6 +47,9 @@ public class PipelineData {
     public boolean decrementReferenceCount(AnalysisItem analysisItem) {
         Key key = analysisItem.createAggregateKey();
         Integer count = getRefMap().get(key);
+        if (count == null) {
+            return true;
+        }
         count--;
         getRefMap().put(key, count);
         return count == 0;

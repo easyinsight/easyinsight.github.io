@@ -351,13 +351,13 @@ public class FeedStorage {
         if (analysisItems != null) {
             Session session = Database.instance().createSession(conn);
             try {
-                for (AnalysisItem analysisItem : analysisItems) {
+                /*for (AnalysisItem analysisItem : analysisItems) {
                     if (analysisItem.getKey().getKeyID() == 0) {
                         session.save(analysisItem.getKey());
                     } else {
                         session.merge(analysisItem.getKey());
                     }
-                }
+                }*/
                 for (AnalysisItem analysisItem : analysisItems) {
                     analysisItem.reportSave(session);
                     if (analysisItem.getAnalysisItemID() == 0) {
