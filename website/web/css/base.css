@@ -361,3 +361,11 @@ h1.headliner {
 p.disclaimer {
 	font-size:10px;
 }
+
+pre {
+    background-color: #DDDDDD;
+    border-style:solid;
+    border-width: 1px;
+    border-color: #888888;
+    margin: 1em;
+}
