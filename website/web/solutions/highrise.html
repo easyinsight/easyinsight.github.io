@@ -18,6 +18,33 @@
     <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
     <script type="text/javascript" src="/js/slimbox2.js"></script>
+    <script language="javascript" type="text/javascript">
+
+normal_image = new Image();
+normal_image.src = "/images/GetStartedNow2.png";
+
+mouseover_image = new Image();
+mouseover_image.src = "/images/GetStartedNow1.png";
+
+sample_image = new Image();
+sample_image.src = "/images/SampleReports2.png";
+
+sample_mouseover_image = new Image();
+sample_mouseover_image.src = "/images/SampleReports1.png";
+
+
+<!-- repeat the 4 lines above for any subsequent images. -->
+
+function swap(){
+if (document.images){
+for (var x=0;
+x<swap.arguments.length;
+x+=2) {
+document[swap.arguments[x]].src = eval(swap.arguments[x+1] + ".src");
+}
+}
+}
+</script>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/slimbox2.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
@@ -44,18 +71,22 @@
               <p style="padding-top:10px;padding-bottom:10px">Want the ability to perform custom Highrise reporting? Whether it's simple reports on your sales pipeline or in depth CRM analysis, Easy Insight can get you that visibility in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation.</p>
 
                 <div style="width:100%" align="center">
-                    <a href="https://www.easy-insight.com/app/#solutionID=19&requiredTier=2"><img src="/images/docs/GetStartedNow.png"  alt="Start Reporting on Highrise!"></a>
+                    <a style="padding-right:40px" href="https://www.easy-insight.com/app/#solutionID=19&requiredTier=2" onMouseOver="swap('getstarted','normal_image')"
+onMouseOut="swap('getstarted','mouseover_image')">
+<img name="getstarted" src="/images/GetStartedNow1.png" border="0"></a>
+                    <a style="padding-left:40px" href="../images/ContactReports.png" rel="lightbox-highrise" onMouseOver="swap('samplereports','sample_image')"
+onMouseOut="swap('samplereports','sample_mouseover_image')">
+<img name="samplereports" src="/images/SampleReports1.png" border="0"></a>
                 </div>
 
-
+                <a href="https://www.easy-insight.com/app/#solutionID=19&requiredTier=2" style="font-family:Verdana;font-size:20px;color:#444444;text-decoration:none">Get Started Now</a>
 
               <div style="padding-top:35px;padding-left:10px;padding-right:30px;float:left">
-                <a href="../images/ContactReports.png" rel="lightbox-highrise"><img src="../images/CompanyDealTreeSmall.png" alt="Highrise report showing companies and deals in hierarchy"/></a>
+                <a href="../images/CompanyDealTree.png" rel="lightbox-highrise" title="Trees let you define hierarchial representations of your Highrise data. In the above report, companies drill down into the deals associated with those companies, with dollar figures rolling up to the company level."><img src="../images/CompanyDealTreeSmall.png" alt="Highrise report showing companies and deals in hierarchy"/></a>
                   <div align="center" style="font-size:12px;padding-top:10px;color:#353535">
                      Click Above to See Sample Highrise Reports
                    </div>
               </div>
-              <span style="display:none"><a href="../images/CompanyDealTree.png" rel="lightbox-highrise" title="Trees let you define hierarchial representations of your Highrise data. In the above report, companies drill down into the deals associated with those companies, with dollar figures rolling up to the company level.">Image 3</a></span>
               <h2>Answers to Your Highrise Reporting Questions</h2>
               <p>Need to build Highrise reports on your companies, cases, deals, emails, tasks, or contacts? Easy Insight gives you the ability to create simple lists of contact information, pie charts of deal dollars by company, line charts of contact creation over time, and anything else you may want! Ad hoc report creation allows you to drag in fields from any of the key Highrise subject matters to create the reports you need to manage and optimize your sales activities. You can apply dynamic filters to restrict the data down to a particular date range, show only deals matching a certain tag, or only open cases. Once you have a report you like, you can export the data to Excel and set it up to deliver over email on a recurring schedule.</p>
                 <div style="padding:10px;float:right">
