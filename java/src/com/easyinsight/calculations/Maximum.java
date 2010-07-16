@@ -1,5 +1,6 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.analysis.FunctionExplanation;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.NumericValue;
 
@@ -19,5 +20,9 @@ public class Maximum extends Function {
             }
         }
         return new NumericValue(max);
+    }
+
+    public FunctionExplanation explain() {
+        return new FunctionExplanation("", "");
     }
 }

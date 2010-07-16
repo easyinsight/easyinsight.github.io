@@ -96,7 +96,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         }
         var serviceData:ServiceData = translate(listData);
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data, serviceData.clientProcessorMap,
-                listData.dataSourceInfo, listData.additionalProperties, listData.limitedResults, listData.maxResults,
+                listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.limitedResults, listData.maxResults,
                 listData.limitResults));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }

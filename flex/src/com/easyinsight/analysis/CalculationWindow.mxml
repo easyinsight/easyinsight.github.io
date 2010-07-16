@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
-           xmlns:formatter="com.easyinsight.analysis.formatter.*"
+           xmlns:formatter="com.easyinsight.analysis.formatter.*" xmlns:schedule="com.easyinsight.schedule.*"
            implements="com.easyinsight.analysis.IAnalysisItemEditor" width="100%" height="100%">
     <mx:Script>
 		<![CDATA[
-
-        import com.easyinsight.analysis.conditions.MeasureConditionRange;
 
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
@@ -13,49 +11,35 @@
         import mx.controls.AdvancedDataGrid;
         import mx.controls.Alert;
         import mx.controls.DataGrid;
+        import mx.controls.TextArea;
+        import mx.events.ListEvent;
         import mx.managers.DragManager;
         import mx.controls.List;
         import mx.events.DragEvent;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var failureMessage:String;
 
         [Bindable]
-        private var calcText:String;
+        protected var calcText:String;
 
         [Bindable]
-        private var calcName:String;
+        protected var calcName:String;
 
         [Bindable]
-        private var formattingConfiguration:FormattingConfiguration;
-
-        private var analysisCalculation:AnalysisCalculation;
+        protected var formattingConfiguration:FormattingConfiguration;
 
         [Bindable]
-        private var applyBefore:Boolean;
+        protected var applyBefore:Boolean;
 
         public function save(dataSourceID:int):AnalysisItem {
-            if (analysisCalculation == null) {
-                analysisCalculation = new AnalysisCalculation();
-                analysisCalculation.concrete = false;
-                var namedKey:NamedKey = new NamedKey();
-                namedKey.name = nameInput.text;
-                analysisCalculation.key = namedKey;
-            } else {
-                analysisCalculation.displayName = nameInput.text;
-            }
-            analysisCalculation.applyBeforeAggregation = applyBeforeCheckbox.selected;
-            analysisCalculation.calculationString = calculationInput.text;
-            analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
-            analysisService.validateCalculation.send(analysisCalculation.calculationString, dataSourceID);
-            return analysisCalculation;
+            return null;
         }
 
         public function validatedCalculation():void {
             failureMessage = analysisService.validateCalculation.lastResult as String;
             if (failureMessage == null)
-                dispatchEvent(new AnalysisItemSaveEvent(analysisCalculation));
+                dispatchEvent(new AnalysisItemSaveEvent(calculationItem));
             else
                 Alert.show("There was a problem with your calculation syntax. Please check the calculation and try again.");
         }
@@ -74,18 +58,6 @@
         //            }
         //            PopUpManager.removePopUp(this);
         //         }
-
-
-        override protected function commitProperties():void {
-            super.commitProperties();
-            if (analysisCalculation != null) {
-                calcText = analysisCalculation.calculationString;
-                calcName = analysisCalculation.display;
-
-                formattingConfiguration = analysisCalculation.formattingConfiguration;
-                applyBefore = analysisCalculation.applyBeforeAggregation;
-            }
-        }
 
         private function dragEnterHandler(event:DragEvent):void {
             var analysisItem:AnalysisItem;
@@ -128,15 +100,17 @@
                 if (outputStr.indexOf(str.charAt(i)) != -1)
                     foundSpecialChar = true;
             }
-            if (foundSpecialChar)
-                calculationInput.text += "[";
-            calculationInput.text += outputStr;
-            if (foundSpecialChar)
-                calculationInput.text += "]";
+            if (foundSpecialChar) {
+                outputStr = "[" + outputStr + "]";
+            }
+            calculationInput.insertTextAtCursor(outputStr);
+        }
+
+        protected function get calculationItem():AnalysisItem {
+            return null;
         }
 
         public function set analysisItem(analysisItem:AnalysisItem):void {
-            analysisCalculation = analysisItem as AnalysisCalculation;
         }
 
         public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -145,22 +119,55 @@
         public function set dataSourceID(dataSourceID:int):void {
         }
 
+        [Bindable]
+        protected var showMeasures:Boolean;
+
+        [Bindable]
+        private var functionExplanation:String;
+
+        [Bindable]
+        private var functionSignature:String;
+
+        private function onFunctionClick(event:ListEvent):void {
+            var xml:XML = event.currentTarget.selectedItem;
+            if (xml != null) {
+                var name:String = String(xml.name());
+                if (name == "function") {
+                    analysisService.explain.send(String(xml.@label));
+                }
+            }
+        }
+
+        private function explained():void {
+            var explanation:FunctionExplanation = analysisService.explain.lastResult as FunctionExplanation;
+            functionExplanation = explanation.description;
+            functionSignature = explanation.signature;
+        }
+
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
-		<mx:method name="validateCalculation" result="validatedCalculation()"/>
-	</mx:RemoteObject>
+        <mx:method name="validateCalculation" result="validatedCalculation()"/>
+        <mx:method name="explain" result="explained()"/>
+    </mx:RemoteObject>
     <mx:HBox width="100%" height="100%">
-        <mx:VBox>
-            <mx:Label text="Available Functions"/>
-            <mx:Tree labelField="@label" width="300">
+        <mx:VBox horizontalAlign="center">
+            <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)">
                 <mx:XMLListCollection>
                     <mx:XMLList>
                         <group label="Math">
+                            <function label="abs"/>
+                            <function label="acos"/>
+                            <function label="asin"/>
+                            <function label="atan"/>
+                            <function label="ceil"/>
+                            <function label="cos"/>
+                            <function label="floor"/>
                             <function label="ln"/>
-                        </group>
-                        <group label="Statistics">
-                            <function label="stddev"/>
+                            <function label="sin"/>
+                            <function label="sqrt"/>
+                            <function label="tan"/>
                         </group>
                         <group label="Data Type">
                             <function label="castsum"/>
@@ -171,32 +178,35 @@
                             <function label="castmedian"/>
                             <function label="castvariance"/>
                         </group>
+                        <group label="Text">
+                            <function label="bracketvalue"/>
+                            <function label="upper"/>
+                            <function label="lower"/>
+                        </group>
                     </mx:XMLList>
                 </mx:XMLListCollection>
             </mx:Tree>
-            <mx:HBox>
-                <mx:CheckBox id="applyBeforeCheckbox" selected="{applyBefore}"/>
-                <mx:Label text="Apply Before Aggregation"/>
-            </mx:HBox>
+            <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF">
+                <mx:Label text="{functionSignature}"/>
+                <mx:TextArea text="{functionExplanation}" borderStyle="none" backgroundAlpha="0" editable="false" selectable="true"
+                    width="300" height="80"/>
+            </mx:VBox>
         </mx:VBox>
         <mx:Form>
             <mx:FormItem label="Name: " direction="horizontal" width="100%">
                 <mx:TextInput id="nameInput" width="100%" text="{calcName}"/>
             </mx:FormItem>
             <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
-                <mx:TextArea id="calculationInput" dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)"
-                             width="400" height="100"
-                             text="{calcText}" borderStyle="solid" borderThickness="1"/>
+                <schedule:CursorTextArea id="calculationInput" dragEnter="dragEnterHandler(event)"
+                                         dragDrop="dragDropHandler(event)"
+                                         width="400" height="220"
+                                         text="{calcText}" borderStyle="solid" borderThickness="1"/>
             </mx:FormItem>
-            <mx:FormItem label="Formatting: ">
+            <mx:FormItem label="Formatting: " visible="{showMeasures}">
                 <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
             </mx:FormItem>
-            <!--<mx:FormItem label="" direction="horizontal">
-				<mx:Button label="Save" click="save()"/>
-				<mx:Button label="Cancel" click="cancel()"/>
-			</mx:FormItem>-->
         </mx:Form>
     </mx:HBox>
     <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3"/>
-	<!--<analysis:CalculationValidator id="calcValidator" source="{calculationInput}" property="text" failureMessage="{failureMessage}"/>-->
+    <!--<analysis:CalculationValidator id="calcValidator" source="{calculationInput}" property="text" failureMessage="{failureMessage}"/>-->
 </mx:Canvas>

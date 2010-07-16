@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _audits:ArrayCollection;
+
+        public function set audits(value:ArrayCollection):void {
+            _audits = value;
+        }
+
+        [Bindable]
+        private var auditText:String;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            var text:String = "";
+            for each (var string:String in _audits) {
+                text += string + "\n";
+            }
+            auditText = text;
+        }
+        ]]></mx:Script>
+    <mx:VBox>
+        <mx:TextArea backgroundAlpha="0" borderStyle="none" width="600" height="40" text="This window provides you with an explanation of what's happened in the underlying report engine. This window should only be used in combination with Easy Insight Support."/>
+        <util:AutoSizeTextArea borderStyle="none" backgroundAlpha="0" editable="false" text="{auditText}" width="600"/>
+        <mx:HBox horizontalAlign="center" width="100%">
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

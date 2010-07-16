@@ -7,7 +7,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 
 import java.util.*;
@@ -123,7 +122,7 @@ public class CompositeFeed extends Feed {
     }
 
     public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
@@ -267,16 +266,21 @@ public class CompositeFeed extends Feed {
             }
         }
 
+        List<String> auditStrings = new ArrayList<String>();
         for (Edge edge : edgeSet) {
             QueryStateNode sourceNode = neededNodes.get(edge.connection.getSourceFeedID());
             QueryStateNode targetNode = neededNodes.get(edge.connection.getTargetFeedID());
             //Key sourceJoin = new DerivedKey(edge.connection.getSourceJoin(), edge.connection.getSourceFeedID());
             //Key targetJoin = new DerivedKey(edge.connection.getTargetJoin(), edge.connection.getTargetFeedID());
-            dataSet = edge.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems);
+            MergeAudit mergeAudit = edge.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems,
+                    sourceNode.dataSourceName, targetNode.dataSourceName);
+            dataSet = mergeAudit.getDataSet();
+            auditStrings.addAll(mergeAudit.getMergeStrings());
             //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
             sourceNode.myDataSet = dataSet;
             targetNode.myDataSet = dataSet;
         }
+        dataSet.setAudits(auditStrings);
 
         return dataSet;
     }
@@ -289,10 +293,12 @@ public class CompositeFeed extends Feed {
         private Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         private Collection<AnalysisItem> allFeedItems;
         private DataSet myDataSet;
+        private String dataSourceName;
 
         private QueryStateNode(long feedID) {
             this.feedID = feedID;
             Feed feed = FeedRegistry.instance().getFeed(feedID);
+            dataSourceName = feed.getName();
             allFeedItems = feed.getFields();
         }
 

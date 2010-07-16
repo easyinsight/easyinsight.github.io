@@ -125,7 +125,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             EvaluationVisitor subNode = new EvaluationVisitor(row);
             ((CalculationTreeNode) node.getChild(i)).accept(subNode);
             // TODO: Better handling of empty values in functions
-            if(subNode.getResult() instanceof EmptyValue || subNode.getResult().toDouble() == null) {
+            if(subNode.getResult() instanceof EmptyValue) {
                 result = new EmptyValue();
                 return;
             }

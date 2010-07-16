@@ -15,7 +15,7 @@
         import com.easyinsight.framework.DataService;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.collections.ArrayCollection;        
+        import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
         private var _analysisDefinition:AnalysisDefinition;
@@ -30,6 +30,18 @@
 
         private var _dataSourceInfo:DataSourceInfo;
 
+        private var _reportAudit:ArrayCollection;
+
+        [Bindable(event="reportAuditChanged")]
+        public function get reportAudit():ArrayCollection {
+            return _reportAudit;
+        }
+
+        public function set reportAudit(value:ArrayCollection):void {
+            if (_reportAudit == value) return;
+            _reportAudit = value;
+            dispatchEvent(new Event("reportAuditChanged"));
+        }
 
         [Bindable(event="dataSourceInfoChanged")]
         public function get dataSourceInfo():DataSourceInfo {
@@ -113,7 +125,16 @@
 
         private function createCalculation():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-            window.editorClass = CalculationWindow;
+            window.editorClass = CalculationMeasureWindow;
+            window.dataSourceID = _dataService.dataFeedID;
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
+            PopUpManager.addPopUp(window, this);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function createCalculatedGrouping():void {
+            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.editorClass = DerivedGroupingWindow;
             window.dataSourceID = _dataService.dataFeedID;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
             PopUpManager.addPopUp(window, this);
@@ -144,14 +165,14 @@
         }
 
         /*private function obfuscate():void {
-            dataView.obfuscate = !dataView.obfuscate;
-            if (dataView.obfuscate) {
-                dispatchEvent(new ReportSizingEvent(700));
-            } else {
-                dispatchEvent(new ReportSizingEvent(0));
-            }
-            dataView.retrieveData();
-        }*/
+         dataView.obfuscate = !dataView.obfuscate;
+         if (dataView.obfuscate) {
+         dispatchEvent(new ReportSizingEvent(700));
+         } else {
+         dispatchEvent(new ReportSizingEvent(0));
+         }
+         dataView.retrieveData();
+         }*/
 
         private function newTextReplaceScrub():void {
             var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));
@@ -159,7 +180,6 @@
             textWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
             PopUpUtil.centerPopUp(textWindow);
         }
-
 
 
         private function editTextReplaceScrubs():void {
@@ -204,10 +224,22 @@
         public function removeAPI():void {
             removeChild(apiButton);
         }
+
+        public function explainReport():void {
+            if (reportAudit != null) {
+                var window:ReportExplanationWindow = new ReportExplanationWindow();
+                window.audits = _reportAudit;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
         ]]></mx:Script>
     <mx:Button id="calculationButton" toolTip="Create Calculation"
                icon="@Embed(source='../../../../assets/text_formula.png')"
                click="createCalculation()"/>
+    <mx:Button id="derivedButton" toolTip="Create Derived Grouping"
+               icon="@Embed(source='../../../../assets/code.png')"
+               click="createCalculatedGrouping()"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
                toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton"/>
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
@@ -220,5 +252,8 @@
     <mx:Button id="textListButton" toolTip="Edit Text Replaces..."
                icon="@Embed(source='../../../../assets/document_edit.png')"
                click="editTextReplaceScrubs()"/>
+    <mx:Button toolTip="Explain Report..."
+               icon="@Embed(source='../../../../assets/information.png')"
+               click="explainReport()"/>
     <!--<analysis:ResultLimitComboBox limits="{limits}"/>-->    
 </mx:HBox>

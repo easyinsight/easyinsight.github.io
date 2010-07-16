@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.datafeeds.CredentialRequirement;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +18,15 @@ public abstract class DataResults {
     private FeedMetadata feedMetadata;
     private DataSourceInfo dataSourceInfo;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private List<String> auditMessages;
+
+    public List<String> getAuditMessages() {
+        return auditMessages;
+    }
+
+    public void setAuditMessages(List<String> auditMessages) {
+        this.auditMessages = auditMessages;
+    }
 
     public Map<String, Object> getAdditionalProperties() {
         return additionalProperties;

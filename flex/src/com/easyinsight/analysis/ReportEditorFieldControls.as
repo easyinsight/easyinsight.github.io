@@ -171,7 +171,9 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
             if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                 editor = HierarchyWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                editor = CalculationWindow;
+                editor = CalculationMeasureWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+                editor = DerivedGroupingWindow;
             } else {
                 editor = AnalysisItemEditor;
             }

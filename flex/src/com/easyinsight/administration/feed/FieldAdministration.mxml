@@ -22,7 +22,9 @@
 
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.AnalysisStep;
-        import com.easyinsight.analysis.CalculationWindow;
+        import com.easyinsight.analysis.CalculationMeasureWindow;
+        import com.easyinsight.analysis.DerivedAnalysisDimension;
+        import com.easyinsight.analysis.DerivedGroupingWindow;
         import com.easyinsight.analysis.HierarchyWindow;
 
         import com.easyinsight.analysis.IAnalysisItemEditor;
@@ -98,7 +100,9 @@
                 if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                     editor = new HierarchyWindow();
                 } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                    editor = new CalculationWindow();
+                    editor = new CalculationMeasureWindow();
+                } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+                    editor = new DerivedGroupingWindow();
                 } else {
                     editor = new AnalysisItemEditor();
                 }
@@ -345,6 +349,22 @@
             toFocus(wrapper);
         }
 
+        private function addDerivedGrouping():void {
+            var calculation:DerivedAnalysisDimension = new DerivedAnalysisDimension();
+            calculation.key = findName("Grouping");
+            var aNode:AnalysisItemNode = new AnalysisItemNode();
+            aNode.analysisItem = calculation;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
+            derivedFields.addItem(wrapper);
+            allFields.addItem(wrapper);
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("displayName", false) ];
+            derivedFields.sort = sort;
+            derivedFields.refresh();
+            dispatchEvent(new AnalysisChangedEvent());
+            toFocus(wrapper);
+        }
+
         private function addCycle():void {
             var cycle:AnalysisStep = new AnalysisStep();
             cycle.key = findName("Cycle");
@@ -416,6 +436,8 @@
                     <mx:HBox paddingLeft="5">
                         <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
                                    toolTip="Add Hierarchy..." click="addHierarchy()"/>
+                        <mx:Button icon="@Embed(source='../../../../../assets/code.png')"
+                                   toolTip="Add Derived Grouping..." click="addDerivedGrouping()"/>
                         <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
                                    toolTip="Add Calculation..." click="addCalculation()"/>
                         <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"

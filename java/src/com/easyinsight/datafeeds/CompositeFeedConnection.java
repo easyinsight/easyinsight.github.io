@@ -101,8 +101,8 @@ public class CompositeFeedConnection implements Serializable {
         connInsertStmt.close();
     }
 
-    public DataSet merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                         Set<AnalysisItem> targetFields) {
+    public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName) {
         Key myJoinDimension = null;
         for (AnalysisItem item : sourceFields) {
             if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(getSourceJoin().toKeyString())) {
@@ -115,7 +115,7 @@ public class CompositeFeedConnection implements Serializable {
                 fromJoinDimension = item.createAggregateKey();
             }
         }
-        System.out.println("Merging data set on " + myJoinDimension.toKeyString() + " to " + fromJoinDimension.toKeyString());
+        String mergeString = "Merging data set on " + sourceName + " : " + myJoinDimension.toKeyString() + " to " + targetName + " : " + fromJoinDimension.toKeyString();
 
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
@@ -154,7 +154,7 @@ public class CompositeFeedConnection implements Serializable {
             compositeRows.addAll(rows);
         }
         compositeRows.addAll(unjoinedRows);
-        return new DataSet(compositeRows);
+        return new MergeAudit(mergeString, new DataSet(compositeRows));
     }
 
     private List<Key> removeSourceKeys;

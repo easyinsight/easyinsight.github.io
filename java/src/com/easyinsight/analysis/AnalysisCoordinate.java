@@ -5,6 +5,7 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.text.NumberFormat;
@@ -45,6 +46,14 @@ public abstract class AnalysisCoordinate extends AnalysisDimension {
     @Override
     public boolean isDerived() {
         return analysisZipCode != null;
+    }
+
+    @Override
+    public void reportSave(Session session) {
+        super.reportSave(session);
+        if (analysisZipCode != null) {
+            analysisZipCode.reportSave(session);
+        }
     }
 
     @Override

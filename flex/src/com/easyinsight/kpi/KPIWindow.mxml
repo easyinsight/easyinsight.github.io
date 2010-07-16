@@ -18,6 +18,7 @@
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.CalculationMeasureWindow;
         import com.easyinsight.analysis.CalculationWindow;
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.MeasureItemEditor;
@@ -134,7 +135,7 @@
         private function editMeasure():void {
             var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             if (analysisMeasure.hasType(AnalysisItemTypes.CALCULATION)) {
-                analysisItemEditor.editorClass = CalculationWindow;
+                analysisItemEditor.editorClass = CalculationMeasureWindow;
             } else {
                 analysisItemEditor.editorClass = MeasureItemEditor;
             }

@@ -1,5 +1,7 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.analysis.AggregationTypes;
+import com.easyinsight.analysis.FunctionExplanation;
 import com.easyinsight.core.Value;
 
 /**
@@ -12,13 +14,45 @@ import com.easyinsight.core.Value;
 public class CastFunction extends Function {
 
     private int aggregationType;
+    private String name;
 
-    public CastFunction(int aggregationType) {
+    public CastFunction(int aggregationType, String name) {
         this.aggregationType = aggregationType;
+        this.name = name;
     }
 
     public Value evaluate() {
         return params.get(0);
+    }
+
+    public FunctionExplanation explain() {
+        String description;
+        switch (aggregationType) {
+            case AggregationTypes.SUM:
+                description = "Forces Number to be calculated as a Sum.";
+                break;
+            case AggregationTypes.AVERAGE:
+                description = "Forces Number to be calculated as an Average.";
+                break;
+            case AggregationTypes.MAX:
+                description = "Forces Number to be calculated as a Max.";
+                break;
+            case AggregationTypes.MIN:
+                description = "Forces Number to be calculated as a Min.";
+                break;
+            case AggregationTypes.COUNT:
+                description = "Forces Number to be calculated as a Count.";
+                break;
+            case AggregationTypes.VARIANCE:
+                description = "Forces Number to be calculated as Variance.";
+                break;
+            case AggregationTypes.MEDIAN:
+                description = "Forces Number to be calculated as Median.";
+                break;
+            default:
+                throw new RuntimeException();
+        }
+        return new FunctionExplanation(name + "(Number)", description);
     }
 
     public int getAggregationType() {

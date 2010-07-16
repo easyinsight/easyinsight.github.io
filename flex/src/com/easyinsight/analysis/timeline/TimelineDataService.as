@@ -58,7 +58,7 @@ public class TimelineDataService extends EventDispatcher implements IReportDataS
         }
         seriesData.additionalProperties.seriesValues = seriesData.seriesValues;
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, dataSets, new Object(), seriesData.dataSourceInfo,
-                seriesData.additionalProperties, false, 0, 0));
+                seriesData.additionalProperties, seriesData.auditMessages, false, 0, 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

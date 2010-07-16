@@ -6,6 +6,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.datafeeds.CompositeFeedConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.MergeAudit;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
@@ -38,11 +39,13 @@ public class FallthroughConnection extends CompositeFeedConnection {
         private List<IRow> mergedRows;
         private List<IRow> unmergedSourceRows;
         private List<IRow> unmergedTargetRows;
+        private String audit;
 
-        private MergeResults(List<IRow> mergedRows, List<IRow> unmergedSourceRows, List<IRow> unmergedTargetRows) {
+        private MergeResults(List<IRow> mergedRows, List<IRow> unmergedSourceRows, List<IRow> unmergedTargetRows, String audit) {
             this.mergedRows = mergedRows;
             this.unmergedSourceRows = unmergedSourceRows;
             this.unmergedTargetRows = unmergedTargetRows;
+            this.audit = audit;
         }
     }
 
@@ -69,7 +72,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
             targetKeys.add(targetJoin);
         }
 
-        //System.out.println("Merging data set on " + sourceJoin.toKeyString() + " to " + targetJoin.toKeyString());
+        String audit = "Merging data set on " + sourceKeys + " to " + targetKeys;
         Map<Set<Value>, List<IRow>> index = new HashMap<Set<Value>, List<IRow>>();
         List<IRow> unjoinedRows = new ArrayList<IRow>();
         for (IRow row : sourceRows) {
@@ -128,17 +131,20 @@ public class FallthroughConnection extends CompositeFeedConnection {
                 unjoinedTargetRows.add(row);
             }
         }
-        return new MergeResults(compositeRows, unjoinedRows, unjoinedTargetRows);
+        return new MergeResults(compositeRows, unjoinedRows, unjoinedTargetRows, audit);
     }
 
     @Override
-    public DataSet merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                         Set<AnalysisItem> targetFields) {
+    public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName) {
+        System.out.println(sourceSet);
+        System.out.println(dataSet);
         List<IRow> compositeRows = new ArrayList<IRow>();
         List<IRow> sourceRows = sourceSet.getRows();
         List<IRow> targetRows = dataSet.getRows();
+        List<String> mergeStrings = new ArrayList<String>();
         for (int i = 0; i < connections.size(); i++) {
-
+                                                 
             List<CompositeFeedConnection> conns = new ArrayList<CompositeFeedConnection>();
             for (int j = i; j < connections.size(); j++) {
                 conns.add(connections.get(j));
@@ -160,10 +166,11 @@ public class FallthroughConnection extends CompositeFeedConnection {
             compositeRows.addAll(mergeResults.mergedRows);
             sourceRows = mergeResults.unmergedSourceRows;
             targetRows = mergeResults.unmergedTargetRows;
+            mergeStrings.add(mergeResults.audit);
         }
         compositeRows.addAll(sourceRows);
         compositeRows.addAll(targetRows);
-        return new DataSet(compositeRows);
+        return new MergeAudit(mergeStrings, new DataSet(compositeRows));
     }
 
     private DataSet combinedData(Set<AnalysisItem> neededItems, long sourceID, DataSet dataSet) {

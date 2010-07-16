@@ -11,6 +11,7 @@ public class DataResults {
     public var feedMetadata:FeedMetadata;
     public var dataSourceInfo:DataSourceInfo;
     public var additionalProperties:Object;
+    public var auditMessages:ArrayCollection;
 
     public function DataResults() {
     }

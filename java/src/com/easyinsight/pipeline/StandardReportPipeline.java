@@ -26,7 +26,11 @@ public class StandardReportPipeline extends Pipeline {
         // a measure filter on a calculation
         // a calculation on a calculation
         // a tag filter?
-        // 
+        //
+
+        // there's still a fundamental challenge here...
+
+        // ordering of the pipeline operations
 
         List<IComponent> components = new ArrayList<IComponent>();
 
@@ -60,9 +64,6 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new CoordinateComponent(pointPopulation.analysisZipCode, pointPopulation.analysisLatitude, pointPopulation.analysisLongitude));
         }
 
-        // we need to track in some different form here, because things aren't saving quite correctly as it stands
-        // 
-
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
@@ -74,8 +75,12 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
             AnalysisList analysisList = (AnalysisList) tag;
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
-        }
+        }        
 
+        for (AnalysisItem calc : items(AnalysisItemTypes.DERIVED_DIMENSION, reportItems)) {
+            DerivedAnalysisDimension calculation = (DerivedAnalysisDimension) calc;
+            components.add(new DerivedGroupingComponent(calculation));
+        }
 
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));

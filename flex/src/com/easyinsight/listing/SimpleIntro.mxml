@@ -95,7 +95,7 @@
                 <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                          backgroundColor="#FFFFFF" height="240"
                          width="350" cornerRadius="8" buttonMode="true" id="connectionsBox"
-                         mouseOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
+                         rollOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
                          mouseOut="connectionsBox.setStyle('backgroundColor', 0xFFFFFF)"
                          click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Connections'))"
                          mouseChildren="false" dropShadowEnabled="true">
@@ -113,7 +113,7 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="addReportBox"
-                             mouseOver="addReportBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOver="addReportBox.setStyle('backgroundColor', 0xDDDDDD)"
                              mouseOut="addReportBox.setStyle('backgroundColor', 0xFFFFFF)"
                              click="newReport()"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
@@ -128,8 +128,8 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="openReportBox"
-                             mouseOver="openReportBox.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="openReportBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             rollOver="openReportBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOut="openReportBox.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Exchange'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                         <mx:Image source="{openReportIcon}"/>
@@ -146,8 +146,8 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="scorecardBox"
-                             mouseOver="scorecardBox.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="scorecardBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             rollOver="scorecardBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOut="scorecardBox.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Scorecards'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                         <mx:Image source="{scorecardIcon}"/>
@@ -161,8 +161,8 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="findReportsBox"
-                             mouseOver="findReportsBox.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="findReportsBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             rollOver="findReportsBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOut="findReportsBox.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Help'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                         <mx:Image source="{helpIcon}"/>
@@ -180,8 +180,8 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="addReportBox2"
-                             mouseOver="addReportBox2.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="addReportBox2.setStyle('backgroundColor', 0xFFFFFF)"
+                             rollOver="addReportBox2.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOut="addReportBox2.setStyle('backgroundColor', 0xFFFFFF)"
                              click="newReport()"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                         <mx:Image source="{newReportIcon}"/>
@@ -195,8 +195,8 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="openAccountReportBox"
-                             mouseOver="openAccountReportBox.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="openAccountReportBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             rollOver="openAccountReportBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOut="openAccountReportBox.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('My Data'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                         <mx:Image source="{accountReportIcon}"/>
@@ -210,8 +210,8 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="openReportBox2"
-                             mouseOver="openReportBox2.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="openReportBox2.setStyle('backgroundColor', 0xFFFFFF)"
+                             rollOver="openReportBox2.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOut="openReportBox2.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Exchange'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                         <mx:Image source="{openReportIcon}"/>
@@ -228,8 +228,8 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="scorecardBox2"
-                             mouseOver="scorecardBox2.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="scorecardBox2.setStyle('backgroundColor', 0xFFFFFF)"
+                             rollOver="scorecardBox2.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOut="scorecardBox2.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Scorecards'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                         <mx:Image source="{scorecardIcon}"/>
@@ -243,8 +243,8 @@
                     <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                              backgroundColor="#FFFFFF" height="175"
                              width="280" cornerRadius="8" buttonMode="true" id="findReportsBox2"
-                             mouseOver="findReportsBox2.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="findReportsBox2.setStyle('backgroundColor', 0xFFFFFF)"
+                             rollOver="findReportsBox2.setStyle('backgroundColor', 0xDDDDDD)"
+                             rollOut="findReportsBox2.setStyle('backgroundColor', 0xFFFFFF)"
                              click="User.getEventNotifier().dispatchEvent(new NavigationEvent('Help'))"
                              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                         <mx:Image source="{helpIcon}"/>

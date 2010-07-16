@@ -42,25 +42,5 @@ public class AnalysisUtil {
         }
         analysisDefinition.analysisID = savedDef.analysisID;
     }
-
-    /*public static function editAnalysisItem(parent:UIComponent, analysisItem:AnalysisItem, dataSourceID:int,
-                                            analysisItems:ArrayCollection):void {
-        var editor:Class;
-        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-            editor = HierarchyWindow;
-        } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-            editor = CalculationWindow;
-        } else {
-            editor = AnalysisItemEditor;
-        }
-        var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-        analysisItemEditor.editorClass = editor;
-        analysisItemEditor.analysisItem = analysisItem;
-        analysisItemEditor.dataSourceID = dataSourceID;
-        analysisItemEditor.analysisItems = analysisItems;
-        analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, analysisItemEdited, false, 0, true);
-        PopUpManager.addPopUp(analysisItemEditor, parent);
-        PopUpUtil.centerPopUp(analysisItemEditor);
-    }*/
 }
 }

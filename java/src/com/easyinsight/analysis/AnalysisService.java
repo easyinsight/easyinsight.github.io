@@ -51,6 +51,15 @@ public class AnalysisService {
         }
     }
 
+    public FunctionExplanation explain(String function) {
+        try {
+            return new FunctionFactory().createFunction(function).explain();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public Collection<InsightDescriptor> getInsightDescriptorsForDataSource(long dataSourceID) {
         long userID = SecurityUtil.getUserID();
         try {

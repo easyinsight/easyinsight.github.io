@@ -350,6 +350,8 @@ public class DataService {
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
+            List<String> auditMessages = dataSet.getAudits();
+            auditMessages.add("At raw data source level, had " + dataSet.getRows().size() + " rows of data");
             //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
@@ -366,6 +368,7 @@ public class DataService {
             }
             //dataSourceInfo.setLastDataTime(dataSet.getLastTime());
             results.setDataSourceInfo(dataSourceInfo);
+            results.setAuditMessages(auditMessages);
             // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;

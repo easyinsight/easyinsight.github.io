@@ -118,7 +118,9 @@ public class DropArea extends HBox
 
     public function customEditor():Class {
         if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-            return CalculationWindow;
+            return CalculationMeasureWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+            return DerivedGroupingWindow;
         } else {
             return getItemEditorClass();
         }

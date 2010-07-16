@@ -62,8 +62,7 @@
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.util.ErrorReportView;
-        import com.easyinsight.util.PNGEnc;
+        import com.easyinsight.util.ErrorReportView;        
         import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.BindingUtils;
@@ -220,7 +219,11 @@
 
         private function onDataReturn(event:DataServiceEvent):void {
             this.dataSourceInfo = event.dataSource;
+            auditString = event.reportAudit;
         }
+
+        [Bindable]
+        private var auditString:ArrayCollection;
 
         private function loadController(controller:IReportController, shareDataSourceSettings:Boolean = false):void {
             var dataViewFactory:DataViewFactory = controller.createDataView();
@@ -1005,9 +1008,6 @@
         <mx:HBox verticalAlign="middle" id="controlBar">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
                toolTip="Close"/>
-                <!--<mx:VRule strokeColor="#DDDDDD" height="16"/>
-                        <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
-                        <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>-->
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                        toolTip="Save" enabled="{!_previewMode}"/>
@@ -1038,7 +1038,7 @@
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
                     wrappers="{wrappers}" availableFields="{availableFields}"
                     dataView="{dataView}" reportSizing="onReportSizing(event)" analysisItemEdit="sortFields()"
-                    dataSourceID="{dataService.dataFeedID}"/>
+                    dataSourceID="{dataService.dataFeedID}" reportAudit="{auditString}"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" label="Filters" icon="@Embed(source='../../../assets/funnel.png')"
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
