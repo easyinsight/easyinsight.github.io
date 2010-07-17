@@ -33,7 +33,7 @@ public class VariableNode extends CalculationTreeNode {
             }
         }
         if (analysisItem == null) {
-            throw new RuntimeException("Could not find " + s);
+            throw new RuntimeException("Could not find field " + s + ".");
         }
     }
 

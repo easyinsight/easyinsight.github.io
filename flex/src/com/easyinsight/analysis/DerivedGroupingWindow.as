@@ -35,7 +35,7 @@ public class DerivedGroupingWindow extends CalculationWindow {
             derivedGrouping.displayName = nameInput.text;
         }
         derivedGrouping.derivationCode = calculationInput.text;
-        analysisService.validateCalculation.send(derivedGrouping.derivationCode, dataSourceID);
+        analysisService.validateCalculation.send(derivedGrouping.derivationCode, dataSourceID, items);
         return derivedGrouping;
     }
 }

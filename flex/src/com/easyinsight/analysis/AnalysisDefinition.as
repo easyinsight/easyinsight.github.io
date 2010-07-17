@@ -55,6 +55,7 @@ package com.easyinsight.analysis
 		public var rootDefinition:Boolean;
 		public var canSaveDirectly:Boolean;
 		public var visibleAtFeedLevel:Boolean;
+        public var outerJoin:Boolean;
 		public var publiclyVisible:Boolean;
 		public var marketplaceVisible:Boolean;
         public var reportStateID:int;

@@ -40,7 +40,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
         //analysisCalculation.applyBeforeAggregation = applyBeforeCheckbox.selected;
         analysisCalculation.calculationString = calculationInput.text;
         analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
-        analysisService.validateCalculation.send(analysisCalculation.calculationString, dataSourceID);
+        analysisService.validateCalculation.send(analysisCalculation.calculationString, dataSourceID, items);
         return analysisCalculation;
     }
 }

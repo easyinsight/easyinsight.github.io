@@ -171,11 +171,12 @@ public class AnalysisService {
         return descriptorList;
     }
 
-    public String validateCalculation(String calculationString, long dataSourceID) {
+    public String validateCalculation(String calculationString, long dataSourceID, List<AnalysisItem> reportItems) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
-        /*String validationString = null;
         try {
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+            List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(feed.getFields());
+            allItems.addAll(reportItems);
             CalculationTreeNode tree;
             ICalculationTreeVisitor visitor;
             CalculationsParser.startExpr_return ret;
@@ -187,7 +188,7 @@ public class AnalysisService {
             try {
                 ret = parser.startExpr();
                 tree = (CalculationTreeNode) ret.getTree();
-                visitor = new ResolverVisitor(feed.getFields(), new FunctionFactory());
+                visitor = new ResolverVisitor(allItems, new FunctionFactory());
                 tree.accept(visitor);
             } catch (RecognitionException e) {
                 e.printStackTrace();
@@ -196,12 +197,23 @@ public class AnalysisService {
             VariableListVisitor variableVisitor = new VariableListVisitor();
             tree.accept(variableVisitor);
 
-        } catch (Exception e) {
-            validationString = e.getMessage();
-        }
+            Set<KeySpecification> specs = variableVisitor.getVariableList();
 
-        return validationString;*/
-        return null;
+            List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
+
+            for (KeySpecification spec : specs) {
+                AnalysisItem analysisItem = null;
+                try {
+                    analysisItem = spec.findAnalysisItem(allItems);
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            return null;
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 
     public void addAnalysisView(long analysisID) {

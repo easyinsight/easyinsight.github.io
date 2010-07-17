@@ -40,24 +40,13 @@
             failureMessage = analysisService.validateCalculation.lastResult as String;
             if (failureMessage == null)
                 dispatchEvent(new AnalysisItemSaveEvent(calculationItem));
-            else
-                Alert.show("There was a problem with your calculation syntax. Please check the calculation and try again.");
-        }
+            else {
+                calculationInput.errorString = failureMessage;
+                calculationInput.setFocus();
+                calculationInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            }
 
-        //        private function validatedCalculation():void {
-        //            failureMessage = analysisService.validateCalculation.lastResult as String;
-        //            if (failureMessage != null) {
-        //                calcValidator.validate();
-        //            } else {
-        //                var analysisCalculation:AnalysisCalculation = new AnalysisCalculation();
-        //                var namedKey:NamedKey = new NamedKey();
-        //                namedKey.name = nameInput.text;
-        //                analysisCalculation.key = namedKey;
-        //                analysisCalculation.calculationString = calculationInput.text;
-        //                dispatchEvent(new AnalysisItemCreationEvent(analysisCalculation));
-        //            }
-        //            PopUpManager.removePopUp(this);
-        //         }
+        }
 
         private function dragEnterHandler(event:DragEvent):void {
             var analysisItem:AnalysisItem;
@@ -113,7 +102,14 @@
         public function set analysisItem(analysisItem:AnalysisItem):void {
         }
 
+        protected var items:ArrayCollection;
+
         public function set analysisItems(analysisItems:ArrayCollection):void {
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
+                items.addItem(analysisItemWrapper.analysisItem);
+            }
+            this.items = items;
         }
 
         public function set dataSourceID(dataSourceID:int):void {
