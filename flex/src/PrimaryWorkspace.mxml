@@ -471,6 +471,8 @@
                 var parts:Array = sessionToken.split("-");
                 var userName:String = parts[0];
                 var cookie:String = parts[1];
+                CookieUtil.deleteCookie("eisession");
+                CookieUtil.setCookie("eisession", authResult.userName + "-" + authResult.sessionCookie, 90);
                 var token:AsyncToken = userService.channelSet.login(userName, cookie);
                 token.addResponder(new AsyncResponder(
                     function (event:ResultEvent, token:Object = null):void {

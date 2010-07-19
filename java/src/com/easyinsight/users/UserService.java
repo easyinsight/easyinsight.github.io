@@ -417,6 +417,8 @@ public class UserService {
                     if (user.getPersonaID() != null) {
                         user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, user.getAccount()));
                     }
+                    user.setLastLoginDate(new Date());
+                    session.update(user);
                 }
                 conn.commit();
             } catch (Exception e) {
@@ -656,7 +658,15 @@ public class UserService {
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
                     userServiceResponse.setActivated(account.isActivated());
+                    String sessionCookie = RandomTextGenerator.generateText(30);
+                    userServiceResponse.setSessionCookie(sessionCookie);
                     user.setLastLoginDate(new Date());
+                    PreparedStatement saveCookieStmt = conn.prepareStatement("INSERT INTO USER_SESSION (USER_ID, SESSION_NUMBER," +
+                            "USER_SESSION_DATE) VALUES (?, ?, ?)");
+                    saveCookieStmt.setLong(1, user.getUserID());
+                    saveCookieStmt.setString(2, sessionCookie);
+                    saveCookieStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                    saveCookieStmt.execute();
                     session.update(user);
                     if (clearCookie) {
                         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SESSION WHERE USER_ID = ? AND SESSION_NUMBER = ?");

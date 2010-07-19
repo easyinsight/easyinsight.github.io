@@ -133,6 +133,7 @@
             var successful:Boolean = authResult.successful;
             if (successful) {
                 if (authResult.sessionCookie != null) {
+                    CookieUtil.deleteCookie("eisession");
                     CookieUtil.setCookie("eisession", authResult.userName + "-" + authResult.sessionCookie, 90);
                 }
                 if (authService.channelSet == null) {
