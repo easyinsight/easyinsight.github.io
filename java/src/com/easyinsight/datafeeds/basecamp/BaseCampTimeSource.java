@@ -99,6 +99,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                     continue;
                 }
 
+                boolean hasEntries = false;
                 EIPageInfo info = new EIPageInfo();
                 info.currentPage = 1;
                     do {
@@ -124,6 +125,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                                 row.addValue(keys.get(TODOID), todoItemID);
                                 row.addValue(keys.get(DATE), new DateValue(date));
                                 row.addValue(keys.get(COUNT), new NumericValue(1));
+                                hasEntries = true;
                             }
                             if (dataStorage != null) {
                                 dataStorage.insertData(ds);
@@ -138,7 +140,15 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                             }
                         }
                     } while(info.currentPage++ < info.MaxPages);
-
+                if (!hasEntries) {
+                    IRow row = ds.createRow();
+                    row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
+                    row.addValue(keys.get(PROJECTNAME), projectName);
+                    if (dataStorage != null) {
+                        dataStorage.insertData(ds);
+                        ds = new DataSet();
+                    }
+                }
             }
         } catch (Throwable e) {
             throw new RuntimeException(e);

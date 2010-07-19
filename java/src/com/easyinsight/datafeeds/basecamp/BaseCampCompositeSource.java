@@ -211,8 +211,13 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     protected Collection<ChildConnection> getLiveChildConnections() {
         return Arrays.asList(new MultiChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_TIME, Arrays.asList(BaseCampTodoSource.ITEMID, BaseCampTodoSource.PROJECTID),
                 Arrays.asList(BaseCampTimeSource.TODOID, BaseCampTimeSource.PROJECTID), Arrays.asList(Arrays.asList(BaseCampTodoSource.TODOLISTNAME,
-                        BaseCampTodoSource.TODOLISTID, BaseCampTodoSource.CONTENT, BaseCampTodoSource.ITEMID), new ArrayList<String>()),
-                Arrays.asList(Arrays.asList(BaseCampTimeSource.TODOID), new ArrayList<String>())),
+                        BaseCampTodoSource.TODOLISTID, BaseCampTodoSource.CONTENT, BaseCampTodoSource.ITEMID, BaseCampTodoSource.MILESTONENAME,
+                        BaseCampTodoSource.COMPLETED, BaseCampTodoSource.MILESTONE_COMPLETED_ON, BaseCampTodoSource.MILESTONE_CREATED_ON,
+                        BaseCampTodoSource.MILESTONE_CREATED_ON, BaseCampTodoSource.DEADLINE, BaseCampTodoSource.CONTENT,
+                        BaseCampTodoSource.CREATEDDATE, BaseCampTodoSource.CREATORID, BaseCampTodoSource.CREATORNAME, BaseCampTodoSource.RESPONSIBLEPARTYNAME,
+                        BaseCampTodoSource.RESPONSIBLEPARTYID, BaseCampTodoSource.DUEON, BaseCampTodoSource.COMPLETEDDATE,
+                        BaseCampTodoSource.COMPLETERID, BaseCampTodoSource.COMPLETERNAME, BaseCampTodoSource.COUNT), new ArrayList<String>()),
+                Arrays.asList(Arrays.asList(BaseCampTimeSource.TODOID), new ArrayList<String>()), true, false),
                 new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID, BaseCampCompanyProjectJoinSource.PROJECT_ID),
                 new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID));
     }
@@ -329,7 +334,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     }
 
     private boolean isProjectLinkable(AnalysisItem analysisItem) {
-        String keyString = analysisItem.getKey().toKeyString();
+        String keyString = analysisItem.getKey().toBaseKey().toKeyString();
         if (BaseCampTodoSource.PROJECTNAME.equals(keyString) ||
                 BaseCampTimeSource.PROJECTNAME.equals(keyString)) {
             return true;

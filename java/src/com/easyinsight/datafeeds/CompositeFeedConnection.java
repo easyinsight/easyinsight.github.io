@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.Row;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
@@ -26,6 +27,8 @@ public class CompositeFeedConnection implements Serializable {
     private Key targetJoin;
     private List<Key> sourceJoins;
     private List<Key> targetJoins;
+    private boolean sourceOuterJoin;
+    private boolean targetOuterJoin;
 
     public CompositeFeedConnection() {
     }
@@ -37,6 +40,22 @@ public class CompositeFeedConnection implements Serializable {
         sourceJoins = Arrays.asList(sourceJoin);
         this.targetJoin = targetJoin;
         targetJoins = Arrays.asList(targetJoin);
+    }
+
+    public boolean isSourceOuterJoin() {
+        return sourceOuterJoin;
+    }
+
+    public void setSourceOuterJoin(boolean sourceOuterJoin) {
+        this.sourceOuterJoin = sourceOuterJoin;
+    }
+
+    public boolean isTargetOuterJoin() {
+        return targetOuterJoin;
+    }
+
+    public void setTargetOuterJoin(boolean targetOuterJoin) {
+        this.targetOuterJoin = targetOuterJoin;
     }
 
     public void setSourceJoins(List<Key> sourceJoins) {
@@ -169,27 +188,41 @@ public class CompositeFeedConnection implements Serializable {
         this.removeTargetKeys = removeTargetKeys;
     }
 
-    public void removeSourceValues(IRow row, Set<AnalysisItem> sourceFields) {
+    public boolean hasRemoveSourceKeys() {
+        return removeSourceKeys != null && removeSourceKeys.size() > 0;
+    }
+
+    public boolean hasRemoveTargetKeys() {
+        return removeTargetKeys != null && removeTargetKeys.size() > 0;
+    }
+
+    public IRow removeSourceValues(IRow row, Set<AnalysisItem> sourceFields) {
+        IRow outerRow = new Row();
+        outerRow.addValues(new HashMap<Key, Value>(row.getValues()));
         for (Key key : removeSourceKeys) {
             Key matchedKey = null;
             for (AnalysisItem item : sourceFields) {
-                if (item.getKey().toKeyString().equals(key.toKeyString())) {
+                if (item.getKey().toBaseKey().getKeyID() == (key.toBaseKey().getKeyID())) {
                     matchedKey = item.createAggregateKey();
                 }
             }
             row.removeValue(matchedKey);
         }
+        return outerRow;
     }
 
-    public void removeTargetValues(IRow row, Set<AnalysisItem> targetFields) {
+    public IRow removeTargetValues(IRow row, Set<AnalysisItem> targetFields) {
+        IRow outerRow = new Row();
+        outerRow.addValues(row.getValues());
         for (Key key : removeTargetKeys) {
             Key matchedKey = null;
             for (AnalysisItem item : targetFields) {
-                if (item.getKey().toKeyString().equals(key.toKeyString())) {
+                if (item.getKey().toBaseKey().getKeyID() == (key.toBaseKey().getKeyID())) {
                     matchedKey = item.createAggregateKey();
                 }
             }
             row.removeValue(matchedKey);
         }
+        return outerRow;
     }
 }

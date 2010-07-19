@@ -19,14 +19,19 @@ public class MultiChildConnection extends ChildConnection {
     private List<String> targetKeys = new ArrayList<String>();
     private List<List<String>> removeSourceKeys = new ArrayList<List<String>>();
     private List<List<String>> removeTargetKeys = new ArrayList<List<String>>();
+    private boolean sourceOuterJoin;
+    private boolean targetOuterJoin;
 
     public MultiChildConnection(FeedType sourceFeedType, FeedType targetFeedType, List<String> sourceKeys,
-                                List<String> targetKeys, List<List<String>> removeSourceKeys, List<List<String>> removeTargetKeys) {
+                                List<String> targetKeys, List<List<String>> removeSourceKeys, List<List<String>> removeTargetKeys,
+                                boolean sourceOuterJoin, boolean targetOuterJoin) {
         super(sourceFeedType, targetFeedType, sourceKeys.get(0), targetKeys.get(0));
         this.sourceKeys = sourceKeys;
         this.targetKeys = targetKeys;
         this.removeSourceKeys = removeSourceKeys;
         this.removeTargetKeys = removeTargetKeys;
+        this.sourceOuterJoin = sourceOuterJoin;
+        this.targetOuterJoin = targetOuterJoin;
     }
 
     @Override
@@ -39,6 +44,7 @@ public class MultiChildConnection extends ChildConnection {
             Key targetKey = targetDef.getField(targetKeyString);
             CompositeFeedConnection conn = new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
                     sourceKey, targetKey);
+            conn.setSourceOuterJoin(sourceOuterJoin);
             List<Key> sourceKeyList = new ArrayList<Key>();
             List<String> removeKeyStrings = removeSourceKeys.get(i);
             for (String removeKey : removeKeyStrings) {
@@ -51,6 +57,7 @@ public class MultiChildConnection extends ChildConnection {
                 targetKeyList.add(targetDef.getField(removeKey));
             }
             conn.setRemoveTargetKeys(targetKeyList);
+            conn.setTargetOuterJoin(targetOuterJoin);
             connections.add(conn);
         }
         return new FallthroughConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(), connections);

@@ -285,7 +285,7 @@ public class CompositeFeed extends Feed {
         return dataSet;
     }
 
-    private static class QueryStateNode {
+    private class QueryStateNode {
         private long feedID;
         //private Set<Key> neededKeys = new HashSet<Key>();
         private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
@@ -312,38 +312,33 @@ public class CompositeFeed extends Feed {
         }
 
         public void addKey(Key key) {
-            for (AnalysisItem analysisItem : allFeedItems) {
+            boolean alreadyHaveItem = false;
+            for (AnalysisItem analysisItem : neededItems) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(key.toKeyString())) {
-                    neededItems.add(analysisItem);
+                    alreadyHaveItem = true;
                 }
             }
-            /*if (!neededKeys.contains(key)) {
-                DerivedKey derivedKey = new DerivedKey(key, feedID);
-                if (!neededKeys.contains(derivedKey)) {
-
-                    neededKeys.add(derivedKey);
-                    //neededItems.add(new AnalysisDimension(derivedKey, true));
+            if (!alreadyHaveItem) {
+                for (AnalysisItem analysisItem : getFields()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toBaseKey().getKeyID() == key.toBaseKey().getKeyID()) {
+                        neededItems.add(analysisItem);
+                    }
                 }
-            }*/
+            }
         }
-
-        /*public void addKey(Key key) {
-            neededKeys.add(key);
-        }*/
 
         public void produceDataSet(InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
 
             Feed feed = FeedRegistry.instance().getFeed(feedID);
 
             // The set of items passed into getAggregateDataSet() needs to resolve down to certain keys
-
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false);
 
             Pipeline pipeline = new CompositeReportPipeline();
             WSListDefinition analysisDefinition = new WSListDefinition();
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-            myDataSet = pipeline.toDataSet(dataSet);            
+            myDataSet = pipeline.toDataSet(dataSet);
         }
 
         public void addFilter(FilterDefinition filterDefinition) {
