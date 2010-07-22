@@ -420,6 +420,7 @@ public class UserService {
                     user.setLastLoginDate(new Date());
                     session.update(user);
                 }
+                session.flush();
                 conn.commit();
             } catch (Exception e) {
                 conn.rollback();
