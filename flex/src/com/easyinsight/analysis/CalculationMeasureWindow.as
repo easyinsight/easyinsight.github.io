@@ -17,7 +17,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
         if (analysisCalculation != null) {
             calcText = analysisCalculation.calculationString;
             calcName = analysisCalculation.display;
-
+            aggregation = analysisCalculation.aggregation;
             formattingConfiguration = analysisCalculation.formattingConfiguration;
             applyBefore = analysisCalculation.applyBeforeAggregation;
         }
@@ -37,7 +37,8 @@ public class CalculationMeasureWindow extends CalculationWindow {
         } else {
             analysisCalculation.displayName = nameInput.text;
         }
-        //analysisCalculation.applyBeforeAggregation = applyBeforeCheckbox.selected;
+        analysisCalculation.applyBeforeAggregation = rowLevelCheckbox.selected;
+        analysisCalculation.aggregation = measureAggregationBox.selectedItem.value;
         analysisCalculation.calculationString = calculationInput.text;
         analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
         analysisService.validateCalculation.send(analysisCalculation.calculationString, dataSourceID, items);

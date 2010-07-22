@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
            xmlns:formatter="com.easyinsight.analysis.formatter.*" xmlns:schedule="com.easyinsight.schedule.*"
-           implements="com.easyinsight.analysis.IAnalysisItemEditor" width="100%" height="100%">
+           xmlns:util="com.easyinsight.util.*"
+           implements="com.easyinsight.analysis.IAnalysisItemEditor" width="100%" height="100%"
+           creationComplete="onCreation()">
     <mx:Script>
 		<![CDATA[
 
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
+        import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.controls.AdvancedDataGrid;
         import mx.controls.Alert;
@@ -29,8 +32,24 @@
         [Bindable]
         protected var formattingConfiguration:FormattingConfiguration;
 
-        [Bindable]
-        protected var applyBefore:Boolean;
+
+        private var _applyBefore:Boolean;
+
+        private function onCreation():void {
+            BindingUtils.bindProperty(this, "applyBefore", rowLevelCheckbox, "selected");
+        }
+
+
+        [Bindable(event="applyBeforeChanged")]
+        public function get applyBefore():Boolean {
+            return _applyBefore;
+        }
+
+        public function set applyBefore(value:Boolean):void {
+            if (_applyBefore == value) return;
+            _applyBefore = value;
+            dispatchEvent(new Event("applyBeforeChanged"));
+        }
 
         public function save(dataSourceID:int):AnalysisItem {
             return null;
@@ -119,6 +138,9 @@
         protected var showMeasures:Boolean;
 
         [Bindable]
+        protected var aggregation:int = AggregationTypes.SUM;
+
+        [Bindable]
         private var functionExplanation:String;
 
         [Bindable]
@@ -174,6 +196,9 @@
                             <function label="castmedian"/>
                             <function label="castvariance"/>
                         </group>
+                        <group label="Dates">
+                            <function label="now"/>
+                        </group>
                         <group label="Text">
                             <function label="bracketvalue"/>
                             <function label="upper"/>
@@ -182,24 +207,44 @@
                     </mx:XMLList>
                 </mx:XMLListCollection>
             </mx:Tree>
-            <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF">
+            <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
                 <mx:Label text="{functionSignature}"/>
-                <mx:TextArea text="{functionExplanation}" borderStyle="none" backgroundAlpha="0" editable="false" selectable="true"
-                    width="300" height="80"/>
+                <mx:TextArea text="{functionExplanation}" borderStyle="none" backgroundAlpha="0" editable="false"
+                             selectable="true"
+                             width="300" height="80"/>
             </mx:VBox>
         </mx:VBox>
-        <mx:Form>
+        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="Name: " direction="horizontal" width="100%">
                 <mx:TextInput id="nameInput" width="100%" text="{calcName}"/>
             </mx:FormItem>
             <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
                 <schedule:CursorTextArea id="calculationInput" dragEnter="dragEnterHandler(event)"
                                          dragDrop="dragDropHandler(event)"
-                                         width="400" height="220"
+                                         width="400" height="200"
                                          text="{calcText}" borderStyle="solid" borderThickness="1"/>
             </mx:FormItem>
             <mx:FormItem label="Formatting: " visible="{showMeasures}">
                 <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Row Level: " visible="{showMeasures}" direction="horizontal">
+                <mx:CheckBox id="rowLevelCheckbox" selected="{applyBefore}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Aggregation: " visible="{applyBefore}" direction="horizontal">
+                <util:SmartComboBox id="measureAggregationBox" rowCount="8" selectedProperty="value" selectedValue="{aggregation}">
+                    <util:dataProvider>
+                        <mx:Array>
+                            <mx:Object label="Sum" value="{AggregationTypes.SUM}"/>
+                            <mx:Object label="Average" value="{AggregationTypes.AVERAGE}"/>
+                            <mx:Object label="Min" value="{AggregationTypes.MIN}"/>
+                            <mx:Object label="Max" value="{AggregationTypes.MAX}"/>
+                            <mx:Object label="Count" value="{AggregationTypes.COUNT}"/>
+                            <mx:Object label="Median" value="{AggregationTypes.MEDIAN}"/>
+                            <mx:Object label="Variance" value="{AggregationTypes.VARIANCE}"/>
+                            <mx:Object label="Ranking" value="{AggregationTypes.RANK}"/>
+                        </mx:Array>
+                    </util:dataProvider>
+                </util:SmartComboBox>
             </mx:FormItem>
         </mx:Form>
     </mx:HBox>

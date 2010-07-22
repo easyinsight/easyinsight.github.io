@@ -16,8 +16,8 @@ import javax.persistence.Table;
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class AnalysisLatitude extends AnalysisCoordinate {
 
-    public AnalysisLatitude(Key key, boolean group, String displayName, int precision) {
-        super(key, group, displayName, precision);
+    public AnalysisLatitude(Key key, boolean group, String displayName) {
+        super(key, group, displayName);
     }
 
     public AnalysisLatitude() {

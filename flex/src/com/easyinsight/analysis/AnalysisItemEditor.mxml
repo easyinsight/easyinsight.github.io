@@ -434,7 +434,7 @@
                         </mx:Box>
                         <mx:Box>
                             <mx:ComboBox id="measureAggregationBox"
-                                 close="aggregationTypeChanged(event)" rowCount="7">
+                                 close="aggregationTypeChanged(event)" rowCount="8">
                                 <mx:dataProvider>
                                     <mx:Array>
                                         <mx:String>Sum</mx:String>

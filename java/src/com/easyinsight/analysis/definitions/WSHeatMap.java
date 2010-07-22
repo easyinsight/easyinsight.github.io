@@ -1,12 +1,11 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.ReportNumericProperty;
+import com.easyinsight.analysis.ReportProperty;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -27,6 +26,8 @@ public class WSHeatMap extends WSAnalysisDefinition {
     private double maxLat;
     private int zoomLevel;
     private int mapType;
+
+    private int precision;
 
     private long heatMapID;
 
@@ -148,5 +149,26 @@ public class WSHeatMap extends WSAnalysisDefinition {
 
     public void setMaxLong(double maxLong) {
         this.maxLong = maxLong;
+    }
+
+    public int getPrecision() {
+        return precision;
+    }
+
+    public void setPrecision(int precision) {
+        this.precision = precision;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        precision = (int) findNumberProperty(properties, "precision", 2);
+    }
+
+    @Override
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportNumericProperty("precision", precision));
+        return properties;
     }
 }

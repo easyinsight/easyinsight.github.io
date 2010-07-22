@@ -4,8 +4,7 @@
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
 
-        [Bindable]
-        private var precision:int;
+
 
         [Bindable]
         private var zipCodeBased:Boolean;
@@ -35,7 +34,6 @@
             super.analysisItem = val;
             if (val is AnalysisLongitude) {
                 var coordinate:AnalysisCoordinate = val as AnalysisCoordinate;
-                precision = coordinate.precision;
                 selectedZipCode = coordinate.analysisZipCode;
                 zipCodeBased = selectedZipCode != null;
             }
@@ -44,14 +42,10 @@
         override public function save(analysisItem:AnalysisItem):void {
             super.save(analysisItem);
             var coordinate:AnalysisCoordinate = analysisItem as AnalysisCoordinate;
-            coordinate.precision = int(precisionInput.text);
             if (zipCodeCheckBox.selected) {
                 coordinate.analysisZipCode = zipCodeCombox.selectedItem as AnalysisZipCode;
             }
         }]]></mx:Script>
-    <mx:FormItem label="Precision:">
-        <mx:TextInput id="precisionInput" text="{precision}"/>
-    </mx:FormItem>
     <mx:FormItem label="Base on Zip Code:" direction="horizontal">
         <mx:CheckBox id="zipCodeCheckBox" selected="{zipCodeBased}"/>
         <util:SmartComboBox dataProvider="{zipCodes}" selectedProperty="display" selectedItem="{selectedZipCode}"

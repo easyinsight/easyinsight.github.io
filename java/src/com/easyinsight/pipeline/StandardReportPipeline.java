@@ -64,6 +64,14 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new CoordinateComponent(pointPopulation.analysisZipCode, pointPopulation.analysisLatitude, pointPopulation.analysisLongitude));
         }
 
+        for (AnalysisItem analysisItem : items(AnalysisItemTypes.LONGITUDE, allNeededAnalysisItems)) {
+            components.add(new CoordinatePrecisionComponent((AnalysisCoordinate) analysisItem));
+        }
+
+        for (AnalysisItem analysisItem : items(AnalysisItemTypes.LATITUDE, allNeededAnalysisItems)) {
+            components.add(new CoordinatePrecisionComponent((AnalysisCoordinate) analysisItem));
+        }
+
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
@@ -80,6 +88,7 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem calc : items(AnalysisItemTypes.DERIVED_DIMENSION, reportItems)) {
             DerivedAnalysisDimension calculation = (DerivedAnalysisDimension) calc;
             components.add(new DerivedGroupingComponent(calculation));
+            components.add(new DerivedDimensionCleanupComponent(calculation));
         }
 
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
@@ -103,6 +112,7 @@ public class StandardReportPipeline extends Pipeline {
             AnalysisCalculation calculation = (AnalysisCalculation) calc;
             if (calculation.isApplyBeforeAggregation()) {
                 components.add(new CalculationComponent(calculation));
+                components.add(new CalculationCleanupComponent(calculation));
             }
         }
 
@@ -126,6 +136,7 @@ public class StandardReportPipeline extends Pipeline {
             AnalysisCalculation calculation = (AnalysisCalculation) calc;
             if (!calculation.isApplyBeforeAggregation()) {
                 components.add(new CalculationComponent(calculation));
+                components.add(new CalculationCleanupComponent(calculation));
             }
         }
 

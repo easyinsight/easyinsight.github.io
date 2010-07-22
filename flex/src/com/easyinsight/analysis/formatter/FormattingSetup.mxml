@@ -32,7 +32,7 @@
 			}
 		]]>
 	</mx:Script>
-	<mx:ComboBox id="formattingType" selectedIndex="0">
+	<mx:ComboBox id="formattingType" selectedIndex="0" rowCount="6">
 		<mx:Object label="Number" data="{FormattingConfiguration.NUMBER}" value="Number"/>
 		<mx:Object label="Currency" data="{FormattingConfiguration.CURRENCY}" value="Currency"/>
 		<mx:Object label="Percentage" data="{FormattingConfiguration.PERCENTAGE}" value="Percentage"/>		

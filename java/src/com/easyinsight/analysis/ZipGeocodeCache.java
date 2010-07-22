@@ -51,6 +51,7 @@ public class ZipGeocodeCache {
                         if (rs.next()) {
                             double longitude = rs.getDouble(1);
                             double latitude = rs.getDouble(2);
+
                             point = new Point(String.valueOf(longitude), String.valueOf(latitude));
                             pointMap.put(zipCode, point);
                         }
@@ -72,6 +73,8 @@ public class ZipGeocodeCache {
             Database.closeConnection(conn);
         }
     }
+
+
 
     public void saveFile(byte[] data) throws IOException {
         EIConnection conn = Database.instance().getConnection();

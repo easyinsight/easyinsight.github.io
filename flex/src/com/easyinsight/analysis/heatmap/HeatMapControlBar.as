@@ -10,8 +10,13 @@ import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
+import com.easyinsight.util.PopUpUtil;
 
+import flash.events.MouseEvent;
+
+import mx.controls.Button;
 import mx.controls.Label;
+import mx.managers.PopUpManager;
 
 public class HeatMapControlBar extends ReportControlBar implements IReportControlBar {
 
@@ -23,6 +28,11 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
 
     public function HeatMapControlBar() {
         super();
+        var pieEditButton:Button = new Button();
+        pieEditButton.setStyle("icon", tableEditIcon);
+        pieEditButton.toolTip = "Edit Heat Map Properties...";
+        pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
+        addChild(pieEditButton);
         latGrouping = new ListDropAreaGrouping();
         latGrouping.maxElements = 1;
         latGrouping.dropAreaType = DimensionDropArea;
@@ -38,6 +48,21 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
     }
 
     private function requestListData(event:AnalysisItemUpdateEvent):void {
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
+    }
+
+    [Embed(source="../../../../../assets/table_edit.png")]
+    public var tableEditIcon:Class;
+
+    private function editLimits(event:MouseEvent):void {
+        var window:HeatMapDefinitionEditWindow = new HeatMapDefinitionEditWindow();
+        window.heatMapDefinition = heatMapDefinition;
+        window.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, onUpdate);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+    }
+
+    private function onUpdate(event:AnalysisItemUpdateEvent):void {
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 

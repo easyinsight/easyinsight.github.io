@@ -1,10 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.IRow;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.EmptyValue;
+import com.easyinsight.core.*;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -42,7 +39,10 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         if(node.getChildCount() == 2) {
             EvaluationVisitor node2 = new EvaluationVisitor(row);
             ((CalculationTreeNode) node.getChild(1)).accept(node2);
-            if(!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null)
+            Value result2 = node2.getResult();
+            if (result.type() == Value.STRING || result2.type() == Value.STRING) {
+                result = new StringValue(result.toString() + result2.toString());
+            } else if(!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null)
                 result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
             else
                 result = new EmptyValue();
@@ -54,17 +54,34 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
         result = node1.getResult();
-        if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null) {
+        
+        if(node1.getResult() instanceof EmptyValue) {
             result = new EmptyValue();
             return;
         }
         if(node.getChildCount() == 2) {
             EvaluationVisitor node2 = new EvaluationVisitor(row);
             ((CalculationTreeNode) node.getChild(1)).accept(node2);
-            if(node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
+            Value result2 = node2.getResult();
+            if (result.type() == Value.NUMBER && result2.type() == Value.NUMBER) {
+                result = new NumericValue(result.toDouble() - result2.toDouble());
+            } else if (result.type() == Value.DATE && result2.type() == Value.NUMBER) {
+                DateValue dateValue = (DateValue) result;
+                long time = dateValue.getDate().getTime();
+                long delta = (long) (time - result2.toDouble());
+                result = new NumericValue(delta);
+            } else if (result.type() == Value.DATE && result2.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) result;
+                DateValue dateValue2 = (DateValue) result2;
+                long delta = dateValue.getDate().getTime() - dateValue2.getDate().getTime();
+                result = new NumericValue(delta);
+            } else if (result.type() == Value.NUMBER && result2.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) result2;
+                long delta = (long) (result.toDouble() - dateValue.getDate().getTime());
+                result = new NumericValue(delta);
+            } else if(node2.getResult() instanceof EmptyValue || node2.getResult().toDouble() == null) {
                 result = new EmptyValue();
-            }
-            else {
+            } else {
                 result = new NumericValue(result.toDouble() - node2.getResult().toDouble());
             }
         }
