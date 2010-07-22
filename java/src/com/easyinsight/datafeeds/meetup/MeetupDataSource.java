@@ -133,8 +133,8 @@ public class MeetupDataSource extends ServerDataSourceDefinition {
         
         items.add(new AnalysisDateDimension(keys.get(JOINED), true, AnalysisDateDimension.DAY_LEVEL));
         items.add(new AnalysisDateDimension(keys.get(VISITED), true, AnalysisDateDimension.DAY_LEVEL));
-        items.add(new AnalysisLatitude(keys.get(LATITUDE), true, "Latitude", 2));
-        items.add(new AnalysisLatitude(keys.get(LONGITUDE), true, "Longitude", 2));
+        items.add(new AnalysisLatitude(keys.get(LATITUDE), true, "Latitude"));
+        items.add(new AnalysisLatitude(keys.get(LONGITUDE), true, "Longitude"));
         items.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         items.add(new AnalysisDimension(keys.get(LINK), true));
         return items;
