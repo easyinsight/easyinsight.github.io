@@ -127,7 +127,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     String responsiblePartyName = highriseCache.getUserName(personId);
                     row.addValue(OWNER, responsiblePartyName);
 
-                    List<String> tagList = highriseCache.getContactTagMap().get(id);
+                    List<String> tagList = highriseCache.getCompanyTagMap().get(id);
                     if (tagList != null) {
                         StringBuilder tagBuilder = new StringBuilder();
                         for (String tag : tagList) {
