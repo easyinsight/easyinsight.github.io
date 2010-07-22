@@ -1,64 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="handleFlashVars()" xmlns:dashboard="com.easyinsight.dashboard.*"
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+                creationComplete="handleFlashVars()" xmlns:dashboard="com.easyinsight.dashboard.*"
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
-	            bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
-	<mx:Script>
+                bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
+    <mx:Script>
 		<![CDATA[
+        import com.easyinsight.account.Account;
         import com.easyinsight.analysis.AnalysisCalculation;
         import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisDimension;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
+        import com.easyinsight.analysis.AnalysisLatitude;
         import com.easyinsight.analysis.AnalysisList;
+        import com.easyinsight.analysis.AnalysisLongitude;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.AnalysisRangeDimension;
         import com.easyinsight.analysis.AnalysisStep;
         import com.easyinsight.analysis.ComplexAnalysisMeasure;
         import com.easyinsight.analysis.DefaultMenuFactory;
-            import com.easyinsight.analysis.PopupMenuFactory;
+        import com.easyinsight.analysis.PopupMenuFactory;
 
         import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.framework.CredentialsCache;
-            import com.easyinsight.framework.WebCredentialsCache;
-            [Bindable]
-            private var urlKey:String;
+        import com.easyinsight.framework.EIMessageListener;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.framework.WebCredentialsCache;
+        import com.easyinsight.util.CookieUtil;
 
-            [Bindable]
-            private var reportType:int;
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
 
-            [Bindable]
-            private var dataSourceID:int;
+        [Bindable]
+        private var urlKey:String;
 
-            [Bindable]
-            private var reportName:String;
+        [Bindable]
+        private var reportType:int;
 
-			private function handleFlashVars():void {
-                CredentialsCache.initialize(new WebCredentialsCache());
-                PopupMenuFactory.menuFactory = new DefaultMenuFactory();
-				this.urlKey = String(Application.application.parameters.analysisID);
-                this.reportType = int(Application.application.parameters.reportType);
-                this.dataSourceID = int(Application.application.parameters.dataSourceID);
-                this.reportName = String(Application.application.parameters.reportName);
+        [Bindable]
+        private var dataSourceID:int;
 
-			}
+        [Bindable]
+        private var reportName:String;
 
-            private function dependancies():void {
-                var analysisDate:AnalysisDateDimension;
-                var dim:AnalysisDimension;
-                var measure:AnalysisMeasure;
-                var complex:ComplexAnalysisMeasure;
-                var range:AnalysisRangeDimension;
-                var list:AnalysisList;
-                var hierarchy:AnalysisHierarchyItem;
-                var step:AnalysisStep;
-                var calculation:AnalysisCalculation;
-                var sigma:SixSigmaMeasure;
+        private function handleFlashVars():void {
+            CredentialsCache.initialize(new WebCredentialsCache());
+            EIMessageListener.initialize();
+            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            this.urlKey = String(Application.application.parameters.analysisID);
+            this.reportType = int(Application.application.parameters.reportType);
+            this.dataSourceID = int(Application.application.parameters.dataSourceID);
+            this.reportName = String(Application.application.parameters.reportName);            
+            // session check
+            userService.isSessionLoggedIn.send();
+        }
+
+        private function dependancies():void {
+            var analysisDate:AnalysisDateDimension;
+            var dim:AnalysisDimension;
+            var measure:AnalysisMeasure;
+            var complex:ComplexAnalysisMeasure;
+            var range:AnalysisRangeDimension;
+            var list:AnalysisList;
+            var hierarchy:AnalysisHierarchyItem;
+            var step:AnalysisStep;
+            var calculation:AnalysisCalculation;
+            var sigma:SixSigmaMeasure;
+            var latitude:AnalysisLatitude;
+            var longitude:AnalysisLongitude;
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        private function sessionCheck():void {
+            var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
+            if (authResult != null) {
+                if (authResult.accountState == Account.DELINQUENT) {
+                    //toLogin(1);
+                } else {
+                    quietLogin(authResult, false);
+                    //toMain();
+                }
+            } else {
+                var sessionToken:String = CookieUtil.getCookie("eisession") as String;
+                if (sessionToken == null) {
+                    stackIndex = 1;
+                } else {
+                    var parts:Array = sessionToken.split("-");
+                    var userName:String = parts[0];
+                    var token:String = parts[1];
+                    userService.sessionCookieCheck.send(token, userName, false);
+                }
             }
+        }
+
+        private function sessionCookieCheck():void {
+            var authResult:UserServiceResponse = userService.sessionCookieCheck.lastResult as UserServiceResponse;
+            if (authResult != null) {
+                if (userService.channelSet == null) {
+                    userService.channelSet = ServerConfig.getChannelSet(userService.destination);
+                }
+                var sessionToken:String = CookieUtil.getCookie("eisession") as String;
+                var parts:Array = sessionToken.split("-");
+                var userName:String = parts[0];
+                var cookie:String = parts[1];
+                CookieUtil.deleteCookie("eisession");
+                CookieUtil.setCookie("eisession", authResult.userName + "-" + authResult.sessionCookie, 90);
+                var token:AsyncToken = userService.channelSet.login(userName, cookie);
+                token.addResponder(new AsyncResponder(
+                    function (event:ResultEvent, token:Object = null):void {
+                        switch (event.result) {
+                            case "success":
+                                dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
+                                    if (authResult.accountState == Account.DELINQUENT) {
+                                        //toLogin(1);
+                                    } else {
+                                        quietLogin(authResult, false);
+                                    }
+                                break;
+                            default:
+                                trace(event.result);
+                        }
+                    },
+                    function (event:FaultEvent, token:Object = null):void {
+                        stackIndex = 1;
+                    }
+                ));
+
+            } else {
+                stackIndex = 1;
+            }
+        }
+
+        private function login(event:LoginEvent):void {
+            quietLogin(event.authResponse, true);
+        }
+
+        private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
+            User.initializeUser(authResponse);
+            User.getInstance().userName = authResponse.userName;            
+            stackIndex = 2;
+        }
+
+        private function setup():void {
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
+        }
+
+        private function loginEvent(event:LoginEvent):void {
+            stackIndex = 2;
+        }
             
 		]]>
 	</mx:Script>
+    <mx:RemoteObject id="userService" destination="login">
+        <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+        <mx:method name="sessionCookieCheck" result="sessionCookieCheck()"/>
+    </mx:RemoteObject>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
-	<mx:VBox width="100%" height="100%">		
-		<dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
-                dataSourceID="{dataSourceID}" reportType="{reportType}" prefix="https://www.easy-insight.com/"/>
-	</mx:VBox>
+    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
+        <mx:Box/>
+        <framework:LoginComponent loginEvent2="stackIndex = 2"/>
+        <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
+                                      dataSourceID="{dataSourceID}" reportType="{reportType}"
+                                      prefix=""/>
+    </mx:ViewStack>
 </mx:Application>
