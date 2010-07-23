@@ -314,7 +314,7 @@ public class UserService {
                 insertStatement.setString(3, passwordPrefix);
 
                 if(updateStatement.executeUpdate() == 0)
-                    insertStatement.executeUpdate();
+                    insertStatement.execute();
 
                 new AccountMemberInvitation().resetPassword(emailAddress, passwordPrefix);
                 success = true;

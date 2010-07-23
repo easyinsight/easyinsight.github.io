@@ -3,6 +3,7 @@ import com.easyinsight.listing.PasswordResetWindow;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
+import mx.controls.Alert;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -33,6 +34,8 @@ public class PasswordReset {
             window.passwordValidation = passwordResetValue;
             PopUpManager.addPopUp(window, workspace, true);
             PopUpUtil.centerPopUp(window);
+        } else {
+            Alert.show("The password reset code you passed in was invalid or expired. Please reset your password again, or if you just did, contact support at support@easy-insight.com for further assistance.");
         }
     }
 }
