@@ -167,8 +167,9 @@ public class UserService {
                 success = true;
             stmt.close();
             conn.commit();
-        } catch(SQLException e){
+        } catch(Exception e){
             conn.rollback();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
