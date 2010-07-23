@@ -10,7 +10,8 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.NewFreeUserWelcome;
-        import com.easyinsight.framework.LoginEvent;        
+        import com.easyinsight.framework.GAHelper;
+        import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;        
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.preferences.UIOption;
@@ -31,6 +32,7 @@
             if (User.getInstance().uiConfiguration != null) {
                 createState(User.getInstance().uiConfiguration);
             }
+            GAHelper.instance().tracker.trackPageview("LoggedInApplication");
         }
 
         private function loginEvent(event:LoginEvent):void {            

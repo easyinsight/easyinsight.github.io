@@ -4,6 +4,7 @@
                 creationComplete="startWorkspace()" xmlns:local="*" applicationComplete="applicationListeners()"
                 xmlns:listing="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*"
                 xmlns:notification="com.easyinsight.outboundnotifications.*"
+                xmlns:ga4flash="com.google.analytics.components.*"
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0"
                 right="0" paddingRight="0"
                 bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIProgressBar">
@@ -17,6 +18,7 @@
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FragmentParser;
+        import com.easyinsight.framework.GAHelper;
         import com.easyinsight.framework.IFullScreenPage;
         import com.easyinsight.framework.InitialLoginWindow;
         import com.easyinsight.framework.LoginPage;
@@ -103,6 +105,7 @@
             User.getEventNotifier().addEventListener("firstLogin", onFirstLogin);
             EIMessageListener.initialize();
             messageListener = EIMessageListener.instance();
+            GAHelper.initialize(tracker);
             userService.isSessionLoggedIn.send();
         }
 
@@ -630,7 +633,8 @@
         ]]>
     </mx:Script>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
-
+    <ga4flash:FlexTracker id="tracker" account="UA-8316271-1"
+                          visualDebug="false" mode="AS3"/>
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
         <mx:method name="sessionCookieCheck" result="sessionCookieCheck()"/>

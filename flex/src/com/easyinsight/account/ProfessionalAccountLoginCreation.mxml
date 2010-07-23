@@ -27,6 +27,12 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function showPrivacy():void {
+            var window:PrivacyPolicy = new PrivacyPolicy();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         private function validatedUser():void {
             var result:String = creationService.doesUserExist.lastResult as String;
             if (result == null) {
@@ -116,26 +122,27 @@
             backgroundColor="#333333" cornerRadius="15" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:Form color="#FFF3F3" fontFamily="Lucida Grande" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="Company Name: " direction="horizontal">
-                <mx:TextInput id="accountName" color="#000000"/>
+                <mx:TextInput id="accountName" color="#000000" width="300"/>
             </mx:FormItem>
             <mx:FormItem label="User Name:" direction="horizontal">
-                <mx:TextInput id="userName" fontFamily="Lucida Grande" fontWeight="normal" color="#000000"/>
+                <mx:TextInput id="userName" fontFamily="Lucida Grande" fontWeight="normal" color="#000000" width="300"/>
             </mx:FormItem>
             <mx:FormItem label="Password:">
-                <mx:TextInput id="password" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal" color="#000000"/>
+                <mx:TextInput id="password" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal" color="#000000" width="300"/>
             </mx:FormItem>
             <mx:FormItem label="Confirm Password:">
                 <mx:TextInput id="confirmPassword" displayAsPassword="true" fontFamily="Lucida Grande"
-                              fontWeight="normal" color="#000000"/>
+                              fontWeight="normal" color="#000000" width="300"/>
             </mx:FormItem>
             <mx:FormItem label="Administrator First Name:">
-                <mx:TextInput id="firstName" fontFamily="Lucida Grande" fontWeight="normal" color="#000000"/>
+                <mx:TextInput id="firstName" fontFamily="Lucida Grande" fontWeight="normal" color="#000000" width="300"/>
             </mx:FormItem>
             <mx:FormItem label="Administrator Last Name:">
-                <mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal" color="#000000"/>
+                <mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal" color="#000000" width="300"/>
             </mx:FormItem>
-            <mx:FormItem label="Email Address:">
-                <mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal" color="#000000"/>
+            <mx:FormItem label="Email Address:" direction="horizontal">
+                <mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal" color="#000000" width="300"/>
+                <mx:LinkButton label="View Privacy Policy" click="showPrivacy()" textDecoration="underline"/>
             </mx:FormItem>
             <mx:FormItem label="Send Me Occasional Updates About Easy Insight" direction="horizontal">
                 <mx:CheckBox id="optInCheckbox" selected="true"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
            xmlns:framework="com.easyinsight.framework.*" xmlns:account="com.easyinsight.account.*"
-           xmlns:kpi="com.easyinsight.kpi.*" xmlns:customupload="com.easyinsight.customupload.*"
+           xmlns:kpi="com.easyinsight.kpi.*" xmlns:customupload="com.easyinsight.customupload.*" 
            backgroundColor="#EEEEEE" creationComplete="setup()" width="100%" height="100%">
     <mx:Metadata>
         [Event(name="loginEvent2", type="com.easyinsight.framework.LoginEvent")]
@@ -84,7 +84,7 @@
                     configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
                     configWindow.addEventListener("later", onLater, false, 0, true);
                     /*configWindow.setStyle("hideEffect", leftEffect);
-                    configWindow.setStyle("showEffect", leftEffect);*/
+                     configWindow.setStyle("showEffect", leftEffect);*/
                     viewStack.addChild(configWindow);
                     panelIndex = 5;
                 }
@@ -182,6 +182,7 @@
         public var moneyIcon:Class;
         ]]></mx:Script>
     <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
+
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="installSolution" result="installed()"/>
         <mx:method name="retrieveSolution" result="gotSolution()"/>
@@ -205,19 +206,20 @@
             <mx:ViewStack selectedIndex="{panelIndex}"
                           id="viewStack" resizeToContent="true" width="100%" height="440"
                           backgroundColor="0xFFFFFF" paddingTop="10">
-                <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+                <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="leftEffect"
+                         showEffect="leftEffect">
                     <!-- login page -->
                     <mx:VBox width="50%" horizontalAlign="center">
-                        <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent"/>
+                        <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent" creationComplete="GAHelper.instance().tracker.trackPageview('Login')"/>
                     </mx:VBox>
                     <mx:VBox width="50%" horizontalAlign="center">
                         <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                                 backgroundColor="#FFFFFF" height="180"
+                                 backgroundColor="#FFFFFF" height="185"
                                  width="350" cornerRadius="8" buttonMode="true" id="connectionsBox"
                                  mouseOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
                                  mouseOut="connectionsBox.setStyle('backgroundColor', 0xFFFFFF)"
                                  click="panelIndex = 1"
-                                 mouseChildren="false">
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                             <mx:Image source="{connectionsIcon}"/>
                             <mx:Text text="No Account Yet?" fontSize="24" selectable="false"/>
                             <mx:TextArea
@@ -235,21 +237,23 @@
                                                    plus="accountType = Account.PLUS; panelIndex = 2"
                                                    basic="accountType = Account.BASIC; panelIndex = 2"
                                                    free="accountType = Account.PERSONAL; panelIndex = 2"
-                                                   requiredTier="{requiredTier}"/>
+                                                   requiredTier="{requiredTier}" creationComplete="GAHelper.instance().tracker.trackPageview('AccountCreationWizard')"/>
                 </mx:VBox>
                 <mx:VBox hideEffect="leftEffect" showEffect="leftEffect">
                     <!-- profile creation page -->
                     <account:ProfessionalAccountLoginCreation cancel="panelIndex = 1"
                                                               loginEvent2="accountCreated(event)"
-                                                              accountType="{accountType}"/>
+                                                              accountType="{accountType}" creationComplete="GAHelper.instance().tracker.trackPageview('LoginCreation')"/>
                 </mx:VBox>
                 <mx:VBox showEffect="leftEffect" hideEffect="leftEffect">
                     <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
-                                                 kpiTutorialNext="remaining()" accountType="{accountType}"/>
+                                                 kpiTutorialNext="remaining()" accountType="{accountType}"
+                            creationComplete="GAHelper.instance().tracker.trackPageview('PersonaWindow')"/>
                 </mx:VBox>
                 <mx:VBox showEffect="leftEffect">
                     <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
-                                                 kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"/>
+                                                kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"
+                            creationComplete="GAHelper.instance().tracker.trackPageview('Preferences')"/>
                 </mx:VBox>
 
                 <!--
@@ -257,11 +261,13 @@
                 -->
 
                 <!-- welcome back panel -->
-                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle" hideEffect="leftEffect" showEffect="leftEffect">
+                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
+                         hideEffect="leftEffect" showEffect="leftEffect">
                     <mx:Image source="{moneyIcon}"/>
-                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0" fontSize="18"
+                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                                 fontSize="18"
                                  text="Your trial has expired. You'll need to enter billing information to continue using Easy Insight."
-                            width="350" height="80"/>
+                                 width="350" height="80"/>
                     <mx:Button label="Enter Billing" click="toBilling()" fontSize="18"/>
                 </mx:VBox>
                 <!-- delinquent panel -->
