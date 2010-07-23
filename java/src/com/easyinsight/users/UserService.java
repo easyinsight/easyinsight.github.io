@@ -159,7 +159,7 @@ public class UserService {
             PreparedStatement stmt = conn.prepareStatement("select password_request_string from password_reset where password_request_string = ? and request_date > ?");
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
-            c.setTimeInMillis(c.getTimeInMillis() - 86400000L);
+            c.setTimeInMillis(c.getTimeInMillis() - 172800000L);
             stmt.setString(1,passwordResetString);
             stmt.setDate(2, new java.sql.Date(c.getTimeInMillis()));
             ResultSet rs = stmt.executeQuery();
