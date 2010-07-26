@@ -229,6 +229,7 @@
             </mx:FormItem>
             <mx:FormItem label="Row Level: " visible="{showMeasures}" direction="horizontal">
                 <mx:CheckBox id="rowLevelCheckbox" selected="{applyBefore}"/>
+                <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you specify row level calculation, Easy Insight will apply your calculation before aggregating the data together."/>
             </mx:FormItem>
             <mx:FormItem label="Aggregation: " visible="{applyBefore}" direction="horizontal">
                 <util:SmartComboBox id="measureAggregationBox" rowCount="8" selectedProperty="value" selectedValue="{aggregation}">

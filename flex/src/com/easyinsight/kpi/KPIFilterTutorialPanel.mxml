@@ -48,9 +48,7 @@
             allFields = new ArrayCollection();
             var dimensions:ArrayCollection = new ArrayCollection();            
             for each (var analysisItem:AnalysisItem in feedDefinition.fields) {
-                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                    dimensions.addItem(analysisItem);
-                }
+                dimensions.addItem(analysisItem);
                 var aNode:AnalysisItemNode = new AnalysisItemNode();
                 aNode.analysisItem = analysisItem;
                 allFields.addItem(new AnalysisItemWrapper(aNode));

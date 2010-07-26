@@ -93,7 +93,7 @@
                             <mx:Text selectable="false" text="90 MB of storage" fontSize="16"/>
                         </mx:VBox>
                         <mx:HRule width="100%"/>
-                        <mx:Text text="Have a large organization with the&#13;need to report and analyze data&#13;from other SaaS applications such as&#13;Basecamp and Highrise?"
+                        <mx:Text text="Have a large organization with the&#13;need to report and analyze data&#13;from SaaS applications or internal&#13;relational databases?"
                                 fontSize="14"/>
                         <mx:Button label="30 Day Free Trial" click="dispatchEvent(new Event('plus'))" styleName="blueButton"
                                    fontSize="16"/>
@@ -109,7 +109,7 @@
                             <mx:Text selectable="false" text="35 MB of storage" fontSize="16"/>
                         </mx:VBox>
                         <mx:HRule width="100%"/>
-                        <mx:Text text="Quickly get a small organization&#13;started with reports and analysis on&#13;other SaaS applications such as&#13;Basecamp and Google Analytics."
+                        <mx:Text text="Quickly get a small organization&#13;started with reports and analysis on&#13;other SaaS applications such as&#13;Basecamp and Highrise."
                                 fontSize="14"/>
                         <mx:Button label="30 Day Free Trial" click="dispatchEvent(new Event('basic'))" styleName="blueButton"
                                    fontSize="16"/>

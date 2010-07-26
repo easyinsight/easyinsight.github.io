@@ -24,6 +24,7 @@
         import com.easyinsight.analysis.feed.AnalysisBasedFeedCreationWindow;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
+        import com.easyinsight.report.URLWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
@@ -102,13 +103,11 @@
 
         private function embed():void {
             if (analysisDefinition.analysisID > 0) {
-                var embedWindow:EmbedInsightWindow = EmbedInsightWindow(PopUpManager.createPopUp(this, EmbedInsightWindow));
-                embedWindow.analysisID = analysisDefinition.analysisID;
+                var embedWindow:EmbedReportWindow = EmbedReportWindow(PopUpManager.createPopUp(this, EmbedReportWindow));
+                embedWindow.urlKey = analysisDefinition.urlKey;
                 embedWindow.reportType = analysisDefinition.reportType;
                 embedWindow.dataSourceID = analysisDefinition.dataFeedID;
                 embedWindow.reportName = analysisDefinition.name;
-                embedWindow.reportHeight = 346;
-                embedWindow.reportWidth = 450;
                 PopUpUtil.centerPopUp(embedWindow);
             } else {
                 Alert.show("You need to save the report first.");
@@ -125,9 +124,9 @@
         }
 
         /*private function exportPDF():void {
-            _dataView.updateExportMetadata();
-            new PDFCreator().createPDF(_dataView.getCoreView());
-        }*/
+         _dataView.updateExportMetadata();
+         new PDFCreator().createPDF(_dataView.getCoreView());
+         }*/
 
         private function netvibes():void {
             flash.net.navigateToURL(new URLRequest("http://www.netvibes.com/subscribe.php?module=UWA&moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(analysisDefinition.analysisID)) + "&reportName=" + escape(analysisDefinition.name) + "&reportType=" + escape(String(analysisDefinition.type)) + "&dataSourceID=" + escape(String(analysisDefinition.dataFeedID)))));
@@ -135,6 +134,15 @@
 
         private function igoogle():void {
             flash.net.navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=" + escape("http://www.netvibes.com/api/uwa/compile/google.php?moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(analysisDefinition.analysisID)) + "&reportName=" + escape(analysisDefinition.name) + "&reportType=" + escape(String(analysisDefinition.type)) + "&dataSourceID=" + escape(String(analysisDefinition.dataFeedID))))));
+        }
+
+        private function url():void {
+            //var escapedName:String = _reportName.replace(/[ @\"&*#$%^~]/g, "-");
+            var url:String = "https://www.easy-insight.com/app/#reportID=" + analysisDefinition.urlKey;
+            var urlWindow:URLWindow = new URLWindow();
+            urlWindow.url = url;
+            PopUpManager.addPopUp(urlWindow, this, true);
+            PopUpUtil.centerPopUp(urlWindow);
         }
 
         public function removeDLS():void {
@@ -160,8 +168,10 @@
     </mx:Script>
     <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
                icon="@Embed(source='../../../../assets/data_add.png')"/>
-    <mx:Button id="embedButton" toolTip="Embed" click="embed()"
+    <mx:Button id="linkButton" toolTip="Embed" click="url()"
                icon="@Embed(source='../../../../assets/link.png')"/>
+    <mx:Button id="embedButton" toolTip="Embed" click="embed()"
+               icon="@Embed(source='../../../../assets/plasma_tv.png')"/>
     <mx:Button id="imageButton" toolTip="Export PNG Image"
                icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()"/>
     <mx:Button id="excelButton" toolTip="Export to Excel"

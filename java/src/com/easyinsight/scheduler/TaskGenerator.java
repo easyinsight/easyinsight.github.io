@@ -32,8 +32,6 @@ public class TaskGenerator {
     @Column(name="requires_backfill")
     private boolean requiresBackfill;
 
-    
-
     public List<ScheduledTask> generateTasks(Date now, EIConnection conn) throws SQLException {
         List<ScheduledTask> tasks = new ArrayList<ScheduledTask>();
         // we run at 10:02

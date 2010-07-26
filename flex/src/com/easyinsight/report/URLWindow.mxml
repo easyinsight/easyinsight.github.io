@@ -16,9 +16,10 @@
             _url = value;
             dispatchEvent(new Event("urlChanged"));
         }]]></mx:Script>
-    <mx:VBox>
-        <mx:TextArea text="{url}" selectable="true" editable="false" width="400" height="200"/>
-        <mx:HBox width="100%" horizontalAlign="center">
+    <mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Text text="You can bookmark this link in your browser or send it to&#13;anyone else on your account with access to the report." fontSize="14"/>
+        <mx:TextArea text="{url}" selectable="true" editable="false" width="400" height="50" borderStyle="solid" borderThickness="1"/>
+        <mx:HBox width="100%" verticalAlign="middle">
             <mx:Button label="Copy to Clipboard" click="System.setClipboard(url)"/>
             <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>

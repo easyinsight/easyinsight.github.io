@@ -85,7 +85,7 @@ public class StandardReportPipeline extends Pipeline {
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
         }        
 
-        for (AnalysisItem calc : items(AnalysisItemTypes.DERIVED_DIMENSION, reportItems)) {
+        for (AnalysisItem calc : items(AnalysisItemTypes.DERIVED_DIMENSION, allNeededAnalysisItems)) {
             DerivedAnalysisDimension calculation = (DerivedAnalysisDimension) calc;
             components.add(new DerivedGroupingComponent(calculation));
             components.add(new DerivedDimensionCleanupComponent(calculation));
@@ -95,6 +95,14 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
         components.add(new TypeTransformComponent());
+
+        for (AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, allNeededAnalysisItems)) {
+            AnalysisCalculation calculation = (AnalysisCalculation) calc;
+            if (calculation.isApplyBeforeAggregation()) {
+                components.add(new CalculationComponent(calculation));
+                components.add(new CalculationCleanupComponent(calculation));
+            }
+        }
 
         components.add(new FilterComponent(true));
         components.add(new FilterPipelineCleanupComponent(true));
@@ -108,13 +116,7 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
-        for (AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, reportItems)) {
-            AnalysisCalculation calculation = (AnalysisCalculation) calc;
-            if (calculation.isApplyBeforeAggregation()) {
-                components.add(new CalculationComponent(calculation));
-                components.add(new CalculationCleanupComponent(calculation));
-            }
-        }
+
 
         for (AnalysisItem step : items(AnalysisItemTypes.STEP, allNeededAnalysisItems)) {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
@@ -132,7 +134,7 @@ public class StandardReportPipeline extends Pipeline {
         // TODO: if a calculation is based on second calculation, populate results with the first calculation first
         // directed graph required? or just list
 
-        for(AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, reportItems)) {
+        for(AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, allNeededAnalysisItems)) {
             AnalysisCalculation calculation = (AnalysisCalculation) calc;
             if (!calculation.isApplyBeforeAggregation()) {
                 components.add(new CalculationComponent(calculation));

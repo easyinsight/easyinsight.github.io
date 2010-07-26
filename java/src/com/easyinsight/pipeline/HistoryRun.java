@@ -71,26 +71,8 @@ public class HistoryRun {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setCredentialFulfillmentList(credentials);
         insightRequestMetadata.setNow(endDate);
-        Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
-        Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
-        for (AnalysisItem analysisItem : analysisItems) {
-            if (!analysisItem.isDerived()) {
-                validQueryItems.add(analysisItem);
-            }
-        }
-        boolean aggregateQuery = true;
-        for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
-            if (analysisItem.blocksDBAggregation()) {
-                aggregateQuery = false;
-            }
-        }
-        insightRequestMetadata.setAggregateQuery(aggregateQuery);
-        Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
-        DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
+        DataSet result = new DataService().listDataSet(analysisDefinition, insightRequestMetadata);
         //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
-        Pipeline pipeline = new StandardReportPipeline();
-        pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-        DataSet result = pipeline.toDataSet(dataSet);
         KPIValue goalValue;
         if (result.getRows().size() > 0) {
             IRow row = result.getRow(0);

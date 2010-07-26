@@ -133,7 +133,7 @@
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox" styleName="TitleWindowContents">
-		<mx:CheckBox label="Apply Before Aggregation" selected="{beforeAgg}" id="aggregationCheckbox"/>
+		<mx:CheckBox label="Row Level:" selected="{beforeAgg}" id="aggregationCheckbox"/>
         <mx:Box id="filterDetailBox"/>
         <mx:VBox id="fieldBox">
             <mx:Button label="Change the Filter Field:" click="changeField()" id="changeButton"/>
