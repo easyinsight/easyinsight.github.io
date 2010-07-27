@@ -65,7 +65,7 @@ public class FeedService implements IDataFeedService {
                 String name = rs.getString(2);
                 int feedType = rs.getInt(3);
                 Date creationDate = new Date(rs.getTimestamp(4).getTime());
-                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID);
+                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID, feedType);
                 infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
                 dataSourceMap.put(dataSourceID, dataSourceDescriptor);
             }
@@ -82,7 +82,7 @@ public class FeedService implements IDataFeedService {
                 String name = groupRS.getString(2);
                 int feedType = groupRS.getInt(3);
                 Date creationDate = new Date(groupRS.getTimestamp(4).getTime());
-                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID);
+                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID, feedType);
                 infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
                 dataSourceMap.put(dataSourceID, dataSourceDescriptor);
             }
@@ -251,23 +251,22 @@ public class FeedService implements IDataFeedService {
         Connection conn = Database.instance().getConnection();
 
         try {
-            PreparedStatement queryDataSources = conn.prepareStatement("SELECT FEED_NAME, DATA_FEED.DATA_FEED_ID FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
+            PreparedStatement queryDataSources = conn.prepareStatement("SELECT FEED_NAME, DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_TYPE FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
                     "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.user_id = ? AND DATA_FEED.visible = ?");
             queryDataSources.setLong(1, SecurityUtil.getUserID());
             queryDataSources.setBoolean(2, true);
             ResultSet queryRS = queryDataSources.executeQuery();
             while (queryRS.next()) {
-                descriptorList.add(new DataSourceDescriptor(queryRS.getString(1), queryRS.getLong(2)));
+                descriptorList.add(new DataSourceDescriptor(queryRS.getString(1), queryRS.getLong(2), queryRS.getInt(3)));
             }
-            PreparedStatement getInsightsStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS, user_to_analysis WHERE " +
+            PreparedStatement getInsightsStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, user_to_analysis WHERE " +
                     "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.user_id = ? AND ANALYSIS.ROOT_DEFINITION = ? AND ANALYSIS.TEMPORARY_REPORT = ?");
             getInsightsStmt.setLong(1, SecurityUtil.getUserID());
             getInsightsStmt.setBoolean(2, false);
             getInsightsStmt.setBoolean(3, false);
             ResultSet reportRS = getInsightsStmt.executeQuery();
             while (reportRS.next()) {
-                // TODO: Add urlKey
-                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4),null));
+                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4), reportRS.getString(5)));
             }
             PreparedStatement getGoalTreeStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name, USER_TO_GOAL_TREE.user_role, GOAL_TREE.goal_tree_icon FROM GOAL_TREE, USER_TO_GOAL_TREE " +
                     "WHERE GOAL_TREE.goal_tree_id = user_to_goal_tree.goal_tree_id and user_to_goal_tree.user_id = ?");

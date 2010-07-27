@@ -92,7 +92,8 @@ public class DataSourceCopyUtils {
                 session.flush();
             }
         }
-        DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID());
+        DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID(),
+                clonedFeedDefinition.getFeedType().getType());
         infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, todo, clonedFeedDefinition.getFeedName(), todo != null));
 
         if (solutionID > 0) {

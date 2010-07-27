@@ -5,6 +5,7 @@ import com.easyinsight.quicksearch.EIDescriptor;
 public class DataSourceDescriptor extends EIDescriptor{
 
     public var description:String;
+    public var dataSourceType:int;
 
     public function DataSourceDescriptor() {
         super();

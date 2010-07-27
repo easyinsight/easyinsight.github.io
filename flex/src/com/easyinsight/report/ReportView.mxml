@@ -391,8 +391,9 @@
 
                     if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
                         filterDefinitions = report.filterDefinitions;
-                        filterIndex = 2;
+                        filterIndex = 1;
                     } else {
+                        leftButtonBar.removeChild(filterButton);
                         filterIndex = 0;
                         filterDefinitions = new ArrayCollection();
                     }
@@ -448,6 +449,19 @@
                 Alert.show(e.message);
             }
         }
+
+        private function toggleFilters():void {
+            if (filterIndex == 1) {
+                filterIndex = 0;
+                filterTooltip = "Show Filters";
+            } else {
+                filterIndex = 1;
+                filterTooltip = "Hide Filters";
+            }
+        }
+
+        [Bindable]
+        private var filterTooltip:String = "Hide Filters";
 
         private var _templateUrlKey:String;
 
@@ -730,18 +744,21 @@
                 <mx:HBox width="1000" verticalAlign="middle">
                     <mx:VBox>
                         <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
-                            <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
+                            <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"
+                                    toolTip="Close the report view"/>
                             <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
-                                       id="fullScreenButton"/>
+                                       id="fullScreenButton" toolTip="View full screen"/>
                             <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
-                                       id="refreshButton"/>
+                                       id="refreshButton" toolTip="Refresh this report"/>
                             <mx:Button click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
-                                       id="bookmarkButton"/>
+                                       id="bookmarkButton" toolTip="Save this report to My Data..."/>
                             <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
                                        labelPlacement="bottom"
-                                       id="exportButton"/>
+                                       id="exportButton" toolTip="Export the report..."/>
+                            <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="bottom"
+                                       id="filterButton" toolTip="{filterTooltip}"/>
                             <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
-                                       labelPlacement="bottom" id="editReportButton"/>
+                                       labelPlacement="bottom" id="editReportButton" toolTip="Open this report in the report editor..."/>
                             <mx:Button click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
                                        id="browserButton"/>
                             <mx:Spacer width="100%"/>
@@ -779,11 +796,7 @@
 
                 <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
                     <mx:Box/>
-                    <mx:Box width="100%" horizontalAlign="center">
-                        <mx:Button label="Show Filters" click="filterIndex = 2"/>
-                    </mx:Box>
                     <mx:VBox width="100%" horizontalAlign="center">
-                        <mx:Button label="Hide Filters" click="filterIndex = 1"/>
                         <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
                                                   borderThickness="1"
                                                   existingFilters="{filterDefinitions}"

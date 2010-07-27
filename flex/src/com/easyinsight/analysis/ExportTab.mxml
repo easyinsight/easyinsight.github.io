@@ -166,9 +166,7 @@
         }
         ]]>
     </mx:Script>
-    <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
-               icon="@Embed(source='../../../../assets/data_add.png')"/>
-    <mx:Button id="linkButton" toolTip="Embed" click="url()"
+    <mx:Button id="linkButton" toolTip="Link by URL" click="url()"
                icon="@Embed(source='../../../../assets/link.png')"/>
     <mx:Button id="embedButton" toolTip="Embed" click="embed()"
                icon="@Embed(source='../../../../assets/plasma_tv.png')"/>
@@ -176,6 +174,8 @@
                icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()"/>
     <mx:Button id="excelButton" toolTip="Export to Excel"
                icon="@Embed(source='../../../../assets/table.png')" click="exportExcel()"/>
+    <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
+               icon="@Embed(source='../../../../assets/data_add.png')"/>
     <!--<mx:Button id="pdfButton" toolTip="Export to PDF"
                icon="@Embed(source='../../../../assets/table.png')" click="exportPDF()"/>-->
     <mx:Button id="netvibesButton" toolTip="Add to netvibes"

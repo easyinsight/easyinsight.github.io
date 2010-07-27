@@ -6,6 +6,8 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.exchange.ExchangePackageData;
 import com.easyinsight.exchange.ExchangeReportData;
+import com.easyinsight.export.ExportService;
+import com.easyinsight.groups.GroupService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.reportpackage.ReportPackage;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
@@ -34,6 +36,20 @@ import org.hibernate.Session;
  * Time: 12:32:59 AM
  */
 public class SolutionService {
+
+    public void addKPIData(SolutionKPIData solutionKPIData) {
+        try {
+            if (solutionKPIData.isAddDataSourceToGroup()) {
+                new GroupService().addDataSourceToDefaultGroup(solutionKPIData.getDataSourceID());
+            }
+            if (solutionKPIData.getActivity() != null) {
+                new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset());
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public List<Long> getInstalledConnections() {
         EIConnection conn = Database.instance().getConnection();
@@ -78,7 +94,7 @@ public class SolutionService {
             ResultSet dsRS = dsQueryStmt.executeQuery();
             if (dsRS.next()) {
                 long originalDataSourceID = dsRS.getLong(1);
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.installed_data_source_id, DATA_FEED.FEED_NAME FROM " +
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.installed_data_source_id, DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE FROM " +
                     "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
                     "SOLUTION_INSTALL.original_data_source_id = ? AND " +
                     "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
@@ -90,10 +106,11 @@ public class SolutionService {
                 while (rs.next()) {
                     long id = rs.getLong(1);
                     String name = rs.getString(2);
-                    descriptors.add(new DataSourceDescriptor(name, id));
+                    int feedType = rs.getInt(3);
+                    descriptors.add(new DataSourceDescriptor(name, id, feedType));
                 }
                 if (descriptors.isEmpty()) {
-                    PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID, DATA_FEED.FEED_NAME FROM " +
+                    PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID, DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE FROM " +
                             "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_GROUPS, GROUP_TO_USER_JOIN WHERE " +
                             "SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID = ? AND " +
                             "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
@@ -106,7 +123,8 @@ public class SolutionService {
                     while (rs.next()) {
                         long id = rs.getLong(1);
                         String name = rs.getString(2);
-                        descriptors.add(new DataSourceDescriptor(name, id));
+                        int feedType = rs.getInt(3);
+                        descriptors.add(new DataSourceDescriptor(name, id, feedType));
                     }
                 }
             }
@@ -428,8 +446,9 @@ public class SolutionService {
         while (rs.next()) {
             long id = rs.getLong(1);
             String name = rs.getString(2);
-            descriptors.add(new DataSourceDescriptor(name, id));
-            extraInfos.add(new ExtraDataSourceInfo(rs.getTimestamp(4), rs.getInt(3)));
+            int feedType = rs.getInt(3);
+            descriptors.add(new DataSourceDescriptor(name, id, feedType));
+            extraInfos.add(new ExtraDataSourceInfo(rs.getTimestamp(4), feedType));
         }
         if (descriptors.isEmpty()) {
             PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID, DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE," +
@@ -446,8 +465,9 @@ public class SolutionService {
             while (rs.next()) {
                 long id = rs.getLong(1);
                 String name = rs.getString(2);
-                descriptors.add(new DataSourceDescriptor(name, id));
-                extraInfos.add(new ExtraDataSourceInfo(rs.getTimestamp(4), rs.getInt(3)));
+                int feedType = rs.getInt(3);
+                descriptors.add(new DataSourceDescriptor(name, id, feedType));
+                extraInfos.add(new ExtraDataSourceInfo(rs.getTimestamp(4), feedType));
             }
         }
     }

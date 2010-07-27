@@ -82,8 +82,10 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
         List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
 
+        analysisItemList.add(this);
+
         for (KeySpecification spec : specs) {
-            AnalysisItem analysisItem = null;
+            AnalysisItem analysisItem;
             try {
                 analysisItem = spec.findAnalysisItem(allItems);
             } catch (CloneNotSupportedException e) {
@@ -148,7 +150,14 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
         ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
         calculationTreeNode.accept(rowVisitor);
-        return new NumericValue(rowVisitor.getResult().toDouble());
+        Value result = rowVisitor.getResult();
+        if (result.type() == Value.EMPTY) {
+            return result;
+        } else if (result.type() == Value.NUMBER) {
+            return result;
+        } else {
+            return new NumericValue(result.toDouble());
+        }
     }
 
     public List<AnalysisItem> getDerivedItems() {

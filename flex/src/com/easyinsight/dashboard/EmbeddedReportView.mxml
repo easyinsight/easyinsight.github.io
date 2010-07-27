@@ -229,7 +229,7 @@
             dataSource = event.dataSourceInfo;
             if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
                 filterDefinitions = report.filterDefinitions;
-                filterIndex = 2;
+                filterIndex = 1;
             } else {
                 filterIndex = 0;
                 filterDefinitions = new ArrayCollection();
@@ -274,6 +274,19 @@
 
         [Bindable]
         private var filterIndex:int;
+
+        [Bindable]
+        private var filterTooltip:String = "Hide Filters";
+
+        private function toggleFilterIndex():void {
+            if (filterIndex == 1) {
+                filterIndex = 0;
+                filterTooltip = "Show Filters";
+            } else {
+                filterIndex = 1;
+                filterTooltip = "Hide Filters";
+            }
+        }
                 ]]>
     </mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
@@ -284,16 +297,13 @@
         <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
                                        id="refreshButton"/>
         <mx:Button toolTip="Export Report" click="exportData()" icon="{exportIcon}" id="exportButton"/>
+        <mx:Button toolTip="{filterTooltip}" click="toggleFilterIndex()" icon="{filterIcon}"/>
         <mx:Spacer width="100%"/>
         <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{dataViewFactory}"/>
     </mx:HBox>
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
         <mx:Box/>
-        <mx:Box width="100%" horizontalAlign="center">
-            <mx:Button label="Show Filters" click="filterIndex = 2"/>
-        </mx:Box>
         <mx:VBox width="100%" horizontalAlign="center">
-            <mx:Button label="Hide Filters" click="filterIndex = 1"/>
             <filtering:EmbeddedTransformContainer id="transformContainer" filterEditable="false"
                           existingFilters="{filterDefinitions}"
                           updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10"

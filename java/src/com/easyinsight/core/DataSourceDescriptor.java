@@ -34,7 +34,8 @@ public class DataSourceDescriptor extends EIDescriptor {
     public DataSourceDescriptor() {
     }
 
-    public DataSourceDescriptor(String name, long id) {
+    public DataSourceDescriptor(String name, long id, int dataSourceType) {
         super(name, id);
+        this.dataSourceType = dataSourceType;
     }
 }

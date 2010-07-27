@@ -200,6 +200,11 @@ public class FilterValueDefinition extends FilterDefinition {
             if (value instanceof String) {
                 String string = (String) value;
                 return !"".equals(string);
+            } else if (value instanceof StringValue) {
+                StringValue stringValue = (StringValue) value;
+                return !"".equals(stringValue.toString());
+            } else if (value instanceof EmptyValue) {
+                return false;
             }
         }
         return super.validForQuery() && filteredValues.size() > 0;
