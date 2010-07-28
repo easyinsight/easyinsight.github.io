@@ -138,6 +138,7 @@
 
         private function onFault(event:FaultEvent):void {
             errorText = event.fault.faultString;
+            stackIndex = 3;
         }
 
         public function set report(value:AnalysisDefinition):void {
@@ -203,7 +204,7 @@
                 <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
                     <mx:ProgressBar label="Saving the report..." indeterminate="true"/>
                 </mx:Box>
-                <mx:VBox width="100%" height="100%" horizontalAlign="center">
+                <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
                     <mx:Label text="We're sorry, but something went wrong in saving the report." fontSize="14"/>
                     <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200"/>
                     <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
