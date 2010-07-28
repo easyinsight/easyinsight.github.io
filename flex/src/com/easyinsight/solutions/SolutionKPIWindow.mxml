@@ -78,35 +78,40 @@
 
         private function esAddToExisting():void {
             if (added) {
-                stackIndex = 2;
+                stackIndex = 3;
             } else {
+                enableScorecards = false;
                 esKpiService.installKPIsToScorecard.send(_dataSourceDescriptor.name, _kpis, false);
             }
         }
 
         private function esAddToNew():void {
             if (added) {
-                stackIndex = 2;
+                stackIndex = 3;
             } else {
+                enableScorecards = false;
                 esKpiService.installKPIsToScorecard.send(_dataSourceDescriptor.name, _kpis, true);
             }
         }
 
         private function addToNew():void {
             if (added) {
-                stackIndex = 4;
+                stackIndex = 3;
             } else {
+                enableScorecards = false;
                 kpiService.installKPIsToScorecard.send(_dataSourceDescriptor.name, _kpis, true);
             }
         }
 
         private function installed():void {
+            enableScorecards = true;
             added = true;
             kpiLinkStart();
             stackIndex = 3;
         }
 
         private function esInstalled():void {
+            enableScorecards = true;
             added = true;
             kpiLinkStart();
             stackIndex = 3;
@@ -144,6 +149,7 @@
         }
 
         private function gotScorecards():void {
+            enableGetScorecards = true;
             var scorecardList:ScorecardList = scorecardService.getScorecardDescriptors.lastResult as ScorecardList;
             if (scorecardList.scorecardDescriptors.length == 0) {
                 userHasKPIs = false;
@@ -192,6 +198,7 @@
             if (syncButton == "Next") {
                 topIndex = 3;
             } else {
+                enableReportSave = false;
                 solutionService.addKPIData.send(kpiData);
             }
         }
@@ -214,6 +221,7 @@
                 kpiData.activity = null;
             }
             kpiData.dataSourceID = _dataSourceDescriptor.id;
+            enableReportSave = false;
             solutionService.addKPIData.send(kpiData);
         }
 
@@ -240,6 +248,15 @@
                 topIndex = 2;
             }
         }
+
+        [Bindable]
+        private var enableReportSave:Boolean = true;
+
+        [Bindable]
+        private var enableGetScorecards:Boolean = true;
+
+        [Bindable]
+        private var enableScorecards:Boolean = true;
 
         [Bindable]
         private var syncLabel:String;
@@ -329,8 +346,8 @@
                                     color="#FFFFFF"/>
                             <mx:HBox>
                                 <mx:Button label="Back" fontSize="24" click="topIndex = 0"/>
-                                <mx:Button label="Next" fontSize="24"
-                                           click="scorecardService.getScorecardDescriptors.send(false)"/>
+                                <mx:Button label="Next" fontSize="24" enabled="{enableGetScorecards}"
+                                           click="enableGetScorecards = false; scorecardService.getScorecardDescriptors.send(false)"/>
                             </mx:HBox>
                         </mx:VBox>
                         <mx:VBox width="100%" horizontalAlign="center" data="1">
@@ -341,7 +358,7 @@
                                     color="#FFFFFF"/>
                             <mx:HBox>
                                 <mx:Button label="Back" fontSize="24" click="stackIndex = 0"/>
-                                <mx:Button label="Next" fontSize="24" click="addToNew()"/>
+                                <mx:Button label="Next" fontSize="24" click="addToNew()" enabled="{enableScorecards}"/>
                             </mx:HBox>
                         </mx:VBox>
                         <mx:VBox width="100%" horizontalAlign="center" data="2">
@@ -352,8 +369,8 @@
                                     color="#FFFFFF"/>
                             <mx:HBox>
                                 <mx:Button label="Back" fontSize="24" click="stackIndex = 0"/>
-                                <mx:Button label="Add to Existing Scorecard" fontSize="24" click="esAddToExisting()"/>
-                                <mx:Button label="Add to New Scorecard" fontSize="24" click="esAddToNew()"/>
+                                <mx:Button label="Add to Existing Scorecard" fontSize="24" click="esAddToExisting()"  enabled="{enableScorecards}"/>
+                                <mx:Button label="Add to New Scorecard" fontSize="24" click="esAddToNew()"  enabled="{enableScorecards}"/>
                                 <mx:Button label="Just Skip Them" fontSize="24" click="kpiLinkStart(); stackIndex = 3"/>
                             </mx:HBox>
                         </mx:VBox>
@@ -387,7 +404,7 @@
                              color="#FFFFFF" height="200"/>
                     <mx:HBox>
                         <mx:Button label="Back" fontSize="24" click="kpiLinkStart(); topIndex = 1"/>
-                        <mx:Button label="{syncButton}" fontSize="24" click="addDataSourceToGroup()"/>
+                        <mx:Button label="{syncButton}" fontSize="24" click="addDataSourceToGroup()" enabled="{enableReportSave}"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:VBox>
@@ -419,7 +436,7 @@
                              color="#FFFFFF" height="200" backgroundAlpha="0" editable="false" selectable="false" borderStyle="none"/>
                     <mx:HBox>
                         <mx:Button label="Back" fontSize="24" click="topIndex = 2"/>
-                        <mx:Button label="Finish" fontSize="24" click="allDone()"/>
+                        <mx:Button label="Finish" fontSize="24" click="allDone()" enabled="{enableReportSave}"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:VBox>

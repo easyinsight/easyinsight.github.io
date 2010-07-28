@@ -61,6 +61,11 @@ public class ExportService {
         }
     }
 
+    public void addOrUpdateSchedule(ScheduledActivity scheduledActivity, int utcOffset, EIConnection conn) throws SQLException {
+        scheduledActivity.save(conn, utcOffset);
+        scheduledActivity.setup(conn);        
+    }
+
     public List<FeedDescriptor> getRefreshableDataSources(ScheduledActivity scheduledActivity) {
         List<FeedDescriptor> validSources = new ArrayList<FeedDescriptor>();
         List<FeedDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();

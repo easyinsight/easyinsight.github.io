@@ -38,16 +38,23 @@ import org.hibernate.Session;
 public class SolutionService {
 
     public void addKPIData(SolutionKPIData solutionKPIData) {
+        EIConnection conn = Database.instance().getConnection();
         try {
-            if (solutionKPIData.isAddDataSourceToGroup()) {
-                new GroupService().addDataSourceToDefaultGroup(solutionKPIData.getDataSourceID());
-            }
+            conn.setAutoCommit(false);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(solutionKPIData.getDataSourceID(), conn);
+            dataSource.setAccountVisible(true);
+            new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
             if (solutionKPIData.getActivity() != null) {
-                new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset());
+                new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
             }
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
