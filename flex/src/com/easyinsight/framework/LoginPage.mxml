@@ -86,7 +86,7 @@
                     /*configWindow.setStyle("hideEffect", leftEffect);
                      configWindow.setStyle("showEffect", leftEffect);*/
                     viewStack.addChild(configWindow);
-                    panelIndex = 5;
+                    panelIndex = 6;
                 }
             }
         }
