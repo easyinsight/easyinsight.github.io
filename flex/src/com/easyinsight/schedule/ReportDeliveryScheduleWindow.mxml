@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                     xmlns:schedule="com.easyinsight.schedule.*"
-                    creationComplete="setup()">
+                    creationComplete="setup()" title="Report Email Delivery">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.AddUserToFeedWindow;
         import com.easyinsight.administration.feed.UserLinkEvent;

@@ -111,7 +111,7 @@
             return true;
         }
         ]]></mx:Script>
-    <mx:FormItem label="Schedule Type:">
+    <mx:FormItem label="How often should this event happen?">
         <mx:ComboBox rowCount="6" id="scheduleBox" change="changeSchedule()" selectedItem="{scheduleType}">
             <mx:dataProvider>
                 <mx:ArrayCollection>
@@ -153,9 +153,10 @@
             </mx:Box>
         </mx:ViewStack>
     </mx:FormItem>
-    <mx:FormItem label="Time:" direction="horizontal">
+    <mx:FormItem label="What time of day?" direction="horizontal">
         <mx:NumericStepper value="{hour}" minimum="0" maximum="23" id="hourStepper"/>
         <mx:Label text=":"/>
         <mx:NumericStepper value="{minute}" minimum="0" maximum="59" id="minuteStepper"/>
+        <mx:Label text="What time zone is this using?" fontSize="10" textDecoration="underline" toolTip="This time will be your browser local time zone."/>
     </mx:FormItem>
 </mx:Form>

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                     xmlns:schedule="com.easyinsight.schedule.*"
-                    creationComplete="setup()">
+                    creationComplete="setup()" title="Data Source Refresh Scheduling">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
@@ -70,10 +70,10 @@
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="Data Source:">
+            <mx:FormItem label="Data Source:" fontSize="12">
                 <util:SmartComboBox dataProvider="{dataSources}" selectedValue="{dataSourceID}"
                                     selectedProperty="dataFeedID"
-                                    id="dataSourceComboBox" labelField="name"/>
+                                    id="dataSourceComboBox" labelField="name" fontSize="12"/>
             </mx:FormItem>
         </mx:Form>
         <schedule:ScheduleConfiguration id="scheduleConfiguration" activity="{activity}"/>
