@@ -47,14 +47,14 @@ public class DataTransformation {
             for (StringPair stringPair : stringPairs) {
                 Integer type = typeMap.get(stringPair.getKey());
                 if (type == null) {
-                    throw new RuntimeException("Unrecognized field " + stringPair.getKey() + " passed as a StringPair.");
+                    throw new ServiceRuntimeException("Unrecognized field " + stringPair.getKey() + " passed as a StringPair. If you wish to change the data source programmatically, set changeDataSourceToMatch to true.");
                 }
                 if (type != Value.STRING) {
                     if (stringPair.getValue() == null || "".equals(stringPair.getValue())) {
                         transformedRow.addValue(stringPair.getKey(), new EmptyValue());
                     } else {
-                        throw new RuntimeException("Field " + stringPair.getKey() + " was passed as a StringPair value when Easy Insight was expecting a " +
-                            (type == Value.NUMBER ? "NumberPair." : "DatePair."));
+                        throw new ServiceRuntimeException("Field " + stringPair.getKey() + " was passed as a StringPair value when Easy Insight was expecting a " +
+                            (type == Value.NUMBER ? "NumberPair." : "DatePair.") + " If you wish to change the data source programmatically, set changeDataSourceToMatch to true.");
                     }
                 } else {
                     transformedRow.addValue(stringPair.getKey(), new StringValue(stringPair.getValue()));
@@ -66,13 +66,13 @@ public class DataTransformation {
             for (NumberPair numberPair : numberPairs) {
                 Integer type = typeMap.get(numberPair.getKey());
                 if (type == null) {
-                    throw new RuntimeException("Unrecognized field " + numberPair.getKey() + " passed as a NumberPair.");
+                    throw new ServiceRuntimeException("Unrecognized field " + numberPair.getKey() + " passed as a NumberPair. If you wish to change the data source programmatically, set changeDataSourceToMatch to true.");
                 }
                 if (type == Value.STRING) {
                     transformedRow.addValue(numberPair.getKey(), new StringValue(String.valueOf(numberPair.getValue())));
                 } else if (type == Value.DATE) {
-                    throw new RuntimeException("Field " + numberPair.getKey() + " was passed as a NumberPair value when Easy Insight was expecting a " +
-                        ("DatePair."));
+                    throw new ServiceRuntimeException("Field " + numberPair.getKey() + " was passed as a NumberPair value when Easy Insight was expecting a " +
+                        ("DatePair.") + " If you wish to change the data source programmatically, set changeDataSourceToMatch to true.");
                 } else {
                     transformedRow.addValue(numberPair.getKey(), new NumericValue(numberPair.getValue()));
                 }
@@ -83,11 +83,11 @@ public class DataTransformation {
             for (DatePair datePair : datePairs) {
                 Integer type = typeMap.get(datePair.getKey());
                 if (type == null) {
-                    throw new RuntimeException("Unrecognized field " + datePair.getKey() + " passed as a DatePair.");
+                    throw new ServiceRuntimeException("Unrecognized field " + datePair.getKey() + " passed as a DatePair. If you wish to change the data source programmatically, set changeDataSourceToMatch to true.");
                 }
                 if (type != Value.DATE) {
-                    throw new RuntimeException("Field " + datePair.getKey() + " was passed as a DatePair value when Easy Insight was expecting a " +
-                        (type == Value.NUMBER ? "NumberPair." : "StringPair."));
+                    throw new ServiceRuntimeException("Field " + datePair.getKey() + " was passed as a DatePair value when Easy Insight was expecting a " +
+                        (type == Value.NUMBER ? "NumberPair." : "StringPair.") + " If you wish to change the data source programmatically, set changeDataSourceToMatch to true.");
                 }
                 if (datePair.getValue() == null) {
                     transformedRow.addValue(datePair.getKey(), new EmptyValue());

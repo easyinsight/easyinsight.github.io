@@ -5,6 +5,7 @@ import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.groups.GroupService;
 import com.easyinsight.reportpackage.ReportPackage;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.reportpackage.ReportPackageResponse;
@@ -263,10 +264,10 @@ public class AnalysisService {
     }
 
     public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
-        return saveAnalysisDefinition(wsAnalysisDefinition, null);
+        return saveAnalysisDefinition(wsAnalysisDefinition, false);
     }
 
-    public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition, byte[] image) {
+    public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition, boolean addToDefaultGroup) {
 
         long userID = SecurityUtil.getUserID();
         if (wsAnalysisDefinition.getAnalysisID() > 0) {
@@ -277,6 +278,7 @@ public class AnalysisService {
         } catch (CacheException e) {
             LogClass.error(e);
         }
+        WSAnalysisDefinition report;
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
@@ -302,11 +304,8 @@ public class AnalysisService {
             analysisDefinition.setAuthorName(SecurityUtil.getUserName());
             analysisStorage.saveAnalysis(analysisDefinition, session);
             session.flush();
-            if (image != null) {
-                saveImage(image, analysisDefinition.getAnalysisID(), conn);
-            }
             conn.commit();
-            return analysisDefinition.createBlazeDefinition();
+            report = analysisDefinition.createBlazeDefinition();
         } catch (Exception e) {
             LogClass.error(e);
             try {
@@ -324,6 +323,10 @@ public class AnalysisService {
             session.close();
             Database.closeConnection(conn);
         }
+        if (addToDefaultGroup) {
+            new GroupService().addReportToDefaultGroup(report.getAnalysisID());
+        }
+        return report;
     }
 
     private void saveImage(byte[] image, long reportID, Connection conn) throws SQLException {

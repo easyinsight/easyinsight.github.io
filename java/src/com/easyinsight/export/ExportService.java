@@ -103,6 +103,28 @@ public class ExportService {
         return (feedType == FeedType.BASECAMP_MASTER.getType() || feedType == FeedType.HIGHRISE_COMPOSITE.getType());
     }
 
+    public ReportDelivery getReportDelivery(long reportID, int utcOffset) {
+        ReportDelivery reportDelivery = null;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCHEDULED_ACCOUNT_ACTIVITY_ID FROM REPORT_DELIVERY WHERE REPORT_ID = ?");
+            queryStmt.setLong(1, reportID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long activityID = rs.getLong(1);
+                reportDelivery = (ReportDelivery) ScheduledActivity.createActivity(ScheduledActivity.REPORT_DELIVERY, activityID, conn, utcOffset);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return reportDelivery;
+    }
+
     public List<ScheduledActivity> getScheduledActivities(int utcOffset) {
         EIConnection conn = Database.instance().getConnection();
         List<ScheduledActivity> activities = new ArrayList<ScheduledActivity>();

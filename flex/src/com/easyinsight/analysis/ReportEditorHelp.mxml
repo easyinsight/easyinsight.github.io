@@ -9,7 +9,6 @@
                 <mx:Button label="Creating Hierarchies" click="video2()" fontSize="18"/>
             </mx:HBox>
             <mx:Button label="View Documentation" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/reportediting.html'))" fontSize="18"/>
-            <mx:Button label="Restore Hints" click="restoreHints()" fontSize="18"/>
         </mx:VBox>
 
         <!--<mx:Button label="Restore Hints" click="restoreHints()"/>-->
@@ -30,10 +29,6 @@
             window.screencastSource = "http://eivideo.s3.amazonaws.com/ReportEditor1.mov";
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        }
-
-        private function restoreHints():void {
-            dispatchEvent(new Event("restoreHints"));
         }
 
         private function video2():void {

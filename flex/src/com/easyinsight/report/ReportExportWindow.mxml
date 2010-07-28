@@ -5,7 +5,8 @@
         import com.easyinsight.analysis.EmbedReportWindow;
         import com.easyinsight.analysis.ExcelCreator;
         import com.easyinsight.analysis.PNGCreator;
-        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.schedule.ReportDelivery;
+        import com.easyinsight.schedule.ReportDeliveryScheduleWindow;        
 
         import mx.managers.PopUpManager;
 
@@ -77,11 +78,32 @@
             navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=" + escape("http://www.netvibes.com/api/uwa/compile/google.php?moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(_report.analysisID)) + "&reportName=" + escape(_reportName) + "&reportType=" + escape(String(_reportType)) + "&dataSourceID=" + escape(String(_dataSourceID))))));
             PopUpManager.removePopUp(this);
         }
+
+        private function email():void {
+            exportService.getReportDelivery.send(_report.analysisID, new Date().getTimezoneOffset());
+        }
+
+        private function gotReportDelivery():void {
+            var delivery:ReportDelivery = exportService.getReportDelivery.lastResult as ReportDelivery;
+            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
+            window.fixedReportID = _report.analysisID;
+            window.fixedReportName = _reportName;
+            window.fixedReportURLKey = _report.urlKey;
+            window.activity = delivery;
+            window.x = this.x;
+            window.y = this.y;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.removePopUp(this);
+        }
         ]]></mx:Script>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
+    </mx:RemoteObject>
     <mx:VBox paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5" horizontalAlign="center">
         <mx:Label text="Click any of the options below to export the report:"/>
         <mx:HBox>
             <mx:Button icon="@Embed(source='../../../../assets/table.png')" label="Excel" click="excel()" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/mail.png')" label="Email" click="email()" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/camera.png')" label="PNG" click="png()" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/link.png')" label="Link" click="url()" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/plasma_tv.png')" label="Embed" click="embed()" labelPlacement="right"/>

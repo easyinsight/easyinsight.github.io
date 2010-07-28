@@ -1,0 +1,288 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" headerHeight="0"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.administration.feed.TagCloud;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.schedule.ReportDelivery;
+        import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+        import mx.validators.Validator;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            reportName = _report.name;
+            reportTags = TagCloud.toString(_report.tagCloud);
+            reportDescription = _report.description;
+            showConnectionSave = _originConnection > 0;
+            if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                firstNextButton = "Next";
+            } else {
+                firstNextButton = "Save";
+            }
+        }
+
+        private function onCreation():void {
+            reportNameInput.setFocus();
+        }
+
+        [Bindable]
+        private var showConnectionSave:Boolean;
+
+        [Bindable]
+        private var stackIndex:int;
+
+        private var _report:AnalysisDefinition;
+
+        private var _originConnection:int;
+
+        public function set originConnection(value:int):void {
+            _originConnection = value;
+        }
+
+        [Bindable]
+        private var reportName:String;
+
+        [Bindable]
+        private var reportTags:String;
+
+        private var reportTagCollection:ArrayCollection;
+
+        [Bindable]
+        private var reportDescription:String;
+
+        private function saved():void {
+            _report = analysisService.saveAnalysisDefinition.lastResult as AnalysisDefinition;
+            dispatchEvent(new SavedAnalysisEvent(_report));
+            stackIndex = 4;
+        }
+
+        private function nextFromName():void {
+            var results:Array = Validator.validateAll([reportNameValidator]);
+            if (results.length > 0) {
+                reportNameInput.setFocus();
+                reportNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            } else {
+                reportName = reportNameInput.text;
+                reportTagCollection = TagCloud.fromString(reportTagsInput.text);
+                reportDescription = reportDescriptionInput.text;
+                if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                    stackIndex++;
+                } else {
+                    stackIndex = 2;
+                    save();
+                }
+            }
+        }
+
+        [Bindable]
+        private var firstNextButton:String = "Next";
+
+        private function save():void {
+            _report.name = reportName;
+            _report.tagCloud = reportTagCollection;
+            _report.description = reportDescription;
+            _report.solutionVisible = exchangeGroup.selectedValue == "yes";
+            stackIndex++;
+            analysisService.saveAnalysisDefinition.send(_report, sharingGroup.selectedValue == "yes");
+        }
+
+        private function excel():void {
+            new ExcelCreator().exportExcel(_report, this);
+        }
+
+        private function email():void {
+            exportService.getReportDelivery.send(_report.analysisID, new Date().getTimezoneOffset());
+        }
+
+        private function gotReportDelivery():void {
+            var delivery:ReportDelivery = exportService.getReportDelivery.lastResult as ReportDelivery;
+            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
+            window.fixedReportID = _report.analysisID;
+            window.fixedReportName = _report.name;
+            window.fixedReportURLKey = _report.urlKey;
+            window.activity = delivery;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function embed():void {
+            var embedWindow:EmbedReportWindow = new EmbedReportWindow();
+            embedWindow.urlKey = _report.urlKey;
+            embedWindow.reportType = _report.reportType;
+            embedWindow.dataSourceID = _report.dataFeedID;
+            embedWindow.reportName = _report.name;
+            PopUpManager.addPopUp(embedWindow, this, true);
+            PopUpUtil.centerPopUp(embedWindow);
+        }
+
+        [Bindable]
+        private var errorText:String;
+
+        [Bindable]
+        [Embed(source="../../../../assets/mail.png")]
+        private var mailIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/table.png")]
+        private var excelIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/plasma_tv.png")]
+        private var embedIcon:Class;
+
+        private function onFault(event:FaultEvent):void {
+            errorText = event.fault.faultString;
+        }
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="saveAnalysisDefinition" result="saved()" fault="onFault(event)"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
+    </mx:RemoteObject>
+    <!--
+     sharing
+     delivery
+    -->
+    <mx:Canvas width="600" height="400">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="#000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="#CCCCCC"/>
+        </mx:VBox>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ViewStack selectedIndex="{stackIndex}" width="550" height="350" backgroundColor="#FFFFFF">
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <!-- what do you want to call this report? -->
+                    <mx:Label text="What do you want to name this report?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextInput text="{reportName}" id="reportNameInput" width="530" fontSize="14"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="What tags should be applied to this report?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextInput text="{reportTags}" id="reportTagsInput" width="530" fontSize="14"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="How do you want to describe this report?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextArea width="530" height="75" id="reportDescriptionInput"
+                                         text="{reportDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="{firstNextButton}" click="nextFromName()" fontSize="14"/>
+                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="Do you want to share this report with other users in the account?" fontSize="14"
+                            fontWeight="bold"/>
+                    <mx:RadioButtonGroup id="sharingGroup"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:RadioButton label="Yes" value="yes" groupName="sharingGroup" selected="true" fontSize="14" tabIndex="0"/>
+                        <mx:RadioButton label="No" value="no" groupName="sharingGroup" fontSize="14" tabIndex="1"/>
+                    </mx:HBox>
+                    <mx:Spacer height="20"/>
+                    <mx:TextArea text="Do you want to share the template of this report on the Exchange for other Easy Insight users?" fontSize="14"
+                            width="530" borderStyle="none" editable="false" selectable="false" fontWeight="bold" backgroundAlpha="0" visible="{showConnectionSave}"/>
+                    <mx:RadioButtonGroup id="exchangeGroup"/>
+                    <mx:HBox width="100%" horizontalAlign="center" visible="{showConnectionSave}">
+                        <mx:RadioButton label="Yes" value="yes" groupName="exchangeGroup" fontSize="14" tabIndex="2"/>
+                        <mx:RadioButton label="No" value="no" groupName="exchangeGroup" selected="true" fontSize="14" tabIndex="3"/>
+                    </mx:HBox>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="Back" click="stackIndex--" fontSize="14" tabIndex="4"/>
+                        <mx:Button label="Save" click="save()" fontSize="14" tabIndex="5"/>
+                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14" tabIndex="6"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar label="Saving the report..." indeterminate="true"/>
+                </mx:Box>
+                <mx:VBox width="100%" height="100%" horizontalAlign="center">
+                    <mx:Label text="We're sorry, but something went wrong in saving the report." fontSize="14"/>
+                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200"/>
+                    <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                </mx:VBox>
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <!-- export settings -->
+                    <mx:TextArea text="Your report has been saved. Listed below are a few of the options you can use as next steps to get the most out of your reporting. You can always access these options and more under the Export tab."
+                            width="530" borderStyle="none" editable="false" selectable="false" fontWeight="bold" backgroundAlpha="0" fontSize="14" height="75"/>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="excelBox"
+                                 mouseOver="excelBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="excelBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="excel()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                            <mx:Image source="{excelIcon}"/>
+                            <mx:Text text="Export to Excel" fontSize="14" selectable="false"/>
+                            <mx:TextArea
+                                    text="Export the report as an Excel spreadsheet"
+                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                    height="80"
+                                    width="130" textAlign="center"/>
+                        </mx:VBox>
+                        <mx:Spacer width="100%"/>
+                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="embedBox"
+                                 mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="embed()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                            <mx:Image source="{embedIcon}"/>
+                            <mx:Text text="Embed this Report" fontSize="14" selectable="false"/>
+                            <mx:TextArea
+                                    text="Generate HTML to embed the report into a web page"
+                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                    height="80"
+                                    width="130" textAlign="center"/>
+                        </mx:VBox>
+                        <mx:Spacer width="100%"/>
+                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="emailBox"
+                                 mouseOver="emailBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="emailBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="email()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                            <mx:Image source="{mailIcon}"/>
+                            <mx:Text text="Email Delivery" fontSize="14" selectable="false"/>
+                            <mx:TextArea
+                                    text="Set up scheduled email delivery of the report"
+                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                    height="80"
+                                    width="130" textAlign="center"/>
+                        </mx:VBox>
+                    </mx:HBox>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <!-- email settings -->
+                    <mx:HBox>
+                        <mx:Button label="Back"/>
+                        <mx:Button label="Close"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <!-- embed settings -->
+                    <mx:HBox>
+                        <mx:Button label="Back"/>
+                        <mx:Button label="Close"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:ViewStack>
+        </mx:Box>
+    </mx:Canvas>
+    <mx:StringValidator id="reportNameValidator" source="{reportNameInput}" property="text" minLength="3" maxLength="100"/> 
+</util:EITitleWindow>

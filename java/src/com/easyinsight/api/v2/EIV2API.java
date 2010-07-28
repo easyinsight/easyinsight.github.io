@@ -208,11 +208,11 @@ public abstract class EIV2API implements IEIV2API {
     }
 
     public void deleteRows(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name = "where") Where where) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new ServiceRuntimeException("This operation has not yet been implemented--coming soon!");
     }
 
     public DataSourceInfo getSourceInfo(@WebParam(name = "dataSourceName") String dataSourceName) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new ServiceRuntimeException("This operation has not yet been implemented--coming soon!");
     }
 
     private static class CallData {
@@ -226,10 +226,19 @@ public abstract class EIV2API implements IEIV2API {
     }
 
     private CallData convertData(String dataSourceName, Row row, EIConnection conn, boolean updateIfNecessary) throws SQLException {
+        if (row == null) {
+            throw new ServiceRuntimeException("You must include at least one row for this operation.");
+        }
         return convertData(dataSourceName, Arrays.asList(row), conn, updateIfNecessary);
     }
 
     private CallData convertData(String dataSourceName, List<Row> rows, EIConnection conn, boolean updateIfNecessary) throws SQLException {
+        if (dataSourceName == null) {
+            throw new ServiceRuntimeException("You must specify a data source name or API key.");
+        }
+        if (rows == null || rows.size() == 0) {
+            throw new ServiceRuntimeException("You must include at least one row for this operation.");
+        }
         DataStorage dataStorage;
         DataSet dataSet;
         Map<Long, Boolean> dataSourceIDs = findDataSourceIDsByName(dataSourceName, conn);
@@ -258,7 +267,7 @@ public abstract class EIV2API implements IEIV2API {
                 long userID = getUserID();
                 // create new data source
                 FeedDefinition feedDefinition = new FeedDefinition();
-                if (dataSourceName == null || dataSourceName.length() < 3) {
+                if (dataSourceName.length() < 3) {
                     throw new ServiceRuntimeException("The data source name must be at least three characters.");
                 }
                 if (dataSourceName.length() > 30) {
@@ -273,11 +282,11 @@ public abstract class EIV2API implements IEIV2API {
                 FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), uploadPolicy);
                 dataStorage = result.getTableDefinitionMetadata();
             } else if (dataSourceIDs.size() > 1) {
-                throw new ServiceRuntimeException("More than one data source was found by that name.");
+                throw new ServiceRuntimeException("More than one data source was found by that name. Please specify an API key for the data source instead.");
             } else {
                 Map.Entry<Long, Boolean> entry = dataSourceIDs.entrySet().iterator().next();
                 if (!entry.getValue()) {
-                    throw new ServiceRuntimeException("This data source does not allow use of the unchecked API.");
+                    throw new ServiceRuntimeException("This data source has been set to prohibit use of changeDataSourceToMatch as true.");
                 }
                 FeedStorage feedStorage = new FeedStorage();
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(entry.getKey());
@@ -307,9 +316,9 @@ public abstract class EIV2API implements IEIV2API {
             dataSet = toDataSet(rows);
         } else {
             if (dataSourceIDs.size() == 0) {
-                throw new ServiceRuntimeException("No data source was found by that API key.");
+                throw new ServiceRuntimeException("No data source was found by that name or API key.");
             } else if (dataSourceIDs.size() > 1) {
-                throw new ServiceRuntimeException("More than one data source was found by that API key--this should never happen.");
+                throw new ServiceRuntimeException("More than one data source was found by that name. Please specify an API key for the data source instead.");
             } else {
                 FeedStorage feedStorage = new FeedStorage();
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceIDs.keySet().iterator().next(), conn);

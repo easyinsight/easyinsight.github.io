@@ -5,7 +5,6 @@
          xmlns:datasources="com.easyinsight.datasources.*" xmlns:analysis="com.easyinsight.analysis.*">
     <mx:Metadata>
         [Event(name="analysisItemEdit", type="com.easyinsight.analysis.AnalysisItemEditEvent")]
-        [Event(name="reportSizing", type="com.easyinsight.analysis.ReportSizingEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.scrub.DataScrubEvent;
@@ -164,16 +163,6 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        /*private function obfuscate():void {
-         dataView.obfuscate = !dataView.obfuscate;
-         if (dataView.obfuscate) {
-         dispatchEvent(new ReportSizingEvent(700));
-         } else {
-         dispatchEvent(new ReportSizingEvent(0));
-         }
-         dataView.retrieveData();
-         }*/
-
         private function newTextReplaceScrub():void {
             var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));
             textWindow.fields = wrappers;
@@ -244,8 +233,6 @@
                toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton"/>
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
                icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
-    <!--<mx:Button id="obfuscateButton" toolTip="Toggle Obfuscation"
-               icon="@Embed(source='../../../../assets/lock.png')" click="obfuscate()"/>-->
         <mx:Button id="textScrubButton" toolTip="Text Replace"
                icon="@Embed(source='../../../../assets/text_find.png')"
                click="newTextReplaceScrub()"/>
@@ -255,5 +242,4 @@
     <mx:Button toolTip="Explain Report..."
                icon="@Embed(source='../../../../assets/information.png')"
                click="explainReport()"/>
-    <!--<analysis:ResultLimitComboBox limits="{limits}"/>-->    
 </mx:HBox>

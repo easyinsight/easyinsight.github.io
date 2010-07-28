@@ -421,6 +421,33 @@ public class GroupService {
         }
     }
 
+    public void addReportToDefaultGroup(long reportID) {
+        SecurityUtil.authorizeInsight(reportID);
+        long groupID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT GROUP_ID FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            queryStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                groupID = rs.getLong(1);
+            } else {
+                throw new RuntimeException("Couldn't find a group");
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            groupStorage.addReportToGroup(reportID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void addFeedToGroup(long feedID, long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         SecurityUtil.authorizeFeed(feedID, Roles.SHARER);

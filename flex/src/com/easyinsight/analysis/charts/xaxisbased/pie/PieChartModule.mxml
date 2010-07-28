@@ -202,6 +202,9 @@
             <mx:series>
                 <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="{labelPosition}"
                     labelFunction="renderPieLabel" id="pieSeries">
+                    <mx:showDataEffect>
+                        <mx:SeriesInterpolate duration="1000" />
+                    </mx:showDataEffect>                    
                 </mx:PieSeries>
             </mx:series>
         </mx:PieChart>

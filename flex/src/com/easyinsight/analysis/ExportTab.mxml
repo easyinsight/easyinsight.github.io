@@ -25,6 +25,8 @@
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.report.URLWindow;
+        import com.easyinsight.schedule.ReportDelivery;
+        import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
@@ -103,11 +105,12 @@
 
         private function embed():void {
             if (analysisDefinition.analysisID > 0) {
-                var embedWindow:EmbedReportWindow = EmbedReportWindow(PopUpManager.createPopUp(this, EmbedReportWindow));
+                var embedWindow:EmbedReportWindow = new EmbedReportWindow();
                 embedWindow.urlKey = analysisDefinition.urlKey;
                 embedWindow.reportType = analysisDefinition.reportType;
                 embedWindow.dataSourceID = analysisDefinition.dataFeedID;
                 embedWindow.reportName = analysisDefinition.name;
+                PopUpManager.addPopUp(embedWindow, this, true);
                 PopUpUtil.centerPopUp(embedWindow);
             } else {
                 Alert.show("You need to save the report first.");
@@ -164,12 +167,31 @@
         public function removeIGoogle():void {
             removeChild(igoogleButton);
         }
-        ]]>
-    </mx:Script>
+
+        private function email():void {
+            exportService.getReportDelivery.send(analysisDefinition.analysisID, new Date().getTimezoneOffset());
+        }
+
+        private function gotReportDelivery():void {
+            var delivery:ReportDelivery = exportService.getReportDelivery.lastResult as ReportDelivery;
+            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
+            window.fixedReportID = analysisDefinition.analysisID;
+            window.fixedReportName = analysisDefinition.name;
+            window.fixedReportURLKey = analysisDefinition.urlKey;
+            window.activity = delivery;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
+    </mx:RemoteObject>
     <mx:Button id="linkButton" toolTip="Link by URL" click="url()"
                icon="@Embed(source='../../../../assets/link.png')"/>
     <mx:Button id="embedButton" toolTip="Embed" click="embed()"
                icon="@Embed(source='../../../../assets/plasma_tv.png')"/>
+    <mx:Button id="emailButton" toolTip="Email Delivery" click="email()"
+               icon="@Embed(source='../../../../assets/mail.png')"/>
     <mx:Button id="imageButton" toolTip="Export PNG Image"
                icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()"/>
     <mx:Button id="excelButton" toolTip="Export to Excel"

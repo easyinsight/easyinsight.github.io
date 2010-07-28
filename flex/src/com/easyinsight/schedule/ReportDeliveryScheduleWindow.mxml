@@ -9,6 +9,7 @@
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
+        import mx.validators.Validator;
 
         [Bindable]
         private var reports:ArrayCollection;
@@ -20,7 +21,9 @@
 
         private function setup():void {
             addEventListener(RecipientEvent.DELETE_RECIPIENT, deleteRecipient);
-            analysisService.getInsightDescriptors.send();
+            if (_fixedReportName == null) {
+                analysisService.getInsightDescriptors.send();
+            }
         }
 
         private function deleteRecipient(event:RecipientEvent):void {
@@ -53,6 +56,12 @@
         private var newActivity:Boolean;
 
         private function save():void {
+            var subjectResults:Array = Validator.validateAll([subjectValidator]);
+            if (subjectResults.length > 0) {
+                subjectInput.setFocus();
+                subjectInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
             newActivity = _activity == null;
             if (activity == null) {
                 activity = new ReportDelivery();
@@ -60,8 +69,13 @@
             if (scheduleConfiguration.save()) {
                 _activity.users = recipients;
                 _activity.htmlEmail = htmlEmailCheckbox.selected;
-                _activity.reportName = reportComboBox.selectedItem.name;
-                _activity.reportID = reportComboBox.selectedItem.id;
+                if (_fixedReportID > 0) {
+                    _activity.reportID = _fixedReportID;
+                    _activity.reportName = _fixedReportName;
+                } else {
+                    _activity.reportName = reportComboBox.selectedItem.name;
+                    _activity.reportID = reportComboBox.selectedItem.id;
+                }
                 _activity.body = bodyTextInput.text;
                 _activity.subject = subjectInput.text;
                 var utcOffset:int = new Date().getTimezoneOffset();
@@ -82,7 +96,13 @@
         private var htmlEmail:Boolean = true;
 
         private function insertReportLink():void {
-            var url:String = "<a href=\"https://www.easy-insight.com/app/#reportID=" + reportComboBox.selectedItem.urlKey + "\">View the Report in Easy Insight</a>";
+            var key:String;
+            if (_fixedReportURLKey != null) {
+                key = _fixedReportURLKey;
+            } else {
+                key = reportComboBox.selectedItem.urlKey;
+            }
+            var url:String = "<a href=\"https://www.easy-insight.com/app/#reportID=" + key + "\">View the Report in Easy Insight</a>";
             bodyTextInput.insertTextAtCursor(url);
         }
 
@@ -104,6 +124,31 @@
             recipients.addItem(event.userStub);
         }
 
+        private var _fixedReportID:int;
+
+        private var _fixedReportName:String;
+
+        private var _fixedReportURLKey:String;
+
+        protected override function createChildren():void {
+            super.createChildren();
+            if (_fixedReportID > 0) {
+                form.removeChild(reportComboBoxItem);
+            }
+        }
+
+        public function set fixedReportID(value:int):void {
+            _fixedReportID = value;
+        }
+
+        public function set fixedReportName(value:String):void {
+            _fixedReportName = value;
+        }
+
+        public function set fixedReportURLKey(value:String):void {
+            _fixedReportURLKey = value;
+        }
+
         [Bindable]
         private var body:String;
 
@@ -122,8 +167,8 @@
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:HBox>
             <mx:VBox>
-                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-                    <mx:FormItem label="Report:">
+                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" id="form">
+                    <mx:FormItem label="Report:" id="reportComboBoxItem">
                         <util:SmartComboBox dataProvider="{reports}" selectedValue="{reportID}" selectedProperty="id"
                                             id="reportComboBox" labelField="name"/>
                     </mx:FormItem>
@@ -182,4 +227,5 @@
             <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
+    <mx:StringValidator id="subjectValidator" source="{subjectInput}" property="text" minLength="1"/>
 </util:EITitleWindow>
