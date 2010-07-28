@@ -98,6 +98,11 @@ public class Scheduler {
                     conn.setAutoCommit(false);
                     List<TaskGenerator> taskGenerators = retrieveTaskGenerators(session);
                     for (TaskGenerator taskGenerator : taskGenerators) {
+                        try {
+                            taskGenerator.createTask();
+                        } catch (OrphanTaskException e) {
+                            continue;
+                        }
                         List<ScheduledTask> tasks = taskGenerator.generateTasks(now, conn);
                         for (ScheduledTask task : tasks) {
                             LogClass.info("Scheduling " + task.getClass().getName() + " for execution on " + task.getExecutionDate());

@@ -42,6 +42,7 @@ public class TaskGenerator {
         long lastTime = now.getTime() / taskInterval * taskInterval;
         Date lastScheduledRun = findStartTaskDate();
         long lastValidTime = lastScheduledRun.getTime() / taskInterval * taskInterval;
+
         while (lastValidTime < lastTime) {
             tasks.add(defineTask(lastValidTime + taskInterval));
             lastValidTime += taskInterval;
@@ -64,7 +65,7 @@ public class TaskGenerator {
     }
 
     protected ScheduledTask createTask() {
-        throw new RuntimeException("Orphan task generator " + getTaskGeneratorID());
+        throw new OrphanTaskException("Orphan task generator " + getTaskGeneratorID());
     }
 
     public boolean isRequiresBackfill() {
