@@ -25,7 +25,11 @@
             } else {
                 firstNextButton = "Save";
             }
+            connectionSave = _report.solutionVisible ? "yes" : "no";
         }
+
+        [Bindable]
+        private var connectionSave:String;
 
         private function onCreation():void {
             reportNameInput.setFocus();
@@ -71,12 +75,11 @@
                 reportName = reportNameInput.text;
                 reportTagCollection = TagCloud.fromString(reportTagsInput.text);
                 reportDescription = reportDescriptionInput.text;
-                if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                /*if (User.getInstance().getAccountType() > Account.PERSONAL) {
                     stackIndex++;
-                } else {
-                    stackIndex = 2;
+                } else {*/
                     save();
-                }
+                //}
             }
         }
 
@@ -88,7 +91,7 @@
             _report.tagCloud = reportTagCollection;
             _report.description = reportDescription;
             _report.solutionVisible = exchangeGroup.selectedValue == "yes";
-            stackIndex++;
+            stackIndex = 2;
             analysisService.saveAnalysisDefinition.send(_report, sharingGroup.selectedValue == "yes");
         }
 
@@ -189,10 +192,10 @@
                     <mx:Spacer height="20"/>
                     <mx:TextArea text="Do you want to share the template of this report on the Exchange for other Easy Insight users?" fontSize="14"
                             width="530" borderStyle="none" editable="false" selectable="false" fontWeight="bold" backgroundAlpha="0" visible="{showConnectionSave}"/>
-                    <mx:RadioButtonGroup id="exchangeGroup"/>
+                    <mx:RadioButtonGroup id="exchangeGroup" selectedValue="{connectionSave}"/>
                     <mx:HBox width="100%" horizontalAlign="center" visible="{showConnectionSave}">
                         <mx:RadioButton label="Yes" value="yes" groupName="exchangeGroup" fontSize="14" tabIndex="2"/>
-                        <mx:RadioButton label="No" value="no" groupName="exchangeGroup" selected="true" fontSize="14" tabIndex="3"/>
+                        <mx:RadioButton label="No" value="no" groupName="exchangeGroup" fontSize="14" tabIndex="3"/>
                     </mx:HBox>
                     <mx:Spacer height="100%"/>
                     <mx:HBox width="100%" horizontalAlign="center">
