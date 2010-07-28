@@ -1,10 +1,6 @@
 package com.easyinsight.filtering
 {
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemResultMetadata;
-import com.easyinsight.analysis.AnalysisMeasureResultMetadata;
-
-import com.easyinsight.framework.CredentialsCache;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -12,7 +8,6 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.HSlider;
@@ -20,24 +15,18 @@ import mx.controls.Label;
 import mx.controls.Text;
 import mx.events.SliderEvent;
 import mx.formatters.Formatter;
-import mx.formatters.NumberFormatter;
 import mx.managers.PopUpManager;
-import mx.rpc.events.ResultEvent;
-import mx.rpc.remoting.RemoteObject;
 import mx.states.AddChild;
 import mx.states.RemoveChild;
 import mx.states.State;
 
 public class SliderMeasureFilter extends HBox implements IFilter
 {
-    //private var dataService:RemoteObject;
     private var hslider:HSlider;
     private var _filterDefinition:FilterRangeDefinition;
     private var analysisItem:AnalysisItem;
     private var lowValue:int;
     private var highValue:int;
-    private var lowField:Label;
-    private var highField:Label;
 
     private var _lowValueString:String;
     private var _highValueString:String;
@@ -260,6 +249,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
     private function createDoubleSlider():HSlider {
         var slider:HSlider = new HSlider();
+        slider.dataTipFormatFunction = dataTipFormatter;
         slider.minimum = _filterDefinition.startValue;
         slider.maximum = _filterDefinition.endValue;
         //slider.labels = [ _filterDefinition.startValue, _filterDefinition.endValue ];
@@ -275,6 +265,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
     private function createMinSlider():HSlider {
         var slider:HSlider = new HSlider();
+        slider.dataTipFormatFunction = dataTipFormatter;
         slider.minimum = _filterDefinition.startValue;
         slider.maximum = _filterDefinition.endValue;
         //slider.labels = [ _filterDefinition.startValue, _filterDefinition.endValue ];
@@ -290,6 +281,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
     private function createMaxSlider():HSlider {
         var slider:HSlider = new HSlider();
+        slider.dataTipFormatFunction = dataTipFormatter;
         slider.minimum = _filterDefinition.startValue;
         slider.maximum = _filterDefinition.endValue;
         //slider.labels = [ _filterDefinition.startValue, _filterDefinition.endValue ];
@@ -301,6 +293,12 @@ public class SliderMeasureFilter extends HBox implements IFilter
         slider.setStyle("bottom", 0);
         slider.setStyle("dataTipPlacement", "top");
         return slider;
+    }
+
+    private function dataTipFormatter(value:Number):String {
+        var f:Formatter = _filterDefinition.field.getFormatter();
+        return f.format(value);
+
     }
 
     /*private function gotMetadata(event:ResultEvent):void {
