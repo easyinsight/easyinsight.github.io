@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" label="Sharing" icon="@Embed(source='../../../../assets/users.png')" paddingLeft="10" paddingTop="10"
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" label="Sharing" icon="@Embed(source='../../../../assets/users.png')"
+         paddingLeft="10" paddingTop="10"
          paddingBottom="10" creationComplete="onCreation()" verticalAlign="middle">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.DataService;
@@ -46,13 +47,18 @@
             publiclyVisible = value.publiclyVisible;
             shareDataSourceSharing = value.visibleAtFeedLevel;
             solutionVisible = value.solutionVisible;
+            accountVisible = value.accountVisible;
             dispatchEvent(new Event("analysisDefinitionChanged"));
         }
 
         public function updateReport():void {
-            analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
-            analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
-            analysisDefinition.solutionVisible = solutionVisibleCheckbox.selected;
+            if (sharingMode.selectedIndex == 0) {
+                analysisDefinition.accountVisible = accountVisibleCheckbox.selected;
+            } else {
+                analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
+                analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
+                analysisDefinition.solutionVisible = solutionVisibleCheckbox.selected;
+            }
         }
 
 
@@ -134,6 +140,9 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        [Bindable]
+        private var accountVisible:Boolean;
+
         [Bindable(event="canSubscribeToFeedChanged")]
         public function get canSubscribeToFeed():Boolean {
             return _canSubscribeToFeed;
@@ -161,55 +170,81 @@
     <mx:RemoteObject id="userUploadService" destination="userUpload">
         <mx:method name="subscribe"/>
     </mx:RemoteObject>
-    <mx:HBox verticalAlign="middle">
-        <mx:Label text="Sharing with Others:"/>
-        <mx:Grid>
-            <mx:GridRow>
-                <mx:GridItem>
-                    <mx:Button id="subscribeToFeedButton" icon="@Embed(source='../../../../assets/folder_into.png')"
-                       click="subscribeToFeed()" toolTip="Add Data Source to My Data" enabled="{canSubscribeToFeed}"/>
-                </mx:GridItem>
-                <mx:GridItem>
-                    <mx:Button id="groupAddFeedButton" icon="@Embed(source='../../../../assets/users_into.png')"
-                       click="addFeedToGroup()" toolTip="Add Data Source to Group" enabled="{canAddFeedToGroup}"/>
-                </mx:GridItem>
-            </mx:GridRow>
-            <mx:GridRow>
-                <mx:GridItem>
-                    <mx:Button id="subscribeToInsightButton" icon="@Embed(source='../../../../assets/folder_into.png')"
-                       click="toMyData()" toolTip="Add Report to My Data" enabled="{canSaveToMyData}"/>
-                </mx:GridItem>
-                <mx:GridItem>
-                <mx:Button id="groupAddInsightButton" icon="@Embed(source='../../../../assets/users_into.png')"
-                       click="addReportToGroup()" toolTip="Manage Report Groups" enabled="{reportSaveable}"/>
-                </mx:GridItem>
-            </mx:GridRow>
-        </mx:Grid>
-    </mx:HBox>
-    <mx:VRule height="50"/>
-    <mx:HBox verticalAlign="middle">
-        <mx:Label text="Sharing with the World:"/>
-        <mx:VBox>
-            <mx:CheckBox label="Use Data Source Sharing Settings"
-                     id="shareDataSourceSharingCheckbox" selected="{shareDataSourceSharing}"
-                     click="sourceSharingChange(event)"/>
+    <mx:VBox>
+        <mx:ToggleButtonBar direction="vertical" id="sharingMode">
+            <mx:dataProvider>
+                <mx:ArrayCollection>
+                    <mx:Array>
+                        <mx:String>Simple</mx:String>
+                        <mx:String>Expert</mx:String>
+                    </mx:Array>
+                </mx:ArrayCollection>
+            </mx:dataProvider>
+        </mx:ToggleButtonBar>
+    </mx:VBox>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{sharingMode.selectedIndex}">
+        <mx:HBox>
+            <mx:Label text="Should this report be visible to other users in your account?" fontSize="14"/>
+            <mx:CheckBox id="accountVisibleCheckbox" selected="{accountVisible}"/>
+        </mx:HBox>
+        <mx:HBox>
             <mx:HBox verticalAlign="middle">
-                <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
-                             selected="{publiclyVisible}"
-                             change="publiclyVisible = publiclyVisibleCheckbox.selected"/>
-                <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                          toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+                <mx:Label text="Sharing with Others:"/>
+                <mx:Grid>
+                    <mx:GridRow>
+                        <mx:GridItem>
+                            <mx:Button id="subscribeToFeedButton"
+                                       icon="@Embed(source='../../../../assets/folder_into.png')"
+                                       click="subscribeToFeed()" toolTip="Add Data Source to My Data"
+                                       enabled="{canSubscribeToFeed}"/>
+                        </mx:GridItem>
+                        <mx:GridItem>
+                            <mx:Button id="groupAddFeedButton" icon="@Embed(source='../../../../assets/users_into.png')"
+                                       click="addFeedToGroup()" toolTip="Add Data Source to Group"
+                                       enabled="{canAddFeedToGroup}"/>
+                        </mx:GridItem>
+                    </mx:GridRow>
+                    <mx:GridRow>
+                        <mx:GridItem>
+                            <mx:Button id="subscribeToInsightButton"
+                                       icon="@Embed(source='../../../../assets/folder_into.png')"
+                                       click="toMyData()" toolTip="Add Report to My Data" enabled="{canSaveToMyData}"/>
+                        </mx:GridItem>
+                        <mx:GridItem>
+                            <mx:Button id="groupAddInsightButton"
+                                       icon="@Embed(source='../../../../assets/users_into.png')"
+                                       click="addReportToGroup()" toolTip="Manage Report Groups"
+                                       enabled="{reportSaveable}"/>
+                        </mx:GridItem>
+                    </mx:GridRow>
+                </mx:Grid>
             </mx:HBox>
-        </mx:VBox>
-    </mx:HBox>
-    <mx:VRule height="50"/>
-    <mx:HBox verticalAlign="middle">
-        <mx:Label text="Sharing the Template:"/>
-        <mx:VBox>
-            <mx:CheckBox label="Connection Visible" id="solutionVisibleCheckbox"
-                         selected="{solutionVisible}" enabled="{originSolution > 0}"/>
-            <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                      toolTip="By checking this box, you make the report template visible to all other Easy Insight users on the source connection. It's a great way to give back to the community!"/>
-        </mx:VBox>
-    </mx:HBox>
+            <mx:VRule height="50"/>
+            <mx:HBox verticalAlign="middle">
+                <mx:Label text="Sharing with the World:"/>
+                <mx:VBox>
+                    <mx:CheckBox label="Use Data Source Sharing Settings"
+                                 id="shareDataSourceSharingCheckbox" selected="{shareDataSourceSharing}"
+                                 click="sourceSharingChange(event)"/>
+                    <mx:HBox verticalAlign="middle">
+                        <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
+                                     selected="{publiclyVisible}"
+                                     change="publiclyVisible = publiclyVisibleCheckbox.selected"/>
+                        <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                                  toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:HBox>
+            <mx:VRule height="50"/>
+            <mx:HBox verticalAlign="middle">
+                <mx:Label text="Sharing the Template:"/>
+                <mx:VBox>
+                    <mx:CheckBox label="Connection Visible" id="solutionVisibleCheckbox"
+                                 selected="{solutionVisible}" enabled="{originSolution > 0}"/>
+                    <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                              toolTip="By checking this box, you make the report template visible to all other Easy Insight users on the source connection. It's a great way to give back to the community!"/>
+                </mx:VBox>
+            </mx:HBox>
+        </mx:HBox>
+    </mx:ViewStack>
 </mx:HBox>

@@ -8,7 +8,11 @@ package com.easyinsight.filtering
 		public var startValueDefined:Boolean;
 		public var endValue:Number;
 		public var endValueDefined:Boolean;
-		
+        public var currentStartValue:Number;
+        public var currentEndValue:Number;
+        public var currentStartValueDefined:Boolean;
+        public var currentEndValueDefined:Boolean;
+
 		public function FilterRangeDefinition()
 		{
 			super();

@@ -120,6 +120,17 @@ public class AnalysisDefinition implements Cloneable {
             inverseJoinColumns = @JoinColumn(name = "analysis_item_id"))
     private Map<String, AnalysisItem> reportStructure;
 
+    @Column(name = "account_visible")
+    private boolean accountVisible;
+
+    public boolean isAccountVisible() {
+        return accountVisible;
+    }
+
+    public void setAccountVisible(boolean accountVisible) {
+        this.accountVisible = accountVisible;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -514,6 +525,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setPubliclyVisible(publiclyVisible);
         analysisDefinition.setVisibleAtFeedLevel(visibleAtFeedLevel);
         analysisDefinition.setSolutionVisible(solutionVisible);
+        analysisDefinition.setAccountVisible(accountVisible);
         return analysisDefinition;
     }
 

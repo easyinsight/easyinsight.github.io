@@ -3,6 +3,7 @@ package com.easyinsight.userupload;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
+import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.reportpackage.ReportPackageStorage;
 import com.easyinsight.storage.DataStorage;
@@ -73,12 +74,15 @@ public class UserUploadService implements IUserUploadService {
             List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
             List<ReportPackageDescriptor> packages = new ReportPackageStorage().getReportPackagesForUser();
             objects.addAll(packages);
+            objects.addAll(new GoalStorage().getTreesForUser(userID));
             Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
             for (FeedDescriptor descriptor : descriptors) {
                 descriptorMap.put(descriptor.getDataFeedID(), descriptor);
             }
             if (includeGroups) {
-                List<FeedDescriptor> groupDataSources = feedStorage.getDataSourcesFromGroups(userID);
+                List<FeedDescriptor> groupDataSources = new ArrayList<FeedDescriptor>();
+                groupDataSources.addAll(feedStorage.getDataSourcesFromGroups(userID));
+                groupDataSources.addAll(feedStorage.getDataSourcesFromAccount(SecurityUtil.getAccountID()));
                 for (FeedDescriptor groupDescriptor : groupDataSources) {
                     if (!descriptorMap.containsKey(groupDescriptor.getDataFeedID())) {
                         descriptorMap.put(groupDescriptor.getDataFeedID(), groupDescriptor);
@@ -88,12 +92,11 @@ public class UserUploadService implements IUserUploadService {
             objects.addAll(descriptorMap.values());
             AnalysisStorage analysisStorage = new AnalysisStorage();
             Map<Long, List<EIDescriptor>> analysisDefinitions = new HashMap<Long, List<EIDescriptor>>();
-            List<InsightDescriptor> groupReports = null;
+            List<InsightDescriptor> groupReports = new ArrayList<InsightDescriptor>();
             if (includeGroups) {
-                groupReports = analysisStorage.getReportsForGroups(userID);
+                groupReports.addAll(analysisStorage.getReportsForGroups(userID));
+                groupReports.addAll(analysisStorage.getReportsForAccount(SecurityUtil.getAccountID()));
             }
-
-
 
             for (InsightDescriptor analysisDefinition : analysisStorage.getInsightDescriptors(userID)) {
                 if (includeGroups) {

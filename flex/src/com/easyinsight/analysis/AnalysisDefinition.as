@@ -65,6 +65,7 @@ package com.easyinsight.analysis
         public var temporaryReport:Boolean;
         public var fontName:String = "Tahoma";
         public var fontSize:int = 12;
+        public var accountVisible:Boolean;
 
 		public function AnalysisDefinition()
 		{

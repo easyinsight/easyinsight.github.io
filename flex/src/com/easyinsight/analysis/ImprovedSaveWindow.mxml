@@ -19,6 +19,7 @@
             reportName = _report.name;
             reportTags = TagCloud.toString(_report.tagCloud);
             reportDescription = _report.description;
+            accountVisible = _report.accountVisible;
             showConnectionSave = _originConnection > 0;
             if (User.getInstance().getAccountType() > Account.PERSONAL) {
                 firstNextButton = "Next";
@@ -30,6 +31,9 @@
 
         [Bindable]
         private var connectionSave:String;
+
+        [Bindable]
+        private var accountVisible:Boolean;
 
         private function onCreation():void {
             reportNameInput.setFocus();
@@ -75,11 +79,11 @@
                 reportName = reportNameInput.text;
                 reportTagCollection = TagCloud.fromString(reportTagsInput.text);
                 reportDescription = reportDescriptionInput.text;
-                /*if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                if (User.getInstance().getAccountType() > Account.PERSONAL) {
                     stackIndex++;
-                } else {*/
+                } else {
                     save();
-                //}
+                }
             }
         }
 
@@ -91,8 +95,9 @@
             _report.tagCloud = reportTagCollection;
             _report.description = reportDescription;
             _report.solutionVisible = exchangeGroup.selectedValue == "yes";
+            _report.accountVisible = sharingGroup.selectedValue == "yes";
             stackIndex = 2;
-            analysisService.saveAnalysisDefinition.send(_report, sharingGroup.selectedValue == "yes");
+            analysisService.saveAnalysisDefinition.send(_report);
         }
 
         private function excel():void {
@@ -269,20 +274,6 @@
                     <mx:Spacer height="100%"/>
                     <mx:HBox width="100%" horizontalAlign="center">
                         <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-                    <!-- email settings -->
-                    <mx:HBox>
-                        <mx:Button label="Back"/>
-                        <mx:Button label="Close"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-                    <!-- embed settings -->
-                    <mx:HBox>
-                        <mx:Button label="Back"/>
-                        <mx:Button label="Close"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:ViewStack>

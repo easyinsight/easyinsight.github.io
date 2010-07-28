@@ -445,6 +445,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
         feedDefinition.setCachedCredentials(null);
         feedDefinition.setRefreshDataInterval(0);
+        feedDefinition.setAccountVisible(false);
         List<FeedFolder> clonedFolders = new ArrayList<FeedFolder>();
         for (FeedFolder feedFolder : getFolders()) {
             try {

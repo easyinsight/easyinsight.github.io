@@ -587,14 +587,35 @@ public class AnalysisStorage {
         List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type " +
+            PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type, analysis.url_key " +
                     "from group_to_insight, group_to_user_join, analysis where " +
-                        "group_to_user_join.group_id = group_to_insight.group_id and group_to_insight.insight_id = analysis.analysis_id and group_to_user_join.user_id = ?");
+                        "group_to_user_join.group_id = group_to_insight.group_id and group_to_insight.insight_id = analysis.analysis_id and group_to_user_join.user_id = ? AND " +
+                    "analysis.account_visible = ?");
             queryStmt.setLong(1, userID);
+            queryStmt.setBoolean(2, true);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                // TODO: Add urlKey
-                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), null));
+                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5)));
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return reports;
+    }
+
+    public List<InsightDescriptor> getReportsForAccount(long accountID) throws SQLException {
+        List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type, analysis.url_key " +
+                    "from user_to_analysis, user, analysis where " +
+                        "user_to_analysis.user_id = user.user_id and user_to_analysis.analysis_id = analysis.analysis_id and user.account_id = ? AND " +
+                    "analysis.account_visible = ?");
+            queryStmt.setLong(1, accountID);
+            queryStmt.setBoolean(2, true);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5)));
             }
         } finally {
             Database.closeConnection(conn);

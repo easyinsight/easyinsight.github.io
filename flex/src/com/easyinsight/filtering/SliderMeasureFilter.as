@@ -313,12 +313,16 @@ public class SliderMeasureFilter extends HBox implements IFilter
     private function onRelease(event:SliderEvent):void {
         var slider:HSlider = event.currentTarget as HSlider;
         if (_filterDefinition.startValueDefined && _filterDefinition.endValueDefined) {
-            _filterDefinition.startValue = slider.values[0];
-            _filterDefinition.endValue = slider.values[1];
+            _filterDefinition.currentStartValue = slider.values[0];
+            _filterDefinition.currentStartValueDefined = true;
+            _filterDefinition.currentEndValue = slider.values[1];
+            _filterDefinition.currentEndValueDefined = true;
         } else if (_filterDefinition.startValueDefined) {
-            _filterDefinition.startValue = slider.value;
+            _filterDefinition.currentStartValue = slider.value;
+            _filterDefinition.currentStartValueDefined = true;
         } else if (_filterDefinition.endValueDefined) {
-            _filterDefinition.endValue = slider.value;
+            _filterDefinition.currentEndValue = slider.value;
+            _filterDefinition.currentEndValueDefined = true;
         }
 
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));

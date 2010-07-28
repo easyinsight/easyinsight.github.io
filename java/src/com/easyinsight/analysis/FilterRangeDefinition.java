@@ -21,9 +21,49 @@ public class FilterRangeDefinition extends FilterDefinition {
     private double endValue;
     @Column(name="high_value_defined")
     private boolean endValueDefined;
+    @Column(name="current_low_value")
+    private double currentStartValue;
+    @Column(name="current_high_value")
+    private double currentEndValue;
+    @Column(name="current_low_value_defined")
+    private boolean currentStartValueDefined;
+    @Column(name="current_high_value_defined")
+    private boolean currentEndValueDefined;
 
     public FilterRangeDefinition() {
         setApplyBeforeAggregation(false);
+    }
+
+    public boolean isCurrentStartValueDefined() {
+        return currentStartValueDefined;
+    }
+
+    public void setCurrentStartValueDefined(boolean currentStartValueDefined) {
+        this.currentStartValueDefined = currentStartValueDefined;
+    }
+
+    public boolean isCurrentEndValueDefined() {
+        return currentEndValueDefined;
+    }
+
+    public void setCurrentEndValueDefined(boolean currentEndValueDefined) {
+        this.currentEndValueDefined = currentEndValueDefined;
+    }
+
+    public double getCurrentStartValue() {
+        return currentStartValue;
+    }
+
+    public void setCurrentStartValue(double currentStartValue) {
+        this.currentStartValue = currentStartValue;
+    }
+
+    public double getCurrentEndValue() {
+        return currentEndValue;
+    }
+
+    public void setCurrentEndValue(double currentEndValue) {
+        this.currentEndValue = currentEndValue;
     }
 
     public boolean isStartValueDefined() {
@@ -59,31 +99,55 @@ public class FilterRangeDefinition extends FilterDefinition {
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedFilterRangeDefinition(getField(), startValueDefined ? startValue : null, endValueDefined ? endValue : null);
+        return new MaterializedFilterRangeDefinition(getField(), startValueDefined() ? startValue() : null, endValueDefined() ? endValue() : null);
+    }
+
+    private boolean startValueDefined() {
+        return currentStartValueDefined || startValueDefined;
+    }
+
+    private boolean endValueDefined() {
+        return currentEndValueDefined || endValueDefined;
+    }
+
+    private double startValue() {
+        if (currentStartValueDefined) {
+            return currentStartValue;
+        } else {
+            return startValue;
+        }
+    }
+
+    private double endValue() {
+        if (currentEndValueDefined) {
+            return currentEndValue;
+        } else {
+            return endValue;
+        }
     }
 
     public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = getField().toKeySQL();
         queryBuilder.append(columnName);
-        if (startValueDefined && endValueDefined) {
+        if (startValueDefined() && endValueDefined()) {
             queryBuilder.append(" > ? AND ");
             queryBuilder.append(columnName);
             queryBuilder.append(" < ?");
-        } else if (startValueDefined) {
+        } else if (startValueDefined()) {
             queryBuilder.append(" > ?");
-        } else if (endValueDefined) {
+        } else if (endValueDefined()) {
             queryBuilder.append(" < ?");
         }
         return queryBuilder.toString();
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        if (startValueDefined) {
-            preparedStatement.setDouble(start++, startValue);
+        if (startValueDefined()) {
+            preparedStatement.setDouble(start++, startValue());
         }
-        if (endValueDefined) {
-            preparedStatement.setDouble(start++, endValue);
+        if (endValueDefined()) {
+            preparedStatement.setDouble(start++, endValue());
         }
         return start;
     }

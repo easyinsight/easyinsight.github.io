@@ -264,10 +264,6 @@ public class AnalysisService {
     }
 
     public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
-        return saveAnalysisDefinition(wsAnalysisDefinition, false);
-    }
-
-    public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition, boolean addToDefaultGroup) {
 
         long userID = SecurityUtil.getUserID();
         if (wsAnalysisDefinition.getAnalysisID() > 0) {
@@ -322,9 +318,6 @@ public class AnalysisService {
             }
             session.close();
             Database.closeConnection(conn);
-        }
-        if (addToDefaultGroup) {
-            new GroupService().addReportToDefaultGroup(report.getAnalysisID());
         }
         return report;
     }

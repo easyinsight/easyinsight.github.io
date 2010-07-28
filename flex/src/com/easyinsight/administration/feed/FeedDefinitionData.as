@@ -30,6 +30,7 @@ package com.easyinsight.administration.feed
 		public var ratingSource:String;
 		public var dataPersisted:Boolean;
 		public var publiclyVisible:Boolean;
+		public var accountVisible:Boolean;
 		public var marketplaceVisible:Boolean;
         public var apiKey:String;
         public var uncheckedAPIEnabled:Boolean;

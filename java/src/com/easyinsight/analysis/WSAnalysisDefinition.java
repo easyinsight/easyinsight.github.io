@@ -52,6 +52,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String name;
     private String authorName;
     private String urlKey;
+    private boolean outerJoin;
     private long analysisID;
     private long dataFeedID;
     private int reportType;
@@ -72,8 +73,18 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String description;
     private boolean temporaryReport;
 
+    private boolean accountVisible;
+
     private String fontName = "Tahoma";
     private int fontSize = 12;
+
+    public boolean isAccountVisible() {
+        return accountVisible;
+    }
+
+    public void setAccountVisible(boolean accountVisible) {
+        this.accountVisible = accountVisible;
+    }
 
     public String getUrlKey() {
         return urlKey;
@@ -81,6 +92,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setUrlKey(String urlKey) {
         this.urlKey = urlKey;
+    }
+
+    public boolean isOuterJoin() {
+        return outerJoin;
+    }
+
+    public void setOuterJoin(boolean outerJoin) {
+        this.outerJoin = outerJoin;
     }
 
     public boolean isTemporaryReport() {

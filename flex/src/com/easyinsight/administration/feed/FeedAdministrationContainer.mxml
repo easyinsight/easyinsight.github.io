@@ -69,6 +69,9 @@
         private var sessionIdInputText:String;
 
         [Bindable]
+        private var accountVisible:Boolean;
+
+        [Bindable]
         private var haveFeed:Boolean = false;
 
         private var unsavedChanges:Boolean = false;
@@ -143,7 +146,7 @@
             this.feedOwnerName = feedDefinition.ownerName;
             this.feedAttribution = feedDefinition.attribution;
             this.anyoneCanView = feedDefinition.uploadPolicy.publiclyVisible;
-
+            this.accountVisible = feedDefinition.accountVisible;
 
             //this.activated = User.getInstance().activated;
 
@@ -197,6 +200,7 @@
                 }
                 feedDefinition.uploadPolicy.owners = owners;
                 feedDefinition.description = feedDescriptionTextArea.text;
+                feedDefinition.accountVisible = accountVisibleCheckBox.selected;
                 feedDefinition.attribution = feedAttributionInput.text;
                 feedDefinition.ownerName = feedOwnerNameInput.text;
                 if (feedAdminDetail != null) {
@@ -370,6 +374,9 @@
 						<mx:FormItem label="Owner Name:">
 							<mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
 						</mx:FormItem>
+                        <mx:FormItem label="Anyone in the Account Can View:">
+                            <mx:CheckBox selected="{accountVisible}" id="accountVisibleCheckBox"/>
+                        </mx:FormItem>
                         <mx:FormItem label="Anyone Can View:">
                             <mx:CheckBox selected="{anyoneCanView}" id="anyoneCheckbox" enabled="{!liveData}"/>
                         </mx:FormItem>

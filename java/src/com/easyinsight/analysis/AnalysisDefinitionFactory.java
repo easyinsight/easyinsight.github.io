@@ -96,6 +96,7 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
         analysisDefinition.setDescription(wsAnalysisDefinition.getDescription());
         analysisDefinition.setAuthorName(wsAnalysisDefinition.getAuthorName());
+        analysisDefinition.setAccountVisible(wsAnalysisDefinition.isAccountVisible());
         analysisDefinition.setDateCreated(wsAnalysisDefinition.getDateCreated());
         analysisDefinition.setDateUpdated(wsAnalysisDefinition.getDateUpdated());
         analysisDefinition.setReportType(wsAnalysisDefinition.getReportType());

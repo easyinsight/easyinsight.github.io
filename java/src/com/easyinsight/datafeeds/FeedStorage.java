@@ -63,8 +63,8 @@ public class FeedStorage {
                 "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
                 "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
-                "REFRESH_INTERVAL, CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "REFRESH_INTERVAL, CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -100,7 +100,8 @@ public class FeedStorage {
         insertDataFeedStmt.setInt(i++, 1);
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isVisible());
         insertDataFeedStmt.setLong(i++, feedDefinition.getParentSourceID());
-        insertDataFeedStmt.setInt(i, feedDefinition.getVersion());
+        insertDataFeedStmt.setInt(i++, feedDefinition.getVersion());
+        insertDataFeedStmt.setBoolean(i, feedDefinition.isAccountVisible());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -564,7 +565,7 @@ public class FeedStorage {
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
-                "CREATE_DATE = ?, UPDATE_DATE = ? WHERE DATA_FEED_ID = ?");
+                "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
         updateDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -588,6 +589,7 @@ public class FeedStorage {
         updateDataFeedStmt.setLong(i++, feedDefinition.getVersion());
         updateDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getDateCreated().getTime()));
         updateDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getDateUpdated().getTime()));
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.isAccountVisible());
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -636,7 +638,7 @@ public class FeedStorage {
         PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, CREATE_DATE," +
                 "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE," +
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, validated_api_enabled," +
-                "REFRESH_INTERVAL, VISIBLE, PARENT_SOURCE_ID " +
+                "REFRESH_INTERVAL, VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
@@ -678,10 +680,11 @@ public class FeedStorage {
             feedDefinition.setValidatedAPIEnabled(rs.getBoolean(i++));
             feedDefinition.setRefreshDataInterval(rs.getLong(i++));
             feedDefinition.setVisible(rs.getBoolean(i++));
-            long parentSourceID = rs.getLong(i);
+            long parentSourceID = rs.getLong(i++);
             if (!rs.wasNull()) {
                 feedDefinition.setParentSourceID(parentSourceID);
             }
+            feedDefinition.setAccountVisible(rs.getBoolean(i));
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
             feedDefinition.customLoad(conn);
@@ -842,6 +845,67 @@ public class FeedStorage {
                     long groupID = rs.getLong(14);
                     FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
                     feedDescriptor.setGroupSourceID(groupID);
+                    feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
+                    descriptorList.add(feedDescriptor);
+                    feedMap.put(dataFeedID, feedDescriptor);
+                }
+            }
+            for (Map.Entry<Long, Long> sizeEntry : sizeMap.entrySet()) {
+                FeedDescriptor feedDescriptor = feedMap.get(sizeEntry.getKey());
+                if (feedDescriptor != null) {
+                    feedDescriptor.setSize(sizeEntry.getValue());
+                    feedDescriptor.setLastDataTime(lastDateMap.get(sizeEntry.getKey()));
+                }
+            }
+            descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
+            queryStmt.close();
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return descriptorList;
+    }
+
+    public List<FeedDescriptor> getDataSourcesFromAccount(long accountID) throws SQLException {
+        List<FeedDescriptor> descriptorList = new ArrayList<FeedDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
+                    "DATA_FEED.PARENT_SOURCE_ID " +
+                    " FROM (upload_policy_users, USER, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
+                    "upload_policy_users.user_id = user.user_id AND user.account_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.account_visible = ?");
+            queryStmt.setLong(1, accountID);
+            queryStmt.setBoolean(2, true);
+            Map<Long, Long> sizeMap = new HashMap<Long, Long>();
+            Map<Long, FeedDescriptor> feedMap = new HashMap<Long, FeedDescriptor>();
+            Map<Long, Date> lastDateMap = new HashMap<Long, Date>();
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long dataFeedID = rs.getLong(1);
+                String feedName = rs.getString(2);
+                long feedSize = rs.getLong(3);
+                int feedType = rs.getInt(4);
+                String ownerName = rs.getString(5);
+                String description = rs.getString(6);
+                String attribution = rs.getString(7);
+                int userRole = rs.getInt(8);
+                Timestamp lastTime = rs.getTimestamp(11);
+                Date lastDataTime = null;
+                boolean hasSavedCredentials = rs.getString(12) != null;
+                if (lastTime != null) {
+                    lastDataTime = new Date(lastTime.getTime());
+                }
+                Long parentSourceID = rs.getLong(13);
+                if (!rs.wasNull() && parentSourceID > 0) {
+                    Long size = sizeMap.get(parentSourceID);
+                    if (size == null) {
+                        sizeMap.put(parentSourceID, feedSize);
+                    } else {
+                        sizeMap.put(parentSourceID, feedSize + size);
+                    }
+                    lastDateMap.put(parentSourceID, lastDataTime);
+                } else {
+                    FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
                     feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
                     descriptorList.add(feedDescriptor);
                     feedMap.put(dataFeedID, feedDescriptor);
