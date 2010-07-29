@@ -16,6 +16,7 @@ public class StringNode extends CalculationTreeNode {
 
     public StringNode(Token payload) {
         super(payload);
+        str = payload.getText();
     }
 
     public StringValue getString() {
