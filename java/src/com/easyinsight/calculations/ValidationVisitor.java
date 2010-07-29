@@ -19,6 +19,10 @@ public class ValidationVisitor implements ICalculationTreeVisitor {
         visitChildren(node);
     }
 
+    public void visit(StringNode node) {
+        visitChildren(node);
+    }
+
     public void visit(NumberNode node) {
         visitChildren(node);
     }

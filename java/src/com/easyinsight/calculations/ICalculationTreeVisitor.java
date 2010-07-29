@@ -12,6 +12,7 @@ public interface ICalculationTreeVisitor {
     void visit(ExponentNode node);
     void visit(VariableNode node);
     void visit(FunctionNode node);
+    void visit(StringNode node);
 
     Value getResult();
 }

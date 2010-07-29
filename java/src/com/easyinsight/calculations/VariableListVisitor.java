@@ -21,6 +21,10 @@ public class VariableListVisitor implements ICalculationTreeVisitor {
         visitChildren(node);
     }
 
+    public void visit(StringNode node) {
+        visitChildren(node);
+    }
+
     public void visit(AddNode node) {
         visitChildren(node);
     }

@@ -51,6 +51,10 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
         visitChildren(node);
     }
 
+    public void visit(StringNode node) {
+        visitChildren(node);
+    }
+
     public void visit(SubtractNode node) {
         visitChildren(node);
     }
