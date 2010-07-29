@@ -126,6 +126,7 @@
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = CalculationMeasureWindow;
             window.dataSourceID = _dataService.dataFeedID;
+            window.analysisItems = wrappers;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
@@ -135,6 +136,7 @@
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = DerivedGroupingWindow;
             window.dataSourceID = _dataService.dataFeedID;
+            window.analysisItems = wrappers;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);

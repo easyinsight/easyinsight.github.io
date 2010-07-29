@@ -28,7 +28,7 @@ public class CalcGraph {
             if (item.hasType(AnalysisItemTypes.CALCULATION)) {
                 AnalysisCalculation calc = (AnalysisCalculation) item;
                 if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
-            } else if (!rowLevel && item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+            } else if (rowLevel && item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                 derivedItems.add(item);
             }
         }
@@ -67,13 +67,5 @@ public class CalcGraph {
             }
         }
         return components;
-    }
-
-    private class CalcNode {
-        private AnalysisItem analysisItem;
-
-        private CalcNode(AnalysisItem analysisItem) {
-            this.analysisItem = analysisItem;
-        }
     }
 }

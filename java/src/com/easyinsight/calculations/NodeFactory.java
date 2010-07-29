@@ -40,6 +40,7 @@ public class NodeFactory extends CommonTreeAdaptor {
 			break;
         case CalculationsLexer.String:
             retVal = new StringNode(payload);
+            break;
 		case CalculationsLexer.FuncEval:
 			retVal = new FunctionNode(payload);
 			break;

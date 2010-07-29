@@ -201,8 +201,9 @@
                         </group>
                         <group label="Text">
                             <function label="bracketvalue"/>
-                            <function label="upper"/>
                             <function label="lower"/>
+                            <function label="namedbracketvalue"/>
+                            <function label="upper"/>
                         </group>
                     </mx:XMLList>
                 </mx:XMLListCollection>

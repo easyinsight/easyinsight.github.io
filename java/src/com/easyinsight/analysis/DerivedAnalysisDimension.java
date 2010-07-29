@@ -65,6 +65,8 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
 
         List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
 
+        analysisItemList.add(this);
+
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem = null;
             try {

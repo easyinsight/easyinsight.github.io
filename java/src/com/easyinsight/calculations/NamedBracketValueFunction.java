@@ -15,6 +15,7 @@ public class NamedBracketValueFunction extends Function {
         Value stringValue = params.get(0);
         Value pair = params.get(1);
         String pairValue = pair.toString();
+        pairValue = pairValue.substring(1, pairValue.length() - 1);
         String string = stringValue.toString();
         boolean found = false;
         String result = null;
@@ -23,16 +24,16 @@ public class NamedBracketValueFunction extends Function {
             int startIndex = string.indexOf("[", index);
             int endIndex = string.indexOf("]", index);
             if (startIndex != -1 && endIndex != -1) {
-                String substring = string.substring(startIndex, endIndex);
+                String substring = string.substring(startIndex + 1, endIndex);
                 int colonIndex = substring.indexOf(":");
                 if (colonIndex != -1) {
                     String prefix = substring.substring(0, colonIndex).trim();
                     if (prefix.equals(pairValue)) {
-                        result = substring.substring(colonIndex).trim();
+                        result = substring.substring(colonIndex + 1).trim();
                         found = true;
                     }
                 }
-                index = endIndex;
+                index = endIndex + 1;
             } else {
                 found = true;
             }
