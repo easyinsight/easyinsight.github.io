@@ -1,6 +1,7 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.calculations.CalcGraph;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.etl.LookupTable;
@@ -20,7 +21,7 @@ public class StandardReportPipeline extends Pipeline {
         private AnalysisLatitude analysisLatitude;
     }
 
-    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap) {
+    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap, List<AnalysisItem> allItems) {
 
         // current problematic scenarios
         // a measure filter on a calculation
@@ -83,26 +84,16 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
             AnalysisList analysisList = (AnalysisList) tag;
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
-        }        
-
-        for (AnalysisItem calc : items(AnalysisItemTypes.DERIVED_DIMENSION, allNeededAnalysisItems)) {
-            DerivedAnalysisDimension calculation = (DerivedAnalysisDimension) calc;
-            components.add(new DerivedGroupingComponent(calculation));
-            components.add(new DerivedDimensionCleanupComponent(calculation));
         }
+
+        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
 
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
         components.add(new TypeTransformComponent());
 
-        for (AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, allNeededAnalysisItems)) {
-            AnalysisCalculation calculation = (AnalysisCalculation) calc;
-            if (calculation.isApplyBeforeAggregation()) {
-                components.add(new CalculationComponent(calculation));
-                components.add(new CalculationCleanupComponent(calculation));
-            }
-        }
+
 
         components.add(new FilterComponent(true));
         components.add(new FilterPipelineCleanupComponent(true));
@@ -134,13 +125,7 @@ public class StandardReportPipeline extends Pipeline {
         // TODO: if a calculation is based on second calculation, populate results with the first calculation first
         // directed graph required? or just list
 
-        for(AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, allNeededAnalysisItems)) {
-            AnalysisCalculation calculation = (AnalysisCalculation) calc;
-            if (!calculation.isApplyBeforeAggregation()) {
-                components.add(new CalculationComponent(calculation));
-                components.add(new CalculationCleanupComponent(calculation));
-            }
-        }
+        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false));
 
         components.add(new AggregationComponent(AggregationTypes.RANK));
 

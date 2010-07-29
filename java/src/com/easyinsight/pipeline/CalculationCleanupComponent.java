@@ -22,7 +22,7 @@ public class CalculationCleanupComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         List<AnalysisItem> items = analysisCalculation.getAnalysisItems(pipelineData.getAllItems(),
-                pipelineData.getReportItems(), false, true);
+                pipelineData.getReportItems(), false, true, false);
         for (AnalysisItem item : items) {
             if (item != analysisCalculation) {
                 if (pipelineData.decrementReferenceCount(item)) {

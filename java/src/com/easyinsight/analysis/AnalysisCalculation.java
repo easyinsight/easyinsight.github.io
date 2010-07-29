@@ -57,7 +57,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return super.getType() | AnalysisItemTypes.CALCULATION;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
@@ -92,7 +92,11 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters));
+                if (completelyShallow) {
+                    analysisItemList.add(analysisItem);
+                } else {
+                    analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false));
+                }
             }
         }
         

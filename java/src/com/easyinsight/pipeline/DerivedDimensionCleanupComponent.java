@@ -1,6 +1,5 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisCalculation;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.DerivedAnalysisDimension;
@@ -23,7 +22,7 @@ public class DerivedDimensionCleanupComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         List<AnalysisItem> items = dimension.getAnalysisItems(pipelineData.getAllItems(),
-                pipelineData.getReportItems(), false, true);
+                pipelineData.getReportItems(), false, true, false);
         for (AnalysisItem item : items) {
             if (item != dimension) {
                 if (pipelineData.decrementReferenceCount(item)) {

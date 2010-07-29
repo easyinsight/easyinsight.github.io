@@ -55,6 +55,8 @@ public class FunctionFactory {
             return new NConcat();
         } else if (s.equals("bracketvalue")) {
             return new BracketValueFunction();
+        } else if (s.equals("namedbracketvalue")) {
+            return new NamedBracketValueFunction();
         } else if (s.equals("upper")) {
             return new UpperCaseFunction();
         } else if (s.equals("lower")) {

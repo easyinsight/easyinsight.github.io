@@ -12,6 +12,11 @@ import com.easyinsight.core.Value;
  */
 public class BracketValueFunction extends Function {
     public Value evaluate() {
+        if (params.size() == 0) {
+            throw new RuntimeException("bracketvalue(String) cannot be applied to ()");
+        } else if (params.size() > 1) {
+            throw new RuntimeException("bracketvalue(String) cannot be applied to these parameters");
+        }
         Value stringValue = params.get(0);
         String string = stringValue.toString();
         int startIndex = string.indexOf("[");

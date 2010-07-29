@@ -20,14 +20,14 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
-        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getRefMap());
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getRefMap(), pipelineData.getAllItems());
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
         return this;
     }
 
-    protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap);
+    protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap, List<AnalysisItem> allItems);
          
     private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
 
@@ -51,7 +51,7 @@ public abstract class Pipeline {
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
-                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true);
+                List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, false);
                 updateCount(baseItems, refMap);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(allFields, allRequestedAnalysisItems);
@@ -104,6 +104,7 @@ public abstract class Pipeline {
 
     public DataSet toDataSet(DataSet dataSet) {
         for (IComponent component : components) {
+            System.out.println(component.getClass().getName() + " - " + dataSet);
             dataSet = component.apply(dataSet, pipelineData);
         }
         return dataSet;
@@ -111,6 +112,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
+            System.out.println(component.getClass().getName() + " - " + dataSet);
             dataSet = component.apply(dataSet, pipelineData);
         }
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));

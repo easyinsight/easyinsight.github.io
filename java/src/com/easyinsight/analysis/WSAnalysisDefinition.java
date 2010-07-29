@@ -304,7 +304,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
         analysisItems.remove(null);
         for (AnalysisItem analysisItem : analysisItems) {
-            List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true);
+            List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, false);
             for (AnalysisItem item : items) {
                 //if (item.getAnalysisItemID()) {
                     columnSet.add(item.getKey());
@@ -348,7 +348,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, false);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
                     if (!columnSet.contains(item)) {

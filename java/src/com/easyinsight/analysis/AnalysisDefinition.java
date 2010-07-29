@@ -388,7 +388,7 @@ public class AnalysisDefinition implements Cloneable {
                 AnalysisItem clonedItem = baseItem.clone();
                 replacementMap.put(baseItem.getAnalysisItemID(), clonedItem);
             }
-            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true);
+            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, false);
             for (AnalysisItem item : items) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();
@@ -417,7 +417,7 @@ public class AnalysisDefinition implements Cloneable {
                 AnalysisItem clonedItem = entry.getValue().clone();
                 replacementMap.put(entry.getValue().getAnalysisItemID(), clonedItem);
                 clonedStructure.put(entry.getKey(), clonedItem);
-                List<AnalysisItem> items = entry.getValue().getAnalysisItems(new ArrayList<AnalysisItem>(), new ArrayList<AnalysisItem>(), false, true);
+                List<AnalysisItem> items = entry.getValue().getAnalysisItems(new ArrayList<AnalysisItem>(), new ArrayList<AnalysisItem>(), false, true, false);
                 for (AnalysisItem item : items) {
                     if (replacementMap.get(item.getAnalysisItemID()) == null) {
                         AnalysisItem clonedChildItem = item.clone();
