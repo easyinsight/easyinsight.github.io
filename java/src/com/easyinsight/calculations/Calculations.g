@@ -17,15 +17,17 @@ tokens
 	Exp = '^';
 	OpenBrace = '[';
 	CloseBrace = ']';
+	Quote = '"';
 }
 
 @header { package com.easyinsight.calculations.generated; }
 @lexer::header { package com.easyinsight.calculations.generated; }
 
+
+expr	:	term ((Add^ | Subtract^) term)*;
 startExpr
 	:	expr EOF!;
 
-expr	:	term ((Add^ | Subtract^) term)*;
 
 term	:	unaryOperator ((Multiply^ | Divide^) unaryOperator)*;
 
@@ -37,14 +39,19 @@ factor	:	symbol | parenExpr;
 // Rule to remove parenthesis out of the AST
 parenExpr
 	:	OpenParen expr CloseParen -> expr;
-symbol	:	Decimal | Variable | function;
+symbol	:	literal | Variable | function;
 function:	Variable OpenParen (expr (Comma expr)*)? CloseParen -> ^(FuncEval Variable (expr (expr)*)?);
 
 /* LEXR */
 
+literal	:	Decimal | String;
+
 Decimal	:	UInteger (Dot UInteger)? ('E' Integer)?;
 
+
 Variable:	BracketedVariable | NoBracketsVariable;
+String	:	Quote Variable Quote;
+
 
 // Last rule to make sure whitespace incorporated in earlier rules is counted.
 

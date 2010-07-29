@@ -38,6 +38,8 @@ public class NodeFactory extends CommonTreeAdaptor {
 		case CalculationsLexer.Decimal:
 			retVal = new NumberNode(payload);
 			break;
+        case CalculationsLexer.String:
+            retVal = new StringNode(payload);
 		case CalculationsLexer.FuncEval:
 			retVal = new FunctionNode(payload);
 			break;
