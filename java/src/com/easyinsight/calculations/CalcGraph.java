@@ -34,36 +34,35 @@ public class CalcGraph {
         }
         List<IComponent> components = new ArrayList<IComponent>();
         if (derivedItems.size() > 0) {
-            DirectedGraph<CalcNode, DefaultEdge> graph = new DefaultDirectedGraph<CalcNode, DefaultEdge>(DefaultEdge.class);
-            Map<Key, CalcNode> nodeMap = new HashMap<Key, CalcNode>();
+            DirectedGraph<AnalysisItem, DefaultEdge> graph = new DefaultDirectedGraph<AnalysisItem, DefaultEdge>(DefaultEdge.class);
+            Map<Key, AnalysisItem> nodeMap = new HashMap<Key, AnalysisItem>();
             for (AnalysisItem item : derivedItems) {
-                CalcNode calcNode = new CalcNode(item);
-                graph.addVertex(calcNode);
-                nodeMap.put(item.createAggregateKey(), calcNode);
+                graph.addVertex(item);
+                nodeMap.put(item.createAggregateKey(), item);
             }
-            for (CalcNode calcNode : nodeMap.values()) {
-                List<AnalysisItem> requiredItems = calcNode.analysisItem.getAnalysisItems(allItems, reportItems, false, true, false);
+            for (AnalysisItem analysisItem : nodeMap.values()) {
+                List<AnalysisItem> requiredItems = analysisItem.getAnalysisItems(allItems, reportItems, false, true, false);
                 for (AnalysisItem item : requiredItems) {
-                    CalcNode requiredNode = nodeMap.get(item.createAggregateKey());
-                    if (requiredNode != null && requiredNode.analysisItem != calcNode.analysisItem) {
-                        graph.addEdge(requiredNode, calcNode);
+                    AnalysisItem requiredNode = nodeMap.get(item.createAggregateKey());
+                    if (requiredNode != null && requiredNode != analysisItem) {
+                        graph.addEdge(requiredNode, analysisItem);
                     }
                 }
             }
 
-            if (new CycleDetector<CalcNode, DefaultEdge>(graph).detectCycles()) {
+            if (new CycleDetector<AnalysisItem, DefaultEdge>(graph).detectCycles()) {
                 throw new RuntimeException("Cycle detected in calculated fields.");
             }
 
-            TopologicalOrderIterator<CalcNode, DefaultEdge> iterator = new TopologicalOrderIterator<CalcNode, DefaultEdge>(graph);
+            TopologicalOrderIterator<AnalysisItem, DefaultEdge> iterator = new TopologicalOrderIterator<AnalysisItem, DefaultEdge>(graph);
             while (iterator.hasNext()) {
-                CalcNode calcNode = iterator.next();
-                if (calcNode.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                    components.add(new CalculationComponent((AnalysisCalculation) calcNode.analysisItem));
-                    components.add(new CalculationCleanupComponent((AnalysisCalculation) calcNode.analysisItem));
-                } else if (calcNode.analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
-                    components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode.analysisItem));
-                    components.add(new DerivedDimensionCleanupComponent((DerivedAnalysisDimension) calcNode.analysisItem));
+                AnalysisItem calcNode = iterator.next();
+                if (calcNode.hasType(AnalysisItemTypes.CALCULATION)) {
+                    components.add(new CalculationComponent((AnalysisCalculation) calcNode));
+                    components.add(new CalculationCleanupComponent((AnalysisCalculation) calcNode));
+                } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                    components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
+                    components.add(new DerivedDimensionCleanupComponent((DerivedAnalysisDimension) calcNode));
                 }
             }
         }
