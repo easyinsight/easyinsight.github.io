@@ -31,6 +31,10 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         result = node.getNumber();
     }
 
+    public void visit(StringNode node) {
+        result = node.getString();
+    }
+
     public void visit(AddNode node) {
         EvaluationVisitor node1 = new EvaluationVisitor(row);
 
