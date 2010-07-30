@@ -13,6 +13,7 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthProvider;
+import oauth.signpost.signature.PlainTextMessageSigner;
 
 import java.net.URL;
 import java.util.List;
@@ -37,6 +38,10 @@ public class TokenService {
     }*/
 
     public String getOAuthURL(int type, long connectionID) {
+        return getOAuthURL(type, connectionID, null);
+    }
+
+    public String getOAuthURL(int type, long connectionID, String extra) {
         try {
 
             OAuthConsumer consumer;
@@ -44,16 +49,23 @@ public class TokenService {
 
             if (type == FeedType.LINKEDIN.getType()) {
                 consumer = new DefaultOAuthConsumer("pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq",
-                                                     "leKpqRVV3M8CMup_x6dY8THBiKT-T4PXSs3cpSVXp0kaMS4AiZYW830yRvH6JU2O");
+                        "leKpqRVV3M8CMup_x6dY8THBiKT-T4PXSs3cpSVXp0kaMS4AiZYW830yRvH6JU2O");
                 provider = new DefaultOAuthProvider(
                         "https://api.linkedin.com/uas/oauth/requestToken", "https://api.linkedin.com/uas/oauth/accessToken",
                         "https://api.linkedin.com/uas/oauth/authorize");
             } else if (type == FeedType.TWITTER.getType()) {
                 consumer = new DefaultOAuthConsumer("Kb9mqPL8TlaJB3lZHK8Fpw",
-                                                 "q7W04Nth2vZYOvOfiiLfTZNdE83sPDpI2uGSAtJhKnM");
-            provider = new DefaultOAuthProvider(
-                    "http://twitter.com/oauth/request_token", "http://twitter.com/oauth/access_token",
-                    "http://twitter.com/oauth/authorize");
+                        "q7W04Nth2vZYOvOfiiLfTZNdE83sPDpI2uGSAtJhKnM");
+                provider = new DefaultOAuthProvider(
+                        "http://twitter.com/oauth/request_token", "http://twitter.com/oauth/access_token",
+                        "http://twitter.com/oauth/authorize");
+            } else if (type == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
+                consumer = new DefaultOAuthConsumer("easyinsight",
+                        "3gKm7ivgkPCeQZChh7ig9CDMBGratLg6yS");
+                consumer.setMessageSigner(new PlainTextMessageSigner());
+                provider = new DefaultOAuthProvider(
+                        "https://"+extra+".freshbooks.com/oauth/oauth_request.php", "https://"+extra+".freshbooks.com/oauth/oauth_access.php",
+                        "https://"+extra+".freshbooks.com/oauth/oauth_authorize.php");
             } else {
                 throw new RuntimeException();
             }
@@ -103,7 +115,7 @@ public class TokenService {
     public String setToken(int type, String sessionToken) {
         /*System.out.println("got URL " + url);
         String queryString = url.substring(url.indexOf("?"));*/
-        
+
         Token tokenObject = new Token();
         tokenObject.setUserID(SecurityUtil.getUserID());
         tokenObject.setTokenType(type);

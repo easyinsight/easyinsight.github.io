@@ -82,7 +82,7 @@ public class DataSourceCopyUtils {
         ConfigureDataFeedTodo todo = null;        
         if (clonedFeedDefinition instanceof IServerDataSourceDefinition) {
             IServerDataSourceDefinition def = (IServerDataSourceDefinition) clonedFeedDefinition;
-            if (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS || def.getFeedType() == FeedType.LINKEDIN) {
+            if (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS || def.getFeedType() == FeedType.LINKEDIN || def.getFeedType() == FeedType.FRESHBOOKS_COMPOSITE) {
                 Session session = Database.instance().createSession(conn);
 
                 todo = new ConfigureDataFeedTodo();

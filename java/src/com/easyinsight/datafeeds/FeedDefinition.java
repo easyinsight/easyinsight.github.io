@@ -320,7 +320,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         this.feedName = feedName;
     }
 
-    public Feed createFeedObject() {
+    public Feed createFeedObject(FeedDefinition parent) {
         return new StaticFeed();
     }
 
@@ -329,7 +329,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public Feed createFeed() {
-        Feed feed = createFeedObject();
+        FeedDefinition parentSource = null; 
+        if (getParentSourceID() > 0) {
+            try {
+                parentSource = new FeedStorage().getFeedDefinitionData(getParentSourceID());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Feed feed = createFeedObject(parentSource);
         feed.setFeedID(getDataFeedID());
         feed.setAttribution(getAttribution());
         feed.setProperties(createProperties());

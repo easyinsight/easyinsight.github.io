@@ -72,7 +72,7 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public Feed createFeedObject() {
+    public Feed createFeedObject(FeedDefinition parent) {
         return new SalesforceFeed();
     }
 

@@ -46,6 +46,18 @@ public class FeedType {
     public static final FeedType MEETUP = new FeedType(38);
     public static final FeedType LINKEDIN = new FeedType(39);
     public static final FeedType HIGHRISE_EMAILS = new FeedType(40);
+    public static final FeedType FRESHBOOKS_INVOICE = new FeedType(41);
+    public static final FeedType FRESHBOOKS_CLIENTS = new FeedType(42);
+    public static final FeedType FRESHBOOKS_EXPENSES = new FeedType(43);
+    public static final FeedType FRESHBOOKS_STAFF = new FeedType(44);
+    public static final FeedType FRESHBOOKS_PROJECTS = new FeedType(45);
+    public static final FeedType FRESHBOOKS_TASKS = new FeedType(46);
+    public static final FeedType FRESHBOOKS_TIME_ENTRIES = new FeedType(47);
+    public static final FeedType FRESHBOOKS_PAYMENTS = new FeedType(48);
+    public static final FeedType FRESHBOOKS_COMPOSITE = new FeedType(49);
+    public static final FeedType FRESHBOOKS_CATEGORIES = new FeedType(50);
+    public static final FeedType FRESHBOOKS_ESTIMATES = new FeedType(51);
+    public static final FeedType FRESHBOOKS_RECURRING = new FeedType(52);
 
     private int type;
 

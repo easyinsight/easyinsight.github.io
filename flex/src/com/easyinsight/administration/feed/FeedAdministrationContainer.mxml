@@ -12,6 +12,7 @@
         import com.easyinsight.customupload.XSSFExcelUploadFormat;
         import com.easyinsight.datasources.BaseCampDataSource;
         import com.easyinsight.datasources.CloudWatchDataSource;
+        import com.easyinsight.datasources.FreshbooksDataSource;
         import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.datasources.JiraDataSource;
@@ -281,6 +282,7 @@
             var sendGrid:SendGridDataSource;
             var meetup:MeetupDataSource;
             var linked:LinkedInDataSource;
+            var freshbooks:FreshbooksDataSource;
         }
 
         [Bindable]

@@ -11,11 +11,7 @@ import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.core.Key;
 import org.jetbrains.annotations.NotNull;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.security.SignatureException;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -64,7 +60,7 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public Feed createFeedObject() {
+    public Feed createFeedObject(FeedDefinition parent) {
         return new CloudWatchFeed();
     }
 

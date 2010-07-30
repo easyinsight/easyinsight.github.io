@@ -112,7 +112,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         queryConnStmt.close();
     }
 
-    public Feed createFeedObject() {
+    public Feed createFeedObject(FeedDefinition parent) {
         try {
             return new CompositeFeed(compositeFeedNodes, obtainChildConnections());
         } catch (SQLException e) {

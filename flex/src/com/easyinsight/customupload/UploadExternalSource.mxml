@@ -53,6 +53,7 @@
                                     <mx:String>SendGrid</mx:String>
                                     <mx:String>Meetup</mx:String>
                                     <mx:String>LinkedIn</mx:String>
+                                    <mx:String>Freshbooks</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
                         </mx:dataProvider>
@@ -122,6 +123,10 @@
                                 userConfigCancel="cancel(event)" />
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.LinkedInDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)" />
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.FreshbooksDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)" />
                     </mx:ViewStack>

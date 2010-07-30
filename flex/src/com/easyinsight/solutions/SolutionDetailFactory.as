@@ -33,6 +33,7 @@ public class SolutionDetailFactory {
         var g:PivotalTrackerSolutionDetail;
         var h:SendGridSolutionDetail;
         var i:MySQLSolutionDetail;
+        var j:FreshbooksSolutionDetail;
     }
 }
 }

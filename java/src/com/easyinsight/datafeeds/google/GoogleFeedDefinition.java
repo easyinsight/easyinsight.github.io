@@ -224,7 +224,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     @Override
-    public Feed createFeedObject() {
+    public Feed createFeedObject(FeedDefinition parent) {
         return new GoogleSpreadsheetFeed(worksheetURL);
     }
 }

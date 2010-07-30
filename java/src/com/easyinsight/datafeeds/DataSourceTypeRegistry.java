@@ -4,6 +4,7 @@ import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
 import com.easyinsight.datafeeds.basecamp.*;
 import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
+import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.datafeeds.gnip.GnipDataSource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
@@ -71,6 +72,17 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HIGHRISE_CASES, HighRiseCaseSource.class);
         registerType(FeedType.HIGHRISE_TASKS, HighRiseTaskSource.class);
         registerType(FeedType.HIGHRISE_EMAILS, HighRiseEmailSource.class);
+        registerType(FeedType.FRESHBOOKS_INVOICE, FreshbooksInvoiceSource.class);
+        registerType(FeedType.FRESHBOOKS_CLIENTS, FreshbooksClientSource.class);
+        registerType(FeedType.FRESHBOOKS_EXPENSES, FreshbooksExpenseSource.class);
+        registerType(FeedType.FRESHBOOKS_PAYMENTS, FreshbooksPaymentSource.class);
+        registerType(FeedType.FRESHBOOKS_STAFF, FreshbooksStaffSource.class);
+        registerType(FeedType.FRESHBOOKS_TASKS, FreshbooksTaskSource.class);
+        registerType(FeedType.FRESHBOOKS_TIME_ENTRIES, FreshbooksTimeEntrySource.class);
+        registerType(FeedType.FRESHBOOKS_COMPOSITE, FreshbooksCompositeSource.class);
+        registerType(FeedType.FRESHBOOKS_CATEGORIES, FreshbooksCategorySource.class);
+        registerType(FeedType.FRESHBOOKS_ESTIMATES, FreshbooksEstimateSource.class);
+        registerType(FeedType.FRESHBOOKS_PROJECTS, FreshbooksProjectSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

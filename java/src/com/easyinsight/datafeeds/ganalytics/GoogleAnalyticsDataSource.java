@@ -204,7 +204,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public Feed createFeedObject() {
+    public Feed createFeedObject(FeedDefinition parent) {
         return new GoogleAnalyticsFeed();
     }
 

@@ -41,7 +41,7 @@ public class AnalysisBasedFeedDefinition extends FeedDefinition {
         return FeedType.ANALYSIS_BASED;
     }
 
-    public Feed createFeedObject() {
+    public Feed createFeedObject(FeedDefinition parent) {
         AnalysisBasedFeed feed = new AnalysisBasedFeed();
         feed.setAnalysisDefinition(new AnalysisStorage().getAnalysisDefinition(reportID));
         return feed;

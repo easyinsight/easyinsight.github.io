@@ -8,8 +8,14 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.basic.DefaultOAuthConsumer;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -36,6 +42,40 @@ public class TwitterDataSource extends ServerDataSourceDefinition {
     public static final String AUTHOR_URL = "Author URL";
     public static final String COUNT = "Count";
 
+    /*
+    token = 61808445-MWFdO52DU3KgqrMsaSrnTMWq4P5ycYQcrMaQUVMIw
+secret token token = QhfbN4AKz0Hb5HfllD5oWn7NGVdDoYh7xDOIUva0I
+     */
+
+    public static void main(String[] args) throws Exception {
+        OAuthConsumer consumer = new DefaultOAuthConsumer("pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq",
+                                                 "leKpqRVV3M8CMup_x6dY8THBiKT-T4PXSs3cpSVXp0kaMS4AiZYW830yRvH6JU2O");
+        consumer.setTokenWithSecret("61808445-MWFdO52DU3KgqrMsaSrnTMWq4P5ycYQcrMaQUVMIw", "QhfbN4AKz0Hb5HfllD5oWn7NGVdDoYh7xDOIUva0I");
+
+        // create an HTTP request to a protected resource
+        //URL url = new URL("http://api.twitter.com/1/users/show.xml?screen_name=EasyInsight");
+        //URL url = new URL("http://api.twitter.com/1/statuses/user_timeline.xml");
+        URL url = new URL("http://api.twitter.com/1/statuses/retweets_of_me.xml");
+                          //"http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,headline,positions)"
+        //URL url = new URL("http://api.linkedin.com/v1/people/id=SquZQtHQhk:" + "(id,connections)");
+        HttpURLConnection request = (HttpURLConnection) url.openConnection();
+
+        // sign the request
+        consumer.sign(request);
+
+        // send the request
+        request.connect();
+
+        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(
+                                request.getInputStream()));
+        String inputLine;
+
+        while ((inputLine = in.readLine()) != null)
+            System.out.println(inputLine);
+        in.close();
+    }
+
     private ArrayList<String> searches = new ArrayList<String>();
 
     public int getDataSourceType() {
@@ -56,7 +96,7 @@ public class TwitterDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public Feed createFeedObject() {
+    public Feed createFeedObject(FeedDefinition parent) {
         return new TwitterFeed(searches);
 
     }
