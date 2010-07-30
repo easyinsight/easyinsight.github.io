@@ -36,7 +36,6 @@
          <path-element>${flexlib}/locale/{locale}</path-element>
          <path-element>/libs/astra-flex.swc</path-element>
          <path-element>/libs/analytics.swc</path-element>
-         <path-element>/libs/AlivePDF.swc</path-element>
          <path-element>/libs/ilog-elixir.swc</path-element>
          <path-element>/libs/ilog-elixir_rb.swc</path-element>
          <path-element>/libs/YahooMap.swc</path-element>
