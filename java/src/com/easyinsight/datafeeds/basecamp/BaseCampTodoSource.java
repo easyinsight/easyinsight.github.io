@@ -113,6 +113,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectName = queryField(curProject, "name/text()");
+                System.out.println("project name = " + projectName);
                 String projectCreatedAtString = queryField(curProject, "created-on/text()");
                 Date projectCreatedAt = deadlineFormat.parse(projectCreatedAtString);
                 String announcement = queryField(curProject, "announcement/text()"); 
@@ -129,11 +130,29 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false);
 
                 Map<String, String> milestoneCommentMap = new HashMap<String, String>();
-                if (source.isIncludeComments()) {
-                    Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
-                    for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
-                        Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
-                        String id = queryField(milestoneNode, "id/text()");
+                Map<String, MilestoneInfo> milestoneMap = new HashMap<String, MilestoneInfo>();
+                
+                Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
+                for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
+                    Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
+                    String id = queryField(milestoneNode, "id/text()");
+                    String milestoneName = queryField(milestoneNode, "title/text()");
+                    String milestoneDl = queryField(milestoneNode, "deadline/text()");
+                    Date milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                    String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
+                    Date milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
+                    String milestoneCompletedOnString = queryField(milestoneNode, "completed-on/text()");
+                    Date milestoneCompletedOn = null;
+                    if (milestoneCompletedOnString != null) {
+                        milestoneCompletedOn = deadlineFormat.parse(milestoneCompletedOnString);
+                    }
+                    String milestoneOwner = null;
+                    String responsiblePartyId = queryField(milestoneNode, "responsible-party-id/text()");
+                    if (responsiblePartyId != null) {
+                        milestoneOwner = basecampCache.getUserName(responsiblePartyId);
+                    }
+                    milestoneMap.put(id, new MilestoneInfo(milestoneName, milestoneCreatedOn, milestoneCompletedOn, milestoneDeadline, milestoneOwner));
+                    if (source.isIncludeComments()) {
                         Document comments = runRestRequest("/milestones/" + id + "/comments.xml", client, builder, url, null, false);
                         Nodes commentNodes = comments.query("/comments/comment");
                         if (commentNodes.size() > 0) {
@@ -142,6 +161,8 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                         }
                     }
                 }
+
+
 
                 Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null, false);
                 Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");
@@ -153,32 +174,21 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                         String todoListDesc = queryField(todoListNode, "description/text()");
                         String todoListPrivacy = "true".equalsIgnoreCase(queryField(todoListNode, "private/text()")) ? "private" : "public";
                         String milestoneIdToRetrieve = queryField(todoListNode, "milestone-id/text()");
-                        Nodes milestoneNodes = milestoneList.query("/milestones/milestone[id/text()=" + milestoneIdToRetrieve + "]");
-                        Node milestoneNode;
+                        MilestoneInfo milestoneInfo = milestoneMap.get(milestoneIdToRetrieve);                        
                         String milestoneName = null;
                         Date milestoneCreatedOn = null;
                         Date milestoneCompletedOn = null;
                         Date milestoneDeadline = null;
                         String milestoneComment = null;
                         String milestoneOwner = null;
-                        if(milestoneNodes.size() > 0) {
-                            milestoneNode = milestoneNodes.get(0);
-                            milestoneName = queryField(milestoneNode, "title/text()");
-                            String milestoneDl = queryField(milestoneNode, "deadline/text()");
-                            milestoneDeadline = deadlineFormat.parse(milestoneDl);
-                            milestoneComment = milestoneCommentMap.get(milestoneIdToRetrieve);
-                            String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
-                            milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
-                            String milestoneCompletedOnString = queryField(milestoneNode, "completed-on/text()");
-                            if (milestoneCompletedOnString != null) {
-                                milestoneCompletedOn = deadlineFormat.parse(milestoneCompletedOnString);
-                            }
-                            String responsiblePartyId = queryField(milestoneNode, "responsible-party-id/text()");
-                            if (responsiblePartyId != null) {
-                                milestoneOwner = basecampCache.getUserName(responsiblePartyId);
-                            }
+                        if (milestoneInfo != null) {
+                            milestoneName = milestoneInfo.milestoneName;
+                            milestoneCreatedOn = milestoneInfo.milestoneCreatedOn;
+                            milestoneCompletedOn = milestoneInfo.milestoneCompletedOn;
+                            milestoneDeadline = milestoneInfo.milestoneDeadline;
+                            milestoneOwner = milestoneInfo.milestoneOwner;
+                            milestoneInfo.published = true;
                         }
-
 
                         try {
                             Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null, false);
@@ -282,6 +292,20 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     //row.addValue(keys.get(PROJECT_CREATION_DATE), projectCreatedAt);
                 }
 
+                for (Map.Entry<String, MilestoneInfo> entry : milestoneMap.entrySet()) {
+                    if (!entry.getValue().published) {
+                        IRow row = ds.createRow();
+                        row.addValue(keys.get(PROJECTNAME), projectName);
+                        row.addValue(keys.get(PROJECTSTATUS), projectStatus);
+                        row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
+                        row.addValue(keys.get(MILESTONE_CREATED_ON), entry.getValue().milestoneCreatedOn);
+                        row.addValue(keys.get(MILESTONE_COMPLETED_ON), entry.getValue().milestoneCompletedOn);
+                        row.addValue(keys.get(MILESTONE_OWNER), entry.getValue().milestoneOwner);
+                        row.addValue(keys.get(DEADLINE), entry.getValue().milestoneDeadline);
+                        row.addValue(keys.get(MILESTONENAME), entry.getValue().milestoneName);
+                    }
+                }
+
                 if (dataStorage != null) {
                     dataStorage.insertData(ds);
                     ds = new DataSet();
@@ -295,6 +319,23 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
             return ds;
         } else {
             return null;
+        }
+    }
+
+    private static class MilestoneInfo {
+        String milestoneName = null;
+        Date milestoneCreatedOn = null;
+        Date milestoneCompletedOn = null;
+        Date milestoneDeadline = null;
+        String milestoneOwner = null;
+        boolean published = false;
+
+        private MilestoneInfo(String milestoneName, Date milestoneCreatedOn, Date milestoneCompletedOn, Date milestoneDeadline, String milestoneOwner) {
+            this.milestoneName = milestoneName;
+            this.milestoneCreatedOn = milestoneCreatedOn;
+            this.milestoneCompletedOn = milestoneCompletedOn;
+            this.milestoneDeadline = milestoneDeadline;
+            this.milestoneOwner = milestoneOwner;
         }
     }
 
