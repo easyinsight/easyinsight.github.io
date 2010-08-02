@@ -66,7 +66,6 @@ public class TaskGenerator {
     }
 
     protected ScheduledTask createTask() {
-        LogClass.info("Task generator " + getTaskGeneratorID() + " appears to be an orphan.");
         throw new OrphanTaskException("Orphan task generator " + getTaskGeneratorID());
     }
 

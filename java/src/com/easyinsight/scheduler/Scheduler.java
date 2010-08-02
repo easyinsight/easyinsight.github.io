@@ -44,7 +44,7 @@ public class Scheduler {
 
     private Scheduler() {
         executor = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-        timer = new Timer();        
+        timer = new Timer("Scheduler Timer");        
     }
 
     public void start() {
@@ -87,6 +87,7 @@ public class Scheduler {
 
     private void scheduleTasks() {
         boolean locked = false;
+        System.out.println("Attempting to schedule tasks...");
         locked = obtainLock(locked);
         if (locked) {
             try {
@@ -96,14 +97,14 @@ public class Scheduler {
                 Session session = Database.instance().createSession(conn);
                 try {
                     conn.setAutoCommit(false);
-                    List<TaskGenerator> taskGenerators = retrieveTaskGenerators(session);
+                    List<TaskGenerator> taskGenerators = retrieveTaskGenerators(session);                    
                     for (TaskGenerator taskGenerator : taskGenerators) {
+                        List<ScheduledTask> tasks;
                         try {
-                            taskGenerator.createTask();
+                            tasks = taskGenerator.generateTasks(now, conn);
                         } catch (OrphanTaskException e) {
                             continue;
                         }
-                        List<ScheduledTask> tasks = taskGenerator.generateTasks(now, conn);
                         for (ScheduledTask task : tasks) {
                             LogClass.info("Scheduling " + task.getClass().getName() + " for execution on " + task.getExecutionDate());
                             session.save(task);
@@ -148,16 +149,20 @@ public class Scheduler {
     }
 
     private boolean obtainLock(boolean locked) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             PreparedStatement lockStmt = conn.prepareStatement("INSERT INTO DISTRIBUTED_LOCK (LOCK_NAME) VALUES (?)");
             lockStmt.setString(1, SCHEDULE_LOCK);
             lockStmt.execute();
             locked = true;
             lockStmt.close();
+            conn.commit();
         } catch (SQLException e) {
             LogClass.debug("Failed to obtain distributed lock, assuming another app server has it.");
+            conn.rollback();
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
         return locked;
