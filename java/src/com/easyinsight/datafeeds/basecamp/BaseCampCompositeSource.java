@@ -219,7 +219,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                         BaseCampTodoSource.COMPLETERID, BaseCampTodoSource.COMPLETERNAME, BaseCampTodoSource.COUNT), new ArrayList<String>()),
                 Arrays.asList(Arrays.asList(BaseCampTimeSource.TODOID), new ArrayList<String>()), true, false),
                 new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID, BaseCampCompanyProjectJoinSource.PROJECT_ID),
-                new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID));
+                new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID),
+                new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMMENTS, BaseCampTodoSource.MILESTONE_ID, BaseCampCommentsSource.MILESTONE_ID));
     }
     
     public void customStorage(Connection conn) throws SQLException {
@@ -275,12 +276,12 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 3;
+        return 4;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new BaseCamp1To2(this), new BaseCamp2To3(this));
+        return Arrays.asList(new BaseCamp1To2(this), new BaseCamp2To3(this), new BaseCamp3To4(this));
     }
 
     @Override

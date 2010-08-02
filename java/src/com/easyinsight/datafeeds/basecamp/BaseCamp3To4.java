@@ -2,37 +2,38 @@ package com.easyinsight.datafeeds.basecamp;
 
 import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.composite.ChildConnection;
 
 import java.sql.SQLException;
 import java.util.Map;
 
 /**
  * User: jamesboe
- * Date: Apr 7, 2010
- * Time: 8:59:27 AM
+ * Date: Mar 1, 2010
+ * Time: 10:00:25 AM
  */
-public class BaseCampTodo5To6 extends DataSourceMigration {
-    public BaseCampTodo5To6(FeedDefinition dataSource) {
+public class BaseCamp3To4 extends DataSourceMigration {
+    public BaseCamp3To4(FeedDefinition dataSource) {
         super(dataSource);
     }
 
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
-        //addAnalysisItem(new AnalysisDateDimension(new NamedKey(BaseCampTodoSource.PROJECT_CREATION_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        addAnalysisItem(new AnalysisDimension(new NamedKey(BaseCampTodoSource.MILESTONE_ID), true));
+        BaseCampCommentsSource commentsSource = new BaseCampCommentsSource();
+        addChildDataSource(commentsSource, conn);
     }
 
     @Override
     public int fromVersion() {
-        return 5;
+        return 3;
     }
 
     @Override
     public int toVersion() {
-        return 6;
+        return 4;
     }
 }

@@ -83,6 +83,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.FRESHBOOKS_CATEGORIES, FreshbooksCategorySource.class);
         registerType(FeedType.FRESHBOOKS_ESTIMATES, FreshbooksEstimateSource.class);
         registerType(FeedType.FRESHBOOKS_PROJECTS, FreshbooksProjectSource.class);
+        registerType(FeedType.BASECAMP_COMMENTS, BaseCampCommentsSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
