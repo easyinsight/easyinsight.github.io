@@ -1,6 +1,7 @@
 package com.easyinsight.scheduler;
 
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.logging.LogClass;
 
 import javax.persistence.*;
 import java.sql.SQLException;
@@ -65,6 +66,7 @@ public class TaskGenerator {
     }
 
     protected ScheduledTask createTask() {
+        LogClass.info("Task generator " + getTaskGeneratorID() + " appears to be an orphan.");
         throw new OrphanTaskException("Orphan task generator " + getTaskGeneratorID());
     }
 
