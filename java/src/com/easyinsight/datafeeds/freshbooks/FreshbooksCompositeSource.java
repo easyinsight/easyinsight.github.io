@@ -1,20 +1,14 @@
 package com.easyinsight.datafeeds.freshbooks;
 
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.DataSourceInfo;
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.FilterValueDefinition;
-import com.easyinsight.datafeeds.CredentialsDefinition;
+import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.users.TokenStorage;
 import flex.messaging.FlexContext;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
@@ -155,7 +149,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     @Override
     protected Collection<ChildConnection> getLiveChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.FRESHBOOKS_INVOICE, FeedType.FRESHBOOKS_CLIENTS, FreshbooksInvoiceSource.CLIENT_ID, FreshbooksClientSource.CLIENT_ID),
-                new ChildConnection(FeedType.FRESHBOOKS_EXPENSES, FeedType.FRESHBOOKS_CATEGORIES, FreshbooksExpenseSource.CATEGORY_ID, FreshbooksCategorySource.CATEGORY_NAME),
+                new ChildConnection(FeedType.FRESHBOOKS_EXPENSES, FeedType.FRESHBOOKS_CATEGORIES, FreshbooksExpenseSource.CATEGORY_ID, FreshbooksCategorySource.CATEGORY_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_EXPENSES, FeedType.FRESHBOOKS_STAFF, FreshbooksExpenseSource.STAFF_ID, FreshbooksStaffSource.STAFF_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_EXPENSES, FeedType.FRESHBOOKS_PROJECTS, FreshbooksExpenseSource.PROJECT_ID, FreshbooksProjectSource.PROJECT_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_EXPENSES, FeedType.FRESHBOOKS_CLIENTS, FreshbooksExpenseSource.CLIENT_ID, FreshbooksClientSource.CLIENT_ID),
@@ -169,8 +163,13 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
 
     @Override
     public List<KPI> createKPIs() {
+        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+        rollingFilterDefinition.setField(findAnalysisItem(FreshbooksInvoiceSource.INVOICE_DATE));
+        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.QUARTER);
         List<KPI> kpis = Arrays.asList(KPIUtil.createKPIWithFilters("Outstanding Invoice Amount", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT_OUTSTANDING),
-                new ArrayList<FilterDefinition>(), KPI.GOOD, 1));        
+                new ArrayList<FilterDefinition>(), KPI.GOOD, 1),
+                KPIUtil.createKPIWithFilters("Invoiced Dollars in the Last 90 Days", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT),
+                Arrays.asList((FilterDefinition) rollingFilterDefinition), KPI.GOOD, 1));        
         return kpis;
     }
 }

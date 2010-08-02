@@ -28,9 +28,6 @@ public abstract class FreshbooksFeed extends Feed {
     private String tokenKey;
     private String tokenSecretKey;
 
-    public static final String CONSUMER_KEY = "easyinsight";
-    public static final String CONSUMER_SECRET = "3gKm7ivgkPCeQZChh7ig9CDMBGratLg6yS";
-
     protected FreshbooksFeed(String url, String tokenKey, String tokenSecretKey) {
         this.url = url;
         this.tokenKey = tokenKey;
@@ -39,9 +36,15 @@ public abstract class FreshbooksFeed extends Feed {
 
     protected String queryField(Node n, String xpath) {
         Nodes results = n.query(xpath);
-        if(results.size() > 0)
-            return results.get(0).getValue();
-        else
+        if(results.size() > 0) {
+            String str = results.get(0).getValue();
+            try {
+                int num = Integer.parseInt(str);
+                return String.valueOf(num);
+            } catch (NumberFormatException e) {
+                return str;
+            }
+        } else
             return null;
     }
 
@@ -50,28 +53,21 @@ public abstract class FreshbooksFeed extends Feed {
         Builder builder = new Builder();
         try {
             // url
-            OAuthConsumer consumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+            OAuthConsumer consumer = new CommonsHttpOAuthConsumer(FreshbooksCompositeSource.CONSUMER_KEY, FreshbooksCompositeSource.CONSUMER_SECRET);
             consumer.setMessageSigner(new PlainTextMessageSigner());
             consumer.setTokenWithSecret(tokenKey, tokenSecretKey);
             HttpPost httpRequest = new HttpPost(url + "/api/2.1/xml-in");
             httpRequest.setHeader("Accept", "application/xml");
             httpRequest.setHeader("Content-Type", "application/xml");
-            /*PostMethod post = new PostMethod(url + "/api/2.1/xml-in");
-            post.setRequestHeader("Accept", "application/xml");
-            post.setRequestHeader("Content-Type", "application/xml");*/
             BasicHttpEntity entity = new BasicHttpEntity();
             entity.setContent(new ByteArrayInputStream(("<request method=\""+queryString+"\">"+requestXML+"</request>").getBytes()));
             httpRequest.setEntity(entity);
-            //post.setRequestBody();
             HttpRequest signedRequest = consumer.sign(httpRequest);
             
             HttpClient client = new DefaultHttpClient();
             ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
             String string = client.execute(httpRequest, responseHandler);
-            //client.executeMethod(post);
-            //response.get
-            //String string = post.getResponseBodyAsString();
             string = string.replace("xmlns=\"http://www.freshbooks.com/api/\"", "");            
             return builder.build(new ByteArrayInputStream(string.getBytes()));
         } catch (Exception e) {
