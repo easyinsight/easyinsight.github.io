@@ -41,21 +41,22 @@ public class MigrationManager {
                         while (migrationTargetRS.next()) {
                             int currentVersion = migrationTargetRS.getInt(1);
                             long dataSourceID = migrationTargetRS.getLong(2);
-                            FeedDefinition migrateSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-                            Map<String, Key> keyMap = new HashMap<String, Key>();
-                            for (AnalysisItem analysisItem : migrateSource.getFields()) {
-                                keyMap.put(analysisItem.getKey().toKeyString(), analysisItem.getKey());
-                            }
-                            List<DataSourceMigration> migrations = migrateSource.getMigrations();
-                            for (DataSourceMigration migration : migrations) {
-                                if (migration.fromVersion() >= currentVersion && migration.toVersion() != currentVersion) {
-                                    migration.migrate(keyMap, conn);
-                                }
-                            }
                             try {
+                                FeedDefinition migrateSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+                                Map<String, Key> keyMap = new HashMap<String, Key>();
+                                for (AnalysisItem analysisItem : migrateSource.getFields()) {
+                                    keyMap.put(analysisItem.getKey().toKeyString(), analysisItem.getKey());
+                                }
+                                List<DataSourceMigration> migrations = migrateSource.getMigrations();
+                                for (DataSourceMigration migration : migrations) {
+                                    if (migration.fromVersion() >= currentVersion && migration.toVersion() != currentVersion) {
+                                        migration.migrate(keyMap, conn);
+                                    }
+                                }
                                 new DataSourceInternalService().updateFeedDefinition(migrateSource, conn, true);
                             } catch (Throwable e) {
-                                LogClass.error("While saving data source " + migrateSource.getDataFeedID());                                
+                                LogClass.error(e);
+                                LogClass.error("While saving data source " + dataSourceID);                                
                             }
                         }
                     }
