@@ -22,7 +22,7 @@ public class HighRiseDeal5To6 extends DataSourceMigration {
 
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
-        addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseDealSource.DESCRIPTION), true));
+        //addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseDealSource.DESCRIPTION), true));
     }
 
     @Override
