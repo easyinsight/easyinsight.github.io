@@ -76,7 +76,7 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
-                components.add(new LookupTableComponent(lookupTable, refMap.get(lookupTable.getSourceField().createAggregateKey())));
+                components.add(new LookupTableComponent(lookupTable, refMap.get(lookupTable.getTargetField().createAggregateKey())));
             }
         }
 
