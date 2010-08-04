@@ -56,7 +56,6 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
-        System.out.println(path);
         try {
             Thread.sleep(150);
         } catch (InterruptedException e) {
