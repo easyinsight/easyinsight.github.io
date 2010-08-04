@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.basecamp;
 
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+import com.easyinsight.logging.LogClass;
 import nu.xom.*;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -114,6 +115,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                     if (badCredentialsOnError) {
                         throw new BaseCampLoginException("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
                     } else {
+                        LogClass.error("Unrelated parse error with status line " + statusLine);
                         throw e;
                     }
                 }
