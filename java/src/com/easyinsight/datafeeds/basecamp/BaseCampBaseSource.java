@@ -98,7 +98,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                     throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
                 } else if (statusLine.indexOf("503") != -1 ||
                         statusLine.indexOf("403") != -1) {
-                    System.out.println(statusLine);
+                    System.out.println(statusLine + " on retrieving " + path);
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
                         System.out.println("no retry header");
