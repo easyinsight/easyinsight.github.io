@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.basecamp;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
@@ -22,8 +23,8 @@ public class BaseCampTodo5To6 extends DataSourceMigration {
 
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
-        //addAnalysisItem(new AnalysisDateDimension(new NamedKey(BaseCampTodoSource.PROJECT_CREATION_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        //addAnalysisItem(new AnalysisDimension(new NamedKey(BaseCampTodoSource.MILESTONE_ID), true));
+        addAnalysisItem(new AnalysisDateDimension(new NamedKey(BaseCampTodoSource.PROJECT_CREATION_DATE), true, AnalysisDateDimension.DAY_LEVEL));
+        addAnalysisItem(new AnalysisDimension(new NamedKey(BaseCampTodoSource.MILESTONE_ID), true));
     }
 
     @Override
