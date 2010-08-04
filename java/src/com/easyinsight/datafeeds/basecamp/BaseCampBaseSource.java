@@ -56,6 +56,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
+        System.out.println(path);
         try {
             Thread.sleep(150);
         } catch (InterruptedException e) {
@@ -69,7 +70,6 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
 
             try {
                 client.executeMethod(restMethod);
-                //System.out.println(restMethod.getResponseBodyAsString());
                 doc = builder.build(restMethod.getResponseBodyAsStream());
                 String rootValue = doc.getRootElement().getValue();
                 if ("The API is not available to this account".equals(rootValue)) {
@@ -108,10 +108,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                         }
                     } else {
                         int retryTime = Integer.parseInt(retryHeader.getValue());
-                        System.out.println("retry time = " + retryTime);
-                        if (retryTime < 20) {
-                            retryTime = 20;
-                        }
+                        System.out.println("retry time = " + retryTime);                        
                         int time = retryTime * 1000;
                         try {
                             Thread.sleep(time);

@@ -115,6 +115,9 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 String announcement = queryField(curProject, "announcement/text()"); 
                 loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", false);
                 String projectStatus = queryField(curProject, "status/text()");
+                if ("template".equals(projectStatus)) {
+                    continue;
+                }
                 if (!source.isIncludeArchived() && "archived".equals(projectStatus)) {
                     continue;
                 }

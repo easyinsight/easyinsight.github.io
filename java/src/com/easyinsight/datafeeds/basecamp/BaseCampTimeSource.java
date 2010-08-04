@@ -90,8 +90,12 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                 Node curProject = projectNodes.get(i);
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
                 String projectName = queryField(curProject, "name/text()");
+                System.out.println("project name = " + projectName);
                 loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", false);
                 String projectStatus = queryField(curProject, "status/text()");
+                if ("template".equals(projectStatus)) {
+                    continue;
+                }
                 if (!baseCampCompositeSource.isIncludeArchived() && "archived".equals(projectStatus)) {
                     continue;
                 }
@@ -104,7 +108,13 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                 info.currentPage = 1;
                     do {
                         try {
-                            Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false);
+                            Document todoLists;
+                            if (info.currentPage == 1) {
+                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml", client, builder, url, info, false);
+                            } else {
+                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false);
+                            }
+
                             Nodes todoListNodes = todoLists.query("/time-entries/time-entry");
                             for(int j = 0;j < todoListNodes.size();j++) {
                                 Node todoListNode = todoListNodes.get(j);
