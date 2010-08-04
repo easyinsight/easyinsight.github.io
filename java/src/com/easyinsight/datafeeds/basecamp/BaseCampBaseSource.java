@@ -98,15 +98,21 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                     throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
                 } else if (statusLine.indexOf("503") != -1 ||
                         statusLine.indexOf("403") != -1) {
-                    System.out.println("basecamp 503, retrying");
+                    System.out.println(statusLine);
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
+                        System.out.println("no retry header");
                         try {
                             Thread.sleep(20000);
                         } catch (InterruptedException e1) {
                         }
                     } else {
-                        int time = Integer.parseInt(retryHeader.getValue()) * 1000;
+                        int retryTime = Integer.parseInt(retryHeader.getValue());
+                        System.out.println("retry time = " + retryTime);
+                        if (retryTime < 20) {
+                            retryTime = 20;
+                        }
+                        int time = retryTime * 1000;
                         try {
                             Thread.sleep(time);
                         } catch (InterruptedException e1) {                            
