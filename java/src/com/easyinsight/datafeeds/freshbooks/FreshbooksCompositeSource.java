@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -171,5 +172,15 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
                 KPIUtil.createKPIWithFilters("Invoiced Dollars in the Last 90 Days", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT),
                 Arrays.asList((FilterDefinition) rollingFilterDefinition), KPI.GOOD, 1));        
         return kpis;
+    }
+
+    @Override
+    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
+        FreshbooksCompositeSource dataSource = (FreshbooksCompositeSource) super.clone(conn);
+        dataSource.setUrl("");
+        dataSource.setTokenKey(null);
+        dataSource.setTokenSecretKey(null);
+        dataSource.setPin(null);
+        return dataSource;
     }
 }
