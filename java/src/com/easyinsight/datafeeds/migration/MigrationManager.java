@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,22 +27,39 @@ public class MigrationManager {
 
     private DataSourceTypeRegistry dataSourceTypeRegistry;
 
+    private static class MigrationInfo {
+        private int version;
+        private long dataSourceID;
+
+        private MigrationInfo(int version, long dataSourceID) {
+            this.version = version;
+            this.dataSourceID = dataSourceID;
+        }
+    }
+
     public void migrate() {
         if (obtainLock()) {
             try {
                 EIConnection conn = Database.instance().getConnection();
                 try {
-                    PreparedStatement queryStmt = conn.prepareStatement("SELECT VERSION, DATA_FEED_ID FROM DATA_FEED WHERE FEED_TYPE = ? AND VERSION < ?");
                     conn.setAutoCommit(false);
                     for (Map.Entry<FeedType, Class> entry : dataSourceTypeRegistry.getDataSourceMap().entrySet()) {
                         FeedDefinition feedDefinition = dataSourceTypeRegistry.createDataSource(entry.getKey());
+                        List<MigrationInfo> infos = new ArrayList<MigrationInfo>();
+                        PreparedStatement queryStmt = conn.prepareStatement("SELECT VERSION, DATA_FEED_ID FROM DATA_FEED WHERE FEED_TYPE = ? AND VERSION < ?");
                         queryStmt.setInt(1, entry.getKey().getType());
                         queryStmt.setInt(2, feedDefinition.getVersion());                        
                         ResultSet migrationTargetRS = queryStmt.executeQuery();
                         while (migrationTargetRS.next()) {
+
                             int currentVersion = migrationTargetRS.getInt(1);
                             long dataSourceID = migrationTargetRS.getLong(2);
-                            try {
+                            infos.add(new MigrationInfo(currentVersion, dataSourceID));
+                        }
+                        for (MigrationInfo migrationInfo : infos) {
+                            long dataSourceID = migrationInfo.dataSourceID;
+                            int currentVersion = migrationInfo.version;
+                            try {    
                                 FeedDefinition migrateSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
                                 Map<String, Key> keyMap = new HashMap<String, Key>();
                                 for (AnalysisItem analysisItem : migrateSource.getFields()) {
@@ -54,16 +72,16 @@ public class MigrationManager {
                                     }
                                 }
                                 new DataSourceInternalService().updateFeedDefinition(migrateSource, conn, true);
+                                conn.commit();
                             } catch (Throwable e) {
                                 LogClass.error(e);
-                                LogClass.error("While saving data source " + dataSourceID);                                
+                                LogClass.error("While saving data source " + dataSourceID);
+                                conn.rollback();
                             }
                         }
                     }
-                    conn.commit();
                 } catch (Throwable e) {
                     LogClass.error(e);
-                    conn.rollback();
                 } finally {
                     conn.setAutoCommit(true);
                     Database.closeConnection(conn);
