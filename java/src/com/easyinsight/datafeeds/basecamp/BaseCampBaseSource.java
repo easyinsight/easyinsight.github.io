@@ -95,25 +95,24 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
-                } else if (statusLine.indexOf("503") != -1 ||
-                        statusLine.indexOf("403") != -1) {
+                } else if (statusLine.indexOf("503") != -1) {
                     System.out.println(statusLine + " on retrieving " + path);
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
-                        System.out.println("no retry header");
                         try {
                             Thread.sleep(20000);
                         } catch (InterruptedException e1) {
                         }
                     } else {
-                        int retryTime = Integer.parseInt(retryHeader.getValue());
-                        System.out.println("retry time = " + retryTime);                        
+                        int retryTime = Integer.parseInt(retryHeader.getValue());                        
                         int time = retryTime * 1000;
                         try {
                             Thread.sleep(time);
                         } catch (InterruptedException e1) {                            
                         }
                     }
+                } else if (statusLine.indexOf("403") != -1) {
+                    throw new RuntimeException("403 error");
                 } else {
                     if (badCredentialsOnError) {
                         throw new BaseCampLoginException("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");

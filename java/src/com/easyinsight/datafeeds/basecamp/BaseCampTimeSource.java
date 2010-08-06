@@ -142,7 +142,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                                 ds = new DataSet();
                             }
                         } catch (Exception e) {
-                            if ("Premature end of file.".equals(e.getMessage())) {
+                            if ("Premature end of file.".equals(e.getMessage()) || "403 error".equals(e.getMessage())) {
                                 LogClass.debug(e.getMessage());
                             } else {
                                 LogClass.error("Error " + e.getMessage() + " while retrieving page " + info.currentPage + " of "+ info.MaxPages);
