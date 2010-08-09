@@ -18,6 +18,7 @@ public class TokenStorage {
     public static final int GOOGLE_ANALYTICS_TOKEN = 13;
     public static final int BASECAMP_TOKEN = 18;
     public static final int HIGHRISE_TOKEN = 23;
+    public static final int FRESHBOOKS_TOKEN = FeedType.FRESHBOOKS_COMPOSITE.getType();
     public static final int PIVOTAL_TRACKER_TOKEN = FeedType.PIVOTAL_TRACKER.getType();
 
     public void saveToken(Token token, long dataSourceID) {
@@ -38,6 +39,7 @@ public class TokenStorage {
                     updateStmt.setLong(3, dataSourceID);
                 }
                 updateStmt.executeUpdate();
+                updateStmt.close();
             } else {
                 PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TOKEN (token_type, user_id, token_value, data_source_id) VALUES (?, ?, ?, ?)");
                 insertStmt.setInt(1, token.getTokenType());
@@ -49,7 +51,9 @@ public class TokenStorage {
                     insertStmt.setLong(4, dataSourceID);
                 }
                 insertStmt.execute();
+                insertStmt.close();
             }
+            queryStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -75,6 +79,7 @@ public class TokenStorage {
                     updateStmt.setLong(3, dataSourceID);
                 }
                 updateStmt.executeUpdate();
+                updateStmt.close();
             } else {
                 PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TOKEN (token_type, user_id, token_value, data_source_id) VALUES (?, ?, ?, ?)");
                 insertStmt.setInt(1, token.getTokenType());
@@ -86,7 +91,9 @@ public class TokenStorage {
                     insertStmt.setLong(4, dataSourceID);
                 }
                 insertStmt.execute();
+                insertStmt.close();
             }
+            queryStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -99,6 +106,7 @@ public class TokenStorage {
             deleteStmt.setInt(1, token.getTokenType());
             deleteStmt.setLong(2, token.getUserID());
             deleteStmt.executeUpdate();
+            deleteStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -122,6 +130,7 @@ public class TokenStorage {
                 token.setTokenType(type);
                 token.setTokenValue(tokenValue);
             }
+            queryStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -162,9 +171,12 @@ public class TokenStorage {
                         insertStmt.setInt(2, type);
                         insertStmt.setLong(3, dataSourceID);
                         insertStmt.execute();
+                        insertStmt.close();
                     }
+                    queryStmt.close();
                 }
             }
+            dataSourceTokenStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -201,9 +213,12 @@ public class TokenStorage {
                         insertStmt.setInt(2, type);
                         insertStmt.setLong(3, dataSourceID);
                         insertStmt.execute();
+                        insertStmt.close();
                     }
+                    queryStmt.close();
                 }
             }
+            dataSourceTokenStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -227,6 +242,7 @@ public class TokenStorage {
                 token.setTokenType(type);
                 token.setTokenValue(tokenValue);
             }
+            queryStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } 

@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedType;
@@ -60,8 +61,8 @@ public class TokenService {
                         "http://twitter.com/oauth/request_token", "http://twitter.com/oauth/access_token",
                         "http://twitter.com/oauth/authorize");
             } else if (type == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
-                consumer = new DefaultOAuthConsumer("easyinsight",
-                        "3gKm7ivgkPCeQZChh7ig9CDMBGratLg6yS");
+                consumer = new DefaultOAuthConsumer(FreshbooksCompositeSource.CONSUMER_KEY,
+                        FreshbooksCompositeSource.CONSUMER_SECRET);
                 consumer.setMessageSigner(new PlainTextMessageSigner());
                 provider = new DefaultOAuthProvider(
                         "https://"+extra+".freshbooks.com/oauth/oauth_request.php", "https://"+extra+".freshbooks.com/oauth/oauth_access.php",
