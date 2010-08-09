@@ -122,8 +122,14 @@ public class CompositeFeedDefinition extends FeedDefinition {
     
     private Key getKey(Connection conn, long targetJoinID) {
         Session session = Database.instance().createSession(conn);
-        List results = session.createQuery("from Key where keyID = ?").setLong(0, targetJoinID).list();
-        return (Key) results.get(0);
+        Key key = null;
+        try {
+            List results = session.createQuery("from Key where keyID = ?").setLong(0, targetJoinID).list();
+            key = (Key) results.get(0);
+        } finally {
+            session.close();
+        }
+        return key;
     }
 
     public void populateFields(Connection conn) {
