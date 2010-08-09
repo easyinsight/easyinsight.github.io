@@ -32,6 +32,7 @@ public class DataSourceInternalService {
             compositeFeedDefinition.populateFields(conn);
             feedStorage.updateDataFeedConfiguration(compositeFeedDefinition, conn);
         }
+        stmt.close();
     }
 
     public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn) throws Exception {
