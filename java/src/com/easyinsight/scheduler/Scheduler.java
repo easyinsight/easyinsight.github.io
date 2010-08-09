@@ -87,7 +87,6 @@ public class Scheduler {
 
     private void scheduleTasks() {
         boolean locked = false;
-        System.out.println("Attempting to schedule tasks...");
         locked = obtainLock(locked);
         if (locked) {
             try {
