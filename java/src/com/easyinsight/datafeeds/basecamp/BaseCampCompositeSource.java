@@ -219,7 +219,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                         BaseCampTodoSource.COMPLETERID, BaseCampTodoSource.COMPLETERNAME, BaseCampTodoSource.COUNT), new ArrayList<String>()),
                 Arrays.asList(Arrays.asList(BaseCampTimeSource.TODOID), new ArrayList<String>()), true, false),
                 new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID, BaseCampCompanyProjectJoinSource.PROJECT_ID),
-                new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID));
+                new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID),
+                new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMMENTS, BaseCampTodoSource.MILESTONE_ID, BaseCampCommentsSource.MILESTONE_ID));
     }
     
     public void customStorage(Connection conn) throws SQLException {
@@ -227,6 +228,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM BASECAMP WHERE DATA_FEED_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO BASECAMP (DATA_FEED_ID, URL, INCLUDE_ARCHIVED," +
                 "include_inactive, INCLUDE_COMMENTS) VALUES (?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
@@ -235,6 +237,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         basecampStmt.setBoolean(4, isIncludeInactive());
         basecampStmt.setBoolean(5, isIncludeComments());
         basecampStmt.execute();
+        basecampStmt.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
@@ -249,6 +252,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
             this.setIncludeInactive(rs.getBoolean(3));
             this.setIncludeComments(rs.getBoolean(4));
         }
+        loadStmt.close();
     }
 
     public String getUrl() {
@@ -275,12 +279,12 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 3;
+        return 4;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new BaseCamp1To2(this), new BaseCamp2To3(this));
+        return Arrays.asList(new BaseCamp1To2(this), new BaseCamp2To3(this), new BaseCamp3To4(this));
     }
 
     @Override
