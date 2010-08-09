@@ -6,10 +6,7 @@ import com.easyinsight.api.Row;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedCreation;
-import com.easyinsight.datafeeds.FeedCreationResult;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
@@ -309,6 +306,7 @@ public abstract class EIV2API implements IEIV2API {
                     feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
                     dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
                     dataStorage.migrate(previousItems, analysisItems, false);
+                    new DataSourceInternalService().updateComposites(feedDefinition, conn);
                 } else {
                     dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
                 }
