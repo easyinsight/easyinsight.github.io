@@ -169,8 +169,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     for (int j = 0; j < phoneNodes.size(); j++) {
                         Node phoneNode = phoneNodes.get(j);
                         String phoneNumber = queryField(phoneNode, "number/text()");
-                        String location = queryField(phoneNode, "location/text()");
-                        System.out.println("location = " + location);
+                        String location = queryField(phoneNode, "location/text()");                        
                         if ("Mobile".equals(location)) {
                             row.addValue(CONTACT_MOBILE_PHONE, phoneNumber);
                         } else if ("Work".equals(location)) {

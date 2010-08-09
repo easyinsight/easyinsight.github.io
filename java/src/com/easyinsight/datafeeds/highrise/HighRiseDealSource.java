@@ -152,7 +152,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 String categoryID = queryField(categoryNode, "id/text()");
                 categoryCache.put(categoryID, categoryName);
             }
-                Document deals = runRestRequest("/deals.xml", client, builder, url, true, true);
+                Document deals = runRestRequest("/deals.xml", client, builder, url, true, false);
                 loadingProgress(0, 1, "Synchronizing with deals...", true);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
