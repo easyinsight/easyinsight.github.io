@@ -12,6 +12,7 @@
         import com.easyinsight.analysis.HierarchyLevel;
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
         import com.easyinsight.analysis.SortFunctionFactory;
+        import com.easyinsight.analysis.Value;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
@@ -20,8 +21,10 @@
         import mx.collections.GroupingField;
         import mx.collections.SummaryField;
         import mx.collections.SummaryRow;
+        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
+        import mx.formatters.Formatter;
 
         [Bindable]
         private var myData:ArrayCollection;
@@ -95,7 +98,7 @@
                 var groupingFields:Array = [];
                 for (var lvlCount:int = 0; lvlCount < hierarchy.hierarchyLevels.length - 1; lvlCount++) {
                     var level:HierarchyLevel = hierarchy.hierarchyLevels.getItemAt(lvlCount) as HierarchyLevel;
-                    var groupingField:GroupingField = new GroupingField();
+                    var groupingField:GroupingField = new CustomGroupingField(level.analysisItem);
                     groupingField.name = level.analysisItem.qualifiedName();
                     groupingFields.push(groupingField);
                     var summaryRow:SummaryRow = new SummaryRow();
@@ -136,7 +139,29 @@
                 coreGrid.groupItemRenderer = hierarchyFactory;
                 hierarchyColumn.headerText = hierarchy.display;
                 //hierarchyColumn.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, hierarchyColumn.sortDescending);
-                hierarchyColumn.dataField = hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName();
+                var bottomItem:AnalysisItem = hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem;
+                hierarchyColumn.labelFunction = function(item:Object, column:AdvancedDataGridColumn):String {
+                    var formatter:Formatter = bottomItem.getFormatter();
+                    var field:String = bottomItem.qualifiedName();
+                    var text:String = "";
+                    if (item[field] is Value) {
+                        var objVal:Value = item[field];
+                        if (objVal == null) {
+                            text = "";
+                        } else {
+                            text = formatter.format(objVal.getValue());
+                        }
+                    } else {
+                        if (item[field] != null) {
+                            text = formatter.format(item[field]);
+                        } else {
+                            text = "";
+                        }
+
+                    }
+                    return text;
+                };
+                hierarchyColumn.dataField = bottomItem.qualifiedName();
                 var existingHierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
                 if (!fieldsChanged && existingHierarchyIndex != -1) {
                     var existingHierarchyColumn:AdvancedDataGridColumn = coreGrid.columns[existingIndex];

@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import org.hibernate.Session;
+
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -32,6 +34,15 @@ public class FilterRangeDefinition extends FilterDefinition {
 
     public FilterRangeDefinition() {
         setApplyBeforeAggregation(false);
+    }
+
+    @Override
+    public void beforeSave(Session session) {
+        super.beforeSave(session);
+        if (Double.isNaN(startValue)) startValue = 0;
+        if (Double.isNaN(endValue)) endValue = 0;
+        if (Double.isNaN(currentStartValue)) currentStartValue = 0;
+        if (Double.isNaN(currentEndValue)) currentEndValue = 0;
     }
 
     public boolean isCurrentStartValueDefined() {

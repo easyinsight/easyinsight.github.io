@@ -46,6 +46,6 @@ public class NamedBracketValueFunction extends Function {
     }
 
     public FunctionExplanation explain() {
-        return new FunctionExplanation("namedbracketvalue(String)", "Returns the first bracketed value found in String. For example, bracketvalue(Deal [John]) would produce a value of John.");
+        return new FunctionExplanation("namedbracketvalue(String, String)", "Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Name, \"Type\").");
     }
 }

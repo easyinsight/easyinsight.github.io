@@ -154,6 +154,7 @@ public class DatabaseManager {
                 smallestSize = size;
             }
         }
+        dbStmt.close();
         if (!foundDBs.isEmpty()) {
             dbToUse = foundDBs.iterator().next();
         }        
