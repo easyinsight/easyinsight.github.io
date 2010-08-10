@@ -93,8 +93,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
-                String projectName = queryField(curProject, "name/text()");
-                System.out.println("project name = " + projectName);                
+                String projectName = queryField(curProject, "name/text()");                                
                 loadingProgress(i, projectNodes.size(), "Synchronizing with comments of " + projectName + "...", false);
                 String projectStatus = queryField(curProject, "status/text()");
                 if (!source.isIncludeArchived() && "archived".equals(projectStatus)) {
