@@ -109,7 +109,6 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectName = queryField(curProject, "name/text()");
-                System.out.println("project name = " + projectName);
                 String projectCreatedAtString = queryField(curProject, "created-on/text()");
                 Date projectCreatedAt = deadlineFormat.parse(projectCreatedAtString);
                 String announcement = queryField(curProject, "announcement/text()"); 
