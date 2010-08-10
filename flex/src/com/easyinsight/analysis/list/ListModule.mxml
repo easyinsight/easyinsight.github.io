@@ -184,6 +184,7 @@
                     if (sortHeader.sort > 0) {
                         var sortField:OrderedSortField = new OrderedSortField();
                         sortField.descending = sortHeader.sort == 2;
+                        sortField.compareFunction = SortFunctionFactory.createSortFunction(sortHeader, sortField.descending); 
                         sortField.name = sortHeader.qualifiedName();
                         sortField.order = sortHeader.sortSequence;
                         sortFields.addItem(sortField);
@@ -204,6 +205,7 @@
                 myDataSet.sort = sort;
                 myDataSet.refresh();
             }
+
             var columns:Array = new Array();
             var initColumn:int = 0;
             if (def.showLineNumbers) {
@@ -243,7 +245,7 @@
                 columnMap[myHeader.qualifiedName()] = myHeader;
                 var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 if (explicitWidth) columnHeaderObject.width = myHeader.width;
-                columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
+                columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);                
                 columnHeaderObject.headerText = myHeader.display;
                 //columnHeaderObject.headerText = "";
                 var keyString:String = myHeader.qualifiedName();
