@@ -1,17 +1,18 @@
-<%@ page import="org.hibernate.Session" %>
-<%@ page import="com.easyinsight.database.Database" %>
-<%@ page import="com.easyinsight.users.Account" %>
-<%@ page import="com.easyinsight.database.EIConnection" %>
-<%@ page import="com.easyinsight.billing.BrainTreeBillingSystem" %>
 <%@ page import="com.easyinsight.billing.BillingUtil" %>
-<%@ page import="com.easyinsight.users.AccountCreditCardBillingInfo" %>
-<%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="java.text.DateFormat" %>
-<%@ page import="java.util.*" %>
-<%@ page import="com.easyinsight.users.User" %>
-<%@ page import="com.easyinsight.users.AccountActivityStorage" %>
-<%@ page import="com.easyinsight.outboundnotifications.TodoBase" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
+<%@ page import="com.easyinsight.users.Account" %>
+<%@ page import="com.easyinsight.users.AccountActivityStorage" %>
+<%@ page import="com.easyinsight.users.AccountCreditCardBillingInfo" %>
+<%@ page import="com.easyinsight.users.User" %>
+<%@ page import="org.hibernate.Session" %>
+<%@ page import="java.text.DateFormat" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Calendar" %>
+<%@ page import="java.util.Date" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.TimeZone" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -56,25 +57,29 @@
         conn.commit();
         System.out.println("Saved account billing info.");
 
-    if(!hashed.equals(request.getParameter("hash")) || !request.getParameter("response").equals("1") || !request.getParameter("cvvresponse").equals("M") || !Arrays.asList("X", "Y", "D", "M", "W", "Z", "P", "L", "G", "I").contains(request.getParameter("avsresponse")))
-        response.sendRedirect("billing.jsp?error=true");
-    else
-    {
-        account.setBillingInformationGiven(true);
+        if(!hashed.equals(request.getParameter("hash"))) {
+            response.sendRedirect("billing.jsp?error=true");
+        }
+        else if (request.getParameter("response").equals("1")) {
+            conn.setSavepoint();
+            account.setBillingInformationGiven(true);
 
             List l = s.createQuery("from BuyOurStuffTodo where userID = ?").setLong(0, userID).list();
             if(l.size() > 0) {
                 s.delete(l.get(0));
             }
 
+            // Can only let account admins use the billing
             if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
               && !user.isAccountAdmin())
                 response.sendRedirect("access.jsp");
 
+            // Set up billing day of month
             if(account.getAccountState() == Account.DELINQUENT) {
                 account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
             } else {
                 Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
+                // billing day of month is at the end of the trial, if there is one
                 if(trialEnd != null) {
                     System.out.println("Trial end date: " + trialEnd.toString());
                     if(trialEnd.after(new Date()) && account.getBillingDayOfMonth() == null) {
@@ -94,16 +99,17 @@
 
             s.flush();
             conn.commit();
+        }
     }
-        }
-        catch(Exception e) {
-            conn.rollback();
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-        finally {
-          Database.closeConnection(conn);
-        }
+    catch(Exception e) {
+        LogClass.error(e);
+        conn.rollback();
+
+        throw new RuntimeException(e);
+    }
+    finally {
+      Database.closeConnection(conn);
+    }
 
 
 %>
