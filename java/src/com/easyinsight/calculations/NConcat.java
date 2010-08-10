@@ -14,7 +14,7 @@ public class NConcat extends Function {
     public Value evaluate() {
         StringBuilder sb = new StringBuilder();
         for(Value v : params) {
-            sb.append(v.toDouble().intValue());
+            sb.append(v.toDouble().longValue());
         }
         return new NumericValue(Double.parseDouble(sb.toString()));
     }

@@ -12,6 +12,7 @@
         import com.easyinsight.analysis.HierarchyLevel;
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
         import com.easyinsight.analysis.SortFunctionFactory;
+        import com.easyinsight.analysis.TextCellRenderer;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.filtering.FilterRawData;
 
@@ -171,6 +172,7 @@
                 }
                 hierarchyColumn.headerRenderer = new ListViewHeaderRendererFactory(hierarchy.display);
                 columns[0] = hierarchyColumn;
+                var variableHeight:Boolean = false;
                 for (var k:int = 0; k < analysisItems.length; k++) {
                     var myHeader:AnalysisItem = analysisItems[k] as AnalysisItem;
                     var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
@@ -187,12 +189,16 @@
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     columnHeaderObject.headerRenderer = new ListViewHeaderRendererFactory(myHeader.display);
 
-                    var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
+                    var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader));
+                    if (myHeader.hasType(AnalysisItemTypes.TEXT)) {
+                        variableHeight = true;
+                    }
                     factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[myHeader.qualifiedName()] };
                     columnHeaderObject.itemRenderer = factory;
 
                     columns[k + 1] = columnHeaderObject;
                 }
+                coreGrid.variableRowHeight = variableHeight;
 
                 myData = dataSet;
 
@@ -202,6 +208,14 @@
             } else {
                 myData = new ArrayCollection();
                 stackIndex = 1;
+            }
+        }
+
+        private function getCellRendererClass(item:AnalysisItem):Class {
+            if (item.hasType(AnalysisItemTypes.TEXT)) {
+                return TextCellRenderer;
+            } else {
+                return AnalysisCellRenderer;
             }
         }
 

@@ -40,8 +40,8 @@ public class NumericValue extends Value implements Serializable {
 
     @Override
     public String toString() {
-        if (value.intValue() - value < .001) {
-            return String.valueOf(value.intValue());
+        if (value.longValue() - value < .001) {
+            return String.valueOf(value.longValue());
         }
         return String.valueOf(value);
     }

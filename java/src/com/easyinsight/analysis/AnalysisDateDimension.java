@@ -130,7 +130,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 tempDate = dateValue.getDate();
             } else if (value.type() == Value.NUMBER) {
                 NumericValue numberValue = (NumericValue) value;
-                tempDate = cachedDateFormat.parse(Integer.toString(numberValue.toDouble().intValue()));
+                tempDate = cachedDateFormat.parse(Long.toString(numberValue.toDouble().longValue()));
             }
         } catch (ParseException e) {
         }

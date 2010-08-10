@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*">
+    <mx:Script><![CDATA[
+
+        [Bindable]
+        private var html:Boolean;
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new AnalysisText();
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is AnalysisText) {
+                var text:AnalysisText = val as AnalysisText;
+                html = text.html;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var text:AnalysisText = analysisItem as AnalysisText;
+            text.html = htmlBox.selected;
+        }]]></mx:Script>
+    <mx:FormItem label="HTML:">
+        <mx:CheckBox selected="{html}" id="htmlBox"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

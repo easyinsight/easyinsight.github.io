@@ -86,7 +86,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 case Value.NUMBER:
                     NumericValue numericValue = (NumericValue) value;
                     double doubleValue = numericValue.getValue();
-                    int intValue = (int) doubleValue;
+                    long intValue = (long) doubleValue;
                     if (doubleValue == intValue && intValue >= 1980 && intValue <= 2014) {
                         newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
                     } else {

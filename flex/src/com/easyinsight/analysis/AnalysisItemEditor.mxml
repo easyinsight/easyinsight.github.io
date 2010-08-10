@@ -60,6 +60,13 @@
                                            measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="Text">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <analysis:TextDetailEditor addedToStage="detailEditor = textDetailEditor" id="textDetailEditor"
+                                           dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                           measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+            </mx:AddChild>
+        </mx:State>
         <mx:State name="Latitude">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:LatitudeDetailEditor addedToStage="detailEditor = latitudeDetailEditor"
@@ -256,7 +263,7 @@
         }
 
         protected function getGroupingOptions():ArrayCollection {
-            return new ArrayCollection(["Grouping", "Range", "Date", "Tags", "Latitude", "Longitude", "Zip Code"]);
+            return new ArrayCollection(["Grouping", "Range", "Date", "Tags", "Latitude", "Longitude", "Zip Code", "Text"]);
         }
 
         protected function getMeasureOptions():ArrayCollection {
@@ -343,6 +350,9 @@
                 case "Zip Code":
                     currentState = "ZipCode";
                     break;
+                case "Text":
+                    currentState = "Text";
+                    break;
             }
         }
 
@@ -418,7 +428,7 @@
                     <mx:ViewStack resizeToContent="true" creationPolicy="all" selectedIndex="{aggIndex}">
                         <mx:Box>
                             <mx:ComboBox id="groupingAggregationBox"
-                                 close="aggregationTypeChanged(event)" rowCount="7">
+                                 close="aggregationTypeChanged(event)" rowCount="8">
                                 <mx:dataProvider>
                                     <mx:Array>
                                         <mx:String>Grouping</mx:String>
@@ -428,6 +438,7 @@
                                         <mx:String>Latitude</mx:String>
                                         <mx:String>Longitude</mx:String>
                                         <mx:String>Zip Code</mx:String>
+                                        <mx:String>Text</mx:String>
                                     </mx:Array>
                                 </mx:dataProvider>
                             </mx:ComboBox>

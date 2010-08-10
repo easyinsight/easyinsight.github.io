@@ -393,7 +393,7 @@ public class DataStorage {
                             row.addValue(fieldMigration.key, new NumericValue(doubleValue));
                         } else {
                             if (existingValue.type() == Value.NUMBER) {
-                                string = ((Integer) ((NumericValue) existingValue).getValue().intValue()).toString();
+                                string = ((Long) ((NumericValue) existingValue).getValue().longValue()).toString();
                             }
                             row.addValue(fieldMigration.key, new StringValue(string));
                         }

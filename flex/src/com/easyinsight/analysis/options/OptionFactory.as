@@ -55,6 +55,8 @@ package com.easyinsight.analysis.options
                     option = OptionTypeNames.LONGITUDE;
                 } else if (analysisItem.hasType(AnalysisItemTypes.ZIP_CODE)) {
                     option = OptionTypeNames.ZIP_CODE;
+                } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                    option = OptionTypeNames.TEXT;
 				} else {
 					option = OptionTypeNames.GROUPING;
 				}
