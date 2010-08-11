@@ -627,7 +627,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public void updateFeedDefinition(FeedDefinition feedDefinition, String tagString) {
+    public String updateFeedDefinition(FeedDefinition feedDefinition, String tagString) {
         SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -644,16 +644,18 @@ public class FeedService implements IDataFeedService {
             new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
             FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
             conn.commit();
+        } catch (UserMessageException ue) {
+            LogClass.error(ue);
+            return ue.getUserMessage();
         } catch (Exception e) {
             LogClass.error(e);
-
             conn.rollback();
             throw new RuntimeException(e);
         } finally {            
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-        //EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
+        return null;
     }
 
 

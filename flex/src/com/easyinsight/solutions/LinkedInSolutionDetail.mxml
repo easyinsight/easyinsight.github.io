@@ -4,6 +4,7 @@
          width="100%" height="100%" paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0"
          verticalGap="0" backgroundColor="#818285" horizontalAlign="center">
     <mx:Script><![CDATA[
+        import com.easyinsight.customupload.OAuthResponse;
 
         [Bindable]
         private var startButtonText:String = "Authorize Access";
@@ -17,8 +18,8 @@
         }
 
         private function gotURL():void {
-            var url:String = tokenService.getOAuthURL.lastResult as String;
-            navigateToURL(new URLRequest(url));
+            var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
+            navigateToURL(new URLRequest(response.requestToken));
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="tokenService" id="tokenService">

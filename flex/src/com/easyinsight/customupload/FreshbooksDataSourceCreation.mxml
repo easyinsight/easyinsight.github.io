@@ -9,10 +9,9 @@
         import com.easyinsight.datasources.FreshbooksDataSource;
         import com.easyinsight.framework.Credentials;
         import com.easyinsight.framework.CredentialsCache;
-        import com.easyinsight.help.ScreencastWindow;
-        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
 
-        import mx.managers.PopUpManager;
+        import mx.controls.Alert;
         import mx.validators.Validator;
 
         [Bindable]
@@ -57,14 +56,24 @@
                 urlInput.setFocus();
                 urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             } else {
+                ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
                 tokenService.getOAuthURL.send(49, 0, urlInput.text);
             }
         }
 
         private function gotURL():void {
-            stackIndex = 1;
-            var url:String = tokenService.getOAuthURL.lastResult as String;
-            navigateToURL(new URLRequest(url));
+            var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
+            if (response.successful) {
+                stackIndex = 1;
+                var requestToken:String = response.requestToken;
+                navigateToURL(new URLRequest(requestToken));
+            } else {
+                if (response.error == OAuthResponse.BAD_HOST) {
+                    Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight.");
+                } else {
+                    Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight.");
+                }
+            }
         }
 
         [Bindable]

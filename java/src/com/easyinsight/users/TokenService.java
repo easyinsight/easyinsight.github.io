@@ -14,6 +14,7 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthProvider;
+import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.signature.PlainTextMessageSigner;
 
 import java.net.URL;
@@ -38,11 +39,11 @@ public class TokenService {
         }
     }*/
 
-    public String getOAuthURL(int type, long connectionID) {
+    public OAuthResponse getOAuthURL(int type, long connectionID) {
         return getOAuthURL(type, connectionID, null);
     }
 
-    public String getOAuthURL(int type, long connectionID, String extra) {
+    public OAuthResponse getOAuthURL(int type, long connectionID, String extra) {
         try {
 
             OAuthConsumer consumer;
@@ -74,7 +75,14 @@ public class TokenService {
             FlexContext.getHttpRequest().getSession().setAttribute("oauthProvider", provider);
 
             //return provider.retrieveRequestToken(consumer, "http://www.easy-insight.com/solutions.html?sourceType=5&connectionID=" + connectionID);
-            return provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
+            String requestToken = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
+            return new OAuthResponse(requestToken, true);
+        } catch (OAuthCommunicationException oauthException) {
+            if (oauthException.getMessage().indexOf("302") != -1) {
+                return new OAuthResponse(false, OAuthResponse.BAD_HOST);
+            } else {
+                return new OAuthResponse(false, OAuthResponse.OTHER_OAUTH_PROBLEM);
+            }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

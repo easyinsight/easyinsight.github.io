@@ -159,7 +159,13 @@
         }
 
         private function created():void {
-            uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
+            var string:String = feedService.updateFeedDefinition.lastResult as String;
+            if (string == null) uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
+            else {
+                Alert.show(string);
+                ready = true;
+                progressBar.visible = false;
+            }
         }
 
         private function refreshed():void {

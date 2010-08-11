@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.freshbooks;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.UserMessageException;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
@@ -13,6 +14,7 @@ import com.easyinsight.users.Credentials;
 import flex.messaging.FlexContext;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
+import oauth.signpost.exception.OAuthCommunicationException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -103,8 +105,9 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
                 tokenKey = consumer.getToken();
                 tokenSecretKey = consumer.getTokenSecret();
             }
+        } catch (OAuthCommunicationException oe) {
+            throw new UserMessageException(oe, "The specified verifier token was rejected. Please try to authorize access again.");
         } catch (Exception e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         }
         super.customStorage(conn);
