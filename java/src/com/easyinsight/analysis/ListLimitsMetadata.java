@@ -28,8 +28,10 @@ public class ListLimitsMetadata extends LimitsMetadata implements Serializable, 
     }
 
     public void afterLoad() {
-        setAnalysisItem((AnalysisItem) Database.deproxy(getAnalysisItem()));
-        getAnalysisItem().afterLoad();
+        if (getAnalysisItem() != null) {
+            setAnalysisItem((AnalysisItem) Database.deproxy(getAnalysisItem()));
+            getAnalysisItem().afterLoad();
+        }
     }
 
     @Override
@@ -38,6 +40,8 @@ public class ListLimitsMetadata extends LimitsMetadata implements Serializable, 
     }
 
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
-        analysisItem = replacementMap.get(analysisItem.getAnalysisItemID());
+        if (analysisItem != null) {
+            analysisItem = replacementMap.get(analysisItem.getAnalysisItemID());
+        }
     }
 }

@@ -17,7 +17,8 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.controls.Button;
-import mx.controls.Label;
+
+import mx.controls.LinkButton;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
@@ -61,8 +62,10 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
                 listViewGrouping.addAnalysisItem(column);
             }
         }
-        var limitLabel:Label = new Label();
-        BindingUtils.bindProperty(limitLabel, "text", this, "limitText");
+        var limitLabel:LinkButton = new LinkButton();
+        limitLabel.setStyle("textDecoration", "underline");
+        limitLabel.addEventListener(MouseEvent.CLICK, editList);
+        BindingUtils.bindProperty(limitLabel, "label", this, "limitText");
         addChild(limitLabel);
     }
 
@@ -115,7 +118,7 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
         return listDefinition;
     }
 
-    public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
+    public function addItem(analysisItem:AnalysisItem):void {
         listViewGrouping.addAnalysisItem(analysisItem);
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
         dispatchEvent(new AnalysisChangedEvent(false));

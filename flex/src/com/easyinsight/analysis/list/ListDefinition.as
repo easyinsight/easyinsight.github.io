@@ -31,6 +31,18 @@ import mx.collections.ArrayCollection;
         }
 
 
+        override public function createDefaultLimits():void {
+            if (this.listLimitsMetadata == null) {
+                if (columns != null && columns.length > 0) {
+                    var limitsMetadata:ListLimitsMetadata = new ListLimitsMetadata();
+                    limitsMetadata.number = 1000;
+                    limitsMetadata.top = true;
+                    this.listLimitsMetadata = limitsMetadata;
+                }
+            }
+        }
+
+
         override public function get type():int {
             return AnalysisDefinition.LIST;
         }
