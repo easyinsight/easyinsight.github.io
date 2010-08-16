@@ -87,6 +87,7 @@
                             <mx:LinkButton label="API" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/api.html'))" textDecoration="underline" fontSize="14"/>
                             <mx:LinkButton label="Databases" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/database.html'))" textDecoration="underline" fontSize="14"/>
                             <mx:LinkButton label="Highrise" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/highrise.html'))" textDecoration="underline" fontSize="14"/>
+                            <mx:LinkButton label="Basecamp" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/basecamp.html'))" textDecoration="underline" fontSize="14"/>
                         </mx:VBox>
                     </mx:HBox>
                 </mx:VBox>
