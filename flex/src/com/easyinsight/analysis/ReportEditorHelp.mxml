@@ -1,43 +1,101 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="0" paddingLeft="0"
-        paddingRight="0" paddingTop="0" headerHeight="0">
-    <mx:VBox verticalGap="0">
-        <mx:VBox paddingBottom="20" paddingLeft="20" paddingRight="20" paddingTop="20" backgroundColor="#000000" horizontalAlign="center"
-                verticalGap="10">
-            <mx:HBox>
-                <mx:Button label="Quick Report Editor Intro" click="video1()" fontSize="18"/>
-                <mx:Button label="Creating Hierarchies" click="video2()" fontSize="18"/>
-            </mx:HBox>
-            <mx:Button label="View Documentation" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/reportediting.html'))" fontSize="18"/>
+        paddingRight="0" paddingTop="0" headerHeight="0" cornerRadius="15">
+    <mx:Canvas width="600" height="400">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="#000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="#CCCCCC"/>
         </mx:VBox>
+        <mx:Box width="100%" height="100%" paddingBottom="20" paddingLeft="20" paddingRight="20" paddingTop="20">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                verticalGap="10" width="100%" height="100%" backgroundColor="#FFFFFF"
+                    paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                <mx:Label text="Need help building the reports you need?" fontSize="18"/>
+                <mx:Spacer height="100%"/>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="140"
+                             width="150" cornerRadius="8" buttonMode="true" id="excelBox"
+                             mouseOver="excelBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="excelBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="screencast()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{screencastIcon}"/>
+                        <mx:Text text="View Screencasts" fontSize="14" selectable="false"/>
+                        <mx:TextArea
+                                text="Check out screencasts for helping with building reports"
+                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                height="80"
+                                width="130" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="140"
+                             width="150" cornerRadius="8" buttonMode="true" id="embedBox"
+                             mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="htmlDoc()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{htmlIcon}"/>
+                        <mx:Text text="View HTML Docs" fontSize="14" selectable="false"/>
+                        <mx:TextArea
+                                text="Open the HTML documentation for report building"
+                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                height="80"
+                                width="130" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="140"
+                             width="150" cornerRadius="8" buttonMode="true" id="emailBox"
+                             mouseOver="emailBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="emailBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="contact()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{contactIcon}"/>
+                        <mx:Text text="Contact Easy Insight" fontSize="14" selectable="false"/>
+                        <mx:TextArea
+                                text="Need further help? Contact us and we'll help you get those reports built"
+                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                height="80"
+                                width="130" textAlign="center"/>
+                    </mx:VBox>
+                </mx:HBox>
+                <mx:Spacer height="100%"/>
+                <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+            </mx:VBox>
+        </mx:Box>
 
         <!--<mx:Button label="Restore Hints" click="restoreHints()"/>-->
-        <mx:HBox width="100%" horizontalAlign="center" paddingBottom="20" paddingLeft="20" paddingRight="20" paddingTop="20" backgroundColor="#FFFFFF">
-            <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="18"/>
-        </mx:HBox>
-    </mx:VBox>
-    <mx:Script><![CDATA[
-        import com.easyinsight.help.ScreencastWindow;
-        import com.easyinsight.util.PopUpUtil;
 
+    </mx:Canvas>
+    <mx:Script><![CDATA[
+
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
-        private function video1():void {
-            var window:ScreencastWindow = new ScreencastWindow();
-            window.width = 946;
-            window.height = 504;
-            window.screencastSource = "http://eivideo.s3.amazonaws.com/ReportEditor1.mov";
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+        [Bindable]
+        [Embed(source="../../../../assets/media_play_green.png")]
+        private var screencastIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/earth.png")]
+        private var htmlIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/mail.png")]
+        private var contactIcon:Class;
+
+        private function screencast():void {
+            navigateToURL(new URLRequest("http://www.youtube.com/user/easyinsight"), "_blank");
         }
 
-        private function video2():void {
-            var window:ScreencastWindow = new ScreencastWindow();
-            window.width = 946;
-            window.height = 504;
-            window.screencastSource = "http://eivideo.s3.amazonaws.com/Hierarchies.mov";
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+        private function htmlDoc():void {
+            navigateToURL(new URLRequest("http://www.easy-insight.com/documentation/toc.html"), "_blank");
+        }
+
+        private function contact():void {
+            Alert.show("For help with building reports, please email support@easy-insight.com. We'll respond to you as quickly as possible.");
         }
         ]]></mx:Script>
 </util:EITitleWindow>
