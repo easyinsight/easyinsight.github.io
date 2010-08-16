@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initListeners()"
-	implements="com.easyinsight.listing.IPerspective" xmlns:listing="com.easyinsight.listing.*" 
-	xmlns:customupload="com.easyinsight.customupload.*" doubleClickEnabled="true" backgroundColor="#DCE2F8">
-	<mx:Script>
+           implements="com.easyinsight.listing.IPerspective" xmlns:listing="com.easyinsight.listing.*"
+           xmlns:customupload="com.easyinsight.customupload.*" doubleClickEnabled="true" backgroundColor="#DCE2F8">
+    <mx:Script>
 		<![CDATA[        
         import com.easyinsight.account.Account;
         import com.easyinsight.customupload.UploadConfigEvent;
@@ -62,7 +62,7 @@
         [Embed(source="../../../../assets/package.png")]
         public var packageIcon:Class;
 
-        [Embed(source="../../../../assets/branchx16.png")]
+        [Embed(source="../../../../assets/branch_add.png")]
         public var kpiTreeIcon:Class;
 
         [Bindable]
@@ -78,7 +78,7 @@
         public var dataConnectionIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/data_table_x64.png")]
+        [Embed(source="../../../../assets/data_table.png")]
         public var joinIcon:Class;
 
         [Bindable]
@@ -86,11 +86,11 @@
         public var packageAddIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/tablesx48.png")]
+        [Embed(source="../../../../assets/tables_x16.png")]
         public var tablesAddIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/calendarx48.png")]
+        [Embed(source="../../../../assets/calendar.png")]
         public var calendarIcon:Class;
 
         [Bindable]
@@ -291,7 +291,7 @@
                 showConnections = uiConfig.getConfiguration(UIConfiguration.SHOW_CONNECTIONS).selected;
                 showLookupTable = uiConfig.getConfiguration(UIConfiguration.SHOW_LOOKUP_TABLE).selected;
                 addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.PRO;
-            }       
+            }
         }
 
         private function passThrough(event:Event):void {
@@ -350,9 +350,9 @@
         private function iconFunction(item:Object, depth:int):Class {
             if (item is DataFeedDescriptor) {
                 return listIcon;
-             } else if (item is InsightDescriptor) {
-             return crosstabIcon;
-             } else if (item is ReportPackageDescriptor) {
+            } else if (item is InsightDescriptor) {
+                return crosstabIcon;
+            } else if (item is ReportPackageDescriptor) {
                 return packageIcon;
             } else if (item is LookupTableDescriptor) {
                 return tablesIcon;
@@ -365,9 +365,9 @@
         private function simpleIconFunction(item:Object):Class {
             if (item is DataFeedDescriptor) {
                 return listIcon;
-             } else if (item is InsightDescriptor) {
-             return crosstabIcon;
-             } else if (item is ReportPackageDescriptor) {
+            } else if (item is InsightDescriptor) {
+                return crosstabIcon;
+            } else if (item is ReportPackageDescriptor) {
                 return packageIcon;
             } else if (item is LookupTableDescriptor) {
                 return tablesIcon;
@@ -511,86 +511,102 @@
         private var addGoalTreeAvailable:Boolean = true;
 
         /*private function createTheme():void {
-            var editor:StyleEditor = new StyleEditor();
-            PopUpManager.addPopUp(editor, this, true);
-            PopUpUtil.centerPopUp(editor);
-        }*/
+         var editor:StyleEditor = new StyleEditor();
+         PopUpManager.addPopUp(editor, this, true);
+         PopUpUtil.centerPopUp(editor);
+         }*/
 
 		]]>
 </mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="deleteGoalTree" result="deletedTree()"/>
     </mx:RemoteObject>
-	<mx:RemoteObject id="uploadService" destination="userUpload">
-		<mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
-		<mx:method name="deleteUserUpload" result="deleted()"/>		
-	</mx:RemoteObject>
-	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
-		<mx:method name="deleteAnalysisDefinition" result="deletedAnalysis()"/>
-	</mx:RemoteObject>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
+        <mx:method name="deleteUserUpload" result="deleted()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="deleteAnalysisDefinition" result="deletedAnalysis()"/>
+    </mx:RemoteObject>
     <mx:RemoteObject id="packageService" destination="reportPackageService">
-		<mx:method name="deleteReportPackage" result="deletedPackage()"/>
-	</mx:RemoteObject>
+        <mx:method name="deleteReportPackage" result="deletedPackage()"/>
+    </mx:RemoteObject>
     <mx:RemoteObject id="etlService" destination="feeds">
-		<mx:method name="deleteLookupTable" result="deletedLookupTable()"/>
-	</mx:RemoteObject>
+        <mx:method name="deleteLookupTable" result="deletedLookupTable()"/>
+    </mx:RemoteObject>
 
-	<mx:ViewStack id="coreContent" height="100%" width="100%" verticalGap="10" selectedIndex="{stackIndex}" creationPolicy="all">
+    <mx:ViewStack id="coreContent" height="100%" width="100%" verticalGap="10" selectedIndex="{stackIndex}"
+                  creationPolicy="all">
         <mx:Box width="100%" height="100%"/>
         <listing:MyNoData/>
         <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:ProgressBar label="Loading your data..." indeterminate="true"/>
         </mx:Box>
-        <mx:VBox width="100%" height="100%" verticalGap="10">
-		<mx:HBox width="100%" id="uploadBox" verticalAlign="middle"  paddingTop="10" paddingLeft="10" paddingRight="10">
-			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
-				label="Combine Sources" labelPlacement="bottom" visible="{showComposite}"/>
-            <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton" icon="{packageAddIcon}"
-				label="Create Package" labelPlacement="bottom" visible="{showPackage}"/>
-			<!--<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
-               label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>-->
-            <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton" icon="{tablesAddIcon}"
-               label="Lookup Table" labelPlacement="bottom" visible="{showLookupTable}"/>
-            <mx:Button toolTip="Scheduling..." click="toScheduling()" id="schedulingButton" icon="{calendarIcon}"
-               label="Scheduling" labelPlacement="bottom" visible="{showLookupTable}"/>
-            <mx:Button toolTip="Add KPI Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
-                           label="Add KPI Tree" labelPlacement="bottom" visible="{addGoalTreeAvailable}"/>
-            <!--<mx:Button toolTip="Create theme..." click="createTheme()" id="styleAddButton" icon="{themeAddIcon}"
-               label="Create Theme" labelPlacement="bottom"/>-->
-            <mx:ProgressBar indeterminate="true" visible="{showLoading}"/>
-            <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" visible="{showConnections}">
-                <mx:Label text="Need to add data?" fontSize="16"/>
-                <mx:Button toolTip="Go to connections..." click="toConnections()" icon="{connectionsIcon}"
-                           label="Go to Connections" labelPlacement="bottom"/>
+        <mx:Box backgroundColor="#818285" width="100%" height="100%" horizontalAlign="center">
+                      <mx:VBox width="1000" height="100%" verticalGap="10" backgroundColor="#FFFFFF" paddingLeft="10"
+                     paddingRight="10">
+            <mx:HBox width="100%" id="uploadBox" paddingTop="10">
+                <mx:Button toolTip="Create composite data source..." click="createCompositeFeed()"
+                           id="compositeFeedButton" icon="{joinIcon}" visible="{showComposite}"/>
+                <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton"
+                           icon="{packageAddIcon}" visible="{showPackage}"/>
+                <!--<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
+             label="Desktop Widget" labelPlacement="bottom" visible="{showWidget}"/>-->
+                <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton"
+                           icon="{tablesAddIcon}"
+                           visible="{showLookupTable}"/>
+                <mx:Button toolTip="Scheduling..." click="toScheduling()" id="schedulingButton" icon="{calendarIcon}"
+                           visible="{showLookupTable}"/>
+                <mx:Button toolTip="Add KPI Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
+                           visible="{addGoalTreeAvailable}"/>
+                <!--<mx:Button toolTip="Create theme..." click="createTheme()" id="styleAddButton" icon="{themeAddIcon}"
+              label="Create Theme" labelPlacement="bottom"/>-->
+                <mx:ProgressBar indeterminate="true" visible="{showLoading}"/>
+                <mx:Spacer width="100%"/>
+                <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" visible="{showConnections}">
+                    <mx:Label text="Need to add data?" fontSize="16"/>
+                    <mx:Button toolTip="Go to connections..." click="toConnections()" icon="{connectionsIcon}"
+                               label="Go to Connections" labelPlacement="bottom"/>
+                </mx:HBox>
+                <mx:VBox horizontalAlign="center">
+                    <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5"
+                             paddingRight="5">
+                        <mx:TextInput id="searchText" keyUp="search()"/>
+                        <mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')"
+                                   id="searchButton"/>
+                    </mx:HBox>
+                    <mx:HBox>
+                        <mx:CheckBox id="groupInclude" change="groupIncludeChanged()" selected="{includeGroups}"/>
+                        <mx:Label text="Include Data in My Groups"/>
+                    </mx:HBox>
+                </mx:VBox>
             </mx:HBox>
-            <mx:VBox horizontalAlign="center">
-                <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
-                    <mx:TextInput id="searchText" keyUp="search()"/>
-                    <mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton"/>
-                </mx:HBox>
-                <mx:HBox>
-                    <mx:CheckBox id="groupInclude" change="groupIncludeChanged()" selected="{includeGroups}"/>
-                    <mx:Label text="Include Data in My Groups"/>
-                </mx:HBox>
-            </mx:VBox>
-		</mx:HBox>
-
-            <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" id="myDataBox">
-            <mx:AdvancedDataGrid width="100%" height="100%" id="uploadGrid" allowMultipleSelection="true" fontSize="12"
-                itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader" itemOpen="onItemOpen(event)"
-                    iconFunction="simpleIconFunction">
-                <mx:dataProvider>
-                    <mx:HierarchicalData source="{displayTreeData}"/>
-                </mx:dataProvider>
-                <mx:columns>
-                    <mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
-                    <mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110" itemRenderer="com.easyinsight.listing.SizeRenderer"/>
-                    <mx:AdvancedDataGridColumn id="dataColumn" headerText="Last Data Time" dataField="lastDataTime" width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
-                            sortCompareFunction="customSort"/>
-                    <mx:AdvancedDataGridColumn width="250" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
-                </mx:columns>
-            </mx:AdvancedDataGrid>
+            <mx:TextArea text="The tree below shows your data sources and reports. You can click on the arrow to the left of any data source to show reports associated with that data source. Use the icons on the right side of the table to create new reports, open existing reports, or take admin actions."
+                    width="980" editable="false" selectable="false" fontSize="14"/>
+            <mx:Box width="100%" height="100%" paddingBottom="10" id="myDataBox">
+                <mx:AdvancedDataGrid width="100%" height="100%" id="uploadGrid" allowMultipleSelection="true"
+                                     fontSize="12"
+                                     itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader"
+                                     itemOpen="onItemOpen(event)"
+                                     iconFunction="simpleIconFunction">
+                    <mx:dataProvider>
+                        <mx:HierarchicalData source="{displayTreeData}"/>
+                    </mx:dataProvider>
+                    <mx:columns>
+                        <mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
+                        <mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110"
+                                                   itemRenderer="com.easyinsight.listing.SizeRenderer"/>
+                        <mx:AdvancedDataGridColumn id="dataColumn" headerText="Last Data Time" dataField="lastDataTime"
+                                                   width="140"
+                                                   itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
+                                                   sortCompareFunction="customSort"/>
+                        <mx:AdvancedDataGridColumn width="240" headerText="" dataField="name" sortable="false"
+                                                   itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
+                    </mx:columns>
+                </mx:AdvancedDataGrid>
             </mx:Box>
         </mx:VBox>
-	</mx:ViewStack>
+        </mx:Box>
+
+    </mx:ViewStack>
 </mx:Canvas>
