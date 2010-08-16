@@ -8,9 +8,7 @@ import org.hibernate.Session;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 /**
  * User: jamesboe
@@ -42,7 +40,7 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
         return ScheduledActivity.DATA_SOURCE_REFRESH;
     }
 
-    protected void customSave(EIConnection conn) throws SQLException {
+    protected void customSave(EIConnection conn, int utcOffset) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SCHEDULED_DATA_SOURCE_REFRESH WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         clearStmt.setLong(1, getScheduledActivityID());
         clearStmt.executeUpdate();

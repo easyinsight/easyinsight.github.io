@@ -6,6 +6,7 @@ import mx.collections.ArrayCollection;
 public class ScheduledDelivery extends ScheduledActivity {
 
     public var users:ArrayCollection = new ArrayCollection();
+    public var emails:ArrayCollection = new ArrayCollection();
 
     public function ScheduledDelivery() {
         super();

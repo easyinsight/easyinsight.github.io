@@ -10,7 +10,7 @@ import mx.events.FlexEvent;
 
 public class RecipientControls extends UIComponent implements IListItemRenderer {
 
-    private var user:UserStub;
+    private var obj:Object;
 
     [Embed(source="../../../../assets/navigate_cross.png")]
     private var deleteIcon:Class;
@@ -42,17 +42,18 @@ public class RecipientControls extends UIComponent implements IListItemRenderer 
     }
 
     private function deleteActivity(event:MouseEvent):void {
-        dispatchEvent(new RecipientEvent(RecipientEvent.DELETE_RECIPIENT, user));
+        if (obj is UserStub) dispatchEvent(new RecipientEvent(RecipientEvent.DELETE_RECIPIENT, UserStub(obj)));
+        else dispatchEvent(new RecipientEvent(RecipientEvent.DELETE_RECIPIENT, null, String(obj)));
     }
 
     [Bindable("dataChange")]
     public function set data(value:Object):void {
-        user = value as UserStub;
+        obj = value;
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
     public function get data():Object {
-        return user;
+        return obj;
     }
 }
 }

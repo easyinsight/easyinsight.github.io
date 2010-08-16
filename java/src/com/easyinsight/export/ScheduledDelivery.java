@@ -17,6 +17,7 @@ import java.util.List;
 public abstract class ScheduledDelivery extends ScheduledActivity {
 
     private List<UserStub> users = new ArrayList<UserStub>();
+    private List<String> emails = new ArrayList<String>();
 
     public List<UserStub> getUsers() {
         return users;
@@ -26,7 +27,15 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
         this.users = users;
     }
 
-    protected void customSave(EIConnection conn) throws SQLException {
+    public List<String> getEmails() {
+        return emails;
+    }
+
+    public void setEmails(List<String> emails) {
+        this.emails = emails;
+    }
+
+    protected void customSave(EIConnection conn, int utcOffset) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM delivery_to_user WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         clearStmt.setLong(1, getScheduledActivityID());
         clearStmt.executeUpdate();
@@ -38,6 +47,17 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
             insertStmt.execute();
         }
         insertStmt.close();
+        PreparedStatement clearEmailStmt = conn.prepareStatement("DELETE FROM delivery_to_email WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        clearEmailStmt.setLong(1, getScheduledActivityID());
+        clearEmailStmt.executeUpdate();
+        clearEmailStmt.close();
+        PreparedStatement insertEmailStmt = conn.prepareStatement("INSERT INTO delivery_to_email (email_address, SCHEDULED_ACCOUNT_ACTIVITY_ID) VALUES (?, ?)");
+        for (String email : emails) {
+            insertEmailStmt.setString(1, email);
+            insertEmailStmt.setLong(2, getScheduledActivityID());
+            insertEmailStmt.execute();
+        }
+        insertEmailStmt.close();
     }
 
     protected void customLoad(EIConnection conn) throws SQLException {
@@ -53,6 +73,15 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
             users.add(userStub);
         }
         queryStmt.close();
+        PreparedStatement queryEmailStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        queryEmailStmt.setLong(1, getScheduledActivityID());
+        List<String> emails = new ArrayList<String>();
+        ResultSet emailRS = queryEmailStmt.executeQuery();
+        while (emailRS.next()) {
+            String email = emailRS.getString(1);
+            emails.add(email);
+        }
         setUsers(users);
+        setEmails(emails);
     }
 }

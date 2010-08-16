@@ -3,9 +3,9 @@
                     xmlns:schedule="com.easyinsight.schedule.*"
                     creationComplete="setup()" title="Report Email Delivery">
     <mx:Script><![CDATA[
-        import com.easyinsight.administration.feed.AddUserToFeedWindow;
-        import com.easyinsight.administration.feed.UserLinkEvent;
+        import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
@@ -27,7 +27,8 @@
         }
 
         private function deleteRecipient(event:RecipientEvent):void {
-            recipients.removeItemAt(recipients.getItemIndex(event.user));
+            if (event.user != null) recipients.removeItemAt(recipients.getItemIndex(event.user));
+            else recipients.removeItemAt(recipients.getItemIndex(event.email));
         }
 
 
@@ -46,7 +47,12 @@
             super.commitProperties();
             if (_activity != null) {
                 htmlEmail = _activity.htmlEmail;
-                recipients = _activity.users;
+                for each (var user:UserStub in _activity.users) {
+                    recipients.addItem(user);
+                }
+                for each (var email:String in _activity.emails) {
+                    recipients.addItem(email);
+                }
                 reportID = _activity.reportID;
                 body = _activity.body;
                 subjectLine = _activity.subject;
@@ -67,7 +73,18 @@
                 activity = new ReportDelivery();
             }
             if (scheduleConfiguration.save()) {
-                _activity.users = recipients;
+                var users:ArrayCollection = new ArrayCollection();
+                var emails:ArrayCollection = new ArrayCollection();
+                for each (var obj:Object in recipients) {
+                    if (obj is UserStub) {
+                        users.addItem(obj);
+                    } else {
+                        emails.addItem(obj);
+                    }
+                }
+                _activity.users = users;
+                _activity.emails = emails;
+
                 _activity.htmlEmail = htmlEmailCheckbox.selected;
                 if (_fixedReportID > 0) {
                     _activity.reportID = _fixedReportID;
@@ -79,6 +96,7 @@
                 _activity.body = bodyTextInput.text;
                 _activity.subject = subjectInput.text;
                 var utcOffset:int = new Date().getTimezoneOffset();
+                ProgressAlert.alert(this, "Saving...", null, exportService.addOrUpdateSchedule);
                 exportService.addOrUpdateSchedule.send(_activity, utcOffset);
             }
         }
@@ -114,14 +132,15 @@
         }
 
         private function addRecipient():void {
-            var window:AddUserToFeedWindow = new AddUserToFeedWindow();
-            window.addEventListener(UserLinkEvent.ADD_USER_LINK, onAddUser, false, 0, true);
+            var window:RecipientWindow = new RecipientWindow();
+            window.addEventListener(RecipientEvent.ADD_RECIPIENT, onAddUser, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
 
-        private function onAddUser(event:UserLinkEvent):void {
-            recipients.addItem(event.userStub);
+        private function onAddUser(event:RecipientEvent):void {
+            if (event.user != null) recipients.addItem(event.user);
+            else recipients.addItem(event.email);
         }
 
         private var _fixedReportID:int;
@@ -193,7 +212,8 @@
                             <mx:Button label="Add Recipient..." click="addRecipient()"/>
                             <mx:DataGrid dataProvider="{recipients}" rowHeight="28">
                                 <mx:columns>
-                                    <util:EIDataGridColumn headerText="User" dataField="displayName" width="300"/>
+                                    <util:EIDataGridColumn headerText="User" dataField="displayName" width="300"
+                                            itemRenderer="com.easyinsight.schedule.RecipientRenderer"/>
                                     <util:EIDataGridColumn headerText="" dataField="displayName"
                                                            itemRenderer="com.easyinsight.schedule.RecipientControls"
                                                            width="50"

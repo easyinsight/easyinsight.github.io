@@ -9,6 +9,7 @@ public class ReportDelivery extends ScheduledDelivery {
     public var subject:String;
     public var body:String;
     public var htmlEmail:Boolean;
+    public var timezoneOffset:int;
 
     public function ReportDelivery() {
         super();

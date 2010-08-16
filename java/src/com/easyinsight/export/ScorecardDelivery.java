@@ -18,7 +18,7 @@ public class ScorecardDelivery extends ScheduledActivity {
     }
 
     @Override
-    protected void customSave(EIConnection conn) throws SQLException {
+    protected void customSave(EIConnection conn, int utcOffset) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SCORECARD_DISPLAY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         clearStmt.setLong(1, getScheduledActivityID());
         clearStmt.executeUpdate();

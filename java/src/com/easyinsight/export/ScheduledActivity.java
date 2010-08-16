@@ -51,19 +51,19 @@ public abstract class ScheduledActivity {
             insertStmt.execute();
             this.scheduledActivityID = Database.instance().getAutoGenKey(insertStmt);
             insertStmt.close();
-            this.customSave(conn);
+            this.customSave(conn, utcOffset);
             scheduleType.save(conn, utcOffset, this.scheduledActivityID);
         } else {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM SCHEDULE WHERE scheduled_account_activity_id = ?");
             deleteStmt.setLong(1, scheduledActivityID);
             deleteStmt.executeUpdate();
             deleteStmt.close();
-            this.customSave(conn);
+            this.customSave(conn, utcOffset);
             scheduleType.save(conn, utcOffset, this.scheduledActivityID);
         }
     }
 
-    protected void customSave(EIConnection conn) throws SQLException {
+    protected void customSave(EIConnection conn, int utcOffset) throws SQLException {
 
     }
 

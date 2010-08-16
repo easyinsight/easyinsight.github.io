@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" keyDown="submitted(event)" creationComplete="onCreationComplete()">
+	<mx:Script>
+		<![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.framework.User;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        [Bindable]
+        private var userStubs:ArrayCollection;
+
+        private function onCreationComplete():void {
+            focusManager.setFocus(userIDInput);
+            shareService.getUserStubs.send(_includeUser);
+        }
+
+        private function gotUserStubs():void {
+            this.userStubs = shareService.getUserStubs.lastResult as ArrayCollection;
+        }
+
+        private function save():void {
+            if (stackIndex == 0) {
+                dispatchEvent(new RecipientEvent(RecipientEvent.ADD_RECIPIENT, userIDInput.selectedItem as UserStub));
+                PopUpManager.removePopUp(this);
+            } else if (stackIndex == 1) {
+                Alert.show("You'll need to select a user from your account to set up email delivery.");
+            } else if (stackIndex == 2) {
+                var results:Array = Validator.validateAll([emailValidator]);
+                if (results.length == 0) {
+                    dispatchEvent(new RecipientEvent(RecipientEvent.ADD_RECIPIENT, null, emailInput.text));
+                    PopUpManager.removePopUp(this);
+                } else {
+                    emailInput.setFocus();
+                    emailInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                }
+            }
+            //
+
+        }
+
+        private function submitted(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                save();
+            }
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private var _includeUser:Boolean = false;
+
+        public function set includeUser(value:Boolean):void {
+            _includeUser = value;
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        private function onChange(event:Event):void {
+            if (typeGroup.selectedValue == "user") {
+                stackIndex = 0;
+            } else if (typeGroup.selectedValue == "email") {
+                if (User.getInstance().getAccountType() < Account.PLUS) {
+                    stackIndex = 1;
+                } else {
+                    stackIndex = 2;
+                }
+            }
+        }
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="shareService" destination="share">
+		<mx:method name="getUserStubs" result="gotUserStubs()"/>			
+	</mx:RemoteObject>
+	<mx:VBox styleName="TitleWindowContents">
+        <mx:Label text="Do you want to send the email to another user on your account or to an external email address?" fontSize="14"/>
+        <mx:RadioButtonGroup id="typeGroup" change="onChange(event)"/>
+        <mx:HBox>
+            <mx:RadioButton label="User in Account" id="userInAccount" value="user" groupName="typeGroup" selected="true"/>
+            <mx:RadioButton label="Email Address" id="emailAddress" value="email" groupName="typeGroup"/>
+        </mx:HBox>
+        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+            <mx:HBox>
+                <mx:Label text="Choose the name of the user:"/>
+                <mx:ComboBox id="userIDInput" dataProvider="{userStubs}" labelField="displayName"/>
+            </mx:HBox>
+            <mx:VBox>
+                <mx:TextArea text="You'll need to upgrade to a Plus or higher account in order to take advantage of this functionality." borderStyle="none"
+                        backgroundAlpha="0" editable="false" selectable="false"/>
+            </mx:VBox>
+            <mx:HBox>
+                <mx:Label text="Enter the email address:"/>
+                <mx:TextInput id="emailInput"/>
+            </mx:HBox>
+        </mx:ViewStack>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Add" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:HBox>
+	</mx:VBox>		
+    <mx:EmailValidator source="{emailInput}" property="text" id="emailValidator"/>
+</util:EITitleWindow>
