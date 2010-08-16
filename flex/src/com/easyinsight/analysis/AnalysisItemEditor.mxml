@@ -287,7 +287,11 @@
                     analysisItem.displayName = fieldNameInput.text;
                     analysisItem.key = key;
                     analysisItem.hidden = hiddenCheckbox.selected;
-                    analysisItem.links = links;
+                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        analysisItem.links = new ArrayCollection();
+                    } else {
+                        analysisItem.links = links;
+                    }
                     analysisItem.filters = transformContainer.getFilterDefinitions();
                     detailEditor.save(analysisItem);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
