@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.composite;
 
+import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
@@ -229,6 +230,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             conn.setAutoCommit(false);
             refreshData(credentials, accountID, now, conn, null);
             conn.commit();
+            ReportCache.instance().flushResults(getDataFeedID());
             return new CredentialsResponse(true, getDataFeedID());
         } catch (Exception e) {
             LogClass.error(e);

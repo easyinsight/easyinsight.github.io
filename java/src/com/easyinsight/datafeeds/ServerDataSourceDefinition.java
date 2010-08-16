@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
@@ -154,6 +155,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             conn.setAutoCommit(false);
             refreshData(credentials, accountID, now, conn, null);
             conn.commit();
+            ReportCache.instance().flushResults(getDataFeedID());
             return new CredentialsResponse(true, getDataFeedID());
         } catch (Exception e) {
             LogClass.error(e);
