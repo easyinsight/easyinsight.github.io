@@ -65,9 +65,6 @@
                 <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
             </mx:VBox>
         </mx:Box>
-
-        <!--<mx:Button label="Restore Hints" click="restoreHints()"/>-->
-
     </mx:Canvas>
     <mx:Script><![CDATA[
 

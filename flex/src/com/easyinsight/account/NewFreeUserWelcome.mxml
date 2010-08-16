@@ -47,36 +47,12 @@
     </mx:Script>
     <mx:HBox width="100%" height="100%" horizontalAlign="center" backgroundColor="#818285">
         <mx:VBox height="100%" backgroundColor="#FFFFFF" width="1000" verticalGap="0">
-            <mx:HBox verticalAlign="middle" horizontalAlign="center"
-                                         width="100%" backgroundColor="#848080" paddingTop="10" paddingBottom="10">
-                <mx:Label text="Getting Started with Easy Insight" fontSize="18" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
-            </mx:HBox>
+            <mx:VBox verticalAlign="middle" horizontalAlign="center"
+                                         width="100%" backgroundColor="#DDDDDD" paddingTop="10" paddingBottom="0">
+                <mx:Label text="Getting Started with Easy Insight" fontSize="18" fontFamily="Tahoma" fontWeight="bold" color="#000000"/>
+                <mx:HRule width="100%"/>
+            </mx:VBox>
             <mx:HBox width="100%" height="260">
-                <!--
-                    ways to get started:
-
-                    free user:
-
-                    browsing for free data
-                    uploading a spreadsheet/pulling in data                    
-
-                    individual user:
-
-                    browsing for free data
-                    uploading a spreadsheet/pulling in data
-                    connecting to external data
-
-                    group user:
-
-                    uploading a spreadsheet/pulling in data
-                    connecting to external data
-                    building from a kpi tree
-
-                    browse documentation
-                    take a tour
-
-                    configurability of user interface
-                -->
                 <mx:VBox width="50%" horizontalAlign="center" backgroundColor="#EEEEEE" paddingLeft="15" paddingRight="15" paddingTop="30" height="100%">
                     <mx:Button label="Upload Your Own Data" click="dispatchEvent(new NavigationEvent('Connections'))" fontSize="18"
                             styleName="redButton"/>
@@ -94,7 +70,7 @@
             </mx:HBox>
             <mx:HBox width="100%" paddingLeft="30" paddingRight="30" paddingTop="20" backgroundColor="#DDDDDD" height="100%" borderStyle="solid" borderThickness="1">
 
-                <mx:VBox width="100%" horizontalAlign="center" borderStyle="solid" borderThickness="1" cornerRadius="15" height="200"
+                <mx:VBox width="100%" horizontalAlign="center" borderStyle="solid" borderThickness="1" cornerRadius="15" height="210"
                         backgroundColor="#FFFFFF">
                     <mx:Label text="Our Easy Insight Documentation" fontSize="16" fontFamily="Tahoma" fontWeight="bold"/>
                     <mx:HRule width="100%"/>
@@ -103,11 +79,14 @@
                             <mx:LinkButton label="All" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/toc.html'))" textDecoration="underline" fontSize="14"/>
                             <mx:LinkButton label="Concepts" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/coreconcepts.html'))" textDecoration="underline" fontSize="14"/>
                             <mx:LinkButton label="Data Sources" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/datasources.html'))" textDecoration="underline" fontSize="14"/>
-                        </mx:VBox>
-                        <mx:VBox width="50%">
                             <mx:LinkButton label="Report Creation" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/reportediting.html'))" textDecoration="underline" fontSize="14"/>
                             <mx:LinkButton label="KPIs" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/kpi.html'))" textDecoration="underline" fontSize="14"/>
+                        </mx:VBox>
+                        <mx:VBox width="50%">
                             <mx:LinkButton label="Collaboration" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/collaboration.html'))" textDecoration="underline" fontSize="14"/>
+                            <mx:LinkButton label="API" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/api.html'))" textDecoration="underline" fontSize="14"/>
+                            <mx:LinkButton label="Databases" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/database.html'))" textDecoration="underline" fontSize="14"/>
+                            <mx:LinkButton label="Highrise" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/highrise.html'))" textDecoration="underline" fontSize="14"/>
                         </mx:VBox>
                     </mx:HBox>
                 </mx:VBox>

@@ -98,6 +98,9 @@
             uiConfig.toggle(UIConfiguration.SHOW_APIS, false);
             uiConfig.toggle(UIConfiguration.SHOW_KPIS, false);
             uiConfig.toggle(UIConfiguration.SHOW_REPORT_EDITOR_API, false);
+            uiConfig.toggle(UIConfiguration.SHOW_CREATE_PACKAGE, false);
+            uiConfig.toggle(UIConfiguration.SHOW_COMBINE_SOURCES, false);
+            uiConfig.toggle(UIConfiguration.SHOW_LOOKUP_TABLE, false);
             uiConfig.toggle(UIConfiguration.SHOW_DLS, false);
             uiConfig.toggle(UIConfiguration.SHOW_TEXT_REPLACES, false);
             if (_accountType == Account.PERSONAL) {
