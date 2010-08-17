@@ -210,20 +210,18 @@ public class ExcelUploadFormat extends UploadFormat {
                 }
                 break;
             case HSSFCell.CELL_TYPE_STRING:
-                String value = cell.getRichStringCellValue().getString();
-                Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
-                Matcher matcher = pattern.matcher(value);
-                if (matcher.find()) {
-                    String substring = value.substring(matcher.start(), matcher.end());
+                String value = cell.getRichStringCellValue().getString().trim();
+                SimpleDateFormat format = guessDate(value);
+                if (format == null) {
+                    obj = new StringValue(value);
+                } else {
                     try {
-                        Date date = defaultDateFormat.parse(substring);
+                        Date date = defaultDateFormat.parse(value);
                         obj = new DateValue(date);
                     } catch (ParseException e) {
                         // ignore
-                        obj = new StringValue(value.trim());
+                        obj = new StringValue(value);
                     }
-                } else {
-                    obj = new StringValue(value.trim());
                 }
                 break;
             case HSSFCell.CELL_TYPE_FORMULA:
@@ -231,6 +229,31 @@ public class ExcelUploadFormat extends UploadFormat {
                 obj = new EmptyValue();
         }
         return obj;
+    }
+
+    private static SimpleDateFormat[] dateFormats = new SimpleDateFormat[] {
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz"),
+            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z"),
+            new SimpleDateFormat("yyyy-MM-dd"),
+            new SimpleDateFormat("MM-dd-yy"),
+            new SimpleDateFormat("MM-dd-yyyy"),
+            new SimpleDateFormat("MM/dd/yy"),
+            new SimpleDateFormat("yyyy/MM/dd"),
+            new SimpleDateFormat("MM/dd/yyyy")
+    };
+
+    private static SimpleDateFormat guessDate(String value) {
+        SimpleDateFormat matchedFormat = null;
+        for (SimpleDateFormat dateFormat : dateFormats) {
+            try {
+                dateFormat.parse(value);
+                matchedFormat = dateFormat;
+                break;
+            } catch (ParseException e) {
+                // didn't work...
+            }
+        }
+        return matchedFormat;
     }
 
     private String[] getHeaderColumns(HSSFSheet sheet, int alignment) {

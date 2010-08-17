@@ -122,9 +122,6 @@ public class StandardReportPipeline extends Pipeline {
         }
         components.add(new AggregationComponent());
 
-        // TODO: if a calculation is based on second calculation, populate results with the first calculation first
-        // directed graph required? or just list
-
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false));
 
         components.add(new AggregationComponent(AggregationTypes.RANK));
