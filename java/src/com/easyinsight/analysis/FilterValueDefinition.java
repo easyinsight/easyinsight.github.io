@@ -158,6 +158,8 @@ public class FilterValueDefinition extends FilterDefinition {
                 value = new NumericValue((Number) valueObject);
             } else if (valueObject instanceof Date) {
                 value = new DateValue((Date) valueObject);
+            } else if (valueObject == null) {
+                continue;
             } else {
                 throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
             }
