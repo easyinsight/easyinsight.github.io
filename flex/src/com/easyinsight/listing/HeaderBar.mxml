@@ -31,8 +31,7 @@
             User.getEventNotifier().addEventListener("uiChange", uiChangeEvent);
             if (User.getInstance().uiConfiguration != null) {
                 createState(User.getInstance().uiConfiguration);
-            }
-            GAHelper.instance().tracker.trackPageview("LoggedInApplication");
+            }            
         }
 
         private function loginEvent(event:LoginEvent):void {            

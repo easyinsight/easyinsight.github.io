@@ -146,6 +146,7 @@
                                 case "success":
                                     /*User.initializeUser(authResult);
                                      User.getInstance().userName = authResult.userName;*/
+                                    GAHelper.instance().tracker.trackPageview("LoggedInApplication");
                                     dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
                                     //User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
                                     break;
