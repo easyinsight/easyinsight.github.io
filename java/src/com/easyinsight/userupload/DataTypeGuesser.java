@@ -48,6 +48,12 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 strings.add(value.toString());
             }
         }
+        if ("".equals(value.toString().trim()) || value.type() == Value.EMPTY) {
+            if (dataTypeMap.get(tag) == null) {
+                dataTypeMap.put(tag, new AnalysisDimension(tag, true));
+            }
+            return;
+        }
         if (value.type() == Value.STRING) {
             AnalysisItem existingGuess = dataTypeMap.get(tag);
             if (existingGuess == null) {
