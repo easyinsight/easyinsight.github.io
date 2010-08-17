@@ -537,34 +537,46 @@ public class DataStorage {
                 KeyMetadata keyMetadata = keys.get(key);
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
-                        Timestamp time = dataRS.getTimestamp(i++);
-                        if (dataRS.wasNull()) {
+                        try {
+                            Timestamp time = dataRS.getTimestamp(i++);
+                            if (dataRS.wasNull()) {
+                                row.addValue(aggregateKey, new EmptyValue());
+                            } else {
+                                row.addValue(aggregateKey, new DateValue(new Date(time.getTime())));
+                            }
+                        } catch (SQLException e) {
                             row.addValue(aggregateKey, new EmptyValue());
-                        } else {
-                            row.addValue(aggregateKey, new DateValue(new java.util.Date(time.getTime())));
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {
-                        double value = dataRS.getDouble(i++);
-                        if (dataRS.wasNull()) {
-                            row.addValue(aggregateKey, new EmptyValue());
-                        } else {
-                            NumericValue numericValue = new NumericValue(value);
-                            if (aggregateQuery && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                                AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                                if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
-                                    CountAggregation countAggregation = new CountAggregation();
-                                    countAggregation.setCount(value);
-                                    numericValue.setAggregation(countAggregation);
+                        try {
+                            double value = dataRS.getDouble(i++);
+                            if (dataRS.wasNull()) {
+                                row.addValue(aggregateKey, new EmptyValue());
+                            } else {
+                                NumericValue numericValue = new NumericValue(value);
+                                if (aggregateQuery && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                                    if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                                        CountAggregation countAggregation = new CountAggregation();
+                                        countAggregation.setCount(value);
+                                        numericValue.setAggregation(countAggregation);
+                                    }
                                 }
+                                row.addValue(aggregateKey, numericValue);
                             }
-                            row.addValue(aggregateKey, numericValue);
+                        } catch (SQLException e) {
+                            row.addValue(aggregateKey, new EmptyValue());
                         }
                     } else {
-                        String value = dataRS.getString(i++);
-                        if (dataRS.wasNull()) {
+                        try {
+                            String value = dataRS.getString(i++);
+                            if (dataRS.wasNull()) {
+                                row.addValue(aggregateKey, new EmptyValue());
+                            } else {
+                                row.addValue(aggregateKey, new StringValue(value));
+                            }
+                        } catch (SQLException e) {
                             row.addValue(aggregateKey, new EmptyValue());
-                        } else {
-                            row.addValue(aggregateKey, new StringValue(value));
                         }
                     }
                 }
