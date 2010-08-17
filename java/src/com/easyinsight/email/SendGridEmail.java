@@ -137,7 +137,7 @@ public class SendGridEmail {
 
         Multipart multipart = new MimeMultipart();
 
-        message.setSubject(subject);
+        message.setSubject(MimeUtility.encodeText(subject));
 
         if (htmlEmail) {
             BodyPart part2 = new MimeBodyPart();

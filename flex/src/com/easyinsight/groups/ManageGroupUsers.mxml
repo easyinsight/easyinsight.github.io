@@ -45,14 +45,18 @@
 
         private function userChange(event:UserLinkEvent):void {
             onChange(null);
-            var userStub:UserStub = event.userStub as UserStub;
-            var groupUser:GroupUser = new GroupUser();
-            groupUser.email = userStub.email;
-            groupUser.fullName = userStub.fullName;
-            groupUser.name = userStub.name;
-            groupUser.userID = userStub.userID;
-            groupUser.role = 3;
-            this.users.addItem(groupUser);
+            if (event.type == UserLinkEvent.ADD_USER_LINK) {
+                var userStub:UserStub = event.userStub as UserStub;
+                var groupUser:GroupUser = new GroupUser();
+                groupUser.email = userStub.email;
+                groupUser.fullName = userStub.fullName;
+                groupUser.name = userStub.name;
+                groupUser.userID = userStub.userID;
+                groupUser.role = 3;
+                this.users.addItem(groupUser);
+            } else {
+                this.users.removeItemAt(this.users.getItemIndex(event.userStub));
+            }
         }
 
         private function onCreation():void {
