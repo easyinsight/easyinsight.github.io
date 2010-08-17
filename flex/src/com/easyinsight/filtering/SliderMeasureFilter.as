@@ -229,10 +229,10 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
         } else {
             if (_filterDefinition.startValueDefined) {
-                lowValueString = String(_filterDefinition.startValue);
+                lowValueString = _filterDefinition.field.getFormatter().format(_filterDefinition.startValue);
             }
             if (_filterDefinition.endValueDefined) {
-                highValueString = String(_filterDefinition.endValue);
+                highValueString = _filterDefinition.field.getFormatter().format(_filterDefinition.endValue);
             }
             if (_filterEditable) {
                 currentState = "Configured";
