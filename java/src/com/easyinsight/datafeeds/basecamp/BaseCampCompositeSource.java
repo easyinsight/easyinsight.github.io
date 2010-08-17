@@ -99,6 +99,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.BASECAMP_TIME);
         feedTypes.add(FeedType.BASECAMP_COMPANY);
         feedTypes.add(FeedType.BASECAMP_COMPANY_PROJECT_JOIN);
+        feedTypes.add(FeedType.BASECAMP_COMMENTS);
         return feedTypes;
     }
 
@@ -339,6 +340,9 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     private boolean isProjectLinkable(AnalysisItem analysisItem) {
         String keyString = analysisItem.getKey().toBaseKey().toKeyString();
+        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            return false;
+        }
         if (BaseCampTodoSource.PROJECTNAME.equals(keyString) ||
                 BaseCampTimeSource.PROJECTNAME.equals(keyString)) {
             return true;
@@ -348,6 +352,9 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     private boolean isTodoListLinkable(AnalysisItem analysisItem) {
         String keyString = analysisItem.getKey().toKeyString();
+        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            return false;
+        }
         if (BaseCampTodoSource.TODOLISTNAME.equals(keyString)) {
             return true;
         }
