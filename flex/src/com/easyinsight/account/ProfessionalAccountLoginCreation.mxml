@@ -118,6 +118,8 @@
         }
         ]]>
     </mx:Script>
+    <mx:TextArea text="Now you just need to build out some simple profile information and you'll be good to go!" fontSize="18" editable="false" selectable="false" borderStyle="none"
+                width="800" textAlign="center"/>
     <mx:VBox verticalGap="0" borderThickness="1" borderColor="#333333" borderStyle="solid" dropShadowEnabled="true"
             backgroundColor="#333333" cornerRadius="15" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:Form color="#FFF3F3" fontFamily="Lucida Grande" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
@@ -153,8 +155,8 @@
             </mx:FormItem>
             <mx:FormItem>
                 <mx:HBox>
-                    <mx:Button label="Create" click="createAccount()" color="#000000"/>
-                    <mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline"/>
+                    <mx:Button label="Create" click="createAccount()" color="#000000" buttonMode="true" useHandCursor="true"/>
+                    <mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline" buttonMode="true" useHandCursor="true"/>
                 </mx:HBox>
             </mx:FormItem>
         </mx:Form>
