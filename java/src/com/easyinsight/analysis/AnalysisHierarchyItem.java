@@ -128,6 +128,16 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
 
     public void reportSave(Session session) {
         super.reportSave(session);
+
+        // clear out any bad rows from the hierarchy
+        
+        Iterator<HierarchyLevel> levelIter = hierarchyLevels.iterator();
+        while (levelIter.hasNext()) {
+            HierarchyLevel hierarchyLevel = levelIter.next();
+            if (hierarchyLevel == null || hierarchyLevel.getAnalysisItem() == null) {
+                levelIter.remove();
+            }
+        }
         for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
             if (hierarchyLevel.getAnalysisItem().getAnalysisItemID() == 0) {
                 AnalysisItem analysisItem = hierarchyLevel.getAnalysisItem();
