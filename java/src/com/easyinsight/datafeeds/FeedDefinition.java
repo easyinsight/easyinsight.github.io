@@ -342,6 +342,28 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setAttribution(getAttribution());
         feed.setProperties(createProperties());
         feed.setFilterExampleMessage(getFilterExampleMessage());
+        populateFeedFields(feed);
+        feed.setName(getFeedName());
+        feed.setVisible(isVisible());
+        feed.setType(getDataSourceType());
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement solutionQueryStmt = conn.prepareStatement("SELECT SOLUTION_ID FROM SOLUTION_INSTALL WHERE INSTALLED_DATA_SOURCE_ID = ?");
+            solutionQueryStmt.setLong(1, getDataFeedID());
+            ResultSet solutionRS = solutionQueryStmt.executeQuery();
+            if (solutionRS.next()) {
+                long solutionID = solutionRS.getLong(1);
+                feed.setOriginSolution(solutionID);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return feed;
+    }
+
+    private void populateFeedFields(Feed feed) {
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
         for (AnalysisItem field : getFields()) {
@@ -388,24 +410,6 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setUrlKey(getApiKey());
         decorateLinks(clones);
         feed.setFields(clones);
-        feed.setName(getFeedName());
-        feed.setVisible(isVisible());
-        feed.setType(getDataSourceType());
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement solutionQueryStmt = conn.prepareStatement("SELECT SOLUTION_ID FROM SOLUTION_INSTALL WHERE INSTALLED_DATA_SOURCE_ID = ?");
-            solutionQueryStmt.setLong(1, getDataFeedID());
-            ResultSet solutionRS = solutionQueryStmt.executeQuery();
-            if (solutionRS.next()) {
-                long solutionID = solutionRS.getLong(1);
-                feed.setOriginSolution(solutionID);
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return feed;
     }
 
     public void customStorage(Connection conn) throws SQLException {

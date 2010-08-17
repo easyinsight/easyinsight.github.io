@@ -34,6 +34,7 @@ public class SolutionDetailFactory {
         var h:SendGridSolutionDetail;
         var i:MySQLSolutionDetail;
         var j:FreshbooksSolutionDetail;
+        var k:CrunchbaseSolutionDetail;
     }
 }
 }

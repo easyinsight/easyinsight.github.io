@@ -30,6 +30,7 @@ package com.easyinsight.listing
         public static const MEETUP:int = 38;
         public static const LINKEDIN:int = 39;
         public static const FRESHBOOKS:int = 49;
+        public static const REDIRECT:int = 54;
 
 		public static const OWNER:int = 1;
 		public static const SUBSCRIBER:int = 3;

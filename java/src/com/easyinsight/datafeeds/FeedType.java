@@ -59,6 +59,7 @@ public class FeedType {
     public static final FeedType FRESHBOOKS_ESTIMATES = new FeedType(51);
     public static final FeedType FRESHBOOKS_RECURRING = new FeedType(52);
     public static final FeedType BASECAMP_COMMENTS = new FeedType(53);
+    public static final FeedType REDIRECT = new FeedType(54);
 
     private int type;
 

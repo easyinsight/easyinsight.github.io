@@ -13,6 +13,7 @@ import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.marketo.MarketoDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
+import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
@@ -84,6 +85,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.FRESHBOOKS_ESTIMATES, FreshbooksEstimateSource.class);
         registerType(FeedType.FRESHBOOKS_PROJECTS, FreshbooksProjectSource.class);
         registerType(FeedType.BASECAMP_COMMENTS, BaseCampCommentsSource.class);
+        registerType(FeedType.REDIRECT, RedirectDataSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

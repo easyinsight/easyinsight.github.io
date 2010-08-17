@@ -9,6 +9,7 @@
         import com.easyinsight.customupload.CsvFileUploadFormat;
         import com.easyinsight.customupload.ExcelUploadFormat;
         import com.easyinsight.customupload.FlatFileUploadFormat;
+        import com.easyinsight.customupload.RedirectDataSource;
         import com.easyinsight.customupload.XSSFExcelUploadFormat;
         import com.easyinsight.datasources.BaseCampDataSource;
         import com.easyinsight.datasources.CloudWatchDataSource;
@@ -138,6 +139,9 @@
                 feedAdminDetail = admin;
             } else {
                 tabNav.removeChild(implBox);
+            }
+            if (feedDefinition.fields == null || feedDefinition.fields.length == 0) {
+                tabNav.removeChild(fieldsBox);
             }
             this.feedAdminMode = true;
             this.feedName = feedDefinition.feedName;
@@ -283,6 +287,7 @@
             var meetup:MeetupDataSource;
             var linked:LinkedInDataSource;
             var freshbooks:FreshbooksDataSource;
+            var redirect:RedirectDataSource;
         }
 
         [Bindable]
@@ -403,7 +408,7 @@
                     </mx:HBox>
                 </mx:VBox>
 			</mx:HBox>
-            <mx:Box label="Fields">
+            <mx:Box label="Fields" id="fieldsBox">
                 <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
                         enableControls="enableControls()"/>
             </mx:Box>            
