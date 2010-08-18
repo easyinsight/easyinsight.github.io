@@ -14,6 +14,7 @@
         import com.easyinsight.util.PopUpUtil;
 
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.formatters.DateFormatter;
@@ -45,6 +46,7 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else if (dataSources.length == 1) {
+                UserAudit.instance().audit(UserAudit.USED_REPORT_IN_EXCHANGE);
                 ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
                 solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
             } else {
@@ -57,6 +59,7 @@
         }
 
         private function dataSourceChoice(event:DataSourceSelectionEvent):void {
+            UserAudit.instance().audit(UserAudit.USED_REPORT_IN_EXCHANGE);
             ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
             solutionService.installReport.send(reportID, event.dataSource.id);
         }

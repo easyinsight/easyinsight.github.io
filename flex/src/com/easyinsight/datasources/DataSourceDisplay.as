@@ -6,6 +6,7 @@ import com.easyinsight.framework.User;
 import com.easyinsight.scorecard.DataSourceAsyncEvent;
 import com.easyinsight.scorecard.DataSourceMessageEvent;
 import com.easyinsight.util.AutoSizeTextArea;
+import com.easyinsight.util.UserAudit;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -239,6 +240,7 @@ public class DataSourceDisplay extends VBox {
 
     private function onClick(event:MouseEvent):void {
         stackIndex = 2;
+        UserAudit.instance().audit(UserAudit.REFRESHED_DATA);
         feedService = new RemoteObject();
         feedService.destination = "feeds";
         feedService.launchAsyncRefresh.addEventListener(ResultEvent.RESULT, onResult);

@@ -8,6 +8,7 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.UserAudit;
 
         import mx.binding.utils.BindingUtils;
         import mx.binding.utils.ChangeWatcher;
@@ -24,6 +25,7 @@
         }
 
         private function addToGoogle():void {
+            UserAudit.instance().audit(UserAudit.EXPORTED_TO_IGOOGLE);
             scorecardService.storeScorecardForGoogle.send(selectedScorecard.id);
         }
 

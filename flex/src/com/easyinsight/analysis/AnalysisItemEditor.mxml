@@ -113,7 +113,7 @@
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.util.PopUpUtil;
-
+        import com.easyinsight.util.UserAudit;
 
         import mx.events.DropdownEvent;
 
@@ -295,6 +295,7 @@
                     analysisItem.filters = transformContainer.getFilterDefinitions();
                     detailEditor.save(analysisItem);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
+                    UserAudit.instance().audit(UserAudit.EDITED_FIELD);
                     return analysisItem;
                 } else {
                     return null;

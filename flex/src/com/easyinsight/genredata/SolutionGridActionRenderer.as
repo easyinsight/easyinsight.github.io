@@ -7,6 +7,7 @@ import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
+import com.easyinsight.util.UserAudit;
 
 import flash.events.MouseEvent;
 
@@ -65,6 +66,7 @@ public class SolutionGridActionRenderer extends HBox{
     }
 
     private function installedReport(event:ResultEvent):void {
+        UserAudit.instance().audit(UserAudit.USED_REPORT_IN_EXCHANGE);
         var insightDescriptor:InsightDescriptor = solutionService.installReport.lastResult as InsightDescriptor;
         // has to emit special property here to let us decide whether or not we want to keep this report
         dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, exchangeItem.id, exchangeItem.ratingAverage, ExchangeReportData(exchangeItem.exchangeData).reportUrlKey)));
@@ -95,6 +97,7 @@ public class SolutionGridActionRenderer extends HBox{
     }
 
     private function dataSourceChoice(event:DataSourceSelectionEvent):void {
+        UserAudit.instance().audit(UserAudit.USED_REPORT_IN_EXCHANGE);
         ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
         solutionService.installReport.send(exchangeItem.id, event.dataSource.id);
     }

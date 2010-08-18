@@ -34,6 +34,7 @@
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.EIErrorEvent;
+        import com.easyinsight.util.UserAudit;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
@@ -363,6 +364,7 @@
                 if (event.credentialRequirements != null) {
                     CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
                 } else {
+                    UserAudit.instance().audit(UserAudit.OPEN_REPORT_VIEW);
                     report = event.analysisDefinition;
                     dataSource = event.dataSourceInfo;
                     reportName = report.name;

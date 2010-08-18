@@ -2,6 +2,7 @@ package com.easyinsight.analysis {
 import com.easyinsight.AnalysisItemDeleteEvent;
 import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.util.UserAudit;
 
 import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
@@ -36,6 +37,7 @@ public class AnalysisItemEventHandler extends UIComponent {
     }
 
     public function copyField(event:ReportEditorFieldEvent):void {
+        UserAudit.instance().audit(UserAudit.COPIED_FIELD);
         analysisService.cloneItem.send(event.item.analysisItem);
     }
 

@@ -13,6 +13,7 @@
         import com.easyinsight.kpi.KPIParentWindow;
         import com.easyinsight.util.Callout;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.UserAudit;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
@@ -225,6 +226,7 @@
         }
 
         private function addedKPI(event:KPIEvent):void {
+            UserAudit.instance().audit(UserAudit.ADDED_KPI);
             kpis.addItem(event.kpi);
         }
 

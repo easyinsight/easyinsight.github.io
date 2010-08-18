@@ -7,6 +7,7 @@
         import com.easyinsight.preferences.Persona;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.UserAudit;
 
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
@@ -74,8 +75,13 @@
 
         private function addUser():void {
             var newUserDialog:NewUserDialog = NewUserDialog(PopUpManager.createPopUp(this, NewUserDialog, true));
-            newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
+            newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, addedUser);
             PopUpUtil.centerPopUp(newUserDialog);
+        }
+
+        private function addedUser(event:RefreshAccountEvent):void {
+            UserAudit.instance().audit(UserAudit.ADDED_USER_TO_ACCOUNT);
+            refreshAccount(event);
         }
 
         private function deletedUser():void {

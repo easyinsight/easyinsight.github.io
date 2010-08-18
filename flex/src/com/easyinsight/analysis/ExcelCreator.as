@@ -2,6 +2,7 @@ package com.easyinsight.analysis {
 import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.util.ProgressAlert;
+import com.easyinsight.util.UserAudit;
 
 import flash.utils.ByteArray;
 
@@ -68,6 +69,7 @@ public class ExcelCreator {
             var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
             insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
             insightMetadata.utcOffset = new Date().getTimezoneOffset();
+            UserAudit.instance().audit(UserAudit.EXPORTED_TO_EXCEL);
             ProgressAlert.alert(parent, "Generating the Excel spreadsheet...", null, upload.exportToExcel);
 			upload.exportToExcel.send(definition, insightMetadata);
 		}

@@ -3,6 +3,8 @@
                     xmlns:schedule="com.easyinsight.schedule.*"
                     creationComplete="setup()" title="Data Source Refresh Scheduling">
     <mx:Script><![CDATA[
+        import com.easyinsight.util.UserAudit;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
@@ -56,6 +58,7 @@
 
         private function saved():void {
             if (newActivity) {
+                UserAudit.instance().audit(UserAudit.SCHEDULED_REFRESH);
                 dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.NEW_ACTIVITY, _activity));
             } else {
                 dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.EDIT_ACTIVITY, _activity));

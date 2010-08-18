@@ -13,6 +13,7 @@ import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.util.FileAlert;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
+import com.easyinsight.util.UserAudit;
 
 import flash.display.Bitmap;
 import flash.display.Loader;
@@ -116,6 +117,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
     }
 
     private function postInstall():void {
+        UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
         var dataSources:int = 0;
         var goalTrees:int = 0;
         var reports:int = 0;

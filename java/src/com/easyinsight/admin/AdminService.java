@@ -40,6 +40,22 @@ public class AdminService {
         }
     }
 
+    public void userAudit(String message) {
+        long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_ACTION_AUDIT (USER_ID, action_name, action_date) values (?, ?, ?)");
+            insertStmt.setLong(1, userID);
+            insertStmt.setString(2, message);
+            insertStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            insertStmt.execute();
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void welcomeEmail(long userID) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         User user;
@@ -67,7 +83,7 @@ public class AdminService {
         }
     }
 
-    /*private void cleanOrphanKeys(EIConnection conn) throws SQLException {
+    private void cleanOrphanKeys(EIConnection conn) throws SQLException {
         PreparedStatement query = conn.prepareStatement("select report_structure_id, analysis.analysis_id, analysis_item.analysis_item_id from report_structure left join analysis on report_structure.analysis_id = analysis.analysis_id left join analysis_item on report_structure.analysis_item_id = analysis_item.analysis_item_id and (analysis.analysis_id is null or analysis_item.analysis_item_id is null)");
         PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM ITEM_KEY WHERE ITEM_KEY_ID = ?");
         ResultSet rs = query.executeQuery();
@@ -76,7 +92,20 @@ public class AdminService {
             nukeStmt.setLong(1, id);
             nukeStmt.executeUpdate();
         }
-    }*/
+    }
+
+    private void cleanOrphanDataSourceKeys(EIConnection conn) throws SQLException {
+        PreparedStatement query = conn.prepareStatement("select item_key.item_key_id from item_key left join named_item_key on item_key.item_key_id = named_item_key.named_item_key_id " +
+                "left join derived_item_key on item_key.item_key_id = derived_item_key.item_key_id where " +
+                "named_item_key.named_item_key_id is null and derived_item_key.derived_item_key_id is null");
+        PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM ITEM_KEY WHERE ITEM_KEY_ID = ?");
+        ResultSet rs = query.executeQuery();
+        while (rs.next()) {
+            long id = rs.getLong(1);
+            nukeStmt.setLong(1, id);
+            nukeStmt.executeUpdate();
+        }
+    }
 
     private void cleanOrphanItems(EIConnection conn) throws SQLException {
         PreparedStatement query = conn.prepareStatement("select report_structure_id, analysis.analysis_id, analysis_item.analysis_item_id " +
@@ -156,7 +185,8 @@ public class AdminService {
             cleanOrphanHierarchies(conn);
             clearOrphanUploadPolicies(conn);
             clearOrphanStepStmt(conn);
-            //cleanOrphanKeys(conn);
+            cleanOrphanKeys(conn);
+            cleanOrphanDataSourceKeys(conn);
             cleanRawUploads(conn);
             conn.commit();
         } catch (SQLException e) {

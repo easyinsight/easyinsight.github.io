@@ -63,6 +63,7 @@
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ErrorReportView;        
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.UserAudit;
 
         import mx.binding.utils.BindingUtils;
         import mx.binding.utils.ChangeWatcher;
@@ -366,6 +367,7 @@
                 }
 
                 if (analysisDefinition == null) {
+                    UserAudit.instance().audit(UserAudit.NEW_REPORT);
                     saveAsEnabled = false;
                     newAnalysis(User.getInstance().defaultReportSharing);
                     for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
@@ -403,6 +405,7 @@
                         }
                         sortFields();
                     }
+                    UserAudit.instance().audit(UserAudit.OPEN_REPORT_EDITOR);
                 }
                 dataView.availableFields = wrappers;
                 loading = false;

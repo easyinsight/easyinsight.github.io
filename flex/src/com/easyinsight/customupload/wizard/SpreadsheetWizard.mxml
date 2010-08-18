@@ -12,6 +12,7 @@
         import com.easyinsight.kpi.TutorialPanel;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
 
@@ -85,6 +86,7 @@
         private var dataSourceName:String = "Blah";
 
         private function createdDataSource():void {
+            UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
             var response:UploadResponse = uploadService.createDataSource.lastResult as UploadResponse;
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID, dataSourceName)));
         }

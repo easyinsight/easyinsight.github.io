@@ -22,6 +22,7 @@ import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
+import com.easyinsight.util.UserAudit;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -361,6 +362,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             PopUpManager.addPopUp(refreshWindow, this, true);
             PopUpUtil.centerPopUp(refreshWindow);
         } else {
+            UserAudit.instance().audit(UserAudit.REFRESHED_DATA);
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
         }
     }

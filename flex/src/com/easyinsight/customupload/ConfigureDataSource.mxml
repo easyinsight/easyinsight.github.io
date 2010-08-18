@@ -12,6 +12,7 @@
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
         import com.easyinsight.scorecard.DataSourceMessageEvent;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.UserAudit;
 
         import mx.controls.Alert;
         import mx.core.UIComponent;
@@ -176,6 +177,7 @@
                 descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
                 dispatchEvent(new DataSourceConfiguredEvent(descriptor));
+                UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
                 PopUpManager.removePopUp(this);
             } else {
