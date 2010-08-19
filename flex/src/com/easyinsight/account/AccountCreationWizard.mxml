@@ -65,13 +65,13 @@
     <mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">
 
         <mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
-            <mx:TextArea text="The first step is to choose an account type. Please note that whatever option you choose, no credit card is required for the trial period." fontSize="18" editable="false" selectable="false" borderStyle="none"
-                width="800" height="60" textAlign="center"/>   
+            <mx:Label text="30 Day Free Trial on All Accounts" fontSize="24" fontWeight="bold"/>
+            <mx:Label text="Please note that whatever option you choose, no credit card is required for the trial period." fontSize="16"/>   
                 <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2" horizontalGap="15">
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
                              width="280" paddingTop="5" paddingBottom="10">
-                        <mx:Label text="BASIC" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="BASIC" fontSize="24" fontWeight="bold"/>
                         <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="20"/>
                         <mx:HRule width="100%"/>
                         <mx:VBox>
@@ -81,13 +81,13 @@
                         <mx:HRule width="100%"/>
                         <mx:Text text="Quickly get a small organization&#13;started with reports and analysis on&#13;other SaaS applications such as&#13;Basecamp and Highrise."
                                 fontSize="14"/>
-                        <mx:Button label="30 Day Free Trial" click="dispatchEvent(new Event('basic'))" styleName="blueButton"
+                        <mx:Button label="Sign Up" click="dispatchEvent(new Event('basic'))" styleName="blueButton"
                                    fontSize="16" buttonMode="true" useHandCursor="true"/>
                     </mx:VBox>
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
                              width="280" paddingTop="5" paddingBottom="10">
-                        <mx:Label text="PLUS" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="PLUS" fontSize="24" fontWeight="bold"/>
                         <mx:Label text="$75/month" color="#D42525" fontWeight="bold" fontSize="20"/>
                         <mx:HRule width="100%"/>
                         <mx:VBox>
@@ -97,14 +97,14 @@
                         <mx:HRule width="100%"/>
                         <mx:Text text="Have a large organization with the&#13;need to report and analyze data&#13;from SaaS applications or internal&#13;relational databases?"
                                 fontSize="14"/>
-                        <mx:Button label="30 Day Free Trial" click="dispatchEvent(new Event('plus'))" styleName="blueButton"
+                        <mx:Button label="Sign Up" click="dispatchEvent(new Event('plus'))" styleName="blueButton"
                                    fontSize="16" buttonMode="true" useHandCursor="true"/>
                     </mx:VBox>
 
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
                              width="280" paddingTop="5" paddingBottom="10">
-                        <mx:Label text="PROFESSIONAL" fontSize="28" fontWeight="bold"/>
+                        <mx:Label text="PROFESSIONAL" fontSize="24" fontWeight="bold"/>
                         <mx:Label text="Starting at $200/month" color="#D42525" fontWeight="bold" fontSize="18"/>
                         <mx:HRule width="100%"/>
                         <mx:VBox>
@@ -114,7 +114,7 @@
                         <mx:HRule width="100%"/>
                         <mx:Text text="Looking to upload a lot of custom&#13;data? This option gives you the&#13;power of full SaaS BI. Flexible pricing&#13;scales with your storage needs."
                                 fontSize="14"/>
-                        <mx:Button label="30 Day Free Trial" click="dispatchEvent(new Event('pro'))" styleName="blueButton"
+                        <mx:Button label="Sign Up" click="dispatchEvent(new Event('pro'))" styleName="blueButton"
                                    fontSize="16" buttonMode="true" useHandCursor="true"/>
                     </mx:VBox>
                 </mx:HBox>
