@@ -129,15 +129,11 @@ public class SendGridEmail {
 
         MimeMessage message = new MimeMessage(mailSession);
 
-        BodyPart bodyPart = new MimeBodyPart();
-        DataSource source = new ByteArrayDataSource(file, "application/excel");
-        bodyPart.setDataHandler(new DataHandler(source));
-        bodyPart.setFileName(reportName + ".xls");
-        bodyPart.setDisposition(Part.ATTACHMENT);
+
 
         Multipart multipart = new MimeMultipart();
 
-        message.setSubject(MimeUtility.encodeText(subject));
+        message.setSubject(subject, "UTF-8");
 
         if (htmlEmail) {
             BodyPart part2 = new MimeBodyPart();
@@ -148,6 +144,12 @@ public class SendGridEmail {
             part1.setText(htmlBody);
             multipart.addBodyPart(part1);
         }
+
+        BodyPart bodyPart = new MimeBodyPart();
+        DataSource source = new ByteArrayDataSource(file, "application/excel");
+        bodyPart.setDataHandler(new DataHandler(source));
+        bodyPart.setFileName(reportName + ".xls");
+        bodyPart.setDisposition(Part.ATTACHMENT);
 
         multipart.addBodyPart(bodyPart);
 
