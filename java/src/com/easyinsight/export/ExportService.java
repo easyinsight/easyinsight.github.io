@@ -10,7 +10,6 @@ import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
@@ -335,7 +334,7 @@ public class ExportService {
                 AnalysisItem analysisItem = listDataResults.getHeaders()[cellIndex];
                 short translatedIndex = positionMap.get(analysisItem);
                 HSSFCellStyle style = getStyle(styleMap, analysisItem, workbook, dateFormat);
-                populateCell(row, translatedIndex, value, style);
+                populateCell(row, translatedIndex, value, style, analysisItem);
                 cellIndex++;
             }
             i++;
@@ -411,12 +410,16 @@ public class ExportService {
         return style;
     }
 
-    private void populateCell(HSSFRow row, int cellIndex, Value value, HSSFCellStyle style) {
+    private void populateCell(HSSFRow row, int cellIndex, Value value, HSSFCellStyle style, AnalysisItem analysisItem) {
         HSSFCell cell = row.createCell(cellIndex);
         cell.setCellStyle(style);
         if (value.type() == Value.STRING) {
             StringValue stringValue = (StringValue) value;
-            HSSFRichTextString richText = new HSSFRichTextString(stringValue.getValue());
+            String string = stringValue.getValue();
+            if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                string = string.replaceAll("\\<.*?\\>", "");
+            }
+            HSSFRichTextString richText = new HSSFRichTextString(string);
             cell.setCellValue(richText);
         } else if (value.type() == Value.NUMBER) {
             NumericValue numericValue = (NumericValue) value;
