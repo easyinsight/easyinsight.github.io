@@ -16,6 +16,7 @@ import com.easyinsight.pipeline.Pipeline;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleGraph;
+import org.jgrapht.traverse.ClosestFirstIterator;
 
 /**
  * User: James Boe
@@ -27,7 +28,8 @@ public class CompositeFeed extends Feed {
     private List<CompositeFeedNode> compositeFeedNodes;
     private List<CompositeFeedConnection> connections;
 
-    public CompositeFeed() { }
+    public CompositeFeed() {
+    }
 
     public CompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections) {
         this.compositeFeedNodes = compositeFeedNodes;
@@ -77,7 +79,7 @@ public class CompositeFeed extends Feed {
                         filterDefinition.getField().setKey(key);
                         filters.add(filterDefinition);
                     }
-                }                
+                }
             }
         }
         return filters;
@@ -249,11 +251,56 @@ public class CompositeFeed extends Feed {
             }
         }
 
+        for (CompositeFeedConnection connection : connections) {
+            if (neededNodes.containsKey(connection.getSourceFeedID()) && neededNodes.containsKey(connection.getTargetFeedID())) {
+                Edge edge = new Edge(connection);
+                QueryStateNode source = queryNodeMap.get(connection.getSourceFeedID());
+                QueryStateNode target = queryNodeMap.get(connection.getTargetFeedID());
+                reducedGraph.addEdge(source, target, edge);
+            }
+        }
+
         // actually connecting the data sets...
 
         DataSet dataSet = null;
 
-        Set<Edge> edgeSet = new HashSet<Edge>();
+        List<String> auditStrings = new ArrayList<String>();
+        ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph);
+
+        while (iter.hasNext()) {
+            QueryStateNode sourceNode = iter.next();
+            if (sourceNode.myDataSet == null) {
+                sourceNode.produceDataSet(insightRequestMetadata);
+            }
+            Edge last = iter.getSpanningTreeEdge(sourceNode);
+            if (last != null) {
+
+                QueryStateNode targetNode;
+                if (reducedGraph.getEdgeSource(last) == sourceNode) {
+                    targetNode = reducedGraph.getEdgeTarget(last);
+                } else {
+                    targetNode = reducedGraph.getEdgeSource(last);
+                }
+                if (targetNode.myDataSet == null) {
+                    targetNode.produceDataSet(insightRequestMetadata);
+                }
+                if (last.connection.getSourceFeedID() != sourceNode.feedID) {
+                    QueryStateNode swap = sourceNode;
+                    sourceNode = targetNode;
+                    targetNode = swap;
+                }
+                MergeAudit mergeAudit = last.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems,
+                        sourceNode.dataSourceName, targetNode.dataSourceName);
+                dataSet = mergeAudit.getDataSet();
+                auditStrings.addAll(mergeAudit.getMergeStrings());
+                //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
+                sourceNode.myDataSet = dataSet;
+                targetNode.myDataSet = dataSet;
+            }
+
+        }
+
+        /*Set<Edge> edgeSet = new HashSet<Edge>();
 
         for (QueryStateNode queryStateNode : neededNodes.values()) {
             queryStateNode.produceDataSet(insightRequestMetadata);
@@ -266,7 +313,7 @@ public class CompositeFeed extends Feed {
             }
         }
 
-        List<String> auditStrings = new ArrayList<String>();
+
         for (Edge edge : edgeSet) {
             QueryStateNode sourceNode = neededNodes.get(edge.connection.getSourceFeedID());
             QueryStateNode targetNode = neededNodes.get(edge.connection.getTargetFeedID());
@@ -279,7 +326,7 @@ public class CompositeFeed extends Feed {
             //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
             sourceNode.myDataSet = dataSet;
             targetNode.myDataSet = dataSet;
-        }
+        }*/
         dataSet.setAudits(auditStrings);
 
         return dataSet;
