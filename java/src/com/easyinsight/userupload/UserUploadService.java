@@ -19,8 +19,6 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
-import com.easyinsight.eventing.EventDispatcher;
-import com.easyinsight.eventing.AsyncCreatedEvent;
 import com.easyinsight.outboundnotifications.*;
 import com.easyinsight.scheduler.*;
 import com.easyinsight.solutions.SolutionInstallInfo;
@@ -92,7 +90,7 @@ public class UserUploadService implements IUserUploadService {
             objects.addAll(descriptorMap.values());
             AnalysisStorage analysisStorage = new AnalysisStorage();
             Map<Long, List<EIDescriptor>> analysisDefinitions = new HashMap<Long, List<EIDescriptor>>();
-            List<InsightDescriptor> groupReports = new ArrayList<InsightDescriptor>();
+            Set<InsightDescriptor> groupReports = new HashSet<InsightDescriptor>();
             if (includeGroups) {
                 groupReports.addAll(analysisStorage.getReportsForGroups(userID));
                 groupReports.addAll(analysisStorage.getReportsForAccount(SecurityUtil.getAccountID()));
@@ -126,14 +124,14 @@ public class UserUploadService implements IUserUploadService {
                 if (analysisDefList == null) {
                     analysisDefList = new ArrayList<EIDescriptor>();
                 }
-                feedDescriptor.setChildren(analysisDefList);
+                feedDescriptor.setChildren(new ArrayList<EIDescriptor>(new HashSet<EIDescriptor>(analysisDefList)));
             }
             for (LookupTableDescriptor lookupTableDescriptor : new FeedService().getLookupTableDescriptors()) {
                 FeedDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());
                 feedDescriptor.getChildren().add(lookupTableDescriptor);
             }
             for (List<EIDescriptor> defList : analysisDefinitions.values()) {
-                objects.addAll(defList);
+                objects.addAll(new ArrayList<EIDescriptor>(new HashSet<EIDescriptor>(defList)));
             }
             if (objects.isEmpty() && firstCall && !includeGroups) {
                 objects = getFeedAnalysisTree(true, false).getObjects();
