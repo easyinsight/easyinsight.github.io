@@ -164,7 +164,9 @@
             dataGrid.setStyle("fontFamily", def.fontName);
             dataGrid.setStyle("fontSize", def.fontSize);
             this.listDef = def;
-            summaryRows = new ArrayCollection();
+            if (dataSet.length > 0) {
+                stackIndex = 0;
+                summaryRows = new ArrayCollection();
             if (def.summaryTotal) {
                 var summaryRow:Object = new Object();
                 for each (var defItem:AnalysisItem in def.columns) {
@@ -185,7 +187,7 @@
                     if (sortHeader.sort > 0) {
                         var sortField:OrderedSortField = new OrderedSortField();
                         sortField.descending = sortHeader.sort == 2;
-                        sortField.compareFunction = SortFunctionFactory.createSortFunction(sortHeader, sortField.descending); 
+                        sortField.compareFunction = SortFunctionFactory.createSortFunction(sortHeader, sortField.descending);
                         sortField.name = sortHeader.qualifiedName();
                         sortField.order = sortHeader.sortSequence;
                         sortFields.addItem(sortField);
@@ -248,7 +250,7 @@
                 columnMap[myHeader.qualifiedName()] = myHeader;
                 var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 if (explicitWidth) columnHeaderObject.width = myHeader.width;
-                columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);                
+                columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                 columnHeaderObject.headerText = myHeader.display;
                 //columnHeaderObject.headerText = "";
                 var keyString:String = myHeader.qualifiedName();
@@ -267,6 +269,13 @@
             if (dataGrid.selectionMode == "none") {
                 dataGrid.selectionMode = "multipleCells";
             }
+            } else {
+                if (def.columns.length > 0) stackIndex = 2;
+                else stackIndex = 1;
+                dataGrid.columns = [];
+                myDataSet = new ArrayCollection();
+            }
+
         }
 
         private function getCellRendererClass(item:AnalysisItem):Class {
@@ -418,8 +427,12 @@
             }
         }
 
+        [Bindable]
+        private var stackIndex:int = 0;
+
         public function clearContents():void {
         }]]></mx:Script>
+    <mx:Canvas width="100%" height="100%">
     <mx:VBox width="100%" height="100%">
         <mx:Box id="topBar" width="100%"/>
         <analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" width="100%" height="100%"
@@ -429,5 +442,23 @@
                            headerShift="headersShifted(event)" fontSize="12" dragExit="dragExitHandler(event)"
                            dragOver="dragOverHandler(event)" fontFamily="Tahoma"/>
     </mx:VBox>
+    <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false" mouseEnabled="false">
+        <mx:Canvas width="100%" height="100%"/>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+            <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
+                    backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                <mx:TextArea fontSize="22" text="You haven't set up a report yet. You can drag the fields from the left into this canvas or into the drop areas above to get started!"
+                    borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+            </mx:Box>
+        </mx:Box>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+            <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
+                    backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                <mx:TextArea fontSize="22" text="We didn't find any data for the fields and filters that you specified in the report."
+                    borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+            </mx:Box>
+        </mx:Box>
+    </mx:ViewStack>
+    </mx:Canvas>
 
 </mx:Module>
