@@ -5,5 +5,5 @@ create table user_action_audit (
   action_name varchar(255) not null,
   action_date datetime not null,
   primary key(user_action_audit_id),
-  constraint user_action_audit_ibfk1 foreign key (user_id) references user (user_id)
+  constraint user_action_audit_ibfk1 foreign key (user_id) references user (user_id) on delete cascade
 );

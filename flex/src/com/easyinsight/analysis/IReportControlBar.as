@@ -17,5 +17,8 @@ public interface IReportControlBar {
     function onCustomChangeEvent(event:CustomChangeEvent):void;
 
     function onDataReceipt(event:DataServiceEvent):void;
+
+    function highlight():void;
+    function normal():void;
 }
 }

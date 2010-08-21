@@ -178,6 +178,9 @@
         private var dataSourceName:String;
 
         [Bindable]
+        private var fieldsLabel:String;
+
+        [Bindable]
         private var dataSourceID:int;
 
         [Bindable]
@@ -339,6 +342,7 @@
                 this.originSolution = feedMetadata.originSolution;
                 this.admin = feedMetadata.dataSourceAdmin;
                 dataSourceName = this.feedMetadata.dataSourceName;
+                fieldsLabel = this.feedMetadata.dataSourceName + " Fields";
                 availableFields = new ArrayCollection();
                 wrappers = new ArrayCollection();
                 for each (var feedNode:FeedNode in feedMetadata.fieldHierarchy) {
@@ -854,16 +858,19 @@
 
         private function onDragComplete(event:DragEvent):void {
             event.preventDefault();
+            dataView.revertDropAreas();
             transformContainer.closeDropMessage();
         }
 
         private function onDragStart():void {
+            dataView.highlightDropAreas();
             if (tabNavigator.selectedIndex == 2) {
                 transformContainer.showDropMessage();
             }
         }
 
         private function onDragEnd():void {
+            dataView.revertDropAreas();
             transformContainer.closeDropMessage();
         }
 
@@ -1026,15 +1033,18 @@
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">
             <mx:VBox height="100%" width="240" id="leftHandBox">
-
-                <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)" id="analysisState"
+                <mx:HBox>
+                    <mx:Label text="Report Type:" fontWeight="bold"/>
+                    <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)" id="analysisState"
                                                    mode="all"/>
+                </mx:HBox>
+
 
                 <mx:VBox height="100%" width="100%" verticalGap="0" borderThickness="1" borderColor="#DCE2F8"
                          borderStyle="solid" dropShadowEnabled="true">
                     <mx:Canvas width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
                     <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center" verticalAlign="middle" height="28">
-                        <mx:Label text="{dataSourceName}" color="0xFFFFFF"/>
+                        <mx:Label text="{fieldsLabel}" color="0xFFFFFF" fontWeight="bold"/>
                     </mx:Box>
                     <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
                                  id="fieldGrid" backgroundColor="#FFFFFF"

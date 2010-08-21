@@ -34,6 +34,7 @@
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.EIErrorEvent;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
 
         import mx.binding.utils.BindingUtils;
@@ -58,6 +59,15 @@
         private function confirmedKeep():void {
             exchangeIndex = 0;
             leftButtonBar.addChildAt(editReportButton, 4);
+            var window:ReportAddedWindow = new ReportAddedWindow();
+            window.report = report;
+            window.addEventListener("editReport", onEdit);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onEdit(event:Event):void {
+            toReportEditor();
         }
 
         private var _reportNavHandler:Function;

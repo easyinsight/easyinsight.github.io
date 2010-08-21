@@ -51,6 +51,13 @@ public class DataViewFactory extends VBox implements IRetrievable {
         this.percentWidth = 100;
     }
 
+    public function highlightDropAreas():void {
+        _controlBar.highlight();
+    }
+
+    public function revertDropAreas():void {
+        _controlBar.normal();
+    }
 
     public function set adHocMode(value:Boolean):void {
         _adHocMode = value;

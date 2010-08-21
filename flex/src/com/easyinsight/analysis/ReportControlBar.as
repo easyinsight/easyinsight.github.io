@@ -110,5 +110,21 @@ public class ReportControlBar extends FlowBox {
         _analysisItems = value;
         dispatchEvent(new Event("analysisItemsChanged"));
     }
+
+    public function highlight():void {
+        for each (var child:DisplayObject in getChildren()) {
+            if (child is ListDropAreaGrouping) {
+                ListDropAreaGrouping(child).highlight();
+            }
+        }
+    }
+
+    public function normal():void {
+        for each (var child:DisplayObject in getChildren()) {
+            if (child is ListDropAreaGrouping) {
+                ListDropAreaGrouping(child).normal();
+            }
+        }
+    }
 }
 }

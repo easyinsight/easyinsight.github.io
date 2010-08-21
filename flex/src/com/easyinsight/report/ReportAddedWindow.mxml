@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    headerHeight="0">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.EmbedReportWindow;
+        import com.easyinsight.analysis.ExcelCreator;
+        import com.easyinsight.schedule.ReportDelivery;
+        import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+        private var _report:AnalysisDefinition;
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        private function excel():void {
+            new ExcelCreator().exportExcel(_report, this);
+        }
+
+        private function email():void {
+            exportService.getReportDelivery.send(_report.analysisID, new Date().getTimezoneOffset());
+        }
+
+        private function editReport():void {
+            dispatchEvent(new Event("editReport"));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function gotReportDelivery():void {
+            var delivery:ReportDelivery = exportService.getReportDelivery.lastResult as ReportDelivery;
+            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
+            window.fixedReportID = _report.analysisID;
+            window.fixedReportName = _report.name;
+            window.fixedReportURLKey = _report.urlKey;
+            window.activity = delivery;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function embed():void {
+            var embedWindow:EmbedReportWindow = new EmbedReportWindow();
+            embedWindow.urlKey = _report.urlKey;
+            embedWindow.reportType = _report.reportType;
+            embedWindow.dataSourceID = _report.dataFeedID;
+            embedWindow.reportName = _report.name;
+            PopUpManager.addPopUp(embedWindow, this, true);
+            PopUpUtil.centerPopUp(embedWindow);
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/mail.png")]
+        private var mailIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/table.png")]
+        private var excelIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/plasma_tv.png")]
+        private var embedIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/edit.png")]
+        private var editIcon:Class;
+        ]]></mx:Script>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
+    </mx:RemoteObject>
+    <mx:Canvas width="800" height="350">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="#000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="#CCCCCC"/>
+        </mx:VBox>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:VBox width="750" horizontalAlign="center" height="300" backgroundColor="#FFFFFF" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" paddingTop="10">
+                <mx:TextArea
+                        text="Now that you've added the report to your account, here are a few of the next steps you can take..."
+                        fontSize="18" borderStyle="none"
+                        backgroundAlpha="0" editable="false" selectable="false" width="700" fontWeight="bold"
+                        height="50"/>
+                <mx:Spacer height="100%"/>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="140"
+                             width="150" cornerRadius="8" buttonMode="true" id="editBox"
+                             mouseOver="editBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="editBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="editReport()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{editIcon}"/>
+                        <mx:Text text="Modify the Report" fontSize="14" selectable="false" fontWeight="bold"/>
+                        <mx:TextArea
+                                text="Tweak the report to meet your particular needs"
+                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                height="80"
+                                width="130" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="140"
+                             width="150" cornerRadius="8" buttonMode="true" id="excelBox"
+                             mouseOver="excelBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="excelBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="excel()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{excelIcon}"/>
+                        <mx:Text text="Export to Excel" fontSize="14" selectable="false" fontWeight="bold"/>
+                        <mx:TextArea
+                                text="Export the report as an Excel spreadsheet"
+                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                height="80"
+                                width="130" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="140"
+                             width="150" cornerRadius="8" buttonMode="true" id="embedBox"
+                             mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="embed()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{embedIcon}"/>
+                        <mx:Text text="Embed this Report" fontSize="14" selectable="false" fontWeight="bold"/>
+                        <mx:TextArea
+                                text="Generate HTML to embed the report into a web page"
+                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                height="80"
+                                width="130" textAlign="center"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                             backgroundColor="#FFFFFF" height="140"
+                             width="150" cornerRadius="8" buttonMode="true" id="emailBox"
+                             mouseOver="emailBox.setStyle('backgroundColor', 0xDDDDDD)"
+                             mouseOut="emailBox.setStyle('backgroundColor', 0xFFFFFF)"
+                             click="email()"
+                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                        <mx:Image source="{mailIcon}"/>
+                        <mx:Text text="Email Delivery" fontSize="14" selectable="false" fontWeight="bold"/>
+                        <mx:TextArea
+                                text="Set up scheduled email delivery of the report"
+                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                height="80"
+                                width="130" textAlign="center"/>
+                    </mx:VBox>
+                </mx:HBox>
+                <mx:Spacer height="100%"/>
+                <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+            </mx:VBox>
+        </mx:Box>
+    </mx:Canvas>
+</util:EITitleWindow>

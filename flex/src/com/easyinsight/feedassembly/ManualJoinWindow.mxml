@@ -6,7 +6,7 @@
         import com.easyinsight.analysis.AnalysisItemTypes;
 
         import mx.collections.Sort;
-
+        import mx.collections.SortField;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
         import com.easyinsight.administration.feed.FeedDefinitionData;
@@ -37,6 +37,7 @@
             sourceFeedName = sourceDefinition.feedName;
             targetFeedName = targetDefinition.feedName;
             var sort:Sort = new Sort();
+            sort.fields = [ new SortField("display", false) ];
             var groupingSourceFields:ArrayCollection = new ArrayCollection();
             for each (var field:AnalysisItem in sourceDefinition.fields) {
                 if (field.hasType(AnalysisItemTypes.DIMENSION) && !field.hasType(AnalysisItemTypes.DATE)) {

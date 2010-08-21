@@ -96,7 +96,7 @@
             PopUpUtil.centerPopUp(window);
         }
         ]]></mx:Script>
-    <mx:TextArea width="400" editable="false" selectable="false" borderStyle="none" backgroundAlpha="0" height="50"
+    <mx:TextArea width="500" editable="false" selectable="false" borderStyle="none" backgroundAlpha="0" height="55" fontSize="12"
                                          text="You can drag the fields below into the report areas to the right. You can click on the arrow to the left of folders to see more fields. You can also right click on the fields to add to the report or create new filters."/>
     <mx:Button icon="@Embed(source='../../../../assets/report/help.png')"
                        click="tutorial()" toolTip="Help!" label="Help!"/>

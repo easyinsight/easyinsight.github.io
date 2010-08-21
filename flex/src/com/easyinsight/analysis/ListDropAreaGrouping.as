@@ -36,6 +36,18 @@ public class ListDropAreaGrouping extends FlowBox
         _dataSourceID = value;
     }
 
+    public function highlight():void {
+        for each (var area:DropArea in dropAreas) {
+            area.highlight();
+        }
+    }
+
+    public function normal():void {
+        for each (var area:DropArea in dropAreas) {
+            area.normal();
+        }
+    }
+
     protected function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
     {
         // resize the FlowBox manually, as the internal calculation doesn't work

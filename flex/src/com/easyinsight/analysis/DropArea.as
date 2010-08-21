@@ -94,6 +94,14 @@ public class DropArea extends HBox
         contextMenu.customItems = [ deleteContextItem ];*/
     }
 
+    public function highlight():void {
+        //setStyle("borderColor", "0x0000FF");
+    }
+
+    public function normal():void {
+       // setStyle("borderColor", 0xB7BABC);
+    }
+
     private function createNoDataLabel():UIComponent {
         var label:EmptyDropAreaLabel = new EmptyDropAreaLabel();
         label.text = getNoDataLabel();
