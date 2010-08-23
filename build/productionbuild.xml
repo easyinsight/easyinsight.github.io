@@ -314,7 +314,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, compileYahooWidget, modules1, modules2, modules3, modules4, modules5">
+    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, compileYahooWidget, modules1, modules2, modules3, modules4, modules5, modules6">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -442,13 +442,98 @@
                static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/administration-app.xml"/>
         </mxmlc>
-    </target>    
+    </target>
+
+    <target name="compileSpreadsheet">
+        <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" output="${flex.path}/SpreadsheetWizard.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/perspectives/spreadsheet-wizard-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="compileKPITreeAdmin">
+        <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/goals/GoalTreeAdminContainer.mxml" output="${flex.path}/KPITreeAdmin.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/perspectives/kpitree-admin-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="compileKPITreeView">
+        <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/goals/GoalTreeViewContainer.mxml" output="${flex.path}/KPITreeView.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/perspectives/kpitree-view-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="compileDataSourceAdmin">
+        <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" output="${flex.path}/DataSourceAdmin.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/perspectives/datasource-admin-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
 
     <target name="modules1" depends="module.area3dchart, module.areachart, module.bar3dchart, module.barchart, module.bubblechart"/>
     <target name="modules2" depends="module.column3dchart, module.columnchart, module.line3dchart, module.list"/>
     <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart, module.linechart, module.timeline"/>
     <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap, module.mmlinechart, module.heatmap"/>
     <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap, module.africamap"/>
+    <target name="modules6" depends="compileDataSourceAdmin, compileKPITreeView, compileKPITreeAdmin, compileSpreadsheet"/>
 
     <target name="module.mmlinechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/MultiMeasureLineChartModule.mxml" output="${flex.path}/MultiMeasureLineChartModule.swf"
