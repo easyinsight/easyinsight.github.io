@@ -10,6 +10,7 @@ public class ReportDelivery extends ScheduledDelivery {
     public var body:String;
     public var htmlEmail:Boolean;
     public var timezoneOffset:int;
+    public var senderID:int;
 
     public function ReportDelivery() {
         super();

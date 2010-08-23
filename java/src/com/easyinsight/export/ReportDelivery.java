@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Date;
 
 /**
@@ -23,6 +24,15 @@ public class ReportDelivery extends ScheduledDelivery {
     private String body;
     private boolean htmlEmail;
     private int timezoneOffset;
+    private long senderID;
+
+    public long getSenderID() {
+        return senderID;
+    }
+
+    public void setSenderID(long senderID) {
+        this.senderID = senderID;
+    }
 
     public int getTimezoneOffset() {
         return timezoneOffset;
@@ -93,7 +103,7 @@ public class ReportDelivery extends ScheduledDelivery {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY (REPORT_ID, delivery_format, subject, body, " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email, timezone_offset) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, html_email, timezone_offset, sender_user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, reportID);
         insertStmt.setInt(2, reportFormat);
         insertStmt.setString(3, subject);
@@ -101,13 +111,18 @@ public class ReportDelivery extends ScheduledDelivery {
         insertStmt.setLong(5, getScheduledActivityID());
         insertStmt.setBoolean(6, htmlEmail);
         insertStmt.setInt(7, timezoneOffset);
+        if (senderID > 0) {
+            insertStmt.setLong(8, senderID);
+        } else {
+            insertStmt.setNull(8, Types.BIGINT);
+        }
         insertStmt.execute();
         insertStmt.close();
     }
 
     protected void customLoad(EIConnection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, ANALYSIS.TITLE, timezone_offset FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, ANALYSIS.TITLE, timezone_offset, SENDER_USER_ID FROM " +
                 "REPORT_DELIVERY, ANALYSIS WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND REPORT_DELIVERY.REPORT_ID = ANALYSIS.ANALYSIS_ID");
         queryStmt.setLong(1, getScheduledActivityID());
@@ -120,6 +135,10 @@ public class ReportDelivery extends ScheduledDelivery {
             htmlEmail = rs.getBoolean(5);
             reportName = rs.getString(6);
             timezoneOffset = rs.getInt(7);
+            long senderID = rs.getLong(8);
+            if (!rs.wasNull()) {
+                this.senderID = senderID;
+            }
             queryStmt.close();
         }
     }

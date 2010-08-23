@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.email.SendGridEmail;
+import com.easyinsight.email.UserStub;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.scheduler.ScheduledTask;
@@ -85,7 +86,6 @@ public class DeliveryScheduledTask extends ScheduledTask {
     }
 
     private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException {
-        System.out.println("invoking report delivery...");
         PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? and " +
                 "delivery_to_user.user_id = user.user_id");
         List<UserInfo> userStubs = new ArrayList<UserInfo>();
@@ -96,6 +96,20 @@ public class DeliveryScheduledTask extends ScheduledTask {
             String firstName = rs.getString(2);
             String lastName = rs.getString(3);
             userStubs.add(new UserInfo(email, firstName, lastName));
+        }
+
+        String senderName = null;
+        String senderEmail = null;
+        PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id and " +
+                "REPORT_DELIVERY.scheduled_account_activity_id = ?");
+        getSernderStmt.setLong(1, activityID);
+        ResultSet senderRS = getSernderStmt.executeQuery();
+        if (senderRS.next()) {
+            String email = senderRS.getString(1);
+            String firstName = senderRS.getString(2);
+            String lastName = senderRS.getString(3);
+            senderName = firstName + " " + lastName;
+            senderEmail = email;
         }
 
         PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where scheduled_account_activity_id = ?");
@@ -150,7 +164,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (ACCOUNT_ID," +
                         "REPORT_DELIVERY_ID, SUCCESSFUL, MESSAGE, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?, ?, ?)");
                 for (UserInfo userInfo : userStubs) {
-                    new SendGridEmail().sendAttachmentEmail(userInfo.email, subjectLine, body, bytes, reportName, htmlEmail);
+                    new SendGridEmail().sendAttachmentEmail(userInfo.email, subjectLine, body, bytes, reportName, htmlEmail, senderEmail, senderName);
                     deliveryAuditStmt.setLong(1, accountID);
                     deliveryAuditStmt.setLong(2, deliveryID);
                     deliveryAuditStmt.setBoolean(3, true);
@@ -160,7 +174,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     deliveryAuditStmt.execute();
                 }
                 for (String email : emails) {
-                    new SendGridEmail().sendAttachmentEmail(email, subjectLine, body, bytes, reportName, htmlEmail);
+                    new SendGridEmail().sendAttachmentEmail(email, subjectLine, body, bytes, reportName, htmlEmail, senderEmail, senderName);
                     deliveryAuditStmt.setLong(1, accountID);
                     deliveryAuditStmt.setLong(2, deliveryID);
                     deliveryAuditStmt.setBoolean(3, true);

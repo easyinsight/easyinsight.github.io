@@ -1,0 +1,2 @@
+alter table report_delivery add sender_user_id bigint(20) default null;
+alter table report_delivery add constraint report_delivery_ibfk3 foreign key (sender_user_id) references user (user_id) on delete set null;

@@ -109,7 +109,7 @@ public class SendGridEmail {
 
     }
 
-    public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String reportName, boolean htmlEmail)
+    public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String reportName, boolean htmlEmail, String fromAddress, String fromName)
             throws MessagingException, UnsupportedEncodingException {
 
 
@@ -137,7 +137,7 @@ public class SendGridEmail {
 
         if (htmlEmail) {
             BodyPart part2 = new MimeBodyPart();
-            part2.setContent(htmlBody, "text/html");
+            part2.setContent(htmlBody, "text/html;charset=UTF-8");
             multipart.addBodyPart(part2);
         } else {
             BodyPart part1 = new MimeBodyPart();
@@ -155,7 +155,13 @@ public class SendGridEmail {
 
         message.setContent(multipart);
 
-        message.setFrom(new InternetAddress("sales@easy-insight.com", "Easy Insight"));
+        if (fromAddress == null) {
+            fromAddress = "sales@easy-insight.com";
+        }
+        if (fromName == null) {
+            fromName = "Easy Insight Reports";
+        }
+        message.setFrom(new InternetAddress(fromAddress, fromName));
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
 
         transport.connect();

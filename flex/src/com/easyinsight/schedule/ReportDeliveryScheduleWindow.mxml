@@ -4,6 +4,7 @@
                     creationComplete="setup()" title="Report Email Delivery">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.util.UserAudit;
@@ -25,6 +26,7 @@
             if (_fixedReportName == null) {
                 analysisService.getInsightDescriptors.send();
             }
+            shareService.getUserStubs.send(false);
         }
 
         private function deleteRecipient(event:RecipientEvent):void {
@@ -57,6 +59,9 @@
                 reportID = _activity.reportID;
                 body = _activity.body;
                 subjectLine = _activity.subject;
+                fromUserID = _activity.senderID;
+            } else {
+                fromUserID = User.getInstance().userID;
             }
         }
 
@@ -94,6 +99,7 @@
                     _activity.reportName = reportComboBox.selectedItem.name;
                     _activity.reportID = reportComboBox.selectedItem.id;
                 }
+                _activity.senderID = fromComboBox.selectedItem.userID;
                 _activity.body = bodyTextInput.text;
                 _activity.subject = subjectInput.text;
                 var utcOffset:int = new Date().getTimezoneOffset();
@@ -170,6 +176,22 @@
             _fixedReportURLKey = value;
         }
 
+        private function gotUserStubs():void {
+            var users:ArrayCollection = shareService.getUserStubs.lastResult as ArrayCollection;
+            var fakeUser:UserStub = new UserStub();
+            fakeUser.userID = 0;
+            fakeUser.firstName = null;
+            fakeUser.fullName = "reports@easy-insight.com";
+            users.addItemAt(fakeUser, 0);
+            this.users = users;
+        }
+
+        [Bindable]
+        private var users:ArrayCollection;
+
+        [Bindable]
+        private var fromUserID:int;
+
         [Bindable]
         private var body:String;
 
@@ -185,6 +207,9 @@
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptors" result="gotReports()"/>
     </mx:RemoteObject>
+    <mx:RemoteObject id="shareService" destination="share">
+		<mx:method name="getUserStubs" result="gotUserStubs()"/>
+	</mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:HBox>
             <mx:VBox>
@@ -209,6 +234,9 @@
                 </mx:Form>
                 <schedule:ScheduleConfiguration activity="{activity}" id="scheduleConfiguration"/>
                 <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                    <mx:FormItem label="Send From:">
+                        <util:SmartComboBox dataProvider="{users}" selectedValue="{fromUserID}" selectedProperty="userID" id="fromComboBox" labelField="displayName"/>
+                    </mx:FormItem>
                     <mx:FormItem label="Recipients:">
                         <mx:VBox>
                             <mx:Button label="Add Recipient..." click="addRecipient()"/>
