@@ -144,11 +144,8 @@
                         function (event:ResultEvent, token:Object = null):void {
                             switch (event.result) {
                                 case "success":
-                                    /*User.initializeUser(authResult);
-                                     User.getInstance().userName = authResult.userName;*/
                                     GAHelper.instance().tracker.trackPageview("LoggedInApplication");
                                     dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
-                                    //User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
                                     break;
                                 default:
                                     trace(event.result);

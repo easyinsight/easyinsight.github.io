@@ -1,24 +1,12 @@
 package com.easyinsight.report {
-import com.easyinsight.FullScreenPage;
+import com.easyinsight.framework.PerspectiveInfo;
 
-import com.easyinsight.listing.AnalyzeSource;
-
-public class MultiReportAnalyzeSource implements AnalyzeSource {
-
-    private var dataSourceID:int;
-    private var dataSourceName:String;
+public class MultiReportAnalyzeSource extends PerspectiveInfo {
 
     public function MultiReportAnalyzeSource(dataSourceID:int, dataSourceName:String = null) {
-        super();
-        this.dataSourceID = dataSourceID;
-        this.dataSourceName = dataSourceName;
-    }
-
-    public function createAnalysisPopup():FullScreenPage {
-        var view:MultiReportView = new MultiReportView();
-        view.dataSourceID = dataSourceID;
-        view.dataSourceName = dataSourceName;
-        return view;
+        super(PerspectiveInfo.MULTI_REPORT_VIEW, new Object());
+        properties.dataSourceID = dataSourceID;
+        properties.dataSourceName = dataSourceName;
     }
 }
 }

@@ -1,5 +1,7 @@
 package com.easyinsight.groups
 {
+import com.easyinsight.framework.ModulePerspective;
+import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.*;
 import com.easyinsight.administration.feed.CredentialsResponse;
 import com.easyinsight.customupload.DataSourceConfiguredEvent;
@@ -224,7 +226,7 @@ public class GroupAdminMyDataIconControls extends HBox
     private function analyzeCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID)));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
@@ -307,7 +309,7 @@ public class GroupAdminMyDataIconControls extends HBox
     private function adminCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.dataFeedID})));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));

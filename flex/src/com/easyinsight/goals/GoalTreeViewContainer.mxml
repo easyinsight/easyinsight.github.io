@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
-<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
+<mx:VBox xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
                 xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()"
-         implements="com.easyinsight.util.IAsyncScreen, com.easyinsight.framework.IFullScreenPage">
-    <states>
+         implements="com.easyinsight.util.IAsyncScreen, com.easyinsight.listing.IPerspective">
+    <mx:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBox}"/>
             <mx:RemoveChild target="{hrule}"/>
         </mx:State>
-    </states>
+    </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedConsumer;
         import com.easyinsight.administration.sharing.UserStub;
@@ -220,7 +220,10 @@
         }
 
 
-        override public function cleanup():void {
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
             for each (var displayObject:DisplayObject in windows) {
                 PopUpManager.removePopUp(displayObject as IFlexDisplayObject);
             }
@@ -253,4 +256,4 @@
         </mx:Canvas>
     </mx:VBox>
 
-</FullScreenPage>
+</mx:VBox>

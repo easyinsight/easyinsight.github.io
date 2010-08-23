@@ -11,8 +11,8 @@
         import com.easyinsight.etl.NewLookupTableWindow;
         import com.easyinsight.framework.AsyncInfoEvent;
         import com.easyinsight.framework.EIMessageListener;
-        import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
@@ -244,11 +244,11 @@
         }
 
         private function gridDoubleClick(event:ListEvent):void {
-            var analyzeSource:AnalyzeSource = null;
+            var analyzeSource:PerspectiveInfo = null;
             var selectedObject:Object = event.currentTarget.selectedItem;
             if (selectedObject is DataFeedDescriptor) {
                 var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
-                analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name);
+                analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID);
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else if (selectedObject is LookupTableDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
@@ -306,9 +306,9 @@
                 descriptor.dataFeedID = event.feedID;
                 descriptor.name = event.name;
                 if (event.startInAdmin) {
-                    dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.dataFeedID})));
                 } else {
-                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID, event.name)));
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID)));
                 }
             }
         }

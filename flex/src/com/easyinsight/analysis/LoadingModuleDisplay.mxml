@@ -6,8 +6,22 @@
         [Bindable]
         private var _moduleInfo:IModuleInfo;
 
+        private var _message:String = "Loading module for display...";
+
+
+        [Bindable(event="messageChanged")]
+        public function get message():String {
+            return _message;
+        }
+
+        public function set message(value:String):void {
+            if (_message == value) return;
+            _message = value;
+            dispatchEvent(new Event("messageChanged"));
+        }
+
         public function set moduleInfo(val:IModuleInfo):void {
             _moduleInfo = val;
         }]]></mx:Script>
-    <mx:ProgressBar id="progressBar" source="{_moduleInfo}" label="Loading module for display..." fontSize="18"/>
+    <mx:ProgressBar id="progressBar" source="{_moduleInfo}" label="{message}" fontSize="18"/>
 </mx:Box>

@@ -1,18 +1,18 @@
 <?xml version="1.0" ?>
-<easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
                             xmlns:filtering="com.easyinsight.filtering.*"
                             xmlns:datasources="com.easyinsight.datasources.*"
                             xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
                             width="100%" height="100%"
                             creationComplete="onCreation()" backgroundColor="#EEEEEE"
-                            implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.framework.IFullScreenPage"
+                            implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
         paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
         direction="vertical">
-    <easyinsight:states>
+    <mx:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{topDisplay}"/>
         </mx:State>
-    </easyinsight:states>
+    </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
@@ -132,7 +132,7 @@
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             viewFactory.loadRenderer();
         }
-        
+
         private function onRollup(event:HierarchyRollupEvent):void {
 
             var overrideObj:HierarchyOverride = new HierarchyOverride();
@@ -662,20 +662,20 @@
                 BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
                 viewFactory.drillthroughFilters = _parameterFilters;
                 reportBox.addChild(viewFactory);
-                 viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
-                 viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
-                 viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
-                 viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
-                 viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
-                 viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
+                viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
+                viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
+                viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+                viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
+                viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
+                viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
 
-                 if (!_embedded) {
-                 loading = true;
-                 }
+                if (!_embedded) {
+                    loading = true;
+                }
 
-                 // if filters were passed in
-                 overlayIndex = 1;
-                 viewFactory.retrieveData(false);
+                // if filters were passed in
+                overlayIndex = 1;
+                viewFactory.retrieveData(false);
             } catch(e:Error) {
                 Alert.show(e.message);
             }
@@ -713,7 +713,7 @@
             _updateURL = value;
         }
 
-        override public function cleanup():void {
+        public function cleanup():void {
             //reportBox.removeChild(viewFactory);
         }
 
@@ -739,7 +739,10 @@
         }
 
         private function toNextReport():void {
-            
+
+        }
+
+        public function gotFocus():void {
         }
 
         ]]></mx:Script>
@@ -864,4 +867,4 @@
         <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
         <mx:method name="keepReport" result="confirmedKeep()"/>
     </mx:RemoteObject>
-</easyinsight:FullScreenPage>
+</mx:VBox>

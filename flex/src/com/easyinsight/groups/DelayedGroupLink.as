@@ -2,6 +2,7 @@ package com.easyinsight.groups
 {
 	import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.framework.NavigationEvent;
+import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.framework.User;
 	import flash.events.EventDispatcher;
 	
@@ -35,9 +36,7 @@ import com.easyinsight.framework.User;
 		private function gotFeed(event:ResultEvent):void {
         	var groupResponse:GroupResponse = groupService.openGroupIfPossible.lastResult as GroupResponse;
         	if (groupResponse.status == GroupResponse.SUCCESS) {
-                var groupDetail:GroupDetail = new GroupDetail();
-                groupDetail.groupID = groupResponse.groupID;
-                User.getEventNotifier().dispatchEvent(new NavigationEvent(null, groupDetail));
+                User.getEventNotifier().dispatchEvent(new NavigationEvent(null, new PerspectiveInfo(PerspectiveInfo.GROUP_DETAIL, {groupID : groupResponse.groupID})));
             } else {
         		// tried to access a data source they don't have rights to, silently fail
         	}        	            

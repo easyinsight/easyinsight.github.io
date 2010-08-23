@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" width="100%" height="100%" doubleClickEnabled="true">
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.AnalyzeSource;
         import com.easyinsight.listing.DataFeedDescriptor;
@@ -47,11 +48,11 @@
         }
 
         private function gridDoubleClick(event:ListEvent):void {
-            var analyzeSource:AnalyzeSource = null;
+            var analyzeSource:PerspectiveInfo = null;
             var selectedObject:Object = event.currentTarget.selectedItem;
             if (selectedObject is DataFeedDescriptor) {
                 var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
-                analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name);
+                analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID);
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else {
                 analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));

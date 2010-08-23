@@ -4,7 +4,10 @@
 	<mx:Script>
     <![CDATA[
         import com.easyinsight.customupload.wizard.FlatFileUploadContext;
-        import com.easyinsight.customupload.wizard.SpreadsheetSetupSource;
+        import com.easyinsight.framework.ModulePerspective;
+        import com.easyinsight.framework.PerspectiveInfo;
+
+        //import com.easyinsight.customupload.wizard.SpreadsheetSetupSource;
         import com.easyinsight.genredata.AnalyzeEvent;
 
         import mx.controls.Alert;
@@ -38,7 +41,8 @@
             if (uploadResponse.successful) {
                 var context:FlatFileUploadContext = new FlatFileUploadContext();
                 context.bytes = fileData;
-                dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
+                //dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_WIZARD, {uploadContext: context, fields: uploadResponse.infos})));
                 PopUpManager.removePopUp(this);
             } else {
                 Alert.show(uploadResponse.failureMessage);

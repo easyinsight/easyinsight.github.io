@@ -15,10 +15,6 @@ public class SolutionDetailFactory {
             page = new clazz();
             page["newAuth"] = auth;
             page["solution"] = solution;
-        } else {
-            var detail:RevisedSolutionDetail = new RevisedSolutionDetail();
-            detail.solution = solution;
-            page = detail;
         }
         return page;
     }

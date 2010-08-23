@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+<mx:VBox xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
                 xmlns:feedassembly="com.easyinsight.feedassembly.*"
                 paddingTop="10" paddingLeft="0" paddingRight="0" paddingBottom="0"
-        implements="com.easyinsight.framework.IFullScreenPage">
+        implements="com.easyinsight.listing.IPerspective">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.feed.FeedChangeEvent;
@@ -70,11 +70,11 @@
             saveNeeded = false;
         }
 
-        public function addFeeds(feedList:ArrayCollection):void {
+        public function set feedList(feedList:ArrayCollection):void {
             this._feedList = feedList;
         }
 
-        override public function cleanup():void {
+        public function cleanup():void {
         }
 
         private function analyze():void {
@@ -82,29 +82,30 @@
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
                         Alert.OK | Alert.CANCEL, null, analyzeListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.feedName)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID)));
             }
         }
 
         private function analyzeListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.feedName)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID)));
             }
+        }
+
+        public function gotFocus():void {
         }
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
 		<mx:method name="updateFeedDefinition" result="updated()"/>
 	</mx:RemoteObject>
-	<mx:VBox width="100%" height="100%">
-		<mx:HBox paddingLeft="20">
-            <mx:Button icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
-                       toolTip="Close"/>
-            <mx:Button icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                           toolTip="Save"/>
-            <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="analyze()"
-                           toolTip="Analyze" enabled="{feedDefinition != null}"/>
-		</mx:HBox>
-		<feedassembly:CompositeWorkspace id="workspace" width="100%" height="100%" feeds="{_feedList}" feedChange="onFeedChange(event)"/>
-	</mx:VBox>
-</FullScreenPage>
+    <mx:HBox paddingLeft="20">
+        <mx:Button icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
+                   toolTip="Close"/>
+        <mx:Button icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+                       toolTip="Save"/>
+        <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="analyze()"
+                       toolTip="Analyze" enabled="{feedDefinition != null}"/>
+    </mx:HBox>
+    <feedassembly:CompositeWorkspace id="workspace" width="100%" height="100%" feeds="{_feedList}" feedChange="onFeedChange(event)"/>
+</mx:VBox>

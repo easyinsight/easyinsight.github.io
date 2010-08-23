@@ -9,6 +9,8 @@ import com.easyinsight.datasources.DataSourceRefreshWindow;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableSource;
 import com.easyinsight.framework.Credentials;
+import com.easyinsight.framework.ModulePerspective;
+import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.goals.GoalDataAnalyzeSource;
@@ -292,7 +294,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     private function analyzeCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID)));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
@@ -378,7 +380,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     private function adminCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.dataFeedID})));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));

@@ -163,7 +163,7 @@
         }
 
         private function done():void {
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceDescriptor.id, _dataSourceDescriptor.name)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceDescriptor.id)));
         }
 
         private function kpiLinkBack():void {

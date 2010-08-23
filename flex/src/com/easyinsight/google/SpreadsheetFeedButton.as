@@ -1,12 +1,12 @@
 package com.easyinsight.google
 {
-import com.easyinsight.administration.feed.GoogleFeedDefinition;
-import com.easyinsight.customupload.UploadConfigEvent;
 import com.easyinsight.customupload.UploadResponse;
-import com.easyinsight.customupload.wizard.SpreadsheetSetupSource;
+import com.easyinsight.customupload.wizard.FieldUploadInfo;
+
+
 import com.easyinsight.framework.Credentials;
+import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.genredata.AnalyzeEvent;
-import com.easyinsight.listing.DataFeedDescriptor;
 
 import com.easyinsight.util.ProgressAlert;
 
@@ -101,6 +101,7 @@ import mx.controls.Button;
             uploadService.analyzeUpload.addEventListener(ResultEvent.RESULT, analyzedStructure);
             ProgressAlert.alert(this.parent.parent, "Analyzing the spreadsheet...", null, uploadService.analyzeUpload);
             uploadService.analyzeUpload.send(context);
+            var fieldUploadInfo:FieldUploadInfo;
 		}
 
         private function analyzedStructure(event:ResultEvent):void {
@@ -108,7 +109,8 @@ import mx.controls.Button;
             if (uploadResponse.successful) {
                 var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
                 context.worksheetURL = _data.url;
-                dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
+                //dispatchEvent(new AnalyzeEvent(new SpreadsheetSetupSource(context, uploadResponse.infos)));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SPREADSHEET_WIZARD, {uploadContext: context, fields: uploadResponse.infos})));
             } else {
                 Alert.show(uploadResponse.failureMessage);
             }

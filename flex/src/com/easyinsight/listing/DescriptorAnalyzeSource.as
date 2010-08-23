@@ -1,28 +1,13 @@
 package com.easyinsight.listing
 {
-import com.easyinsight.DataAnalysisContainer;
-import com.easyinsight.FullScreenPage;
-import com.easyinsight.framework.DataService;
+import com.easyinsight.framework.PerspectiveInfo;
 
-import mx.managers.BrowserManager;
-
-	public class DescriptorAnalyzeSource implements AnalyzeSource
+	public class DescriptorAnalyzeSource extends PerspectiveInfo
 	{
-        private var dataFeedID:int;
-        private var name:String;
-		public function DescriptorAnalyzeSource(dataFeedID:int, name:String)
+		public function DescriptorAnalyzeSource(dataFeedID:int)
 		{
-			this.dataFeedID = dataFeedID;
-            this.name = name;
+			super(PerspectiveInfo.REPORT_EDITOR, new Object());
+			properties.dataSourceID = dataFeedID;
 		}
-
-        public function createAnalysisPopup():FullScreenPage {
-            var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();
-            var dataService:DataService = new DataService();
-            dataService.dataFeedID = dataFeedID;
-            dataAnalysisContainer.dataService = dataService;
-            BrowserManager.getInstance().setTitle("Easy Insight - " + name);
-            return dataAnalysisContainer;
-        }
 	}
 }

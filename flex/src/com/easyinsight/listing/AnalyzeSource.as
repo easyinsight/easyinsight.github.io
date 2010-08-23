@@ -1,9 +1,8 @@
 package com.easyinsight.listing
 {
-	import com.easyinsight.FullScreenPage;
-	
-	public interface AnalyzeSource
+
+public interface AnalyzeSource
 	{
-		function createAnalysisPopup():FullScreenPage;
+		function createAnalysisPopup():IPerspective;
 	}
 }

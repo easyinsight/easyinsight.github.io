@@ -1,7 +1,6 @@
 package com.easyinsight.framework {
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.solutions.DelayedSolutionLink;
-import com.easyinsight.solutions.RevisedSolutionDetail;
 
 import flash.events.EventDispatcher;
 

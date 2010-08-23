@@ -7,15 +7,15 @@ public class ConnectionGoEvent extends Event {
 
     public static const CONNECTION_GO:String = "connectionGo";
 
-    public var source:AnalyzeSource;
+    public var perspectiveInfo:PerspectiveInfo;
 
-    public function ConnectionGoEvent(source:AnalyzeSource) {
+    public function ConnectionGoEvent(perspectiveInfo:PerspectiveInfo) {
         super(CONNECTION_GO);
-        this.source = source;
+        this.perspectiveInfo = perspectiveInfo;
     }
 
     override public function clone():Event {
-        return new ConnectionGoEvent(source);
+        return new ConnectionGoEvent(perspectiveInfo);
     }
 }
 }

@@ -1,13 +1,9 @@
 package com.easyinsight.account {
-import com.easyinsight.FullScreenPage;
-import com.easyinsight.listing.AnalyzeSource;
+import com.easyinsight.framework.PerspectiveInfo;
 
-public class AccountSetupWizardSource implements AnalyzeSource {
+public class AccountSetupWizardSource extends PerspectiveInfo {
     public function AccountSetupWizardSource() {
-    }
-
-    public function createAnalysisPopup():FullScreenPage {
-        return new AccountSetupWizard();
+        super(PerspectiveInfo.ACCOUNT_CREATION);
     }
 }
 }

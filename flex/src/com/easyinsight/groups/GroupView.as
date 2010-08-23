@@ -1,7 +1,7 @@
 package com.easyinsight.groups {
 import com.easyinsight.framework.NavigationEvent;
+import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.framework.User;
-import com.easyinsight.util.AutoSizeTextArea;
 
 import flash.events.Event;
 
@@ -9,7 +9,6 @@ import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.containers.VBox;
-import mx.controls.Label;
 import mx.controls.TextArea;
 
 public class GroupView extends VBox{
@@ -43,9 +42,7 @@ public class GroupView extends VBox{
     }
 
     private function onClick(event:MouseEvent):void {
-        var groupDetail:GroupDetail = new GroupDetail();
-        groupDetail.groupID = group.groupID;
-        User.getEventNotifier().dispatchEvent(new NavigationEvent(null, groupDetail));
+        User.getEventNotifier().dispatchEvent(new NavigationEvent(null, new PerspectiveInfo(PerspectiveInfo.GROUP_DETAIL, {groupID : group.groupID})));
     }
 
     [Bindable(event="titleTextChanged")]

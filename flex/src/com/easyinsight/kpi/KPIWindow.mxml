@@ -13,15 +13,12 @@
         import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemEditEvent;
-        import com.easyinsight.analysis.AnalysisItemEditWindow;
+
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.AnalysisMeasure;
-        import com.easyinsight.analysis.CalculationMeasureWindow;
-        import com.easyinsight.analysis.CalculationWindow;
         import com.easyinsight.analysis.FeedMetadata;
-        import com.easyinsight.analysis.MeasureItemEditor;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.filtering.FilterDefinition;
@@ -132,7 +129,7 @@
             }
         }
 
-        private function editMeasure():void {
+        /*private function editMeasure():void {
             var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             if (analysisMeasure.hasType(AnalysisItemTypes.CALCULATION)) {
                 analysisItemEditor.editorClass = CalculationMeasureWindow;
@@ -144,7 +141,7 @@
             PopUpManager.addPopUp(analysisItemEditor, this, true);
             PopUpUtil.centerPopUp(analysisItemEditor);
             analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
-        }
+        }*/
 
         private static const NONE:AnalysisItem = new AnalysisItem();
 
@@ -497,7 +494,7 @@
                                                   selectedItem="{analysisMeasure}"
                                                   fontFamily="Lucida Grande" fontWeight="normal"
                                                   labelField="display"/>
-                <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
+                <!--<mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>-->
             </mx:FormItem>
             <!--<mx:FormItem label="Connection Visible:">
                 <mx:CheckBox id="connectionVisibleCheckbox" selected="{connectionVisible}"/>

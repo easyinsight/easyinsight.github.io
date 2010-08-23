@@ -114,7 +114,7 @@ public class ScorecardContextWindow extends VBox {
         report.dataFeedID = kpi.coreFeedID;
         report.columns = new ArrayCollection([ kpi.analysisMeasure ]);
         report.name = kpi.name;
-        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportEditorAnalyzeSource(report, 0)));
+        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportEditorAnalyzeSource(report)));
         destroy();
     }
 

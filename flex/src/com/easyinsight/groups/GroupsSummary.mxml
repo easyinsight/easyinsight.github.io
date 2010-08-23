@@ -10,12 +10,12 @@
 		<![CDATA[
 
         import com.easyinsight.account.Account;
+        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
 
-        import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
 
@@ -61,18 +61,14 @@
         }
 
         private function groupSelected(event:GroupSelectedEvent):void {
-            var groupDetail:GroupDetail = new GroupDetail();
-            groupDetail.groupID = event.groupID;
-            User.getEventNotifier().dispatchEvent(new NavigationEvent(null, groupDetail));
+            User.getEventNotifier().dispatchEvent(new NavigationEvent(null, new PerspectiveInfo(PerspectiveInfo.GROUP_DETAIL, {groupID : event.groupID})));
         }
 
         private function onNewGroup(event:GroupSelectedEvent):void {
             if (User.getInstance().getAccountType() == Account.BASIC) {
                 groupAddIndex = 2;
             }
-            var groupDetail:GroupDetail = new GroupDetail();
-            groupDetail.groupID = event.groupID;
-            User.getEventNotifier().dispatchEvent(new NavigationEvent(null, groupDetail));
+            User.getEventNotifier().dispatchEvent(new NavigationEvent(null, new PerspectiveInfo(PerspectiveInfo.GROUP_DETAIL, {groupID : event.groupID})));
         }
 
         private function gotMemberGroups():void {

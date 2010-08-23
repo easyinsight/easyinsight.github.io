@@ -1,5 +1,7 @@
 package com.easyinsight.listing
 {
+import com.easyinsight.framework.ModulePerspective;
+import com.easyinsight.framework.PerspectiveInfo;
 
 import mx.containers.VBox;
 import flash.events.MouseEvent;
@@ -9,7 +11,7 @@ import flash.events.MouseEvent;
 	public class ListingOption extends VBox
 	{
 		public var _displayName:String;
-        public var _perspectiveClass:Class;
+        public var _perspectiveClass:int;
 		public var _perspective:IPerspective;
 		[Bindable]
 		public var children:ArrayCollection;
@@ -43,7 +45,7 @@ import flash.events.MouseEvent;
         }
 
 
-    public function set perspectiveClass(value:Class):void {
+    public function set perspectiveClass(value:int):void {
         _perspectiveClass = value;
         invalidateProperties();
     }
@@ -53,8 +55,9 @@ import flash.events.MouseEvent;
         }
 
         public function get perspective():IPerspective {
-            if (_perspective == null && _perspectiveClass != null) {
-                _perspective = new _perspectiveClass();
+            if (_perspective == null && _perspectiveClass > 0) {
+                _perspective = new ModulePerspective(new PerspectiveInfo(_perspectiveClass));
+                //_perspective = new _perspectiveClass();
             }
             return _perspective;
         }

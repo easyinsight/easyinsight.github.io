@@ -16,7 +16,7 @@
 
         private function onChoice(event:MouseEvent):void {
             var ds:DataSourceDescriptor = event.currentTarget.data as DataSourceDescriptor;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(ds.id, ds.name)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(ds.id)));
             PopUpManager.removePopUp(this);
         }
 

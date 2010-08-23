@@ -67,7 +67,7 @@
         }
 
         private function uploadConfigComplete(event:UploadConfigEvent):void {
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID, event.name)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID)));
         }
 ]]></mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService2">

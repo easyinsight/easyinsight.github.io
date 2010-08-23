@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+<mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
 	xmlns:feed="com.easyinsight.administration.feed.*" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
-        creationComplete="setupListeners()" backgroundColor="#DCE2F8" implements="com.easyinsight.framework.IFullScreenPage">
+        creationComplete="setupListeners()" backgroundColor="#DCE2F8" implements="com.easyinsight.listing.IPerspective">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
@@ -27,7 +27,6 @@
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.salesforce.SalesforceFeedDefinition;
         import com.easyinsight.util.ProgressAlert;
-        import com.easyinsight.wesabe.WesabeDataSource;
 
         import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
@@ -222,14 +221,14 @@
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
                         Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.feedName)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID)));
             }
         }
 
         private function toReportListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 //   dataAnalysisContainer.cleanup();
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID, feedDefinition.feedName)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID)));
             }
         }
 
@@ -278,7 +277,6 @@
             var google:GoogleAnalyticsDataSource;
             var salesforce:SalesforceFeedDefinition;
             var jira:JiraDataSource;
-            var wesabe:WesabeDataSource;
             var cloudwatch:CloudWatchDataSource;
             var googleDoc:GoogleFeedDefinition;
             var marketoSource:MarketoDataSource;
@@ -304,7 +302,7 @@
             controlsEnabled = true;
         }
 
-        override public function cleanup():void {
+        public function cleanup():void {
         }
 
         private function updated():void {
@@ -338,6 +336,9 @@
                     availableGroups.addItem(desc);
                 }
             }
+        }
+
+        public function gotFocus():void {
         }
 		]]>
 	</mx:Script>
@@ -418,4 +419,4 @@
 		</mx:TabNavigator>
 	</mx:VBox>
 	<mx:StringValidator id="nameValidator" source="{feedNameInput}" property="text" minLength="3" maxLength="40"/>
-</FullScreenPage>
+</mx:Module>

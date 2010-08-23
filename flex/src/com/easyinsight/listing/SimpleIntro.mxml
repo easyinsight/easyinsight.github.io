@@ -70,7 +70,7 @@
         private function newReport():void {
             if (dataSources.length == 1) {
                 var ds:DataSourceDescriptor = dataSources.getItemAt(0) as DataSourceDescriptor;
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(ds.id, ds.name)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(ds.id)));
             } else {
                 var window:NewReportWindow = new NewReportWindow();
                 window.addEventListener(AnalyzeEvent.ANALYZE, toAnalyze, false, 0, true);

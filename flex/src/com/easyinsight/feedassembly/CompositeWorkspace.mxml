@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<core:FullScreenPage xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+<mx:Canvas xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
                      creationComplete="initializeData()" xmlns:adobe="com.adobe.flex.extras.controls.springgraph.*"
-                     implements="com.easyinsight.administration.feed.IFeedAdminDetail"
-                     paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0">
+                     implements="com.easyinsight.administration.feed.IFeedAdminDetail">
     <mx:Metadata>
         [Event(name="feedChange", type="com.easyinsight.administration.feed.FeedChangeEvent")]
     </mx:Metadata>
@@ -461,22 +460,20 @@
         <mx:method name="getCredentials" result="gotCredentials()"/>
         <mx:method name="testJoin" result="tested()"/>
     </mx:RemoteObject>
-    <mx:Canvas width="100%" height="100%">
-        <mx:VBox width="250" paddingLeft="5" paddingRight="10" height="100%" backgroundColor="#333333" paddingBottom="10" paddingTop="10">
-            <mx:TextArea text="Drag data sources into the canvas to the right to add them to the composite data source." borderStyle="none"
-                    backgroundAlpha="0" editable="false" selectable="false" height="70" width="235" color="#FFFFFF" fontSize="14"/>
-            <mx:List dataProvider="{allFeeds}" dragEnabled="true" labelField="name" height="100%" width="235"/>
-        </mx:VBox>
-        <mx:VBox width="100%" height="100%" backgroundColor="#E0E0E0" x="250">
-            <mx:HBox paddingTop="5" paddingLeft="5" horizontalAlign="center" width="100%">
-                <mx:TextArea text="Right click on data sources once you've added them to the canvas to create new joins or remove the data sources. Right click on joins to describe, test, or delete." borderStyle="none"
-                    backgroundAlpha="0" editable="false" selectable="false" height="40" width="500" color="#000000" fontSize="12"/>
-                <mx:Text fontSize="14" id="failureText" visible="false"/>
-            </mx:HBox>
-            <adobe:SpringGraph dragEnter="dragEnterHandler(event)" dragOver="dragOverHandler(event)"
-                               dragDrop="dragDropHandler(event)" id="s" backgroundColor="#777777" lineColor="#6666ff"
-                               edgeRenderer="{testEdgeRenderer}" itemRenderer="{new GraphFeedNodeFactory()}"
-                               width="100%" height="100%" autoFit="true" dataProvider="{graph}"/>
-        </mx:VBox>
-    </mx:Canvas>
-</core:FullScreenPage>
+    <mx:VBox width="250" paddingLeft="5" paddingRight="10" height="100%" backgroundColor="#333333" paddingBottom="10" paddingTop="10">
+        <mx:TextArea text="Drag data sources into the canvas to the right to add them to the composite data source." borderStyle="none"
+                backgroundAlpha="0" editable="false" selectable="false" height="70" width="235" color="#FFFFFF" fontSize="14"/>
+        <mx:List dataProvider="{allFeeds}" dragEnabled="true" labelField="name" height="100%" width="235"/>
+    </mx:VBox>
+    <mx:VBox width="100%" height="100%" backgroundColor="#E0E0E0" x="250">
+        <mx:HBox paddingTop="5" paddingLeft="5" horizontalAlign="center" width="100%">
+            <mx:TextArea text="Right click on data sources once you've added them to the canvas to create new joins or remove the data sources. Right click on joins to describe, test, or delete." borderStyle="none"
+                backgroundAlpha="0" editable="false" selectable="false" height="40" width="500" color="#000000" fontSize="12"/>
+            <mx:Text fontSize="14" id="failureText" visible="false"/>
+        </mx:HBox>
+        <adobe:SpringGraph dragEnter="dragEnterHandler(event)" dragOver="dragOverHandler(event)"
+                           dragDrop="dragDropHandler(event)" id="s" backgroundColor="#777777" lineColor="#6666ff"
+                           edgeRenderer="{testEdgeRenderer}" itemRenderer="{new GraphFeedNodeFactory()}"
+                           width="100%" height="100%" autoFit="true" dataProvider="{graph}"/>
+    </mx:VBox>
+</mx:Canvas>

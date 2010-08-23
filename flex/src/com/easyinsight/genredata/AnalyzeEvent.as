@@ -1,23 +1,23 @@
 package com.easyinsight.genredata
 {
-	import flash.events.Event;
-	
-	import com.easyinsight.listing.AnalyzeSource;
+import com.easyinsight.framework.PerspectiveInfo;
+
+import flash.events.Event;
 
 	public class AnalyzeEvent extends Event
 	{
 		public static const ANALYZE:String = "analyze";
-		
-		public var analyzeSource:AnalyzeSource;
+
+        public var perspectiveInfo:PerspectiveInfo;
 				
-		public function AnalyzeEvent(analyzeSource:AnalyzeSource)
+		public function AnalyzeEvent(perspectiveInfo:PerspectiveInfo)
 		{
 			super(ANALYZE, true);
-			this.analyzeSource = analyzeSource;
+			this.perspectiveInfo = perspectiveInfo;
 		}
 		
 		override public function clone():Event {
-			return new AnalyzeEvent(analyzeSource);
+			return new AnalyzeEvent(perspectiveInfo);
 		}
 	}
 }

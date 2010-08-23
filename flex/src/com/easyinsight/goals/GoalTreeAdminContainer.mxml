@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goals="com.easyinsight.goals.*"
+<mx:VBox xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goals="com.easyinsight.goals.*"
 	width="100%" height="100%" backgroundColor="#DCE2F8" creationComplete="onCreation()"
-        implements="com.easyinsight.framework.IFullScreenPage">
+        implements="com.easyinsight.listing.IPerspective">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
@@ -290,7 +290,10 @@
 
         }
 
-        override public function cleanup():void {
+        public function cleanup():void {
+        }
+
+        public function gotFocus():void {
         }
     ]]>
 	</mx:Script>
@@ -350,4 +353,4 @@
         </mx:TabNavigator>
 	</mx:VBox>
     <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3" maxLength="30"/>
-</FullScreenPage>
+</mx:VBox>

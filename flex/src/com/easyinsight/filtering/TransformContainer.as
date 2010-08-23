@@ -4,7 +4,6 @@ import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
-import com.easyinsight.analysis.DropArea;
 import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
@@ -280,9 +279,6 @@ public class TransformContainer extends HBox
         if (event.dragInitiator is DataGrid) {
             var initialList:DataGrid = DataGrid(event.dragInitiator);
             analysisItem = AnalysisItemWrapper(initialList.selectedItem).analysisItem;
-        } else if (event.dragInitiator is DropArea) {
-            var dropArea:DropArea = event.dragInitiator as DropArea;
-            analysisItem = dropArea.analysisItem;
         } else if (event.dragInitiator is List) {
             var list:List = List(event.dragInitiator);
             analysisItem = list.selectedItem as AnalysisItem;
@@ -342,9 +338,6 @@ public class TransformContainer extends HBox
         if (event.dragInitiator is DataGrid) {
             var initialList:DataGrid = DataGrid(event.dragInitiator);
             analysisItem = AnalysisItemWrapper(initialList.selectedItem).analysisItem;
-        } else if (event.dragInitiator is DropArea) {
-            var dropArea:DropArea = event.dragInitiator as DropArea;
-            analysisItem = dropArea.analysisItem;
         } else if (event.dragInitiator is List) {
             var list:List = List(event.dragInitiator);
             analysisItem = list.selectedItem as AnalysisItem;

@@ -1,25 +1,12 @@
 package com.easyinsight.goals {
-import com.easyinsight.listing.AnalyzeSource;
-import com.easyinsight.FullScreenPage;
-public class GoalDataAnalyzeSource implements AnalyzeSource
-	{
-		private var _goalTreeID:int;
+import com.easyinsight.framework.PerspectiveInfo;
+
+public class GoalDataAnalyzeSource extends PerspectiveInfo {
 
 		public function GoalDataAnalyzeSource(goalTreeID:int)
 		{
-			this._goalTreeID = goalTreeID;
-		}
-
-
-    public function get goalTreeID():int {
-        return _goalTreeID;
-    }
-
-    public function createAnalysisPopup():FullScreenPage
-		{
-			var goalTreeAdminContainer:GoalTreeViewContainer = new GoalTreeViewContainer();
-			goalTreeAdminContainer.goalTreeID = goalTreeID;
-			return goalTreeAdminContainer;
+            super(PerspectiveInfo.KPI_TREE_VIEW, new Object());
+			properties.goalTreeID = goalTreeID;
 		}
 
 }

@@ -36,7 +36,7 @@
         }
 
         private function toDataSource():void {
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceDescriptor.id, _dataSourceDescriptor.name)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceDescriptor.id)));
             PopUpManager.removePopUp(this);
         }
 

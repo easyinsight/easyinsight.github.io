@@ -1,9 +1,6 @@
 package com.easyinsight.report {
 import com.easyinsight.analysis.EmbeddedControllerLookup;
 import com.easyinsight.analysis.IEmbeddedReportController;
-import com.easyinsight.goals.GoalHistoryDescriptor;
-import com.easyinsight.goals.GoalHistoryView;
-import com.easyinsight.goals.GoalTreeViewContainer;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.IAsyncScreen;
@@ -36,19 +33,8 @@ public class ReportWindowFactory implements IAsyncScreenFactory{
             var controller:IEmbeddedReportController = new controllerClass();
             reportView.viewFactory = controller.createEmbeddedView();
             return reportView;
-        } else if (descriptor.getType() == EIDescriptor.GOAL_HISTORY) {
-            var histDescriptor:GoalHistoryDescriptor = descriptor as GoalHistoryDescriptor;
-            var historyView:GoalHistoryView = new GoalHistoryView();
-            historyView.goalID = descriptor.id;
-            historyView.dataSourceID = histDescriptor.dataSourceID;
-            historyView.dataSourceName = histDescriptor.dataSourceName;
-            return historyView;
-        } else {
-            var goalView:GoalTreeViewContainer = new GoalTreeViewContainer();
-            goalView.goalTreeID = descriptor.id;
-            goalView.embedded = true;
-            return goalView;
         }
+        return null;
     }
 }
 }

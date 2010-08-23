@@ -2,13 +2,12 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.analysis.AnalysisItemEditor;
+        
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
         import com.easyinsight.analysis.AnalysisItem;
-
-        import mx.states.AddChild;
+       
         import mx.states.State;
 
         [Bindable]
@@ -22,8 +21,6 @@
 
         [Bindable]
         private var beforeAgg:Boolean;
-
-        private var editor:AnalysisItemEditor;
 
         private var _detailClass:Class;
 
@@ -51,7 +48,6 @@
         }
 
         private function onFilterEdit(event:FilterEditEvent):void {
-            var previousDefinition:FilterDefinition = _filterDefinition;
             _filterDefinition = event.filterDefinition;
             coreBox.removeChildAt(1);
             _detailClass = event.editorClass;
@@ -76,23 +72,7 @@
                 filterDetailBox.addChild(filterDetailEditor as DisplayObject);
             }
 
-            if (!_fieldEditable) {
-                coreBox.removeChild(fieldBox);    
-            }
 
-            if (editor == null) {
-                editorState = new State();
-                editorState.name = "editorState";
-                var addOp:AddChild = new AddChild();
-                editor = new AnalysisItemEditor();
-                editor.analysisItem = _analysisItem;
-                editor.analysisItems = _analysisItems;
-                editor.fieldNameEditable = false;
-                addOp.target = editor;
-                addOp.relativeTo = changeFieldBox;
-                editorState.overrides = [ addOp ];
-                states = [ editorState ];
-            }
             //coreBox.addChildAt(editor, index);
         }
 
@@ -107,9 +87,9 @@
         private function save():void {
             var previousDefinition:FilterDefinition = _filterDefinition;
             _filterDefinition = filterDetailEditor.makeUpdates();
-            if (currentState == "editorState") {
+            /*if (currentState == "editorState") {
                 _filterDefinition.field = editor.save(_feedID);
-            }
+            }*/
             _filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
 
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
@@ -119,26 +99,11 @@
         private function cancel():void {
             PopUpManager.removePopUp(this);
         }
-
-        private function changeField():void {
-            if (currentState == "" || currentState == null) {
-                changeButton.label = "Hide Changes to Filter Field:";
-                currentState = "editorState";
-            } else {
-                
-                changeButton.label = "Change the Filter Field:";
-                currentState = "";
-            }
-        }
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox" styleName="TitleWindowContents">
 		<mx:CheckBox label="Row Level:" selected="{beforeAgg}" id="aggregationCheckbox"/>
         <mx:Box id="filterDetailBox"/>
-        <mx:VBox id="fieldBox">
-            <mx:Button label="Change the Filter Field:" click="changeField()" id="changeButton"/>
-            <mx:Box id="changeFieldBox"/>
-        </mx:VBox>
 		<mx:HBox width="100%" horizontalAlign="center">
 			<mx:Button label="Save" click="save()"/>
 			<mx:Button label="Cancel" click="cancel()"/>

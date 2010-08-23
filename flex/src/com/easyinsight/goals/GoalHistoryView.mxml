@@ -18,7 +18,7 @@
         import mx.core.Container;
 
         private function goDataSource():void {
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceID, _dataSourceName)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceID)));
         }
 
         [Bindable]

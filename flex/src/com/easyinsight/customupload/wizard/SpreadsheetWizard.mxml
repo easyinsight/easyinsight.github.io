@@ -1,11 +1,12 @@
 <?xml version="1.0" ?>
-<listing:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.*"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.*"
                         xmlns:kpi="com.easyinsight.kpi.*" xmlns:wizard="com.easyinsight.customupload.wizard.*"
                         xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
-                        width="100%" height="100%" implements="com.easyinsight.framework.IFullScreenPage">
+                        width="100%" height="100%" implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.customupload.UploadResponse;
+
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.kpi.KPITutorialEvent;
         import com.easyinsight.kpi.TutorialButtons;
@@ -88,11 +89,17 @@
         private function createdDataSource():void {
             UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
             var response:UploadResponse = uploadService.createDataSource.lastResult as UploadResponse;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID, dataSourceName)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
         }
 
         private function onCancel(event:Event):void {
             dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
         }
         ]]></mx:Script>
     <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
@@ -129,5 +136,4 @@
             </mx:ViewStack>
         </mx:Box>
     </mx:Canvas>
-
-</listing:FullScreenPage>
+</mx:Module>

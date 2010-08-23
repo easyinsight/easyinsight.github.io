@@ -12,7 +12,8 @@
         import com.easyinsight.account.NewFreeUserWelcome;
         import com.easyinsight.framework.GAHelper;
         import com.easyinsight.framework.LoginEvent;
-        import com.easyinsight.framework.User;        
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.framework.User;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.preferences.UIOption;
         import com.easyinsight.scorecard.LoggedInHome;
@@ -153,7 +154,7 @@
             }
         }
 
-        [Bindable]
+        /*[Bindable]
         private var introPanel:Class = SimpleIntro;
         [Bindable]
         private var myData:Class = MyData;
@@ -170,49 +171,49 @@
         [Bindable]
         private var accountBase:Class = AccountBasePage;
         [Bindable]
-        private var help:Class = NewFreeUserWelcome;
+        private var help:Class = NewFreeUserWelcome;*/
 		]]>
     </mx:Script>
     <mx:Image source="{logo}"/>
     <mx:Spacer width="10"/>
-    <listing:ListingOption perspectiveClass="{introPanel}" displayName="Home" listingChange="onListingChange(event)" width="85">
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.HOME_PAGE}" displayName="Home" listingChange="onListingChange(event)" width="85">
         <mx:Image source="{homeIcon}" id="homeImage"/>
         <mx:Label text="Home" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{myGoals}" displayName="Scorecards" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.SCORECARDS}" displayName="Scorecards" listingChange="onListingChange(event)"
             id="scorecardOption" width="85">
         <mx:Image source="{scorecardIcon}" id="kpisImage"/>
         <mx:Label text="Scorecards" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{myData}" displayName="My Data" listingChange="onListingChange(event)" id="myDataOption" width="85">
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.MY_DATA}" displayName="My Data" listingChange="onListingChange(event)" id="myDataOption" width="85">
         <mx:Image source="{myDataIcon}" id="myDataImage"/>
         <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{connections}" displayName="Connections" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.CONNECTIONS}" displayName="Connections" listingChange="onListingChange(event)"
             id="connectionsOption" width="85">
         <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
         <mx:Label text="Connections" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{exchange}" displayName="Exchange" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.EXCHANGE}" displayName="Exchange" listingChange="onListingChange(event)"
             id="exchangeOption" width="85">
         <mx:Image source="{catalogIcon}" id="catalogImage"/>
         <mx:Label text="Exchange" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{groupsSummary}" displayName="Groups" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.GROUPS}" displayName="Groups" listingChange="onListingChange(event)"
             id="groupsOption" width="85">
         <mx:Image source="{groupsIcon}" id="groupsImage"/>
         <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{apiPage}" displayName="Developers" listingChange="onListingChange(event)" id="apiListingOption" width="85">
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.API}" displayName="Developers" listingChange="onListingChange(event)" id="apiListingOption" width="85">
         <mx:Image source="{apiIcon}" id="apiImage"/>
         <mx:Label text="Developers" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{accountBase}" displayName="Accounts" listingChange="onListingChange(event)"
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.ACCOUNT}" displayName="Accounts" listingChange="onListingChange(event)"
             id="accountsOption" width="85">
         <mx:Image source="{accountIcon}" id="accountImage"/>
         <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{help}" displayName="Help" listingChange="onListingChange(event)" width="85">
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.HELP}" displayName="Help" listingChange="onListingChange(event)" width="85">
         <mx:Image source="{helpIcon}" id="helpImage"/>
         <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
