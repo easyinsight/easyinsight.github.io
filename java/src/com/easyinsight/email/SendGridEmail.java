@@ -156,7 +156,7 @@ public class SendGridEmail {
         message.setContent(multipart);
 
         if (fromAddress == null) {
-            fromAddress = "sales@easy-insight.com";
+            fromAddress = "reports@easy-insight.com";
         }
         if (fromName == null) {
             fromName = "Easy Insight Reports";
