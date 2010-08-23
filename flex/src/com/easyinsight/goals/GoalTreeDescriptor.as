@@ -15,5 +15,9 @@ public class GoalTreeDescriptor extends EIDescriptor {
     override public function getType():int {
         return EIDescriptor.GOAL_TREE;
     }
+
+    public function get size():int {
+        return 0;
+    }
 }
 }
