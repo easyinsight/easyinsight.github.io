@@ -18,6 +18,10 @@
          <path-element>${flexlib}/libs/utilities.swc</path-element>
          <path-element>${flexlib}/locale/{locale}</path-element>
          <path-element>../libs/Efflex_v0.03_fx3_fp9.swc</path-element>
+            <path-element>../libs/ilog-elixir.swc</path-element>
+         <path-element>../libs/ilog-elixir_rb.swc</path-element>
+            <path-element>../libs/flexlib.swc</path-element>
+            <path-element>../libs/IconUtility.swc</path-element>
         </library-path>
 
         <context-root>/app</context-root>
