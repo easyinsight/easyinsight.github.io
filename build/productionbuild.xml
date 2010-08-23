@@ -447,7 +447,7 @@
     <target name="compileSpreadsheet">
         <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" output="${flex.path}/SpreadsheetWizard.swf"
                static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/perspectives/spreadsheet-wizard-module.xml"/>
+            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/spreadsheet-wizard-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.5.0.12683.swz"/>
                 <url rsl-url="framework_3.5.0.12683.swf"/>
@@ -468,7 +468,7 @@
     <target name="compileKPITreeAdmin">
         <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/goals/GoalTreeAdminContainer.mxml" output="${flex.path}/KPITreeAdmin.swf"
                static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/perspectives/kpitree-admin-module.xml"/>
+            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/kpitree-admin-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.5.0.12683.swz"/>
                 <url rsl-url="framework_3.5.0.12683.swf"/>
@@ -489,7 +489,7 @@
     <target name="compileKPITreeView">
         <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/goals/GoalTreeViewContainer.mxml" output="${flex.path}/KPITreeView.swf"
                static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/perspectives/kpitree-view-module.xml"/>
+            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/kpitree-view-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.5.0.12683.swz"/>
                 <url rsl-url="framework_3.5.0.12683.swf"/>
@@ -510,7 +510,7 @@
     <target name="compileDataSourceAdmin">
         <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" output="${flex.path}/DataSourceAdmin.swf"
                static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/perspectives/datasource-admin-module.xml"/>
+            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/datasource-admin-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.5.0.12683.swz"/>
                 <url rsl-url="framework_3.5.0.12683.swf"/>
