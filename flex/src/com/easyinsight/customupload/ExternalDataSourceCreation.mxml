@@ -61,7 +61,7 @@
                 CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);
             }
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, dataSourceName));
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(id, dataSourceName)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(id)));
         }
 
         ]]></mx:Script>
