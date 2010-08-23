@@ -1,10 +1,5 @@
 package com.easyinsight.analysis {
 import com.easyinsight.filtering.FilterDefinition;
-import com.easyinsight.util.PopUpUtil;
-
-import mx.collections.ArrayCollection;
-import mx.core.UIComponent;
-import mx.managers.PopUpManager;
 
 public class AnalysisUtil {
     public function AnalysisUtil() {
@@ -16,7 +11,8 @@ public class AnalysisUtil {
                 continue;
             }
             for each (var savedItem:AnalysisItem in savedDef.getFields()) {
-                if (savedItem.qualifiedName() == item.qualifiedName()) {
+                if (savedItem.qualifiedName() == item.qualifiedName() &&
+                        savedItem.getType() == item.getType()) {
                     item.analysisItemID = savedItem.analysisItemID;
                     break;
                 }
@@ -25,7 +21,8 @@ public class AnalysisUtil {
         if (analysisDefinition.filterDefinitions != null) {
             for each (var filter:FilterDefinition in analysisDefinition.filterDefinitions) {
                 for each (var savedFilter:FilterDefinition in savedDef.filterDefinitions) {
-                    if (savedFilter.field.qualifiedName() == filter.field.qualifiedName()) {
+                    if (savedFilter.field.qualifiedName() == filter.field.qualifiedName() &&
+                            savedFilter.getType() == filter.getType()) {
                         filter.filterID = savedFilter.filterID;
                     }
                 }
@@ -34,7 +31,8 @@ public class AnalysisUtil {
         if (analysisDefinition.addedItems != null) {
             for each (var addedItem:AnalysisItem in analysisDefinition.addedItems){
                 for each (var savedAddedItem:AnalysisItem in savedDef.addedItems) {
-                    if (savedAddedItem.qualifiedName() == addedItem.qualifiedName()) {
+                    if (savedAddedItem.qualifiedName() == addedItem.qualifiedName() &&
+                            savedAddedItem.getType() == addedItem.getType()) {
                         addedItem.analysisItemID = savedAddedItem.analysisItemID;
                     }
                 }
