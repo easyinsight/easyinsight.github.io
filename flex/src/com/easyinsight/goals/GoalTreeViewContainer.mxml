@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
+<mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
                 xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()"
          implements="com.easyinsight.util.IAsyncScreen, com.easyinsight.listing.IPerspective">
     <mx:states>
@@ -231,6 +231,7 @@
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalDataTree" result="gotTree()"/>
     </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%">
     <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
         <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" label="Back" labelPlacement="bottom"/>
         <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data" label="Refresh" labelPlacement="bottom"/>
@@ -255,5 +256,6 @@
             </ilog:OrgChart>
         </mx:Canvas>
     </mx:VBox>
+    </mx:VBox>
 
-</mx:VBox>
+</mx:Module>

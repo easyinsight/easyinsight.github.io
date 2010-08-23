@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goals="com.easyinsight.goals.*"
+<mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goals="com.easyinsight.goals.*"
 	width="100%" height="100%" backgroundColor="#DCE2F8" creationComplete="onCreation()"
         implements="com.easyinsight.listing.IPerspective">
 	<mx:Script>
@@ -353,4 +353,4 @@
         </mx:TabNavigator>
 	</mx:VBox>
     <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3" maxLength="30"/>
-</mx:VBox>
+</mx:Module>
