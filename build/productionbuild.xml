@@ -445,7 +445,7 @@
     </target>
 
     <target name="compileSpreadsheet">
-        <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" output="${flex.path}/SpreadsheetWizard.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" output="${flex.path}/SpreadsheetWizard.swf"
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/spreadsheet-wizard-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
@@ -466,7 +466,7 @@
     </target>
 
     <target name="compileKPITreeAdmin">
-        <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/goals/GoalTreeAdminContainer.mxml" output="${flex.path}/KPITreeAdmin.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/goals/GoalTreeAdminContainer.mxml" output="${flex.path}/KPITreeAdmin.swf"
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/kpitree-admin-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
@@ -487,7 +487,7 @@
     </target>
 
     <target name="compileKPITreeView">
-        <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/goals/GoalTreeViewContainer.mxml" output="${flex.path}/KPITreeView.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/goals/GoalTreeViewContainer.mxml" output="${flex.path}/KPITreeView.swf"
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/kpitree-view-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
@@ -508,7 +508,7 @@
     </target>
 
     <target name="compileDataSourceAdmin">
-        <mxmlc file="${teamcity.build.checkoutDir}/src/com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" output="${flex.path}/DataSourceAdmin.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" output="${flex.path}/DataSourceAdmin.swf"
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/datasource-admin-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
