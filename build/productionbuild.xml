@@ -314,7 +314,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, compileYahooWidget, modules1, modules2, modules3, modules4, modules5, modules6">
+    <target name="compileFlex" depends="compileJava, compileCoreSWC, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, compileYahooWidget, modules1, modules2, modules3, modules4, modules5, modules6">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -324,6 +324,33 @@
 
     <target name="quickArchive" depends="compileJava, compileFlexOptimized">
         <zip destfile="${code.path}/code.zip" baseDir="${webapp.path}"/>
+    </target>
+
+    <target name="compileCoreSWC">
+        <compc output="${teamcity.build.checkoutDir}/flex//libs/rsl/tmp/EICore.swc">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/swc-optimized-config.xml"/>
+            <source-path path-element="${teamcity.build.checkoutDir}/flex/swc/core"/>
+            <include-sources dir="../swc/core" includes="*"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+        </compc>
+        <unzip src="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swc" dest="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp"/>
+        <rename src="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/library.swf" dest="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swf"/>
+        <copy file="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swf" todir="${flex.path}/EICore.swf"/>
+        <copy file="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swc" todir="${teamcity.build.checkoutDir}/flex/libs/rsl"/>
+        <delete dir="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp"/>
     </target>
     
     <target name="compileFlexOptimized">
@@ -344,31 +371,13 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
-
-    <target name="compileIntro">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/IntroApplication.mxml" output="${flex.path}/IntroApplication.swf"
-               static-rsls="false" link-report="${basedir}/intro.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/intro-config.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
-    </target>    
 
     <target name="compileEmbeddedInsight">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf"
@@ -388,6 +397,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
 
@@ -397,28 +410,6 @@
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/YahooWidgetReport.mxml" output="${flex.path}/YahooWidgetReport.swf"
                static-rsls="false" link-report="${basedir}/yahoo.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/yahoo-report.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
-    </target>
-
-    <target name="compileYahooGoals">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/YahooWidgetGoals.mxml" output="${flex.path}/YahooWidgetGoals.swf"
-               static-rsls="false" link-report="${basedir}/yahoo-goals.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/yahoo-goals.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
@@ -462,6 +453,10 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -482,6 +477,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -504,6 +503,10 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -524,6 +527,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -553,6 +560,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -573,6 +584,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -596,6 +611,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
@@ -617,6 +636,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -640,6 +663,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
@@ -661,6 +688,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -684,6 +715,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
@@ -705,6 +740,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -728,6 +767,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
@@ -749,6 +792,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -772,6 +819,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
@@ -793,6 +844,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -816,6 +871,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
@@ -837,6 +896,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -860,27 +923,9 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
-        </mxmlc>
 
-    </target>
-
-    <target name="module.map">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/MapModule.mxml" output="${flex.path}/MapModule.swf"
-               static-rsls="false" link-report="${basedir}/map.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -903,6 +948,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -946,6 +995,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -966,6 +1019,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -988,6 +1045,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -1008,6 +1069,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -1030,6 +1095,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -1050,6 +1119,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -1073,6 +1146,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
@@ -1094,6 +1171,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
 
@@ -1117,6 +1198,10 @@
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
 
     </target>
@@ -1138,6 +1223,10 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
                 <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         
