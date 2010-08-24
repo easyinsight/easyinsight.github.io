@@ -370,7 +370,6 @@
         private var report:AnalysisDefinition;
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
-            try {
                 if (event.credentialRequirements != null) {
                     CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
                 } else {
@@ -405,9 +404,11 @@
                         filterDefinitions = report.filterDefinitions;
                         filterIndex = 1;
                     } else {
-                        leftButtonBar.removeChild(filterButton);
-                        filterIndex = 0;
-                        filterDefinitions = new ArrayCollection();
+                        if (leftButtonBar.contains(filterButton)) {
+                            leftButtonBar.removeChild(filterButton);
+                            filterIndex = 0;
+                            filterDefinitions = new ArrayCollection();
+                        }
                     }
 
                     transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
@@ -457,9 +458,6 @@
                     dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
                     retrievedDataOnce = true;
                 }
-            } catch(e:Error) {
-                Alert.show(e.message);
-            }
         }
 
         private function toggleFilters():void {
