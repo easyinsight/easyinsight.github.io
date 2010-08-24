@@ -330,7 +330,7 @@
         <compc output="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swc">
             <load-config filename="${teamcity.build.checkoutDir}/flex/swc-optimized-config.xml"/>
             <source-path path-element="${teamcity.build.checkoutDir}/flex/swc/core"/>
-            <include-sources dir="../swc/core" includes="*"/>
+            <include-sources dir="${teamcity.build.checkoutDir}/flex/swc/core" includes="*"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.5.0.12683.swz"/>
                 <url rsl-url="framework_3.5.0.12683.swf"/>
