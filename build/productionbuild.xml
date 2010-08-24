@@ -327,7 +327,7 @@
     </target>
 
     <target name="compileCoreSWC">
-        <compc output="${teamcity.build.checkoutDir}/flex//libs/rsl/tmp/EICore.swc">
+        <compc output="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swc">
             <load-config filename="${teamcity.build.checkoutDir}/flex/swc-optimized-config.xml"/>
             <source-path path-element="${teamcity.build.checkoutDir}/flex/swc/core"/>
             <include-sources dir="../swc/core" includes="*"/>
