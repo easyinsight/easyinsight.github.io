@@ -141,7 +141,7 @@ public class SendGridEmail {
             multipart.addBodyPart(part2);
         } else {
             BodyPart part1 = new MimeBodyPart();
-            part1.setText(htmlBody);
+            part1.setContent(htmlBody,"text/plain;charset=utf-8");
             multipart.addBodyPart(part1);
         }
 
