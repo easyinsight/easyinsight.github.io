@@ -27,8 +27,6 @@
         import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
 
-        import com.easyinsight.analysis.conditions.ConditionRenderer;
-
         import mx.charts.chartClasses.IAxis;
         import mx.charts.LinearAxis;
         import mx.formatters.Formatter;
@@ -60,7 +58,6 @@
         private var dimensionFormatter:Formatter;
 
         private var customColors:Boolean = false;
-        private var conditionRenderer:ConditionRenderer;
 
         private var columnChart:ColumnChart3D;
 
@@ -271,11 +268,6 @@
 
                 measureFormatter = columnChartDef.measure.getFormatter();
                 dimensionFormatter = columnChartDef.xaxis.getFormatter();
-                var conditionRenderer:ConditionRenderer = columnChartDef.measure.createClientRenderer();
-                if (conditionRenderer.hasCustomColor()) {
-                    customColors = true;
-                    this.conditionRenderer = conditionRenderer;
-                }
 
                 var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
                 if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {

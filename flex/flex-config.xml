@@ -34,25 +34,26 @@
          <path-element>${flexlib}/libs/rpc.swc</path-element>
          <path-element>${flexlib}/libs/utilities.swc</path-element>
          <path-element>${flexlib}/locale/{locale}</path-element>
-         <path-element>/libs/astra-flex.swc</path-element>
-         <path-element>/libs/analytics.swc</path-element>
-         <path-element>/libs/ilog-elixir.swc</path-element>
-         <path-element>/libs/ilog-elixir_rb.swc</path-element>
-         <path-element>/libs/YahooMap.swc</path-element>
-         <path-element>/libs/flexlib.swc</path-element>
-         <path-element>/libs/IconUtility.swc</path-element>
-         <path-element>/libs/Efflex_v0.03_fx3_fp9.swc</path-element>
+         <path-element>libs/astra-flex.swc</path-element>
+         <path-element>libs/analytics.swc</path-element>
+         <path-element>libs/ilog-elixir.swc</path-element>
+         <path-element>libs/ilog-elixir_rb.swc</path-element>
+         <path-element>libs/YahooMap.swc</path-element>
+         <path-element>libs/flexlib.swc</path-element>
+         <path-element>libs/IconUtility.swc</path-element>
+         <path-element>libs/Efflex_v0.03_fx3_fp9.swc</path-element>
+         <path-element>libs/rsl/EICore.swc</path-element>
       </library-path>
         <context-root>/app</context-root>
        <!-- <services>C:\apache-tomcat-6.0.14\webapps\app\WEB-INF\flex\services-config.xml</services> -->
         <services>/blazeds/services-config.xml</services>
         <source-path>
-         <path-element>/src</path-element>
+         <path-element>src</path-element>
       </source-path>
     </compiler>
     <target-player>10.0.0</target-player>    
     <file-specs>
         <path-element>src/PrimaryWorkspace.mxml</path-element>
     </file-specs>
-    <static-link-runtime-shared-libraries>false</static-link-runtime-shared-libraries>
+    <static-link-runtime-shared-libraries>true</static-link-runtime-shared-libraries>
 </flex-config>

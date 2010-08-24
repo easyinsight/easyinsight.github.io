@@ -3,12 +3,9 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.crosstab.CrosstabDefinition;
-        import com.easyinsight.analysis.crosstab.EICrosstabHeaderRenderer;
-        import mx.controls.olapDataGridClasses.OLAPDataGridHeaderRenderer;
-import mx.controls.olapDataGridClasses.OLAPDataGridHeaderRendererProvider;
+
 import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
-			import mx.olap.IOLAPAxisPosition;
-			import com.easyinsight.analysis.conditions.ConditionRenderer;
+		
 			import mx.collections.ICollectionView;
 			import mx.olap.OLAPResult;
 			import mx.controls.Alert;
@@ -34,23 +31,10 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 			private var grid:OLAPDataGrid;
 			private var cube:OLAPCube;
 			
-			private var renderer:ConditionRenderer;
-			
-			private function styleValue(row:IOLAPAxisPosition, column:IOLAPAxisPosition, 
-            	value:Number):Object {
-        		if (renderer.hasCustomColor()) {
-					return {color: renderer.getColor(value) };
-        		} else {
-        			return null;
-        		}
-			}
-			
 			public function populate(crosstabDefinition:CrosstabDefinition, data:ICollectionView, grid:OLAPDataGrid):void {
 				this.grid = grid;
-				grid.styleFunction = styleValue;
 				this._crosstabDefinition = crosstabDefinition;
 				var analysisMeasure:AnalysisMeasure = crosstabDefinition.measures[0] as AnalysisMeasure;
-				this.renderer = analysisMeasure.createClientRenderer();
 				this.cube = new OLAPCube();						
 				cube.dataProvider = normalize(data);
 				//grid.itemRenderer = new AnalysisCellRendererFactory(analysisMeasure.qualifiedName(), analysisMeasure, renderer);
@@ -92,7 +76,6 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 						var existingValue:Value = object[key];
 						if (existingValue != null) {
 							var value:Object = existingValue.getValue();
-							this.renderer.addValue(value);
 							newObject[key] = value;
 						} 
 					}
@@ -101,7 +84,6 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 						var rowExistingValue:Value = object[rowKey];
 						if (rowExistingValue != null) {
 							var rowValue:Object = rowExistingValue.getValue();
-							this.renderer.addValue(rowValue);
 							newObject[rowKey] = rowValue;
 						} 
 					}
@@ -110,7 +92,6 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 						var measureExistingValue:Value = object[measureKey];
 						if (measureExistingValue != null) {
 							var measureValue:Object = measureExistingValue.getValue();
-							this.renderer.addValue(measureValue);
 							newObject[measureKey] = measureValue;
 						} 
 					}

@@ -1,13 +1,11 @@
 package com.easyinsight.analysis
 {
 
-import com.easyinsight.analysis.conditions.ConditionRenderer;
-	import com.easyinsight.analysis.conditions.NoConditionRenderer;
+
 	import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
 import mx.collections.ArrayCollection;
-import mx.controls.Label;
-import mx.core.UIComponent;
+
 import mx.formatters.Formatter;
 		
 	[Bindable]
@@ -59,10 +57,6 @@ import mx.formatters.Formatter;
 		
 		public function hasType(type:int):Boolean {
 			return (getType() & type) == type;
-		}
-		
-		public function createClientRenderer():ConditionRenderer {
-			return NoConditionRenderer.getDefaultRenderer();
 		}
 		
 		private static function iHateThis():void {

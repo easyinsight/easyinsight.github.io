@@ -1,12 +1,10 @@
 package com.easyinsight.analysis.service {
 
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.EmbeddedDataResults;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.IEmbeddedDataService;
 import com.easyinsight.analysis.Value;
-import com.easyinsight.analysis.conditions.ConditionRenderer;
 import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.InsightRequestMetadata;
@@ -16,7 +14,6 @@ import mx.collections.ArrayCollection;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
-import mx.controls.Alert;
 
 public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDataService {
 
@@ -44,9 +41,6 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         if (listData.credentialRequirements == null || listData.credentialRequirements.length == 0) {
             var clientProcessorMap:Object = new Object();
             var headers:ArrayCollection = new ArrayCollection(listData.headers);
-            for each (var analysisItem:AnalysisItem in headers) {
-                clientProcessorMap[analysisItem.qualifiedName()] = analysisItem.createClientRenderer();
-            }
             var rows:ArrayCollection = new ArrayCollection(listData.rows);
             var data:ArrayCollection = new ArrayCollection();
             for (var i:int = 0; i < rows.length; i++) {
@@ -63,8 +57,6 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
                         endObject[key] = value.getValue();
                     }
 
-                    var conditionRenderer:ConditionRenderer = clientProcessorMap[key];
-                    conditionRenderer.addValue(value);
                     if (value.links != null) {
                         for (var linkKey:String in value.links) {
                             endObject[linkKey + "_link"] = value.links[linkKey];

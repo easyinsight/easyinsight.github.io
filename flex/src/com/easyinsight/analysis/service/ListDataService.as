@@ -7,7 +7,6 @@ import com.easyinsight.analysis.EmptyValue;
 import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.Value;
-import com.easyinsight.analysis.conditions.ConditionRenderer;
 import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
@@ -53,11 +52,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
     }
 
     public function translate(listData:ListDataResults):ServiceData {
-        var clientProcessorMap:Object = new Object();
         var headers:ArrayCollection = new ArrayCollection(listData.headers);
-        for each (var analysisItem:AnalysisItem in headers) {
-            clientProcessorMap[analysisItem.qualifiedName()] = analysisItem.createClientRenderer();
-        }
         var rows:ArrayCollection = new ArrayCollection(listData.rows);
         var data:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < rows.length; i++) {
@@ -73,8 +68,6 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
                 } else {
                     endObject[key] = value.getValue();
                 }
-                var conditionRenderer:ConditionRenderer = clientProcessorMap[key];
-                conditionRenderer.addValue(value);
                 if (value.links != null) {
                     for (var linkKey:String in value.links) {
                         endObject[linkKey + "_link"] = value.links[linkKey];
@@ -83,7 +76,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
             }
             data.addItem(endObject);
         }
-        return new ServiceData(data, clientProcessorMap);
+        return new ServiceData(data);
     }
 
     private function processListData(event:ResultEvent):void {
@@ -95,7 +88,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
             CredentialsCache.getCache().obtainCredentials(DisplayObject(Application.application), listData.credentialRequirements, retrieve);
         }
         var serviceData:ServiceData = translate(listData);
-        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data, serviceData.clientProcessorMap,
+        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data, 
                 listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.limitedResults, listData.maxResults,
                 listData.limitResults));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));

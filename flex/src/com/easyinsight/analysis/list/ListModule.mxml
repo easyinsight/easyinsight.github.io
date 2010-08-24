@@ -260,7 +260,7 @@
                 if (myHeader.hasType(AnalysisItemTypes.TEXT)) {
                     variableHeight = true;
                 }
-                factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[keyString] };
+                factory.properties = { analysisItem: myHeader };
                 columnHeaderObject.itemRenderer = factory;
                 columns[k + initColumn] = columnHeaderObject;
             }
@@ -395,7 +395,7 @@
                 item.width = column.width;
                 var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
                 if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
-                    item.sortSequence = sortInfo.sequenceNumber; 
+                    item.sortSequence = sortInfo.sequenceNumber;
                     if (sortInfo.descending) {
                         item.sort = 2;
                     } else {

@@ -21,9 +21,7 @@ import com.easyinsight.filtering.FilterRawData;
         import mx.charts.events.ChartItemEvent;
         import mx.events.FlexEvent;
         import mx.graphics.BitmapFill;
-        import mx.graphics.IFill;
-
-        import com.easyinsight.analysis.conditions.ConditionRenderer;
+        import mx.graphics.IFill;        
 
         import mx.charts.chartClasses.IAxis;
         import mx.charts.LinearAxis;
@@ -81,7 +79,6 @@ import com.easyinsight.filtering.FilterRawData;
         private var measureFormatter:Formatter;
 
         private var customColors:Boolean = false;
-        private var conditionRenderer:ConditionRenderer;
 
         private var barChart:BarChart3D;
 
@@ -211,11 +208,6 @@ import com.easyinsight.filtering.FilterRawData;
 
                 measureFormatter = barChartDef.measure.getFormatter();
                 dimensionFormatter = barChartDef.yaxis.getFormatter();
-                var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
-                if (conditionRenderer.hasCustomColor()) {
-                    customColors = true;
-                    this.conditionRenderer = conditionRenderer;
-                }
 
                 var newXAxisItem:AnalysisItem = barChartDef.measure;
                 if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {

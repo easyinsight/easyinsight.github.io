@@ -12,7 +12,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.VBox;
-import mx.containers.ViewStack;
 import mx.controls.Alert;
 import mx.controls.ProgressBar;
 import mx.events.ModuleEvent;
@@ -31,7 +30,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
     private var _analysisDefinition:AnalysisDefinition;
 
     private var _lastData:ArrayCollection;
-    private var _lastClientProcessorMap:Object;
     private var _availableFields:ArrayCollection;
 
     private var moduleInfo:IModuleInfo;
@@ -236,7 +234,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
             retrieveData();
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
-            _reportRenderer.renderReport(_lastData, _analysisDefinition, _lastClientProcessorMap, null);
+            _reportRenderer.renderReport(_lastData, _analysisDefinition, new Object(), null);
         }
     }
 
@@ -280,8 +278,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         dispatchEvent(event);
         _controlBar.onDataReceipt(event);
         _lastData = event.dataSet;
-        _lastClientProcessorMap = event.clientProcessorMap;
-        _reportRenderer.renderReport(event.dataSet, _analysisDefinition, event.clientProcessorMap, event.additionalProperties);
+        _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
     }
 
     private function loadReportRenderer():void {

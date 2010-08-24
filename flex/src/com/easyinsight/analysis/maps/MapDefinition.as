@@ -18,6 +18,10 @@ import mx.collections.ArrayCollection;
 		public var mapDefinitionID:int;
         public var measure:AnalysisItem;
         public var geography:AnalysisItem;
+        public var highColor:uint;
+        public var lowColor:uint;
+        public var colorStrategy:String;
+        public var backgroundColor:uint;
 		
 		public function MapDefinition()
 		{
@@ -58,5 +62,15 @@ import mx.collections.ArrayCollection;
         override public function getFields():ArrayCollection {
             return new ArrayCollection([ geography, measure]);
         }
-	}
+
+
+        override public function createFormItems():ArrayCollection {
+            var items:ArrayCollection = super.createFormItems();
+            items.addItem(new ComboBoxReportFormItem("Color Strategy", "colorStrategy", colorStrategy,
+                this, ["Linear", "Logarithmic"]));
+            items.addItem(new ColorReportFormItem("High Color", "highColor", highColor, this));
+            items.addItem(new ColorReportFormItem("Low Color", "lowColor", lowColor, this));
+            return items;
+        }
+    }
 }

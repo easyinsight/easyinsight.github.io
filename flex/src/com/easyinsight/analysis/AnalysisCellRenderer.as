@@ -20,7 +20,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 {
     private var _data:Object;
     private var _analysisItem:AnalysisItem;
-    private var _renderer:ConditionRenderer;
 
     public function AnalysisCellRenderer() {
         super();
@@ -48,14 +47,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 
     public function set analysisItem(val:AnalysisItem):void {
         _analysisItem = val;
-    }
-
-    public function get renderer():ConditionRenderer {
-        return _renderer;
-    }
-
-    public function set renderer(val:ConditionRenderer):void {
-        _renderer = val;
     }
 
     public function validateProperties():void {

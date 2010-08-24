@@ -1,10 +1,8 @@
 package com.easyinsight.analysis.conditions
 {
-	import com.easyinsight.analysis.Value;
-	
-	[Bindable]
-	[RemoteClass(alias="com.easyinsight.conditions.MeasureCondition")]
-	public class MeasureCondition
+import mx.controls.Alert;
+
+public class MeasureCondition
 	{		
 		public var lowColor:uint;
 		public var lowValue:int;
@@ -14,15 +12,6 @@ package com.easyinsight.analysis.conditions
 		
 		public function MeasureCondition()
 		{
-		}
-		
-		public function clone():MeasureCondition {
-			var measureCondition:MeasureCondition = new MeasureCondition();
-			measureCondition.lowColor = this.lowColor;
-			measureCondition.lowValue = this.lowValue;
-			measureCondition.highColor = this.highColor;
-			measureCondition.highValue = this.highValue;
-			return measureCondition;
 		}
 		
 		public function getColor(transformed:Number):uint {
@@ -56,11 +45,24 @@ package com.easyinsight.analysis.conditions
 			var mixedBlue:uint = ((blue2 * upperWeight) + (blue1 * lowerWeight)) / 100;									
 			
 			var newColor:uint = mixedRed << 16 | mixedGreen << 8 | mixedBlue;
+            //Alert.show("new color = " + newColor + " while high color = " + highColor + " and low color = " + lowColor);
+            if (highColor > lowColor) {
+                if (newColor > highColor) {
+                    newColor = highColor;
+                } else if (newColor < lowColor) {
+                    newColor = lowColor;
+                }
+            } else {
+
+                if (newColor < highColor) {
+
+                    newColor = highColor;
+                } else if (newColor > lowColor) {
+                    newColor = lowColor;
+                }
+            }
+            
 			return newColor;
-		}	
-		
-		public function accepts(value:Number):Boolean {
-			return value >= lowValue && value <= highValue;
-		}	
+		}
 	}
 }

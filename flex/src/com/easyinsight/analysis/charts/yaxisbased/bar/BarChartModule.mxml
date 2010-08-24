@@ -11,7 +11,6 @@ import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.SortableAxisTitle;
-import com.easyinsight.analysis.conditions.ConditionRenderer;
 
         import com.easyinsight.filtering.FilterRawData;
 
@@ -60,7 +59,6 @@ import mx.events.FlexEvent;
         private var dimensionFormatter:Formatter;
 
         private var customColors:Boolean = false;
-        private var conditionRenderer:ConditionRenderer;
 
         private var barChart:BarChart;
 
@@ -303,11 +301,6 @@ import mx.events.FlexEvent;
 
                 measureFormatter = barChartDef.measure.getFormatter();
                 dimensionFormatter = barChartDef.yaxis.getFormatter();
-                var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
-                if (conditionRenderer.hasCustomColor()) {
-                    customColors = true;
-                    this.conditionRenderer = conditionRenderer;
-                }
 
                 var newXAxisItem:AnalysisItem = barChartDef.measure;
                 if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {

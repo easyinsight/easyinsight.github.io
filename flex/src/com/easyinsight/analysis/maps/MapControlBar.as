@@ -12,13 +12,15 @@ import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.map.MapDropAreaGrouping;
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
-import mx.collections.ArrayCollection;
-import mx.containers.HBox;
+import mx.controls.Button;
 import mx.controls.Label;
 import mx.events.FlexEvent;
-import mx.events.ListEvent;
+import mx.managers.PopUpManager;
 
 public class MapControlBar extends ReportControlBar implements IReportControlBar {
 
@@ -52,12 +54,13 @@ public class MapControlBar extends ReportControlBar implements IReportControlBar
         lookupMap[MapDefinition.MIDDLE_EAST] = MIDDLE_EAST;
     }
 
-    private function onMapTypeChange(event:ListEvent):void {
-        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
-    }
-
     override protected function createChildren():void {
         super.createChildren();
+        var listEditButton:Button = new Button();
+        listEditButton.setStyle("icon", tableEditIcon);
+        listEditButton.toolTip = "Edit List Properties...";
+        listEditButton.addEventListener(MouseEvent.CLICK, editList);
+        addChild(listEditButton);
         addDropAreaGrouping(xAxisGrouping);
         addDropAreaGrouping(measureGrouping);
          if (mapDefinition.geography != null) {
@@ -69,6 +72,17 @@ public class MapControlBar extends ReportControlBar implements IReportControlBar
         var limitLabel:Label = new Label();
         BindingUtils.bindProperty(limitLabel, "text", this, "limitText");
         addChild(limitLabel);
+    }
+
+    [Embed(source="../../../../../assets/table_edit.png")]
+    public var tableEditIcon:Class;
+
+    private function editList(event:MouseEvent):void {
+        var listWindow:MapDefinitionEditWindow = new MapDefinitionEditWindow();
+        listWindow.mapDefinition = mapDefinition;
+        listWindow.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        PopUpManager.addPopUp(listWindow, this, true);
+        PopUpUtil.centerPopUp(listWindow);
     }
 
     private var _limitText:String;

@@ -12,8 +12,6 @@ import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.SortableAxisTitle;
 
-import com.easyinsight.analysis.conditions.ConditionRenderer;
-
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.pseudocontext.PseudoContextWindow;
         
@@ -60,7 +58,6 @@ import mx.charts.series.ColumnSeries;
         private var dimensionFormatter:Formatter;
 
         private var customColors:Boolean = false;
-        private var conditionRenderer:ConditionRenderer;
 
         private var columnChart:ColumnChart;
 
@@ -262,11 +259,6 @@ import mx.charts.series.ColumnSeries;
 
                 measureFormatter = columnChartDef.measure.getFormatter();
                 dimensionFormatter = columnChartDef.xaxis.getFormatter();
-                var conditionRenderer:ConditionRenderer = columnChartDef.measure.createClientRenderer();
-                if (conditionRenderer.hasCustomColor()) {
-                    customColors = true;
-                    this.conditionRenderer = conditionRenderer;
-                }
 
                 var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
                 if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {

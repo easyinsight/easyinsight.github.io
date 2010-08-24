@@ -50,7 +50,6 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
         if (listData.invalidAnalysisItemIDs != null && listData.invalidAnalysisItemIDs.length > 0) {
             dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
         }
-        var clientProcessorMap:Object = new Object();
         var headers:ArrayCollection = new ArrayCollection(listData.headers);
         var rows:ArrayCollection = new ArrayCollection(listData.rows);
         var data:ArrayCollection = new ArrayCollection();
@@ -71,7 +70,7 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
             }
             data.addItem(endObject);
         }
-        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, null, listData.dataSourceInfo, null, listData.auditMessages));
+        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, listData.dataSourceInfo, null, listData.auditMessages));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

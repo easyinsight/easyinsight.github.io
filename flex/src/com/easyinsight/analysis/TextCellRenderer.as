@@ -1,6 +1,6 @@
 package com.easyinsight.analysis
 {
-	import com.easyinsight.analysis.conditions.ConditionRenderer;
+
 
 
 
@@ -20,7 +20,6 @@ public class TextCellRenderer extends Text
 	{
 		private var _data:Object;
 		private var _analysisItem:AnalysisText;
-		private var _renderer:ConditionRenderer;
 
 		public function TextCellRenderer() {
 			super();
@@ -49,15 +48,7 @@ public class TextCellRenderer extends Text
         public function set analysisItem(val:AnalysisText):void {
             _analysisItem = val;
         }
-
-        public function get renderer():ConditionRenderer {
-            return _renderer;
-        }
-
-        public function set renderer(val:ConditionRenderer):void {
-            _renderer = val;
-        }
-
+    
 		override public function set data(value:Object):void {
 			_data = value;
             var text:String;

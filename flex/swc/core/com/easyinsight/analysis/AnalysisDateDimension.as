@@ -1,7 +1,6 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.analysis.formatter.DimensionValueFormatter;
-import com.easyinsight.framework.User;
 
 import mx.formatters.DateFormatter;
 	import mx.formatters.Formatter;
@@ -26,6 +25,7 @@ import mx.formatters.NumberFormatter;
 		}
 		
 		override public function getFormatter():Formatter {
+            var format:int = 0;
             var formatter:Formatter;
             if (dateLevel <= AnalysisItemTypes.WEEK_LEVEL) {
                 var dateFormatter:DateFormatter = new DateFormatter();
@@ -34,7 +34,7 @@ import mx.formatters.NumberFormatter;
                         dateFormatter.formatString = "YYYY";
                         break;
                     case AnalysisItemTypes.MONTH_LEVEL:
-                        switch (User.getInstance().dateFormat) {
+                        switch (format) {
                             case 0:
                             case 3:
                                 dateFormatter.formatString = "MM/YYYY";
@@ -52,7 +52,7 @@ import mx.formatters.NumberFormatter;
                         break;
                     case AnalysisItemTypes.WEEK_LEVEL:
                     case AnalysisItemTypes.DAY_LEVEL:
-                        switch (User.getInstance().dateFormat) {
+                        switch (format) {
                             case 0:
                                 dateFormatter.formatString = "MM/DD/YYYY";
                                 break;
@@ -71,7 +71,7 @@ import mx.formatters.NumberFormatter;
                         }
                         break;
                     case AnalysisItemTypes.HOUR_LEVEL:
-                        switch (User.getInstance().dateFormat) {
+                        switch (format) {
                             case 0:
                                 dateFormatter.formatString = "MM/DD/YYYY HH:00";
                                 break;
@@ -90,7 +90,7 @@ import mx.formatters.NumberFormatter;
                         }
                         break;
                     case AnalysisItemTypes.MINUTE_LEVEL:
-                        switch (User.getInstance().dateFormat) {
+                        switch (format) {
                             case 0:
                                 dateFormatter.formatString = "MM/DD/YYYY HH:NN";
                                 break;

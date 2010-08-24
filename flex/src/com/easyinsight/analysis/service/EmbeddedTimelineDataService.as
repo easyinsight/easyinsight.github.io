@@ -1,15 +1,9 @@
 package com.easyinsight.analysis.service {
 
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.EmbeddedDataResults;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.EmbeddedTimelineResults;
 import com.easyinsight.analysis.IEmbeddedDataService;
 import com.easyinsight.analysis.ListDataResults;
-import com.easyinsight.analysis.SeriesDataResults;
-import com.easyinsight.analysis.Value;
-import com.easyinsight.analysis.conditions.ConditionRenderer;
 import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.InsightRequestMetadata;
@@ -19,7 +13,6 @@ import mx.collections.ArrayCollection;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
-import mx.controls.Alert;
 
 public class EmbeddedTimelineDataService extends EventDispatcher implements IEmbeddedDataService {
 

@@ -10,7 +10,9 @@
 
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.analysis.ReportRendererEvent;
+        import com.easyinsight.analysis.conditions.MeasureCondition;
+        import com.easyinsight.analysis.conditions.MeasureConditionRange;
+        import com.easyinsight.analysis.conditions.StatefulConditionRenderer;
         import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
@@ -121,10 +123,21 @@
         private var formatter:Formatter;
 
         private function createRenderer(rows:ArrayCollection, mapDefinition:MapDefinition):ConditionRenderer {
-            var renderer:ConditionRenderer = mapDefinition.measure.createClientRenderer();
+
+            var measureRange:MeasureConditionRange = new MeasureConditionRange();
+            measureRange.condition = new MeasureCondition();
+            measureRange.condition.highColor = mapDefinition.highColor;
+            measureRange.condition.highValue = 100;
+            measureRange.condition.lowColor = mapDefinition.lowColor;
+            measureRange.condition.lowValue = 0;
+            if (mapDefinition.colorStrategy == "Linear") {
+                measureRange.valueRangeType = MeasureConditionRange.PERCENTAGE;
+            } else if (mapDefinition.colorStrategy == "Logarithmic") {
+                measureRange.valueRangeType = MeasureConditionRange.LOGARITHM;
+            }
+            var renderer:StatefulConditionRenderer = new StatefulConditionRenderer(measureRange);
             for (var i:int = 0; i < rows.length; i++) {
                 var row:Object = rows.getItemAt(i);
-                var values:Array = row.values as Array;
                 var dimensionValue:String;
                 var measureValue:Object;
                 dimensionValue = row[mapDefinition.geography.qualifiedName()];

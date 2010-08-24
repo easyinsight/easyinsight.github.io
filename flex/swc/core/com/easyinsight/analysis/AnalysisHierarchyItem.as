@@ -1,8 +1,6 @@
 package com.easyinsight.analysis {
-import com.easyinsight.HierarchyComboBox;
 
 import mx.collections.ArrayCollection;
-import mx.core.UIComponent;
 import mx.formatters.Formatter;
 
 [Bindable]

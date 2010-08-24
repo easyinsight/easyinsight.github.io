@@ -3,11 +3,8 @@
                                    xmlns:analysis="com.easyinsight.analysis.*"
                                    xmlns:formatter="com.easyinsight.analysis.formatter.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.conditions.MeasureConditionRange;
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
-        [Bindable]
-        private var measureConditionRange:MeasureConditionRange;
 
         [Bindable]
         private var formattingConfiguration:FormattingConfiguration;
@@ -60,7 +57,6 @@
             super.analysisItem = val;
             if (val is AnalysisMeasure) {
                 var analysisMeasure:AnalysisMeasure = val as AnalysisMeasure;
-                measureConditionRange = analysisMeasure.measureConditionRange;
                 formattingConfiguration = analysisMeasure.formattingConfiguration;
                 this.highGood = analysisMeasure.highIsGood ? "yes" : "no";
             }

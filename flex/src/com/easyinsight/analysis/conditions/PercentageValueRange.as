@@ -22,7 +22,11 @@ package com.easyinsight.analysis.conditions
 		}
 		
 		public function getRangeValue(dataPoint:Number):Number {
-			multiplier = 100 / (max - min);			
+            // max = 44
+            // min = 0
+            // multiplier = 100 / 44 = 2.2
+			multiplier = 100 / (max - min);
+            // 0 * 2.2 = 0
 			return (dataPoint - min) * multiplier; 	    						 		
 		}
 		

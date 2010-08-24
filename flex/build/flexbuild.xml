@@ -18,25 +18,31 @@
         </mxmlc>
     </target>
 
-    <target name="compileFlexTest">
-        <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
-               static-rsls="true" incremental="true">
-            <load-config filename="../flex-autotest.xml"/>
-        </mxmlc>
-    </target>
+    <target name="compileCoreSWC">
+        <compc output="../libs/rsl/tmp/EICore.swc">
+            <load-config filename="../swc-optimized-config.xml"/>
+            <source-path path-element="../swc/core"/>
+            <include-sources dir="../swc/core" includes="*"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
 
-    <target name="compileMemTest">
-        <mxmlc file="../src/MemTest.mxml" output="${deployment.path}/MemTest.swf"
-               static-rsls="true" incremental="true">
-            <load-config filename="../mem-config.xml"/>
-        </mxmlc>
-    </target>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
 
-    <target name="compilePrototype">
-        <mxmlc file="../src/PrototypePage.mxml" output="${deployment.path}/PrototypePage.swf"
-               static-rsls="true" incremental="true">
-            <load-config filename="../prototype.xml"/>
-        </mxmlc>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+        </compc>
+        <unzip src="../libs/rsl/tmp/EICore.swc" dest="../libs/rsl/tmp"/>
+        <rename src="../libs/rsl/tmp/library.swf" dest="../libs/rsl/tmp/EICore.swf"/>
+        <copy file="../libs/rsl/tmp/EICore.swf" todir="${deployment.path}/EICore.swf"/>
+        <copy file="../libs/rsl/tmp/EICore.swc" todir="../libs/rsl"/>
+        <delete dir="../libs/rsl/tmp"/>
     </target>
 
     <target name="compileBillingTest">
@@ -100,18 +106,6 @@
             <arg value="${AIR_PREP_NAME}"/>
             <arg value="${AIR_NAME}"/>            
         </java>
-        <!--<java jar="${ADT.JAR}" fork="true" failonerror="true">
-            <arg value="-package"/>
-            <arg value="-storetype"/>
-            <arg value="${STORETYPE}"/>
-            <arg value="-keystore"/>
-            <arg value="${KEYSTORE}"/>
-            <arg value="-storepass"/>
-            <arg value="Grav1tyfails"/>
-            <arg value="${AIR_NAME}"/>
-            <arg value="${APP_DESCRIPTOR}"/>
-            <arg value="../out/air/${APP_NAME}.swf"/>
-        </java>-->
     </target>
 
     <target name="compileFlexOptimized">
@@ -132,36 +126,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
-        </mxmlc>
-        <SWFAnalysis linkReportPath="optimized.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="PrimaryWorkspace"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
-    </target>
-
-    <target name="compileFlexOptimized2">
-        <mxmlc file="../src/PrimaryWorkspace2.mxml" output="${deployment.path}/PrimaryWorkspace2.swf"
-               static-rsls="false" link-report="optimized.txt">
-            <load-config filename="../core-optimized-config2.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="EICore.swf"/>
             </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
-    <target name="compileIntro">
-        <mxmlc file="../src/IntroApplication.mxml" output="${deployment.path}/IntroApplication.swf"
-               static-rsls="true">
-            <load-config filename="../intro-config.xml"/>
         </mxmlc>
     </target>
 
@@ -182,6 +149,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -204,6 +174,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -225,12 +198,15 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
     <target name="compileDataSourceAdmin">
         <mxmlc file="../src/com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" output="${deployment.path}/DataSourceAdmin.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="dsadmin.txt">
             <load-config filename="../perspectives/datasource-admin-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.5.0.12683.swz"/>
@@ -246,7 +222,12 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
+        <SWFAnalysis linkReportPath="dsadmin.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="DataSourceAdmin"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="compileReportEditor">
@@ -267,26 +248,8 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
-    <target name="compileListModule">
-        <mxmlc file="../src/com/easyinsight/dashboard/ListViewModule.mxml" output="${deployment.path}/ListViewModule.swf"
-               static-rsls="false">
-            <load-config filename="../list-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -312,92 +275,6 @@
         </mxmlc>
     </target>
 
-    <target name="compileChartModule">
-        <mxmlc file="../src/com/easyinsight/dashboard/ColumnChartViewModule.mxml" output="${deployment.path}/ColumnChartViewModule.swf"
-               static-rsls="false">
-            <load-config filename="../chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
-    <target name="compileMapModule">
-        <mxmlc file="../src/com/easyinsight/dashboard/MapViewModule.mxml" output="${deployment.path}/MapViewModule.swf"
-               static-rsls="false">
-            <load-config filename="../map-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
-    <target name="compileGoalsModule">
-        <mxmlc file="../src/com/easyinsight/goals/MyGoalsModule2.mxml" output="${deployment.path}/MyGoalsModule.swf"
-               static-rsls="false">
-            <load-config filename="../goals-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
-    <target name="compileDataAnalysis">
-        <mxmlc file="../src/com/easyinsight/framework/DataAnalysisModule.mxml" output="${deployment.path}/DataAnalysisModule.swf"
-               static-rsls="false">
-            <load-config filename="../data-analysis-container.xml"/>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-        </mxmlc>
-    </target>
-
     <target name="compileEmbeddedInsight">
         <mxmlc file="../src/EmbeddedInsight.mxml" output="${deployment.path}/EmbeddedInsight.swf"
                static-rsls="false" link-report="embedded-report.txt">
@@ -415,6 +292,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -461,45 +341,10 @@
         </mxmlc>
     </target>
 
-    <target name="compileListModule2">
-        <mxmlc file="../src/com/easyinsight/dashboard/ListViewModule.mxml" output="${deployment.path}/ListViewModule.swf"
-               static-rsls="true">
-            <load-config filename="../list-module.xml"/>
-        </mxmlc>
-    </target>
-
-    <target name="compiileHelpModule">
-        <mxmlc file="../src/com/easyinsight/help/TutorialModule.mxml" output="${deployment.path}/TutorialModule.swf"
-               static-rsls="false">
-            <load-config filename="../help-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
     <target name="compileAdmin">
         <mxmlc file="../src/AdministrationApplication.mxml" output="${deployment.path}/AdministrationApplication.swf"
                static-rsls="true">
             <load-config filename="../administration-app.xml"/>
-        </mxmlc>
-    </target>    
-
-    <target name="compileRIA">
-        <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
-               static-rsls="true">
-            <load-config filename="../riatest-core-config.xml"/>
         </mxmlc>
     </target>
 
@@ -511,7 +356,7 @@
 
     <target name="module.list">
         <mxmlc file="../src/com/easyinsight/analysis/list/ListModule.mxml" output="${deployment.path}/ListModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="list.txt">
             <load-config filename="../modules/list-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.5.0.12683.swz"/>
@@ -527,7 +372,12 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
+        <SWFAnalysis linkReportPath="list.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="List"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.columnchart">
@@ -547,6 +397,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -569,6 +422,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -589,6 +445,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -611,6 +470,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -631,6 +493,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -653,6 +518,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -673,6 +541,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -695,6 +566,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -715,6 +589,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -737,6 +614,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -757,6 +637,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -779,6 +662,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -799,6 +685,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -821,26 +710,8 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
-    <target name="module.map">
-        <mxmlc file="../src/com/easyinsight/analysis/maps/MapModule.mxml" output="${deployment.path}/MapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/map-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -863,6 +734,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -883,6 +757,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -905,6 +782,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -925,6 +805,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -947,6 +830,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -967,6 +853,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -989,6 +878,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -1009,6 +901,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -1031,6 +926,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -1051,6 +949,9 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
+            </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -1073,6 +974,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -1094,73 +998,9 @@
                 <url rsl-url="rpc_3.5.0.12683.swz"/>
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
-    <!--<target name="compileGoalsModule">
-        <mxmlc file="../src/com/easyinsight/goals/MyGoalsModule2.mxml" output="${deployment.path}/MyGoalsModule.swf"
-               static-rsls="false">
-            <load-config filename="../goals-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
+            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                <url rsl-url="/app/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
-
-    <target name="compileDataAnalysis">
-        <mxmlc file="../src/com/easyinsight/framework/DataAnalysisModule.mxml" output="${deployment.path}/DataAnalysisModule.swf"
-               static-rsls="false">
-            <load-config filename="../data-analysis-container.xml"/>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-        </mxmlc>
-    </target>
-
-    <target name="compileDataSourceAdmin">
-        <mxmlc file="../src/com/easyinsight/framework/DataSourceAdminModule.mxml" output="${deployment.path}/DataSourceAdminModule.swf"
-               static-rsls="false">
-            <load-config filename="../data-source-admin.xml"/>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-        </mxmlc>
-    </target>-->
 </project>
