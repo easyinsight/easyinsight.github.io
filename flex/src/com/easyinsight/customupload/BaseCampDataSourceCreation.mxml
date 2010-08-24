@@ -82,7 +82,7 @@
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
         <mx:FormItem label="You can find the token on your Basecamp page under My Info - API Token." fontSize="10"/>
-        <mx:FormItem label="Include Inactive Projects:" direction="horizontal">
+        <mx:FormItem label="Include On Hold/Inactive Projects:" direction="horizontal">
             <mx:CheckBox id="inactiveCheckbox" selected="{inactiveIncluded}"/>
             <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on inactive projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>
         </mx:FormItem>
