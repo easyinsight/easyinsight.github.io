@@ -10,7 +10,7 @@ public class ReportPerspectiveInfo extends PerspectiveInfo {
     
     public function ReportPerspectiveInfo(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null, installOption:Boolean = false, origin:int = 0,
             originalReportID:int = 0, originScore:Number = 0, templateUrlKey:String = null) {
-        super(PerspectiveInfo.REPORT_EDITOR);
+        super(PerspectiveInfo.REPORT_VIEW);
         var properties:Object = new Object();
         properties.reportID = insightDescriptor.id;
         properties.reportType = insightDescriptor.reportType;
