@@ -127,7 +127,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -151,7 +151,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -175,7 +175,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -199,7 +199,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -223,7 +223,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFAnalysis linkReportPath="dsadmin.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="DataSourceAdmin"
@@ -249,7 +249,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -294,7 +294,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -374,7 +374,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFAnalysis linkReportPath="list.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="List"
@@ -400,7 +400,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -424,7 +424,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -448,7 +448,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -472,7 +472,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -496,7 +496,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -520,7 +520,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -544,7 +544,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -592,7 +592,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -616,7 +616,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -640,7 +640,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -664,7 +664,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -688,7 +688,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -712,7 +712,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -736,7 +736,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -760,7 +760,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -784,7 +784,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -808,7 +808,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -832,7 +832,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -856,7 +856,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -880,7 +880,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -904,7 +904,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -928,7 +928,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -952,7 +952,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -976,7 +976,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -1000,7 +1000,7 @@
                 <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
             <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
+                <url rsl-url="easyui-debug/EICore.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
