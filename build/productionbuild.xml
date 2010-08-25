@@ -348,7 +348,7 @@
         </compc>
         <unzip src="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swc" dest="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp"/>
         <rename src="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/library.swf" dest="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swf"/>
-        <copy file="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swf" todir="${flex.path}/EICore.swf"/>
+        <copy file="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swf" todir="${flex.path}"/>
         <copy file="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp/EICore.swc" todir="${teamcity.build.checkoutDir}/flex/libs/rsl"/>
         <delete dir="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp"/>
     </target>
