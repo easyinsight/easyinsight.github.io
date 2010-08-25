@@ -1,6 +1,5 @@
 package com.easyinsight.account
 {
-	import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.users.AccountTransferObject")]

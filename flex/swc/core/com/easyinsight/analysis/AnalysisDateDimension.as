@@ -1,6 +1,7 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.analysis.formatter.DimensionValueFormatter;
+import com.easyinsight.framework.User;
 
 import mx.formatters.DateFormatter;
 	import mx.formatters.Formatter;
@@ -25,7 +26,7 @@ import mx.formatters.NumberFormatter;
 		}
 		
 		override public function getFormatter():Formatter {
-            var format:int = 0;
+            var format:int = User.getInstance().dateFormat;
             var formatter:Formatter;
             if (dateLevel <= AnalysisItemTypes.WEEK_LEVEL) {
                 var dateFormatter:DateFormatter = new DateFormatter();
