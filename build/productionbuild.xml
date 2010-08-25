@@ -314,7 +314,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileCoreSWC, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, compileYahooWidget, modules1, modules2, modules3, modules4, modules5, modules6">
+    <target name="compileFlex" depends="compileJava, compileCoreSWC, compileFlexOptimized, compileAdmin, compileEmbeddedInsight, modules1, modules2, modules3, modules4, modules5, modules6">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -403,28 +403,6 @@
             </runtime-shared-library-path>
         </mxmlc>
 
-
-    </target>
-
-    <target name="compileYahooWidget">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/YahooWidgetReport.mxml" output="${flex.path}/YahooWidgetReport.swf"
-               static-rsls="false" link-report="${basedir}/yahoo.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/yahoo-report.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
 
     </target>
 
