@@ -281,10 +281,10 @@
                             navigation(new NavigationEvent("Scorecards"));
                             break;
                         case "exchange":
-                            var view:int = int(o.view);
-                            var display:int = int(o.display);
-                            var subTopic:int = int(o.subTopicID);
-                            navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display, subTopicID: subTopic}));
+                            //var view:int = int(o.view);
+                            //var display:int = int(o.display);
+                            //var subTopic:int = int(o.subTopicID);
+                            navigation(new NavigationEvent("Exchange"));
                             break;
                         case "groups":
                             navigation(new NavigationEvent("Groups"));
