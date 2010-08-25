@@ -8,6 +8,8 @@
         </mx:State>
     </util:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
@@ -61,6 +63,15 @@
             }
         }
 
+        private function reactivate():void {
+            ProgressAlert.alert(this, "Reactivating account...", null, userService.applyReactivation);
+            userService.applyReactivation.send(_accountAdminTO.accountID);
+        }
+
+        private function reactivated():void {
+
+        }
+
         private function created():void {
             dispatchEvent(new RefreshAccountsListEvent());
             PopUpManager.removePopUp(this);
@@ -69,6 +80,7 @@
     <mx:RemoteObject destination="eiAdmin" id="userService">
         <mx:method name="eiActivateBizAccount" result="created()"/>
         <mx:method name="adminUpdate" result="created()"/>
+        <mx:method name="applyReactivation" result="reactivated()"/>
     </mx:RemoteObject>
     <mx:VBox styleName="TitleWindowContents" width="100%">
         <mx:Form>
@@ -114,6 +126,7 @@
             <mx:Box id="actionsBox"/>
         </mx:HBox>
         <mx:DateField selectedDate="{trialDate}" id="dateSelector"/>
+        <mx:Button label="Reactivate" click="reactivate()"/>
         <mx:DataGrid dataProvider="{adminUsers}" width="600">
             <mx:columns>
                 <mx:DataGridColumn dataField="firstName" headerText="First Name" width="150"/>

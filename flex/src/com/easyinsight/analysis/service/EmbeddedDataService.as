@@ -39,7 +39,6 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
     private function processListData(event:ResultEvent):void {
         var listData:EmbeddedDataResults = dataRemoteSource.getEmbeddedResults.lastResult as EmbeddedDataResults;
         if (listData.credentialRequirements == null || listData.credentialRequirements.length == 0) {
-            var clientProcessorMap:Object = new Object();
             var headers:ArrayCollection = new ArrayCollection(listData.headers);
             var rows:ArrayCollection = new ArrayCollection(listData.rows);
             var data:ArrayCollection = new ArrayCollection();
@@ -66,7 +65,7 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
                 data.addItem(endObject);
             }
         }
-        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, data, listData.definition, clientProcessorMap, listData.dataSourceAccessible,
+        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, data, listData.definition, listData.dataSourceAccessible,
                 listData.attribution, listData.credentialRequirements, listData.dataSourceInfo, listData.ratingsAverage,
                 listData.ratingsCount, listData.additionalProperties));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));

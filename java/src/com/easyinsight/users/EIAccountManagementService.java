@@ -1,8 +1,11 @@
 package com.easyinsight.users;
 
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.preferences.UISettingRetrieval;
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.database.Database;
@@ -25,6 +28,25 @@ import java.util.ArrayList;
  */
 public class EIAccountManagementService {
 
+    public void applyReactivation(int accountID) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_ID = ?");
+            updateStmt.setInt(1, Account.REACTIVATION_POSSIBLE);
+            updateStmt.setLong(2, accountID);
+            updateStmt.executeUpdate();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public void specialOffer() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 30);
@@ -37,25 +59,6 @@ public class EIAccountManagementService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-
-            // find all trial users who are older than two weeks ago
-
-            // ideal sales automation is once/week, because it seems like they're losing interest after one week
-
-            // initial email:
-            // how to create reports, how to create KPIs, how to connect to data sources
-
-            // week 1 email:
-            // report types, going from KPIs to reports
-
-            // week 2 email:
-            // pulling in further data to extend your dashboard?, hierarchies
-
-            // week 3 email:
-            // kpi trees (if pro), combining data sources
-
-            // week 4 email:
-            //  
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_TIMED_STATE.account_id FROM ACCOUNT_TIMED_STATE, ACCOUNT WHERE " +
                     "state_change_time < ? and ACCOUNT_TIMED_STATE.account_state = ? AND ACCOUNT_TIMED_STATE.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND " +

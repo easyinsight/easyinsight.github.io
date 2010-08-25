@@ -100,6 +100,8 @@ public class User extends EventDispatcher
             User.getEventNotifier().dispatchEvent(new Event("renewalOption"));
         } else if (response.accountType == Account.DELINQUENT) {
             User.getEventNotifier().dispatchEvent(new Event("accountDelinquent"));
+        } else if (response.accountType == Account.REACTIVATION_POSSIBLE) {
+            User.getEventNotifier().dispatchEvent(new Event("reactivationPossible"));
         }
         if (response.uiSettings != null) {
             _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);

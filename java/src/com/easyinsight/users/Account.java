@@ -37,6 +37,7 @@ public class Account {
     public static final int BETA = 8;
     public static final int TRIAL = 9;
     public static final int CLOSING = 10;
+    public static final int REACTIVATION_POSSIBLE = 11;
 
     public static final long PERSONAL_MAX = 5000000;
     public static final long BASIC_MAX = 35000000;
@@ -106,6 +107,9 @@ public class Account {
     @Column(name="default_reporting_sharing")
     private boolean defaultReportSharing;
 
+    @Column(name="renewal_option_available")
+    private boolean renewalOptionAvailable;
+
     @Column(name="creation_date")
     private Date creationDate;
 
@@ -160,6 +164,14 @@ public class Account {
 
     public void setPublicDataEnabled(boolean publicDataEnabled) {
         this.publicDataEnabled = publicDataEnabled;
+    }
+
+    public boolean isRenewalOptionAvailable() {
+        return renewalOptionAvailable;
+    }
+
+    public void setRenewalOptionAvailable(boolean renewalOptionAvailable) {
+        this.renewalOptionAvailable = renewalOptionAvailable;
     }
 
     public boolean isReportSharingEnabled() {

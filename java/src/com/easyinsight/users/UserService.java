@@ -35,6 +35,41 @@ import flex.messaging.FlexContext;
  */
 public class UserService {
 
+    public void reactivate() {
+        long accountID = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+            if (account.getAccountState() == Account.REACTIVATION_POSSIBLE) {
+                account.setAccountState(Account.TRIAL);
+                PreparedStatement nukeTimedState = conn.prepareStatement("DELETE FROM ACCOUNT_TIMED_STATE WHERE ACCOUNT_ID = ?");
+                nukeTimedState.setLong(1, accountID);
+                nukeTimedState.executeUpdate();
+                PreparedStatement addTimedState = conn.prepareStatement("INSERT INTO ACCOUNT_TIMED_STATE (ACCOUNT_ID, ACCOUNT_STATE, STATE_CHANGE_TIME) VALUES (?, ?, ?)");
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.DAY_OF_YEAR, 30);
+                addTimedState.setLong(1, accountID);
+                addTimedState.setInt(2, Account.ACTIVE);
+                addTimedState.setTimestamp(3, new java.sql.Timestamp(cal.getTimeInMillis()));
+                addTimedState.execute();
+                session.update(account);
+            } else {
+                throw new RuntimeException("Attempt to reactivate an account not in reactivation possible state");
+            }
+            session.flush();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
+        }
+    }
+
     public AccountSetupData applySetupData(AccountSetupData accountSetupData) {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);

@@ -128,7 +128,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
             event.additionalProperties.prefix = _prefix;
             try {
                 _report = event.analysisDefinition;
-                _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap, event.additionalProperties);
+                _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, new Object(), event.additionalProperties);
                 dispatchEvent(event);
             } catch(e:Error) {
                 dispatchEvent(new EIErrorEvent(e));

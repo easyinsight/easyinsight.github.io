@@ -52,6 +52,9 @@ public class AccountStatusRenderer extends HBox{
             case Account.TRIAL:
                 statusLabel.text = "Trial";
                 break;
+            case Account.REACTIVATION_POSSIBLE:
+                statusLabel.text = "Reactivable";
+                break;
             default:
                 statusLabel.text = "(Unknown State)";
                 break;

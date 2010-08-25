@@ -39,6 +39,9 @@ public class AccountTypeRenderer extends HBox{
             case Account.ENTERPRISE:
                 typeLabel.text = "Enterprise";
                 break;
+            case Account.ADMINISTRATOR:
+                typeLabel.text = "Administrator";
+                break;
         }
     }
 

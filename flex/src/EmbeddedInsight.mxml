@@ -117,7 +117,7 @@
                         switch (event.result) {
                             case "success":
                                 dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
-                                    if (authResult.accountState == Account.DELINQUENT) {
+                                    if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.REACTIVATION_POSSIBLE) {
                                         //toLogin(1);
                                     } else {
                                         quietLogin(authResult, false);

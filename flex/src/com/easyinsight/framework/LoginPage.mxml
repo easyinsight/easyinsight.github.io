@@ -51,6 +51,8 @@
         private function setup():void {
             if (_initState == 1) {
                 panelIndex = 5;
+            } else if (_initState == 2) {
+                panelIndex = 6;
             } else {
                 loginComponent.setupFocus();
             }
@@ -86,7 +88,7 @@
                     /*configWindow.setStyle("hideEffect", leftEffect);
                      configWindow.setStyle("showEffect", leftEffect);*/
                     viewStack.addChild(configWindow);
-                    panelIndex = 6;
+                    panelIndex = 8;
                 }
             }
         }
@@ -157,6 +159,9 @@
         private function loginHandler(event:LoginEvent):void {
             if (event.authResponse.accountState == Account.DELINQUENT) {
                 panelIndex = 5;
+            } else if (event.authResponse.accountState == Account.REACTIVATION_POSSIBLE) {
+                panelIndex = 6;
+                dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
             } else {
                 dispatchEvent(event);
             }
@@ -167,6 +172,18 @@
 
         public function set initState(value:int):void {
             _initState = value;
+        }
+
+        private function reactivate():void {
+            userService.reactivate.send();
+        }
+
+        private function reactivated():void {
+            panelIndex = 7;
+        }
+
+        private function onward():void {
+            dispatchEvent(new Event("allDone"));
         }
 
         [Bindable]
@@ -189,6 +206,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject destination="login" id="userService">
         <mx:method name="applySetupData" result="applied()"/>
+        <mx:method name="reactivate" result="reactivated()"/>
     </mx:RemoteObject>
     <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
         <mx:VBox width="1000" verticalGap="0" borderStyle="solid" borderThickness="1" borderColor="#DDDDDD"
@@ -271,6 +289,22 @@
                     <mx:Button label="Enter Billing" click="toBilling()" fontSize="18"/>
                 </mx:VBox>
                 <!-- delinquent panel -->
+                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
+                         hideEffect="leftEffect" showEffect="leftEffect" verticalGap="25">
+                    <mx:Image source="{connectionsIcon}"/>
+                    <mx:Label text="Ready to give Easy Insight another try?" fontSize="18"/>
+                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                                 fontSize="18"
+                                 text="When you reactivate your account, you'll receive a fresh 30 day trial."
+                                 width="350" height="80" textAlign="center"/>
+                    <mx:Button label="Reactivate" click="reactivate()" fontSize="18"/>
+                </mx:VBox>
+                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
+                         hideEffect="leftEffect" showEffect="leftEffect" verticalGap="25">
+                    <mx:Image source="{connectionsIcon}"/>
+                    <mx:Label text="Your account is now active again with a new 30 day trial!" fontSize="20"/>
+                    <mx:Button label="Onward to the Application!" click="onward()" fontSize="18"/>
+                </mx:VBox>
             </mx:ViewStack>
             <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
         </mx:VBox>

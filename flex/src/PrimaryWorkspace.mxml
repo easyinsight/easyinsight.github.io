@@ -212,7 +212,7 @@
             var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
             if (currentFragment != browserManager.fragment) {
                 currentFragment = browserManager.fragment;
-                if (User.getInstance() != null) {
+                if (User.getInstance() != null && User.getInstance().accountState != Account.REACTIVATION_POSSIBLE) {
                     parseFragmentObject(o, currentFragment);
                 } else {
                     if (o.solutionID != null && o.solutionID != "") {
@@ -432,6 +432,9 @@
             if (authResult != null) {
                 if (authResult.accountState == Account.DELINQUENT) {
                     toLogin(1);
+                } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
+                    quietLogin(authResult, false);
+                    toLogin(2);
                 } else {
                     quietLogin(authResult, false);
                     toMain();
@@ -472,6 +475,9 @@
                                 dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
                                     if (authResult.accountState == Account.DELINQUENT) {
                                         toLogin(1);
+                                    } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
+                                        quietLogin(authResult, false);
+                                        toLogin(2);
                                     } else {
                                         quietLogin(authResult, false);
                                         toMain();

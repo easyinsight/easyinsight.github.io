@@ -23,6 +23,7 @@ package com.easyinsight.account
         public static const BETA:int = 8;
         public static const TRIAL:int = 9;
         public static const CLOSING:int = 10;
+        public static const REACTIVATION_POSSIBLE:int = 11;
 
 		public var accountType:int;
 		public var accountID:int;

@@ -10,7 +10,6 @@ public class EmbeddedDataServiceEvent extends Event {
     public static const DATA_RETURNED:String = "embeddedDataReturned";
 
     public var dataSet:ArrayCollection;
-    public var clientProcessorMap:Object;
     public var analysisDefinition:AnalysisDefinition;
     public var dataSourceAccessible:Boolean;
     public var attribution:String;
@@ -20,12 +19,11 @@ public class EmbeddedDataServiceEvent extends Event {
     public var dataSourceInfo:DataSourceInfo;
     public var additionalProperties:Object;
 
-    public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, dataSourceAccessible:Boolean,
+    public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, dataSourceAccessible:Boolean,
             attribution:String, credentialRequirements:ArrayCollection, dataSourceInfo:DataSourceInfo, ratingsAverage:Number,
                 ratingsCount:int, additionalProperties:Object) {
         super(type);
         this.dataSet = dataSet;
-        this.clientProcessorMap = clientProcessorMap;
         this.analysisDefinition = analysisDefinition;
         this.dataSourceAccessible = dataSourceAccessible;
         this.attribution = attribution;
@@ -37,7 +35,7 @@ public class EmbeddedDataServiceEvent extends Event {
     }
 
     override public function clone():Event {
-        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, clientProcessorMap, dataSourceAccessible, attribution,
+        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, dataSourceAccessible, attribution,
                 credentialRequirements, dataSourceInfo, ratingsAverage, ratingsCount, additionalProperties);
     }
 }
