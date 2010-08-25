@@ -122,6 +122,7 @@ public class GoalStorage {
                                 kpis.add(new KPIStorage().getKPI(kpiID, conn));
                             }
                         }
+                        getKPIStmt.close();
                         conn.commit();
                     } catch (Exception e) {
                         conn.rollback();
@@ -151,6 +152,7 @@ public class GoalStorage {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM MILESTONE WHERE MILESTONE_ID = ?");
             deleteStmt.setLong(1, milestoneID);
             deleteStmt.executeUpdate();
+            deleteStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
@@ -170,6 +172,7 @@ public class GoalStorage {
                 Date milestoneDate = new Date(milestoneRS.getDate(3).getTime());
                 milestones.add(new GoalTreeMilestone(milestoneDate, milestoneID, milestoneName));
             }
+            queryStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
@@ -185,6 +188,7 @@ public class GoalStorage {
         if (rs.next()) {
             goalTreeMilestone = new GoalTreeMilestone(new Date(rs.getDate(1).getTime()), goalMilestoneID, rs.getString(2));
         }
+        queryStmt.close();
         return goalTreeMilestone;
     }
 
@@ -241,6 +245,7 @@ public class GoalStorage {
                 consumers.add(new UserStub(userID, userName, email, fullName, accountID, firstName));
             }
         }
+        getUsersStmt.close();
         PreparedStatement getGroupsStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, ROLE, COMMUNITY_GROUP.name " +
                 "FROM GOAL_TREE_TO_GROUP, COMMUNITY_GROUP WHERE GOAL_TREE_ID = ? AND " +
                 "COMMUNITY_GROUP.COMMUNITY_GROUP_ID = GOAL_TREE_TO_GROUP.GROUP_ID");
@@ -258,6 +263,7 @@ public class GoalStorage {
         }
         goalTree.setAdministrators(administrators);
         goalTree.setConsumers(consumers);
+        getGroupsStmt.close();
     }
 
     private void saveUsers(long goalTreeID, List<FeedConsumer> users, int role, Connection conn) throws SQLException {
@@ -305,6 +311,7 @@ public class GoalStorage {
                 // TODO: add urlKey
                 descriptors.add(new GoalTreeDescriptor(treeID, name, role, rs.getString(4), null));
             }
+            getTreesStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
@@ -462,6 +469,7 @@ public class GoalStorage {
                 childNode.setParent(goalTreeNode);
                 children.add(childNode);
             }
+            childQueryStmt.close();
             goalTreeNode.setChildren(children);
             querySubTreeStmt.setLong(1, nodeID);
             ResultSet subTreeRS = querySubTreeStmt.executeQuery();
@@ -473,6 +481,7 @@ public class GoalStorage {
                 goalTreeNode.setSubTreeName(subTreeName);
                 goalTreeNode.setSubTreeIcon(treeIconImage);
             }
+            querySubTreeStmt.close();
             return goalTreeNode;
         } else {
             throw new RuntimeException("Could not find node " + nodeID);

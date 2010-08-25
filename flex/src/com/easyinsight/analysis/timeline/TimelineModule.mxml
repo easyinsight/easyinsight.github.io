@@ -195,7 +195,7 @@
             var value:Value = seriesValues.getItemAt(currentFrame) as Value;
             currentFrameText = timeline.sequence.analysisItem.getFormatter().format(value.getValue());
             frameData = allFrames.getItemAt(currentFrame) as ServiceData;
-            _reportRenderer.renderReport(frameData.data, timeline.report, frameData.clientProcessorMap, additionalProperties);
+            _reportRenderer.renderReport(frameData.data, timeline.report, new Object(), additionalProperties);
         }
 
         private function blah():void {

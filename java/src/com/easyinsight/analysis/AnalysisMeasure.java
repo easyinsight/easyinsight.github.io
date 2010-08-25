@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
-import com.easyinsight.conditions.MeasureConditionRange;
 
 import javax.persistence.*;
 
@@ -16,10 +15,6 @@ import javax.persistence.*;
 public class AnalysisMeasure extends AnalysisItem {
     @Column(name="aggregation")
     private int aggregation;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="measure_condition_range_id")
-    private MeasureConditionRange measureConditionRange;
 
     public AnalysisMeasure() {
     }
@@ -99,29 +94,12 @@ public class AnalysisMeasure extends AnalysisItem {
         this.aggregation = aggregation;
     }
 
-    public MeasureConditionRange getMeasureConditionRange() {
-        return measureConditionRange;
-    }
-
-    public void setMeasureConditionRange(MeasureConditionRange measureConditionRange) {
-        this.measureConditionRange = measureConditionRange;
-    }
-
     public AnalysisItemResultMetadata createResultMetadata() {
         return new AnalysisMeasureResultMetadata();
     }
 
     public int getQueryAggregation() {
         return aggregation;
-    }
-
-    @Override
-    public AnalysisItem clone() throws CloneNotSupportedException {
-        AnalysisMeasure analysisMeasure = (AnalysisMeasure) super.clone();
-        if (analysisMeasure.getMeasureConditionRange() != null) {
-            analysisMeasure.setMeasureConditionRange(analysisMeasure.getMeasureConditionRange().clone());
-        }
-        return analysisMeasure;
     }
 
     public boolean equals(Object o) {
