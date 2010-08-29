@@ -6,7 +6,7 @@ import flash.events.TimerEvent;
 import flash.utils.Timer;
 
 public class WelcomeScreen extends Loader {
-    [ Embed(source="../../../../assets/logoswf.swf", mimeType="application/octet-stream") ]
+    [ Embed(source="../../../../assets/Preloader.swf", mimeType="application/octet-stream") ]
     public var WelcomeScreenGraphic:Class;
     public var timer:Timer;
     private var fadeInRate:Number = .01;
