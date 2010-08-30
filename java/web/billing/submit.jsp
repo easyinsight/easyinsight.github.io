@@ -64,6 +64,8 @@
             conn.setSavepoint();
             account.setBillingInformationGiven(true);
 
+            boolean yearly = request.getParameter("orderid").startsWith("yearly");
+
             List l = s.createQuery("from BuyOurStuffTodo where userID = ?").setLong(0, userID).list();
             if(l.size() > 0) {
                 s.delete(l.get(0));
@@ -77,6 +79,10 @@
             // Set up billing day of month
             if(account.getAccountState() == Account.DELINQUENT) {
                 account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
+                if(yearly)
+                    account.setBillingMonthOfYear(c.get(Calendar.MONTH));
+                else
+                    account.setBillingMonthOfYear(null);
             } else {
                 Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
                 // billing day of month is at the end of the trial, if there is one
@@ -87,11 +93,35 @@
                         cal.setTime(trialEnd);
                         System.out.println("Billing day of month: " + cal.get(Calendar.DAY_OF_MONTH));
                         account.setBillingDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
+                        if(yearly)
+                            account.setBillingMonthOfYear(cal.get(Calendar.MONTH));
+                        else
+                            account.setBillingMonthOfYear(null);
                     }
                     else {
                         Calendar cal = Calendar.getInstance();
                         account.setBillingDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
-                    }
+                        if(yearly)
+                            account.setBillingMonthOfYear(cal.get(Calendar.MONTH));
+                        else
+                            account.setBillingMonthOfYear(null);
+                    }                    
+                }
+            }
+
+            // If we've gotten this far, they're updating their billing information instead of submitting it. Allow upgrades to yearly, but if they're already yearly don't update
+            // billing_month_of_year
+            if(yearly && account.getBillingMonthOfYear() == null) {
+                Calendar cal = Calendar.getInstance();
+                if(account.getBillingDayOfMonth() == null) {
+                    account.setBillingDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
+                }
+                //  if the billing day of month is before the billing day of month, yearly billing starts this month, otherwise
+                // it starts next month.
+                if(cal.get(Calendar.DAY_OF_MONTH) < account.getBillingDayOfMonth()) {
+                    account.setBillingMonthOfYear(cal.get(Calendar.MONTH));
+                } else {
+                    account.setBillingMonthOfYear((cal.get(Calendar.MONTH) + 1) % 12);
                 }
             }
             account.setAccountState(Account.ACTIVE);

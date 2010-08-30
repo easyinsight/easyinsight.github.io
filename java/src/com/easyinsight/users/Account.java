@@ -116,6 +116,9 @@ public class Account {
     @Column(name="billing_day_of_month")
     private Integer billingDayOfMonth;
 
+    @Column(name="billing_month_of_year")
+    private Integer billingMonthOfYear;
+
     @Column(name="date_format")
     private int dateFormat;
 
@@ -410,7 +413,12 @@ public class Account {
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
         billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
         billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
-        Map<String, String> params = billingSystem.billAccount(this.getAccountID(), this.monthlyCharge());
+        Map<String, String> params = null;
+        if(this.getBillingMonthOfYear() != null) {
+            params = billingSystem.billAccount(this.getAccountID(), this.yearlyCharge());
+        } else {
+            params = billingSystem.billAccount(this.getAccountID(), this.monthlyCharge());
+        }
         if(!params.get("response").equals("1")) {
             setAccountState(Account.DELINQUENT);
             LogClass.info("Billing failed!");
@@ -442,11 +450,23 @@ public class Account {
         }
     }
 
+    public double yearlyCharge() {
+        return monthlyCharge() * 11.0;
+    }
+
     public boolean isActivated() {
         return activated;
     }
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public Integer getBillingMonthOfYear() {
+        return billingMonthOfYear;
+    }
+
+    public void setBillingMonthOfYear(Integer billingMonthOfYear) {
+        this.billingMonthOfYear = billingMonthOfYear;
     }
 }

@@ -1,7 +1,5 @@
-<%@ page import="java.util.Date" %>
 <%@ page import="java.text.DateFormat" %>
 <%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="java.util.TimeZone" %>
 <%@ page import="java.security.MessageDigest" %>
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.database.Database" %>
@@ -10,9 +8,8 @@
 <%@ page import="com.easyinsight.billing.BillingUtil" %>
 <%@ page import="com.easyinsight.security.PasswordService" %>
 <%@ page import="com.easyinsight.users.User" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Formatter" %>
 <%@ page import="com.easyinsight.config.ConfigLoader" %>
+<%@ page import="java.util.*" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -62,11 +59,17 @@
 
     String keyID = BillingUtil.getKeyID();
     String key = BillingUtil.getKey();
-    String orderID = "";
+    boolean monthly = account.getBillingMonthOfYear() == null && (request.getParameter("billingType") == null || !request.getParameter("billingType").equals("yearly"));
+    String orderID = (monthly ? "monthly-" : "yearly-") + UUID.randomUUID().toString();
+
     String amount = "1.00";
     String type = "auth";
     if(account.getAccountState() == Account.DELINQUENT) {
-        amount = String.valueOf(account.monthlyCharge());
+        if(monthly) {
+            amount = String.valueOf(account.monthlyCharge());
+        } else {
+            amount = String.valueOf(account.yearlyCharge()); 
+        }
         type = "sale";
     }
 
@@ -91,7 +94,7 @@
               accountInfoString = "";
       }
       Formatter f = new Formatter();
-      String charge = f.format("%.2f", account.monthlyCharge()).toString();
+      String charge = f.format("%.2f", monthly ? account.monthlyCharge() : (account.yearlyCharge())).toString();
 
 %>
 
@@ -104,9 +107,16 @@
         <script language="javascript" type="text/javascript">
         function setCCexp() {
             document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + document.getElementById("ccexpYear").value;
-
         }
-    </script>
+
+        function changeBilling() {
+            for(i = 0;i < document.forms[0].billingType.length;i++) {
+                if(document.forms[0].billingType[i].checked)
+                    window.location.search = "billingType=" + document.forms[0].billingType[i].value;
+            }
+        }
+
+        </script>
     <style type="text/css">
         #centerPage p {
             text-indent:0px;
@@ -166,6 +176,10 @@
       <input id="hash" type="hidden" value="<%= hash %>" name="hash"/>
       <input id="type" type="hidden" value="<%= type %>" name="type" />
       <table cellpadding="3"><tbody>
+      <% f = new Formatter(); %>
+      <tr colspan="4"><td style="text-align:left"><label for="monthlyBillingType"><input id="monthlyBillingType" type="radio" name="billingType" value="monthly" <%= account.getBillingMonthOfYear() != null ? "disabled=\"disabled\"" : "" %> <%= monthly ? "checked=\"checked\"" : "" %> onchange="changeBilling()" /> Monthly billing, $<%= f.format("%.2f", account.monthlyCharge()) %> per month.</label></td></tr>
+      <% f = new Formatter(); %>
+      <tr colspan="4"><td style="text-align:left"><label for="yearlyBillingType"><input id="yearlyBillingType" type="radio" name="billingType" value="yearly" <%= !monthly ? "checked=\"checked\"" : "" %> onchange="changeBilling()" /> Yearly billing, $<%= f.format("%.2f", account.yearlyCharge()) %> per year.</label></td></tr>
       <tr>
           <td>First Name:</td><td><input id="firstname" type="text" value="" name="firstname" style="width:16.5em" /></td>
           <td>Last Name:</td><td colspan="3"><input id="lastname" type="text" value="" name="lastname" style="width:16.5em" /></td>
@@ -203,7 +217,7 @@
           <option value="19">19</option>
           <option value="20">20</option>
       </select></td></tr>
-      <tr><td colspan="6" style="font-size:14px;text-align:left">You are signing up for the <%= accountInfoString %> account tier, and you will be charged $<%= charge %> USD monthly for your subscription.  <% if(account.getAccountState() == Account.DELINQUENT) { %> Since your account is currently delinquent, the first charge will be applied today. <% } %>  </td></tr>
+      <tr><td colspan="6" style="font-size:14px;text-align:left">You are signing up for the <%= accountInfoString %> account tier, and you will be charged $<%= charge %> USD <%= monthly ? "monthly" : "yearly" %> for your subscription.  <% if(account.getAccountState() == Account.DELINQUENT) { %> Since your account is currently delinquent, the first charge will be applied today. <% } %>  </td></tr>
       <tr><td colspan="6" style="text-align:center"> <input class="submitButton" type="image" value="" src="transparent.gif" name="commit"/></td></tr>
       </tbody></table>
 
