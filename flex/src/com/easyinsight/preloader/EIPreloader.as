@@ -254,8 +254,10 @@ import flash.display.DisplayObject;
 
             // create and center the main box (all other sprites are added to it)
             mainBox = new Sprite();
-            mainBox.x = stageWidth / 2 - mainBoxWidth / 2;
-            mainBox.y = stageHeight / 2 - mainBoxHeight / 2;
+            if (stage) {
+                mainBox.x = stage.stageWidth / 2 - mainBoxWidth / 2;
+                mainBox.y = stage.stageHeight / 2 - mainBoxHeight / 2;
+            }
 
             // fill the main box with boxColors and add it to the stage
             //mainBox.filters = [largeDropShadow];
