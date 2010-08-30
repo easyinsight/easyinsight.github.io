@@ -7,7 +7,7 @@
                 xmlns:ga4flash="com.google.analytics.components.*"
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0"
                 right="0" paddingRight="0"
-                bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIProgressBar">
+                bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIPreloader">
     <mx:Script>
 		<![CDATA[        
         import com.easyinsight.account.Account;
