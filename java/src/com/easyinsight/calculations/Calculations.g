@@ -50,7 +50,8 @@ Decimal	:	UInteger (Dot UInteger)? ('E' Integer)?;
 
 
 Variable:	BracketedVariable | NoBracketsVariable;
-String	:	Quote Variable Quote;
+
+String	:	Quote (VariableWhitespace)* Variable? Quote;
 
 
 // Last rule to make sure whitespace incorporated in earlier rules is counted.

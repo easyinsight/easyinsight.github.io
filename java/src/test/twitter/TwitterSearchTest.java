@@ -38,11 +38,11 @@ public class TwitterSearchTest extends TestCase {
         Connection conn = Database.instance().getConnection();
         TwitterDataSource tds = new TwitterDataSource();
         tds.setSearches(new ArrayList(Arrays.asList("ty lawson")));
-        Feed feed = tds.createFeedObject();
+//        Feed feed = tds.createFeedObject();
         List<AnalysisItem> items;
         items = tds.createAnalysisItems(keys, new DataSet(), null, conn);
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>(items);
-        DataSet ds = feed.getAggregateDataSet(itemSet, null, null, items, false);
+//        DataSet ds = feed.getAggregateDataSet(itemSet, null, null, items, false);
 
     }
 
