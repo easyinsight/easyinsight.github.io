@@ -12,6 +12,7 @@ public class HeatMapDefinition extends AnalysisDefinition {
 
     public var longitudeItem:AnalysisItem;
     public var latitudeItem:AnalysisItem;
+    public var zipCode:AnalysisItem;
     public var measure:AnalysisItem;
     public var latitude:Number;
     public var longitude:Number;

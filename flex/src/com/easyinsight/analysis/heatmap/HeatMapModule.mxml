@@ -4,6 +4,7 @@
     <mx:Fade id="fadeInEffect" alphaFrom="0.0" alphaTo="0.57" duration="1000" />
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.CoordinateValue;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
@@ -156,9 +157,15 @@
                 heatMapDefinition = analysisDefinition as HeatMapDefinition;
                 var data:ArrayCollection = new ArrayCollection();
                 for each (var point:Object in dataSet) {
-                    if (point[heatMapDefinition.longitudeItem.qualifiedName()] != 0 ||
-                        point[heatMapDefinition.latitudeItem.qualifiedName()] != 0) {
-                        data.addItem(point);
+                    if (heatMapDefinition.zipCode != null) {
+                        if (point[heatMapDefinition.zipCode.qualifiedName()] is CoordinateValue) {
+                            data.addItem(point);
+                        }
+                    } else {
+                        if (point[heatMapDefinition.longitudeItem.qualifiedName()] != 0 ||
+                            point[heatMapDefinition.latitudeItem.qualifiedName()] != 0) {
+                            data.addItem(point);
+                        }
                     }
                 }
                 this.dataSet = data;
@@ -176,7 +183,13 @@
         }
 
         private function latLonToPoint(o:Object):Object {
-            return map.fromLatLngToViewport(new LatLng(Number(o[heatMapDefinition.latitudeItem.qualifiedName()]), Number(o[heatMapDefinition.longitudeItem.qualifiedName()])));
+            if (heatMapDefinition.zipCode != null) {
+                var coordinateValue:CoordinateValue = o[heatMapDefinition.zipCode.qualifiedName()];
+                return map.fromLatLngToViewport(new LatLng(Number(coordinateValue.y), Number(coordinateValue.x)));
+                //return map.fromLatLngToViewport(new LatLng(0, 0));
+            } else {
+                return map.fromLatLngToViewport(new LatLng(Number(o[heatMapDefinition.latitudeItem.qualifiedName()]), Number(o[heatMapDefinition.longitudeItem.qualifiedName()])));
+            }
         }
 
         private function getCount(o:Object):Number {

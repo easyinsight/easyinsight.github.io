@@ -16,6 +16,7 @@ public abstract class Value implements Serializable {
     public static final int DATE = 3;
     public static final int AGGREGATION = 4;
     public static final int EMPTY = 4;
+    public static final int COORDINATE = 5;
     private static final long serialVersionUID = 5584087693730331068L;
 
     // in theory, we have URL, we have image

@@ -4,20 +4,19 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.api.*;
 import com.easyinsight.api.Row;
 import com.easyinsight.core.*;
+import com.easyinsight.core.StringValue;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.storage.IWhere;
 import com.easyinsight.userupload.UploadPolicy;
+import com.easyinsight.util.RandomTextGenerator;
 
 import javax.jws.WebParam;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.*;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -25,7 +24,12 @@ import java.util.*;
  * Date: Jun 21, 2010
  * Time: 12:13:29 PM
  */
-public abstract class EIV2API implements IEIV2API {
+public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
+
+    private static final int TRANSACTION_OPENED = 1;
+    private static final int TRANSACTION_FAILED = 2;
+    private static final int TRANSACTION_COMMITTED = 3;
+    private static final int TRANSACTION_ROLLED_BACK = 4;
 
     protected abstract long getUserID();
 
@@ -35,32 +39,117 @@ public abstract class EIV2API implements IEIV2API {
         return true;
     }
 
-    public void replaceRows(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name = "rows") Row[] rows, @WebParam(name = "changeDataSourceToMatch") boolean changeDataSourceToMatch) {
+    private void saveLoad(SerializedLoad load, EIConnection conn, long transactionDatabaseID) throws SQLException, IOException {
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO data_transaction_command (data_transaction_id, command_blob) VALUES (?, ?)");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(load);
+        byte[] bytes = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+        insertStmt.setBinaryStream(1, bis, bytes.length);
+        insertStmt.setLong(2, transactionDatabaseID);
+        insertStmt.execute();
+    }
+
+    private List<Row> loadRows(long transactionID, EIConnection conn) throws SQLException, IOException, ClassNotFoundException {
+        List<Row> rows = new ArrayList<Row>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT COMMAND_BLOB FROM DATA_TRANSACTION_COMMAND WHERE DATA_TRANSACTION_ID = ?", ResultSet.TYPE_FORWARD_ONLY);
+        queryStmt.setLong(1, transactionID);
+        ResultSet blobRS = queryStmt.executeQuery();
+        while (blobRS.next()) {
+            byte[] bytes = blobRS.getBytes(1);
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            SerializedLoad load = (SerializedLoad) ois.readObject();
+            rows.addAll(load.toRows());
+        }
+        return rows;
+    }
+
+    private long identifyTransactionID(String transactionID, EIConnection conn) throws SQLException {
+        PreparedStatement txnQueryStmt = conn.prepareStatement("SELECT data_transaction_id FROM data_transaction where external_txn_id = ? AND user_id = ?");
+        txnQueryStmt.setString(1, transactionID);
+        txnQueryStmt.setLong(2, getUserID());
+        ResultSet rs = txnQueryStmt.executeQuery();
+        return rs.getLong(1);
+    }
+
+    public String beginTransaction(@WebParam(name="dataSourceName") String dataSourceName,
+                                   @WebParam(name="transactionOperation") boolean replaceData,
+                                   @WebParam(name = "changeDataSourceToMatch") boolean changeDataSourceToMatch) {
+        long userID = getUserID();
         EIConnection conn = Database.instance().getConnection();
-        DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
-            
+            String txnString = RandomTextGenerator.generateText(15);
+            PreparedStatement insertTxnStmt = conn.prepareStatement("INSERT INTO DATA_TRANSACTION (USER_ID, external_txn_id, txn_date, txn_status, data_source_name," +
+                    "replace_data, change_data_source_to_match) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)");
+            insertTxnStmt.setLong(1, userID);
+            insertTxnStmt.setString(2, txnString);
+            insertTxnStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            insertTxnStmt.setInt(4, TRANSACTION_OPENED);
+            insertTxnStmt.setString(5, dataSourceName);
+            insertTxnStmt.setBoolean(6, replaceData);
+            insertTxnStmt.setBoolean(7, changeDataSourceToMatch);
+            insertTxnStmt.execute();
+            conn.commit();
+            return txnString;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new ServiceRuntimeException(e.getMessage());
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public CommitResult commit(@WebParam(name = "transactionID") String transactionID) {
+        EIConnection conn = Database.instance().getConnection();
+        DataStorage dataStorage = null;
+        CommitResult commitResult = new CommitResult();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement txnQueryStmt = conn.prepareStatement("SELECT data_transaction_id, data_source_name, replace_data, change_data_source_to_match " +
+                    "FROM data_transaction where external_txn_id = ? AND user_id = ?");
+            txnQueryStmt.setString(1, transactionID);
+            txnQueryStmt.setLong(2, getUserID());
+            ResultSet rs = txnQueryStmt.executeQuery();
+            long transactionDatabaseID = rs.getLong(1);
+            String dataSourceName = rs.getString(2);
+            boolean replaceData = rs.getBoolean(3);
+            boolean changeDataSourceToMatch = rs.getBoolean(4);
+            List<Row> rows = loadRows(transactionDatabaseID, conn);
             CallData callData = convertData(dataSourceName, rows, conn, changeDataSourceToMatch);
             dataStorage = callData.dataStorage;
-            dataStorage.truncate();
+            if (replaceData) dataStorage.truncate();
             dataStorage.insertData(callData.dataSet);
             dataStorage.commit();
             conn.commit();
+
+            commitResult.setSuccessful(true);
+            commitResult.setFailedRows(new RowStatus[] {});
+            //commitResult.setDataSourceAPIKey();
+            //commitResult.setDataSourceURL();
+            return commitResult;
         } catch (ServiceRuntimeException sre) {
             LogClass.debug(sre.getMessage());
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw sre;
+            commitResult.setSuccessful(false);
+            commitResult.setFailureMessage(sre.getMessage());
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            conn.rollback();
-            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+            commitResult.setSuccessful(false);
+            commitResult.setFailureMessage(e.getMessage());
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -68,155 +157,37 @@ public abstract class EIV2API implements IEIV2API {
             }
             Database.closeConnection(conn);
         }
+        return commitResult;
     }
 
-    public void addRow(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name = "row") Row row, @WebParam(name = "changeDataSourceToMatch") boolean changeDataSourceToMatch) {
+    public void rollback(@WebParam(name = "transactionID") String transactionID) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void loadRows(@WebParam(name = "rows") Row[] rows,
+                        @WebParam(name="transactionID") String transactionID) {
         EIConnection conn = Database.instance().getConnection();
-        if (row == null) {
+        if (rows == null) {
             throw new ServiceRuntimeException("You must specify at least one Row.");
         }
-        DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
-            CallData callData = convertData(dataSourceName, row, conn, changeDataSourceToMatch);
-            dataStorage = callData.dataStorage;
-            dataStorage.insertData(callData.dataSet);
-            dataStorage.commit();
+            long transactionDatabaseID = identifyTransactionID(transactionID, conn);
+            SerializedLoad load = SerializedLoad.fromRows(Arrays.asList(rows));
+            saveLoad(load, conn, transactionDatabaseID);
             conn.commit();
         } catch (ServiceRuntimeException sre) {
             LogClass.debug(sre.getMessage());
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
             conn.rollback();
             throw sre;
         } catch (Exception e) {
             LogClass.error(e);
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
             conn.rollback();
             throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
-            if (dataStorage != null) {
-                dataStorage.closeConnection();
-            }
             Database.closeConnection(conn);
         }
-    }
-
-    public void addRows(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name = "rows") Row[] rows, @WebParam(name = "changeDataSourceToMatch") boolean changeDataSourceToMatch) {
-        EIConnection conn = Database.instance().getConnection();
-        DataStorage dataStorage = null;
-        try {
-            conn.setAutoCommit(false);
-            CallData callData = convertData(dataSourceName, rows, conn, changeDataSourceToMatch);
-            dataStorage = callData.dataStorage;
-            dataStorage.insertData(callData.dataSet);
-            dataStorage.commit();
-            conn.commit();
-        } catch (ServiceRuntimeException sre) {
-            LogClass.debug(sre.getMessage());
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
-            conn.rollback();
-            throw sre;
-        } catch (Exception e) {
-            LogClass.error(e);
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
-            conn.rollback();
-            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
-        } finally {
-            conn.setAutoCommit(true);
-            if (dataStorage != null) {
-                dataStorage.closeConnection();
-            }
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void updateRow(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name = "row") Row row, @WebParam(name = "where") Where where, @WebParam(name = "changeDataSourceToMatch") boolean changeDataSourceToMatch) {
-        EIConnection conn = Database.instance().getConnection();
-        if (row == null) {
-            throw new ServiceRuntimeException("You must specify at least one Row.");
-        }
-        DataStorage dataStorage = null;
-        try {
-            List<IWhere> wheres = createWheres(where);
-            conn.setAutoCommit(false);
-            CallData callData = convertData(dataSourceName, Arrays.asList(row), conn, changeDataSourceToMatch);
-            dataStorage = callData.dataStorage;
-            dataStorage.updateData(callData.dataSet, wheres);
-            dataStorage.commit();
-            conn.commit();
-        } catch (ServiceRuntimeException sre) {
-            LogClass.debug(sre.getMessage());
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
-            conn.rollback();
-            throw sre;
-        } catch (Exception e) {
-            LogClass.error(e);
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
-            conn.rollback();
-            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
-        } finally {
-            conn.setAutoCommit(true);
-            if (dataStorage != null) {
-                dataStorage.closeConnection();
-            }
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void updateRows(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name = "rows") Row[] rows, @WebParam(name = "where") Where where, @WebParam(name = "changeDataSourceToMatch") boolean changeDataSourceToMatch) {
-        EIConnection conn = Database.instance().getConnection();
-        DataStorage dataStorage = null;
-        try {
-            List<IWhere> wheres = createWheres(where);
-            conn.setAutoCommit(false);
-            CallData callData = convertData(dataSourceName, rows, conn, changeDataSourceToMatch);
-            dataStorage = callData.dataStorage;
-            dataStorage = callData.dataStorage;
-            dataStorage.updateData(callData.dataSet, wheres);
-            dataStorage.commit();
-            conn.commit();
-        } catch (ServiceRuntimeException sre) {
-            LogClass.debug(sre.getMessage());
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
-            conn.rollback();
-            throw sre;
-        } catch (Exception e) {
-            LogClass.error(e);
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
-            conn.rollback();
-            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
-        } finally {
-            conn.setAutoCommit(true);
-            if (dataStorage != null) {
-                dataStorage.closeConnection();
-            }
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void deleteRows(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name = "where") Where where) {
-        throw new ServiceRuntimeException("This operation has not yet been implemented--coming soon!");
-    }
-
-    public DataSourceInfo getSourceInfo(@WebParam(name = "dataSourceName") String dataSourceName) {
-        throw new ServiceRuntimeException("This operation has not yet been implemented--coming soon!");
     }
 
     private static class CallData {
@@ -402,57 +373,5 @@ public abstract class EIV2API implements IEIV2API {
             }
         }
         return transformedRow;
-    }
-
-    protected final List<IWhere> createWheres(Where where) {
-        List<IWhere> wheres = new ArrayList<IWhere>();
-        StringWhere[] stringWheres = where.getStringWheres();
-        if (stringWheres != null) {
-            for (StringWhere stringWhere : stringWheres) {
-                if (stringWhere.getKey() == null) {
-                    throw new ServiceRuntimeException("StringWhere with value " + stringWhere.getValue() + " had no key--key is a required field.");
-                }
-                wheres.add(new com.easyinsight.storage.StringWhere(new NamedKey(stringWhere.getKey()), stringWhere.getValue()));
-            }
-        }
-        NumberWhere[] numberWheres = where.getNumberWheres();
-        if (numberWheres != null) {
-            for (NumberWhere numberWhere : numberWheres) {
-                if (numberWhere.getKey() == null) {
-                    throw new ServiceRuntimeException("NumberWhere with value " + numberWhere.getValue() + " had no key--key is a required field.");
-                }
-                Comparison comparison = numberWhere.getComparison();
-                if (comparison == null) {
-                    throw new ServiceRuntimeException("NumberWhere with key " + numberWhere.getKey() + " had no comparison--comparison is a required field.");
-                }
-                wheres.add(new com.easyinsight.storage.NumericWhere(new NamedKey(numberWhere.getKey()), numberWhere.getValue(), comparison.createStorageComparison()));
-            }
-        }
-        DateWhere[] dateWheres = where.getDateWheres();
-        if (dateWheres != null) {
-            for (DateWhere dateWhere : dateWheres) {
-                if (dateWhere.getKey() == null) {
-                    throw new ServiceRuntimeException("DateWhere with value " + dateWhere.getValue() + " had no key--key is a required field.");
-                }
-                Comparison comparison = dateWhere.getComparison();
-                if (comparison == null) {
-                    throw new ServiceRuntimeException("DateWhere with key " + dateWhere.getKey() + " had no comparison--comparison is a required field.");
-                }
-                wheres.add(new com.easyinsight.storage.DateWhere(new NamedKey(dateWhere.getKey()), dateWhere.getValue(), comparison.createStorageComparison()));
-            }
-        }
-        DayWhere[] dayWheres = where.getDayWheres();
-        if (dayWheres != null) {
-            for (DayWhere dayWhere : dayWheres) {
-                if (dayWhere.getKey() == null) {
-                    throw new ServiceRuntimeException("DayWhere with value " + dayWhere.getDayOfYear() + " had no key--key is a required field.");
-                }
-                if (dayWhere.getYear() == 0) {
-                    throw new ServiceRuntimeException("DayWhere with key " + dayWhere.getKey() + " was set to year 0.");
-                }
-                wheres.add(new com.easyinsight.storage.DayWhere(new NamedKey(dayWhere.getKey()), dayWhere.getYear(), dayWhere.getDayOfYear()));
-            }
-        }
-        return wheres;
     }
 }

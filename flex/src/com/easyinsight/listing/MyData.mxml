@@ -48,12 +48,6 @@
         import mx.utils.ObjectUtil;
         import mx.utils.URLUtil;
 
-        private function downloadAirWidget():void {
-            var request:URLRequest = new URLRequest("/app/assets/EIAirWidget.air");
-            request.method = URLRequestMethod.GET;
-            navigateToURL(request);
-        }
-
         private var initialEntry:Boolean = true;
 
         [Embed(source="../../../../assets/data_blue_x16.png")]

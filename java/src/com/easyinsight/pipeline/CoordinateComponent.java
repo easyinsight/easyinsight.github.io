@@ -11,18 +11,14 @@ import com.easyinsight.dataset.DataSet;
  */
 public class CoordinateComponent implements IComponent {
 
-    private AnalysisZipCode analysisZipCode;
-    private AnalysisLatitude analysisLatitude;
-    private AnalysisLongitude analysisLongitude;
+    private AnalysisItem analysisZipCode;
 
-    public CoordinateComponent(AnalysisZipCode analysisZipCode, AnalysisLatitude analysisLatitude, AnalysisLongitude analysisLongitude) {
+    public CoordinateComponent(AnalysisItem analysisZipCode) {
         this.analysisZipCode = analysisZipCode;
-        this.analysisLatitude = analysisLatitude;
-        this.analysisLongitude = analysisLongitude;
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {        
-        new ZipGeocodeCache().blah(dataSet, analysisZipCode, analysisLongitude, analysisLatitude);
+        new ZipGeocodeCache().blah(dataSet, analysisZipCode);
         return dataSet;
     }
 

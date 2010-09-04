@@ -1,6 +1,7 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSHeatMap;
 import com.easyinsight.calculations.CalcGraph;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedService;
@@ -14,12 +15,6 @@ import java.util.*;
  * Time: 9:36:30 AM
  */
 public class StandardReportPipeline extends Pipeline {
-
-    private static class PointPopulation {
-        private AnalysisZipCode analysisZipCode;
-        private AnalysisLongitude analysisLongitude;
-        private AnalysisLatitude analysisLatitude;
-    }
 
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap, List<AnalysisItem> allItems) {
 
@@ -35,34 +30,11 @@ public class StandardReportPipeline extends Pipeline {
 
         List<IComponent> components = new ArrayList<IComponent>();
 
-        Map<String, PointPopulation> map = new HashMap<String, PointPopulation>();
-        for (AnalysisItem coordinate : items(AnalysisItemTypes.LONGITUDE, allNeededAnalysisItems)) {
-            AnalysisCoordinate analysisCoordinate = (AnalysisCoordinate) coordinate;
-            if (analysisCoordinate.getAnalysisZipCode() != null) {
-                PointPopulation pointPopulation = map.get(analysisCoordinate.getAnalysisZipCode().toDisplay());
-                if (pointPopulation == null) {
-                    pointPopulation = new PointPopulation();
-                    pointPopulation.analysisZipCode = analysisCoordinate.getAnalysisZipCode();
-                    map.put(analysisCoordinate.getAnalysisZipCode().toDisplay(), pointPopulation);
-                }
-                pointPopulation.analysisLongitude = (AnalysisLongitude) analysisCoordinate;
+        if (report instanceof WSHeatMap) {
+            WSHeatMap heatMap = (WSHeatMap) report;
+            if (heatMap.getZipCode() != null) {
+                components.add(new CoordinateComponent(heatMap.getZipCode()));
             }
-        }
-        for (AnalysisItem coordinate : items(AnalysisItemTypes.LATITUDE, allNeededAnalysisItems)) {
-            AnalysisCoordinate analysisCoordinate = (AnalysisCoordinate) coordinate;
-            if (analysisCoordinate.getAnalysisZipCode() != null) {
-                PointPopulation pointPopulation = map.get(analysisCoordinate.getAnalysisZipCode().toDisplay());
-                if (pointPopulation == null) {
-                    pointPopulation = new PointPopulation();
-                    pointPopulation.analysisZipCode = analysisCoordinate.getAnalysisZipCode();
-                    map.put(analysisCoordinate.getAnalysisZipCode().toDisplay(), pointPopulation);
-                }
-                pointPopulation.analysisLatitude = (AnalysisLatitude) analysisCoordinate;
-            }
-        }
-
-        for (PointPopulation pointPopulation : map.values()) {
-            components.add(new CoordinateComponent(pointPopulation.analysisZipCode, pointPopulation.analysisLatitude, pointPopulation.analysisLongitude));
         }
 
         for (AnalysisItem analysisItem : items(AnalysisItemTypes.LONGITUDE, allNeededAnalysisItems)) {

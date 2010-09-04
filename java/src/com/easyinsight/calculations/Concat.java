@@ -21,6 +21,6 @@ public class Concat extends Function {
     }
 
     public FunctionExplanation explain() {
-        return new FunctionExplanation("nconcat(value...)", "Combines the numeric parameters passed in");
+        return new FunctionExplanation("concat(value...)", "Combines the numeric parameters passed in");
     }
 }

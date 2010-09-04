@@ -16,6 +16,7 @@ public class WSHeatMap extends WSAnalysisDefinition {
 
     private AnalysisItem latitudeItem;
     private AnalysisItem longitudeItem;
+    private AnalysisItem zipCode;
     private AnalysisItem measure;
 
     private double latitude;
@@ -30,6 +31,14 @@ public class WSHeatMap extends WSAnalysisDefinition {
     private int precision;
 
     private long heatMapID;
+
+    public AnalysisItem getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(AnalysisItem zipCode) {
+        this.zipCode = zipCode;
+    }
 
     public long getHeatMapID() {
         return heatMapID;
@@ -102,7 +111,11 @@ public class WSHeatMap extends WSAnalysisDefinition {
 
     @Override
     public Set<AnalysisItem> getAllAnalysisItems() {
-        return new HashSet<AnalysisItem>(Arrays.asList(latitudeItem, longitudeItem, measure));
+        if (zipCode != null) {
+            return new HashSet<AnalysisItem>(Arrays.asList(zipCode, measure));
+        } else {
+            return new HashSet<AnalysisItem>(Arrays.asList(latitudeItem, longitudeItem, measure));
+        }
     }
 
     @Override
@@ -110,6 +123,7 @@ public class WSHeatMap extends WSAnalysisDefinition {
         addItems("latitudeItem", Arrays.asList(latitudeItem), structure);
         addItems("longitudeItem", Arrays.asList(longitudeItem), structure);
         addItems("measure", Arrays.asList(measure), structure);
+        addItems("zipCode", Arrays.asList(zipCode), structure);
     }
 
     @Override
@@ -117,6 +131,7 @@ public class WSHeatMap extends WSAnalysisDefinition {
         latitudeItem = firstItem("latitudeItem", structure);
         longitudeItem = firstItem("longitudeItem", structure);
         measure = firstItem("measure", structure);
+        zipCode = firstItem("zipCode", structure);
     }
 
     public double getMaxLat() {

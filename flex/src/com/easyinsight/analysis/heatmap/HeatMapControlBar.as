@@ -12,14 +12,21 @@ import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.util.PopUpUtil;
 
+import flash.events.Event;
 import flash.events.MouseEvent;
 
+import mx.containers.HBox;
+import mx.containers.VBox;
+import mx.containers.ViewStack;
 import mx.controls.Button;
 import mx.controls.Label;
+import mx.controls.RadioButton;
+import mx.controls.RadioButtonGroup;
 import mx.managers.PopUpManager;
 
 public class HeatMapControlBar extends ReportControlBar implements IReportControlBar {
 
+    private var zipGrouping:ListDropAreaGrouping;
     private var latGrouping:ListDropAreaGrouping;
     private var longGrouping:ListDropAreaGrouping;
     private var measureGrouping:ListDropAreaGrouping;
@@ -33,6 +40,10 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
         pieEditButton.toolTip = "Edit Heat Map Properties...";
         pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
         addChild(pieEditButton);
+        zipGrouping = new ListDropAreaGrouping();
+        zipGrouping.maxElements = 1;
+        zipGrouping.dropAreaType = DimensionDropArea;
+        zipGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         latGrouping = new ListDropAreaGrouping();
         latGrouping.maxElements = 1;
         latGrouping.dropAreaType = DimensionDropArea;
@@ -66,24 +77,66 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
+    private function onChange(event:Event):void {
+        if (event.currentTarget.selectedValue == "zip") {
+            stack.selectedIndex = 0;
+        } else {
+            stack.selectedIndex = 1;
+        }
+    }
+
+    private var stack:ViewStack;
+
     override protected function createChildren():void {
         super.createChildren();
+
+        var vbox:VBox = new VBox();
+        var radioGroup:RadioButtonGroup = new RadioButtonGroup();
+        radioGroup.addEventListener(Event.CHANGE, onChange);
+        var zipRadio:RadioButton = new RadioButton();
+        zipRadio.label = "Use Zip Code";
+        zipRadio.value = "zip";
+        zipRadio.group = radioGroup;
+        zipRadio.selected = true;
+        var latLongRadio:RadioButton = new RadioButton();
+        latLongRadio.label = "Use Longitude/Latitude";
+        latLongRadio.value = "latlong";
+        latLongRadio.group = radioGroup;
+        vbox.addChild(zipRadio);
+        vbox.addChild(latLongRadio);
+        addChild(vbox);
+
+        stack = new ViewStack();
+        stack.resizeToContent = true;
+        var box1:HBox = new HBox();
+        var box2:HBox = new HBox();
+        var zipLabel:Label = new Label();
+        zipLabel.text = "Zip Code:";
+        zipLabel.setStyle("fontSize", 14);
+        box1.addChild(zipLabel);
+        addDropAreaGrouping(zipGrouping, box1);
         var groupingLabel:Label = new Label();
-        groupingLabel.text = "Latitude Grouping:";
+        groupingLabel.text = "Latitude:";
         groupingLabel.setStyle("fontSize", 14);
-        addChild(groupingLabel);
-        addDropAreaGrouping(latGrouping);
+        box2.addChild(groupingLabel);
+        addDropAreaGrouping(latGrouping, box2);
         var longGroupLabel:Label = new Label();
-        longGroupLabel.text = "Longitude Grouping:";
+        longGroupLabel.text = "Longitude:";
         longGroupLabel.setStyle("fontSize", 14);
-        addChild(longGroupLabel);
-        addDropAreaGrouping(longGrouping);
+        box2.addChild(longGroupLabel);
+        addDropAreaGrouping(longGrouping, box2);
+        stack.addChild(box1);
+        stack.addChild(box2);
+        addChild(stack);
+
         var measureLabel:Label = new Label();
         measureLabel.text = "Measure:";
         measureLabel.setStyle("fontSize", 14);
         addChild(measureLabel);
         addDropAreaGrouping(measureGrouping);
-
+        if (heatMapDefinition.zipCode != null) {
+            zipGrouping.addAnalysisItem(heatMapDefinition.zipCode);
+        }
         if (heatMapDefinition.latitudeItem != null) {
             latGrouping.addAnalysisItem(heatMapDefinition.latitudeItem);
         }
@@ -105,6 +158,7 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {
+        heatMapDefinition.zipCode = zipGrouping.getListColumns()[0];
         heatMapDefinition.latitudeItem = latGrouping.getListColumns()[0];
         heatMapDefinition.longitudeItem = longGrouping.getListColumns()[0];
         heatMapDefinition.measure = measureGrouping.getListColumns()[0];
@@ -112,8 +166,8 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
     }
 
     public function isDataValid():Boolean {
-        return (latGrouping.getListColumns().length > 0 && measureGrouping.getListColumns().length > 0 &&
-                longGrouping.getListColumns().length > 0);
+        return ((zipGrouping.getListColumns().length > 0 || (latGrouping.getListColumns().length > 0 && longGrouping.getListColumns().length > 0 )) &&
+                measureGrouping.getListColumns().length > 0);
     }
 
     public function addItem(analysisItem:AnalysisItem):void {

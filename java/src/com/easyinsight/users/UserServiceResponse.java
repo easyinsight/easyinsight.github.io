@@ -12,6 +12,7 @@ import java.util.Date;
 public class UserServiceResponse {
     private boolean successful;
     private String failureMessage;
+    private boolean guestUser;
     private long userID;
     private long accountID;
     private String userName;
@@ -46,7 +47,8 @@ public class UserServiceResponse {
                                boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
                                boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible,
-                               Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin) {
+                               Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
+                               boolean guestUser) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -69,6 +71,7 @@ public class UserServiceResponse {
         this.dateFormat = dateFormat;
         this.defaultReportSharing = defaultReportSharing;
         this.cookieLogin = cookieLogin;
+        this.guestUser = guestUser;
     }
 
     public String getSessionCookie() {
@@ -77,6 +80,14 @@ public class UserServiceResponse {
 
     public void setSessionCookie(String sessionCookie) {
         this.sessionCookie = sessionCookie;
+    }
+
+    public boolean isGuestUser() {
+        return guestUser;
+    }
+
+    public void setGuestUser(boolean guestUser) {
+        this.guestUser = guestUser;
     }
 
     public boolean isDefaultReportSharing() {

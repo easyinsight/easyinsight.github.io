@@ -23,6 +23,7 @@ public class UserServiceResponse
     public var firstName:String;
     public var freeUpgradePossible:Boolean;
     public var firstLogin:Boolean;
+    public var guestUser:Boolean;
     public var lastLoginDate:Date;
     public var accountName:String;
     public var renewalOptionPossible:Boolean;

@@ -1,6 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.StringValue;
+import com.easyinsight.core.CoordinateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -30,7 +30,7 @@ public class ZipGeocodeCache {
 
     private Map<String, Point> pointMap = new WeakHashMap<String, Point>();
 
-    public void blah(DataSet dataSet, AnalysisZipCode zip, AnalysisLongitude analysisLongitude, AnalysisLatitude analysisLatitude) {
+    public void blah(DataSet dataSet, AnalysisItem zip) {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT LONGITUDE, LATITUDE FROM ZIP_CODE_GEOCODE WHERE ZIP_CODE = ?");
@@ -57,12 +57,7 @@ public class ZipGeocodeCache {
                         }
                     }
                     if (point != null) {
-                        if (analysisLongitude != null) {
-                            row.addValue(analysisLongitude.createAggregateKey(), new StringValue(point.getLongitude()));
-                        }
-                        if (analysisLatitude != null) {
-                            row.addValue(analysisLatitude.createAggregateKey(), new StringValue(point.getLatitude()));
-                        }
+                        row.addValue(zip.createAggregateKey(), new CoordinateValue(point.getLongitude(), point.getLatitude()));                        
                     }
                 }
             }

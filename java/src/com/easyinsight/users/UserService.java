@@ -662,7 +662,7 @@ public class UserService {
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                     user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
+                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -693,7 +693,7 @@ public class UserService {
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
+                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
                     userServiceResponse.setActivated(account.isActivated());
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     userServiceResponse.setSessionCookie(sessionCookie);
@@ -791,7 +791,7 @@ public class UserService {
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
+                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
 
                         userServiceResponse.setActivated(account.isActivated());
 
@@ -884,7 +884,7 @@ public class UserService {
                         (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                         user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                         !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true);
+                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);

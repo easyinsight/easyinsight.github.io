@@ -32,6 +32,9 @@ public class User {
     @Transient
     private UISettings uiSettings;
 
+    @Column(name="guest_user")
+    private boolean guestUser;
+
     @Column(name="first_name")
     private String firstName;
 
@@ -83,6 +86,14 @@ public class User {
         userTransferObject.setFirstName(firstName);
         userTransferObject.setPersonaID(personaID != null ? personaID : 0);
         return userTransferObject;
+    }
+
+    public boolean isGuestUser() {
+        return guestUser;
+    }
+
+    public void setGuestUser(boolean guestUser) {
+        this.guestUser = guestUser;
     }
 
     public boolean isOptInEmail() {
