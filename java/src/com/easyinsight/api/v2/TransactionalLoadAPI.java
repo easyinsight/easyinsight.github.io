@@ -72,6 +72,7 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
         txnQueryStmt.setString(1, transactionID);
         txnQueryStmt.setLong(2, getUserID());
         ResultSet rs = txnQueryStmt.executeQuery();
+        rs.next();
         return rs.getLong(1);
     }
 
@@ -117,6 +118,7 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
             txnQueryStmt.setString(1, transactionID);
             txnQueryStmt.setLong(2, getUserID());
             ResultSet rs = txnQueryStmt.executeQuery();
+            rs.next();
             long transactionDatabaseID = rs.getLong(1);
             String dataSourceName = rs.getString(2);
             boolean replaceData = rs.getBoolean(3);
