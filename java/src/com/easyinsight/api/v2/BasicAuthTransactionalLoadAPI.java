@@ -10,7 +10,7 @@ import javax.xml.ws.WebServiceContext;
  * Date: Sep 3, 2010
  * Time: 6:42:21 PM
  */
-public class BasicAuthTransactionalLoadAPI extends TransactionalLoadAPI {
+public class BasicAuthTransactionalLoadAPI extends TransactionalLoadAPI implements ITransactionalLoadAPI {
      @Resource
     private WebServiceContext context;
 
