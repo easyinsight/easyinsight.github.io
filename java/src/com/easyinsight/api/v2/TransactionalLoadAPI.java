@@ -47,8 +47,8 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
         byte[] bytes = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         BufferedInputStream bis = new BufferedInputStream(bais, 1024);
-        insertStmt.setBinaryStream(1, bis, bytes.length);
-        insertStmt.setLong(2, transactionDatabaseID);
+        insertStmt.setLong(1, transactionDatabaseID);
+        insertStmt.setBinaryStream(2, bis, bytes.length);
         insertStmt.execute();
     }
 
