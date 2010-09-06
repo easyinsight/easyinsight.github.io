@@ -9,6 +9,8 @@ import java.util.Date;
  */
 public class SerialDateValue extends SerialValue {
     private Date value;
+    private static final long serialVersionUID = -565182371910649050L;
+
 
     public Date getValue() {
         return value;

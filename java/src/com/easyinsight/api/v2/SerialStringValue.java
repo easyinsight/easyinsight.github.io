@@ -7,6 +7,8 @@ package com.easyinsight.api.v2;
  */
 public class SerialStringValue extends SerialValue {
     private String value;
+    private static final long serialVersionUID = 6510146780055488213L;
+
 
     public String getValue() {
         return value;

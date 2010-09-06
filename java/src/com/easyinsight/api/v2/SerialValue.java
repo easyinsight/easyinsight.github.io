@@ -9,6 +9,8 @@ import java.io.Serializable;
  */
 public class SerialValue implements Serializable {
     private String key;
+    private static final long serialVersionUID = -2194446225686851986L;
+
 
     public String getKey() {
         return key;

@@ -5,6 +5,7 @@ import com.easyinsight.api.NumberPair;
 import com.easyinsight.api.Row;
 import com.easyinsight.api.StringPair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +14,10 @@ import java.util.List;
  * Date: Sep 3, 2010
  * Time: 6:26:07 PM
  */
-public class SerializedLoad {
+public class SerializedLoad implements Serializable {
     private List<SerialRow> rows;
+    private static final long serialVersionUID = 4888572349725355233L;
+
 
     public List<SerialRow> getRows() {
         return rows;

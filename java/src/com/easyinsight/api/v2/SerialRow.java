@@ -11,6 +11,8 @@ public class SerialRow implements Serializable {
     private SerialStringValue[] stringValues;
     private SerialNumericValue[] numberValues;
     private SerialDateValue[] dateValues;
+    private static final long serialVersionUID = 5215604172273795175L;
+
 
     public SerialStringValue[] getStringValues() {
         return stringValues;
