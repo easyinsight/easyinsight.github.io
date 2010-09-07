@@ -18,6 +18,7 @@
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.managers.BrowserManager;
         import mx.utils.URLUtil;
 
@@ -68,13 +69,13 @@
             targetFieldName = targetItem.display;
             masterLookupTable = new Object();
             lookupMap = new Object();
-            var valueStrings:ArrayCollection = new ArrayCollection();
+            //var valueStrings:ArrayCollection = new ArrayCollection();
             for each (var pair:LookupPair in _lookupTable.lookupPairs) {
                 lookupMap[String(pair.sourceValue.getValue())] = pair;
                 masterLookupTable[String(pair.sourceValue.getValue())] = pair;
-                valueStrings.addItem(String(pair.sourceValue.getValue()));
+                //valueStrings.addItem(String(pair.sourceValue.getValue()));
             }
-            valueStrings.sort = new Sort();
+            /*valueStrings.sort = new Sort();
             valueStrings.refresh();
             for each (var valueString:String in valueStrings) {
                 var lookupPair:LookupPair = masterLookupTable[valueString];
@@ -84,7 +85,7 @@
                 row.mode = rowType;
                 lookupTableBox.addChild(row);
                 editors.addItem(row);
-            }
+            }*/
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.lookupTableID = _lookupTable.urlKey;
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
@@ -133,24 +134,78 @@
             for each (var val:Value in values) {
                 valueStrings.addItem(String(val.getValue()));
             }
+            sort.fields = [ new SortField(null, true) ];
             valueStrings.sort = sort;
             valueStrings.refresh();
+
+            var pageCtr:int = 0;
+            var itemCtr:int = 0;
+            var page:LookupTablePage;
+
             for each (var valueString:String in valueStrings) {
+
+                if (itemCtr == 0) {
+                    page = new LookupTablePage();
+                    page.rowType = rowType;
+                    pages.addItem(page);
+                    pageCtr++;
+                }
                 var pair:LookupPair = masterLookupTable[valueString];
                 if (pair == null) {
                     pair = new LookupPair();
                     var strValue:StringValue = new StringValue();
                     strValue.value = valueString;
                     pair.sourceValue = strValue;
+                    if (rowType == "grouping") {
+                        var emptyValue:StringValue = new StringValue();
+                        emptyValue.value = "";
+                        pair.targetValue = emptyValue;
+                    }
                     masterLookupTable[valueString] = pair;
                 }
                 lookupMap[valueString] = pair;
-                var row:LookupTableRow = new LookupTableRow();
-                row.pair = pair;
-                row.mode = rowType;
-                lookupTableBox.addChild(row);
-                editors.addItem(row);
+                page.pairs.addItem(pair);
+                //editors.addItem(row);
+                itemCtr++;
+                if (itemCtr == 15) {
+                    itemCtr = 0;
+                }
             }
+            lookupTableBox.addChild(pages.getItemAt(0) as LookupTablePage);
+            this.maxPages = pageCtr;
+            pageLabel = maxPages + " pages";
+            nextPageEnabled = maxPages > 1;
+        }
+
+        private var maxPages:int;
+
+        private var pages:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
+        private var prevPageEnabled:Boolean;
+
+        [Bindable]
+        private var nextPageEnabled:Boolean;
+
+        private function previousPage():void {
+            nextPageEnabled = true;
+            var newIndex:int = lookupTableBox.selectedIndex - 1;
+            if (newIndex == 0) {
+                prevPageEnabled = false;
+            }
+            lookupTableBox.selectedIndex = newIndex;
+        }
+
+        private function nextPage():void {
+            prevPageEnabled = true;
+            var newIndex:int = lookupTableBox.selectedIndex + 1;
+            if (lookupTableBox.getChildren().length <= newIndex) {
+                lookupTableBox.addChild(pages.getItemAt(newIndex) as LookupTablePage);
+            }
+            if (newIndex == (maxPages - 1)) {
+                nextPageEnabled = false;
+            }
+            lookupTableBox.selectedIndex = newIndex;
         }
 
         private function gotDefinition():void {
@@ -174,11 +229,18 @@
             dispatchEvent(new AnalysisCloseEvent(this));
         }
 
+        [Bindable]
+        private var pageLabel:String;
+
         private var editors:ArrayCollection = new ArrayCollection();
 
         private function save():void {
             var pairs:ArrayCollection = new ArrayCollection();
-            for each (var pair:LookupPair in masterLookupTable) {
+            for each (var page:LookupTablePage in lookupTableBox.getChildren()) {
+                page.save(masterLookupTable, pairs);
+            }
+            /*for each (var pair:LookupPair in masterLookupTable) {
+
                 for each (var row:LookupTableRow in editors) {
                     var savePair:LookupPair = row.save();
                     if (String(savePair.sourceValue.getValue()) == String(pair.sourceValue.getValue())) {
@@ -186,7 +248,7 @@
                     }
                 }
                 pairs.addItem(pair);
-            }
+            }*/
             _lookupTable.lookupPairs = pairs;
             ProgressAlert.alert(this, "Saving...", null, etlService.updateLookupTable);
             etlService.updateLookupTable.send(_lookupTable);
@@ -218,7 +280,7 @@
         <!--<mx:method name="getAnalysisItemMetadata" result="gotMetadata()"/>-->
         <mx:method name="getFeedMetadata" result="gotDefinition()"/>
     </mx:RemoteObject>
-    <mx:VBox width="1000" height="100%" horizontalAlign="center" paddingTop="5" backgroundColor="#FFFFFF">
+    <mx:VBox width="1000" height="100%" horizontalAlign="center" paddingTop="5" backgroundColor="#FFFFFF" paddingBottom="10">
         <mx:HBox width="100%" paddingLeft="15">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
                        toolTip="Close"/>
@@ -235,7 +297,6 @@
         </mx:HBox>
         <mx:Label text="Too many values for this field? Create filters by dragging fields into the canvas to the right." fontSize="14"/>
         <mx:HBox width="100%">
-
             <mx:List dataProvider="{availableDimensions}" labelField="display"
                      dragEnabled="true"
                      dragMoveEnabled="false" width="30%"
@@ -251,22 +312,17 @@
                                               paddingTop="5" updatedTransforms="onFilterChange(event)"/>
             </mx:Canvas>
         </mx:HBox>
-        <!--<mx:ViewStack width="100%" selectedIndex="{toggleBar.selectedIndex}" resizeToContent="true">-->
-        <!--<mx:HBox>
-                <mx:Label text="Fill in additional fields content"/>
-            </mx:HBox>
-            <mx:HBox width="100%">
-                
-            </mx:HBox>
-        </mx:ViewStack>-->
-
-
-        <!--
-            drag in additional fields
-            filter container
-            
-        -->
         <mx:HRule width="100%"/>
-        <mx:VBox id="lookupTableBox" width="650"/>
+        <mx:HBox>
+            <mx:Button label="Previous Page" click="previousPage()" enabled="{prevPageEnabled}"/>
+            <mx:Label text="{pageLabel}"/>
+            <mx:Button label="Next Page" click="nextPage()" enabled="{nextPageEnabled}"/>
+        </mx:HBox>
+        <mx:ViewStack id="lookupTableBox" width="650" resizeToContent="true"/>
+        <mx:HBox>
+            <mx:Button label="Previous Page" click="previousPage()" enabled="{prevPageEnabled}"/>
+            <mx:Label text="{pageLabel}"/>
+            <mx:Button label="Next Page" click="nextPage()" enabled="{nextPageEnabled}"/>
+        </mx:HBox>
     </mx:VBox>
 </mx:VBox>

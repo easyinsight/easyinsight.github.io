@@ -41,6 +41,7 @@
             super.createChildren();
             if (_mode == "grouping") {
                 textInput = new TextInput();
+                textInput.width = 250;
                 textInput.text = targetText;
                 addChild(textInput);
             } else if (_mode == "date") {

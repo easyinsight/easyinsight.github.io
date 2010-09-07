@@ -10,6 +10,15 @@ import com.easyinsight.core.Value;
 public class LookupPair {
     private Value sourceValue;
     private Value targetValue;
+    private long lookupPairID;
+
+    public long getLookupPairID() {
+        return lookupPairID;
+    }
+
+    public void setLookupPairID(long lookupPairID) {
+        this.lookupPairID = lookupPairID;
+    }
 
     public Value getSourceValue() {
         return sourceValue;

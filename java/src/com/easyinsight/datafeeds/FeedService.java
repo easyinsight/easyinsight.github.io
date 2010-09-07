@@ -804,7 +804,7 @@ public class FeedService implements IDataFeedService {
                 lookupTable.setTargetField(targetItem);
                 lookupTable.setUrlKey(urlKey);
                 lookupTable.setLookupTableID(lookupTableID);
-                PreparedStatement getPairsStmt = conn.prepareStatement("SELECT SOURCE_VALUE, TARGET_VALUE, target_date_value, target_measure FROM " +
+                PreparedStatement getPairsStmt = conn.prepareStatement("SELECT SOURCE_VALUE, TARGET_VALUE, target_date_value, target_measure, lookup_pair_id FROM " +
                         "LOOKUP_PAIR WHERE LOOKUP_TABLE_ID = ?");
                 getPairsStmt.setLong(1, lookupTableID);
                 ResultSet pairsRS = getPairsStmt.executeQuery();
@@ -833,6 +833,7 @@ public class FeedService implements IDataFeedService {
                     LookupPair lookupPair = new LookupPair();
                     lookupPair.setSourceValue(new StringValue(sourceValue));
                     lookupPair.setTargetValue(value);
+                    lookupPair.setLookupPairID(pairsRS.getLong(5));
                     pairs.add(lookupPair);
                 }
                 lookupTable.setLookupPairs(pairs);
@@ -909,45 +910,106 @@ public class FeedService implements IDataFeedService {
     }
 
     private void savePairs(long id, AnalysisItem analysisItem, List<LookupPair> pairs, EIConnection conn) throws SQLException {
-        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM LOOKUP_PAIR WHERE LOOKUP_TABLE_ID = ?");
+        /*PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM LOOKUP_PAIR WHERE LOOKUP_TABLE_ID = ?");
         clearStmt.setLong(1, id);
-        clearStmt.executeUpdate();
+        clearStmt.executeUpdate();*/
         if (analysisItem.getType() == AnalysisItemTypes.DIMENSION) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO LOOKUP_PAIR (LOOKUP_TABLE_ID, " +
-                    "SOURCE_VALUE, TARGET_VALUE) VALUES (?, ?, ?)");
+                    "SOURCE_VALUE, TARGET_VALUE) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE LOOKUP_PAIR SET SOURCE_VALUE = ?," +
+                    "TARGET_VALUE = ? WHERE LOOKUP_PAIR_ID = ?");
             for (LookupPair lookupPair : pairs) {
-                insertStmt.setLong(1, id);
-                insertStmt.setString(2, lookupPair.getSourceValue().toString());
-                insertStmt.setString(3, lookupPair.getTargetValue().toString());
-                insertStmt.execute();
+                if (lookupPair.getLookupPairID() == 0) {
+                    insertStmt.setLong(1, id);
+                    String sourceValue = lookupPair.getSourceValue().toString();
+                    if (sourceValue.length() > 200) {
+                        sourceValue = sourceValue.substring(0, 200);
+                    }
+                    insertStmt.setString(2, sourceValue);
+                    insertStmt.setString(3, lookupPair.getTargetValue().toString());
+                    insertStmt.execute();
+                } else {
+                    String sourceValue = lookupPair.getSourceValue().toString();
+                    if (sourceValue.length() > 200) {
+                        sourceValue = sourceValue.substring(0, 200);
+                    }
+                    updateStmt.setString(1, sourceValue);
+                    updateStmt.setString(2, lookupPair.getTargetValue().toString());
+                    updateStmt.setLong(3, lookupPair.getLookupPairID());
+                    updateStmt.executeUpdate();
+                }
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO LOOKUP_PAIR (LOOKUP_TABLE_ID, " +
-                    "SOURCE_VALUE, target_date_value) VALUES (?, ?, ?)");
+                    "SOURCE_VALUE, target_date_value) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE LOOKUP_PAIR SET SOURCE_VALUE = ?," +
+                    "TARGET_DATE_VALUE = ? WHERE LOOKUP_PAIR_ID = ?");
             for (LookupPair lookupPair : pairs) {
-                insertStmt.setLong(1, id);
-                insertStmt.setString(2, lookupPair.getSourceValue().toString());
-                DateValue dateValue = (DateValue) lookupPair.getTargetValue();
-                if (dateValue.getDate() == null) {
-                    insertStmt.setNull(3, Types.TIMESTAMP);
+                if (lookupPair.getLookupPairID() == 0) {
+                    insertStmt.setLong(1, id);
+                    String sourceValue = lookupPair.getSourceValue().toString();
+                    if (sourceValue.length() > 200) {
+                        sourceValue = sourceValue.substring(0, 200);
+                    }
+                    insertStmt.setString(2, sourceValue);
+                    DateValue dateValue = (DateValue) lookupPair.getTargetValue();
+                    if (dateValue.getDate() == null) {
+                        insertStmt.setNull(3, Types.TIMESTAMP);
+                    } else {
+                        insertStmt.setTimestamp(3, new java.sql.Timestamp(dateValue.getDate().getTime()));
+                    }
+                    insertStmt.execute();
                 } else {
-                    insertStmt.setTimestamp(3, new java.sql.Timestamp(dateValue.getDate().getTime()));
+                    String sourceValue = lookupPair.getSourceValue().toString();
+                    if (sourceValue.length() > 200) {
+                        sourceValue = sourceValue.substring(0, 200);
+                    }
+                    updateStmt.setString(1, sourceValue);
+                    DateValue dateValue = (DateValue) lookupPair.getTargetValue();
+                    if (dateValue.getDate() == null) {
+                        updateStmt.setNull(2, Types.TIMESTAMP);
+                    } else {
+                        updateStmt.setTimestamp(2, new java.sql.Timestamp(dateValue.getDate().getTime()));
+                    }
+                    updateStmt.setLong(3, lookupPair.getLookupPairID());
+                    updateStmt.execute();
                 }
-                insertStmt.execute();
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO LOOKUP_PAIR (LOOKUP_TABLE_ID," +
-                    "SOURCE_VALUE, TARGET_MEASURE) VALUES (?, ?, ?)");
+                    "SOURCE_VALUE, TARGET_MEASURE) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE LOOKUP_PAIR SET SOURCE_VALUE = ?," +
+                    "TARGET_MEASURE = ? WHERE LOOKUP_PAIR_ID = ?");
             for (LookupPair lookupPair : pairs) {
-                insertStmt.setLong(1, id);
-                insertStmt.setString(2, lookupPair.getSourceValue().toString());
-                NumericValue numericValue = (NumericValue) lookupPair.getTargetValue();
-                if (numericValue.getValue() == null) {
-                    insertStmt.setNull(3, Types.DOUBLE);    
+                if (lookupPair.getLookupPairID() == 0) {
+                    insertStmt.setLong(1, id);
+                    String sourceValue = lookupPair.getSourceValue().toString();
+                    if (sourceValue.length() > 200) {
+                        sourceValue = sourceValue.substring(0, 200);
+                    }
+                    insertStmt.setString(2, sourceValue);
+                    NumericValue numericValue = (NumericValue) lookupPair.getTargetValue();
+                    if (numericValue.getValue() == null) {
+                        insertStmt.setNull(3, Types.DOUBLE);
+                    } else {
+                        insertStmt.setDouble(3, numericValue.getValue());
+                    }
+                    insertStmt.execute();
                 } else {
-                    insertStmt.setDouble(3, numericValue.getValue());
+                    String sourceValue = lookupPair.getSourceValue().toString();
+                    if (sourceValue.length() > 200) {
+                        sourceValue = sourceValue.substring(0, 200);
+                    }
+                    updateStmt.setString(1, sourceValue);
+                    NumericValue numericValue = (NumericValue) lookupPair.getTargetValue();
+                    if (numericValue.getValue() == null) {
+                        updateStmt.setNull(2, Types.DOUBLE);
+                    } else {
+                        updateStmt.setDouble(2, numericValue.getValue());
+                    }
+                    updateStmt.setLong(3, id);
+                    updateStmt.execute();
                 }
-                insertStmt.execute();
             }
         }
     }

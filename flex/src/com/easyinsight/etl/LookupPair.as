@@ -7,6 +7,7 @@ public class LookupPair {
 
     public var sourceValue:Value;
     public var targetValue:Value;
+    public var lookupPairID:int;
 
     public function LookupPair() {
     }
