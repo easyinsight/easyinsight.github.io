@@ -41,7 +41,6 @@
             super.createChildren();
             if (_mode == "grouping") {
                 textInput = new TextInput();
-                textInput.width = 250;
                 textInput.text = targetText;
                 addChild(textInput);
             } else if (_mode == "date") {
@@ -59,24 +58,20 @@
         private var dateField:DateField;
 
         public function save():LookupPair {
-            var pair:LookupPair = new LookupPair();
-            var sourceValue:StringValue = new StringValue();
-            sourceValue.value = sourceInput.text;
-            pair.sourceValue = sourceValue;
             if (_mode == "grouping") {
                 var targetValue:StringValue = new StringValue();
                 targetValue.value = textInput.text;
-                pair.targetValue = targetValue;
+                _pair.targetValue = targetValue;
             } else if (_mode == "date") {
                 var dateValue:DateValue = new DateValue();
                 dateValue.date = dateField.selectedDate;
-                pair.targetValue = dateValue;
+                _pair.targetValue = dateValue;
             } else if (_mode == "measure") {
                 var numValue:NumericValue = new NumericValue();
                 numValue.value = int(numberInput.text);
-                pair.targetValue = numValue;
+                _pair.targetValue = numValue;
             }
-            return pair;
+            return _pair;
         }
 
         public function set pair(value:LookupPair):void {

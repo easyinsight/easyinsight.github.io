@@ -1,0 +1,1 @@
+alter table lookup_pair change source_value source_value text not null;

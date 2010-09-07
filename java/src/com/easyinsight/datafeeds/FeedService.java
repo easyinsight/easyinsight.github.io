@@ -922,17 +922,17 @@ public class FeedService implements IDataFeedService {
                 if (lookupPair.getLookupPairID() == 0) {
                     insertStmt.setLong(1, id);
                     String sourceValue = lookupPair.getSourceValue().toString();
-                    if (sourceValue.length() > 200) {
+                    /*if (sourceValue.length() > 200) {
                         sourceValue = sourceValue.substring(0, 200);
-                    }
+                    }*/
                     insertStmt.setString(2, sourceValue);
                     insertStmt.setString(3, lookupPair.getTargetValue().toString());
                     insertStmt.execute();
                 } else {
                     String sourceValue = lookupPair.getSourceValue().toString();
-                    if (sourceValue.length() > 200) {
+                    /*if (sourceValue.length() > 200) {
                         sourceValue = sourceValue.substring(0, 200);
-                    }
+                    }*/
                     updateStmt.setString(1, sourceValue);
                     updateStmt.setString(2, lookupPair.getTargetValue().toString());
                     updateStmt.setLong(3, lookupPair.getLookupPairID());
@@ -948,9 +948,9 @@ public class FeedService implements IDataFeedService {
                 if (lookupPair.getLookupPairID() == 0) {
                     insertStmt.setLong(1, id);
                     String sourceValue = lookupPair.getSourceValue().toString();
-                    if (sourceValue.length() > 200) {
+                    /*if (sourceValue.length() > 200) {
                         sourceValue = sourceValue.substring(0, 200);
-                    }
+                    }*/
                     insertStmt.setString(2, sourceValue);
                     DateValue dateValue = (DateValue) lookupPair.getTargetValue();
                     if (dateValue.getDate() == null) {
@@ -961,9 +961,9 @@ public class FeedService implements IDataFeedService {
                     insertStmt.execute();
                 } else {
                     String sourceValue = lookupPair.getSourceValue().toString();
-                    if (sourceValue.length() > 200) {
+                    /*if (sourceValue.length() > 200) {
                         sourceValue = sourceValue.substring(0, 200);
-                    }
+                    }*/
                     updateStmt.setString(1, sourceValue);
                     DateValue dateValue = (DateValue) lookupPair.getTargetValue();
                     if (dateValue.getDate() == null) {
@@ -972,7 +972,7 @@ public class FeedService implements IDataFeedService {
                         updateStmt.setTimestamp(2, new java.sql.Timestamp(dateValue.getDate().getTime()));
                     }
                     updateStmt.setLong(3, lookupPair.getLookupPairID());
-                    updateStmt.execute();
+                    updateStmt.executeUpdate();
                 }
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
@@ -984,9 +984,9 @@ public class FeedService implements IDataFeedService {
                 if (lookupPair.getLookupPairID() == 0) {
                     insertStmt.setLong(1, id);
                     String sourceValue = lookupPair.getSourceValue().toString();
-                    if (sourceValue.length() > 200) {
+                    /*if (sourceValue.length() > 200) {
                         sourceValue = sourceValue.substring(0, 200);
-                    }
+                    }*/
                     insertStmt.setString(2, sourceValue);
                     NumericValue numericValue = (NumericValue) lookupPair.getTargetValue();
                     if (numericValue.getValue() == null) {
@@ -997,9 +997,9 @@ public class FeedService implements IDataFeedService {
                     insertStmt.execute();
                 } else {
                     String sourceValue = lookupPair.getSourceValue().toString();
-                    if (sourceValue.length() > 200) {
+                    /*if (sourceValue.length() > 200) {
                         sourceValue = sourceValue.substring(0, 200);
-                    }
+                    }*/
                     updateStmt.setString(1, sourceValue);
                     NumericValue numericValue = (NumericValue) lookupPair.getTargetValue();
                     if (numericValue.getValue() == null) {
@@ -1007,8 +1007,8 @@ public class FeedService implements IDataFeedService {
                     } else {
                         updateStmt.setDouble(2, numericValue.getValue());
                     }
-                    updateStmt.setLong(3, id);
-                    updateStmt.execute();
+                    updateStmt.setLong(3, lookupPair.getLookupPairID());
+                    updateStmt.executeUpdate();
                 }
             }
         }

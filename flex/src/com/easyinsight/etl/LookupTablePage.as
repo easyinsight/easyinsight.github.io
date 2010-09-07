@@ -33,13 +33,10 @@ public class LookupTablePage extends VBox {
     }
 
     public function save(masterLookupTable:Object, masterPairs:ArrayCollection):void {
-        for each (var pair:LookupPair in masterLookupTable) {
-            for each (var row:LookupTableRow in getChildren()) {
-                var savePair:LookupPair = row.save();
-                if (String(savePair.sourceValue.getValue()) == String(pair.sourceValue.getValue())) {
-                    pair.targetValue = savePair.targetValue;
-                }
-            }
+        for each (var row:LookupTableRow in getChildren()) {
+            var savePair:LookupPair = row.save();
+            var pair:LookupPair = masterLookupTable[String(savePair.sourceValue.getValue())];
+            pair.targetValue = savePair.targetValue;
             masterPairs.addItem(pair);
         }
     }
