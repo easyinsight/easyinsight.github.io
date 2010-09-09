@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox label="Metadata" icon="@Embed(source='../../../../assets/note.png')" paddingLeft="10" paddingTop="10"
+<mx:HBox label="Getting Started" icon="@Embed(source='../../../../assets/note.png')" paddingLeft="10" paddingTop="10"
          paddingBottom="10" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()"
          xmlns:datasources="com.easyinsight.datasources.*" width="100%" horizontalGap="20" verticalAlign="middle">
     <mx:states>
@@ -96,8 +96,11 @@
             PopUpUtil.centerPopUp(window);
         }
         ]]></mx:Script>
-    <mx:TextArea width="500" editable="false" selectable="false" borderStyle="none" backgroundAlpha="0" height="55" fontSize="12"
+    <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:TextArea width="500" editable="false" selectable="false" borderStyle="none" backgroundAlpha="0" height="60" fontSize="14"
                                          text="You can drag the fields below into the report areas to the right. You can click on the arrow to the left of folders to see more fields. You can also right click on the fields to add to the report or create new filters."/>
+    </mx:Box>
     <mx:Button icon="@Embed(source='../../../../assets/report/help.png')"
                        click="tutorial()" toolTip="Help!" label="Help!"/>
     <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay"/>
