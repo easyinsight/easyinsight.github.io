@@ -4,6 +4,7 @@ import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.util.AuthenticationException;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.logging.LogClass;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +59,7 @@ public class TokenRedirectServlet extends HttpServlet {
                          "Security error while retrieving session token.");
           return;
         } catch (AuthenticationException e) {
+            LogClass.error(e);
           resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                          "Server rejected one time use token.");
           return;
