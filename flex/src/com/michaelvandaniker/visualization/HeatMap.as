@@ -4,11 +4,12 @@ package com.michaelvandaniker.visualization
     import flash.display.BlendMode;
     import flash.display.GradientType;
     import flash.display.Shape;
-    import flash.filters.BlurFilter;
+import flash.events.Event;
+import flash.filters.BlurFilter;
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
-    
+
     import mx.collections.ArrayCollection;
     import mx.core.UIComponent;
     import mx.events.CollectionEvent;
@@ -83,6 +84,7 @@ package com.michaelvandaniker.visualization
          * This is used to determine the centerValue.
          */
         protected var pointDictionary:Object;
+        protected var pointValues:Object;
 		
 		/**
 		 * A collection of Points extracted from the dataProvider
@@ -116,6 +118,8 @@ package com.michaelvandaniker.visualization
 	        }
         }
         private var _gradientArray:Array;
+
+        private var maxPointsInOnePlace:int; 
        
 		[Bindable]
 		/**
@@ -251,7 +255,7 @@ package com.michaelvandaniker.visualization
             drawHeatMap();           
 			
 			var bgColor:Number = getStyle("backgroundColor");
-			var bgAlpha:Number = getStyle("backgroundAlpha")
+			var bgAlpha:Number = getStyle("backgroundAlpha");
 			graphics.clear();
             graphics.beginFill(bgColor,bgAlpha);
             graphics.drawRect(0,0,width,height);
@@ -281,6 +285,7 @@ package com.michaelvandaniker.visualization
 				
 				// Generate a list of unique points in the dataProvider
 				pointDictionary = new Object();
+                pointValues = new Object();
 				var tempPoints:Array = new Array();
 	            for each(var o:Object in _dataProvider)
 	            {
@@ -288,24 +293,17 @@ package com.michaelvandaniker.visualization
 	            	if(rect.containsPoint(point))
 	            	{
 	            		var pointCount:Number = weightFunction.apply(this,[o]);
-	            		for(var a:int = 0; a < pointCount; a++)
-	            		{
-	            			tempPoints.push(point);
-	            		}
 	            			
-		                var pointKey:String = Math.round(point.x)+"_"+Math.round(point.y);
+		                var pointKey:String = point.x +"_" + point.y;
+
+                        pointValues[pointKey] = point;
 		                if(pointDictionary[pointKey] == null)
 							pointDictionary[pointKey] = pointCount;
 		                else
 		                    pointDictionary[pointKey] += pointCount;
 					} 
 	            }
-	            
-	            if(tempPoints.toString() != points.toString())
-	            {
-	            	points = tempPoints;
-	            	centerValueDirtyFlag = true;
-	            }
+	            centerValueDirtyFlag = true;
 			}
         }
         
@@ -313,7 +311,7 @@ package com.michaelvandaniker.visualization
         {
         	// Determine the centerValue by taking 255 / the maximum number of points in a single place.
 			// Bound centerValue between 19  and 255 / 5 to keep the gradient diverse enough to remain attractive.
-			var maxPointsInOnePlace:int = 5;
+			maxPointsInOnePlace = 5;
 			for(var key:String in pointDictionary)
 			{
 				maxPointsInOnePlace = Math.max(maxPointsInOnePlace,pointDictionary[key]);
@@ -335,44 +333,52 @@ package com.michaelvandaniker.visualization
                     heatBitmapData.dispose();
                 return;
             }
-           
-            var cellSize:int = itemRadius * 2;
-            var m:Matrix = new Matrix();
-            m.createGradientBox(cellSize, cellSize, 0, -itemRadius, -itemRadius);
-           
-            // Create the sphere of influence: A circle with a gradient that moves
-            // from blue to black as you move from the inside of the circle out.
-            var heatMapShape:Shape = new Shape();
-            heatMapShape.graphics.clear();
-            heatMapShape.graphics.beginGradientFill(GradientType.RADIAL,[centerValue,0],[1,1],[0,255],m);
-            heatMapShape.graphics.drawCircle(0,0,itemRadius);
-            heatMapShape.graphics.endFill();
-           
-            // Bitmap.draw is fastest when the first argument is a BitmapData,
-            // so draw the shape to a BitmapData to save time later.
-            var heatMapItem:BitmapData = new BitmapData(heatMapShape.width,heatMapShape.height,true,0x00000000);
-            var translationMatrix:Matrix = new Matrix();
-            translationMatrix.tx = itemRadius;
-            translationMatrix.ty = itemRadius;
-            heatMapItem.draw(heatMapShape,translationMatrix);
-           
+
             // If there is an existing heatBitmapData we have to clear it.
-            // Using fillRect for this is faster than creating a new BitmapData, so only use new 
+            // Using fillRect for this is faster than creating a new BitmapData, so only use new
             // when needed (width or height has changed or heatBitmapData does not exist)
             if(!heatBitmapData || heatBitmapData.width != width || heatBitmapData.height != height)
                 heatBitmapData = new BitmapData(width,height,true,0x00000000);
             else
                 heatBitmapData.fillRect(new Rectangle(0,0,heatBitmapData.width,heatBitmapData.height),0x00000000);
-            
-            // Draw a heatMapItem to the BitmapData for each point. Use the screen blend mode
-            // to create the effect of overlapping heatMapItems influencing each other. 
-            var len:int = points.length;
-            for each(var point:Point in points)
-            {
-                translationMatrix.tx = point.x - itemRadius;
-                translationMatrix.ty = point.y - itemRadius;
-                heatBitmapData.draw(heatMapItem,translationMatrix,null,BlendMode.SCREEN);
+
+            var cellSize:int = itemRadius * 2;
+            var m:Matrix = new Matrix();
+            m.createGradientBox(cellSize, cellSize, 0, -itemRadius, -itemRadius);
+            var cache:Object = new Object();
+            for(var key:String in pointDictionary) {
+                var curPoint:Point = pointValues[key] as Point;
+                var curVal:Number = pointDictionary[key] as Number;
+                var curColor:Number = Math.round((curVal / maxPointsInOnePlace) * 255);
+                if(!cache[curColor]) {
+                    var heatMapShape:Shape = new Shape();
+                    heatMapShape.graphics.clear();
+
+                    // Create the sphere of influence: A circle with a gradient that moves
+                    // from blue to black as you move from the inside of the circle out.
+                    heatMapShape.graphics.beginGradientFill(GradientType.RADIAL,[curColor, 0],[1,1],[0,255],m);
+                    heatMapShape.graphics.drawCircle(0,0,itemRadius);
+                    heatMapShape.graphics.endFill();
+
+                    // Bitmap.draw is fastest when the first argument is a BitmapData,
+                    // so draw the shape to a BitmapData to save time later.
+                    var heatMapItem:BitmapData = new BitmapData(heatMapShape.width,heatMapShape.height,true,0x00000000);
+                    var translationMatrix:Matrix = new Matrix();
+                    translationMatrix.tx = itemRadius;
+                    translationMatrix.ty = itemRadius;
+                    heatMapItem.draw(heatMapShape,translationMatrix);
+                    cache[curColor] = heatMapItem;
+                }
+
+                translationMatrix.tx = curPoint.x - itemRadius;
+                translationMatrix.ty = curPoint.y - itemRadius;
+                heatBitmapData.draw(cache[curColor] as BitmapData,translationMatrix,null,BlendMode.SCREEN);
             }
+
+            for each(var hm:BitmapData in cache) {
+                hm.dispose();
+            }
+
             heatMapItem.dispose();
 			
 			// paletteMap leaves some artifacts unless we get rid of the blackest colors 
