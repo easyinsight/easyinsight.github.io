@@ -52,10 +52,6 @@ public class AnalysisService {
         }
     }
 
-    public void testSWC(AnalysisTest analysisTest) {
-        System.out.println(analysisTest.getMessage());
-    }
-
     public FunctionExplanation explain(String function) {
         try {
             return new FunctionFactory().createFunction(function).explain();
