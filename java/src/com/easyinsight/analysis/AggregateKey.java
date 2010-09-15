@@ -3,6 +3,8 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Key;
 
+import java.util.List;
+
 /**
  * User: James Boe
  * Date: Aug 30, 2008
@@ -12,11 +14,13 @@ public class AggregateKey extends NamedKey {
     private int type;
     private Key key;
     private int columnIdentifier;
+    private List<FilterDefinition> filters;
 
-    public AggregateKey(Key key, int type) {
+    public AggregateKey(Key key, int type, List<FilterDefinition> filters) {
         super(key.toKeyString());
         this.key = key;
         this.type = type;
+        this.filters = filters;
     }
 
     public Key underlyingKey() {
@@ -40,8 +44,11 @@ public class AggregateKey extends NamedKey {
 
         AggregateKey that = (AggregateKey) o;
 
-        return type == that.type && key.toKeyString().equals(that.key.toKeyString());
+        if (type != that.type) return false;
+        if (filters != null ? !filters.equals(that.filters) : that.filters != null) return false;
+        if (!key.equals(that.key)) return false;
 
+        return true;
     }
 
     @Override
@@ -49,6 +56,7 @@ public class AggregateKey extends NamedKey {
         int result = super.hashCode();
         result = 31 * result + type;
         result = 31 * result + key.hashCode();
+        result = 31 * result + (filters != null ? filters.hashCode() : 0);
         return result;
     }
 }

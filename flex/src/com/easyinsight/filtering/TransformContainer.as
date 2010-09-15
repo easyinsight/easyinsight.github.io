@@ -253,7 +253,11 @@ public class TransformContainer extends HBox
         } else if (filterDefinition.getType() == FilterDefinition.ROLLING_DATE) {
             filter = new RollingRangeFilter(_feedID, filterDefinition.field);
         } else if (filterDefinition.getType() == FilterDefinition.LAST_VALUE) {
-            filter = new LastValueFilter(_feedID, filterDefinition.field);
+            filter = new LastValueFilter(_feedID, filterDefinition.field, LastValueFilter.LAST_VALUE);
+        } else if (filterDefinition.getType() == FilterDefinition.FIRST_VALUE) {
+            filter = new LastValueFilter(_feedID, filterDefinition.field, LastValueFilter.FIRST_VALUE);
+        } else if (filterDefinition.getType() == FilterDefinition.NULL) {
+            filter = new LastValueFilter(_feedID, filterDefinition.field, LastValueFilter.NULL_VALUE);
         } else if (filterDefinition.getType() == FilterDefinition.PATTERN) {
             filter = new PatternFilter(_feedID, filterDefinition.field);
         }

@@ -46,13 +46,6 @@ public class SliderMeasureFilter extends HBox implements IFilter
     public function SliderMeasureFilter(feedID:int, analysisItem:AnalysisItem) {
         super();
         this.analysisItem = analysisItem;
-        /*dataService = new RemoteObject();
-         dataService.destination = "data";
-         dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-         dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());*/
-        /*setStyle("borderStyle", "solid");
-         setStyle("borderThickness", 1);
-         setStyle("paddingBottom", 0);*/
     }
 
     private var _loadingFromReport:Boolean = false;

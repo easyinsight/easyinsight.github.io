@@ -433,32 +433,32 @@
         public function clearContents():void {
         }]]></mx:Script>
     <mx:Canvas width="100%" height="100%">
-    <mx:VBox width="100%" height="100%">
-        <mx:Box id="topBar" width="100%"/>
-        <analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" width="100%" height="100%"
-                           dragEnter="dragEnterHandler(event)" dragComplete="dragCompleteHandler(event)"
-                           dragDrop="dragDropHandler(event)" selectionMode="multipleCells"
-                           keyUp="keyboardHandler(event)" rowColorFunction="rowColor"
-                           headerShift="headersShifted(event)" fontSize="12" dragExit="dragExitHandler(event)"
-                           dragOver="dragOverHandler(event)" fontFamily="Tahoma"/>
-    </mx:VBox>
-    <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false" mouseEnabled="false">
-        <mx:Canvas width="100%" height="100%"/>
-        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-            <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
-                    backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                <mx:TextArea fontSize="22" text="You haven't set up a report yet. You can drag the fields from the left into this canvas or into the drop areas above to get started!"
-                    borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+        <mx:VBox width="100%" height="100%">
+            <mx:Box id="topBar" width="100%"/>
+            <analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" width="100%" height="100%"
+                               dragEnter="dragEnterHandler(event)" dragComplete="dragCompleteHandler(event)"
+                               dragDrop="dragDropHandler(event)" selectionMode="multipleCells"
+                               keyUp="keyboardHandler(event)" rowColorFunction="rowColor"
+                               headerShift="headersShifted(event)" fontSize="12" dragExit="dragExitHandler(event)"
+                               dragOver="dragOverHandler(event)" fontFamily="Tahoma"/>
+        </mx:VBox>
+        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false" mouseEnabled="false">
+            <mx:Canvas width="100%" height="100%"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22" text="You haven't set up a report yet. You can drag the fields from the left into this canvas or into the drop areas above to get started!"
+                        borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+                </mx:Box>
             </mx:Box>
-        </mx:Box>
-        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-            <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
-                    backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                <mx:TextArea fontSize="22" text="We didn't find any data for the fields and filters that you specified in the report."
-                    borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22" text="We didn't find any data for the fields and filters that you specified in the report."
+                        borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+                </mx:Box>
             </mx:Box>
-        </mx:Box>
-    </mx:ViewStack>
+        </mx:ViewStack>
     </mx:Canvas>
 
 </mx:Module>

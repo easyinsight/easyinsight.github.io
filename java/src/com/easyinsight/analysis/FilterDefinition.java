@@ -1,6 +1,8 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.pipeline.FilterComponent;
+import com.easyinsight.pipeline.FilterPipelineCleanupComponent;
 import com.easyinsight.pipeline.IComponent;
 import org.hibernate.Session;
 
@@ -91,11 +93,13 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
     public abstract int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException;
 
     public boolean validForQuery() {
-        if (getField().hasType(AnalysisItemTypes.STEP) || getField().hasType(AnalysisItemTypes.RANGE_DIMENSION)) {
-            return false;
-        }
-        if (getField().getLookupTableID() != null && getField().getLookupTableID() > 0) {
-            return false;
+        if (getField() != null) {
+            if (getField().hasType(AnalysisItemTypes.STEP) || getField().hasType(AnalysisItemTypes.RANGE_DIMENSION)) {
+                return false;
+            }
+            if (getField().getLookupTableID() != null && getField().getLookupTableID() > 0) {
+                return false;
+            }
         }
         return enabled;
     }
@@ -107,27 +111,38 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
     }
 
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
-        setField(replacementMap.get(field.getAnalysisItemID()));
+        if (field != null) {
+            setField(replacementMap.get(field.getAnalysisItemID()));
+        }
     }
 
     public void beforeSave(Session session) {
-        getField().reportSave(session);
-        if (getField().getKey().getKeyID() == 0) {
-            session.save(getField().getKey());
-        }
-        if (getField().getAnalysisItemID() == 0) {
-            session.save(getField());
-        } else {
-            session.update(getField());
+        if (getField() != null) {
+            getField().reportSave(session);
+            if (getField().getKey().getKeyID() == 0) {
+                session.save(getField().getKey());
+            }
+            if (getField().getAnalysisItemID() == 0) {
+                session.save(getField());
+            } else {
+                session.update(getField());
+            }
         }
     }
 
     public void afterLoad() {
-        setField((AnalysisItem) Database.deproxy(getField()));
-        getField().afterLoad();
+        if (getField() != null) {
+            setField((AnalysisItem) Database.deproxy(getField()));
+            getField().afterLoad();
+        }
     }
 
-    public List<IComponent> createComponents() {
-        return new ArrayList<IComponent>();
+    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor) {
+        List<IComponent> components = new ArrayList<IComponent>();
+        if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
+            components.add(new FilterComponent(this, filterProcessor));
+        }
+        components.add(new FilterPipelineCleanupComponent(this));
+        return components;
     }
 }

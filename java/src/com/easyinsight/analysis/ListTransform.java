@@ -89,7 +89,7 @@ public class ListTransform {
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem analysisHierarchy = (AnalysisHierarchyItem) analysisItem;
                         AggregateKey aggregateKey = analysisHierarchy.getHierarchyLevel().getAnalysisItem().createAggregateKey();
-                        row.addValue(new AggregateKey(analysisHierarchy.getKey(), analysisHierarchy.getType()), row.getValue(aggregateKey));
+                        row.addValue(new AggregateKey(analysisHierarchy.getKey(), analysisHierarchy.getType(), analysisHierarchy.getFilters()), row.getValue(aggregateKey));
                     }
                 }
             }

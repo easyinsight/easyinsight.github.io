@@ -1,6 +1,6 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.AnalysisCoordinate;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.definitions.WSHeatMap;
@@ -16,9 +16,9 @@ import java.text.NumberFormat;
  */
 public class CoordinatePrecisionComponent implements IComponent {
 
-    private AnalysisCoordinate analysisCoordinate;
+    private AnalysisItem analysisCoordinate;
 
-    public CoordinatePrecisionComponent(AnalysisCoordinate analysisCoordinate) {
+    public CoordinatePrecisionComponent(AnalysisItem analysisCoordinate) {
         this.analysisCoordinate = analysisCoordinate;
     }
 

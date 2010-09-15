@@ -10,22 +10,27 @@ import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
 import mx.managers.PopUpManager;
-import mx.rpc.remoting.RemoteObject;
 
 public class LastValueFilter extends HBox implements IFilter {
-    public function LastValueFilter(feedID:int, analysisItem:AnalysisItem) {
+
+    public static const LAST_VALUE:int = 1;
+    public static const FIRST_VALUE:int = 2;
+    public static const NULL_VALUE:int = 3;
+
+    public function LastValueFilter(feedID:int, analysisItem:AnalysisItem, valueType:int) {
         super();
         _analysisItem = analysisItem;
         _feedID = feedID;
+        _valueType = valueType;
     }
 
-    private var _filterDefinition:LastValueFilterDefinition;
+    private var _filterDefinition:FilterDefinition;
+    private var _valueType:int;
 		private var _analysisItem:AnalysisItem;
 		private var _feedID:int;
 		private var deleteButton:Button;
 		private var editButton:Button;
 		private var labelText:Label;
-		private var dataService:RemoteObject;
 		private var _analysisItems:ArrayCollection;
 
 		[Bindable]
@@ -39,6 +44,8 @@ public class LastValueFilter extends HBox implements IFilter {
 		public function set analysisItems(analysisItems:ArrayCollection):void {
 			_analysisItems = analysisItems;
 		}
+
+
 
     private var _loadingFromReport:Boolean = false;
 
@@ -71,7 +78,9 @@ public class LastValueFilter extends HBox implements IFilter {
 		override protected function createChildren():void {
 			super.createChildren();
             if (_filterDefinition == null) {
-                _filterDefinition = new LastValueFilterDefinition();
+                if (_valueType == LAST_VALUE) _filterDefinition = new LastValueFilterDefinition();
+                else if (_valueType == FIRST_VALUE) _filterDefinition = new FirstValueFilterDefinition();
+                else if (_valueType == NULL_VALUE) _filterDefinition = new NullValueFilterDefinition();
                 _filterDefinition.field = _analysisItem;
             }
             //if (!_filterEditable) {

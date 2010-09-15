@@ -21,4 +21,4 @@ create table data_transaction_command (
   constraint data_transaction_command_ibfk1 foreign key (data_transaction_id) references data_transaction (data_transaction_id) on delete cascade
 );
 
-# alter table user add guest_user tinyint(4) not null default 0;
+alter table user add guest_user tinyint(4) not null default 0;

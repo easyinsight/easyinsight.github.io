@@ -374,11 +374,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public AggregateKey createAggregateKey() {
-        return new AggregateKey(getKey(), getType());
+        return new AggregateKey(getKey(), getType(), getFilters());
     }
 
     public AggregateKey createAggregateKey(boolean measure) {
-        return new AggregateKey(getKey(), getType());
+        return new AggregateKey(getKey(), getType(), getFilters());
     }
 
     public void beforeSave() {

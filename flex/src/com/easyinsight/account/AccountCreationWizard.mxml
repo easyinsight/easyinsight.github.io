@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*"
          top="0">
     <mx:Metadata>
         [Event(name="cancel", type="flash.events.Event")]
@@ -62,12 +62,9 @@
         private var accountIndex:int;
 		]]>
 	</mx:Script>
-    <mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">
-
-        <mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
-            <mx:Label text="30 Day Free Trial on All Accounts" fontSize="24" fontWeight="bold"/>
-            <mx:Label text="Please note that whatever option you choose, no credit card is required for the trial period." fontSize="16"/>   
-                <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2" horizontalGap="15">
+            <mx:Label text="30 Day Free Trial on All Accounts" fontSize="24" fontWeight="bold" x="287"/>
+            <mx:Label text="Please note that whatever option you choose, no credit card is required for the trial period." fontSize="16" x="143" y="40"/>
+                <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2" horizontalGap="15" y="71">
                     <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center"
                              backgroundColor="#FFFFFF"
                              width="280" paddingTop="5" paddingBottom="10">
@@ -118,7 +115,7 @@
                                    fontSize="16" buttonMode="true" useHandCursor="true"/>
                     </mx:VBox>
                 </mx:HBox>
-            <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
+            <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true" x="359" y="358">
                 <mx:HBox verticalAlign="middle" horizontalGap="0">
                     <mx:Label text="We also offer a"/>
                     <mx:LinkButton textDecoration="underline" label="free plan" click="dispatchEvent(new Event('free'))" paddingLeft="0" paddingRight="0"/>
@@ -132,9 +129,5 @@
                             paddingLeft="0" paddingRight="0" left="0" right="0"/>
                 </mx:HBox>
             </mx:ViewStack>
-            <mx:Spacer height="100%"/>
-            <mx:LinkButton textDecoration="underline" label="Cancel" fontSize="16" click="dispatchEvent(new Event('cancel'))"/>
-            <mx:Spacer height="100%"/>
-        </mx:VBox>
-    </mx:VBox>
-</mx:VBox>
+            <mx:LinkButton textDecoration="underline" label="Cancel" fontSize="16" click="dispatchEvent(new Event('cancel'))" x="463" y="394"/>
+</mx:Canvas>

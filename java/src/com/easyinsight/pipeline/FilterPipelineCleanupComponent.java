@@ -2,11 +2,8 @@ package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FilterDefinition;
 
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * User: James Boe
@@ -15,21 +12,15 @@ import java.util.ArrayList;
  */
 public class FilterPipelineCleanupComponent implements IComponent {
 
-    private boolean before;
+    private FilterDefinition filterDefinition;
 
-    public FilterPipelineCleanupComponent(boolean before) {
-        this.before = before;
+    public FilterPipelineCleanupComponent(FilterDefinition filterDefinition) {
+        this.filterDefinition = filterDefinition;
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        if (pipelineData.getReport().retrieveFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : pipelineData.getReport().retrieveFilterDefinitions()) {
-                if ((before && filterDefinition.isApplyBeforeAggregation()) || (!before && !filterDefinition.isApplyBeforeAggregation())) {
-                    if (pipelineData.decrementReferenceCount(filterDefinition.getField())) {
-                        pipelineData.getReportItems().remove(filterDefinition.getField());
-                    }
-                }
-            }
+        if (pipelineData.decrementReferenceCount(filterDefinition.getField())) {
+            pipelineData.getReportItems().remove(filterDefinition.getField());
         }
         return dataSet;
     }

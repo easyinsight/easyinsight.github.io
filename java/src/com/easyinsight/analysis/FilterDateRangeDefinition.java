@@ -189,11 +189,11 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public List<IComponent> createComponents() {
+    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor) {
         if (getStartDateDimension() != null || getEndDateDimension() != null) {
             return Arrays.asList((IComponent) new DateRangePluginComponent(this));
         } else {
-            return super.createComponents();
+            return super.createComponents(beforeAggregation, filterProcessor);
         }
     }
 }

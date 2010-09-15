@@ -178,7 +178,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
         reportCanvas.percentHeight = 100;
         reportCanvas.percentWidth = 100;
         var progressBar:ProgressBar = new ProgressBar();
-        progressBar.indeterminate = true;
+        BindingUtils.bindProperty(progressBar, "indeterminate", this, "showLoading");
         progressBar.label = "Loading the report...";
         progressBar.setStyle("fontSize", 18);
         box.addChild(progressBar);

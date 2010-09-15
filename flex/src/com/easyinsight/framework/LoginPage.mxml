@@ -1,8 +1,9 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
            xmlns:framework="com.easyinsight.framework.*" xmlns:account="com.easyinsight.account.*"
            xmlns:kpi="com.easyinsight.kpi.*" xmlns:customupload="com.easyinsight.customupload.*" 
-           backgroundColor="#EEEEEE" creationComplete="setup()" width="100%" height="100%">
+           backgroundColor="#EEEEEE" creationComplete="setup()" width="100%" height="100%" horizontalAlign="center"
+        verticalAlign="middle">
     <mx:Metadata>
         [Event(name="loginEvent2", type="com.easyinsight.framework.LoginEvent")]
         [Event(name="quietLogin", type="com.easyinsight.framework.LoginEvent")]
@@ -23,6 +24,7 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.effects.Effect;
 
         [Bindable]
         private var panelIndex:int;
@@ -187,6 +189,9 @@
         }
 
         [Bindable]
+        private var slideEffect:Effect = rightEffect;
+
+        [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
 
@@ -198,7 +203,8 @@
         [Embed(source="../../../../assets/credit_card_x48.png")]
         public var moneyIcon:Class;
         ]]></mx:Script>
-    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
+    <viewStackEffects:Slide id="leftEffect" direction="right"/>
+    <viewStackEffects:Slide id="rightEffect" direction="left"/>
 
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="installSolution" result="installed()"/>
@@ -208,35 +214,28 @@
         <mx:method name="applySetupData" result="applied()"/>
         <mx:method name="reactivate" result="reactivated()"/>
     </mx:RemoteObject>
-    <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-        <mx:VBox width="1000" verticalGap="0" borderStyle="solid" borderThickness="1" borderColor="#DDDDDD"
-                 backgroundColor="#FFFFFF" paddingBottom="0"
-                 paddingLeft="0" paddingRight="0" paddingTop="0">
+
+        <mx:Canvas width="1000" borderStyle="solid" borderThickness="1" borderColor="#DDDDDD"
+                 backgroundColor="#FFFFFF">
             <mx:Box width="100%" backgroundImage="{topImage}" backgroundSize="100%" height="18"/>
-            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="0"
-                     paddingLeft="0" paddingRight="0" paddingTop="0">
-                <mx:Image source="{logo}"/>
-            </mx:HBox>
-            <mx:Spacer height="20"/>
-            <mx:HBox width="100%" backgroundColor="#848080" horizontalAlign="center" paddingTop="5" paddingBottom="5">
-                <mx:Label text="Getting Started" color="#FFFFFF" fontSize="24"/>
-            </mx:HBox>
+            <mx:Image source="{logo}" y="18" x="414"/>
+            <mx:Canvas width="100%" backgroundColor="#848080" y="77" height="44">
+                <mx:Label text="Getting Started" color="#FFFFFF" x="409" y="5" fontSize="24"/>
+            </mx:Canvas>
             <mx:ViewStack selectedIndex="{panelIndex}"
                           id="viewStack" resizeToContent="true" width="100%" height="440"
-                          backgroundColor="0xFFFFFF" paddingTop="10">
-                <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="leftEffect"
-                         showEffect="leftEffect">
+                          backgroundColor="0xFFFFFF" paddingTop="10" y="122">
+                <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <!-- login page -->
-                    <mx:VBox width="50%" horizontalAlign="center">
-                        <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent" creationComplete="GAHelper.instance().tracker.trackPageview('Login')"/>
-                    </mx:VBox>
+                    <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent" creationComplete="GAHelper.instance().tracker.trackPageview('Login')"
+                            y="114"/>                    
                     <mx:VBox width="50%" horizontalAlign="center">
                         <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                                  backgroundColor="#FFFFFF" height="185"
                                  width="350" cornerRadius="8" buttonMode="true" id="connectionsBox"
                                  mouseOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
                                  mouseOut="connectionsBox.setStyle('backgroundColor', 0xFFFFFF)"
-                                 click="panelIndex = 1"
+                                 click="slideEffect = rightEffect; panelIndex = 1"
                                  mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
                             <mx:Image source="{connectionsIcon}"/>
                             <mx:Text text="No Account Yet?" fontSize="24" selectable="false"/>
@@ -248,39 +247,39 @@
                         </mx:VBox>
                     </mx:VBox>
                 </mx:HBox>
-                <mx:VBox hideEffect="leftEffect" showEffect="leftEffect">
+                <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <!-- account wizard -->
-                    <account:AccountCreationWizard cancel="panelIndex = 0"
-                                                   pro="accountType = Account.PRO; panelIndex = 2"
-                                                   plus="accountType = Account.PLUS; panelIndex = 2"
-                                                   basic="accountType = Account.BASIC; panelIndex = 2"
-                                                   free="accountType = Account.PERSONAL; panelIndex = 2"
+                    <account:AccountCreationWizard cancel="slideEffect = leftEffect; panelIndex = 0"
+                                                   pro="accountType = Account.PRO; slideEffect = rightEffect; panelIndex = 2"
+                                                   plus="accountType = Account.PLUS; slideEffect = rightEffect; panelIndex = 2"
+                                                   basic="accountType = Account.BASIC; slideEffect = rightEffect; panelIndex = 2"
+                                                   free="accountType = Account.PERSONAL; slideEffect = rightEffect; panelIndex = 2"
                                                    requiredTier="{requiredTier}" creationComplete="GAHelper.instance().tracker.trackPageview('AccountCreationWizard')"/>
                 </mx:VBox>
-                <mx:VBox hideEffect="leftEffect" showEffect="leftEffect">
+                <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <!-- profile creation page -->
-                    <account:ProfessionalAccountLoginCreation cancel="panelIndex = 1"
-                                                              loginEvent2="accountCreated(event)"
+                    <account:ProfessionalAccountLoginCreation cancel="slideEffect = leftEffect; panelIndex = 1"
+                                                              loginEvent2="slideEffect = rightEffect; accountCreated(event)"
                                                               accountType="{accountType}" creationComplete="GAHelper.instance().tracker.trackPageview('LoginCreation')"/>
                 </mx:VBox>
-                <mx:VBox showEffect="leftEffect" hideEffect="leftEffect">
+                <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
-                                                 kpiTutorialNext="remaining()" accountType="{accountType}"
+                                                 kpiTutorialNext="slideEffect = rightEffect; remaining()" accountType="{accountType}"
                             creationComplete="GAHelper.instance().tracker.trackPageview('PersonaWindow')"/>
                 </mx:VBox>
-                <mx:VBox showEffect="leftEffect">
+                <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
                                                 kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"
                             creationComplete="GAHelper.instance().tracker.trackPageview('Preferences')"/>
                 </mx:VBox>
 
                 <!--
-                    additional emails 
+                    additional emails
                 -->
 
                 <!-- welcome back panel -->
                 <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="leftEffect" showEffect="leftEffect">
+                         hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <mx:Image source="{moneyIcon}"/>
                     <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
                                  fontSize="18"
@@ -290,7 +289,7 @@
                 </mx:VBox>
                 <!-- delinquent panel -->
                 <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="leftEffect" showEffect="leftEffect" verticalGap="25">
+                         hideEffect="{slideEffect}" showEffect="{slideEffect}" verticalGap="25">
                     <mx:Image source="{connectionsIcon}"/>
                     <mx:Label text="Ready to give Easy Insight another try?" fontSize="18"/>
                     <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
@@ -300,13 +299,12 @@
                     <mx:Button label="Reactivate" click="reactivate()" fontSize="18"/>
                 </mx:VBox>
                 <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="leftEffect" showEffect="leftEffect" verticalGap="25">
+                         hideEffect="{slideEffect}" showEffect="{slideEffect}" verticalGap="25">
                     <mx:Image source="{connectionsIcon}"/>
                     <mx:Label text="Your account is now active again with a new 30 day trial!" fontSize="20"/>
                     <mx:Button label="Onward to the Application!" click="onward()" fontSize="18"/>
                 </mx:VBox>
             </mx:ViewStack>
-            <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
-        </mx:VBox>
-    </mx:Box>
-</mx:Canvas>
+            <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18" y="562"/>
+        </mx:Canvas>
+</mx:Box>

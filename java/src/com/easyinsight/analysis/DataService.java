@@ -182,6 +182,9 @@ public class DataService {
                 }
             }
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            if (analysisDefinition == null) {
+                return null;
+            }
             boolean dataSourceAccessible;
             try {
                 SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());

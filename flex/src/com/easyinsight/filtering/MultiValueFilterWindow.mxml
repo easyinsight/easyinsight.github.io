@@ -181,13 +181,17 @@
         <mx:VBox>
             <mx:Label text="Drag Items Between Available and Filtered"/>
             <mx:CheckBox label="Filter Includes Values" id="includeCheckbox" selected="{includeFilter}"/>
-            <mx:HBox>
+            <mx:HBox verticalAlign="middle">
                 <mx:VBox>
                     <mx:ApplicationControlBar width="200">
                         <mx:Label text="Available Values"/>
                     </mx:ApplicationControlBar>
                     <mx:TextInput id="availableSearch" change="sourceChange()"/>
                     <mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="200"/>
+                </mx:VBox>
+                <mx:VBox>
+                    <mx:Button label="Add All"/>
+                    <mx:Button label="Remove All"/>
                 </mx:VBox>
                 <mx:VBox>
                     <mx:ApplicationControlBar width="200">

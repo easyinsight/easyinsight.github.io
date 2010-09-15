@@ -4,11 +4,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Value;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-
 /**
  * User: James Boe
  * Date: May 18, 2009
@@ -16,47 +11,24 @@ import java.util.ArrayList;
  */
 public class FilterComponent implements IComponent {
 
-    private boolean beforeAggregation;
+    private FilterDefinition filterDefinition;
+    private IFilterProcessor filterProcessor;
 
-    public FilterComponent(boolean beforeAggregation) {
-        this.beforeAggregation = beforeAggregation;
+    public FilterComponent(FilterDefinition filterDefinition, IFilterProcessor filterProcessor) {
+        this.filterDefinition = filterDefinition;
+        this.filterProcessor = filterProcessor;
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap = new HashMap<AnalysisItem, Collection<MaterializedFilterDefinition>>();
-        if (pipelineData.getReport().retrieveFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : pipelineData.getReport().retrieveFilterDefinitions()) {
-                if (filterDefinition.isEnabled()) {
-                    if (filterDefinition.isApplyBeforeAggregation() == beforeAggregation) {
-                        Collection<MaterializedFilterDefinition> filters = filterMap.get(filterDefinition.getField());
-                        if (filters == null) {
-                            filters = new ArrayList<MaterializedFilterDefinition>();
-                            filterMap.put(filterDefinition.getField(), filters);
-                        }
-                        filters.add(filterDefinition.materialize(pipelineData.getInsightRequestMetadata()));
-                    }
-                }
-            }
-        }
+        MaterializedFilterDefinition filter = filterDefinition.materialize(pipelineData.getInsightRequestMetadata());
         DataSet resultDataSet = new DataSet();
         for (IRow row : dataSet.getRows()) {
             boolean rowValid = true;
-            for (AnalysisItem analysisItem : filterMap.keySet()) {
-                Value value = row.getValue(analysisItem);
-
-                Collection<MaterializedFilterDefinition> filterDefinitions = filterMap.get(analysisItem);
-                if (filterDefinitions != null) {
-                    for (MaterializedFilterDefinition filter : filterDefinitions) {
-                        if (!filter.allows(value)) {
-                            rowValid = false;
-                        }
-                    }
-                }
+            Value value = row.getValue(filter.getKey());
+            if (!filter.allows(value)) {
+                rowValid = false;
             }
-            if (rowValid) {
-                IRow newRow = resultDataSet.createRow();
-                newRow.addValues(row.getValues());
-            }
+            filterProcessor.createRow(resultDataSet, row, filterDefinition, rowValid);
         }
         return resultDataSet;
     }

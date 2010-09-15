@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
 
+import java.util.List;
+
 /**
  * User: jamesboe
  * Date: Feb 4, 2010
@@ -11,8 +13,8 @@ public class AggregateMeasureKey extends AggregateKey {
     private int aggregation;
     private String displayName;
 
-    public AggregateMeasureKey(Key key, int type, int aggregation, String displayName) {
-        super(key, type);
+    public AggregateMeasureKey(Key key, int type, int aggregation, String displayName, List<FilterDefinition> filters) {
+        super(key, type, filters);
         this.aggregation = aggregation;
         this.displayName = displayName;
     }
