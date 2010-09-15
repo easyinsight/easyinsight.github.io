@@ -12,9 +12,12 @@ import flash.events.EventDispatcher;
 		public static const RANGE:int = 2;
 		public static const DATE:int = 3;
 		public static const ROLLING_DATE:int = 4;
-		public static const LAST_N:int = 5;
 		public static const LAST_VALUE:int = 5;
 		public static const PATTERN:int = 6;
+		public static const FIRST_VALUE:int = 7;
+        public static const ORDERED:int = 8;
+        public static const OR:int = 9;
+        public static const NULL:int = 10;
 
 		public var field:AnalysisItem;
 		public var applyBeforeAggregation:Boolean = true;
