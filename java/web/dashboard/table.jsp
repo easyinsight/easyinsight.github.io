@@ -16,6 +16,7 @@
 <%@ page import="com.easyinsight.core.InsightDescriptor" %>
 <%@ page import="com.easyinsight.goals.GoalTreeDescriptor" %>
 <%@ page import="com.easyinsight.reportpackage.ReportPackageDescriptor" %>
+<%@ page import="com.easyinsight.analysis.InsightRequestMetadata" %>
 <%
     try {
     com.easyinsight.scorecard.Scorecard scorecard = null;
@@ -38,7 +39,7 @@
     if("true".equals(request.getParameter("refresh"))) {
         refresh = true;
     }
-    ScorecardWrapper scorecardWrapper = service.getScorecard(scorecardID, userID, new java.util.ArrayList<com.easyinsight.datafeeds.CredentialFulfillment>(), refresh);
+    ScorecardWrapper scorecardWrapper = service.getScorecard(scorecardID, userID, new java.util.ArrayList<com.easyinsight.datafeeds.CredentialFulfillment>(), refresh, new InsightRequestMetadata());
     if (scorecardWrapper.getCredentials() != null && scorecardWrapper.getCredentials().size() > 0) {
         List<CredentialFulfillment> newCreds = new LinkedList<CredentialFulfillment>();
         HashSet<Long> dataSets = new HashSet<Long>();
