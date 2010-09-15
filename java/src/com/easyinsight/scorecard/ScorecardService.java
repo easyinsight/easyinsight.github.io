@@ -170,10 +170,11 @@ public class ScorecardService {
         return new ScorecardList(scorecards, hasData);
     }
 
-    public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) {        
+    public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeScorecard(scorecardID);
         try {
-            return scorecardStorage.getScorecard(scorecardID, credentials, forceRefresh);
+            insightRequestMetadata.setCredentialFulfillmentList(credentials);
+            return scorecardStorage.getScorecard(scorecardID, insightRequestMetadata, forceRefresh);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -216,13 +217,14 @@ public class ScorecardService {
 
     }
 
-    public KPI addKPIToScorecard(KPI kpi, long scorecardID, List<CredentialFulfillment> credentials) {
+    public KPI addKPIToScorecard(KPI kpi, long scorecardID, List<CredentialFulfillment> credentials, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeScorecard(scorecardID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             scorecardStorage.addKPIToScorecard(kpi, scorecardID, conn);
-            refreshValuesForList(Arrays.asList(kpi), conn, credentials, false);
+            insightRequestMetadata.setCredentialFulfillmentList(credentials);
+            refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
             conn.commit();
             return kpi;
         } catch (Exception e) {
@@ -255,13 +257,14 @@ public class ScorecardService {
         }
     }
 
-    public KPI updateKPI(KPI kpi, List<CredentialFulfillment> credentials) {
+    public KPI updateKPI(KPI kpi, List<CredentialFulfillment> credentials, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeKPI(kpi.getKpiID());
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             new KPIStorage().saveKPI(kpi, conn);
-            refreshValuesForList(Arrays.asList(kpi), conn, credentials, false);
+            insightRequestMetadata.setCredentialFulfillmentList(credentials);
+            refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
             conn.commit();
             return kpi;
         } catch (Exception e) {
@@ -372,9 +375,9 @@ public class ScorecardService {
         return outcome;
     }
 
-    private KPIOutcome refreshKPIValue(KPI kpi, List<CredentialFulfillment> credentials, EIConnection conn) throws SQLException {
+    private KPIOutcome refreshKPIValue(KPI kpi, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         List<KPIValue> lastTwoValues = new HistoryRun().lastTwoValues(kpi.getCoreFeedID(), kpi.getAnalysisMeasure(),
-                kpi.getFilters(), credentials, kpi.getDayWindow());
+                kpi.getFilters(), kpi.getDayWindow(), insightRequestMetadata);
         Double newValue = null;
         Double oldValue = null;
         Double percentChange = null;
@@ -439,7 +442,7 @@ public class ScorecardService {
         return new KPIOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), kpi.getKpiID(), percentChange, directional);
     }
 
-    public List<KPI> refreshValuesForList(List<KPI> kpis, EIConnection conn, List<CredentialFulfillment> credentialsList, boolean allSources) throws Exception {
+    public List<KPI> refreshValuesForList(List<KPI> kpis, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean allSources) throws Exception {
         if (allSources) {
             Set<Long> dataSourceIDs = new HashSet<Long>();
             for (KPI kpi : kpis) {
@@ -450,7 +453,7 @@ public class ScorecardService {
                 if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
                     IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
                     Credentials credentials = null;
-                    for (CredentialFulfillment fulfillment : credentialsList) {
+                    for (CredentialFulfillment fulfillment : insightRequestMetadata.getCredentialFulfillmentList()) {
                         if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
                             credentials = fulfillment.getCredentials();
                         }
@@ -469,7 +472,7 @@ public class ScorecardService {
             }
         }
         for (KPI kpi : kpis) {
-            KPIOutcome kpiValue = refreshKPIValue(kpi, credentialsList, conn);
+            KPIOutcome kpiValue = refreshKPIValue(kpi, conn, insightRequestMetadata);
             kpi.setKpiOutcome(kpiValue);
             kpiValue.setKpiID(kpi.getKpiID());
             //kpi.setKpiValue(kpiValue);

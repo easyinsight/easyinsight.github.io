@@ -3,6 +3,7 @@ package com.easyinsight.kpi;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CredentialFulfillment;
@@ -100,7 +101,7 @@ public class KPIService {
         }
     }
 
-    public List<KPI> getKPIsForStart(long targetDataSourceID, List<CredentialFulfillment> credentials) {
+    public List<KPI> getKPIsForStart(long targetDataSourceID, List<CredentialFulfillment> credentials, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -113,7 +114,8 @@ public class KPIService {
                 kpi.setCoreFeedID(targetDataSourceID);
                 kpiStorage.saveKPI(kpi, conn);
             }
-            new ScorecardService().refreshValuesForList(kpis, conn, credentials, false);
+            insightRequestMetadata.setCredentialFulfillmentList(credentials);
+            new ScorecardService().refreshValuesForList(kpis, conn, insightRequestMetadata, false);
             conn.commit();
             return kpis;
         } catch (Exception e) {
@@ -164,12 +166,13 @@ public class KPIService {
         }
     }
 
-    public KPI saveKPI(KPI kpi, List<CredentialFulfillment> credentials) {
+    public KPI saveKPI(KPI kpi, List<CredentialFulfillment> credentials, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             kpiStorage.saveKPI(kpi, conn);
-            new ScorecardService().refreshValuesForList(Arrays.asList(kpi), conn, credentials, false);
+            insightRequestMetadata.setCredentialFulfillmentList(credentials);
+            new ScorecardService().refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
             conn.commit();
             return kpi;
         } catch (Exception e) {

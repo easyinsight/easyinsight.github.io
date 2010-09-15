@@ -1,5 +1,6 @@
 package com.easyinsight.scorecard;
 
+import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -139,11 +140,11 @@ public class ScorecardStorage {
         }
     }
 
-    public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) throws Exception {
+    public ScorecardWrapper getScorecard(long scorecardID, InsightRequestMetadata insightRequestMetadata, boolean forceRefresh) throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            ScorecardWrapper scorecard = getScorecard(scorecardID, conn, credentials, forceRefresh);
+            ScorecardWrapper scorecard = getScorecard(scorecardID, conn, insightRequestMetadata, forceRefresh);
             conn.commit();
             return scorecard;
         } catch (Exception e) {
@@ -155,17 +156,17 @@ public class ScorecardStorage {
         }
     }
 
-    public ScorecardWrapper getScorecard(long scorecardID, EIConnection conn, List<CredentialFulfillment> credentials, boolean forceRefresh) throws Exception {
+    public ScorecardWrapper getScorecard(long scorecardID, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean forceRefresh) throws Exception {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID, SCORECARD_NAME FROM SCORECARD WHERE SCORECARD_ID = ?");
         queryStmt.setLong(1, scorecardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
-            return loadScorecoard(rs, conn, credentials, forceRefresh);
+            return loadScorecoard(rs, conn, insightRequestMetadata, forceRefresh);
         }
         return null;
     }
 
-    private ScorecardWrapper updateScorecard(Scorecard scorecard, EIConnection conn, List<CredentialFulfillment> existingCredentials, boolean forceRefresh) throws Exception {
+    private ScorecardWrapper updateScorecard(Scorecard scorecard, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean forceRefresh) throws Exception {
         List<KPI> longRefreshKPIs = new ArrayList<KPI>();
         List<KPI> shortRefreshKPIs = new ArrayList<KPI>();
         for (KPI kpi : scorecard.getKpis()) {
@@ -179,17 +180,17 @@ public class ScorecardStorage {
         }
         List<CredentialRequirement> credentialRequirements = new ArrayList<CredentialRequirement>();
 
-        List<KPI> credentialedLongRefreshKPIs = pareKPIs(longRefreshKPIs, existingCredentials, credentialRequirements);
-        List<KPI> credentialedShortRefreshKPIs = pareKPIs(shortRefreshKPIs, existingCredentials, credentialRequirements);
+        List<KPI> credentialedLongRefreshKPIs = pareKPIs(longRefreshKPIs, insightRequestMetadata, credentialRequirements);
+        List<KPI> credentialedShortRefreshKPIs = pareKPIs(shortRefreshKPIs, insightRequestMetadata, credentialRequirements);
 
         ScorecardWrapper scorecardWrapper = new ScorecardWrapper();
 
         if (credentialRequirements.isEmpty()) {
-            new ScorecardService().refreshValuesForList(credentialedShortRefreshKPIs, conn, existingCredentials, false);
+            new ScorecardService().refreshValuesForList(credentialedShortRefreshKPIs, conn, insightRequestMetadata, false);
             if (credentialedLongRefreshKPIs != null && credentialedLongRefreshKPIs.size() > 0) {
                 scorecardWrapper.setAsyncRefresh(true);
                 scorecardWrapper.setAsyncRefreshKpis(credentialedLongRefreshKPIs);
-                longKPIs(credentialedLongRefreshKPIs, existingCredentials, scorecard.getScorecardID());
+                longKPIs(credentialedLongRefreshKPIs, insightRequestMetadata, scorecard.getScorecardID());
             }
         }
 
@@ -261,7 +262,8 @@ public class ScorecardStorage {
         return credentialRequirements;
     }
 
-    private void longKPIs(final List<KPI> kpiList, final List<CredentialFulfillment> credentialsList, final long scorecardID) {
+    private void longKPIs(final List<KPI> kpiList, final InsightRequestMetadata insightRequestMetadata, final long scorecardID) {
+        final List<CredentialFulfillment> credentialsList = insightRequestMetadata.getCredentialFulfillmentList();
         final Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
         for (KPI kpi : kpiList) {
             List<KPI> kpis = kpiMap.get(kpi.getCoreFeedID());
@@ -312,7 +314,7 @@ public class ScorecardStorage {
                     EIConnection conn = Database.instance().getConnection();
                     try {
                         conn.setAutoCommit(false);
-                        new ScorecardService().refreshValuesForList(kpiList, conn, credentialsList, false);
+                        new ScorecardService().refreshValuesForList(kpiList, conn, insightRequestMetadata, false);
                         PreparedStatement getKPIStmt = conn.prepareStatement("SELECT SCORECARD_TO_KPI.KPI_ID FROM SCORECARD_TO_KPI WHERE " +
                                 "scorecard_to_kpi.scorecard_id = ?");
                         getKPIStmt.setLong(1, scorecardID);
@@ -350,7 +352,7 @@ public class ScorecardStorage {
         thread.start();
     }
 
-    public List<KPI> pareKPIs(List<KPI> kpiList, List<CredentialFulfillment> existingCredentials, List<CredentialRequirement> credentialRequirements) throws SQLException {
+    public List<KPI> pareKPIs(List<KPI> kpiList, InsightRequestMetadata insightRequestMetadata, List<CredentialRequirement> credentialRequirements) throws SQLException {
         List<KPI> credentialedKPIs = new ArrayList<KPI>();
         Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
         for (KPI kpi : kpiList) {
@@ -363,7 +365,7 @@ public class ScorecardStorage {
         }
         for (Long dataSourceID : kpiMap.keySet()) {
             FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-            if (feedDefinition.needsCredentials(existingCredentials)) {
+            if (feedDefinition.needsCredentials(insightRequestMetadata.getCredentialFulfillmentList())) {
                 credentialRequirements.add(new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
                             CredentialsDefinition.STANDARD_USERNAME_PW));
             } else {
@@ -414,7 +416,7 @@ public class ScorecardStorage {
         return feedDefinition.isLongRefresh();
     }
 
-    private ScorecardWrapper loadScorecoard(ResultSet rs, EIConnection conn, List<CredentialFulfillment> credentials, boolean forceRefresh) throws Exception {
+    private ScorecardWrapper loadScorecoard(ResultSet rs, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean forceRefresh) throws Exception {
         Scorecard scorecard = new Scorecard();
         scorecard.setScorecardID(rs.getLong(1));
         scorecard.setName(rs.getString(2));
@@ -429,7 +431,7 @@ public class ScorecardStorage {
         }
         getKPIStmt.close();
         scorecard.setKpis(kpis);
-        ScorecardWrapper scorecardWrapper = updateScorecard(scorecard, conn, credentials, forceRefresh);
+        ScorecardWrapper scorecardWrapper = updateScorecard(scorecard, conn, insightRequestMetadata, forceRefresh);
         scorecardWrapper.setScorecard(scorecard);
         return scorecardWrapper;
     }

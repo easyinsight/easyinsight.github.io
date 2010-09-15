@@ -1,5 +1,6 @@
 package com.easyinsight.goals;
 
+import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.analysis.Tag;
 
 import com.easyinsight.kpi.KPI;
@@ -208,14 +209,16 @@ public class GoalService {
         }
     }    
 
-    public GoalTree forceRefresh(long goalTreeID, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees) {
+    public GoalTree forceRefresh(long goalTreeID, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees,
+                                 InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);                
                 List<KPI> kpis = new ArrayList<KPI>(GoalUtil.getKPIs(goalTreeID, includeSubTrees, conn));
-                new ScorecardService().refreshValuesForList(kpis, conn, credentialsList, allSources);
+                insightRequestMetadata.setCredentialFulfillmentList(credentialsList);
+                new ScorecardService().refreshValuesForList(kpis, conn, insightRequestMetadata, allSources);
                 conn.commit();
             } catch (Exception e) {
                 conn.rollback();
@@ -355,14 +358,15 @@ public class GoalService {
         }
     }
 
-    public KPITreeWrapper getGoalDataTree(long goalTreeID, List<CredentialFulfillment> credentialsList) {
+    public KPITreeWrapper getGoalDataTree(long goalTreeID, List<CredentialFulfillment> credentialsList, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeGoalTreeSolutionInstall(goalTreeID);
         KPITreeWrapper kpiTreeWrapper;
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             List<KPI> kpis = new ArrayList<KPI>(GoalUtil.getKPIs(goalTreeID, false, conn));
-            kpiTreeWrapper = goalStorage.updateKPITree(kpis, goalTreeID, conn, credentialsList, false);
+            insightRequestMetadata.setCredentialFulfillmentList(credentialsList);
+            kpiTreeWrapper = goalStorage.updateKPITree(kpis, goalTreeID, conn, insightRequestMetadata, false);
             kpiTreeWrapper.setGoalTree(goalStorage.retrieveGoalTree(goalTreeID, conn));
             conn.commit();
         } catch (Exception e) {

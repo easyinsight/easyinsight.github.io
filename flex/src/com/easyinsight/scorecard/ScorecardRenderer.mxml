@@ -8,6 +8,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
+        import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIEvent;
         import com.easyinsight.kpi.KPIParentWindow;
@@ -31,7 +32,9 @@
         public function forceRefresh():void {
             baseIndex = 4;
             forcedRefresh = true;
-            scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), true);
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
+            scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), true, metadata);
         }
 
         private var forcedRefresh:Boolean = false;
@@ -47,7 +50,9 @@
             if (!_tutorialMode) {
                 if (_scorecard == null) {
                     baseIndex = 0;
-                    scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), false);
+                    var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+                    metadata.utcOffset = new Date().getTimezoneOffset();
+                    scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), false, metadata);
                 }
             }
         }
@@ -243,7 +248,9 @@
 
         private function onCredentials():void {
             baseIndex = 4;
-            scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), forcedRefresh);
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
+            scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), forcedRefresh, metadata);
         }
 
         private var callout:Callout;

@@ -73,7 +73,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         long userID = rs.getLong(2);
         StringBuilder stringBuilder = new StringBuilder();
         ScorecardList scorecardList = new ScorecardInternalService().getScorecardDescriptors(userID, true);
-        for (ScorecardDescriptor scorecardDescriptor : scorecardList.getScorecardDescriptors()) {
+        /*for (ScorecardDescriptor scorecardDescriptor : scorecardList.getScorecardDescriptors()) {
             ScorecardWrapper scorecardWrapper = new ScorecardInternalService().getScorecard(scorecardDescriptor.getId(),
                     userID, new ArrayList<CredentialFulfillment>(), false);
             Scorecard scorecard = scorecardWrapper.getScorecard();
@@ -81,7 +81,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 KPIOutcome kpiOutcome = kpi.getKpiOutcome();
                 //kpiOutcome.
             }
-        }
+        }*/
         //new SendGridEmail().sendAttachmentEmail(email, subjectLine, body, bytes, reportName, htmlEmail);
     }
 

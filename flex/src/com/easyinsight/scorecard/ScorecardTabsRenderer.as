@@ -1,5 +1,6 @@
 package com.easyinsight.scorecard {
 import com.easyinsight.framework.CredentialsCache;
+import com.easyinsight.framework.InsightRequestMetadata;
 
 import flash.display.DisplayObject;
 import flash.events.Event;
@@ -152,7 +153,9 @@ public class ScorecardTabsRenderer extends FlowBox {
         //event.destinationScorecard.kpis.addItem(event.kpi);
         event.sourceScorecard = selectedScorecard;
         scorecardService.removeKPIFromScorecard.send(event.kpi.kpiID, selectedScorecard.id);
-        scorecardService.addKPIToScorecard.send(event.kpi, event.destinationScorecard.id, CredentialsCache.getCache().createCredentials());
+        var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+        metadata.utcOffset = new Date().getTimezoneOffset();
+        scorecardService.addKPIToScorecard.send(event.kpi, event.destinationScorecard.id, CredentialsCache.getCache().createCredentials(), metadata);
         dispatchEvent(event);
     }
 

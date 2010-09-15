@@ -14,6 +14,7 @@
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
+        import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
@@ -39,7 +40,7 @@
         private var background2:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/document_out_x32.png")]
+        [Embed(source="../../../../assets/document_out.png")]
         private var closeIcon:Class;
 
         [Bindable]
@@ -47,11 +48,11 @@
         private var editIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/refresh_x32.png")]
+        [Embed(source="../../../../assets/refresh.png")]
         private var refreshIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/plasma_tv_x32.png")]
+        [Embed(source="../../../../assets/plasma_tv.png")]
         private var fullScreenIcon:Class;
 
         private var _goalTreeID:int;
@@ -87,7 +88,9 @@
             addEventListener(ModelessWindowEvent.WINDOW_REMOVED, onWindowRemove);
             addEventListener(ModelessWindowEvent.WINDOW_ADDED, onWindowAdd);
             ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.getGoalDataTree);
-            goalService.getGoalDataTree.send(_goalTreeID, CredentialsCache.getCache().createCredentials());
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
+            goalService.getGoalDataTree.send(_goalTreeID, CredentialsCache.getCache().createCredentials(), metadata);
         }
 
 

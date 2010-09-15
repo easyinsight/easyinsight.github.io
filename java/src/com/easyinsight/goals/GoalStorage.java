@@ -31,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class GoalStorage {
 
-     public KPITreeWrapper updateKPITree(List<KPI> kpis, long kpiTreeID, EIConnection conn, List<CredentialFulfillment> existingCredentials, boolean forceRefresh) throws Exception {
+     public KPITreeWrapper updateKPITree(List<KPI> kpis, long kpiTreeID, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean forceRefresh) throws Exception {
         List<KPI> longRefreshKPIs = new ArrayList<KPI>();
         List<KPI> shortRefreshKPIs = new ArrayList<KPI>();
         ScorecardStorage scorecardStorage = new ScorecardStorage(); 
@@ -46,17 +46,17 @@ public class GoalStorage {
         }
         List<CredentialRequirement> credentialRequirements = new ArrayList<CredentialRequirement>();
 
-        List<KPI> credentialedLongRefreshKPIs = scorecardStorage.pareKPIs(longRefreshKPIs, existingCredentials, credentialRequirements);
-        List<KPI> credentialedShortRefreshKPIs = scorecardStorage.pareKPIs(shortRefreshKPIs, existingCredentials, credentialRequirements);
+        List<KPI> credentialedLongRefreshKPIs = scorecardStorage.pareKPIs(longRefreshKPIs, insightRequestMetadata, credentialRequirements);
+        List<KPI> credentialedShortRefreshKPIs = scorecardStorage.pareKPIs(shortRefreshKPIs, insightRequestMetadata, credentialRequirements);
 
         KPITreeWrapper scorecardWrapper = new KPITreeWrapper();
 
         if (credentialRequirements.isEmpty()) {
-            new ScorecardService().refreshValuesForList(credentialedShortRefreshKPIs, conn, existingCredentials, false);
+            new ScorecardService().refreshValuesForList(credentialedShortRefreshKPIs, conn, insightRequestMetadata, false);
             if (credentialedLongRefreshKPIs != null && credentialedLongRefreshKPIs.size() > 0) {
                 scorecardWrapper.setAsyncRefresh(true);
                 //scorecardWrapper.setAsyncRefreshKpis(credentialedLongRefreshKPIs);
-                longKPIs(credentialedLongRefreshKPIs, existingCredentials, kpiTreeID);
+                longKPIs(credentialedLongRefreshKPIs, insightRequestMetadata, kpiTreeID);
             }
         }
 
@@ -64,7 +64,7 @@ public class GoalStorage {
         return scorecardWrapper;
     }
 
-    private void longKPIs(final List<KPI> kpiList, final List<CredentialFulfillment> credentialsList, final long kpiTreeID) {
+    private void longKPIs(final List<KPI> kpiList, final InsightRequestMetadata insightRequestMetadata, final long kpiTreeID) {
         final Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
         for (KPI kpi : kpiList) {
             List<KPI> kpis = kpiMap.get(kpi.getCoreFeedID());
@@ -89,7 +89,7 @@ public class GoalStorage {
                         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
                         IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
                         Credentials credentials = null;
-                        for (CredentialFulfillment fulfillment : credentialsList) {
+                        for (CredentialFulfillment fulfillment : insightRequestMetadata.getCredentialFulfillmentList()) {
                             if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
                                 credentials = fulfillment.getCredentials();
                             }
@@ -109,7 +109,7 @@ public class GoalStorage {
                     EIConnection conn = Database.instance().getConnection();
                     try {
                         conn.setAutoCommit(false);
-                        new ScorecardService().refreshValuesForList(kpiList, conn, credentialsList, false);
+                        new ScorecardService().refreshValuesForList(kpiList, conn, insightRequestMetadata, false);
                         PreparedStatement getKPIStmt = conn.prepareStatement("SELECT GOAL_TREE_NODE.KPI_ID FROM GOAL_TREE_NODE WHERE " +
                                 "GOAL_TREE_NODE.goal_tree_id = ?");
                         getKPIStmt.setLong(1, kpiTreeID);

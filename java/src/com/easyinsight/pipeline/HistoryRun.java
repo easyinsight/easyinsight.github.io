@@ -18,7 +18,7 @@ import java.util.*;
 public class HistoryRun {
 
     public List<KPIValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
-                                                     List<CredentialFulfillment> credentials, int timeWindow) throws TokenMissingException {
+                                                     int timeWindow, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
         // the way this should work...
 
         // if date dimension and time window
@@ -49,11 +49,11 @@ public class HistoryRun {
             Date startDate = new Date(endDate.getTime() - time);
 
 
-            KPIValue startValue = blah(createReport(dataSourceID, measure, filters), feed, startDate, measure, credentials);
-            KPIValue endValue = blah(createReport(dataSourceID, measure, filters), feed, endDate, measure, credentials);
+            KPIValue startValue = blah(createReport(dataSourceID, measure, filters), startDate, measure, insightRequestMetadata);
+            KPIValue endValue = blah(createReport(dataSourceID, measure, filters), endDate, measure, insightRequestMetadata);
             return Arrays.asList(startValue, endValue);
         } else {
-            KPIValue value = blah(createReport(dataSourceID, measure, filters), feed, endDate, measure, credentials);
+            KPIValue value = blah(createReport(dataSourceID, measure, filters), endDate, measure, insightRequestMetadata);
             return Arrays.asList(value);
         }
     }
@@ -66,10 +66,8 @@ public class HistoryRun {
         return report;
     }
 
-    public KPIValue blah(WSAnalysisDefinition analysisDefinition, Feed feed, Date endDate,
-                         AnalysisMeasure measure, List<CredentialFulfillment> credentials) {
-        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-        insightRequestMetadata.setCredentialFulfillmentList(credentials);
+    public KPIValue blah(WSAnalysisDefinition analysisDefinition, Date endDate,
+                         AnalysisMeasure measure, InsightRequestMetadata insightRequestMetadata) {
         insightRequestMetadata.setNow(endDate);
         DataSet result = new DataService().listDataSet(analysisDefinition, insightRequestMetadata);
         //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);

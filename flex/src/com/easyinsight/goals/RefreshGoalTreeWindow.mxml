@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Refresh Goal Tree Data Sources">
     <mx:Script><![CDATA[
-        import com.easyinsight.framework.CredentialsCache;        
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -21,16 +22,20 @@
 
         private function onCredentials():void {
             ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
                 goalService.forceRefresh.send(_goalTreeID, CredentialsCache.getCache().createCredentials(),
-                        allDataSourcesCheckbox.selected, subTreesCheckbox.selected);
+                        allDataSourcesCheckbox.selected, subTreesCheckbox.selected, metadata);
         }
 
         private function gotCredentials():void {
             var credentials:ArrayCollection = goalService.getCredentialsForGoalTree.lastResult as ArrayCollection;
             if (credentials.length == 0) {
                 ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
+                var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+                metadata.utcOffset = new Date().getTimezoneOffset();
                 goalService.forceRefresh.send(_goalTreeID, CredentialsCache.getCache().createCredentials(), allDataSourcesCheckbox.selected,
-                        subTreesCheckbox.selected);
+                        subTreesCheckbox.selected, metadata);
             } else {
                 CredentialsCache.getCache().obtainCredentials(this, credentials, onCredentials);
             }

@@ -24,6 +24,7 @@
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.User;
         import com.easyinsight.icons.IconSelectionEvent;
         import com.easyinsight.icons.IconSelectionWindow;
@@ -359,14 +360,20 @@
             if (_scorecardID > 0) {
                 if (newKPI) {
                     ProgressAlert.alert(this, "Saving the KPI...", null, scorecardService.addKPIToScorecard);
-                    scorecardService.addKPIToScorecard(_kpi, _scorecardID, CredentialsCache.getCache().createCredentials());
+                    var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+                    metadata.utcOffset = new Date().getTimezoneOffset();
+                    scorecardService.addKPIToScorecard(_kpi, _scorecardID, CredentialsCache.getCache().createCredentials(), metadata);
                 } else {
                     ProgressAlert.alert(this, "Saving the KPI...", null, scorecardService.updateKPI);
-                    scorecardService.updateKPI(_kpi, CredentialsCache.getCache().createCredentials());
+                    var metadata2:InsightRequestMetadata = new InsightRequestMetadata();
+                    metadata2.utcOffset = new Date().getTimezoneOffset();
+                    scorecardService.updateKPI(_kpi, CredentialsCache.getCache().createCredentials(), metadata2);
                 }
             } else {
                 ProgressAlert.alert(this, "Saving the KPI...", null, kpiService.saveKPI);
-                kpiService.saveKPI(_kpi, CredentialsCache.getCache().createCredentials());
+                var metadata3:InsightRequestMetadata = new InsightRequestMetadata();
+                metadata3.utcOffset = new Date().getTimezoneOffset();
+                kpiService.saveKPI(_kpi, CredentialsCache.getCache().createCredentials(), metadata3);
             }
         }
 

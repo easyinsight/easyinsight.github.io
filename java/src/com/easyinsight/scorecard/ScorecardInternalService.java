@@ -1,5 +1,6 @@
 package com.easyinsight.scorecard;
 
+import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CredentialFulfillment;
@@ -92,10 +93,12 @@ public class ScorecardInternalService {
         return new ScorecardList(scorecards, hasData);
     }
 
-    public ScorecardWrapper getScorecard(long scorecardID, long userID, List<CredentialFulfillment> credentials, boolean forceRefresh) {
+    public ScorecardWrapper getScorecard(long scorecardID, long userID, List<CredentialFulfillment> credentials, boolean forceRefresh,
+                                         InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeScorecard(scorecardID, userID);
         try {
-            return new ScorecardStorage().getScorecard(scorecardID, credentials, forceRefresh);
+            insightRequestMetadata.setCredentialFulfillmentList(credentials);
+            return new ScorecardStorage().getScorecard(scorecardID, insightRequestMetadata, forceRefresh);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
