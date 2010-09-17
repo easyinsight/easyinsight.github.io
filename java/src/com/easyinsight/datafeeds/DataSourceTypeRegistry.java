@@ -6,7 +6,6 @@ import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
-import com.easyinsight.datafeeds.gnip.GnipDataSource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.highrise.*;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
@@ -48,7 +47,6 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.DEFAULT, FeedDefinition.class);
         registerType(FeedType.BASECAMP_MASTER, BaseCampCompositeSource.class);
         registerType(FeedType.ADMIN_STATS, AdminStatsDataSource.class);
-        registerType(FeedType.GNIP, GnipDataSource.class);
         registerType(FeedType.GOOGLE_ANALYTICS, GoogleAnalyticsDataSource.class);
         registerType(FeedType.TEST_ALPHA, TestAlphaDataSource.class);
         registerType(FeedType.TEST_BETA, TestBetaDataSource.class);
