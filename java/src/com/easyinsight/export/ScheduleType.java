@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -19,6 +18,7 @@ public abstract class ScheduleType {
     private int hour;
     private int minute;
     private long scheduleID;
+    private int timeOffset;
 
     public static final int DAILY = 1;
     public static final int WEEKDAYS = 2;
@@ -28,6 +28,14 @@ public abstract class ScheduleType {
     public static final int MONTHLY = 6;
 
     public abstract int retrieveType();
+
+    public int getTimeOffset() {
+        return timeOffset;
+    }
+
+    public void setTimeOffset(int timeOffset) {
+        this.timeOffset = timeOffset;
+    }
 
     public int getHour() {
         return hour;
@@ -53,7 +61,7 @@ public abstract class ScheduleType {
         this.scheduleID = scheduleID;
     }
 
-    public void timeToGMT(int utcOffset) {
+    /*public void timeToGMT(int utcOffset) {
         int hours = utcOffset / 60;
         this.hour = (hour + hours) % 24;
     }
@@ -61,17 +69,18 @@ public abstract class ScheduleType {
     public void timeFromGMT(int utcOffset) {
         int hours = utcOffset / 60;
         this.hour = Math.abs((hour - hours) % 24);
-    }
+    }*/
 
-    public long save(EIConnection conn, int utcOffset, long scheduledActivityID) throws SQLException {
-        timeToGMT(utcOffset);
+    public long save(EIConnection conn, long scheduledActivityID) throws SQLException {
+        //timeToGMT(utcOffset);
         PreparedStatement insertScheduleStmt = conn.prepareStatement("INSERT INTO SCHEDULE (SCHEDULE_HOUR, SCHEDULE_MINUTE, SCHEDULE_TYPE, " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID) VALUES (?, ?, ?, ?)",
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, TIME_OFFSET) VALUES (?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
         insertScheduleStmt.setInt(1, getHour());
         insertScheduleStmt.setInt(2, getMinute());
         insertScheduleStmt.setInt(3, retrieveType());
         insertScheduleStmt.setLong(4, scheduledActivityID);
+        insertScheduleStmt.setInt(5, timeOffset);
         insertScheduleStmt.execute();
         long scheduleID = Database.instance().getAutoGenKey(insertScheduleStmt);
         this.scheduleID = scheduleID;

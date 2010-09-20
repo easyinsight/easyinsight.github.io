@@ -52,14 +52,16 @@ public abstract class ScheduledActivity {
             this.scheduledActivityID = Database.instance().getAutoGenKey(insertStmt);
             insertStmt.close();
             this.customSave(conn, utcOffset);
-            scheduleType.save(conn, utcOffset, this.scheduledActivityID);
+            scheduleType.setTimeOffset(utcOffset);
+            scheduleType.save(conn, this.scheduledActivityID);
         } else {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM SCHEDULE WHERE scheduled_account_activity_id = ?");
             deleteStmt.setLong(1, scheduledActivityID);
             deleteStmt.executeUpdate();
             deleteStmt.close();
             this.customSave(conn, utcOffset);
-            scheduleType.save(conn, utcOffset, this.scheduledActivityID);
+            scheduleType.setTimeOffset(utcOffset);
+            scheduleType.save(conn, this.scheduledActivityID);
         }
     }
 
@@ -72,7 +74,7 @@ public abstract class ScheduledActivity {
     }
 
 
-    public static ScheduledActivity createActivity(int activityType, long activityID, EIConnection conn, int utcOffset) throws SQLException {
+    public static ScheduledActivity createActivity(int activityType, long activityID, EIConnection conn) throws SQLException {
         ScheduledActivity scheduledActivity;
         switch (activityType) {
             case ScheduledActivity.DATA_SOURCE_REFRESH:
@@ -86,13 +88,14 @@ public abstract class ScheduledActivity {
         }        
         scheduledActivity.setScheduledActivityID(activityID);
         scheduledActivity.customLoad(conn);
-        ScheduleType scheduleType = loadSchedule(activityID, conn, utcOffset);
+        ScheduleType scheduleType = loadSchedule(activityID, conn);
         scheduledActivity.setScheduleType(scheduleType);
         return scheduledActivity;
     }
 
-    private static ScheduleType loadSchedule(long activityID, EIConnection conn, int utcOffset) throws SQLException {
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT SCHEDULE.schedule_type, SCHEDULE.SCHEDULE_HOUR, SCHEDULE.SCHEDULE_MINUTE, SCHEDULE.SCHEDULE_ID FROM SCHEDULE WHERE " +
+    private static ScheduleType loadSchedule(long activityID, EIConnection conn) throws SQLException {
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT SCHEDULE.schedule_type, SCHEDULE.SCHEDULE_HOUR, SCHEDULE.SCHEDULE_MINUTE, SCHEDULE.SCHEDULE_ID," +
+                "SCHEDULE.time_offset FROM SCHEDULE WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         loadStmt.setLong(1, activityID);
         ResultSet rs = loadStmt.executeQuery();
@@ -101,6 +104,7 @@ public abstract class ScheduledActivity {
             int hour = rs.getInt(2);
             int minute = rs.getInt(3);
             long id = rs.getLong(4);
+            int utcOffset = rs.getInt(5);
             ScheduleType schedule;
             switch (type) {
                 case ScheduleType.DAILY:
@@ -127,7 +131,7 @@ public abstract class ScheduledActivity {
             schedule.setScheduleID(id);
             schedule.setHour(hour);
             schedule.setMinute(minute);
-            schedule.timeFromGMT(utcOffset);
+            schedule.setTimeOffset(utcOffset);
             schedule.customLoad(conn);
             loadStmt.close();
             return schedule;

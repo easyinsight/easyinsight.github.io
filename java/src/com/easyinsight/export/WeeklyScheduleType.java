@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * User: jamesboe
@@ -34,6 +35,7 @@ public class WeeklyScheduleType extends ScheduleType {
     @Nullable
     public Date runTime(Date lastTime, Date now) {
         Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.ZONE_OFFSET, getTimeOffset() * 1000);        
         cal.set(Calendar.HOUR_OF_DAY, getHour());
         cal.set(Calendar.MINUTE, getMinute());
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);

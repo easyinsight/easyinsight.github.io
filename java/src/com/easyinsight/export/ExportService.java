@@ -22,6 +22,7 @@ import com.easyinsight.analysis.ListRow;
 import com.easyinsight.analysis.*;
 
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.util.RandomTextGenerator;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
@@ -31,6 +32,8 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -42,6 +45,66 @@ public class ExportService {
 
     public static final String CURRENCY_STYLE = "currency";
     public static final String GENERIC_STYLE = "generic";
+
+    private static final String URL = "https://localhost:4443/app/selenium/selenium.jsp?userName={0}&password={1}&seleniumID={2}&dataSourceID={3}&reportID={4}&reportType={5}";
+
+    public void seleniumDraw(long requestID, byte[] bytes) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void test() {
+        requestSeleniumDrawForEmail(38, 1);
+    }
+
+    public void requestSeleniumDrawForEmail(long reportDeliveryID, long userID) {
+        // emit the JMS event or whatever we're using
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            long id = new EmailSeleniumPostProcessor(reportDeliveryID).save(conn);
+            String userName = RandomTextGenerator.generateText(50);
+            String password = RandomTextGenerator.generateText(50);
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SELENIUM_REQUEST (SELENIUM_PROCESSOR_ID, " +
+                    "USERNAME, PASSWORD, REQUEST_TIME, USER_ID) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            insertStmt.setLong(1, id);
+            insertStmt.setString(2, userName);
+            insertStmt.setString(3, password);
+            insertStmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
+            insertStmt.setLong(5, userID);
+            insertStmt.execute();
+            long seleniumID = Database.instance().getAutoGenKey(insertStmt);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, ANALYSIS.data_feed_id, ANALYSIS.report_type, ANALYSIS.url_key FROM " +
+                    "ANALYSIS, REPORT_DELIVERY WHERE ANALYSIS.analysis_id = REPORT_DELIVERY.report_id AND REPORT_DELIVERY.report_delivery_id = ?");
+            queryStmt.setLong(1, reportDeliveryID);
+            ResultSet rs = queryStmt.executeQuery();
+            rs.next();
+            long dataSourceID = rs.getLong(2);
+            int reportType = rs.getInt(3);
+            String urlKey = rs.getString(4);
+            String url = MessageFormat.format(URL, userName, password, seleniumID, dataSourceID, urlKey, reportType);
+            System.out.println(url);
+            conn.commit();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
 
     public void addOrUpdateSchedule(ScheduledActivity scheduledActivity, int utcOffset) {
         EIConnection conn = Database.instance().getConnection();
@@ -116,7 +179,7 @@ public class ExportService {
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
                 long activityID = rs.getLong(1);
-                reportDelivery = (ReportDelivery) ScheduledActivity.createActivity(ScheduledActivity.REPORT_DELIVERY, activityID, conn, utcOffset);
+                reportDelivery = (ReportDelivery) ScheduledActivity.createActivity(ScheduledActivity.REPORT_DELIVERY, activityID, conn);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -141,7 +204,7 @@ public class ExportService {
             while (rs.next()) {
                 long activityID = rs.getLong(1);
                 int activityType = rs.getInt(2);
-                activities.add(ScheduledActivity.createActivity(activityType, activityID, conn, utcOffset));
+                activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
             }
             conn.commit();
         } catch (Exception e) {

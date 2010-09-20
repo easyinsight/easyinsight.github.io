@@ -668,6 +668,51 @@ public class UserService {
         }
     }
 
+    public UserServiceResponse seleniumCheck(String userName, String password) {
+        UserServiceResponse userServiceResponse = null;
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SELENIUM_REQUEST.USER_ID FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST.username = ? and " +
+                    "selenium_request.password = ?");
+            queryStmt.setString(1, userName);
+            queryStmt.setString(2, password);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long userID = rs.getLong(1);
+                List results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
+                if (results.size() > 0) {
+                    User user = (User) results.get(0);
+                    Account account = user.getAccount();
+                    if (user.getPersonaID() != null) {
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+                    }
+                    userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                         user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                            (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                            user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
+                            !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                    userServiceResponse.setActivated(account.isActivated());
+                } else {
+                    userServiceResponse = null;
+                }
+            }
+            session.flush();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException();
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
+        }
+        return userServiceResponse;
+    }
+
     public UserServiceResponse sessionCookieCheck(String cookie, String userName, boolean clearCookie) {
         UserServiceResponse userServiceResponse = null;
         EIConnection conn = Database.instance().getConnection();

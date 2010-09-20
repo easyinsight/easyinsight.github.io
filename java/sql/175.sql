@@ -1,0 +1,1 @@
+alter table schedule add time_offset integer not null default 0;
