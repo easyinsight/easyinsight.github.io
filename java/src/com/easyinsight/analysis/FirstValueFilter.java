@@ -8,6 +8,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,6 +42,10 @@ public class FirstValueFilter extends FilterDefinition {
     }
 
     public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor) {
-        return Arrays.asList((IComponent) new FirstValueComponent(this));
+        if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
+            return Arrays.asList((IComponent) new FirstValueComponent(this));
+        } else {
+            return new ArrayList<IComponent>();
+        }
     }
 }
