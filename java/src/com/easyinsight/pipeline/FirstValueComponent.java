@@ -7,8 +7,6 @@ import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -16,8 +14,6 @@ import java.util.Map;
  * Time: 12:34:56 PM
  */
 public class FirstValueComponent implements IComponent {
-
-    private Map<Map<Key, Value>, IRow> aggregationMap = new LinkedHashMap<Map<Key, Value>, IRow>();
 
     private FirstValueFilter lastValueFilter;
 

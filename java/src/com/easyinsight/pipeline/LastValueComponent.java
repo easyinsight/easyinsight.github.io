@@ -1,13 +1,14 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.core.DateValue;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.LinkedHashMap;
-import java.util.HashMap;
 
 /**
  * User: jamesboe
@@ -25,47 +26,29 @@ public class LastValueComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        DataSet producedSet = new DataSet();
-        AnalysisDimension existingDate = null;
         AnalysisDateDimension sortDim = (AnalysisDateDimension) lastValueFilter.getField();
-        for (AnalysisItem analysisItem : pipelineData.getAllRequestedItems()) {
-            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                AnalysisDateDimension dimension = (AnalysisDateDimension) analysisItem;
-                if (analysisItem.getKey().equals(lastValueFilter.getField().getKey()) && dimension.getDateLevel() == sortDim.getDateLevel()) {
-                    existingDate = (AnalysisDateDimension) analysisItem;
-                    break;
+        Key sortKey = sortDim.createAggregateKey();
+        Date firstDate = null;
+        for (IRow row : dataSet.getRows()) {
+            Value value = row.getValue(sortKey);
+            if (value.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) value;
+                if (firstDate == null || firstDate.getTime() < dateValue.getDate().getTime()) {
+                    firstDate = dateValue.getDate();
                 }
             }
         }
-        // first question...
-        // sort the values by the date sort item in an ascending fashion
-        if (existingDate == null) {
-            dataSet.sort(lastValueFilter.getField(), false);
-        } else {
-            dataSet.sort(existingDate, false);
-        }
-
-        for (int i = 0; i < dataSet.getRows().size(); i++) {
-            IRow row = dataSet.getRow(i);
-            // create the key map here...
-            Map<Key, Value> dimensionKey = new HashMap<Key, Value>();
-
-            for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
-                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                    AggregateKey aggregateKey = analysisItem.createAggregateKey();
-                    dimensionKey.put(aggregateKey, row.getValue(aggregateKey));
+        DataSet newSet = new DataSet();
+        for (IRow row : dataSet.getRows()) {
+            Value value = row.getValue(sortKey);
+            if (value.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) value;
+                if (dateValue.getDate().equals(firstDate)) {
+                    newSet.addRow(row);
                 }
             }
-            aggregationMap.put(dimensionKey, row);            
         }
-
-        for (Map.Entry<Map<Key, Value>, IRow> entry : aggregationMap.entrySet()) {
-            IRow row = entry.getValue();
-            IRow newRow = producedSet.createRow();
-            newRow.addValues(row.getValues());
-        }
-
-        return producedSet;
+        return newSet;
     }
 
     public void decorate(DataResults listDataResults) {
