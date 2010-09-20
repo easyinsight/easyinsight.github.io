@@ -99,20 +99,22 @@ public class FilterValueDefinition extends FilterDefinition {
     public void beforeSave(Session session) {
         super.beforeSave(session);
         Set<Value> valueSet = new HashSet<Value>();
-        for (Object valueObject : filteredValues) {
-            Value value;
-            if (valueObject instanceof Value) {
-                value = (Value) valueObject;
-            } else if (valueObject instanceof String) {
-                value = new StringValue((String) valueObject);
-            } else if (valueObject instanceof Number) {
-                value = new NumericValue((Number) valueObject);
-            } else if (valueObject instanceof Date) {
-                value = new DateValue((Date) valueObject);
-            } else {
-                throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+        if (filteredValues != null) {
+            for (Object valueObject : filteredValues) {
+                Value value;
+                if (valueObject instanceof Value) {
+                    value = (Value) valueObject;
+                } else if (valueObject instanceof String) {
+                    value = new StringValue((String) valueObject);
+                } else if (valueObject instanceof Number) {
+                    value = new NumericValue((Number) valueObject);
+                } else if (valueObject instanceof Date) {
+                    value = new DateValue((Date) valueObject);
+                } else {
+                    throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+                }
+                valueSet.add(value);
             }
-            valueSet.add(value);
         }
         Set<PersistableValue> filterDefinitionValues = PersistableValueFactory.fromValue(valueSet);
         setPersistedValues(filterDefinitionValues);
