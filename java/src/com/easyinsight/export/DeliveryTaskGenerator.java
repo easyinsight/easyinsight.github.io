@@ -55,7 +55,7 @@ public class DeliveryTaskGenerator extends TaskGenerator {
     }
 
     private ScheduleType getScheduleType(EIConnection conn) throws SQLException {
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT SCHEDULE.schedule_type, SCHEDULE.SCHEDULE_HOUR, SCHEDULE.SCHEDULE_MINUTE, SCHEDULE.SCHEDULE_ID FROM SCHEDULE WHERE " +
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT SCHEDULE.schedule_type, SCHEDULE.SCHEDULE_HOUR, SCHEDULE.SCHEDULE_MINUTE, SCHEDULE.SCHEDULE_ID, SCHEDULE.time_offset FROM SCHEDULE WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         loadStmt.setLong(1, activityID);
         ResultSet rs = loadStmt.executeQuery();
@@ -64,6 +64,7 @@ public class DeliveryTaskGenerator extends TaskGenerator {
             int hour = rs.getInt(2);
             int minute = rs.getInt(3);
             long id = rs.getLong(4);
+            int offset = rs.getInt(5);
             ScheduleType schedule;
             switch (type) {
                 case ScheduleType.DAILY:
@@ -90,6 +91,7 @@ public class DeliveryTaskGenerator extends TaskGenerator {
             schedule.setScheduleID(id);
             schedule.setHour(hour);
             schedule.setMinute(minute);
+            schedule.setTimeOffset(offset);
             schedule.customLoad(conn);
             loadStmt.close();
             return schedule;
