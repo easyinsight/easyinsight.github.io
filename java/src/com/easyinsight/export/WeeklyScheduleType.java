@@ -39,7 +39,7 @@ public class WeeklyScheduleType extends ScheduleType {
         cal.set(Calendar.HOUR_OF_DAY, getHour());
         cal.set(Calendar.MINUTE, getMinute());
         System.out.println("cal time = " + cal.getTime());
-        cal.setTimeInMillis(cal.getTimeInMillis() - (getTimeOffset() * 60 * 1000));
+        cal.setTimeInMillis(cal.getTimeInMillis() + (getTimeOffset() * 60 * 1000));
         //cal.set(Calendar.ZONE_OFFSET, getTimeOffset() * 60 * 1000);
         System.out.println("after time zone = " + cal.getTime());
 
