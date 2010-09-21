@@ -297,7 +297,7 @@
     <mx:RemoteObject destination="scorecardService" id="scorecardService">
         <mx:method name="getScorecard" result="gotScorecard()"/>
     </mx:RemoteObject>
-    <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%">
+    <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%"  creationPolicy="all">
         <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:ProgressBar label="Loading the scorecard..." indeterminate="{retrieving}"/>
         </mx:Box>
