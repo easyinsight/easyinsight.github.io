@@ -119,7 +119,9 @@ import flash.filters.BlurFilter;
         }
         private var _gradientArray:Array;
 
-        private var maxPointsInOnePlace:int; 
+        private var maxPointsInOnePlace:int;
+
+        private var bitmapCache:Object;
        
 		[Bindable]
 		/**
@@ -239,19 +241,17 @@ import flash.filters.BlurFilter;
 
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth,unscaledHeight);
-            
+
+            if(collectionDirtyFlag) {
+                updateCenterValue();
+            }
+
             if(collectionDirtyFlag || oldWidth != width || oldHeight != height)
             {
             	updatePoints();
             	collectionDirtyFlag = false;
             }
-            
-            if(centerValueDirtyFlag)
-            {
-            	updateCenterValue();
-            	centerValueDirtyFlag = false;
-            }
-            
+
             drawHeatMap();           
 			
 			var bgColor:Number = getStyle("backgroundColor");
@@ -280,13 +280,10 @@ import flash.filters.BlurFilter;
 				// of the display area. To get the proper coloring around the ends we 
 				// need to include points that fall just outside the bounds as well.
                 var rect:Rectangle = new Rectangle(-itemRadius, -itemRadius, unscaledWidth + (itemRadius * 2), unscaledHeight + (itemRadius * 2));
-//				var rect:Rectangle = getRect(this);
-//				rect.inflate(itemRadius,itemRadius);
 				
 				// Generate a list of unique points in the dataProvider
 				pointDictionary = new Object();
                 pointValues = new Object();
-				var tempPoints:Array = new Array();
 	            for each(var o:Object in _dataProvider)
 	            {
 	            	var point:Point = transformationFunction.apply(this,[o]);
@@ -303,22 +300,40 @@ import flash.filters.BlurFilter;
 		                    pointDictionary[pointKey] += pointCount;
 					} 
 	            }
-	            centerValueDirtyFlag = true;
 			}
         }
         
         protected function updateCenterValue():void
         {
+
+            var allPoints:Object = new Object();
+	        for each(var o:Object in _dataProvider)
+	        {
+	            var point:Point = transformationFunction.apply(this,[o]);
+                var pointCount:Number = weightFunction.apply(this,[o]);
+		        var pointKey:String = point.x +"_" + point.y;
+
+		        if(allPoints[pointKey] == null)
+				    allPoints[pointKey] = pointCount;
+		        else
+		            allPoints[pointKey] += pointCount;
+			}
+
         	// Determine the centerValue by taking 255 / the maximum number of points in a single place.
 			// Bound centerValue between 19  and 255 / 5 to keep the gradient diverse enough to remain attractive.
 			maxPointsInOnePlace = 5;
-			for(var key:String in pointDictionary)
+			for each(var value:Number in allPoints)
 			{
-				maxPointsInOnePlace = Math.max(maxPointsInOnePlace,pointDictionary[key]);
+				maxPointsInOnePlace = Math.max(maxPointsInOnePlace,value);
 			}
 			var tempCenterValue:Number = Math.max(19,255 / maxPointsInOnePlace);
 			if(tempCenterValue != centerValue)
 				centerValue = tempCenterValue;
+
+            for each(var hm:BitmapData in bitmapCache) {
+                hm.dispose();
+            }
+            bitmapCache = new Object();
         }
         
         /**
@@ -344,13 +359,12 @@ import flash.filters.BlurFilter;
 
             var cellSize:int = itemRadius * 2;
             var m:Matrix = new Matrix();
-            m.createGradientBox(cellSize, cellSize, 0, -itemRadius, -itemRadius);
-            var cache:Object = new Object();
+            m.createGradientBox(cellSize, cellSize, 0, -itemRadius, -itemRadius);           
             for(var key:String in pointDictionary) {
                 var curPoint:Point = pointValues[key] as Point;
                 var curVal:Number = pointDictionary[key] as Number;
-                var curColor:Number = Math.round((curVal / maxPointsInOnePlace) * 255);
-                if(!cache[curColor]) {
+                var curColor:Number = Math.round(Math.pow(curVal / maxPointsInOnePlace, 7/8) * (255 - centerValue) + centerValue);
+                if(!bitmapCache[curColor]) {
                     var heatMapShape:Shape = new Shape();
                     heatMapShape.graphics.clear();
 
@@ -367,19 +381,13 @@ import flash.filters.BlurFilter;
                     translationMatrix.tx = itemRadius;
                     translationMatrix.ty = itemRadius;
                     heatMapItem.draw(heatMapShape,translationMatrix);
-                    cache[curColor] = heatMapItem;
+                    bitmapCache[curColor] = heatMapItem;
                 }
 
                 translationMatrix.tx = curPoint.x - itemRadius;
                 translationMatrix.ty = curPoint.y - itemRadius;
-                heatBitmapData.draw(cache[curColor] as BitmapData,translationMatrix,null,BlendMode.SCREEN);
+                heatBitmapData.draw(bitmapCache[curColor] as BitmapData,translationMatrix,null,BlendMode.SCREEN);
             }
-
-            for each(var hm:BitmapData in cache) {
-                hm.dispose();
-            }
-
-            heatMapItem.dispose();
 			
 			// paletteMap leaves some artifacts unless we get rid of the blackest colors 
 			heatBitmapData.threshold(heatBitmapData, heatBitmapData.rect,POINT,"<=", 0x00000003, 0x00000000, 0x000000FF, true);
