@@ -7,7 +7,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.exchange.ExchangePackageData;
 import com.easyinsight.exchange.ExchangeReportData;
 import com.easyinsight.export.ExportService;
-import com.easyinsight.groups.GroupService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.reportpackage.ReportPackage;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
@@ -45,7 +44,16 @@ public class SolutionService {
             dataSource.setAccountVisible(true);
             new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
             if (solutionKPIData.getActivity() != null) {
-                new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT SCHEDULED_DATA_SOURCE_REFRESH.SCHEDULED_DATA_SOURCE_REFRESH_ID FROM SCHEDULED_DATA_SOURCE_REFRESH, DATA_FEED, SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
+                        "SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = data_feed.data_feed_id and data_feed.feed_type = ? AND " +
+                        "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id and " +
+                        "scheduled_account_activity.account_id = ?");
+                queryStmt.setInt(1, dataSource.getFeedType().getType());
+                queryStmt.setLong(2, SecurityUtil.getAccountID());
+                ResultSet rs = queryStmt.executeQuery();
+                if (!rs.next()) {
+                    new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
+                }
             }
             conn.commit();
         } catch (Exception e) {

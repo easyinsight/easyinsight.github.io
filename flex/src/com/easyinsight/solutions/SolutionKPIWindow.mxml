@@ -13,6 +13,7 @@
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.schedule.DailyScheduleType;
         import com.easyinsight.schedule.DataSourceRefreshActivity;
         import com.easyinsight.scorecard.Scorecard;
         import com.easyinsight.scorecard.ScorecardList;
@@ -211,11 +212,20 @@
         }
 
         private function allDone():void {
-            if (syncGroup.selectedValue == "yes") {
+            if (syncButton == "Next") {
                 activity = new DataSourceRefreshActivity();
                 activity.dataSourceID = _dataSourceDescriptor.id;
                 activity.dataSourceName = _dataSourceDescriptor.name;
-                scheduleConfiguration.save();
+                var schedule:DailyScheduleType = new DailyScheduleType();
+                var morningOrEvening:int = int(Math.random() * 2);
+                if (morningOrEvening == 0) {
+                    schedule.hour = int(Math.random() * 6);
+                } else {
+                    schedule.hour = int(Math.random() * 6) + 18;
+                }
+                schedule.minute = int(Math.random() * 60);
+                activity.scheduleType = schedule;
+                kpiData.utcOffset = new Date().getTimezoneOffset();
                 kpiData.activity = activity;
             } else {
                 kpiData.activity = null;
@@ -404,42 +414,10 @@
                              color="#FFFFFF" height="200"/>
                     <mx:HBox>
                         <mx:Button label="Back" fontSize="24" click="kpiLinkStart(); topIndex = 1"/>
-                        <mx:Button label="{syncButton}" fontSize="24" click="addDataSourceToGroup()" enabled="{enableReportSave}"/>
-                    </mx:HBox>
-                </mx:VBox>
-            </mx:VBox>
-            <mx:VBox width="100%" height="100%" verticalGap="0">
-                <mx:HBox height="50%" width="100%">
-                    <mx:VBox verticalAlign="middle" horizontalAlign="center" height="100%" width="50%">
-                        <mx:RadioButtonGroup id="syncGroup" change="syncIndex = syncGroup.selectedValue == 'yes' ? syncIndex = 1 : 0"/>
-                        <mx:VBox>
-                            <mx:RadioButton label="I'll Just Refresh on Demand" groupName="syncGroup" value="no"
-                                            fontSize="24" selected="true"/>
-                            <mx:RadioButton label="Resync on a Scheduled Basis" groupName="syncGroup" selected="false"
-                                            value="yes" fontSize="24"/>
-                        </mx:VBox>
-                    </mx:VBox>
-                    <mx:VBox verticalAlign="middle" horizontalAlign="center" height="100%" width="50%">
-                        <mx:ViewStack selectedIndex="{syncIndex}" resizeToContent="true">
-                            <mx:Box/>
-                            <mx:VBox>
-                                <schedule:ScheduleConfiguration id="scheduleConfiguration" activity="{activity}"
-                                        fontSize="18"/>
-                            </mx:VBox>
-                        </mx:ViewStack>
-                    </mx:VBox>
-                </mx:HBox>
-                <mx:VBox height="50%" width="100%" backgroundColor="#404041" horizontalAlign="center"
-                         verticalAlign="middle">
-                    <mx:TextArea text="{syncLabel}"
-                             fontSize="24" width="800"
-                             color="#FFFFFF" height="200" backgroundAlpha="0" editable="false" selectable="false" borderStyle="none"/>
-                    <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="topIndex = 2"/>
                         <mx:Button label="Finish" fontSize="24" click="allDone()" enabled="{enableReportSave}"/>
                     </mx:HBox>
                 </mx:VBox>
-            </mx:VBox>
+            </mx:VBox>            
         </mx:ViewStack>
 
     </mx:VBox>
