@@ -907,6 +907,7 @@ public class DataStorage {
         sqlBuilder.append("PRIMARY KEY (");
         sqlBuilder.append(primaryKey);
         sqlBuilder.append("),");
+        int indexCount = 0;
         for (KeyMetadata keyMetadata : keys.values()) {
             if (keyMetadata.getType() == Value.STRING || keyMetadata.getType() == Value.DATE) {
                 sqlBuilder.append("INDEX (");
@@ -921,6 +922,10 @@ public class DataStorage {
                 sqlBuilder.append(column);
                 sqlBuilder.append(")");
                 sqlBuilder.append(",");
+            }
+            indexCount++;
+            if (indexCount == 63) {
+                break;
             }
         }
         if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
