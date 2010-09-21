@@ -19,9 +19,11 @@ public class WeekdayScheduleType extends ScheduleType {
     @Nullable
     public Date runTime(Date lastTime, Date now) {
         Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(cal.getTimeInMillis() - (getTimeOffset() * 60 * 1000));
         cal.set(Calendar.HOUR_OF_DAY, getHour());
         cal.set(Calendar.MINUTE, getMinute());
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+        cal.setTimeInMillis(cal.getTimeInMillis() + (getTimeOffset() * 60 * 1000));
         if (dayOfWeek >= Calendar.MONDAY && dayOfWeek <= Calendar.FRIDAY) {
             if (cal.getTime().getTime() > lastTime.getTime() && cal.getTime().getTime() < now.getTime()) {
                 return cal.getTime();

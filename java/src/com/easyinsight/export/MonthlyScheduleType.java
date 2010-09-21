@@ -34,9 +34,11 @@ public class MonthlyScheduleType extends ScheduleType {
     @Nullable
     public Date runTime(Date lastTime, Date now) {
         Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(cal.getTimeInMillis() - (getTimeOffset() * 60 * 1000));
         cal.set(Calendar.HOUR_OF_DAY, getHour());
         cal.set(Calendar.MINUTE, getMinute());
         int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        cal.setTimeInMillis(cal.getTimeInMillis() + (getTimeOffset() * 60 * 1000));
         if (dayOfMonth == this.dayOfMonth) {
             if (cal.getTime().getTime() > lastTime.getTime() && cal.getTime().getTime() < now.getTime()) {
                 return cal.getTime();

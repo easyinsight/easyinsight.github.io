@@ -35,16 +35,11 @@ public class WeeklyScheduleType extends ScheduleType {
     @Nullable
     public Date runTime(Date lastTime, Date now) {
         Calendar cal = Calendar.getInstance();
-        System.out.println("time offset = " + getTimeOffset());
         cal.setTimeInMillis(cal.getTimeInMillis() - (getTimeOffset() * 60 * 1000));
-        System.out.println("minus offset = " + cal.getTime());
         cal.set(Calendar.HOUR_OF_DAY, getHour());
         cal.set(Calendar.MINUTE, getMinute());
-        System.out.println("cal time = " + cal.getTime());
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
-        //cal.set(Calendar.ZONE_OFFSET, getTimeOffset() * 60 * 1000);
         cal.setTimeInMillis(cal.getTimeInMillis() + (getTimeOffset() * 60 * 1000));
-        System.out.println("final time = " + cal.getTime());
 
         if (dayOfWeek == this.dayOfWeek) {
             if (cal.getTime().getTime() > lastTime.getTime() && cal.getTime().getTime() < now.getTime()) {
