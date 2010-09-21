@@ -133,7 +133,7 @@
         </mx:HBox>
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" id="groupStack">
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                <mx:ProgressBar indeterminate="true" label="Loading available groups..."/>
+                <mx:ProgressBar indeterminate="{stackIndex == 0}" label="Loading available groups..."/>
             </mx:Box>
             <mx:Canvas width="100%" height="100%">
                 <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.groups.GroupView" dataProvider="{myGroups}" id="solutionGrid"

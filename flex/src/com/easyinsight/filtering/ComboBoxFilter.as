@@ -9,13 +9,14 @@ import com.easyinsight.analysis.Value;
 import com.easyinsight.framework.CredentialsCache;
 
 import flash.events.Event;
-import flash.events.MouseEvent;	
-	
-	import mx.collections.ArrayCollection;
+import flash.events.MouseEvent;
+
+import mx.binding.utils.BindingUtils;
+import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.containers.HBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
+
 import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
@@ -181,6 +182,7 @@ public class ComboBoxFilter extends HBox implements IFilter
             showEffect.direction = "down";
             loadingBar.label = "";
             loadingBar.labelPlacement = "right";
+            BindingUtils.bindProperty(loadingBar, "indeterminate", this, "valuesSet");
             loadingBar.indeterminate = true;
             loadingBox.addChild(loadingBar);
             loadingBox.setStyle("hideEffect", showEffect);
@@ -200,6 +202,20 @@ public class ComboBoxFilter extends HBox implements IFilter
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
+    }
+
+    private var _valuesSet:Boolean = true;
+
+
+    [Bindable(event="valuesSetChanged")]
+    public function get valuesSet():Boolean {
+        return _valuesSet;
+    }
+
+    public function set valuesSet(value:Boolean):void {
+        if (_valuesSet == value) return;
+        _valuesSet = value;
+        dispatchEvent(new Event("valuesSetChanged"));
     }
 
     private function filterValueChanged(event:DropdownEvent):void {
@@ -260,6 +276,7 @@ public class ComboBoxFilter extends HBox implements IFilter
             if (deleteButton != null) {
 			    deleteButton.enabled = true;
             }
+            valuesSet = false;
             viewStack.selectedIndex = 1;
             if (!_loadingFromReport) {
                 if (newFilter) {

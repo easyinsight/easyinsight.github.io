@@ -30,9 +30,9 @@
         }
         ]]></mx:Script>
     <mx:HBox horizontalAlign="center" width="100%" height="100%" backgroundColor="#818285" id="core">
-        <mx:VBox width="1000" backgroundColor="#FFFFFF" height="100%" paddingTop="10" paddingLeft="5" paddingRight="5"
+        <mx:Canvas width="1000" backgroundColor="#FFFFFF" height="100%"
                  id="scorecardBox">
             <scorecard:ScorecardUserDisplay id="scorecardDisplay" noData="currentState='noData'" gotData="currentState=''"/>
-        </mx:VBox>
+        </mx:Canvas>
     </mx:HBox>
 </mx:VBox>

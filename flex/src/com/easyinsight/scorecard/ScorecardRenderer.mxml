@@ -49,6 +49,7 @@
             forcedRefresh = false;
             if (!_tutorialMode) {
                 if (_scorecard == null) {
+                    retrieving = true;
                     baseIndex = 0;
                     var metadata:InsightRequestMetadata = new InsightRequestMetadata();
                     metadata.utcOffset = new Date().getTimezoneOffset();
@@ -112,6 +113,9 @@
             }
         }
 
+        [Bindable]
+        private var retrieving:Boolean = false;
+
         public function set configurationMode(value:Boolean):void {
             if (_configurationMode == value) return;
             _configurationMode = value;
@@ -123,6 +127,7 @@
         private var infoLabel:String;
 
         private function gotScorecard():void {
+            retrieving = false;
             var scorecardWrapper:ScorecardWrapper = scorecardService.getScorecard.lastResult as ScorecardWrapper;
             _scorecard = scorecardWrapper.scorecard;
             if (scorecardWrapper.credentials != null && scorecardWrapper.credentials.length > 0) {
@@ -292,9 +297,9 @@
     <mx:RemoteObject destination="scorecardService" id="scorecardService">
         <mx:method name="getScorecard" result="gotScorecard()"/>
     </mx:RemoteObject>
-    <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%" creationPolicy="all">
+    <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%">
         <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle">
-            <mx:ProgressBar label="Loading the scorecard..." indeterminate="true"/>
+            <mx:ProgressBar label="Loading the scorecard..." indeterminate="{retrieving}"/>
         </mx:Box>
         <mx:VBox width="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:Label text="You haven't defined any KPIs yet for this scorecard." fontSize="16"/>
@@ -305,7 +310,7 @@
                 <mx:ViewStack width="100%" selectedIndex="{refreshIndex}" resizeToContent="true">
                     <mx:Box/>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:ProgressBar label="{asyncMessage}" indeterminate="true"/>
+                        <!--<mx:ProgressBar label="{asyncMessage}" indeterminate="{refreshIndex == 1}"/>-->
                     </mx:HBox>
                     <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
                         <mx:Label text="Some of your KPIs are out of date:"/>
@@ -318,7 +323,8 @@
                                     width="760" id="plainGrid">
                 <scorecard:columns>
                     <util:EIDataGridColumn headerText="" dataField="name"
-                                           itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50" sortable="false"/>
+                                           itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"
+                                           sortable="false"/>
                     <util:EIDataGridColumn headerText="KPI Name" dataField="name"
                                            itemRenderer="{kpiNameFactory}"/>
                     <util:EIDataGridColumn headerText="Latest Value" dataField="name"
@@ -336,39 +342,40 @@
                 <mx:Label text="Click on KPI names to dive into the data." fontSize="10"/>
             </mx:HBox>
         </mx:VBox>
-    <mx:VBox width="100%">
-        <mx:HBox width="100%" verticalAlign="middle">            
-            <mx:ViewStack width="100%" selectedIndex="{refreshIndex}">
-                <mx:Box/>
-                <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                    <mx:ProgressBar label="Refreshing data sources in the background..." indeterminate="true"/>
-                </mx:HBox>
-                <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-                    <mx:Label text="Some of your KPIs are out of date:"/>
-                    <mx:Button label="Refresh Values" click="refreshValues()"/>
-                </mx:HBox>
-            </mx:ViewStack>
-        </mx:HBox>
-        <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="760" id="adminGrid">
-            <mx:columns>
-                <util:EIDataGridColumn headerText="" dataField="name"
-                                       itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50" sortable="false"/>
-                <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
-                <util:EIDataGridColumn headerText="Latest Value" dataField="name"
-                                       itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
-                <util:EIDataGridColumn headerText="" dataField="name"
-                                       itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
-                                       sortable="false"/>
-                <util:EIDataGridColumn headerText="" dataField="name" sortable="false"
-                                       itemRenderer="{controlFactory}" width="150"/>
-            </mx:columns>
-        </mx:DataGrid>
-        <mx:HBox width="100%" horizontalAlign="center" visible="{!_tutorialMode}">
-            <mx:Label text="Click on KPI names to dive into the data." fontSize="10"/>
-        </mx:HBox>
-    </mx:VBox>
+        <mx:VBox width="100%">
+            <mx:HBox width="100%" verticalAlign="middle">
+                <mx:ViewStack width="100%" selectedIndex="{refreshIndex}">
+                    <mx:Box/>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                        <!--<mx:ProgressBar label="Refreshing data sources in the background..." indeterminate="{refreshIndex == 1}"/>-->
+                    </mx:HBox>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:Label text="Some of your KPIs are out of date:"/>
+                        <mx:Button label="Refresh Values" click="refreshValues()"/>
+                    </mx:HBox>
+                </mx:ViewStack>
+            </mx:HBox>
+            <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="760" id="adminGrid">
+                <mx:columns>
+                    <util:EIDataGridColumn headerText="" dataField="name"
+                                           itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"
+                                           sortable="false"/>
+                    <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
+                    <util:EIDataGridColumn headerText="Latest Value" dataField="name"
+                                           itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
+                    <util:EIDataGridColumn headerText="" dataField="name"
+                                           itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
+                                           sortable="false"/>
+                    <util:EIDataGridColumn headerText="" dataField="name" sortable="false"
+                                           itemRenderer="{controlFactory}" width="150"/>
+                </mx:columns>
+            </mx:DataGrid>
+            <mx:HBox width="100%" horizontalAlign="center" visible="{!_tutorialMode}">
+                <mx:Label text="Click on KPI names to dive into the data." fontSize="10"/>
+            </mx:HBox>
+        </mx:VBox>
         <mx:Box width="100%" height="250" horizontalAlign="center" verticalAlign="middle">
-            <mx:ProgressBar label="Refreshing the scorecard..." indeterminate="true"/>
+            <!--<mx:ProgressBar label="Refreshing the scorecard..." indeterminate="{baseIndex == 4}"/>-->
         </mx:Box>
-</mx:ViewStack>
+    </mx:ViewStack>
 </mx:VBox>

@@ -825,7 +825,7 @@
                         <mx:Box/>
                         <mx:Box width="100%" height="100%" id="loadingLayer" visible="{loading}"
                                 horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-                            <mx:ProgressBar indeterminate="true" label="Loading the report..." visible="true" fontSize="20"/>
+                            <mx:ProgressBar indeterminate="{overlayIndex == 1}" label="Loading the report..." visible="true" fontSize="20"/>
                         </mx:Box>
                         <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
                                 verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">

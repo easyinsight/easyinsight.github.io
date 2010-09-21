@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*"
          xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*" xmlns:util="com.easyinsight.util.*"
-         creationComplete="onCreationComplete()" width="100%">
+         creationComplete="onCreationComplete()" width="100%" paddingTop="10" paddingLeft="5" paddingRight="5">
     <mx:Metadata>
         [Event(name="noData", type="flash.events.Event")]
         [Event(name="gotData", type="flash.events.Event")]
@@ -21,7 +21,7 @@
         import mx.rpc.events.ResultEvent;
 
         private function redirectToGoogle(ev:ResultEvent):void {
-            flash.net.navigateToURL(new URLRequest("http://www.google.com/ig/adde?moduleurl=http://hosting.gmodules.com/ig/gadgets/file/107893811811246228172/scorecard-gadget.xml"));
+            navigateToURL(new URLRequest("http://www.google.com/ig/adde?moduleurl=http://hosting.gmodules.com/ig/gadgets/file/107893811811246228172/scorecard-gadget.xml"));
         }
 
         private function addToGoogle():void {
@@ -59,7 +59,7 @@
         private function onCreationComplete():void {
             primaryStackIndex = 0;
             retrieveScorecards();
-            scorecardService.storeScorecardForGoogle.addEventListener(ResultEvent.RESULT,  redirectToGoogle);
+            scorecardService.storeScorecardForGoogle.addEventListener(ResultEvent.RESULT, redirectToGoogle);
         }
 
         [Bindable]
@@ -106,7 +106,7 @@
             var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
             configureRenderer(scorecardRenderer);
             scorecardRenderer.addEventListener(FlexEvent.CREATION_COMPLETE, function (event:FlexEvent):void {
-                scorecardIndex = newIndex;                
+                scorecardIndex = newIndex;
             }, false, 0, true);
             scorecardRenderer.scorecardDescriptor = event.scorecard;
             scorecardRenderer.retrieveData();
@@ -337,7 +337,7 @@
         <mx:ViewStack resizeToContent="true" selectedIndex="{primaryStackIndex}" width="100%" creationPolicy="all"
                       paddingTop="15" paddingBottom="15">
             <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle">
-                <mx:ProgressBar label="Loading scorecards..." indeterminate="true"/>
+                <mx:ProgressBar label="Loading scorecards..." indeterminate="{primaryStackIndex == 0}"/>
             </mx:Box>
             <mx:VBox horizontalAlign="center" width="100%">
                 <mx:Label text="You haven't defined any scorecards yet." fontSize="16"/>
