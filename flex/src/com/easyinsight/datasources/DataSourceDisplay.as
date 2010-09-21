@@ -203,23 +203,25 @@ public class DataSourceDisplay extends VBox {
     private var lastMessage:Date;
 
     private function onMessage(event:DataSourceMessageEvent):void {
-        var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
-        //Alert.show("got a message with type = " + scorecardEvent.type);
-        if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
-            lastMessage = scorecardEvent.timestamp;
-            if (scorecardEvent.dataSourceID == _dataSource.dataSourceID) {
-                if (scorecardEvent.type == DataSourceAsyncEvent.NAME_UPDATE) {
-                    asyncLabel = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
-                } else if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
-                    asyncLabel = scorecardEvent.dataSourceName;
-                    if (scorecardEvent.max > 0 && progressBar != null) {
-                        progressBar.maximum = scorecardEvent.max;
-                        progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
+        if (event != null && progressBar != null) {
+            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
+            //Alert.show("got a message with type = " + scorecardEvent.type);
+            if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
+                lastMessage = scorecardEvent.timestamp;
+                if (scorecardEvent.dataSourceID == _dataSource.dataSourceID) {
+                    if (scorecardEvent.type == DataSourceAsyncEvent.NAME_UPDATE) {
+                        asyncLabel = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
+                    } else if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
+                        asyncLabel = scorecardEvent.dataSourceName;
+                        if (scorecardEvent.max > 0 && progressBar != null) {
+                            progressBar.maximum = scorecardEvent.max;
+                            progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
+                        }
+                    } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
+                        asyncLabel = scorecardEvent.dataSourceName;
+                    } else if (scorecardEvent.type == DataSourceAsyncEvent.DONE) {
+                        stackIndex = 3;
                     }
-                } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
-                    asyncLabel = scorecardEvent.dataSourceName;
-                } else if (scorecardEvent.type == DataSourceAsyncEvent.DONE) {
-                    stackIndex = 3;
                 }
             }
         }
