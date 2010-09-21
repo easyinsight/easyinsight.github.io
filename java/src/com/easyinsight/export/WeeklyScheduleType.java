@@ -37,14 +37,14 @@ public class WeeklyScheduleType extends ScheduleType {
         Calendar cal = Calendar.getInstance();
         System.out.println("time offset = " + getTimeOffset());
         cal.setTimeInMillis(cal.getTimeInMillis() - (getTimeOffset() * 60 * 1000));
+        System.out.println("minus offset = " + cal.getTime());
         cal.set(Calendar.HOUR_OF_DAY, getHour());
         cal.set(Calendar.MINUTE, getMinute());
         System.out.println("cal time = " + cal.getTime());
 
         //cal.set(Calendar.ZONE_OFFSET, getTimeOffset() * 60 * 1000);
-        System.out.println("after time zone = " + cal.getTime());
         cal.setTimeInMillis(cal.getTimeInMillis() + (getTimeOffset() * 60 * 1000));
-
+        System.out.println("final time = " + cal.getTime());
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
         if (dayOfWeek == this.dayOfWeek) {
             if (cal.getTime().getTime() > lastTime.getTime() && cal.getTime().getTime() < now.getTime()) {
