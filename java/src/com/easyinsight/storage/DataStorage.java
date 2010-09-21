@@ -589,8 +589,12 @@ public class DataStorage {
             int i = 1;
             for (FilterDefinition filterDefinition : filters) {
                 KeyMetadata keyMetadata = keys.get(filterDefinition.getField().createAggregateKey(false));
-                int type = keyMetadata.type;
-                i = filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
+                if (keyMetadata != null) {
+                    int type = keyMetadata.type;
+                    i = filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
+                } else {
+                    LogClass.error(filterDefinition.getField().getAnalysisItemID() + " - " + filterDefinition.getField().toDisplay() + " was not found in the key metadata");
+                }
             }
         }
     }

@@ -265,21 +265,7 @@ public class CompositeFeed extends Feed {
         DataSet dataSet = null;
 
         List<String> auditStrings = new ArrayList<String>();
-        
-        // need to identify a start vertex for this to work properly?
-
-        // for example, we merge account:account ID -> with user:account ID
-        // we merge data source:ds ID with join:ds ID
-        //
-
-        Map<Long, Set<Long>> associations = new HashMap<Long, Set<Long>>();
-        Map<Long, Set<QueryStateNode>> map = new HashMap<Long, Set<QueryStateNode>>();
         ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph);
-
-        Set<AnalysisItem> masterSet = new HashSet<AnalysisItem>();
-        for (QueryStateNode node : queryNodeMap.values()) {
-            masterSet.addAll(node.neededItems);
-        }
 
         while (iter.hasNext()) {
             QueryStateNode sourceNode = iter.next();
@@ -304,52 +290,12 @@ public class CompositeFeed extends Feed {
                     targetNode = swap;
                 }
                 MergeAudit mergeAudit = last.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems,
-                        sourceNode.dataSourceName, targetNode.dataSourceName, masterSet);
+                        sourceNode.dataSourceName, targetNode.dataSourceName);
                 dataSet = mergeAudit.getDataSet();
                 auditStrings.addAll(mergeAudit.getMergeStrings());
                 //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
-
-                // retrieve the data in cluster 1
-                // retrieve the data in cluster 2
-
-                // retrieve the data from clusters 1 -> 2
-
-                Set<Long> sourceAssociations = associations.get(sourceNode.feedID);
-                if (sourceAssociations == null) {
-                    sourceAssociations = new HashSet<Long>();
-                    sourceAssociations.add(sourceNode.feedID);
-                    associations.put(sourceNode.feedID, sourceAssociations);
-                }
-
-                Set<Long> targetAssociations = associations.get(targetNode.feedID);
-                if (targetAssociations == null) {
-                    targetAssociations = new HashSet<Long>();
-                    targetAssociations.add(targetNode.feedID);
-                    associations.put(targetNode.feedID, targetAssociations);
-                }
-
-                Set<QueryStateNode> sourceIDs = map.get(sourceNode.feedID);
-                if (sourceIDs == null) {
-                    sourceIDs = new HashSet<QueryStateNode>();
-                    map.put(sourceNode.feedID, sourceIDs);
-                }
-                sourceIDs.add(sourceNode);
-                sourceIDs.add(targetNode);
-                Set<QueryStateNode> targetIDs = map.get(targetNode.feedID);
-                if (targetIDs == null) {
-                    targetIDs = new HashSet<QueryStateNode>();
-                    map.put(targetNode.feedID, targetIDs);
-                }
-                targetIDs.add(targetNode);
-                targetIDs.add(sourceNode);
-                sourceIDs.addAll(targetIDs);
-                targetIDs.addAll(sourceIDs);
-                for (QueryStateNode node : sourceIDs) {
-                    node.myDataSet = dataSet;
-                }
-                for (QueryStateNode node : targetIDs) {
-                    node.myDataSet = dataSet;
-                }
+                sourceNode.myDataSet = dataSet;
+                targetNode.myDataSet = dataSet;
             }
 
         }

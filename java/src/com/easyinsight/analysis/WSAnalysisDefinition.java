@@ -334,7 +334,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     public List<FilterDefinition> retrieveFilterDefinitions() {
-        return filterDefinitions;
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        if (filterDefinitions != null) {
+            for (FilterDefinition filter : filterDefinitions) {
+                if (filter.isEnabled()) {
+                    filters.add(filter);
+                }
+            }
+        }
+        return filters;
     }
 
     public Set<AnalysisItem> getColumnItems(List<AnalysisItem> allItems) {

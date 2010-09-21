@@ -45,8 +45,7 @@ public class AggregateKey extends NamedKey {
         AggregateKey that = (AggregateKey) o;
 
         if (type != that.type) return false;
-        if (filters != null ? !filters.equals(that.filters) : that.filters != null) return false;
-        if (!key.equals(that.key)) return false;
+        if (key != null ? !key.equals(that.key) : that.key != null) return false;
 
         return true;
     }
@@ -55,8 +54,7 @@ public class AggregateKey extends NamedKey {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + type;
-        result = 31 * result + key.hashCode();
-        result = 31 * result + (filters != null ? filters.hashCode() : 0);
+        result = 31 * result + (key != null ? key.hashCode() : 0);
         return result;
     }
 }

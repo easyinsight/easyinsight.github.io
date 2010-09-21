@@ -60,7 +60,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new TypeTransformComponent());
 
         if (report.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
+            for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor()));
             }
         }
@@ -92,7 +92,7 @@ public class StandardReportPipeline extends Pipeline {
 
         components.add(new LinkDecorationComponent());
         if (report.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
+            for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor()));
             }
         }
