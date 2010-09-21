@@ -186,10 +186,14 @@
         protected override function measure():void {
             super.measure();
             if (kpis != null) {
-                plainGrid.verticalScrollPolicy = "off";
-                plainGrid.height = plainGrid.measureHeightOfItems(0, kpis.length) + plainGrid.headerHeight + 4;
-                adminGrid.verticalScrollPolicy = "off";
-                adminGrid.height = adminGrid.measureHeightOfItems(0, kpis.length) + adminGrid.headerHeight + 4;
+                if (plainGrid != null) {
+                    plainGrid.verticalScrollPolicy = "off";
+                    plainGrid.height = plainGrid.measureHeightOfItems(0, kpis.length) + plainGrid.headerHeight + 4;
+                }
+                if (adminGrid != null) {
+                    adminGrid.verticalScrollPolicy = "off";
+                    adminGrid.height = adminGrid.measureHeightOfItems(0, kpis.length) + adminGrid.headerHeight + 4;
+                }
             }
         }
 
@@ -297,7 +301,7 @@
     <mx:RemoteObject destination="scorecardService" id="scorecardService">
         <mx:method name="getScorecard" result="gotScorecard()"/>
     </mx:RemoteObject>
-    <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%"  creationPolicy="all">
+    <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%">
         <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:ProgressBar label="Loading the scorecard..." indeterminate="{retrieving}"/>
         </mx:Box>
