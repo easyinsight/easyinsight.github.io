@@ -109,7 +109,8 @@ public class SendGridEmail {
 
     }
 
-    public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String reportName, boolean htmlEmail, String fromAddress, String fromName)
+    public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String attachmentName, boolean htmlEmail, String fromAddress, String fromName,
+                                    String mimeEncoding)
             throws MessagingException, UnsupportedEncodingException {
 
 
@@ -146,9 +147,9 @@ public class SendGridEmail {
         }
 
         BodyPart bodyPart = new MimeBodyPart();
-        DataSource source = new ByteArrayDataSource(file, "application/excel");
+        DataSource source = new ByteArrayDataSource(file, mimeEncoding);
         bodyPart.setDataHandler(new DataHandler(source));
-        bodyPart.setFileName(reportName + ".xls");
+        bodyPart.setFileName(attachmentName);
         bodyPart.setDisposition(Part.ATTACHMENT);
 
         multipart.addBodyPart(bodyPart);

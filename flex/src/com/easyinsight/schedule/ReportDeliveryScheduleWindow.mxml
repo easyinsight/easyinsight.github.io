@@ -60,6 +60,7 @@
                 body = _activity.body;
                 subjectLine = _activity.subject;
                 fromUserID = _activity.senderID;
+                formatValue = String(_activity.reportFormat);
             } else {
                 fromUserID = User.getInstance().userID;
             }
@@ -90,6 +91,7 @@
                 }
                 _activity.users = users;
                 _activity.emails = emails;
+                _activity.reportFormat = int(outputFormatBox.selectedItem.data);
 
                 _activity.htmlEmail = htmlEmailCheckbox.selected;
                 if (_fixedReportID > 0) {
@@ -199,7 +201,7 @@
         private var subjectLine:String;
 
         [Bindable]
-        private var formatValue:int;
+        private var formatValue:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
@@ -225,6 +227,7 @@
                                 <mx:ArrayCollection>
                                     <mx:Array>
                                         <mx:Object label="Excel" data="1"/>
+                                        <mx:Object label="PNG" data="2"/>
                                     </mx:Array>
                                 </mx:ArrayCollection>
                             </util:dataProvider>

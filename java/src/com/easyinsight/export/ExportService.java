@@ -22,7 +22,6 @@ import com.easyinsight.analysis.ListRow;
 import com.easyinsight.analysis.*;
 
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.util.RandomTextGenerator;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
@@ -32,8 +31,6 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -45,15 +42,24 @@ public class ExportService {
 
     public static final String CURRENCY_STYLE = "currency";
     public static final String GENERIC_STYLE = "generic";
-
-    private static final String URL = "https://localhost:4443/app/selenium/selenium.jsp?userName={0}&password={1}&seleniumID={2}&dataSourceID={3}&reportID={4}&reportType={5}";
-
+    
     public void seleniumDraw(long requestID, byte[] bytes) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE SELENIUM_REQUEST SET RESULT_BYTES = ? WHERE SELENIUM_REQUEST_ID = ?");
+            updateStmt.setBytes(1, bytes);
+            updateStmt.setLong(2, requestID);
+            updateStmt.executeUpdate();
             conn.commit();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SELENIUM_PROCESSOR_ID, ACCOUNT_ID FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST_ID = ?");
+            queryStmt.setLong(1, requestID);
+            ResultSet rs = queryStmt.executeQuery();
+            rs.next();
+            long processorID = rs.getLong(1);
+            long accountID = rs.getLong(2);
+            SeleniumPostProcessor processor = SeleniumPostProcessor.loadProcessor(processorID, conn);
+            processor.process(bytes, conn, accountID);
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -64,46 +70,8 @@ public class ExportService {
         }
     }
 
-    public void test() {
-        requestSeleniumDrawForEmail(38, 1);
-    }
-
-    public void requestSeleniumDrawForEmail(long reportDeliveryID, long userID) {
-        // emit the JMS event or whatever we're using
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            long id = new EmailSeleniumPostProcessor(reportDeliveryID).save(conn);
-            String userName = RandomTextGenerator.generateText(50);
-            String password = RandomTextGenerator.generateText(50);
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SELENIUM_REQUEST (SELENIUM_PROCESSOR_ID, " +
-                    "USERNAME, PASSWORD, REQUEST_TIME, USER_ID) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            insertStmt.setLong(1, id);
-            insertStmt.setString(2, userName);
-            insertStmt.setString(3, password);
-            insertStmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
-            insertStmt.setLong(5, userID);
-            insertStmt.execute();
-            long seleniumID = Database.instance().getAutoGenKey(insertStmt);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, ANALYSIS.data_feed_id, ANALYSIS.report_type, ANALYSIS.url_key FROM " +
-                    "ANALYSIS, REPORT_DELIVERY WHERE ANALYSIS.analysis_id = REPORT_DELIVERY.report_id AND REPORT_DELIVERY.report_delivery_id = ?");
-            queryStmt.setLong(1, reportDeliveryID);
-            ResultSet rs = queryStmt.executeQuery();
-            rs.next();
-            long dataSourceID = rs.getLong(2);
-            int reportType = rs.getInt(3);
-            String urlKey = rs.getString(4);
-            String url = MessageFormat.format(URL, userName, password, seleniumID, dataSourceID, urlKey, reportType);
-            System.out.println(url);
-            conn.commit();
-        } catch (Throwable e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
+    public void test(long activityID, long userID, long accountID) {
+        new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID);
     }
 
     public void addOrUpdateSchedule(ScheduledActivity scheduledActivity, int utcOffset) {

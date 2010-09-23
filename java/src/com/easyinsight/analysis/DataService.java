@@ -31,12 +31,12 @@ public class DataService {
 
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials, int utfOffset) {
-        SecurityUtil.authorizeFeedAccess(feedID);
-        if (analysisItem == null) {
-            LogClass.error("Received null analysis item from feed " + feedID);
-            return null;
-        }
         try {
+            SecurityUtil.authorizeFeedAccess(feedID);
+            if (analysisItem == null) {
+                LogClass.error("Received null analysis item from feed " + feedID);
+                return null;
+            }
             Feed feed = feedRegistry.getFeed(feedID);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(utfOffset);
@@ -49,8 +49,8 @@ public class DataService {
     }
 
     public Set<CredentialRequirement> getCredentialRequirements(long feedID) {
-        SecurityUtil.authorizeFeedAccess(feedID);
         try {
+            SecurityUtil.authorizeFeedAccess(feedID);
             Feed feed = feedRegistry.getFeed(feedID);
             return feed.getCredentialRequirement(false);
         } catch (Exception e) {
@@ -60,8 +60,8 @@ public class DataService {
     }
 
     public FeedMetadata getFeedMetadata(long feedID) {
-        SecurityUtil.authorizeFeedAccess(feedID);
         try {
+            SecurityUtil.authorizeFeedAccess(feedID);
             Feed feed = feedRegistry.getFeed(feedID);
             Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
             Collection<AnalysisItem> feedItems = feed.getFields();
@@ -101,16 +101,6 @@ public class DataService {
         }
     }
 
-    /*public ListDataResults list(long analysisID) {
-        AnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);
-        return list(analysisDefinition.createBlazeDefinition());
-    }
-
-    public CrossTabDataResults pivot(long analysisID) {
-        AnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);
-        return pivot(analysisDefinition.createBlazeDefinition());
-    } */
-
     private Set<Long> validate(WSAnalysisDefinition analysisDefinition, Feed feed) {
         Set<Long> ids = new HashSet<Long>();
         Set<Long> invalidIDs = new HashSet<Long>();
@@ -135,8 +125,8 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
-        SecurityUtil.authorizeInsight(reportID);
         try {
+            SecurityUtil.authorizeInsight(reportID);
             Feed feed = feedRegistry.getFeed(dataSourceID);
             Set<CredentialRequirement> credentialsRequired = feed.getCredentialRequirement(insightRequestMetadata.isRefreshAllSources());
             if (credentialsRequired.size() > 0) {
@@ -273,8 +263,8 @@ public class DataService {
     }
 
     public DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
@@ -308,8 +298,8 @@ public class DataService {
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             long startTime = System.currentTimeMillis();
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
             if (insightRequestMetadata == null) {
