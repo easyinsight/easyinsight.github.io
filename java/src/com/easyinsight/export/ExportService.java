@@ -59,6 +59,9 @@ public class ExportService {
             long processorID = rs.getLong(1);
             long accountID = rs.getLong(2);
             SeleniumPostProcessor processor = SeleniumPostProcessor.loadProcessor(processorID, conn);
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST_ID = ?");
+            clearStmt.setLong(1, requestID);
+            clearStmt.executeUpdate();
             processor.process(bytes, conn, accountID);
         } catch (Exception e) {
             LogClass.error(e);
