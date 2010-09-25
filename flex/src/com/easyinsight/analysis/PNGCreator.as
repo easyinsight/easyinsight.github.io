@@ -30,6 +30,12 @@ package com.easyinsight.analysis
 			Alert.show("Image saved!");
 		}
 
+        public function drawToBytes(renderable:DisplayObject):ByteArray {
+            var bd:BitmapData = new BitmapData(renderable.width, renderable.height);
+			bd.draw(renderable);
+			return PNGEnc.encode(bd);
+        }
+
 		public function draw(renderable:DisplayObject):void {
 			var bd:BitmapData = new BitmapData(renderable.width, renderable.height);
 			bd.draw(renderable);
