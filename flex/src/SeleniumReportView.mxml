@@ -1,0 +1,105 @@
+<?xml version="1.0" ?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+                creationComplete="handleFlashVars()" xmlns:dashboard="com.easyinsight.dashboard.*"
+                paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
+                bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.analysis.DefaultMenuFactory;
+        import com.easyinsight.analysis.PopupMenuFactory;
+
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.framework.EIMessageListener;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.framework.WebCredentialsCache;
+
+        import mx.controls.Alert;
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        [Bindable]
+        private var urlKey:String;
+
+        [Bindable]
+        private var reportType:int;
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        [Bindable]
+        private var reportName:String;
+
+        private var userName:String;
+
+        private var password:String;
+
+        [Bindable]
+        private var requestID:int;
+
+        private function handleFlashVars():void {
+            CredentialsCache.initialize(new WebCredentialsCache());
+            EIMessageListener.initialize();
+            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            this.urlKey = String(Application.application.parameters.analysisID);
+            this.reportType = int(Application.application.parameters.reportType);
+            this.dataSourceID = int(Application.application.parameters.dataSourceID);
+            this.reportName = String(Application.application.parameters.reportName);
+            this.userName = String(Application.application.parameters.userName);
+            this.password = String(Application.application.parameters.password);
+            this.requestID = int(Application.application.parameters.seleniumID);
+            // session check
+            userService.seleniumCheck.send(userName, password);
+        }
+
+        private function authenticated():void {
+            var authResult:UserServiceResponse = userService.seleniumCheck.lastResult as UserServiceResponse;
+            var successful:Boolean = authResult.successful;
+            if (successful) {
+
+                if (userService.channelSet == null) {
+                    userService.channelSet = ServerConfig.getChannelSet(userService.destination);
+                }
+                var token:AsyncToken = userService.channelSet.login(userName, password);
+                token.addResponder(new AsyncResponder(
+                    function (event:ResultEvent, token:Object = null):void {
+                        switch (event.result) {
+                            case "success":
+                                User.initializeUser(authResult);
+                                User.getInstance().userName = authResult.userName;
+                                stackIndex = 1;                                
+                                break;
+                            default:
+                                Alert.show("failed!");
+                        }
+                    },
+                    function (event:FaultEvent, token:Object = null):void {
+                        switch (event.fault.faultCode) {
+                            case "Client.Authentication":
+                            default:
+                        Alert.show(event.fault.faultString);
+                        }
+                    }));
+                }
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+		]]>
+	</mx:Script>
+    <mx:RemoteObject id="userService" destination="login">
+        <mx:method name="seleniumCheck" result="authenticated()"/>
+    </mx:RemoteObject>
+    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
+        <mx:Box/>
+        <dashboard:SeleniumReport id="panel" urlKey="{urlKey}" reportName="{reportName}" seleniumID="{requestID}"
+                                      dataSourceID="{dataSourceID}" reportType="{reportType}"
+                                      prefix="https://localhost:4443/"/>
+    </mx:ViewStack>
+</mx:Application>
