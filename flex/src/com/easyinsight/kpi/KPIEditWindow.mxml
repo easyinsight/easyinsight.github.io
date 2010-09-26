@@ -1,6 +1,0 @@
-<?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
-    <mx:Script><![CDATA[
-        
-        ]]></mx:Script>
-</util:EITitleWindow>
