@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.34, for debian-linux-gnu (i486)
+-- MySQL dump 10.13  Distrib 5.1.36, for apple-darwin9.5.0 (i386)
 --
 -- Host: localhost    Database: dms
 -- ------------------------------------------------------
--- Server version	5.1.34-0.dotdeb.0-log
+-- Server version	5.1.36-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -42,9 +42,15 @@ CREATE TABLE `account` (
   `marketplace_enabled` tinyint(4) NOT NULL DEFAULT '1',
   `public_data_enabled` tinyint(4) NOT NULL DEFAULT '1',
   `report_share_enabled` tinyint(4) NOT NULL DEFAULT '1',
+  `upgraded` tinyint(4) NOT NULL DEFAULT '0',
+  `renewal_option_available` tinyint(4) NOT NULL DEFAULT '0',
+  `date_format` int(11) NOT NULL DEFAULT '0',
+  `default_reporting_sharing` tinyint(4) NOT NULL DEFAULT '1',
+  `manual_invoicing` tinyint(4) NOT NULL DEFAULT '0',
+  `billing_month_of_year` int(11) DEFAULT NULL,
   PRIMARY KEY (`account_id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,7 +70,7 @@ CREATE TABLE `account_activation` (
   UNIQUE KEY `activation_key` (`activation_key`),
   KEY `account_id` (`account_id`),
   CONSTRAINT `account_activation_ibfk1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=239 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -87,7 +93,7 @@ CREATE TABLE `account_activity` (
   `max_size` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`account_activity_id`),
   KEY `account_id` (`account_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=361 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,7 +130,7 @@ CREATE TABLE `account_credit_card_billing_info` (
   PRIMARY KEY (`account_credit_card_billing_info_id`),
   KEY `account_id` (`account_id`),
   CONSTRAINT `account_credit_card_billing_info_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -175,7 +181,7 @@ CREATE TABLE `account_time_task` (
   `scheduled_task_id` bigint(20) NOT NULL,
   PRIMARY KEY (`account_time_task_id`),
   KEY `scheduled_task_id` (`scheduled_task_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=681 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=222 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -191,7 +197,7 @@ CREATE TABLE `account_timed_state` (
   `state_change_time` datetime NOT NULL,
   `account_state` int(11) NOT NULL,
   PRIMARY KEY (`account_timed_state_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=182 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -306,7 +312,7 @@ CREATE TABLE `additional_items` (
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `additional_items_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `additional_items_ibfk_2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=296 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -339,6 +345,7 @@ CREATE TABLE `analysis` (
   `solution_visible` tinyint(4) NOT NULL DEFAULT '0',
   `temporary_report` tinyint(4) NOT NULL DEFAULT '0',
   `url_key` varchar(100) DEFAULT NULL,
+  `account_visible` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`analysis_id`),
   KEY `data_feed_id` (`data_feed_id`),
   KEY `analysis_idx3` (`marketplace_visible`),
@@ -346,8 +353,9 @@ CREATE TABLE `analysis` (
   KEY `analysis_idx5` (`solution_visible`),
   KEY `analysis_idx6` (`root_definition`),
   KEY `analysis_url_idx` (`url_key`),
+  KEY `analysis_idx7` (`temporary_report`),
   CONSTRAINT `analysis_ibfk_1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2146 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -384,7 +392,7 @@ CREATE TABLE `analysis_calculation` (
   PRIMARY KEY (`analysis_calculation_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `analysis_calculation_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=238 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -397,14 +405,13 @@ DROP TABLE IF EXISTS `analysis_coordinate`;
 CREATE TABLE `analysis_coordinate` (
   `analysis_coordinate_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `analysis_item_id` bigint(20) NOT NULL,
-  `precision_value` int(11) NOT NULL,
   `analysis_zip_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`analysis_coordinate_id`),
   KEY `analysis_coordinate_ibfk1` (`analysis_item_id`),
   KEY `analysis_coordinate_ibfk2` (`analysis_zip_id`),
-  CONSTRAINT `analysis_coordinate_ibfk2` FOREIGN KEY (`analysis_zip_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL,
-  CONSTRAINT `analysis_coordinate_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=latin1;
+  CONSTRAINT `analysis_coordinate_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
+  CONSTRAINT `analysis_coordinate_ibfk2` FOREIGN KEY (`analysis_zip_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -422,7 +429,7 @@ CREATE TABLE `analysis_date` (
   PRIMARY KEY (`analysis_date_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `analysis_date_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5482 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2907 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -437,15 +444,13 @@ CREATE TABLE `analysis_dimension` (
   `group_by` tinyint(4) DEFAULT NULL,
   `analysis_item_id` bigint(20) DEFAULT NULL,
   `key_dimension_id` bigint(20) DEFAULT NULL,
-  `hierarchy_id` bigint(20) DEFAULT NULL,
-  `hierarchy_level_id` bigint(20) DEFAULT NULL,
   `summary` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`analysis_dimension_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   KEY `key_dimension_id` (`key_dimension_id`),
   CONSTRAINT `analysis_dimension_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_dimension_ibfk_2` FOREIGN KEY (`key_dimension_id`) REFERENCES `analysis_item` (`analysis_item_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=39246 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=17222 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -461,8 +466,10 @@ CREATE TABLE `analysis_hierarchy_item` (
   `hierarchy_level_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`analysis_hierarchy_item_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
+  KEY `analysis_hierarchy_item_ibfk1` (`hierarchy_level_id`),
+  CONSTRAINT `analysis_hierarchy_item_ibfk1` FOREIGN KEY (`hierarchy_level_id`) REFERENCES `hierarchy_level` (`hierarchy_level_id`) ON DELETE SET NULL,
   CONSTRAINT `analysis_hierarchy_item_ibfk2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=467 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -481,7 +488,7 @@ CREATE TABLE `analysis_hierarchy_item_to_hierarchy_level` (
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `analysis_hierarchy_item_to_hierarchy_level_ibfk1` FOREIGN KEY (`hierarchy_level_id`) REFERENCES `hierarchy_level` (`hierarchy_level_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_hierarchy_item_to_hierarchy_level_ibfk2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4643 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -506,12 +513,13 @@ CREATE TABLE `analysis_item` (
   `description` text,
   `concrete` tinyint(4) NOT NULL DEFAULT '1',
   `lookup_table_id` bigint(20) DEFAULT NULL,
+  `sort_sequence` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`analysis_item_id`),
   KEY `item_key_id` (`item_key_id`),
   KEY `analysis_item_ibfk7` (`lookup_table_id`),
   CONSTRAINT `analysis_item_ibfk7` FOREIGN KEY (`lookup_table_id`) REFERENCES `lookup_table` (`lookup_table_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_item_ibfk_1` FOREIGN KEY (`item_key_id`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=54017 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=20078 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -528,9 +536,9 @@ CREATE TABLE `analysis_item_to_filter` (
   PRIMARY KEY (`analysis_item_to_filter_id`),
   KEY `analysis_item_to_filter_ibfk1` (`analysis_item_id`),
   KEY `analysis_item_to_filter_ibfk2` (`filter_id`),
-  CONSTRAINT `analysis_item_to_filter_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`),
-  CONSTRAINT `analysis_item_to_filter_ibfk2` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+  CONSTRAINT `analysis_item_to_filter_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
+  CONSTRAINT `analysis_item_to_filter_ibfk2` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -549,7 +557,7 @@ CREATE TABLE `analysis_item_to_link` (
   KEY `analysis_item_to_link_ibfk2` (`link_id`),
   CONSTRAINT `analysis_item_to_link_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_item_to_link_ibfk2` FOREIGN KEY (`link_id`) REFERENCES `link` (`link_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2579 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=274 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -565,7 +573,7 @@ CREATE TABLE `analysis_latitude` (
   PRIMARY KEY (`analysis_latitude_id`),
   KEY `analysis_latitude_ibfk1` (`analysis_item_id`),
   CONSTRAINT `analysis_latitude_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -583,7 +591,7 @@ CREATE TABLE `analysis_list` (
   PRIMARY KEY (`analysis_list_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `analysis_list_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=412 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=219 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -599,7 +607,7 @@ CREATE TABLE `analysis_longitude` (
   PRIMARY KEY (`analysis_longitude_id`),
   KEY `analysis_longitude_ibfk1` (`analysis_item_id`),
   CONSTRAINT `analysis_longitude_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -619,7 +627,7 @@ CREATE TABLE `analysis_measure` (
   KEY `measure_condition_range_id` (`measure_condition_range_id`),
   CONSTRAINT `analysis_measure_ibfk2` FOREIGN KEY (`measure_condition_range_id`) REFERENCES `measure_condition_range` (`measure_condition_range_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_measure_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14770 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2849 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -677,7 +685,7 @@ CREATE TABLE `analysis_range` (
   CONSTRAINT `analysis_range_ibfk2` FOREIGN KEY (`lower_range_option_id`) REFERENCES `range_option` (`range_option_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_range_ibfk3` FOREIGN KEY (`higher_range_option_id`) REFERENCES `range_option` (`range_option_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_range_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -696,7 +704,7 @@ CREATE TABLE `analysis_range_to_range_option` (
   KEY `analysis_range_to_range_option_ibfk2` (`range_option_id`),
   CONSTRAINT `analysis_range_to_range_option_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_range_to_range_option_ibfk2` FOREIGN KEY (`range_option_id`) REFERENCES `range_option` (`range_option_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=783 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -713,11 +721,15 @@ CREATE TABLE `analysis_step` (
   `end_date_dimension_id` bigint(20) DEFAULT NULL,
   `analysis_item_id` bigint(20) NOT NULL,
   PRIMARY KEY (`analysis_step_id`),
-  KEY `correlation_dimension_id` (`correlation_dimension_id`),
-  KEY `start_date_dimension_id` (`start_date_dimension_id`),
-  KEY `end_date_dimension_id` (`end_date_dimension_id`),
-  KEY `analysis_item_id` (`analysis_item_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=618 DEFAULT CHARSET=latin1;
+  KEY `analysis_step_ibfk1` (`correlation_dimension_id`),
+  KEY `analysis_step_ibfk2` (`start_date_dimension_id`),
+  KEY `analysis_step_ibfk3` (`end_date_dimension_id`),
+  KEY `analysis_step_ibfk4` (`analysis_item_id`),
+  CONSTRAINT `analysis_step_ibfk1` FOREIGN KEY (`correlation_dimension_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL,
+  CONSTRAINT `analysis_step_ibfk2` FOREIGN KEY (`start_date_dimension_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL,
+  CONSTRAINT `analysis_step_ibfk3` FOREIGN KEY (`end_date_dimension_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL,
+  CONSTRAINT `analysis_step_ibfk4` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -732,7 +744,23 @@ CREATE TABLE `analysis_tags` (
   `tag` varchar(100) DEFAULT NULL,
   `use_count` int(11) DEFAULT '0',
   PRIMARY KEY (`analysis_tags_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1256 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=595 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `analysis_text`
+--
+
+DROP TABLE IF EXISTS `analysis_text`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `analysis_text` (
+  `analysis_text_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `analysis_item_id` bigint(20) NOT NULL,
+  `html` tinyint(4) NOT NULL,
+  PRIMARY KEY (`analysis_text_id`),
+  KEY `analysis_text_ibfk1` (`analysis_item_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -771,7 +799,7 @@ CREATE TABLE `analysis_to_data_scrub` (
   KEY `analysis_to_data_scrub_ibfk1` (`analysis_id`),
   CONSTRAINT `analysis_to_data_scrub_ibfk1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_to_data_scrub_ibfk2` FOREIGN KEY (`data_scrub_id`) REFERENCES `data_scrub` (`data_scrub_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -790,22 +818,7 @@ CREATE TABLE `analysis_to_filter_join` (
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `analysis_to_filter_join_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_to_filter_join_ibfk_2` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=881 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `analysis_to_hierarchy_join`
---
-
-DROP TABLE IF EXISTS `analysis_to_hierarchy_join`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `analysis_to_hierarchy_join` (
-  `analysis_to_hierarchy_join` bigint(20) NOT NULL AUTO_INCREMENT,
-  `analysis_id` bigint(20) DEFAULT NULL,
-  `analysis_item_id` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`analysis_to_hierarchy_join`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -824,7 +837,7 @@ CREATE TABLE `analysis_to_tag` (
   KEY `analysis_tags_id` (`analysis_tags_id`),
   CONSTRAINT `analysis_to_tag_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_to_tag_ibfk_2` FOREIGN KEY (`analysis_tags_id`) REFERENCES `analysis_tags` (`analysis_tags_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1190 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -840,7 +853,7 @@ CREATE TABLE `analysis_zip` (
   PRIMARY KEY (`analysis_zip_id`),
   KEY `analysis_zip_ibfk1` (`analysis_item_id`),
   CONSTRAINT `analysis_zip_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=129 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -857,7 +870,7 @@ CREATE TABLE `bandwidth_usage` (
   `bandwidth_date` date NOT NULL,
   PRIMARY KEY (`bandwidth_usage_id`),
   KEY `account_id` (`account_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=399 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -871,9 +884,12 @@ CREATE TABLE `basecamp` (
   `basecamp_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `data_feed_id` bigint(11) NOT NULL,
   `url` varchar(255) NOT NULL,
+  `include_archived` tinyint(4) NOT NULL DEFAULT '0',
+  `include_inactive` tinyint(4) NOT NULL DEFAULT '0',
+  `include_comments` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`basecamp_id`),
   KEY `data_feed_id` (`data_feed_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1606 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=609 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -904,7 +920,7 @@ CREATE TABLE `billing_scheduled_task` (
   PRIMARY KEY (`billing_scheduled_task_id`),
   KEY `billing_scheduled_task_ibfk1` (`scheduled_task_id`),
   CONSTRAINT `billing_scheduled_task_ibfk1` FOREIGN KEY (`scheduled_task_id`) REFERENCES `scheduled_task` (`scheduled_task_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=162 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -920,7 +936,7 @@ CREATE TABLE `billing_task_generator` (
   PRIMARY KEY (`billing_generator_id`),
   KEY `task_generator_id` (`task_generator_id`),
   CONSTRAINT `billing_task_generator_ibfk1` FOREIGN KEY (`task_generator_id`) REFERENCES `task_generator` (`task_generator_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -936,7 +952,7 @@ CREATE TABLE `buy_our_stuff_todo` (
   PRIMARY KEY (`buy_our_stuff_id`),
   KEY `buy_our_stuff_todo_ibfk1` (`todo_id`),
   CONSTRAINT `buy_our_stuff_todo_ibfk1` FOREIGN KEY (`todo_id`) REFERENCES `todo_base` (`todo_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -958,28 +974,7 @@ CREATE TABLE `chart_definition` (
   KEY `limits_metadata_id` (`limits_metadata_id`),
   CONSTRAINT `chart_definition_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `chart_definition_ibfk_2` FOREIGN KEY (`limits_metadata_id`) REFERENCES `limits_metadata` (`limits_metadata_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `chart_field`
---
-
-DROP TABLE IF EXISTS `chart_field`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `chart_field` (
-  `chart_field_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `analysis_id` bigint(20) DEFAULT NULL,
-  `analysis_item_id` bigint(20) DEFAULT NULL,
-  `position` int(11) DEFAULT NULL,
-  `field_type` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`chart_field_id`),
-  KEY `analysis_id` (`analysis_id`),
-  KEY `analysis_item_id` (`analysis_item_id`),
-  CONSTRAINT `chart_field_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
-  CONSTRAINT `chart_field_ibfk_2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1018,7 +1013,7 @@ CREATE TABLE `chart_report` (
   PRIMARY KEY (`chart_report_id`),
   KEY `report_state_id` (`report_state_id`),
   KEY `limits_metadata_id` (`limits_metadata_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=280 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1040,7 +1035,7 @@ CREATE TABLE `community_group` (
   KEY `tag_cloud_id` (`tag_cloud_id`),
   KEY `community_group_url_idx` (`url_key`),
   CONSTRAINT `community_group_ibfk1` FOREIGN KEY (`tag_cloud_id`) REFERENCES `analysis_tags` (`analysis_tags_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1074,6 +1069,7 @@ CREATE TABLE `composite_connection` (
   `target_feed_node_id` bigint(20) NOT NULL,
   `source_join` bigint(20) NOT NULL,
   `target_join` bigint(20) NOT NULL,
+  `priority` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`composite_connection_id`),
   KEY `composite_feed_id` (`composite_feed_id`),
   KEY `source_feed_node_id` (`source_feed_node_id`),
@@ -1085,7 +1081,7 @@ CREATE TABLE `composite_connection` (
   CONSTRAINT `composite_connection_ibfk_3` FOREIGN KEY (`target_feed_node_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `composite_connection_ibfk_4` FOREIGN KEY (`source_join`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE,
   CONSTRAINT `composite_connection_ibfk_5` FOREIGN KEY (`target_join`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3764 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2996 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1101,7 +1097,7 @@ CREATE TABLE `composite_feed` (
   PRIMARY KEY (`composite_feed_id`),
   KEY `data_feed_id` (`data_feed_id`),
   CONSTRAINT `composite_feed_ibfk_1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2095 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1024 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1115,12 +1111,14 @@ CREATE TABLE `composite_node` (
   `composite_node_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `composite_feed_id` bigint(20) NOT NULL,
   `data_feed_id` bigint(20) NOT NULL,
+  `x` int(11) NOT NULL DEFAULT '50',
+  `y` int(11) NOT NULL DEFAULT '50',
   PRIMARY KEY (`composite_node_id`),
   KEY `composite_feed_id` (`composite_feed_id`),
   KEY `data_feed_id` (`data_feed_id`),
   CONSTRAINT `composite_node_ibfk_1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `composite_node_ibfk_2` FOREIGN KEY (`composite_feed_id`) REFERENCES `composite_feed` (`composite_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5786 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4640 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1137,7 +1135,7 @@ CREATE TABLE `configure_data_feed_todo` (
   PRIMARY KEY (`configure_data_feed_todo_id`),
   KEY `todo_id` (`todo_id`),
   KEY `data_source_id` (`data_source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=370 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1157,42 +1155,6 @@ CREATE TABLE `crosstab_definition` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `crosstab_field`
---
-
-DROP TABLE IF EXISTS `crosstab_field`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `crosstab_field` (
-  `crosstab_field_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `analysis_id` bigint(20) DEFAULT NULL,
-  `analysis_item_id` bigint(20) DEFAULT NULL,
-  `position` int(11) DEFAULT NULL,
-  `field_type` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`crosstab_field_id`),
-  KEY `analysis_id` (`analysis_id`),
-  CONSTRAINT `crosstab_field_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `crosstab_measure_column`
---
-
-DROP TABLE IF EXISTS `crosstab_measure_column`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `crosstab_measure_column` (
-  `crosstab_analysis_id` bigint(20) DEFAULT NULL,
-  `crosstab_measure_column_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `aggregation` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`crosstab_measure_column_id`),
-  KEY `crosstab_analysis_id` (`crosstab_analysis_id`),
-  CONSTRAINT `crosstab_measure_column_ibfk_1` FOREIGN KEY (`crosstab_analysis_id`) REFERENCES `crosstab_field` (`crosstab_field_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `crosstab_report`
 --
 
@@ -1204,7 +1166,7 @@ CREATE TABLE `crosstab_report` (
   `report_state_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`crosstab_report_id`),
   KEY `report_state_id` (`report_state_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1222,6 +1184,58 @@ CREATE TABLE `custom_data_source` (
   KEY `custom_data_source_ibfk1` (`data_feed_id`),
   CONSTRAINT `custom_data_source_ibfk1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `custom_n_filter`
+--
+
+DROP TABLE IF EXISTS `custom_n_filter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `custom_n_filter` (
+  `custom_n_filter_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `filter_id` bigint(20) NOT NULL,
+  `analysis_item_id` bigint(20) NOT NULL,
+  `before_or_after` tinyint(4) NOT NULL,
+  `interval_type` int(11) NOT NULL,
+  `interval_amount` int(11) NOT NULL,
+  PRIMARY KEY (`custom_n_filter_id`),
+  KEY `custom_n_filter_ibfk1` (`analysis_item_id`),
+  KEY `custom_n_filter_ibfk2` (`filter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `daily_schedule`
+--
+
+DROP TABLE IF EXISTS `daily_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `daily_schedule` (
+  `daily_schedule_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `schedule_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`daily_schedule_id`),
+  KEY `daily_schedule_ibfk1` (`schedule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `data_activity_task_generator`
+--
+
+DROP TABLE IF EXISTS `data_activity_task_generator`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_activity_task_generator` (
+  `data_activity_task_generator_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `task_generator_id` bigint(20) NOT NULL,
+  `scheduled_activity_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`data_activity_task_generator_id`),
+  KEY `data_activity_task_generator_ibfk1` (`task_generator_id`),
+  KEY `data_activity_task_generator_ibfk2` (`scheduled_activity_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1259,10 +1273,15 @@ CREATE TABLE `data_feed` (
   `visible` tinyint(4) NOT NULL DEFAULT '1',
   `parent_source_id` bigint(20) DEFAULT NULL,
   `version` bigint(20) NOT NULL DEFAULT '1',
+  `account_visible` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`data_feed_id`),
   KEY `dynamic_service_definition_id` (`dynamic_service_definition_id`),
+  KEY `data_feed_idx1` (`PUBLICLY_VISIBLE`),
+  KEY `data_feed_idx2` (`MARKETPLACE_VISIBLE`),
+  KEY `data_feed_idx3` (`visible`),
+  KEY `data_feed_idx4` (`parent_source_id`),
   CONSTRAINT `data_feed_ibfk1` FOREIGN KEY (`dynamic_service_definition_id`) REFERENCES `dynamic_service_definition` (`dynamic_service_definition_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3149 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1166 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1278,7 +1297,7 @@ CREATE TABLE `data_scrub` (
   PRIMARY KEY (`data_scrub_id`),
   KEY `analysis_id` (`analysis_id`),
   CONSTRAINT `data_scrub_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1338,7 +1357,23 @@ CREATE TABLE `data_source_query` (
   PRIMARY KEY (`data_source_query_id`),
   KEY `scheduled_task_id` (`scheduled_task_id`),
   KEY `data_source_id` (`data_source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2984 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `data_source_refresh_lock`
+--
+
+DROP TABLE IF EXISTS `data_source_refresh_lock`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_source_refresh_lock` (
+  `data_source_refresh_lock_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `data_source_id` bigint(20) NOT NULL,
+  `lock_time` bigint(20) NOT NULL,
+  PRIMARY KEY (`data_source_refresh_lock_id`),
+  UNIQUE KEY `data_source_refresh_lock_idx1` (`data_source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1355,7 +1390,7 @@ CREATE TABLE `data_source_task_generator` (
   PRIMARY KEY (`data_source_task_generator_id`),
   KEY `data_source_id` (`data_source_id`),
   KEY `task_generator_id` (`task_generator_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1376,7 +1411,7 @@ CREATE TABLE `data_source_to_group_notification` (
   KEY `notification_id` (`notification_id`),
   CONSTRAINT `data_source_to_group_notification_ibfk1` FOREIGN KEY (`notification_id`) REFERENCES `notification_base` (`notification_id`) ON DELETE CASCADE,
   CONSTRAINT `data_source_to_group_notification_ibfk2` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1393,6 +1428,43 @@ CREATE TABLE `data_source_to_virtual_dimension` (
   PRIMARY KEY (`data_source_to_virtual_dimension_id`),
   KEY `data_source_id` (`data_source_id`),
   KEY `virtual_dimension_id` (`virtual_dimension_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `data_transaction`
+--
+
+DROP TABLE IF EXISTS `data_transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_transaction` (
+  `data_transaction_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `data_source_name` varchar(255) NOT NULL,
+  `replace_data` tinyint(4) NOT NULL,
+  `change_data_source_to_match` tinyint(4) NOT NULL,
+  `external_txn_id` varchar(20) NOT NULL,
+  `txn_date` datetime NOT NULL,
+  `txn_status` tinyint(4) NOT NULL,
+  PRIMARY KEY (`data_transaction_id`),
+  KEY `data_transaction_ibfk1` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `data_transaction_command`
+--
+
+DROP TABLE IF EXISTS `data_transaction_command`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_transaction_command` (
+  `data_transaction_command_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `command_blob` blob NOT NULL,
+  `data_transaction_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`data_transaction_command_id`),
+  KEY `data_transaction_command_ibfk1` (`data_transaction_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1431,10 +1503,10 @@ CREATE TABLE `date_range_filter` (
   KEY `filter_id` (`filter_id`),
   KEY `date_range_filter_ibfk3` (`start_dimension`),
   KEY `date_range_filter_ibfk4` (`end_dimension`),
-  CONSTRAINT `date_range_filter_ibfk4` FOREIGN KEY (`end_dimension`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL,
   CONSTRAINT `date_range_filter_ibfk3` FOREIGN KEY (`start_dimension`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL,
+  CONSTRAINT `date_range_filter_ibfk4` FOREIGN KEY (`end_dimension`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL,
   CONSTRAINT `date_range_filter_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1451,7 +1523,7 @@ CREATE TABLE `date_sequence` (
   PRIMARY KEY (`date_sequence_id`),
   KEY `date_sequence_ibfk1` (`report_sequence_id`),
   CONSTRAINT `date_sequence_ibfk1` FOREIGN KEY (`report_sequence_id`) REFERENCES `report_sequence` (`report_sequence_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1498,7 +1570,105 @@ CREATE TABLE `db_snapshot_task` (
   `scheduled_task_id` bigint(20) NOT NULL,
   PRIMARY KEY (`db_snapshot_task_id`),
   KEY `scheduled_task_id` (`scheduled_task_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=681 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=222 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `delivery_schedule`
+--
+
+DROP TABLE IF EXISTS `delivery_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `delivery_schedule` (
+  `delivery_schedule_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`delivery_schedule_id`),
+  KEY `delivery_schedule_ibfk1` (`scheduled_account_activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `delivery_scheduled_task`
+--
+
+DROP TABLE IF EXISTS `delivery_scheduled_task`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `delivery_scheduled_task` (
+  `delivery_scheduled_task_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  `scheduled_task_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`delivery_scheduled_task_id`),
+  KEY `delivery_scheduled_task_ibfk1` (`scheduled_account_activity_id`),
+  KEY `delivery_scheduled_task_ibfk2` (`scheduled_task_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=134 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `delivery_task_generator`
+--
+
+DROP TABLE IF EXISTS `delivery_task_generator`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `delivery_task_generator` (
+  `delivery_task_generator_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `task_generator_id` bigint(20) NOT NULL,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`delivery_task_generator_id`),
+  KEY `delivery_task_generator_ibfk1` (`task_generator_id`),
+  KEY `delivery_task_generator_ibfk2` (`scheduled_account_activity_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `delivery_to_email`
+--
+
+DROP TABLE IF EXISTS `delivery_to_email`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `delivery_to_email` (
+  `delivery_to_email_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  `email_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`delivery_to_email_id`),
+  KEY `delivery_to_email_ibfk1` (`scheduled_account_activity_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `delivery_to_user`
+--
+
+DROP TABLE IF EXISTS `delivery_to_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `delivery_to_user` (
+  `delivery_to_user_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`delivery_to_user_id`),
+  KEY `delivery_to_user_ibfk1` (`scheduled_account_activity_id`),
+  KEY `delivery_to_user_ibfk2` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `derived_analysis_dimension`
+--
+
+DROP TABLE IF EXISTS `derived_analysis_dimension`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `derived_analysis_dimension` (
+  `derived_analysis_dimension_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `derivation_code` text NOT NULL,
+  `analysis_item_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`derived_analysis_dimension_id`),
+  KEY `derived_analysis_dimension_ibfk1` (`analysis_item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1520,7 +1690,7 @@ CREATE TABLE `derived_item_key` (
   CONSTRAINT `derived_item_key_ibfk_1` FOREIGN KEY (`item_key_id`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE,
   CONSTRAINT `derived_item_key_ibfk_2` FOREIGN KEY (`parent_item_key_id`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE,
   CONSTRAINT `derived_item_key_ibfk_3` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14392 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9049 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1533,9 +1703,10 @@ DROP TABLE IF EXISTS `distributed_lock`;
 CREATE TABLE `distributed_lock` (
   `distributed_lock_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `lock_name` varchar(100) DEFAULT NULL,
+  `lock_time` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`distributed_lock_id`),
   UNIQUE KEY `lock_name` (`lock_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=220550 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=817 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1554,7 +1725,7 @@ CREATE TABLE `drill_through` (
   KEY `drill_through_ibfk2` (`report_id`),
   CONSTRAINT `drill_through_ibfk1` FOREIGN KEY (`link_id`) REFERENCES `link` (`link_id`) ON DELETE CASCADE,
   CONSTRAINT `drill_through_ibfk2` FOREIGN KEY (`report_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1631,6 +1802,22 @@ CREATE TABLE `dynamic_service_method_key` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `email_audit`
+--
+
+DROP TABLE IF EXISTS `email_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `email_audit` (
+  `email_audit_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `email_category` varchar(255) NOT NULL,
+  PRIMARY KEY (`email_audit_id`),
+  KEY `email_audit_ibfk1` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `empty_value`
 --
 
@@ -1658,7 +1845,7 @@ CREATE TABLE `excel_export` (
   `excel_file` longblob NOT NULL,
   `user_id` bigint(20) NOT NULL,
   PRIMARY KEY (`excel_export_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1671,10 +1858,11 @@ DROP TABLE IF EXISTS `excel_upload_format`;
 CREATE TABLE `excel_upload_format` (
   `excel_upload_format_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `feed_id` bigint(20) NOT NULL,
+  `excel_model` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`excel_upload_format_id`),
   KEY `feed_id` (`feed_id`),
   CONSTRAINT `excel_upload_format_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=333 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1749,10 +1937,11 @@ CREATE TABLE `feed_persistence_metadata` (
   `database_name` varchar(100) DEFAULT NULL,
   `last_data_time` datetime DEFAULT NULL,
   PRIMARY KEY (`feed_persistence_metadata_id`),
+  UNIQUE KEY `feed_pers_cidx1` (`feed_id`,`version`),
   KEY `feed_id` (`feed_id`),
   KEY `feed_fpm_idx1` (`version`),
   CONSTRAINT `feed_persistence_metadata_ibfk1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3138 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1147 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1790,7 +1979,7 @@ CREATE TABLE `feed_to_analysis_item` (
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `feed_to_analysis_item_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `feed_to_analysis_item_ibfk_2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=136976 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=72711 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1809,7 +1998,7 @@ CREATE TABLE `feed_to_tag` (
   KEY `analysis_tags_id` (`analysis_tags_id`),
   CONSTRAINT `feed_to_tag_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `feed_to_tag_ibfk_2` FOREIGN KEY (`analysis_tags_id`) REFERENCES `analysis_tags` (`analysis_tags_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2308 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1831,7 +2020,7 @@ CREATE TABLE `file_process_create_scheduled_task` (
   KEY `file_process_create_scheduled_task_ibfk2` (`upload_id`),
   KEY `file_process_create_scheduled_task_ibfk3` (`user_id`),
   KEY `file_process_create_scheduled_task_ibfk4` (`account_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1855,7 +2044,7 @@ CREATE TABLE `file_process_update_scheduled_task` (
   KEY `file_process_update_scheduled_task_ibfk3` (`feed_id`),
   KEY `file_process_update_scheduled_task_ibfk4` (`user_id`),
   KEY `file_process_update_scheduled_task_ibfk5` (`account_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1877,7 +2066,7 @@ CREATE TABLE `filter` (
   PRIMARY KEY (`filter_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `filter_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1822 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=403 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1932,7 +2121,7 @@ CREATE TABLE `filter_to_value` (
   KEY `value_id` (`value_id`),
   CONSTRAINT `filter_to_value_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE,
   CONSTRAINT `filter_to_value_ibfk_2` FOREIGN KEY (`value_id`) REFERENCES `value` (`value_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1547 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=298 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1953,6 +2142,21 @@ CREATE TABLE `filter_value` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `first_value_filter`
+--
+
+DROP TABLE IF EXISTS `first_value_filter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `first_value_filter` (
+  `first_value_filter_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `filter_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`first_value_filter_id`),
+  KEY `first_value_filter_ibfk1` (`filter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `flat_file_upload_format`
 --
 
@@ -1967,7 +2171,7 @@ CREATE TABLE `flat_file_upload_format` (
   PRIMARY KEY (`flat_file_upload_format_id`),
   KEY `feed_id` (`feed_id`),
   CONSTRAINT `flat_file_upload_format_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=223 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1984,7 +2188,7 @@ CREATE TABLE `folder` (
   PRIMARY KEY (`folder_id`),
   KEY `folder_ibfk1` (`data_source_id`),
   CONSTRAINT `folder_ibfk1` FOREIGN KEY (`data_source_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7418 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4767 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2003,7 +2207,7 @@ CREATE TABLE `folder_to_analysis_item` (
   KEY `folder_to_analysis_item_ibfk2` (`analysis_item_id`),
   CONSTRAINT `folder_to_analysis_item_ibfk1` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`folder_id`) ON DELETE CASCADE,
   CONSTRAINT `folder_to_analysis_item_ibfk2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=87380 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=44964 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2022,7 +2226,7 @@ CREATE TABLE `folder_to_folder` (
   KEY `folder_to_folder_ibfk2` (`child_folder_id`),
   CONSTRAINT `folder_to_folder_ibfk1` FOREIGN KEY (`parent_folder_id`) REFERENCES `folder` (`folder_id`) ON DELETE CASCADE,
   CONSTRAINT `folder_to_folder_ibfk2` FOREIGN KEY (`child_folder_id`) REFERENCES `folder` (`folder_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2037,7 +2241,25 @@ CREATE TABLE `formatting_configuration` (
   `formatting_type` int(11) NOT NULL,
   `text_uom` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`formatting_configuration_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51741 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=20752 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `freshbooks`
+--
+
+DROP TABLE IF EXISTS `freshbooks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `freshbooks` (
+  `freshbooks_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `url` varchar(255) NOT NULL,
+  `data_source_id` bigint(20) NOT NULL,
+  `token_key` varchar(255) DEFAULT NULL,
+  `token_secret_key` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`freshbooks_id`),
+  KEY `freshbooks_ibfk1` (`data_source_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2054,7 +2276,7 @@ CREATE TABLE `gauge_report` (
   `max_value` int(11) NOT NULL,
   PRIMARY KEY (`gauge_report_id`),
   KEY `report_state_id` (`report_state_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2072,7 +2294,7 @@ CREATE TABLE `gnip` (
   `filter_id` varchar(255) NOT NULL,
   PRIMARY KEY (`gnip_id`),
   KEY `data_feed_id` (`data_feed_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2090,7 +2312,7 @@ CREATE TABLE `goal_history` (
   PRIMARY KEY (`goal_history_id`),
   KEY `goal_tree_node_id` (`goal_tree_node_id`),
   CONSTRAINT `goal_history_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=589 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2109,7 +2331,7 @@ CREATE TABLE `goal_node_to_user` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `goal_node_to_user_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
   CONSTRAINT `goal_node_to_user_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2132,7 +2354,7 @@ CREATE TABLE `goal_outcome` (
   KEY `goal_tree_node_id` (`goal_tree_node_id`),
   KEY `goal_outcome_eval_idx` (`evaluation_date`),
   CONSTRAINT `goal_outcome_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1775 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2151,7 +2373,7 @@ CREATE TABLE `goal_to_filter` (
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `goal_to_filter_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
   CONSTRAINT `goal_to_filter_ibfk2` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1029 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2170,7 +2392,7 @@ CREATE TABLE `goal_to_problem_filter` (
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `goal_to_problem_filter_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
   CONSTRAINT `goal_to_problem_filter_ibfk2` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2192,7 +2414,7 @@ CREATE TABLE `goal_tree` (
   KEY `goal_tree_ibfk3` (`default_milestone_id`),
   KEY `goal_tree_url_idx` (`url_key`),
   CONSTRAINT `goal_tree_ibfk3` FOREIGN KEY (`default_milestone_id`) REFERENCES `milestone` (`milestone_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=191 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2216,7 +2438,7 @@ CREATE TABLE `goal_tree_node` (
   KEY `goal_tree_node_ibfk2` (`kpi_id`),
   CONSTRAINT `goal_tree_node_ibfk1` FOREIGN KEY (`parent_goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
   CONSTRAINT `goal_tree_node_ibfk2` FOREIGN KEY (`kpi_id`) REFERENCES `kpi` (`kpi_id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=930 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2233,7 +2455,7 @@ CREATE TABLE `goal_tree_node_tag` (
   PRIMARY KEY (`goal_tree_node_tag_id`),
   KEY `goal_tree_node_id` (`goal_tree_node_id`),
   CONSTRAINT `goal_tree_node_tag_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=743 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2252,7 +2474,7 @@ CREATE TABLE `goal_tree_node_to_feed` (
   KEY `feed_id` (`feed_id`),
   CONSTRAINT `goal_tree_node_to_feed_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
   CONSTRAINT `goal_tree_node_to_feed_ibfk2` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2271,7 +2493,7 @@ CREATE TABLE `goal_tree_node_to_insight` (
   KEY `insight_id` (`insight_id`),
   CONSTRAINT `goal_tree_node_to_insight_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
   CONSTRAINT `goal_tree_node_to_insight_ibfk2` FOREIGN KEY (`insight_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=299 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2345,7 +2567,7 @@ CREATE TABLE `google_feed` (
   PRIMARY KEY (`google_feed_id`),
   KEY `data_feed_id` (`data_feed_id`),
   CONSTRAINT `google_feed_ibfk_1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2361,7 +2583,7 @@ CREATE TABLE `graphic_definition` (
   PRIMARY KEY (`graphic_definition_id`),
   KEY `analysis_id` (`analysis_id`),
   CONSTRAINT `graphic_definition_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2382,7 +2604,7 @@ CREATE TABLE `group_audit_message` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `group_audit_message_ibfk1` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE,
   CONSTRAINT `group_audit_message_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2440,26 +2662,7 @@ CREATE TABLE `group_notification` (
   KEY `notification_id` (`notification_id`),
   CONSTRAINT `group_notification_ibfk1` FOREIGN KEY (`notification_id`) REFERENCES `notification_base` (`notification_id`) ON DELETE CASCADE,
   CONSTRAINT `group_notification_ibfk2` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `group_to_feed_join`
---
-
-DROP TABLE IF EXISTS `group_to_feed_join`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `group_to_feed_join` (
-  `group_to_feed_join_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `group_id` bigint(20) DEFAULT NULL,
-  `feed_id` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`group_to_feed_join_id`),
-  KEY `feed_id` (`feed_id`),
-  KEY `group_id` (`group_id`),
-  CONSTRAINT `group_to_feed_join_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
-  CONSTRAINT `group_to_feed_join_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2513,7 +2716,7 @@ CREATE TABLE `group_to_insight` (
   KEY `group_id` (`group_id`),
   CONSTRAINT `group_to_insight_join_ibfk_1` FOREIGN KEY (`insight_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `group_to_insight_join_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2552,7 +2755,7 @@ CREATE TABLE `group_to_tag` (
   KEY `analysis_tags_id` (`analysis_tags_id`),
   CONSTRAINT `group_to_tag_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE,
   CONSTRAINT `group_to_tag_ibfk_2` FOREIGN KEY (`analysis_tags_id`) REFERENCES `analysis_tags` (`analysis_tags_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2572,7 +2775,7 @@ CREATE TABLE `group_to_user_join` (
   KEY `group_id` (`group_id`),
   CONSTRAINT `group_to_user_join_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `group_to_user_join_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2606,10 +2809,14 @@ CREATE TABLE `heat_map` (
   `latitude` double NOT NULL,
   `longitude` double NOT NULL,
   `zoom_level` int(11) NOT NULL,
+  `min_long` double DEFAULT NULL,
+  `max_long` double DEFAULT NULL,
+  `min_lat` double DEFAULT NULL,
+  `max_lat` double DEFAULT NULL,
   PRIMARY KEY (`heat_map_id`),
   KEY `heat_map_ibfk1` (`report_state_id`),
   CONSTRAINT `heat_map_ibfk1` FOREIGN KEY (`report_state_id`) REFERENCES `report_state` (`report_state_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2640,7 +2847,7 @@ CREATE TABLE `hierarchy_level` (
   PRIMARY KEY (`hierarchy_level_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `hierarchy_level_ibfk2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=949 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2654,10 +2861,12 @@ CREATE TABLE `highrise` (
   `highrise_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `feed_id` bigint(20) NOT NULL,
   `url` varchar(255) NOT NULL,
+  `include_emails` tinyint(4) NOT NULL DEFAULT '0',
+  `join_deals_to_contacts` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`highrise_id`),
   KEY `highrise_ibfk1` (`feed_id`),
   CONSTRAINT `highrise_ibfk1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=459 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2672,6 +2881,18 @@ CREATE TABLE `icon` (
   `icon_name` varchar(100) DEFAULT NULL,
   `icon_file` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`icon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `innodb_lock_monitor`
+--
+
+DROP TABLE IF EXISTS `innodb_lock_monitor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `innodb_lock_monitor` (
+  `a` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2749,7 +2970,7 @@ CREATE TABLE `item_key` (
   `item_key_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `display_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`item_key_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=47820 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=19370 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2766,7 +2987,7 @@ CREATE TABLE `jira` (
   PRIMARY KEY (`jira_id`),
   KEY `data_feed_id` (`data_feed_id`),
   CONSTRAINT `jira_ibfk1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2798,7 +3019,7 @@ CREATE TABLE `kpi` (
   CONSTRAINT `kpi_ibfk1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `kpi_ibfk2` FOREIGN KEY (`analysis_measure_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
   CONSTRAINT `kpi_ibfk3` FOREIGN KEY (`date_dimension_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=369 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2822,7 +3043,7 @@ CREATE TABLE `kpi_role` (
   CONSTRAINT `kpi_role_ibfk1` FOREIGN KEY (`kpi_id`) REFERENCES `kpi` (`kpi_id`) ON DELETE CASCADE,
   CONSTRAINT `kpi_role_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `kpi_role_ibfk3` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=594 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2841,7 +3062,7 @@ CREATE TABLE `kpi_to_filter` (
   KEY `kpi_to_filter_ibfk2` (`filter_id`),
   CONSTRAINT `kpi_to_filter_ibfk1` FOREIGN KEY (`kpi_id`) REFERENCES `kpi` (`kpi_id`) ON DELETE CASCADE,
   CONSTRAINT `kpi_to_filter_ibfk2` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=693 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2884,7 +3105,7 @@ CREATE TABLE `kpi_value` (
   PRIMARY KEY (`kpi_value_id`),
   KEY `kpi_value_ibfk1` (`kpi_id`),
   CONSTRAINT `kpi_value_ibfk1` FOREIGN KEY (`kpi_id`) REFERENCES `kpi` (`kpi_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1347 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2917,7 +3138,7 @@ CREATE TABLE `last_value_filter` (
   PRIMARY KEY (`last_value_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `last_value_filter_ibfk1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2954,7 +3175,7 @@ CREATE TABLE `limits_metadata` (
   `top_items` tinyint(4) DEFAULT NULL,
   `number_items` int(11) DEFAULT NULL,
   PRIMARY KEY (`limits_metadata_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=124 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2968,7 +3189,24 @@ CREATE TABLE `link` (
   `link_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `label` varchar(255) NOT NULL,
   PRIMARY KEY (`link_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=467 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `linkedin_data_source`
+--
+
+DROP TABLE IF EXISTS `linkedin_data_source`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `linkedin_data_source` (
+  `linkedin_data_source_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `feed_id` bigint(20) NOT NULL,
+  `token_key` varchar(255) DEFAULT NULL,
+  `token_secret_key` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`linkedin_data_source_id`),
+  KEY `linkedin_data_source_ibfk1` (`feed_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3006,7 +3244,7 @@ CREATE TABLE `list_definition` (
   PRIMARY KEY (`list_definition_id`),
   KEY `analysis_id` (`analysis_id`),
   CONSTRAINT `list_definition_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=356 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3025,7 +3263,7 @@ CREATE TABLE `list_limits_metadata` (
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `list_limits_metadata_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
   CONSTRAINT `list_limits_metadata_ibfk_2` FOREIGN KEY (`limits_metadata_id`) REFERENCES `limits_metadata` (`limits_metadata_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3043,7 +3281,7 @@ CREATE TABLE `list_report` (
   `summarize_all` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`list_report_id`),
   KEY `report_state_id` (`report_state_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1262 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=192 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3056,13 +3294,14 @@ DROP TABLE IF EXISTS `lookup_pair`;
 CREATE TABLE `lookup_pair` (
   `lookup_pair_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `lookup_table_id` bigint(20) NOT NULL,
-  `source_value` varchar(200) NOT NULL,
+  `source_value` text NOT NULL,
   `target_value` varchar(200) DEFAULT NULL,
   `target_date_value` datetime DEFAULT NULL,
+  `target_measure` double DEFAULT NULL,
   PRIMARY KEY (`lookup_pair_id`),
   KEY `lookup_pair_ibfk1` (`lookup_table_id`),
   CONSTRAINT `lookup_pair_ibfk1` FOREIGN KEY (`lookup_table_id`) REFERENCES `lookup_table` (`lookup_table_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22334 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3078,6 +3317,7 @@ CREATE TABLE `lookup_table` (
   `source_item_id` bigint(20) NOT NULL,
   `target_item_id` bigint(20) NOT NULL,
   `data_source_id` bigint(20) NOT NULL,
+  `url_key` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`lookup_table_id`),
   KEY `lookup_table_ibfk1` (`data_source_id`),
   KEY `lookup_table_ibfk2` (`source_item_id`),
@@ -3085,7 +3325,7 @@ CREATE TABLE `lookup_table` (
   CONSTRAINT `lookup_table_ibfk1` FOREIGN KEY (`data_source_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `lookup_table_ibfk2` FOREIGN KEY (`source_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
   CONSTRAINT `lookup_table_ibfk3` FOREIGN KEY (`target_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3165,7 +3405,7 @@ CREATE TABLE `map_report` (
   `map_type` int(11) DEFAULT NULL,
   PRIMARY KEY (`map_report_id`),
   KEY `report_state_id` (`report_state_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3198,7 +3438,7 @@ CREATE TABLE `measure_condition` (
   `high_color` int(11) NOT NULL,
   `high_value` int(11) NOT NULL,
   PRIMARY KEY (`measure_condition_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=107 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3218,7 +3458,7 @@ CREATE TABLE `measure_condition_range` (
   KEY `high_measure_condition_id` (`high_measure_condition_id`),
   CONSTRAINT `measure_condition_range_ibfk_1` FOREIGN KEY (`low_measure_condition_id`) REFERENCES `measure_condition` (`measure_condition_id`) ON DELETE CASCADE,
   CONSTRAINT `measure_condition_range_ibfk_2` FOREIGN KEY (`high_measure_condition_id`) REFERENCES `measure_condition` (`measure_condition_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3253,6 +3493,37 @@ CREATE TABLE `milestone` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `monthly_schedule`
+--
+
+DROP TABLE IF EXISTS `monthly_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `monthly_schedule` (
+  `monthly_schedule_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `schedule_id` bigint(20) NOT NULL,
+  `day_of_month` int(11) NOT NULL,
+  PRIMARY KEY (`monthly_schedule_id`),
+  KEY `monthly_schedule_ibfk1` (`schedule_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `mwf_schedule`
+--
+
+DROP TABLE IF EXISTS `mwf_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `mwf_schedule` (
+  `mwf_schedule_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `schedule_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`mwf_schedule_id`),
+  KEY `mwf_schedule_ibfk1` (`schedule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `named_item_key`
 --
 
@@ -3266,7 +3537,7 @@ CREATE TABLE `named_item_key` (
   PRIMARY KEY (`named_item_key_id`),
   KEY `item_key_id` (`item_key_id`),
   CONSTRAINT `named_item_key_ibfk_1` FOREIGN KEY (`item_key_id`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=33421 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10298 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3284,7 +3555,22 @@ CREATE TABLE `notification_base` (
   PRIMARY KEY (`notification_id`),
   KEY `acting_user_id` (`acting_user_id`),
   CONSTRAINT `notification_base_ibfk1` FOREIGN KEY (`acting_user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `null_filter`
+--
+
+DROP TABLE IF EXISTS `null_filter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `null_filter` (
+  `null_filter_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `filter_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`null_filter_id`),
+  KEY `null_filter_ibfk1` (`filter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3299,6 +3585,71 @@ CREATE TABLE `numeric_value` (
   `value_id` bigint(20) DEFAULT NULL,
   `numeric_content` double NOT NULL,
   PRIMARY KEY (`numeric_value_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `or_filter`
+--
+
+DROP TABLE IF EXISTS `or_filter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `or_filter` (
+  `or_filter_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `filter_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`or_filter_id`),
+  KEY `or_filter_ibfk1` (`filter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `or_filter_to_filter`
+--
+
+DROP TABLE IF EXISTS `or_filter_to_filter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `or_filter_to_filter` (
+  `or_filter_to_filter_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `or_filter_id` bigint(20) NOT NULL,
+  `filter_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`or_filter_to_filter_id`),
+  KEY `or_filter_to_filter_ibfk1` (`or_filter_id`),
+  KEY `or_filter_id_filter_ibfk2` (`filter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ordered_filter`
+--
+
+DROP TABLE IF EXISTS `ordered_filter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ordered_filter` (
+  `ordered_filter_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `filter_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`ordered_filter_id`),
+  KEY `ordered_filter_ibfk1` (`filter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ordered_filter_to_filter`
+--
+
+DROP TABLE IF EXISTS `ordered_filter_to_filter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ordered_filter_to_filter` (
+  `ordered_filter_to_filter_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ordered_filter_id` bigint(20) NOT NULL,
+  `filter_id` bigint(20) NOT NULL,
+  `order_value` int(11) NOT NULL,
+  PRIMARY KEY (`ordered_filter_to_filter_id`),
+  KEY `ordered_filter_to_filter_ibfk1` (`ordered_filter_id`),
+  KEY `ordered_filter_id_filter_ibfk2` (`filter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3318,7 +3669,7 @@ CREATE TABLE `password_reset` (
   UNIQUE KEY `password_reset_unique1` (`password_request_string`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `password_reset_ibfk1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3335,7 +3686,7 @@ CREATE TABLE `password_storage` (
   `password` varchar(255) NOT NULL,
   PRIMARY KEY (`password_id`),
   KEY `data_feed_id` (`data_feed_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3354,7 +3705,7 @@ CREATE TABLE `pattern_filter` (
   PRIMARY KEY (`pattern_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `pattern_filter_ibfk1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3387,7 +3738,7 @@ CREATE TABLE `persona` (
   PRIMARY KEY (`persona_id`),
   KEY `persona_id_ibfk1` (`account_id`),
   CONSTRAINT `persona_id_ibfk1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3402,7 +3753,7 @@ CREATE TABLE `png_export` (
   `user_id` bigint(20) DEFAULT NULL,
   `png_image` longblob NOT NULL,
   PRIMARY KEY (`png_export_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3453,10 +3804,14 @@ CREATE TABLE `range_filter` (
   `high_value_variable` varchar(255) DEFAULT NULL,
   `low_value_defined` tinyint(4) NOT NULL DEFAULT '1',
   `high_value_defined` tinyint(4) NOT NULL DEFAULT '1',
+  `current_low_value` double NOT NULL DEFAULT '0',
+  `current_high_value` double NOT NULL DEFAULT '0',
+  `current_low_value_defined` tinyint(4) NOT NULL DEFAULT '0',
+  `current_high_value_defined` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`range_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `range_filter_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3472,7 +3827,24 @@ CREATE TABLE `range_option` (
   `low_value` double NOT NULL,
   `high_value` double NOT NULL,
   PRIMARY KEY (`range_option_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `redirect_data_source`
+--
+
+DROP TABLE IF EXISTS `redirect_data_source`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `redirect_data_source` (
+  `redirect_data_source_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `data_source_id` bigint(20) NOT NULL,
+  `delegate_data_source_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`redirect_data_source_id`),
+  KEY `redirect_data_source_ibfk1` (`data_source_id`),
+  KEY `redirect_data_source_ibfk2` (`delegate_data_source_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3514,6 +3886,51 @@ CREATE TABLE `report_deliveree` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `report_delivery`
+--
+
+DROP TABLE IF EXISTS `report_delivery`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `report_delivery` (
+  `report_delivery_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `report_id` bigint(20) NOT NULL,
+  `delivery_format` int(11) NOT NULL,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `body` text NOT NULL,
+  `html_email` tinyint(4) NOT NULL DEFAULT '1',
+  `timezone_offset` int(11) NOT NULL DEFAULT '0',
+  `sender_user_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`report_delivery_id`),
+  KEY `report_delivery_ibfk1` (`report_id`),
+  KEY `report_delivery_ibfk2` (`scheduled_account_activity_id`),
+  KEY `report_delivery_ibfk3` (`sender_user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `report_delivery_audit`
+--
+
+DROP TABLE IF EXISTS `report_delivery_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `report_delivery_audit` (
+  `report_delivery_audit_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_id` bigint(20) NOT NULL,
+  `report_delivery_id` bigint(20) NOT NULL,
+  `successful` tinyint(4) NOT NULL,
+  `message` text,
+  `target_email` varchar(255) NOT NULL,
+  `send_date` datetime NOT NULL,
+  PRIMARY KEY (`report_delivery_audit_id`),
+  KEY `report_delivery_audit_ibfk1` (`account_id`),
+  KEY `report_delivery_audit_ibfk2` (`report_delivery_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `report_image`
 --
 
@@ -3527,7 +3944,23 @@ CREATE TABLE `report_image` (
   PRIMARY KEY (`report_image_id`),
   KEY `report_id` (`report_id`),
   CONSTRAINT `report_image_ibfk1` FOREIGN KEY (`report_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `report_numeric_property`
+--
+
+DROP TABLE IF EXISTS `report_numeric_property`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `report_numeric_property` (
+  `report_numeric_property_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `report_property_id` bigint(20) NOT NULL,
+  `property_value` double NOT NULL,
+  PRIMARY KEY (`report_numeric_property_id`),
+  KEY `report_numeric_property_ibfk1` (`report_property_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3554,7 +3987,7 @@ CREATE TABLE `report_package` (
   KEY `report_package_ibfk1` (`data_source_id`),
   KEY `report_package_url_idx` (`url_key`),
   CONSTRAINT `report_package_ibfk1` FOREIGN KEY (`data_source_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3574,7 +4007,21 @@ CREATE TABLE `report_package_to_report` (
   KEY `report_package_to_report_ibfk2` (`report_id`),
   CONSTRAINT `report_package_to_report_ibfk1` FOREIGN KEY (`report_package_id`) REFERENCES `report_package` (`report_package_id`) ON DELETE CASCADE,
   CONSTRAINT `report_package_to_report_ibfk2` FOREIGN KEY (`report_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `report_property`
+--
+
+DROP TABLE IF EXISTS `report_property`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `report_property` (
+  `report_property_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `property_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`report_property_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=185 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3607,7 +4054,7 @@ CREATE TABLE `report_sequence` (
   PRIMARY KEY (`report_sequence_id`),
   KEY `report_sequence_ibfk1` (`analysis_item_id`),
   CONSTRAINT `report_sequence_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3619,10 +4066,24 @@ DROP TABLE IF EXISTS `report_state`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `report_state` (
   `report_state_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `analysis_id` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`report_state_id`),
-  KEY `analysis_id` (`analysis_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1839 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`report_state_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=256 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `report_string_property`
+--
+
+DROP TABLE IF EXISTS `report_string_property`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `report_string_property` (
+  `report_string_property_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `report_property_id` bigint(20) NOT NULL,
+  `property_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`report_string_property_id`),
+  KEY `report_string_property_ibfk1` (`report_property_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=179 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3638,9 +4099,11 @@ CREATE TABLE `report_structure` (
   `analysis_id` bigint(11) NOT NULL,
   `analysis_item_id` bigint(11) NOT NULL,
   PRIMARY KEY (`report_structure_id`),
-  KEY `analysis_id` (`analysis_id`),
-  KEY `analysis_item_id` (`analysis_item_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2097 DEFAULT CHARSET=latin1;
+  KEY `report_structure_ibfk1` (`analysis_id`),
+  KEY `report_structure_ibfk2` (`analysis_item_id`),
+  CONSTRAINT `report_structure_ibfk1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
+  CONSTRAINT `report_structure_ibfk2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3661,7 +4124,24 @@ CREATE TABLE `report_to_group_notification` (
   KEY `notification_id` (`notification_id`),
   CONSTRAINT `report_to_group_notification_ibfk1` FOREIGN KEY (`notification_id`) REFERENCES `notification_base` (`notification_id`) ON DELETE CASCADE,
   CONSTRAINT `report_to_group_notification_ibfk2` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `report_to_report_property`
+--
+
+DROP TABLE IF EXISTS `report_to_report_property`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `report_to_report_property` (
+  `report_to_report_property_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `analysis_id` bigint(20) NOT NULL,
+  `report_property_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`report_to_report_property_id`),
+  KEY `report_to_report_property_ibfk1` (`analysis_id`),
+  KEY `report_to_report_property_ibfk2` (`report_property_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=183 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3675,10 +4155,13 @@ CREATE TABLE `rolling_range_filter` (
   `rolling_range_filter_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `interval_value` int(11) NOT NULL,
   `filter_id` bigint(20) DEFAULT NULL,
+  `before_or_after` tinyint(4) NOT NULL DEFAULT '0',
+  `interval_type` int(11) DEFAULT '0',
+  `interval_amount` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`rolling_range_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `rolling_range_filter_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=805 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=136 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3698,6 +4181,57 @@ CREATE TABLE `salesforce_definition` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `schedule`
+--
+
+DROP TABLE IF EXISTS `schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `schedule` (
+  `schedule_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  `schedule_type` int(11) NOT NULL,
+  `schedule_hour` int(11) NOT NULL,
+  `schedule_minute` int(11) NOT NULL,
+  PRIMARY KEY (`schedule_id`),
+  KEY `schedule_ibfk1` (`scheduled_account_activity_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `scheduled_account_activity`
+--
+
+DROP TABLE IF EXISTS `scheduled_account_activity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `scheduled_account_activity` (
+  `scheduled_account_activity_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_id` bigint(20) NOT NULL,
+  `activity_type` int(11) NOT NULL,
+  PRIMARY KEY (`scheduled_account_activity_id`),
+  KEY `scheduled_user_activity_ibfk1` (`account_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `scheduled_data_source_refresh`
+--
+
+DROP TABLE IF EXISTS `scheduled_data_source_refresh`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `scheduled_data_source_refresh` (
+  `scheduled_data_source_refresh_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  `data_source_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`scheduled_data_source_refresh_id`),
+  KEY `scheduled_data_source_refresh_ibfk1` (`scheduled_account_activity_id`),
+  KEY `scheduled_data_source_refresh_ibfk2` (`data_source_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `scheduled_task`
 --
 
@@ -3712,7 +4246,7 @@ CREATE TABLE `scheduled_task` (
   `stopped_time` datetime DEFAULT NULL,
   `task_generator_id` bigint(20) NOT NULL,
   PRIMARY KEY (`scheduled_task_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4545 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3733,7 +4267,7 @@ CREATE TABLE `scorecard` (
   KEY `scorecard_ibfk2` (`group_id`),
   CONSTRAINT `scorecard_ibfk1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `scorecard_ibfk2` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3752,7 +4286,7 @@ CREATE TABLE `scorecard_to_kpi` (
   KEY `scorecard_to_kpi_ibfk2` (`kpi_id`),
   CONSTRAINT `scorecard_to_kpi_ibfk1` FOREIGN KEY (`scorecard_id`) REFERENCES `scorecard` (`scorecard_id`) ON DELETE CASCADE,
   CONSTRAINT `scorecard_to_kpi_ibfk2` FOREIGN KEY (`kpi_id`) REFERENCES `kpi` (`kpi_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=242 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3771,7 +4305,7 @@ CREATE TABLE `server_refresh_task` (
   KEY `scheduled_task_id` (`scheduled_task_id`),
   KEY `data_source_id` (`data_source_id`),
   KEY `server_refresh_task_ibfk3` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3836,7 +4370,7 @@ CREATE TABLE `solution` (
   `logo_link` varchar(255) DEFAULT NULL,
   `detail_page_class` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`solution_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3858,7 +4392,7 @@ CREATE TABLE `solution_install` (
   CONSTRAINT `solution_install_ibfk1` FOREIGN KEY (`solution_id`) REFERENCES `solution` (`solution_id`) ON DELETE CASCADE,
   CONSTRAINT `solution_install_ibfk2` FOREIGN KEY (`original_data_source_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `solution_install_ibfk3` FOREIGN KEY (`installed_data_source_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=436 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3894,7 +4428,7 @@ CREATE TABLE `solution_to_feed` (
   KEY `solution_to_feed_ibfk2` (`feed_id`),
   CONSTRAINT `solution_to_feed_ibfk1` FOREIGN KEY (`solution_id`) REFERENCES `solution` (`solution_id`) ON DELETE CASCADE,
   CONSTRAINT `solution_to_feed_ibfk2` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3948,7 +4482,7 @@ CREATE TABLE `string_value` (
   PRIMARY KEY (`string_value_id`),
   KEY `value_id` (`value_id`),
   CONSTRAINT `string_value_ibfk_1` FOREIGN KEY (`value_id`) REFERENCES `value` (`value_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1540 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=375 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3997,7 +4531,7 @@ CREATE TABLE `task_generator` (
   `start_task_date` datetime NOT NULL,
   `requires_backfill` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`task_generator_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4020,7 +4554,7 @@ CREATE TABLE `text_replace_scrub` (
   KEY `text_replace_scrub_ibfk2` (`analysis_item_id`),
   CONSTRAINT `text_replace_scrub_ibfk1` FOREIGN KEY (`data_scrub_id`) REFERENCES `data_scrub` (`data_scrub_id`) ON DELETE CASCADE,
   CONSTRAINT `text_replace_scrub_ibfk2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4062,7 +4596,7 @@ CREATE TABLE `timeline_report` (
   CONSTRAINT `timeline_report_ibfk1` FOREIGN KEY (`contained_report_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `timeline_report_ibfk2` FOREIGN KEY (`report_sequence_id`) REFERENCES `report_sequence` (`report_sequence_id`) ON DELETE CASCADE,
   CONSTRAINT `timeline_report_ibfk3` FOREIGN KEY (`report_state_id`) REFERENCES `report_state` (`report_state_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4078,7 +4612,7 @@ CREATE TABLE `todo_base` (
   `todo_type` int(11) DEFAULT NULL,
   PRIMARY KEY (`todo_id`),
   KEY `todo_base_ibfk1` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=479 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=174 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4099,7 +4633,22 @@ CREATE TABLE `token` (
   KEY `token_ibfk3` (`data_source_id`),
   CONSTRAINT `token_ibfk1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `token_ibfk3` FOREIGN KEY (`data_source_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=248 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tr_schedule`
+--
+
+DROP TABLE IF EXISTS `tr_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tr_schedule` (
+  `tr_schedule_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `schedule_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`tr_schedule_id`),
+  KEY `tr_schedule_ibfk1` (`schedule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4114,7 +4663,7 @@ CREATE TABLE `tree_report` (
   `report_state_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`tree_report_id`),
   KEY `report_state_id` (`report_state_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4130,7 +4679,7 @@ CREATE TABLE `treemap_report` (
   `color_scheme` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`treemap_report_id`),
   KEY `report_state_id` (`report_state_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=143 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4161,7 +4710,7 @@ CREATE TABLE `ui_visibility_setting` (
   `config_element` varchar(255) NOT NULL,
   `visible` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`ui_visibility_setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2574 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4181,7 +4730,7 @@ CREATE TABLE `upload_policy_groups` (
   KEY `upload_policy_groups_ibfk2` (`group_id`),
   CONSTRAINT `upload_policy_groups_ibfk1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `upload_policy_groups_ibfk2` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4198,8 +4747,10 @@ CREATE TABLE `upload_policy_users` (
   `role` int(11) NOT NULL,
   PRIMARY KEY (`upload_policy_users_id`),
   KEY `upload_policy_users_ibfk2` (`user_id`),
+  KEY `upload_policy_users_ibfk1` (`feed_id`),
+  CONSTRAINT `upload_policy_users_ibfk1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `upload_policy_users_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8190 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3376 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4216,7 +4767,7 @@ CREATE TABLE `url_link` (
   PRIMARY KEY (`url_link_id`),
   KEY `url_link_ibfk1` (`link_id`),
   CONSTRAINT `url_link_ibfk1` FOREIGN KEY (`link_id`) REFERENCES `link` (`link_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=460 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4233,7 +4784,6 @@ CREATE TABLE `user` (
   `name` varchar(60) NOT NULL,
   `email` varchar(60) NOT NULL,
   `username` varchar(40) NOT NULL,
-  `permissions` int(11) NOT NULL,
   `account_admin` tinyint(4) NOT NULL DEFAULT '1',
   `data_source_creator` tinyint(4) NOT NULL DEFAULT '0',
   `insight_creator` tinyint(4) NOT NULL DEFAULT '0',
@@ -4244,6 +4794,10 @@ CREATE TABLE `user` (
   `profile_image` blob,
   `first_name` varchar(255) DEFAULT NULL,
   `title` varchar(255) DEFAULT NULL,
+  `initial_setup_done` tinyint(4) NOT NULL DEFAULT '1',
+  `renewal_option_available` tinyint(4) NOT NULL DEFAULT '0',
+  `opt_in_email` tinyint(4) NOT NULL DEFAULT '0',
+  `guest_user` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `email_2` (`email`),
@@ -4252,7 +4806,24 @@ CREATE TABLE `user` (
   KEY `user_ibfk5` (`persona_id`),
   CONSTRAINT `user_ibfk5` FOREIGN KEY (`persona_id`) REFERENCES `persona` (`persona_id`) ON DELETE SET NULL,
   CONSTRAINT `user_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=325 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user_action_audit`
+--
+
+DROP TABLE IF EXISTS `user_action_audit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_action_audit` (
+  `user_action_audit_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `action_name` varchar(255) NOT NULL,
+  `action_date` datetime NOT NULL,
+  PRIMARY KEY (`user_action_audit_id`),
+  KEY `user_action_audit_ibfk1` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1186 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4291,7 +4862,7 @@ CREATE TABLE `user_notification` (
   KEY `notification_id` (`notification_id`),
   CONSTRAINT `user_notification_ibfk1` FOREIGN KEY (`notification_id`) REFERENCES `notification_base` (`notification_id`) ON DELETE CASCADE,
   CONSTRAINT `user_notification_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4372,7 +4943,60 @@ CREATE TABLE `user_report_rating` (
   KEY `user_report_rating_ibfk2` (`user_id`),
   CONSTRAINT `user_report_rating_ibfk1` FOREIGN KEY (`report_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `user_report_rating_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user_scorecard_display`
+--
+
+DROP TABLE IF EXISTS `user_scorecard_display`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_scorecard_display` (
+  `user_scorecard_display_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `html_email` tinyint(4) NOT NULL,
+  `scheduled_account_activity_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`user_scorecard_display_id`),
+  KEY `user_scorecard_display_ibfk1` (`user_id`),
+  KEY `user_scorecard_display_ibfk2` (`scheduled_account_activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user_scorecard_ordering`
+--
+
+DROP TABLE IF EXISTS `user_scorecard_ordering`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_scorecard_ordering` (
+  `user_scorecard_ordering_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `scorecard_id` bigint(20) NOT NULL,
+  `scorecard_order` bigint(20) NOT NULL,
+  PRIMARY KEY (`user_scorecard_ordering_id`),
+  KEY `user_scorecard_ordering_ibfk1` (`user_id`),
+  KEY `user_scorecard_ordering_ibfk2` (`scorecard_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user_session`
+--
+
+DROP TABLE IF EXISTS `user_session`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_session` (
+  `user_session_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `session_number` varchar(255) NOT NULL,
+  `user_session_date` datetime NOT NULL,
+  PRIMARY KEY (`user_session_id`),
+  KEY `user_session_ibfk1` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4393,7 +5017,7 @@ CREATE TABLE `user_to_analysis` (
   KEY `analysis_id` (`analysis_id`),
   CONSTRAINT `user_to_analysis_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `user_to_analysis_ibfk_2` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2414 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4414,7 +5038,7 @@ CREATE TABLE `user_to_data_source_notification` (
   KEY `user_to_data_source_notification_ibfk1` (`notification_id`),
   CONSTRAINT `user_to_data_source_notification_ibfk1` FOREIGN KEY (`notification_id`) REFERENCES `notification_base` (`notification_id`) ON DELETE CASCADE,
   CONSTRAINT `user_to_data_source_notification_ibfk2` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4454,7 +5078,7 @@ CREATE TABLE `user_to_goal_tree` (
   KEY `goal_tree_id` (`goal_tree_id`),
   CONSTRAINT `user_to_goal_tree_ibfk1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `user_to_goal_tree_ibfk2` FOREIGN KEY (`goal_tree_id`) REFERENCES `goal_tree` (`goal_tree_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=388 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4534,7 +5158,7 @@ CREATE TABLE `user_to_report_package` (
   KEY `user_to_report_package_ibfk2` (`report_package_id`),
   CONSTRAINT `user_to_report_package_ibfk1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `user_to_report_package_ibfk2` FOREIGN KEY (`report_package_id`) REFERENCES `report_package` (`report_package_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4550,7 +5174,7 @@ CREATE TABLE `user_to_solution` (
   `solution_id` bigint(20) DEFAULT NULL,
   `user_role` int(11) DEFAULT NULL,
   PRIMARY KEY (`user_solution_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4573,6 +5197,22 @@ CREATE TABLE `user_to_solution_to_feed` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `user_unsubscribe_key`
+--
+
+DROP TABLE IF EXISTS `user_unsubscribe_key`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_unsubscribe_key` (
+  `user_unsubscribe_key_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `unsubscribe_key` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_unsubscribe_key_id`),
+  KEY `user_ibkf1` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `user_upload`
 --
 
@@ -4587,7 +5227,7 @@ CREATE TABLE `user_upload` (
   PRIMARY KEY (`user_upload_id`),
   KEY `account_id` (`account_id`),
   CONSTRAINT `user_upload_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=183 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4600,7 +5240,7 @@ DROP TABLE IF EXISTS `value`;
 CREATE TABLE `value` (
   `value_id` bigint(20) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`value_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1540 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=375 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4617,7 +5257,7 @@ CREATE TABLE `value_based_filter` (
   PRIMARY KEY (`value_based_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `value_based_filter_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=766 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=198 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4687,6 +5327,54 @@ CREATE TABLE `virtual_transform_to_value` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `weekday_schedule`
+--
+
+DROP TABLE IF EXISTS `weekday_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `weekday_schedule` (
+  `weekday_schedule_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `schedule_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`weekday_schedule_id`),
+  KEY `weekday_schedule_ibfk1` (`schedule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `weekly_schedule`
+--
+
+DROP TABLE IF EXISTS `weekly_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `weekly_schedule` (
+  `weekly_schedule_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `schedule_id` bigint(20) NOT NULL,
+  `day_of_week` int(11) NOT NULL,
+  PRIMARY KEY (`weekly_schedule_id`),
+  KEY `weekly_schedule_ibfk1` (`schedule_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `wow_armory`
+--
+
+DROP TABLE IF EXISTS `wow_armory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `wow_armory` (
+  `wow_armory_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `server` varchar(255) NOT NULL,
+  `guild_name` varchar(255) NOT NULL,
+  `data_source_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`wow_armory_id`),
+  KEY `wow_armory_ibfk1` (`data_source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `yahoo_map_definition`
 --
 
@@ -4731,4 +5419,4 @@ CREATE TABLE `zip_code_geocode` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-04-07 16:42:24
+-- Dump completed on 2010-09-15  9:23:57
