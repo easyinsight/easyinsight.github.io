@@ -13,9 +13,9 @@
 
         private var _dataSourceID:int;
 
-        private var _reportWidth:uint = 500;
+        private var _reportWidth:uint = 600;
 
-        private var _reportHeight:uint = 600;
+        private var _reportHeight:uint = 500;
 
         private var _reportName:String;
 

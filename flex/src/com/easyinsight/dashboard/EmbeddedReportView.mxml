@@ -33,8 +33,10 @@
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.report.ReportExportWindow;
+        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.controls.Label;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
@@ -60,6 +62,8 @@
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             if (_urlKey != null) {
                 analysisService.openAnalysisIfPossible.send(_urlKey);
+            } else {
+                Alert.show("No analysisID parameter was specified in the report embed HTML code.");
             }
         }
 
@@ -184,8 +188,8 @@
 
         private function gotReportInfo():void {
             var response:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
-            _analysisID = response.insightDescriptor.id;
             if (response.status == InsightResponse.SUCCESS) {
+                _analysisID = response.insightDescriptor.id;
                 if (dataViewFactory != null)
                     coreVBox.removeChild(dataViewFactory);
 
@@ -200,6 +204,8 @@
                 dataViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
                 dataViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
                 dataViewFactory.retrieveData(false);
+            } else {
+                Alert.show("Failed to load the report");
             }
         }
 
