@@ -90,6 +90,17 @@ public class SolutionService {
                 long connectionID = groupRS.getLong(1);
                 connectionIDs.add(connectionID);
             }
+            PreparedStatement connAccountStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.SOLUTION_ID FROM SOLUTION_INSTALL, UPLOAD_POLICY_USERS, DATA_FEED, USER WHERE " +
+                    "UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND UPLOAD_POLICY_USERS.feed_id = SOLUTION_INSTALL.installed_data_source_id AND " +
+                    "SOLUTION_INSTALL.installed_data_source_id = DATA_FEED.DATA_FEED_ID AND DATA_FEED.VISIBLE = ? AND DATA_FEED.ACCOUNT_VISIBLE = ?");
+            connAccountStmt.setLong(1, SecurityUtil.getAccountID());
+            connAccountStmt.setBoolean(2, true);
+            connAccountStmt.setBoolean(3, true);
+            ResultSet acountRS = connAccountStmt.executeQuery();
+            while (acountRS.next()) {
+                long connectionID = acountRS.getLong(1);
+                connectionIDs.add(connectionID);
+            }
             return new ArrayList<Long>(connectionIDs);
         } catch (Exception e) {
             LogClass.error(e);
@@ -483,6 +494,26 @@ public class SolutionService {
                 int feedType = rs.getInt(3);
                 descriptors.add(new DataSourceDescriptor(name, id, feedType));
                 extraInfos.add(new ExtraDataSourceInfo(rs.getTimestamp(4), feedType));
+            }
+        }
+        if (descriptors.isEmpty()) {
+            PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.installed_data_source_id, DATA_FEED.FEED_NAME, DATA_FEED.FEED_TYPE, DATA_FEED.create_date FROM " +
+                "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE " +
+                "SOLUTION_INSTALL.original_data_source_id = ? AND " +
+                "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
+                "UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? AND " +
+                    "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ? AND DATA_FEED.ACCOUNT_VISIBLE = ?");
+            queryAccountStmt.setLong(1, originalDataSourceID);
+            queryAccountStmt.setLong(2, SecurityUtil.getAccountID());
+            queryAccountStmt.setBoolean(3, true);
+            queryAccountStmt.setBoolean(4, true);
+            ResultSet accountRS = queryAccountStmt.executeQuery();
+            while (accountRS.next()) {
+                long id = accountRS.getLong(1);
+                String name = accountRS.getString(2);
+                int feedType = accountRS.getInt(3);
+                descriptors.add(new DataSourceDescriptor(name, id, feedType));
+                extraInfos.add(new ExtraDataSourceInfo(accountRS.getTimestamp(4), feedType));
             }
         }
     }
