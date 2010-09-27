@@ -1,0 +1,1 @@
+%JAVA_HOME%\bin\java -cp commons-codec-1.4.jar;commons-logging-1.1.1.jar;httpclient-4.0.3.jar;httpcore-4.0.1.jar;httpcore-nio-4.0.1.jar;httpmime-4.0.3.jar;jaxb-api-2.1.jar;jaxb-impl-2.1.7.jar;jaxb-xjc-2.1.7.jar;selenium-java-client-driver.jar;selenium-server.jar;typica.jar;classes com.easyinsight.selenium.SeleniumRunner
