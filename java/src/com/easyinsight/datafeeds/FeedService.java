@@ -86,6 +86,24 @@ public class FeedService implements IDataFeedService {
                 infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
                 dataSourceMap.put(dataSourceID, dataSourceDescriptor);
             }
+             PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT DATA_FEED_ID, DATA_FEED.feed_name, DATA_FEED.feed_type, DATA_FEED.create_date" +
+                    " FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE VISIBLE = ? AND " +
+                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.account_id = ? and UPLOAD_POLICY_USERS.feed_id = data_feed.data_feed_id AND " +
+                     "data_feed.account_visible = ?");
+            queryAccountStmt.setBoolean(1, true);
+            queryAccountStmt.setLong(2, SecurityUtil.getAccountID());
+            queryAccountStmt.setBoolean(3, true);
+            ResultSet accountRS = queryAccountStmt.executeQuery();
+            while (accountRS.next()) {
+                long dataSourceID = accountRS.getLong(1);
+                String name = accountRS.getString(2);
+                int feedType = accountRS.getInt(3);
+                Date creationDate = new Date(accountRS.getTimestamp(4).getTime());
+                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID, feedType);
+                infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
+                dataSourceMap.put(dataSourceID, dataSourceDescriptor);
+            }
+            queryAccountStmt.close();
             for (DataSourceDescriptor dataSource : dataSourceMap.values()) {
                 describe(dataSource, infos.get(dataSource.getId()), conn);
             }
