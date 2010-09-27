@@ -104,7 +104,7 @@
         </script>
     <%
             if(scorecardWrapper.getCredentials().size() == newCreds.size()) { 
-                scorecardWrapper = service.getScorecard(scorecardID, userID, newCreds, refresh);
+                scorecardWrapper = service.getScorecard(scorecardID, userID, newCreds, refresh, new InsightRequestMetadata());
                 if(scorecardWrapper.getCredentials().size() > 0){ %>
                     <script type="text/javascript">$("#credentialsDialog").dialog('open');</script>
                 <%
