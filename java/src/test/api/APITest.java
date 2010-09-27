@@ -8,7 +8,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.security.SecurityUtil;
 import test.util.TestUtil;
 
-import javax.xml.rpc.ServiceException;
 import java.util.Calendar;
 import java.util.Arrays;
 import java.util.List;
@@ -92,7 +91,7 @@ public class APITest extends TestCase {
         ListDataResults listResults = (ListDataResults) dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
     }
 
-    public void testBasicUnchecked() throws ServiceException, RemoteException, SQLException {
+    public void testBasicUnchecked() throws RemoteException, SQLException {
         long userID = TestUtil.getIndividualTestUser();
         TestUncheckedPublish service = new TestUncheckedPublish(userID, SecurityUtil.getSecurityProvider().getUserPrincipal().getAccountID());
         com.easyinsight.api.Row row = new com.easyinsight.api.Row();
