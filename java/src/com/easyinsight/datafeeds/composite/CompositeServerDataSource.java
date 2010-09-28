@@ -16,6 +16,9 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
+import java.net.InetAddress;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -245,6 +248,14 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO data_source_refresh_audit (account_id, data_source_id, " +
+                    "start_time, server_id) values (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            insertStmt.setLong(1, accountID);
+            insertStmt.setLong(2, getDataFeedID());
+            insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            insertStmt.setString(4, InetAddress.getLocalHost().getHostAddress());
+            insertStmt.execute();
+            long auditID = Database.instance().getAutoGenKey(insertStmt);
             if (credentials == null) {
                 if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
                     credentials = new Credentials();
@@ -262,6 +273,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 source.refreshData(credentials, accountID, now, conn, this);
                 allItems.addAll(source.getFields());
             }
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE data_source_refresh_audit set end_time = ? where data_source_refresh_audit_id = ?");
+            updateStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            updateStmt.setLong(2, auditID);
+            updateStmt.executeUpdate();
         } finally {
             DataTypeMutex.mutex().unlock(getFeedType());
         }
