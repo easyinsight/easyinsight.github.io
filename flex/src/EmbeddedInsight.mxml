@@ -27,13 +27,6 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.framework.WebCredentialsCache;
-        import com.easyinsight.util.CookieUtil;
-
-        import mx.messaging.config.ServerConfig;
-        import mx.rpc.AsyncResponder;
-        import mx.rpc.AsyncToken;
-        import mx.rpc.events.FaultEvent;
-        import mx.rpc.events.ResultEvent;
 
         [Bindable]
         private var urlKey:String;
@@ -87,52 +80,6 @@
                     //toMain();
                 }
             } else {
-                var sessionToken:String = CookieUtil.getCookie("eisession") as String;
-                if (sessionToken == null) {
-                    stackIndex = 1;
-                } else {
-                    var parts:Array = sessionToken.split("-");
-                    var userName:String = parts[0];
-                    var token:String = parts[1];
-                    userService.sessionCookieCheck.send(token, userName, false);
-                }
-            }
-        }
-
-        private function sessionCookieCheck():void {
-            var authResult:UserServiceResponse = userService.sessionCookieCheck.lastResult as UserServiceResponse;
-            if (authResult != null) {
-                if (userService.channelSet == null) {
-                    userService.channelSet = ServerConfig.getChannelSet(userService.destination);
-                }
-                var sessionToken:String = CookieUtil.getCookie("eisession") as String;
-                var parts:Array = sessionToken.split("-");
-                var userName:String = parts[0];
-                var cookie:String = parts[1];
-                CookieUtil.deleteCookie("eisession");
-                CookieUtil.setCookie("eisession", authResult.userName + "-" + authResult.sessionCookie, 90);
-                var token:AsyncToken = userService.channelSet.login(userName, cookie);
-                token.addResponder(new AsyncResponder(
-                    function (event:ResultEvent, token:Object = null):void {
-                        switch (event.result) {
-                            case "success":
-                                dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
-                                    if (authResult.accountState == Account.DELINQUENT || authResult.accountState == Account.REACTIVATION_POSSIBLE) {
-                                        //toLogin(1);
-                                    } else {
-                                        quietLogin(authResult, false);
-                                    }
-                                break;
-                            default:
-                                trace(event.result);
-                        }
-                    },
-                    function (event:FaultEvent, token:Object = null):void {
-                        stackIndex = 1;
-                    }
-                ));
-
-            } else {
                 stackIndex = 1;
             }
         }
@@ -160,7 +107,6 @@
 	</mx:Script>
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
-        <mx:method name="sessionCookieCheck" result="sessionCookieCheck()"/>
     </mx:RemoteObject>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
     <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
