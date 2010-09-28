@@ -5,12 +5,23 @@
                 bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.analysis.AnalysisCalculation;
+        import com.easyinsight.analysis.AnalysisDateDimension;
+        import com.easyinsight.analysis.AnalysisDimension;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+        import com.easyinsight.analysis.AnalysisLatitude;
+        import com.easyinsight.analysis.AnalysisList;
+        import com.easyinsight.analysis.AnalysisLongitude;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.AnalysisRangeDimension;
+        import com.easyinsight.analysis.AnalysisStep;
+        import com.easyinsight.analysis.ComplexAnalysisMeasure;
         import com.easyinsight.analysis.DefaultMenuFactory;
+        import com.easyinsight.analysis.DerivedAnalysisDimension;
         import com.easyinsight.analysis.PopupMenuFactory;
-
+        import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
-        import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.framework.WebCredentialsCache;
@@ -54,6 +65,22 @@
             this.requestID = int(Application.application.parameters.seleniumID);
             // session check
             userService.seleniumCheck.send(userName, password);
+        }
+
+        private function dependancies():void {
+            var analysisDate:AnalysisDateDimension;
+            var dim:AnalysisDimension;
+            var measure:AnalysisMeasure;
+            var complex:ComplexAnalysisMeasure;
+            var range:AnalysisRangeDimension;
+            var list:AnalysisList;
+            var hierarchy:AnalysisHierarchyItem;
+            var step:AnalysisStep;
+            var calculation:AnalysisCalculation;
+            var sigma:SixSigmaMeasure;
+            var latitude:AnalysisLatitude;
+            var longitude:AnalysisLongitude;
+            var derived:DerivedAnalysisDimension;
         }
 
         private function authenticated():void {
