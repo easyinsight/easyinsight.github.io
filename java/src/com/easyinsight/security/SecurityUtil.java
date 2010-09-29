@@ -374,7 +374,19 @@ public class SecurityUtil {
                 if (groupRS.next()) {
                     return groupRS.getInt(1);
                 } else {
-                    return Integer.MAX_VALUE;
+                    PreparedStatement accountQueryStmt = conn.prepareStatement("select role from upload_policy_users, user, data_feed where " +
+                            "data_feed.data_feed_id = ? AND data_feed.data_feed_id = upload_policy_users.feed_id and " +
+                            "data_feed.account_visible = ? and upload_policy_users.user_id = user.user_id and " +
+                            "user.account_id = ?");
+                    accountQueryStmt.setLong(1, feedID);
+                    accountQueryStmt.setBoolean(2, true);
+                    accountQueryStmt.setLong(3, getAccountID());
+                    ResultSet accountRS = accountQueryStmt.executeQuery();
+                    if (accountRS.next()) {
+                        return accountRS.getInt(1);
+                    } else {
+                        return Integer.MAX_VALUE;
+                    }
                 }
             }
         } catch (SQLException e) {
