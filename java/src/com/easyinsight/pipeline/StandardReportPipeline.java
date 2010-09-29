@@ -35,8 +35,12 @@ public class StandardReportPipeline extends Pipeline {
             if (heatMap.getZipCode() != null) {
                 components.add(new CoordinateComponent(heatMap.getZipCode()));
             }
-            components.add(new CoordinatePrecisionComponent(heatMap.getLongitudeItem()));
-            components.add(new CoordinatePrecisionComponent(heatMap.getLatitudeItem()));
+            if (heatMap.getLongitudeItem() != null) {
+                components.add(new CoordinatePrecisionComponent(heatMap.getLongitudeItem()));
+            }
+            if (heatMap.getLatitudeItem() != null) {
+                components.add(new CoordinatePrecisionComponent(heatMap.getLatitudeItem()));
+            }
         }
 
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
