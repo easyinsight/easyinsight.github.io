@@ -227,7 +227,7 @@ public class Query {
                         case Types.DATE:
                         case Types.TIME:
                         case Types.TIMESTAMP:
-                            Date date = rs.getDate(column);
+                            Date date = rs.getTimestamp(column);
                             DatePair dp = new DatePair();
                             if(date != null) {
                                 GregorianCalendar cal = (GregorianCalendar) Calendar.getInstance();
