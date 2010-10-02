@@ -39,8 +39,9 @@ public class EasyInsightLoginCommand implements LoginCommand {
             session.setAttribute("accountType", userServiceResponse.getAccountType());
             session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
             session.setAttribute("nonCookieLogin", true);
+            session.setAttribute("guestUser", userServiceResponse.isGuestUser());
             return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
-                    userServiceResponse.isAccountAdmin());
+                    userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser());
         } else {
             userServiceResponse = userService.sessionCookieCheck(password, userName, true);
             if (userServiceResponse != null && userServiceResponse.isSuccessful()) {
@@ -51,8 +52,9 @@ public class EasyInsightLoginCommand implements LoginCommand {
                 session.setAttribute("accountType", userServiceResponse.getAccountType());
                 session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
                 session.setAttribute("nonCookieLogin", false);
+                session.setAttribute("guestUser", userServiceResponse.isGuestUser());
                 return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
-                    userServiceResponse.isAccountAdmin());
+                    userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser());
             } else {
                 userServiceResponse = userService.seleniumCheck(userName, password);
                 if (userServiceResponse != null) {
@@ -63,8 +65,9 @@ public class EasyInsightLoginCommand implements LoginCommand {
                     session.setAttribute("accountType", userServiceResponse.getAccountType());
                     session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
                     session.setAttribute("nonCookieLogin", true);
+                    session.setAttribute("guestUser", userServiceResponse.isGuestUser());
                     return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
-                        userServiceResponse.isAccountAdmin());
+                        userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser());
                 }
             }
             return null;

@@ -115,22 +115,20 @@
     </mx:RemoteObject>    
     
     <mx:VBox width="1000" height="100%" id="coreContent" backgroundColor="#FFFFFF" paddingTop="10" paddingLeft="10"
-             paddingRight="10" paddingBottom="10">
-        <mx:HBox width="100%" horizontalAlign="center" id="topBox" height="80">
-            <mx:ViewStack resizeToContent="true" selectedIndex="{groupAddIndex}" width="100%" height="100%">
-                <mx:Box/>
-                <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-                    <mx:Label text="You are only able to create groups with a Basic or higher account." fontSize="16" color="#000000"/>
-                </mx:Box>
-                <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-                    <mx:Label text="You are only allowed to have one group with a Basic account." fontSize="16" color="#000000"/>
-                </mx:Box>
-                <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-                    <mx:Button icon="@Embed('../../../../assets/users3_add.png')" label="Create a New Group..."
-                       click="createNewGroup()" labelPlacement="bottom"/>
-                </mx:Box>
-            </mx:ViewStack>
-        </mx:HBox>
+             paddingRight="10" paddingBottom="10" horizontalAlign="center">
+        <mx:ViewStack resizeToContent="true" selectedIndex="{groupAddIndex}">
+            <mx:Box/>
+            <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
+                <mx:Label text="You are only able to create groups with a Basic or higher account." fontSize="16" color="#000000"/>
+            </mx:Box>
+            <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
+                <mx:Label text="You are only allowed to have one group with a Basic account." fontSize="16" color="#000000"/>
+            </mx:Box>
+            <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
+                <mx:Button icon="@Embed('../../../../assets/users3_add.png')" label="Create a New Group..."
+                   click="createNewGroup()" labelPlacement="bottom"/>
+            </mx:Box>
+        </mx:ViewStack>
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" id="groupStack">
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
                 <mx:ProgressBar indeterminate="{stackIndex == 0}" label="Loading available groups..."/>

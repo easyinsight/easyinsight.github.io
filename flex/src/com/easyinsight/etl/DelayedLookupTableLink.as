@@ -1,5 +1,6 @@
 package com.easyinsight.etl
 {
+import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 	import flash.events.EventDispatcher;
 	import mx.rpc.events.ResultEvent;
@@ -19,6 +20,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
 		}
 		
 		public function execute():void {
+            if (User.getInstance().guestUser) return;
 			feedService.openLookupTableIfPossible.send(analysisID);
 		}
 

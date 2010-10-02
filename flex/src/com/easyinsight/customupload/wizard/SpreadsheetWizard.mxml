@@ -16,6 +16,7 @@
         import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
 
         private var _uploadContext:UploadContext;
 
@@ -87,13 +88,21 @@
         private var dataSourceName:String = "Blah";
 
         private function createdDataSource():void {
-            UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
-            var response:UploadResponse = uploadService.createDataSource.lastResult as UploadResponse;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
+            //UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
+            try {
+                var response:UploadResponse = uploadService.createDataSource.lastResult as UploadResponse;
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(response.feedID)));
+            } catch(e:Error) {
+                Alert.show(e.message);
+            }
         }
 
         private function onCancel(event:Event):void {
             dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
+        private function blah():void {
+            var context:FlatFileUploadContext;
         }
 
         public function gotFocus():void {

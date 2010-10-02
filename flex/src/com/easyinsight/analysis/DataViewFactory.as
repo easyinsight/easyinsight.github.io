@@ -2,6 +2,7 @@ package com.easyinsight.analysis {
 
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.DataServiceLoadingEvent;
+import com.easyinsight.report.ReportEventProcessor;
 import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
@@ -304,6 +305,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer, false, 0, true);
             _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
             _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
+            _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
             _dataService.preserveValues = _reportRenderer.preserveValues();
             if (_loadingDisplay != null) {
                 reportCanvas.removeChild(_loadingDisplay);
@@ -316,6 +318,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 retrieveData();
             }
         }
+    }
+
+    private function onReportWindow(event:ReportWindowEvent):void {
+        ReportEventProcessor.fromEvent(event, this);
     }
 
     private function onRollup(event:HierarchyRollupEvent):void {

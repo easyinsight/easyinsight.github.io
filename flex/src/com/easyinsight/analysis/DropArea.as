@@ -32,11 +32,6 @@ public class DropArea extends HBox
 {
     private var _analysisItem:AnalysisItem;
 
-    private var _assigned:Boolean;
-    private var _selected:Boolean;
-
-    private var coreComponent:UIComponent;
-
     [Bindable]
     [Embed(source="../../../../assets/navigate_cross.png")]
     private var deleteIcon:Class;
@@ -87,11 +82,7 @@ public class DropArea extends HBox
         setStyle("backgroundColor", 0xFFFFFF);
         var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
         deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
-        //dataSet.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
         PopupMenuFactory.assignMenu(this, [ deleteContextItem ]);
-        /*contextMenu = new ContextMenu();
-        contextMenu.hideBuiltInItems();
-        contextMenu.customItems = [ deleteContextItem ];*/
     }
 
     public function highlight():void {
@@ -112,10 +103,6 @@ public class DropArea extends HBox
         deletion();
     }
 
-    public function getItemEditorClass():Class {
-        return AnalysisItemEditor;
-    }
-
     public function set analysisItems(analysisItems:ArrayCollection):void {
         this._analysisItems = analysisItems;
     }
@@ -130,7 +117,7 @@ public class DropArea extends HBox
         } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
             return DerivedGroupingWindow;
         } else {
-            return getItemEditorClass();
+            return null;
         }
     }
 
@@ -151,10 +138,6 @@ public class DropArea extends HBox
 
     public function createAnalysisItem():AnalysisItem {
         return analysisItem;
-    }
-
-    private function sendUpdateEvent():void {
-        dispatchEvent(new DropAreaUpdateEvent(analysisItem));
     }
 
     protected function toDefaultState():void {

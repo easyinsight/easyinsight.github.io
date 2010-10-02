@@ -18,24 +18,39 @@ import java.util.HashMap;
  */
 public class DataTransformation {
     private Map<String, Integer> typeMap = new HashMap<String, Integer>();
+    private AnalysisMeasure count;
 
     public DataTransformation(FeedDefinition feedDefinition) {
         for (AnalysisItem field : feedDefinition.getFields()) {
             typeMap.put(field.getKey().toKeyString(), field.hasType(AnalysisItemTypes.DATE_DIMENSION) ? Value.DATE :
                 field.hasType(AnalysisItemTypes.MEASURE) ? Value.NUMBER : Value.STRING);
+            if (field.hasType(AnalysisItemTypes.MEASURE)) {
+                AnalysisMeasure test = (AnalysisMeasure) field;
+                if (test.isRowCountField()) {
+                    count = test;
+                }
+            }
         }
     }
 
     public final DataSet toDataSet(Row row) {
         DataSet dataSet = new DataSet();
-        dataSet.addRow(toRow(row));
+        IRow convertedRow = toRow(row);
+        if (count != null) {
+            convertedRow.addValue(count.getKey(), new NumericValue(1));
+        }
+        dataSet.addRow(convertedRow);
         return dataSet;
     }
 
     public final DataSet toDataSet(List<Row> rows) {
         DataSet dataSet = new DataSet();
         for (Row row : rows) {
-            dataSet.addRow(toRow(row));
+            IRow convertedRow = toRow(row);
+            if (count != null) {
+                convertedRow.addValue(count.getKey(), new NumericValue(1));
+            }
+            dataSet.addRow(convertedRow);
         }
         return dataSet;
     }

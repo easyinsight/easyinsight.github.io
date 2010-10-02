@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
          xmlns:listing="com.easyinsight.listing.*" xmlns:scorecards="com.easyinsight.scorecard.*" width="100%"
          height="100%"
          implements="com.easyinsight.listing.IPerspective"
@@ -278,4 +278,4 @@
 
     </mx:VBox>
     </mx:Canvas>
-</mx:VBox>
+</mx:Module>

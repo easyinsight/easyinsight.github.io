@@ -1,4 +1,6 @@
 package com.easyinsight.scorecard {
+import com.easyinsight.kpi.KPIIconRenderer;
+
 import flash.events.Event;
 import flash.events.EventDispatcher;
 
@@ -9,7 +11,10 @@ public class KPINameFactory extends EventDispatcher implements IFactory {
 
     private var _contextMenuAvailable:Boolean;
 
-    public function KPINameFactory() {
+    private var _rendererClass:String;
+
+    public function KPINameFactory(rendererClass:String) {
+        this._rendererClass = rendererClass;
     }
 
     [Bindable(event="contextMenuAvailableChanged")]
@@ -23,10 +28,27 @@ public class KPINameFactory extends EventDispatcher implements IFactory {
         dispatchEvent(new Event("contextMenuAvailableChanged"));
     }
 
+    public function set rendererClass(value:String):void {
+        _rendererClass = value;
+    }
+
     public function newInstance():* {
-        var kpiNameRenderer:KPINameRenderer = new KPINameRenderer();
-        BindingUtils.bindProperty(kpiNameRenderer, "contextMenuAvailable", this, "contextMenuAvailable");
-        return kpiNameRenderer;
+        var renderer:*;
+        if (_rendererClass == "name") {
+            renderer = new KPINameRenderer();
+        } else if (_rendererClass == "icon") {
+            renderer = new KPIIconRenderer();
+        } else if (_rendererClass == "value") {
+            renderer = new KPIValueRenderer();
+        } else if (_rendererClass == "time") {
+            renderer = new KPITimeRenderer();
+        } else if (_rendererClass == "change") {
+            renderer = new KPIChangeRenderer();
+        } else if (_rendererClass == "status") {
+            renderer = new KPIStatusRenderer();
+        }
+        BindingUtils.bindProperty(renderer, "contextMenuAvailable", this, "contextMenuAvailable");
+        return renderer;
     }
 }
 }

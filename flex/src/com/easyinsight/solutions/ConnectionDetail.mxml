@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.listing.IPerspective" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import mx.core.UIComponent;
+
+        private var _solution:Solution;
+        private var _auth:Boolean;
+
+        public function set solution(value:Solution):void {
+            _solution = value;
+        }
+
+        public function set auth(value:Boolean):void {
+            _auth = value;
+        }
+
+        protected override function createChildren():void {
+            super.createChildren();
+            if (page == null) {
+                var className:String = _solution.detailPageClass;
+                var clazz:Class = getDefinitionByName(className) as Class;
+                var page:UIComponent = new clazz();
+                page["newAuth"] = _auth;
+                page["solution"] = _solution;
+            }
+            addChild(page);
+        }
+
+        private function blah():void {
+            var a:GoogleAnalyticsSolutionDetail;
+            var b:BasecampSolutionDetail;
+            var c:HighriseSolutionDetail;
+            var d:FileUploadSolutionDetail;
+            var e:GoogleSpreadsheetSolutionDetail;
+            var f:LinkedInSolutionDetail;
+            var g:PivotalTrackerSolutionDetail;
+            var h:SendGridSolutionDetail;
+            var i:MySQLSolutionDetail;
+            var j:FreshbooksSolutionDetail;
+            var k:CrunchbaseSolutionDetail;
+        }
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
+        }]]></mx:Script>
+</mx:Module>

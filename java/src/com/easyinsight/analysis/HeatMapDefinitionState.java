@@ -2,8 +2,11 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSHeatMap;
 import com.easyinsight.core.Key;
+import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +46,29 @@ public class HeatMapDefinitionState extends AnalysisDefinitionState {
 
     @Column(name="max_lat")
     private double maxLat;
+
+    @Column(name="display_type")
+    private int displayType;
+
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinColumn(name="point_report_id")
+    private AnalysisDefinition pointReport;
+
+    public AnalysisDefinition getPointReport() {
+        return pointReport;
+    }
+
+    public void setPointReport(AnalysisDefinition pointReport) {
+        this.pointReport = pointReport;
+    }
+
+    public int getDisplayType() {
+        return displayType;
+    }
+
+    public void setDisplayType(int displayType) {
+        this.displayType = displayType;
+    }
 
     public int getMapType() {
         return mapType;
@@ -97,11 +123,13 @@ public class HeatMapDefinitionState extends AnalysisDefinitionState {
         heatMapDefinition.setLatitude(latitude);
         heatMapDefinition.setLongitude(longitude);
         heatMapDefinition.setMapType(mapType);
+        heatMapDefinition.setDisplayType(displayType);
         heatMapDefinition.setZoomLevel(zoomLevel);
         heatMapDefinition.setMinLat(minLat);
         heatMapDefinition.setMinLong(minLong);
         heatMapDefinition.setMaxLat(maxLat);
         heatMapDefinition.setMaxLong(maxLong);
+        heatMapDefinition.setPointReportID(pointReport != null ? pointReport.getAnalysisID() : 0);
         heatMapDefinition.setHeatMapID(getHeatMapDefinitionID());
         return heatMapDefinition;
     }
@@ -136,5 +164,21 @@ public class HeatMapDefinitionState extends AnalysisDefinitionState {
 
     public void setMaxLat(double maxLat) {
         this.maxLat = maxLat;
+    }
+
+    @Override
+    public Collection<? extends AnalysisDefinition> containedReports(Session session) {
+        if (pointReport != null) {
+            return Arrays.asList(pointReport);
+        } else {
+            return super.containedReports(session);
+        }
+    }
+
+    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+        super.updateReportIDs(reportReplacementMap);
+        if (pointReport != null) {
+            pointReport = reportReplacementMap.get(pointReport.getAnalysisID());
+        }
     }
 }

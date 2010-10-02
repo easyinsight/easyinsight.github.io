@@ -25,6 +25,9 @@ public class PerspectiveInfo {
     public static const HELP:int = 22;
     public static const GROUP_DETAIL:int = 23;
     public static const GROUPS:int = 24;
+    public static const CONNECTION_DETAIL:int = 25;
+    public static const KPI_WINDOW:int = 26;
+    public static const ANALYSIS_ITEM_EDITOR:int = 27;
 
     public var perspectiveType:int;
     public var properties:Object = null;

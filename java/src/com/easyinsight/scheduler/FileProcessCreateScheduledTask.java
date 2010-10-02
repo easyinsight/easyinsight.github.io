@@ -1,5 +1,7 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.analysis.AggregationTypes;
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.User;
@@ -92,6 +94,20 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
                 dataSet.refreshKey(field.getKey());
             }
 
+            boolean hasCount = false;
+            for (AnalysisItem field : fields) {
+                if ("count".equals(field.toDisplay().toLowerCase())) {
+                    hasCount = true;
+                }
+            }
+
+            AnalysisMeasure countMeasure = null;
+            if (!hasCount) {
+                countMeasure = new AnalysisMeasure("Count", AggregationTypes.SUM);
+                countMeasure.setRowCountField(true);
+                fields.add(countMeasure);
+            }
+
             FileBasedFeedDefinition feedDefinition = new FileBasedFeedDefinition();
             feedDefinition.setUploadFormat(uploadFormat);
             feedDefinition.setFeedName(name);
@@ -100,7 +116,7 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
             UploadPolicy uploadPolicy = new UploadPolicy(user.getUserID(), user.getAccount().getAccountID());
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(fields);
-            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), uploadPolicy);
+            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(countMeasure), uploadPolicy);
             tableDef = result.getTableDefinitionMetadata();
             feedID = result.getFeedID();
             tableDef.commit();

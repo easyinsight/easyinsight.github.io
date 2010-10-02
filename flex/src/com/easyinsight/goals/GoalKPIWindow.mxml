@@ -4,10 +4,8 @@
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIEvent;
         import com.easyinsight.kpi.KPIParentWindow;
-        import com.easyinsight.kpi.KPIWindow;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]

@@ -5,6 +5,9 @@
          backgroundColor="#DCE2F8" doubleClickEnabled="true" creationComplete="initListeners()">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.customupload.UploadResponse;
+        import com.easyinsight.customupload.wizard.FieldUploadInfo;
+        import com.easyinsight.customupload.wizard.FlatFileUploadContext;
         import com.easyinsight.framework.LoginEvent;
 
         import com.easyinsight.listing.IPerspective;
@@ -147,6 +150,12 @@
                     break;*/
             }
             return okay;
+        }
+
+        private function blah():void {
+            var context:FlatFileUploadContext;
+            var info:FieldUploadInfo;
+            var response:UploadResponse;
         }
 
         private function updateFilters():void {

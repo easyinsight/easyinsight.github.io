@@ -10,7 +10,7 @@ public class AnalysisItemSaveEvent extends Event{
 
     public function AnalysisItemSaveEvent(item:AnalysisItem) {
         analysisItem = item;
-        super(ANALYSIS_ITEM_SAVE);
+        super(ANALYSIS_ITEM_SAVE, true);
     }
 }
 }

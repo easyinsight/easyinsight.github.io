@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:VBox>
+        <mx:Label text="Marketing Text Goes Here"/>
+        <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+    </mx:VBox>
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.core.UIComponent;
+        import mx.managers.PopUpManager;
+
+        public static function newWindow(parent:UIComponent):void {
+            var window:GuestWindow = new GuestWindow();
+            PopUpManager.addPopUp(window, parent, true);
+            PopUpUtil.centerPopUp(window);
+        }
+        ]]></mx:Script>
+</util:EITitleWindow>

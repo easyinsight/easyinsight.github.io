@@ -5,7 +5,6 @@ import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.groups.GroupService;
 import com.easyinsight.reportpackage.ReportPackage;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.reportpackage.ReportPackageResponse;
@@ -90,7 +89,7 @@ public class AnalysisService {
             Map<Key, Key> keyReplacementMap = new HashMap<Key, Key>();
 
             Session session = Database.instance().createSession(conn);
-            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
+            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition, session);
             Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
             for (AnalysisItem item : feed.getFields()) {
                 keyReplacementMap.put(item.getKey(), item.getKey());
@@ -295,7 +294,7 @@ public class AnalysisService {
             stmt.setLong(1, wsAnalysisDefinition.getAnalysisID());
             stmt.executeUpdate();
 
-            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition);
+            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition, session);
             analysisDefinition.setUserBindings(bindings);
             analysisDefinition.setAuthorName(SecurityUtil.getUserName());
             analysisStorage.saveAnalysis(analysisDefinition, session);

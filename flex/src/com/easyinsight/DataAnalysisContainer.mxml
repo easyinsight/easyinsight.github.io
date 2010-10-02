@@ -32,14 +32,25 @@
 		<![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.analysis.AddedItemUpdateEvent;
+        import com.easyinsight.analysis.AnalysisCalculation;
         import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
+        import com.easyinsight.analysis.AnalysisLatitude;
+        import com.easyinsight.analysis.AnalysisList;
+        import com.easyinsight.analysis.AnalysisLongitude;
+        import com.easyinsight.analysis.AnalysisStep;
+        import com.easyinsight.analysis.AnalysisText;
         import com.easyinsight.analysis.AnalysisUtil;
+        import com.easyinsight.analysis.AnalysisZipCode;
         import com.easyinsight.analysis.AvailableFieldRenderer;
         import com.easyinsight.analysis.ControllerLookup;
+        import com.easyinsight.analysis.CoordinateValue;
         import com.easyinsight.analysis.DataServiceEvent;
+        import com.easyinsight.analysis.DerivedAnalysisDimension;
+        import com.easyinsight.analysis.DrillThrough;
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
@@ -48,6 +59,9 @@
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
+        import com.easyinsight.analysis.SixSigmaMeasure;
+        import com.easyinsight.analysis.StringValue;
+        import com.easyinsight.analysis.URLLink;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -55,6 +69,7 @@
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.guest.GuestWindow;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.MultiReportAnalyzeSource;
@@ -570,6 +585,7 @@
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_NETVIBES).selected) exportTab.removeNetvibes();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_IGOOGLE).selected) exportTab.removeIGoogle();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMAIL).selected) exportTab.removeEmail();
                     } else {
                         tabNavigator.removeChild(exportTab);
                     }
@@ -693,7 +709,9 @@
         }
 
         private function save():void {
-            if (analysisDefinition.canSaveDirectly) {
+            if (User.getInstance().guestUser) {
+                GuestWindow.newWindow(this);
+            } else if (analysisDefinition.canSaveDirectly) {
                 dataView.updateExportMetadata();
                 var window:ImprovedSaveWindow = new ImprovedSaveWindow();
                 window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saved);
@@ -720,12 +738,16 @@
         }
 
         private function saveAs():void {
-            // if we're in admin mode, this should be disabled...
-            var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
-            dataView.updateExportMetadata();
-            saveDialog.analysisDefinition = analysisDefinition;
-            saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
-            PopUpUtil.centerPopUp(saveDialog);
+            if (User.getInstance().guestUser) {
+                GuestWindow.newWindow(this);
+            } else {
+                // if we're in admin mode, this should be disabled...
+                var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
+                dataView.updateExportMetadata();
+                saveDialog.analysisDefinition = analysisDefinition;
+                saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
+                PopUpUtil.centerPopUp(saveDialog);
+            }
         }
 
         private function savedAnalysis(event:SavedAnalysisEvent):void {
@@ -956,18 +978,25 @@
             }
         }
 
+        private function blah():void {
+            var analysisStep:AnalysisStep;
+            var analysisLat:AnalysisLatitude;
+            var analysisLong:AnalysisLongitude;
+            var analysisText:AnalysisText;
+            var analysisZip:AnalysisZipCode;
+            var sigma:SixSigmaMeasure;
+            var tags:AnalysisList;
+            var hierarchy:AnalysisHierarchyItem;
+            var calc:AnalysisCalculation;
+            var derived:DerivedAnalysisDimension;
+            var urlLink:URLLink;
+            var drillthrough:DrillThrough;
+            var coordinate:CoordinateValue;
+            var stringValue:StringValue;
+        }
+
         [Bindable]
         private var fieldsIndex:int = 0;
-
-        private function editToggle():void {
-            if (fieldsIndex == 0) {
-                leftHandBox.width = leftHandBox.width + 150;
-                fieldsIndex = 1;
-            } else {
-                leftHandBox.width = leftHandBox.width - 150;
-                fieldsIndex = 0;
-            }
-        }
 
         [Bindable]
         private var fieldIndex:int = 0;

@@ -1,8 +1,9 @@
 package com.easyinsight.solutions {
-import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.framework.User;
 
 import com.easyinsight.listing.IPerspective;
 import com.easyinsight.listing.ListingChangeEvent;
+import com.easyinsight.preferences.UIConfiguration;
 
 import flash.events.EventDispatcher;
 
@@ -28,6 +29,12 @@ public class DelayedSolutionLink extends EventDispatcher{
     }
 
     public function execute():void {
+        if (User.getInstance().uiConfiguration != null) {
+            var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
+            if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CONNECTIONS).selected) {
+                return;
+            }
+        }
         solutionService.retrieveSolution.send(solutionID);
     }
 

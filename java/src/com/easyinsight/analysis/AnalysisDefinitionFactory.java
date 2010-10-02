@@ -1,8 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.analysis.definitions.WSGanttChartDefinition;
 import com.easyinsight.analysis.definitions.WSHeatMap;
 import com.easyinsight.analysis.definitions.WSTimeline;
 import com.easyinsight.analysis.gauge.GaugeDefinitionState;
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -11,7 +13,7 @@ import com.easyinsight.analysis.gauge.GaugeDefinitionState;
  */
 public class AnalysisDefinitionFactory {
 
-    public static AnalysisDefinition fromWSDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
+    public static AnalysisDefinition fromWSDefinition(WSAnalysisDefinition wsAnalysisDefinition, Session session) {
         AnalysisDefinitionState analysisDefinitionState;
         if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.CROSSTAB)) {
             WSCrosstabDefinition wsCrosstabDefinition = (WSCrosstabDefinition) wsAnalysisDefinition;
@@ -71,7 +73,7 @@ public class AnalysisDefinitionFactory {
             TimelineDefinitionState timelineDefinitionState = new TimelineDefinitionState();
             timelineDefinitionState.setDefinitionID(wsTimeline.getTimelineID());
             timelineDefinitionState.setFilter(wsTimeline.getSequence());
-            timelineDefinitionState.setContainedReport(AnalysisDefinitionFactory.fromWSDefinition(wsTimeline.getReport()));
+            timelineDefinitionState.setContainedReport(AnalysisDefinitionFactory.fromWSDefinition(wsTimeline.getReport(), session));
             analysisDefinitionState = timelineDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.HEATMAP)) {
             WSHeatMap heatMap = (WSHeatMap) wsAnalysisDefinition;
@@ -79,13 +81,22 @@ public class AnalysisDefinitionFactory {
             heatMapDefinitionState.setLatitude(heatMap.getLatitude());
             heatMapDefinitionState.setLongitude(heatMap.getLongitude());
             heatMapDefinitionState.setMapType(heatMap.getMapType());
+            heatMapDefinitionState.setDisplayType(heatMap.getDisplayType());
             heatMapDefinitionState.setZoomLevel(heatMap.getZoomLevel());
             heatMapDefinitionState.setHeatMapDefinitionID(heatMap.getHeatMapID());
             heatMapDefinitionState.setMinLat(heatMap.getMinLat());
             heatMapDefinitionState.setMinLong(heatMap.getMinLong());
             heatMapDefinitionState.setMaxLat(heatMap.getMaxLat());
             heatMapDefinitionState.setMaxLong(heatMap.getMaxLong());
+            if (heatMap.getPointReportID() > 0) {
+                heatMapDefinitionState.setPointReport(new AnalysisStorage().getPersistableReport(heatMap.getPointReportID(), session));
+            }
             analysisDefinitionState = heatMapDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.GANTT)) {
+            WSGanttChartDefinition gantt = (WSGanttChartDefinition) wsAnalysisDefinition;
+            GanttChartDefinitionState ganttChartDefinitionState = new GanttChartDefinitionState();
+            ganttChartDefinitionState.setGanttDefinitionID(gantt.getGanttDefinitionID());
+            analysisDefinitionState = ganttChartDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }

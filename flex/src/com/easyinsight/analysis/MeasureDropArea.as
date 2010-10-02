@@ -15,10 +15,6 @@ package com.easyinsight.analysis
 			return "Measure";
 		}
 		
-		override public function getItemEditorClass():Class {
-			return MeasureItemEditor;
-		}
-		
 		override protected function getNoDataLabel():String {
 			return "Drop Measure Here";
 		}

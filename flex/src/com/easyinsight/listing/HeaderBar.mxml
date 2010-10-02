@@ -9,19 +9,11 @@
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.account.NewFreeUserWelcome;
-        import com.easyinsight.framework.GAHelper;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.preferences.UIOption;
-        import com.easyinsight.scorecard.LoggedInHome;
-        import com.easyinsight.solutions.RevisedSolutionSummary;
-        import com.easyinsight.groups.GroupsSummary;
-        import com.easyinsight.account.AccountBasePage;
-        import com.easyinsight.customupload.api.APIPage;
-        import com.easyinsight.genredata.GenreDataProvider;
 
         import mx.states.RemoveChild;
         import mx.states.State;
@@ -132,6 +124,7 @@
             currentState = "";
             var ops:Array = [];
             evaluate(apiListingOption, UIConfiguration.SHOW_APIS, config, ops);
+            evaluate(accountsOption, UIConfiguration.SHOW_ACCOUNT, config, ops);
             evaluate(myDataOption, UIConfiguration.SHOW_MY_DATA, config, ops);
             evaluate(connectionsOption, UIConfiguration.SHOW_CONNECTIONS, config, ops);
             evaluate(exchangeOption, UIConfiguration.SHOW_EXCHANGE, config, ops);
@@ -143,6 +136,10 @@
                 states = [ state ];
                 currentState = "Persona";
             }
+            if (!config.getConfiguration(UIConfiguration.SHOW_REPORT_BUG).selected) {
+                removeChild(bugButton);
+            }
+
         }
 
         private function evaluate(listingOption:ListingOption, key:String, uiConfig:UIConfiguration, ops:Array):void {
@@ -153,25 +150,6 @@
                 ops.push(removeChild);
             }
         }
-
-        /*[Bindable]
-        private var introPanel:Class = SimpleIntro;
-        [Bindable]
-        private var myData:Class = MyData;
-        [Bindable]
-        private var connections:Class = RevisedSolutionSummary;
-        [Bindable]
-        private var exchange:Class = GenreDataProvider;
-        [Bindable]
-        private var groupsSummary:Class = GroupsSummary;
-        [Bindable]
-        private var myGoals:Class = LoggedInHome;
-        [Bindable]
-        private var apiPage:Class = APIPage;
-        [Bindable]
-        private var accountBase:Class = AccountBasePage;
-        [Bindable]
-        private var help:Class = NewFreeUserWelcome;*/
 		]]>
     </mx:Script>
     <mx:Image source="{logo}"/>
@@ -218,7 +196,7 @@
         <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <mx:Spacer width="100%"/>
-    <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug"/>
+    <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug" id="bugButton"/>
     <mx:Spacer width="10"/>
     <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)"/>
     <mx:Spacer width="10"/>

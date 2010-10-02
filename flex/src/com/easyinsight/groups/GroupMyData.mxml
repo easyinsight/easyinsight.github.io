@@ -3,7 +3,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.listing.AnalyzeSource;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.MyDataTree;
@@ -35,7 +34,6 @@
         }
 
         private function gotFeedAnalysisTree():void {
-
             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
             var myDataTree:MyDataTree = groupService.getFeedAnalysisTree.lastResult as MyDataTree;            
             sourceTreeData = myDataTree.objects;
@@ -57,7 +55,6 @@
             } else {
                 analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
-
             }
         }
 

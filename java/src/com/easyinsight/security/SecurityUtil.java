@@ -28,8 +28,8 @@ public class SecurityUtil {
     private static ISecurityProvider securityProvider;
     private static ThreadLocal<UserPrincipal> threadLocal = new ThreadLocal<UserPrincipal>();
 
-    public static void populateThreadLocal(String userName, long userID, long accountID, int accountType, boolean accountAdmin) {
-        threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin));
+    public static void populateThreadLocal(String userName, long userID, long accountID, int accountType, boolean accountAdmin, boolean guestUser) {
+        threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin, guestUser));
     }
 
     public static void setSecurityProvider(ISecurityProvider securityProvider) {
@@ -38,6 +38,13 @@ public class SecurityUtil {
 
     public static ISecurityProvider getSecurityProvider(){
         return SecurityUtil.securityProvider;
+    }
+
+    public static boolean isGuestUser() {
+        UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
+        if(userPrincipal == null)
+            userPrincipal = threadLocal.get();
+        return userPrincipal.isGuestUser();
     }
 
     public static boolean isAccountAdmin() {
@@ -92,12 +99,29 @@ public class SecurityUtil {
                 if (user.getPersonaID() != null) {
                     user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                 }
-                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(), 
+                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                         account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
                         user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser());
             } else {
+                /*results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
+                if (results.size() > 0) {
+                    Account account = (Account) results.get(0);
+                    if(!Arrays.asList(Account.TRIAL, Account.ACTIVE).contains(account.getAccountState())) {
+                        return new UserServiceResponse(false, "This account is not active. Please log in to re-activate your account.");
+                    }
+                    if (user.getPersonaID() != null) {
+                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+                    }
+                    userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                                    user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                            account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
+                            user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
+                            user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser());
+                } else {
+                    
+                }*/
                 throw new SecurityException();
             }
             conn.commit();
@@ -704,7 +728,7 @@ public class SecurityUtil {
                 }
             }
             int role = getInsightRole(userPrincipal.getUserID(), reportID);
-            if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {                
+            if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
                 throw new SecurityException();
             }
         }

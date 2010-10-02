@@ -11,13 +11,23 @@ public class CoordinateValue extends Value implements Serializable {
 
     private String x;
     private String y;
+    private String zip;
 
     public CoordinateValue() {
     }
 
-    public CoordinateValue(String x, String y) {
+    public CoordinateValue(String x, String y, String zip) {
         this.x = x;
         this.y = y;
+        this.zip = zip;
+    }
+
+    public String getZip() {
+        return zip;
+    }
+
+    public void setZip(String zip) {
+        this.zip = zip;
     }
 
     public String getX() {

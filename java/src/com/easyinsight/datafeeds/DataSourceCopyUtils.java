@@ -216,8 +216,13 @@ public class DataSourceCopyUtils {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE DATA_FEED_ID = ?");
         queryStmt.setLong(1, feedID);
         ResultSet rs = queryStmt.executeQuery();
-        while (rs.next()) {
-            analyses.add(AnalysisDefinitionFactory.fromWSDefinition(analysisStorage.getAnalysisDefinition(rs.getLong(1), conn)));
+        Session session = Database.instance().createSession(conn);
+        try {
+            while (rs.next()) {
+                analyses.add(AnalysisDefinitionFactory.fromWSDefinition(analysisStorage.getAnalysisDefinition(rs.getLong(1), conn), session));
+            }
+        } finally {
+            session.close();
         }
         return analyses;
     }

@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*"
-         xmlns:listing="com.easyinsight.listing.*" width="100%"
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*"
+         xmlns:listing="com.easyinsight.listing.*" width="100%" backgroundColor="#818285" horizontalAlign="center"
          height="100%" implements="com.easyinsight.listing.IPerspective">
     <mx:states>
         <mx:State name="noData">
             <mx:RemoveChild target="{scorecardBox}"/>
-            <mx:AddChild relativeTo="{core}">
+            <mx:AddChild>
                 <listing:MyNoData/>
             </mx:AddChild>
         </mx:State>
@@ -29,10 +29,8 @@
         public function cleanup():void {
         }
         ]]></mx:Script>
-    <mx:HBox horizontalAlign="center" width="100%" height="100%" backgroundColor="#818285" id="core">
-        <mx:Canvas width="1000" backgroundColor="#FFFFFF" height="100%"
-                 id="scorecardBox">
-            <scorecard:ScorecardUserDisplay id="scorecardDisplay" noData="currentState='noData'" gotData="currentState=''"/>
-        </mx:Canvas>
-    </mx:HBox>
-</mx:VBox>
+    <mx:Canvas width="1000" backgroundColor="#FFFFFF" height="100%"
+             id="scorecardBox">
+        <scorecard:ScorecardUserDisplay id="scorecardDisplay" noData="currentState='noData'" gotData="currentState=''"/>
+    </mx:Canvas>
+</mx:HBox>

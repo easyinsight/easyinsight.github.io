@@ -1,0 +1,86 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%">
+
+    <mx:Script><![CDATA[
+        private var _overlayIndex:int;
+
+        private var _loading:Boolean;
+
+        private var _stackTrace:String;
+
+        [Bindable(event="stackTraceChanged")]
+        public function get stackTrace():String {
+            return _stackTrace;
+        }
+
+        public function set stackTrace(value:String):void {
+            if (_stackTrace == value) return;
+            _stackTrace = value;
+            dispatchEvent(new Event("stackTraceChanged"));
+        }
+
+        [Bindable(event="overlayIndexChanged")]
+        public function get overlayIndex():int {
+            return _overlayIndex;
+        }
+
+        public function set overlayIndex(value:int):void {
+            if (_overlayIndex == value) return;
+            _overlayIndex = value;
+            dispatchEvent(new Event("overlayIndexChanged"));
+        }
+
+        [Bindable(event="loadingChanged")]
+        public function get loading():Boolean {
+            return _loading;
+        }
+
+        public function set loading(value:Boolean):void {
+            if (_loading == value) return;
+            _loading = value;
+            dispatchEvent(new Event("loadingChanged"));
+        }]]></mx:Script>
+
+    <mx:Canvas width="100%" height="100%" id="reportBox"/>
+    <mx:ViewStack width="100%" height="100%" selectedIndex="{overlayIndex}" resizeToContent="true">
+        <mx:Box/>
+        <mx:Box width="100%" height="100%" id="loadingLayer" visible="{loading}"
+                horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+            <mx:ProgressBar indeterminate="{overlayIndex == 1}" label="Loading the report..." visible="true"
+                            fontSize="20"/>
+        </mx:Box>
+        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
+                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+            <mx:Box paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+                    backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+                    cornerRadius="10">
+                <util:AutoSizeTextArea
+                        text="We're sorry, but something went wrong in retrieving data for this report. We've logged the error on our servers and our engineers will fix it as soon as possible."
+                        visible="true" fontSize="18" width="400"
+                        editable="false" backgroundAlpha="0"/>
+            </mx:Box>
+        </mx:Box>
+        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
+                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+            <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+                     backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+                     cornerRadius="10">
+                <util:AutoSizeTextArea
+                        text="We're sorry, but something went wrong in retrieving data for this report. You may want to edit the report, see if any fields are missing from the report drop areas, and adjust from there."
+                        visible="true" fontSize="18" width="400"
+                        editable="false" backgroundAlpha="0"/>
+                <mx:Button label="See Error Details" click="overlayIndex = 4"/>
+            </mx:VBox>
+        </mx:Box>
+        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
+                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
+            <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
+                     backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
+                     cornerRadius="10">
+                <mx:TextArea text="{stackTrace}" visible="true" fontSize="12" width="500"
+                             editable="false" backgroundAlpha="0" height="300"/>
+                <mx:Button label="Hide Error Details" click="overlayIndex = 3"/>
+            </mx:VBox>
+        </mx:Box>
+    </mx:ViewStack>
+</mx:Canvas>

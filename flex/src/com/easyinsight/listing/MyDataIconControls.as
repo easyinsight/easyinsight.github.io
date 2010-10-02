@@ -1,6 +1,5 @@
 package com.easyinsight.listing
 {
-import com.easyinsight.administration.feed.CredentialsResponse;
 import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.customupload.RefreshWindow;
@@ -9,7 +8,6 @@ import com.easyinsight.datasources.DataSourceRefreshWindow;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableSource;
 import com.easyinsight.framework.Credentials;
-import com.easyinsight.framework.ModulePerspective;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
@@ -24,7 +22,6 @@ import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
-import com.easyinsight.util.UserAudit;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -58,8 +55,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     [Embed(source="../../../../assets/navigate_cross.png")]
     public var deleteIcon:Class;
 
-    private var userUploadSource:RemoteObject;
-
     private var feedService:RemoteObject;
 
     private var refreshButton:Button;
@@ -82,35 +77,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     public function MyDataIconControls()
     {
         super();
-        analyzeButton = new Button();
-        analyzeButton.setStyle("icon", playIcon);
-        BindingUtils.bindProperty(analyzeButton, "toolTip", this, "analyzeTooltip");
-        BindingUtils.bindProperty(analyzeButton, "visible", this, "analyzeVisible");
-        analyzeButton.addEventListener(MouseEvent.CLICK, analyzeCalled);
 
-        refreshButton = new Button();
-        refreshButton.setStyle("icon", refreshIcon);
-        BindingUtils.bindProperty(refreshButton, "toolTip", this, "refreshTooltip");
-        BindingUtils.bindProperty(refreshButton, "visible", this, "refreshVisible");
-        refreshButton.addEventListener(MouseEvent.CLICK, refreshCalled);
-
-        adminButton = new Button();
-        adminButton.setStyle("icon", adminIcon);
-        BindingUtils.bindProperty(adminButton, "toolTip", this, "adminTooltip");
-        BindingUtils.bindProperty(adminButton, "visible", this, "adminVisible");
-        adminButton.addEventListener(MouseEvent.CLICK, adminCalled);
-
-        copyButton = new Button();
-        copyButton.setStyle("icon", copyIcon);
-        BindingUtils.bindProperty(copyButton, "toolTip", this, "copyTooltip");
-        BindingUtils.bindProperty(copyButton, "visible", this, "copyVisible");
-        copyButton.addEventListener(MouseEvent.CLICK, copyCalled);
-
-        deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
-        BindingUtils.bindProperty(deleteButton, "toolTip", this, "deleteTooltip");
-        BindingUtils.bindProperty(deleteButton, "visible", this, "deleteVisible");
-        deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
 
 
         this.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
@@ -119,14 +86,88 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         this.setStyle("paddingRight", 5);
     }
 
+    private var _showAnalyze:Boolean = true;
+    private var _showRefresh:Boolean = true;
+    private var _showAdmin:Boolean = true;
+    private var _showCopy:Boolean = true;
+    private var _showDelete:Boolean = true;
+
+    public function set showAnalyze(value:Boolean):void {
+        _showAnalyze = value;
+    }
+
+    public function set showRefresh(value:Boolean):void {
+        _showRefresh = value;
+    }
+
+    public function set showAdmin(value:Boolean):void {
+        _showAdmin = value;
+    }
+
+    public function set showCopy(value:Boolean):void {
+        _showCopy = value;
+    }
+
+    public function set showDelete(value:Boolean):void {
+        _showDelete = value;
+    }
 
     override protected function createChildren():void {
         super.createChildren();
-        addChild(analyzeButton);
-        addChild(refreshButton);
-        addChild(adminButton);
-        addChild(copyButton);
-        addChild(deleteButton);
+        if (_showAnalyze) {
+            if (analyzeButton == null) {
+                analyzeButton = new Button();
+                analyzeButton.setStyle("icon", playIcon);
+                BindingUtils.bindProperty(analyzeButton, "toolTip", this, "analyzeTooltip");
+                BindingUtils.bindProperty(analyzeButton, "visible", this, "analyzeVisible");
+                analyzeButton.addEventListener(MouseEvent.CLICK, analyzeCalled);
+            }
+            addChild(analyzeButton);
+        }
+
+        if (_showRefresh) {
+            if (refreshButton == null) {
+                refreshButton = new Button();
+                refreshButton.setStyle("icon", refreshIcon);
+                BindingUtils.bindProperty(refreshButton, "toolTip", this, "refreshTooltip");
+                BindingUtils.bindProperty(refreshButton, "visible", this, "refreshVisible");
+                refreshButton.addEventListener(MouseEvent.CLICK, refreshCalled);
+            }
+            addChild(refreshButton);
+        }
+
+        if (_showAdmin) {
+            if (adminButton == null) {
+                adminButton = new Button();
+                adminButton.setStyle("icon", adminIcon);
+                BindingUtils.bindProperty(adminButton, "toolTip", this, "adminTooltip");
+                BindingUtils.bindProperty(adminButton, "visible", this, "adminVisible");
+                adminButton.addEventListener(MouseEvent.CLICK, adminCalled);
+            }
+            addChild(adminButton);
+        }
+
+        if (_showCopy) {
+            if (copyButton == null) {
+                copyButton = new Button();
+                copyButton.setStyle("icon", copyIcon);
+                BindingUtils.bindProperty(copyButton, "toolTip", this, "copyTooltip");
+                BindingUtils.bindProperty(copyButton, "visible", this, "copyVisible");
+                copyButton.addEventListener(MouseEvent.CLICK, copyCalled);
+            }
+            addChild(copyButton);
+        }
+
+        if (_showDelete) {
+            if (deleteButton == null) {
+                deleteButton = new Button();
+                deleteButton.setStyle("icon", deleteIcon);
+                BindingUtils.bindProperty(deleteButton, "toolTip", this, "deleteTooltip");
+                BindingUtils.bindProperty(deleteButton, "visible", this, "deleteVisible");
+                deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
+            }
+            addChild(deleteButton);
+        }
     }
 
     override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
@@ -134,16 +175,32 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         var buttonWidth:int = 40;
         var buttonHeight:int = 22;
         var padding:int = 5;
-        analyzeButton.move((padding),0);
-        analyzeButton.setActualSize(buttonWidth, buttonHeight);
-        refreshButton.move((padding * 2) + (buttonWidth),0);
-        refreshButton.setActualSize(buttonWidth, buttonHeight);
-        adminButton.move((padding * 3) + (buttonWidth * 2),0);
-        adminButton.setActualSize(buttonWidth, buttonHeight);
-        copyButton.move((padding * 4) + (buttonWidth * 3),0);
-        copyButton.setActualSize(buttonWidth, buttonHeight);
-        deleteButton.move((padding * 5) + (buttonWidth * 4),0);
-        deleteButton.setActualSize(buttonWidth, buttonHeight);
+        var i:int = 1;
+        if (analyzeButton != null) {
+            analyzeButton.move((padding * i),0);
+            analyzeButton.setActualSize(buttonWidth, buttonHeight);
+            i++;
+        }
+        if (refreshButton != null) {
+            refreshButton.move((padding * i) + (buttonWidth),0);
+            refreshButton.setActualSize(buttonWidth, buttonHeight);
+            i++;
+        }
+        if (adminButton != null) {
+            adminButton.move((padding * i) + (buttonWidth * (i - 1)),0);
+            adminButton.setActualSize(buttonWidth, buttonHeight);
+            i++;
+        }
+        if (copyButton != null) {
+            copyButton.move((padding * i) + (buttonWidth * (i - 1)),0);
+            copyButton.setActualSize(buttonWidth, buttonHeight);
+            i++;
+        }
+        if (deleteButton != null) {
+            deleteButton.move((padding * i) + (buttonWidth * (i - 1)),0);
+            deleteButton.setActualSize(buttonWidth, buttonHeight);
+            i++;
+        }
     }
 
     [Bindable(event="analyzeTooltipChanged")]
@@ -352,21 +409,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
 
     private function passEvent(event:UploadConfigEvent):void {
         dispatchEvent(event);
-    }
-
-
-    private function completedRefresh(event:ResultEvent):void {
-        var credentialsResponse:CredentialsResponse = userUploadSource.refreshData.lastResult as CredentialsResponse;
-        if (!credentialsResponse.successful) {
-            var refreshWindow:RefreshWindow = new RefreshWindow();
-            refreshWindow.dataSourceID = credentialsResponse.dataSourceID;
-            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured, false, 0, true);
-            PopUpManager.addPopUp(refreshWindow, this, true);
-            PopUpUtil.centerPopUp(refreshWindow);
-        } else {
-            UserAudit.instance().audit(UserAudit.REFRESHED_DATA);
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
-        }
     }
 
     private function fileData(feedDescriptor:DataFeedDescriptor):void {

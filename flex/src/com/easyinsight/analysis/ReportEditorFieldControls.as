@@ -8,7 +8,6 @@ import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-	import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.listClasses.IListItemRenderer;
@@ -174,8 +173,6 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
                 editor = CalculationMeasureWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
                 editor = DerivedGroupingWindow;
-            } else {
-                editor = AnalysisItemEditor;
             }
 			var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
 			analysisItemEditor.editorClass = editor; 			

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         xmlns:filters="com.easyinsight.filtering.*" xmlns:range="com.easyinsight.analysis.range.*" width="550"
         height="400"
         xmlns:analysis="com.easyinsight.analysis.*"
@@ -516,4 +516,4 @@
         </mx:VBox>
     </mx:TabNavigator>
     <mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>
-</mx:Box>
+</mx:Module>

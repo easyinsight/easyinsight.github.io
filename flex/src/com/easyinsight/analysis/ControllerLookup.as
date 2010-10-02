@@ -13,8 +13,8 @@ import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
 import com.easyinsight.analysis.crosstab.CrosstabController;
+import com.easyinsight.analysis.gantt.GanttController;
 import com.easyinsight.analysis.gauge.GaugeController;
-import com.easyinsight.analysis.heatmap.HeatMapControlBar;
 import com.easyinsight.analysis.heatmap.HeatMapController;
 import com.easyinsight.analysis.list.ListController;
 import com.easyinsight.analysis.maps.AfricaMapController;
@@ -116,6 +116,9 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.HEATMAP:
                 controller = HeatMapController;
+                break;
+            case AnalysisDefinition.GANTT:
+                controller = GanttController;
                 break;
         }
         return controller;

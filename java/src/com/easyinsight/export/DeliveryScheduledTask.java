@@ -2,11 +2,7 @@ package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.email.SendGridEmail;
-import com.easyinsight.email.UserStub;
-import com.easyinsight.kpi.KPI;
-import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.scorecard.*;
 import com.easyinsight.security.SecurityUtil;
@@ -117,7 +113,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 long accountID = queryRS.getLong(3);
                 int accountType = queryRS.getInt(4);
                 boolean accountAdmin = queryRS.getBoolean(5);
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin);
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false);
 
                 if (deliveryFormat == ReportDelivery.EXCEL) {
                     WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);

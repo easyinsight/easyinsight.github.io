@@ -169,6 +169,10 @@
             removeChild(igoogleButton);
         }
 
+        public function removeEmail():void {
+            removeChild(emailButton);
+        }
+
         private function email():void {
             if (analysisDefinition.analysisID == 0) {
                 Alert.show("You need to save the report first.");

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public abstract class AnalysisDefinitionState implements Cloneable {
 
     }
 
-    public Collection<? extends AnalysisDefinition> containedReports() {
+    public Collection<? extends AnalysisDefinition> containedReports(Session session) {
         return new ArrayList<AnalysisDefinition>();
     }
 

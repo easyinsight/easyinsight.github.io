@@ -88,6 +88,7 @@ public class FragmentParser {
                 delayedTemplate.execute();
             }),
             new FragmentTester("redirectID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                if (User.getInstance().guestUser) return;
                 var redirectType:int = int(key);
                 var sessionToken:String = String(o.token);
                 var redirector:TokenRedirector = new TokenRedirector();
@@ -97,6 +98,7 @@ public class FragmentParser {
                 redirector.addEventListener(ListingChangeEvent.LISTING_CHANGE, workspace.changePerspective);
             }),
             new FragmentTester("oauthRedirectID", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
+                if (User.getInstance().guestUser) return;
                 var oauthRedirectID:int = int(key);
                 var token:String = String(o.token);
                 var secret:String = String(o.secret);

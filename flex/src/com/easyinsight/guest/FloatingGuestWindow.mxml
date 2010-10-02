@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" headerHeight="8">
+    <mx:Script><![CDATA[
+
+        import mx.core.Application;
+        import mx.core.UIComponent;
+        import mx.managers.PopUpManager;
+
+        public static function newWindow(parent:UIComponent):void {
+            var window:FloatingGuestWindow = new FloatingGuestWindow();
+            var app:Application = Application.application as Application;
+            window.y = 0;
+            window.x = app.width - 200;
+            PopUpManager.addPopUp(window, parent, false);
+        }
+        ]]></mx:Script>
+    <mx:VBox width="200" backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:TextArea text="You're currently logged in through a guest account. Want to switch to another view or ready to create your own account?"
+                editable="false" selectable="false" width="190" borderStyle="none" backgroundAlpha="0" height="70"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Switch View"/>
+            <mx:Button label="Sign Up"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

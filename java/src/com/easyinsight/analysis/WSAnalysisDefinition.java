@@ -48,6 +48,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int TIMELINE = 26;
     public static final int HEATMAP = 27;
     public static final int MAP_AFRICA = 28;
+    public static final int GANTT = 29;
 
     private String name;
     private String authorName;
@@ -452,6 +453,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void applyFilters(List<FilterDefinition> drillThroughFilters) {
         for (FilterDefinition filterDefinition : drillThroughFilters) {
+            boolean foundFilter = false;
             for (FilterDefinition ourDefinition : retrieveFilterDefinitions()) {
                 if (ourDefinition.getField().getKey().equals(filterDefinition.getField().getKey())) {
                     // match the filter?
@@ -459,8 +461,12 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         FilterValueDefinition ourFilterValueDefinition = (FilterValueDefinition) ourDefinition;
                         FilterValueDefinition sourceFilterValueDefinition = (FilterValueDefinition) filterDefinition;
                         ourFilterValueDefinition.setFilteredValues(sourceFilterValueDefinition.getFilteredValues());
+                        foundFilter = true;
                     }
                 }
+            }
+            if (!foundFilter) {
+                filterDefinitions.add(filterDefinition);
             }
         }
     }

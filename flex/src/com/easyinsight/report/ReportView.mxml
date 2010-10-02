@@ -1,13 +1,14 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
-                            xmlns:filtering="com.easyinsight.filtering.*"
-                            xmlns:datasources="com.easyinsight.datasources.*"
-                            xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
-                            width="100%" height="100%"
-                            creationComplete="onCreation()" backgroundColor="#EEEEEE"
-                            implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
-        paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
-        direction="vertical">
+         xmlns:filtering="com.easyinsight.filtering.*"
+         xmlns:datasources="com.easyinsight.datasources.*"
+         xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
+         xmlns:report="com.easyinsight.report.*"
+         width="100%" height="100%"
+         creationComplete="onCreation()" backgroundColor="#EEEEEE"
+         implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
+         paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
+         direction="vertical">
     <mx:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{topDisplay}"/>
@@ -370,94 +371,94 @@
         private var report:AnalysisDefinition;
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
-                if (event.credentialRequirements != null) {
-                    CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
+            if (event.credentialRequirements != null) {
+                CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
+            } else {
+                UserAudit.instance().audit(UserAudit.OPEN_REPORT_VIEW);
+                report = event.analysisDefinition;
+                dataSource = event.dataSourceInfo;
+                reportName = report.name;
+                var nf:NumberFormatter = new NumberFormatter();
+                if (_originReportID > 0) {
+                    _score = _originReportScore;
+                    _placeHolderID = _originReportID;
                 } else {
-                    UserAudit.instance().audit(UserAudit.OPEN_REPORT_VIEW);
-                    report = event.analysisDefinition;
-                    dataSource = event.dataSourceInfo;
-                    reportName = report.name;
-                    var nf:NumberFormatter = new NumberFormatter();
-                    if (_originReportID > 0) {
-                        _score = _originReportScore;
-                        _placeHolderID = _originReportID;
-                    } else {
-                        _score = event.ratingsAverage;
-                        _placeHolderID = _dataSourceID;
-                    }
-                    reportRatingCount = nf.format(event.ratingsCount);
-                    reportRating = nf.format(event.ratingsAverage);
-                    reportViews = String(report.viewCount);
-                    description = report.description;
-                    attribution = event.attribution;
-                    tags = "";
-                    if (report.tagCloud != null && report.tagCloud.length > 0) {
-                        for each (var tag:Tag in report.tagCloud) {
-                            tags += tag.tagName;
-                            tags += ",";
-                        }
-                        tags = tags.substring(0, tags.length - 1);
-                    }
-                    admin = event.dataSourceAccessible;
-
-                    if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                        filterDefinitions = report.filterDefinitions;
-                        filterIndex = 1;
-                    } else {
-                        if (leftButtonBar.contains(filterButton)) {
-                            leftButtonBar.removeChild(filterButton);
-                            filterIndex = 0;
-                            filterDefinitions = new ArrayCollection();
-                        }
-                    }
-
-                    transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
-                    if (!admin) {
-                        if (leftButtonBar.contains(editReportButton)) {
-                            leftButtonBar.removeChild(editReportButton);
-                        }
-                        showReportEditor = false;
-                    }
-                    ownerName = report.authorName;
-                    var dateFormatter:DateFormatter = new DateFormatter();
-                    switch (User.getInstance().dateFormat) {
-                        case 0:
-                            dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-                            break;
-                        case 1:
-                            dateFormatter.formatString = "YYYY-MM-DD HH:NN";
-                            break;
-                        case 2:
-                            dateFormatter.formatString = "DD-MM-YYYY HH:NN";
-                            break;
-                        case 3:
-                            dateFormatter.formatString = "DD/MM/YYYY HH:NN";
-                            break;
-                        case 4:
-                            dateFormatter.formatString = "DD.MM.YYYY HH:NN";
-                            break;
-                    }
-                    reportDate = dateFormatter.format(report.dateCreated);
-                    // lastDataTime = dateFormatter.format(event.lastDataTime);
-                    if (!_embedded && _updateURL && !_showAddBar) {
-                        var feedFragmentObject:Object = new Object();
-                        feedFragmentObject.reportID = report.urlKey;
-                        var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                        BrowserManager.getInstance().setFragment(feedFragmentString);
-                        BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                    } else if (_showAddBar) {
-                        var templateFragmentObject:Object = new Object();
-                        templateFragmentObject.reportTemplateID = _templateUrlKey;
-                        var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
-                        BrowserManager.getInstance().setFragment(templateFragmentString);
-                        BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                    }
-                    loading = false;
-                    overlayIndex = 0;
-                    receivedData = true;
-                    dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
-                    retrievedDataOnce = true;
+                    _score = event.ratingsAverage;
+                    _placeHolderID = _dataSourceID;
                 }
+                reportRatingCount = nf.format(event.ratingsCount);
+                reportRating = nf.format(event.ratingsAverage);
+                reportViews = String(report.viewCount);
+                description = report.description;
+                attribution = event.attribution;
+                tags = "";
+                if (report.tagCloud != null && report.tagCloud.length > 0) {
+                    for each (var tag:Tag in report.tagCloud) {
+                        tags += tag.tagName;
+                        tags += ",";
+                    }
+                    tags = tags.substring(0, tags.length - 1);
+                }
+                admin = event.dataSourceAccessible;
+
+                if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                    filterDefinitions = report.filterDefinitions;
+                    filterIndex = 1;
+                } else {
+                    if (leftButtonBar.contains(filterButton)) {
+                        leftButtonBar.removeChild(filterButton);
+                        filterIndex = 0;
+                        filterDefinitions = new ArrayCollection();
+                    }
+                }
+
+                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+                if (!admin) {
+                    if (leftButtonBar.contains(editReportButton)) {
+                        leftButtonBar.removeChild(editReportButton);
+                    }
+                    showReportEditor = false;
+                }
+                ownerName = report.authorName;
+                var dateFormatter:DateFormatter = new DateFormatter();
+                switch (User.getInstance().dateFormat) {
+                    case 0:
+                        dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                        break;
+                    case 1:
+                        dateFormatter.formatString = "YYYY-MM-DD HH:NN";
+                        break;
+                    case 2:
+                        dateFormatter.formatString = "DD-MM-YYYY HH:NN";
+                        break;
+                    case 3:
+                        dateFormatter.formatString = "DD/MM/YYYY HH:NN";
+                        break;
+                    case 4:
+                        dateFormatter.formatString = "DD.MM.YYYY HH:NN";
+                        break;
+                }
+                reportDate = dateFormatter.format(report.dateCreated);
+                // lastDataTime = dateFormatter.format(event.lastDataTime);
+                if (!_embedded && _updateURL && !_showAddBar) {
+                    var feedFragmentObject:Object = new Object();
+                    feedFragmentObject.reportID = report.urlKey;
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                } else if (_showAddBar) {
+                    var templateFragmentObject:Object = new Object();
+                    templateFragmentObject.reportTemplateID = _templateUrlKey;
+                    var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
+                    BrowserManager.getInstance().setFragment(templateFragmentString);
+                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                }
+                loading = false;
+                overlayIndex = 0;
+                receivedData = true;
+                dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+                retrievedDataOnce = true;
+            }
         }
 
         private function toggleFilters():void {
@@ -640,7 +641,7 @@
                 if (!_showExport) {
                     leftButtonBar.removeChild(exportButton);
                 }
-                if (!_showReportEditor || _showAddBar) {
+                if (!_showReportEditor || _showAddBar || User.getInstance().guestUser) {
                     leftButtonBar.removeChild(editReportButton);
                 }
                 if (!_showBrowser) {
@@ -651,7 +652,15 @@
                 }
 
                 if (_showAddBar) {
-                    exchangeIndex = 1;
+                    if (!User.getInstance().guestUser) {
+                        exchangeIndex = 1;
+                    }
+                }
+
+                if (User.getInstance().guestUser) {
+                    highBox.removeChild(dataSourceDisplay);
+                } else {
+                    dataSourceDisplay.visible = true;
                 }
 
                 viewFactory.reportID = _reportID;
@@ -659,7 +668,7 @@
                 viewFactory.dataSourceID = _dataSourceID;
                 BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
                 viewFactory.drillthroughFilters = _parameterFilters;
-                reportBox.addChild(viewFactory);
+                reportCanvas.reportBox.addChild(viewFactory);
                 viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
                 viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
                 viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
@@ -745,122 +754,91 @@
 
         ]]></mx:Script>
 
-        <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF">
-            <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5">
-                <mx:ViewStack resizeToContent="true">
-                    <mx:Box/>
-                    <mx:HBox>
-                        <mx:Button icon="{previousReportArrow}" toolTip="Previous Report" click="toPreviousReport()"/>
-                        <mx:VRule height="50"/>
-                    </mx:HBox>
-                </mx:ViewStack>
-                <mx:HBox width="1000" verticalAlign="middle">
-                    <mx:VBox>
-                        <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
-                            <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"
-                                    toolTip="Close the report view"/>
-                            <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
-                                       id="fullScreenButton" toolTip="View full screen"/>
-                            <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
-                                       id="refreshButton" toolTip="Refresh this report"/>
-                            <mx:Button click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
-                                       id="bookmarkButton" toolTip="Save this report to My Data..."/>
-                            <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
-                                       labelPlacement="bottom"
-                                       id="exportButton" toolTip="Export the report..."/>
-                            <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="bottom"
-                                       id="filterButton" toolTip="{filterTooltip}"/>
-                            <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
-                                       labelPlacement="bottom" id="editReportButton" toolTip="Open this report in the report editor..."/>
-                            <mx:Button click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
-                                       id="browserButton"/>
-                            <mx:Spacer width="100%"/>
-                            <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350" fontSize="14"/>
-                            <mx:Spacer width="100%"/>
-                        </mx:HBox>
-                        <util:AutoSizeTextArea text="{description}" visible="true" fontSize="14" width="720"
-                                            editable="false" backgroundAlpha="0"/>
-                    </mx:VBox>
-                    <mx:Spacer width="100%"/>
-                    <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"/>
+    <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF">
+        <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5">
+            <mx:ViewStack resizeToContent="true">
+                <mx:Box/>
+                <mx:HBox>
+                    <mx:Button icon="{previousReportArrow}" toolTip="Previous Report" click="toPreviousReport()"/>
+                    <mx:VRule height="50"/>
                 </mx:HBox>
-                <mx:ViewStack resizeToContent="true">
-                    <mx:Box/>
-                    <mx:HBox>
-                        <mx:VRule height="50"/>
-                        <mx:Button icon="{nextReportArrow}" toolTip="Next Report" click="toNextReport()"/>
+            </mx:ViewStack>
+            <mx:HBox width="1000" verticalAlign="middle" id="highBox">
+                <mx:VBox>
+                    <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
+                        <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"
+                                   toolTip="Close the report view"/>
+                        <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
+                                   id="fullScreenButton" toolTip="View full screen"/>
+                        <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
+                                   id="refreshButton" toolTip="Refresh this report"/>
+                        <mx:Button click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
+                                   id="bookmarkButton" toolTip="Save this report to My Data..."/>
+                        <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
+                                   labelPlacement="bottom"
+                                   id="exportButton" toolTip="Export the report..."/>
+                        <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="bottom"
+                                   id="filterButton" toolTip="{filterTooltip}"/>
+                        <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
+                                   labelPlacement="bottom" id="editReportButton"
+                                   toolTip="Open this report in the report editor..."/>
+                        <mx:Button click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
+                                   id="browserButton"/>
+                        <mx:Spacer width="100%"/>
+                        <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350"
+                                  fontSize="14"/>
+                        <mx:Spacer width="100%"/>
                     </mx:HBox>
-                </mx:ViewStack>
+                    <util:AutoSizeTextArea text="{description}" visible="true" fontSize="14" width="720"
+                                           editable="false" backgroundAlpha="0"/>
+                </mx:VBox>
+                <mx:Spacer width="100%"/>
+                <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"
+                                               id="dataSourceDisplay"
+                                               visible="false"/>
             </mx:HBox>
-            <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
-        </mx:VBox>
-            <mx:VBox width="100%" height="100%">
-                <mx:ViewStack resizeToContent="true" selectedIndex="{exchangeIndex}" width="100%">
-                    <mx:Box/>
-                    <mx:VBox paddingTop="15" width="100%" horizontalAlign="center">
-                        <mx:HBox id="addReportBox" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF" borderColor="#CCCCCC"
-                            borderThickness="1" cornerRadius="5" dropShadowEnabled="true" borderStyle="solid" paddingLeft="5" paddingRight="5" horizontalGap="20">
-                            <mx:TextArea text="Want to save this report to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
-                                editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0" fontSize="14"/>
-                            <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton" click="saveReport(event)"/>
-                        </mx:HBox>
-                    </mx:VBox>
-                </mx:ViewStack>
-
-                <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
-                    <mx:Box/>
-                    <mx:VBox width="100%" horizontalAlign="center">
-                        <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
-                                                  borderThickness="1"
-                                                  existingFilters="{filterDefinitions}"
-                                                  width="100%" paddingLeft="10"
-                                                  paddingTop="10" paddingBottom="10"
-                                                  paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
-                                                  backgroundColor="#FFFFFF"/>
-                    </mx:VBox>
-                </mx:ViewStack>
-                <mx:Canvas width="100%" height="100%">
-                    <mx:Canvas width="100%" height="100%" id="reportBox"/>
-                    <mx:ViewStack width="100%" height="100%" selectedIndex="{overlayIndex}" resizeToContent="true">
-                        <mx:Box/>
-                        <mx:Box width="100%" height="100%" id="loadingLayer" visible="{loading}"
-                                horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-                            <mx:ProgressBar indeterminate="{overlayIndex == 1}" label="Loading the report..." visible="true" fontSize="20"/>
-                        </mx:Box>
-                        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
-                                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-                            <mx:Box paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
-                                backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
-                                cornerRadius="10">
-                                <util:AutoSizeTextArea text="We're sorry, but something went wrong in retrieving data for this report. We've logged the error on our servers and our engineers will fix it as soon as possible." visible="true" fontSize="18" width="400"
-                                    editable="false" backgroundAlpha="0"/>
-                            </mx:Box>
-                        </mx:Box>
-                        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
-                                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-                            <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
-                                backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
-                                cornerRadius="10">
-                                <util:AutoSizeTextArea text="We're sorry, but something went wrong in retrieving data for this report. You may want to edit the report, see if any fields are missing from the report drop areas, and adjust from there." visible="true" fontSize="18" width="400"
-                                    editable="false" backgroundAlpha="0"/>
-                                <mx:Button label="See Error Details" click="overlayIndex = 4"/>
-                            </mx:VBox>
-                        </mx:Box>
-                        <mx:Box width="100%" height="100%" visible="{loading}" horizontalAlign="center"
-                                verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
-                            <mx:VBox paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10"
-                                backgroundColor="#FFFFFF" borderStyle="solid" borderThickness="1" borderColor="#FFFFFF"
-                                cornerRadius="10">
-                                <mx:TextArea text="{stackTrace}" visible="true" fontSize="12" width="500"
-                                    editable="false" backgroundAlpha="0" height="300"/>
-                                <mx:Button label="Hide Error Details" click="overlayIndex = 3"/>
-                            </mx:VBox>
-                        </mx:Box>
-                    </mx:ViewStack>
-                </mx:Canvas>
-
-
+            <mx:ViewStack resizeToContent="true">
+                <mx:Box/>
+                <mx:HBox>
+                    <mx:VRule height="50"/>
+                    <mx:Button icon="{nextReportArrow}" toolTip="Next Report" click="toNextReport()"/>
+                </mx:HBox>
+            </mx:ViewStack>
+        </mx:HBox>
+        <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
+    </mx:VBox>
+    <mx:VBox width="100%" height="100%">
+        <mx:ViewStack resizeToContent="true" selectedIndex="{exchangeIndex}" width="100%">
+            <mx:Box/>
+            <mx:VBox paddingTop="15" width="100%" horizontalAlign="center">
+                <mx:HBox id="addReportBox" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF"
+                         borderColor="#CCCCCC"
+                         borderThickness="1" cornerRadius="5" dropShadowEnabled="true" borderStyle="solid"
+                         paddingLeft="5" paddingRight="5" horizontalGap="20">
+                    <mx:TextArea
+                            text="Want to save this report to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
+                            editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0"
+                            fontSize="14"/>
+                    <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton"
+                               click="saveReport(event)"/>
+                </mx:HBox>
             </mx:VBox>
+        </mx:ViewStack>
+
+        <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
+            <mx:Box/>
+            <mx:VBox width="100%" horizontalAlign="center">
+                <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
+                                              borderThickness="1"
+                                              existingFilters="{filterDefinitions}"
+                                              width="100%" paddingLeft="10"
+                                              paddingTop="10" paddingBottom="10"
+                                              paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
+                                              backgroundColor="#FFFFFF"/>
+            </mx:VBox>
+        </mx:ViewStack>
+        <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}" loading="{loading}"/>
+    </mx:VBox>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
         <mx:method name="keepReport" result="confirmedKeep()"/>

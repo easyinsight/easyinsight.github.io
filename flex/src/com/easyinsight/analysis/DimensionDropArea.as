@@ -15,9 +15,5 @@ package com.easyinsight.analysis
 		override protected function getNoDataLabel():String {
 			return "Drop Dimension Here";
 		}
-		
-		override public function getItemEditorClass():Class {
-			return DimensionItemEditor;
-		}
 	}
 }

@@ -110,6 +110,10 @@
             file.load();
         }
 
+        private function blah():void {
+            var context:FlatFileUploadContext;
+        }
+
         private function cancel():void {
             PopUpManager.removePopUp(this);
         }

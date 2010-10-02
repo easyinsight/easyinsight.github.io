@@ -15,7 +15,6 @@ import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
-import com.easyinsight.reportpackage.ReportPackageWindow;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
@@ -313,12 +312,6 @@ public class GroupAdminMyDataIconControls extends HBox
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
-        } else if (obj is ReportPackageDescriptor) {
-            var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
-            var window:ReportPackageWindow = new ReportPackageWindow();
-            window.reportPackageID = packageDescriptor.id;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
     }
 

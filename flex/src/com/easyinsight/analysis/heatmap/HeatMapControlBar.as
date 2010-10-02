@@ -85,10 +85,36 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
         }
     }
 
+    private function onTypeChange(event:Event):void {
+        if (event.currentTarget.selectedValue == "heatmap") {
+            heatMapDefinition.displayType = HeatMapDefinition.HEAT_MAP;
+        } else {
+            heatMapDefinition.displayType = HeatMapDefinition.POINT_MAP;
+        }
+        requestListData(null);
+    }
+
     private var stack:ViewStack;
 
     override protected function createChildren():void {
         super.createChildren();
+
+        var displayTypeVBox:VBox = new VBox();
+        var displayTypeRadioGroup:RadioButtonGroup = new RadioButtonGroup();
+        displayTypeRadioGroup.addEventListener(Event.CHANGE, onTypeChange);
+        var heatMapRadio:RadioButton = new RadioButton();
+        heatMapRadio.label = "Heat Map";
+        heatMapRadio.value = "heatmap";
+        heatMapRadio.group = displayTypeRadioGroup;
+        heatMapRadio.selected = heatMapDefinition.displayType == HeatMapDefinition.HEAT_MAP;
+        var pointMapRadio:RadioButton = new RadioButton();
+        pointMapRadio.label = "Points";
+        pointMapRadio.value = "points";
+        pointMapRadio.group = displayTypeRadioGroup;
+        pointMapRadio.selected = heatMapDefinition.displayType == HeatMapDefinition.POINT_MAP;
+        displayTypeVBox.addChild(heatMapRadio);
+        displayTypeVBox.addChild(pointMapRadio);
+        addChild(displayTypeVBox);
 
         var vbox:VBox = new VBox();
         var radioGroup:RadioButtonGroup = new RadioButtonGroup();
@@ -97,11 +123,12 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
         zipRadio.label = "Use Zip Code";
         zipRadio.value = "zip";
         zipRadio.group = radioGroup;
-        zipRadio.selected = true;
+        zipRadio.selected = heatMapDefinition.latitudeItem == null && heatMapDefinition.longitudeItem == null;
         var latLongRadio:RadioButton = new RadioButton();
         latLongRadio.label = "Use Longitude/Latitude";
         latLongRadio.value = "latlong";
         latLongRadio.group = radioGroup;
+        latLongRadio.selected = heatMapDefinition.latitudeItem != null && heatMapDefinition.longitudeItem != null;
         vbox.addChild(zipRadio);
         vbox.addChild(latLongRadio);
         addChild(vbox);

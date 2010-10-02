@@ -7,6 +7,7 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
+        import com.easyinsight.framework.ITutorialRegistrar;
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -22,6 +23,7 @@
         import com.easyinsight.util.Callout;
 
         import mx.collections.ArrayCollection;
+        import mx.core.Application;
 
         private var _dataSourceDescriptor:DataSourceDescriptor;
 
@@ -141,7 +143,7 @@
             var reportElement:ActionTutorialElement = new ActionTutorialElement(event);
             tutorial.getNotes().addItemAt(reportElement, 0);
 
-            PrimaryWorkspace.registerTutorial(tutorial);
+            ITutorialRegistrar(Application.application).registerTutorialForApp(tutorial);
             tutorial.startTutorial();
 
             /*var reportAnalyzeSource:ReportEditorAnalyzeSource = event.analyzeSource as ReportEditorAnalyzeSource;

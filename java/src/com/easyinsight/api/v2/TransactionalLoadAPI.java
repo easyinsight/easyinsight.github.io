@@ -3,8 +3,6 @@ package com.easyinsight.api.v2;
 import com.easyinsight.analysis.*;
 import com.easyinsight.api.*;
 import com.easyinsight.api.Row;
-import com.easyinsight.core.*;
-import com.easyinsight.core.StringValue;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -247,10 +245,11 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
             }
         }
         if (updateIfNecessary) {
+            FeedDefinition feedDefinition;
             if (dataSourceIDs.size() == 0) {
                 long userID = getUserID();
                 // create new data source
-                FeedDefinition feedDefinition = new FeedDefinition();
+                feedDefinition = new FeedDefinition();
                 if (dataSourceName.length() < 3) {
                     throw new ServiceRuntimeException("The data source name must be at least three characters.");
                 }
@@ -262,6 +261,17 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
                 feedDefinition.setValidatedAPIEnabled(true);
                 UploadPolicy uploadPolicy = new UploadPolicy(userID, getAccountID());
                 feedDefinition.setUploadPolicy(uploadPolicy);
+                boolean hasCount = false;
+                for (AnalysisItem item : analysisItems) {
+                    if (item.toDisplay().toLowerCase().equals("count")) {
+                        hasCount = true;
+                    }
+                }
+                if (!hasCount) {
+                    AnalysisMeasure analysisMeasure = new AnalysisMeasure("Count", AggregationTypes.SUM);
+                    analysisMeasure.setRowCountField(true);
+                    analysisItems.add(analysisMeasure);
+                }
                 feedDefinition.setFields(analysisItems);
                 FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), uploadPolicy);
                 dataStorage = result.getTableDefinitionMetadata();
@@ -273,7 +283,7 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
                     throw new ServiceRuntimeException("This data source has been set to prohibit use of changeDataSourceToMatch as true.");
                 }
                 FeedStorage feedStorage = new FeedStorage();
-                FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(entry.getKey());
+                feedDefinition = feedStorage.getFeedDefinitionData(entry.getKey());
                 boolean newFieldsFound = false;
                 List<AnalysisItem> previousItems = feedDefinition.getFields();
                 for (AnalysisItem newItem : analysisItems) {
@@ -298,7 +308,8 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
                     dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
                 }
             }
-            dataSet = toDataSet(rows);
+            DataTransformation dataTransformation = new DataTransformation(feedDefinition);
+            dataSet = dataTransformation.toDataSet(rows);
         } else {
             if (dataSourceIDs.size() == 0) {
                 throw new ServiceRuntimeException("No data source was found by that name or API key.");
@@ -329,51 +340,5 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
             dataSourceIDs.put(rs.getLong(1), rs.getBoolean(2));
         }
         return dataSourceIDs;
-    }
-
-    protected final DataSet toDataSet(Row row) {
-        DataSet dataSet = new DataSet();
-        dataSet.addRow(toRow(row));
-        return dataSet;
-    }
-
-    protected final DataSet toDataSet(List<Row> rows) {
-        DataSet dataSet = new DataSet();
-        for (Row row : rows) {
-            dataSet.addRow(toRow(row));
-        }
-        return dataSet;
-    }
-
-    private IRow toRow(Row row) {
-        IRow transformedRow = new com.easyinsight.analysis.Row();
-        StringPair[] stringPairs = row.getStringPairs();
-        if (stringPairs != null) {
-            for (StringPair stringPair : stringPairs) {
-                if (stringPair.getKey() == null) {
-                    throw new ServiceRuntimeException("StringPair with value " + stringPair.getValue() + " had no key--key is a required field.");
-                }
-                transformedRow.addValue(stringPair.getKey(), stringPair.getValue() == null ? new EmptyValue() : new StringValue(stringPair.getValue()));
-            }
-        }
-        NumberPair[] numberPairs = row.getNumberPairs();
-        if (numberPairs != null) {
-            for (NumberPair numberPair : numberPairs) {
-                if (numberPair.getKey() == null) {
-                    throw new ServiceRuntimeException("NumberPair with value " + numberPair.getValue() + " had no key--key is a required field.");
-                }
-                transformedRow.addValue(numberPair.getKey(), new NumericValue(numberPair.getValue()));
-            }
-        }
-        DatePair[] datePairs = row.getDatePairs();
-        if (datePairs != null) {
-            for (DatePair datePair : datePairs) {
-                if (datePair.getKey() == null) {
-                    throw new ServiceRuntimeException("DatePair with value " + datePair.getValue() + " had no key--key is a required field.");
-                }
-                transformedRow.addValue(datePair.getKey(), datePair.getValue() == null ? new EmptyValue() : new DateValue(datePair.getValue()));
-            }
-        }
-        return transformedRow;
     }
 }

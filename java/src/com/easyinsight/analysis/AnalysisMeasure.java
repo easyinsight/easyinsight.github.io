@@ -16,6 +16,9 @@ public class AnalysisMeasure extends AnalysisItem {
     @Column(name="aggregation")
     private int aggregation;
 
+    @Column(name="row_count_field")
+    private boolean rowCountField;
+
     public AnalysisMeasure() {
     }
 
@@ -50,6 +53,14 @@ public class AnalysisMeasure extends AnalysisItem {
         FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
         formattingConfiguration.setFormattingType(formattingType);
         setFormattingConfiguration(formattingConfiguration);
+    }
+
+    public boolean isRowCountField() {
+        return rowCountField;
+    }
+
+    public void setRowCountField(boolean rowCountField) {
+        this.rowCountField = rowCountField;
     }
 
     @Override

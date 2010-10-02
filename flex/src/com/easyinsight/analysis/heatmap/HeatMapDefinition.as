@@ -10,6 +10,9 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSHeatMap")]
 public class HeatMapDefinition extends AnalysisDefinition {
 
+    public static const HEAT_MAP:int = 1;
+    public static const POINT_MAP:int = 2;
+
     public var longitudeItem:AnalysisItem;
     public var latitudeItem:AnalysisItem;
     public var zipCode:AnalysisItem;
@@ -23,7 +26,9 @@ public class HeatMapDefinition extends AnalysisDefinition {
     public var zoomLevel:int;
     public var precision:int;
     public var mapType:int;
+    public var displayType:int = HEAT_MAP;
     public var heatMapID:int;
+    public var pointReportID:int;
 
     public function HeatMapDefinition() {
         super();

@@ -144,7 +144,6 @@
                         function (event:ResultEvent, token:Object = null):void {
                             switch (event.result) {
                                 case "success":
-                                    GAHelper.instance().tracker.trackPageview("LoggedInApplication");
                                     dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
                                     break;
                                 default:

@@ -93,9 +93,10 @@
             <node label="Middle East" type="{AnalysisDefinition.MAP_MIDDLE_EAST}"/>
             <node label="Africa" type="{AnalysisDefinition.MAP_AFRICA}"/>
         </node>
-        <node label="Heat Map" type="{AnalysisDefinition.HEATMAP}"/>
+        <node label="Google Map" type="{AnalysisDefinition.HEATMAP}"/>
         <node label="Tree Map" type="{AnalysisDefinition.TREEMAP}"/>
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
+        <node label="Gantt" type="{AnalysisDefinition.GANTT}"/>
         <node label="Timeline" type="{AnalysisDefinition.TIMELINE}"/>
         <!-- <node label="Split" state="Split"/>-->
     </mx:XMLList>

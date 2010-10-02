@@ -7,6 +7,8 @@
         [Event(name="gotData", type="flash.events.Event")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+        import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
 
@@ -309,6 +311,18 @@
 
         }
 
+        protected override function createChildren():void {
+            super.createChildren();
+            if (User.getInstance().uiConfiguration != null) {
+                var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
+                var showControls:Boolean = uiConfig.getConfiguration(UIConfiguration.SHOW_SCORECARD_CONTROLS).selected;
+                if (!showControls) {
+                    removeChild(spacer);
+                    removeChild(controls);
+                }
+            }
+        }
+
         private var _activeEffect:Effect = leftEffect;
 
 
@@ -364,8 +378,8 @@
             </mx:VBox>
         </mx:ViewStack>
     </mx:VBox>
-    <mx:Spacer width="20"/>
-    <mx:ViewStack resizeToContent="true" selectedIndex="{sideBarControlsIndex}">
+    <mx:Spacer width="20" id="spacer"/>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{sideBarControlsIndex}" id="controls">
         <mx:VBox paddingRight="10" paddingTop="20">
             <!--<mx:CheckBox label="Include Groups" id="includeGroupsCheckbox"/>-->
             <mx:Label text="Scorecard Controls" fontSize="12" fontWeight="bold" paddingRight="0"/>

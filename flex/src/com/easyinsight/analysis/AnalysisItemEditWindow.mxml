@@ -2,6 +2,8 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.PerspectiveInfo;
+
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
@@ -42,10 +44,17 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            editor = new _editorClass();
-            editor.dataSourceID = _dataSourceID;
-            editor.analysisItem = _analysisItem;
-            editor.analysisItems = _analysisItems;
+            if (_editorClass == null) {
+                editor = new AnalysisItemEditorPerspective(new PerspectiveInfo(PerspectiveInfo.ANALYSIS_ITEM_EDITOR, {dataSourceID: _dataSourceID,
+                    analysisItem: _analysisItem, analysisItems: _analysisItems}));
+                this.width = 600;
+                this.height = 480;
+            } else {
+                editor = new _editorClass();
+                editor.dataSourceID = _dataSourceID;
+                editor.analysisItem = _analysisItem;
+                editor.analysisItems = _analysisItems;
+            }
 
             editorFormItem.addChildAt(editor as DisplayObject, 0);
         }

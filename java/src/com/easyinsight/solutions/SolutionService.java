@@ -570,7 +570,7 @@ public class SolutionService {
             for (InsightDescriptor report : packageReports) {
                 AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(report.getId(), session);
                 FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
-                List<AnalysisDefinition> reports = originalBaseReport.containedReports();
+                List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
                 reports.add(originalBaseReport);
 
 
@@ -639,7 +639,7 @@ public class SolutionService {
             FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
             // okay, we might have multiple reports here...
             // find all the other reports in the dependancy graph here
-            List<AnalysisDefinition> reports = originalBaseReport.containedReports();
+            List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
             reports.add(originalBaseReport);
             Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
             List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();

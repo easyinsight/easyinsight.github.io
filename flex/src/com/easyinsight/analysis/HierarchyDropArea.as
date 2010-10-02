@@ -19,10 +19,6 @@ package com.easyinsight.analysis
 			return "Hierarchy";
 		}
 		
-		override public function getItemEditorClass():Class {
-			return MeasureItemEditor;
-		}
-		
 		override protected function getNoDataLabel():String {
 			return "Drop Hierarchy Here";
 		}

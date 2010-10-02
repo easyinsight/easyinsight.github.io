@@ -8,6 +8,9 @@ public class AnalysisItemNode extends FeedNode{
     }
 
     override public function get display():String {
+        if (analysisItem == null) {
+            return "!!!! NULL !!!!";
+        }
         return analysisItem.display;
     }
 }

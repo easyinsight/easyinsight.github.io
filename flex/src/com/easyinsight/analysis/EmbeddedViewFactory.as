@@ -5,7 +5,7 @@ import com.easyinsight.analysis.service.ReportRetrievalFault;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.HierarchyOverride;
 import com.easyinsight.report.AbstractViewFactory;
-
+import com.easyinsight.report.ReportEventProcessor;
 import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.util.EIErrorEvent;
 
@@ -146,16 +146,21 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
 
     private function reportLoadHandler(event:ModuleEvent):void {
         _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
-        _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
-        _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
-        _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-        _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport);
+        _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
+        _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
+        _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
+        _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
+        _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
         _dataService.preserveValues = _reportRenderer.preserveValues();
         addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
             retrieveData(false);
         }
+    }
+
+    private function onReportWindow(event:ReportWindowEvent):void {
+        ReportEventProcessor.fromEvent(event, this);
     }
 
     private function toReport(event:ReportNavigationEvent):void {

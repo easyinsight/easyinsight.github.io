@@ -10,7 +10,6 @@ import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.IPerspective;
 import com.easyinsight.quicksearch.EIDescriptor;
-import com.easyinsight.util.FileAlert;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 import com.easyinsight.util.UserAudit;

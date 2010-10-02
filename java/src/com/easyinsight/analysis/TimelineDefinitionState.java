@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.definitions.WSTimeline;
 import com.easyinsight.core.Key;
 import com.easyinsight.sequence.Sequence;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.util.Arrays;
@@ -81,7 +82,7 @@ public class TimelineDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public Collection<? extends AnalysisDefinition> containedReports() {
+    public Collection<? extends AnalysisDefinition> containedReports(Session session) {
         return Arrays.asList(containedReport);
     }
 

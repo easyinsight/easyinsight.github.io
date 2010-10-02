@@ -230,6 +230,7 @@
                 case AnalysisDefinition.MAP_MIDDLE_EAST:
                 case AnalysisDefinition.MAP_USA:
                 case AnalysisDefinition.MAP_WORLD:
+                case AnalysisDefinition.HEATMAP:
                     reportImage = map;
                     break;
                 case AnalysisDefinition.GAUGE:

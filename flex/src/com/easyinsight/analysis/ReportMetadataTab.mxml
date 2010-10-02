@@ -17,21 +17,19 @@
     </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
-        import com.easyinsight.administration.feed.TagCloud;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
-        import mx.validators.Validator;
 
         private function onCreation():void {
-            if (User.getInstance() == null) {
-                currentState = "NotLoggedIn";
-                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            setState();
+            if (User.getInstance().guestUser) {
+                removeChild(dataSourceDisplay);
             } else {
-                setState();
+                dataSourceDisplay.visible = true;
             }
         }
 
@@ -103,5 +101,5 @@
     </mx:Box>
     <mx:Button icon="@Embed(source='../../../../assets/report/help.png')"
                        click="tutorial()" toolTip="Help!" label="Help!"/>
-    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay"/>
+    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay" visible="false"/>
 </mx:HBox>

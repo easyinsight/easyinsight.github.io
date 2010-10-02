@@ -227,7 +227,7 @@
                           backgroundColor="0xFFFFFF" paddingTop="10" y="122">
                 <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <!-- login page -->
-                    <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent" creationComplete="GAHelper.instance().tracker.trackPageview('Login')"
+                    <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent"
                             y="114"/>                    
                     <mx:VBox width="50%" horizontalAlign="center">
                         <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
@@ -254,23 +254,21 @@
                                                    plus="accountType = Account.PLUS; slideEffect = rightEffect; panelIndex = 2"
                                                    basic="accountType = Account.BASIC; slideEffect = rightEffect; panelIndex = 2"
                                                    free="accountType = Account.PERSONAL; slideEffect = rightEffect; panelIndex = 2"
-                                                   requiredTier="{requiredTier}" creationComplete="GAHelper.instance().tracker.trackPageview('AccountCreationWizard')"/>
+                                                   requiredTier="{requiredTier}"/> 
                 </mx:VBox>
                 <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <!-- profile creation page -->
                     <account:ProfessionalAccountLoginCreation cancel="slideEffect = leftEffect; panelIndex = 1"
                                                               loginEvent2="slideEffect = rightEffect; accountCreated(event)"
-                                                              accountType="{accountType}" creationComplete="GAHelper.instance().tracker.trackPageview('LoginCreation')"/>
+                                                              accountType="{accountType}"/>
                 </mx:VBox>
                 <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
-                                                 kpiTutorialNext="slideEffect = rightEffect; remaining()" accountType="{accountType}"
-                            creationComplete="GAHelper.instance().tracker.trackPageview('PersonaWindow')"/>
+                                                 kpiTutorialNext="slideEffect = rightEffect; remaining()" accountType="{accountType}"/>
                 </mx:VBox>
                 <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
-                                                kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"
-                            creationComplete="GAHelper.instance().tracker.trackPageview('Preferences')"/>
+                                                kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"/>
                 </mx:VBox>
 
                 <!--

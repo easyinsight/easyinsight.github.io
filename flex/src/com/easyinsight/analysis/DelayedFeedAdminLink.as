@@ -3,6 +3,7 @@ package com.easyinsight.analysis
 	import com.easyinsight.framework.LoginEvent;
 
 import com.easyinsight.framework.PerspectiveInfo;
+import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 	import flash.events.EventDispatcher;
 	
@@ -30,6 +31,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
 		}
 		
 		public function execute():void {
+            if (User.getInstance().guestUser) return;
 			feedService.openFeedIfPossible.send(feedID);
 		}
 

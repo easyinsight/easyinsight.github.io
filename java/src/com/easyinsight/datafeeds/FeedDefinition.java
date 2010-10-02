@@ -1,5 +1,7 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.core.DateValue;
+import com.easyinsight.core.Value;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
@@ -58,6 +60,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private List<FeedFolder> folders = new ArrayList<FeedFolder>();
     private boolean visible = true;
     private long parentSourceID;
+    private boolean adjustDates;
+
+    public boolean isAdjustDates() {
+        return adjustDates;
+    }
+
+    public void setAdjustDates(boolean adjustDates) {
+        this.adjustDates = adjustDates;
+    }
 
     public int getDataSourceType() {
         return DataSourceInfo.STORED_PUSH;
@@ -603,6 +614,10 @@ public class FeedDefinition implements Cloneable, Serializable {
         DataStorage.delete(dataFeedID, conn);
     }
 
+    public List<String> getNestedFolders() {
+        return null;
+    }
+
     protected FeedFolder defineFolder(String name) {
         for (FeedFolder feedFolder : getFolders()) {
             if (name.equals(feedFolder.getName())) {
@@ -641,5 +656,39 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void decorateLinks(List<AnalysisItem> analysisItems) {
         
+    }
+
+    public DataSet adjustDates(DataSet dataSet) {
+
+        long latestDate = 0;
+        for (IRow row : dataSet.getRows()) {
+            for (Value value : row.getValues().values()) {
+                if (value.type() == Value.DATE) {
+                    DateValue dateValue = (DateValue) value;
+                    if (dateValue.getDate() == null) {
+                        continue;
+                    }
+                    if (latestDate == 0 || dateValue.getDate().getTime() > latestDate) {
+                        latestDate = dateValue.getDate().getTime();
+                    }
+                }
+            }
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        long offset = cal.getTime().getTime() - latestDate;
+        for (IRow row : dataSet.getRows()) {
+            for (Value value : row.getValues().values()) {
+                if (value.type() == Value.DATE) {
+                    DateValue dateValue = (DateValue) value;
+                    if (dateValue.getDate() == null) {
+                        continue;
+                    }
+                    dateValue.setDate(new Date(dateValue.getDate().getTime() + offset));
+                }
+            }
+        }
+
+        return dataSet;
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*"
-                title="Tree Configuration">
+                title="Tree Configuration" creationComplete="onCreation()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisItemUpdateEvent;
@@ -22,6 +22,7 @@
 
         public function set heatMapDefinition(treeDefinition:HeatMapDefinition):void {
             this.definition = treeDefinition;
+            pointReportID = definition.pointReportID;
         }
 
         protected override function commitProperties():void {
@@ -33,12 +34,17 @@
             }
         }
 
+        private function onCreation():void {
+            analysisService.getInsightDescriptorsForDataSource.send(definition.dataFeedID);
+        }
+
         private var reportItems:ArrayCollection;
 
         public function save():void {
             for each (var reportFormItem:ReportFormItem in reportItems) {
                 reportFormItem.save();
             }
+            definition.pointReportID = pointComboBox.selectedItem.id;
             dispatchEvent(new AnalysisItemUpdateEvent());
             PopUpManager.removePopUp(this);
         }
@@ -46,11 +52,30 @@
         public function cancel():void {
             PopUpManager.removePopUp(this);
         }
+
+        private function gotReports():void {
+            var reports:ArrayCollection = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
+            var nothing:Object = { id: 0, name: "[ No Report ]"};
+            reports.addItemAt(nothing, 0);
+            this.reports = reports;
+        }
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        [Bindable]
+        private var pointReportID:int;
 		]]>
     </mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
+    </mx:RemoteObject>
     <mx:VBox paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
     <mx:Form id="form" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
-
+        <mx:FormItem label="Show This Report when User Clicks on Points:">
+            <util:SmartComboBox id="pointComboBox" dataProvider="{reports}" labelField="name" selectedValue="{pointReportID}"
+                                selectedProperty="id"/>
+        </mx:FormItem>
     </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>

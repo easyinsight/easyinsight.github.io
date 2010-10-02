@@ -57,7 +57,7 @@ public class ZipGeocodeCache {
                         }
                     }
                     if (point != null) {
-                        row.addValue(zip.createAggregateKey(), new CoordinateValue(point.getLongitude(), point.getLatitude()));                        
+                        row.addValue(zip.createAggregateKey(), new CoordinateValue(point.getLongitude(), point.getLatitude(), zipCode));                        
                     }
                 }
             }

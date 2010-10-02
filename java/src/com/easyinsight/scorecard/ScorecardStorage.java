@@ -149,6 +149,7 @@ public class ScorecardStorage {
             return scorecard;
         } catch (Exception e) {
             conn.rollback();
+            LogClass.error(e);
             throw e;
         } finally {
             conn.setAutoCommit(true);
@@ -212,13 +213,14 @@ public class ScorecardStorage {
         final int accountType = SecurityUtil.getAccountTier();
         final boolean accountAdmin = SecurityUtil.isAccountAdmin();
         final String userName = SecurityUtil.getUserName();
+        final boolean guestUser = SecurityUtil.isGuestUser();
 
         final Set<Long> dataSourceIDs = new HashSet<Long>();
         dataSourceIDs.add(dataSourceID);
         Thread thread = new Thread(new Runnable() {
 
             public void run() {
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin);
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
                 try {
                     for (Long dataSourceID : dataSourceIDs) {
                         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
@@ -278,11 +280,12 @@ public class ScorecardStorage {
         final int accountType = SecurityUtil.getAccountTier();
         final boolean accountAdmin = SecurityUtil.isAccountAdmin();
         final String userName = SecurityUtil.getUserName();
+        final boolean guestUser = SecurityUtil.isGuestUser();
 
         Thread thread = new Thread(new Runnable() {
 
             public void run() {
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin);
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
                 try {
                     for (Long dataSourceID : kpiMap.keySet()) {
                         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);

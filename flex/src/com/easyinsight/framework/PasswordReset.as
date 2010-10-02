@@ -4,6 +4,7 @@ import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
 import mx.controls.Alert;
+import mx.core.UIComponent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -12,9 +13,9 @@ public class PasswordReset {
 
     private var userService:RemoteObject;
     private var passwordResetValue:String;
-    private var workspace:PrimaryWorkspace;
+    private var workspace:UIComponent;
 
-    public function PasswordReset(passwordResetValue:String, workspace:PrimaryWorkspace) {
+    public function PasswordReset(passwordResetValue:String, workspace:UIComponent) {
         this.passwordResetValue = passwordResetValue;
         this.workspace = workspace;
         userService = new RemoteObject();

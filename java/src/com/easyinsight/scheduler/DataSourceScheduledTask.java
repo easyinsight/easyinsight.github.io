@@ -54,7 +54,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
             if (dataSourceUser == null) {
                 throw new RuntimeException("No user found for data source.");
             }
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin FROM USER, ACCOUNT " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user FROM USER, ACCOUNT " +
                     "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
             queryStmt.setInt(1, Account.ACTIVE);
             queryStmt.setInt(2, Account.TRIAL);
@@ -66,7 +66,8 @@ public class DataSourceScheduledTask extends ScheduledTask {
                 long accountID = rs.getLong(3);
                 int accountType = rs.getInt(4);
                 boolean accountAdmin = rs.getBoolean(5);
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin);
+                boolean guestUser = rs.getBoolean(6);
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
                 if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                     try {
                         dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn, null);

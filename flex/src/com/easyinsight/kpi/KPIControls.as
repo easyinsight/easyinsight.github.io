@@ -1,7 +1,5 @@
 package com.easyinsight.kpi {
-import com.easyinsight.kpi.KPI;
-import com.easyinsight.kpi.KPIEvent;
-import com.easyinsight.kpi.KPIWindow;
+
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -64,7 +62,7 @@ public class KPIControls extends HBox {
     private function onCopyResult(event:ResultEvent):void {
         var copy:KPI = kpiService.copyKPI.lastResult as KPI;
         dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, copy));
-        var kpiWindow:KPIWindow = new KPIWindow();
+        var kpiWindow:KPIParentWindow = new KPIParentWindow();
         kpiWindow.scorecardID = 0;
         kpiWindow.kpi = copy;
         kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI, false, 0, true);
@@ -73,7 +71,7 @@ public class KPIControls extends HBox {
     }
 
     private function onEdit(event:MouseEvent):void {
-        var kpiWindow:KPIWindow = new KPIWindow();
+        var kpiWindow:KPIParentWindow = new KPIParentWindow();
         kpiWindow.scorecardID = 0;
         kpiWindow.kpi = kpi;
         kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI, false, 0, true);

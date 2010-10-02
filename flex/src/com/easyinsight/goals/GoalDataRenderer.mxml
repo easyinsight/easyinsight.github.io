@@ -1,22 +1,18 @@
 <?xml version="1.0" ?>
 <OrgChartItemRendererBase xmlns="com.easyinsight.goals.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-        borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" dropShadowEnabled="true" click="onClick(event)">
+        borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" dropShadowEnabled="true">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIIconFactory;
         import com.easyinsight.scorecard.ScorecardContextWindow;
         import com.easyinsight.util.ModelessWindowEvent;
-        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.PrefixManager;
 
         import ilog.orgchart.OrgChartItem;
 
-        import mx.core.Application;
         import mx.events.CloseEvent;
 import mx.formatters.NumberFormatter;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var trendImage:Class;
@@ -96,31 +92,6 @@ import mx.formatters.NumberFormatter;
             dispatchEvent(event);
         }
 
-        private function onClick(event:MouseEvent):void {
-            if (kpi != null) {
-                var window:ScorecardContextWindow = new ScorecardContextWindow(kpi, passThrough, this);
-                window.data = this.data;
-                PopUpManager.addPopUp(window, this);
-                var clippingY:uint = Application.application.height;
-
-                window.x = event.stageX + 5;
-
-                var startY:uint = event.stageY + 5;
-
-                var endYPosition:uint;
-                if (kpi.reports == null) {
-                    endYPosition = event.stageY + 25;
-                } else {
-                    endYPosition = event.stageY + 25 + kpi.reports.length * 35;
-                }
-
-                if (endYPosition > clippingY) {
-                    startY -= (endYPosition - clippingY);
-                }
-                window.y = startY;
-            }
-        }
-
         private function onAnalyze(event:AnalyzeEvent):void {
             dispatchEvent(event);
         }
@@ -154,29 +125,28 @@ import mx.formatters.NumberFormatter;
                 treeName = goalTreeNodeData.name;
                 subTreePresent = goalTreeNodeData.subTreeID > 0;
                 if (goalTreeNodeData.kpi != null) {
-                if (goalTreeNodeData.kpi.kpiOutcome != null) {
-                    if (goalTreeNodeData.kpi.analysisMeasure == null) {
-                        currentValue = numberFormatter.format(goalTreeNodeData.kpi.kpiOutcome.outcomeValue);
-                    } else {
-                        currentValue = goalTreeNodeData.kpi.analysisMeasure.getFormatter().format(goalTreeNodeData.kpi.kpiOutcome.outcomeValue);
-                    }
-                    currentValueExists = true;
-                } else {
-                    currentValueExists = false;
-                    currentValue = null;
-                }
-
-                if (goalTreeNodeData.kpi.kpiOutcome != null && goalTreeNodeData.kpi.kpiOutcome.problemEvaluated) {
-                    trendImage = negativeIcon;
-                } /*else if (goalTreeNodeData.kpi.problemConditions.length > 0) {
-                    trendImage = positiveIcon;
-                }*/ else {
                     if (goalTreeNodeData.kpi.kpiOutcome != null) {
-                        trendImage = KPIIconFactory.iconForKPI(goalTreeNodeData.kpi);
+                        if (goalTreeNodeData.kpi.analysisMeasure == null) {
+                            currentValue = numberFormatter.format(goalTreeNodeData.kpi.kpiOutcome.outcomeValue);
+                        } else {
+                            currentValue = goalTreeNodeData.kpi.analysisMeasure.getFormatter().format(goalTreeNodeData.kpi.kpiOutcome.outcomeValue);
+                        }
+                        currentValueExists = true;
+                    } else {
+                        currentValueExists = false;
+                        currentValue = null;
+                    }
+
+                    if (goalTreeNodeData.kpi.kpiOutcome != null && goalTreeNodeData.kpi.kpiOutcome.problemEvaluated) {
+                        trendImage = negativeIcon;
+                    } /*else if (goalTreeNodeData.kpi.problemConditions.length > 0) {
+                        trendImage = positiveIcon;
+                    }*/ else {
+                        if (goalTreeNodeData.kpi.kpiOutcome != null) {
+                            trendImage = KPIIconFactory.iconForKPI(goalTreeNodeData.kpi);
+                        }
                     }
                 }
-                }
-                
                 defineContextMenu(goalTreeNodeData);
             } else {
                 currentValue = null;
@@ -192,7 +162,8 @@ import mx.formatters.NumberFormatter;
                 subTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, navigateToSubTree);
                 items.push(subTreeItem);
             }
-            PopupMenuFactory.menuFactory.assignMenu(this, items);
+            new ScorecardContextWindow(kpi, passThrough, this, items);
+            //PopupMenuFactory.menuFactory.assignMenu(this, items);
         }
 
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {

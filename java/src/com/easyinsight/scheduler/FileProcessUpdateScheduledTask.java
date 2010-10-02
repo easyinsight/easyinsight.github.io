@@ -1,5 +1,8 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
@@ -88,15 +91,24 @@ public class FileProcessUpdateScheduledTask extends ScheduledTask {
                 ev.setFeedName(feedDefinition.getFeedName());
                 EventDispatcher.instance().dispatch(ev);
             }*/
+            AnalysisMeasure rowCount = null;
+            for (AnalysisItem field : feedDefinition.getFields()) {
+                if (field.hasType(AnalysisItemTypes.MEASURE)) {
+                    AnalysisMeasure measure = (AnalysisMeasure) field;
+                    if (measure.isRowCountField()) {
+                        rowCount = measure;
+                    }
+                }
+            }
             metadata = DataStorage.writeConnection(feedDefinition, conn, accountID);
             PersistableDataSetForm form = feedDefinition.getUploadFormat().createDataSet(bytes, feedDefinition.getFields());
             if (update) {
                 //DataRetrievalManager.instance().storeData(feedID, form);
                 metadata.truncate();
-                metadata.insertData(form.toDataSet());
+                metadata.insertData(form.toDataSet(rowCount));
             } else {
                 //DataRetrievalManager.instance().appendData(feedID, form);
-                metadata.insertData(form.toDataSet());
+                metadata.insertData(form.toDataSet(rowCount));
             }
             metadata.commit();
         }

@@ -27,10 +27,29 @@ public class WSHeatMap extends WSAnalysisDefinition {
     private double maxLat;
     private int zoomLevel;
     private int mapType;
+    private int displayType;
 
     private int precision;
 
+    private long pointReportID;
+
     private long heatMapID;
+
+    public long getPointReportID() {
+        return pointReportID;
+    }
+
+    public void setPointReportID(long pointReportID) {
+        this.pointReportID = pointReportID;
+    }
+
+    public int getDisplayType() {
+        return displayType;
+    }
+
+    public void setDisplayType(int displayType) {
+        this.displayType = displayType;
+    }
 
     public AnalysisItem getZipCode() {
         return zipCode;

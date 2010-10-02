@@ -1,6 +1,5 @@
 package com.easyinsight.groups
 {
-import com.easyinsight.framework.ModulePerspective;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.*;
 import com.easyinsight.administration.feed.CredentialsResponse;
@@ -15,7 +14,6 @@ import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
-import com.easyinsight.reportpackage.ReportPackageWindow;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
@@ -52,16 +50,11 @@ public class GroupMyDataIconControls extends HBox
 
     private var adminButton:Button;
     private var analyzeButton:Button;
-    private var deleteButton:Button;
 
     private var _analyzeTooltip:String = "Analyze...";
     private var _analyzeVisible:Boolean = true;
-    private var _refreshTooltip:String = "Refresh...";
-    private var _refreshVisible:Boolean = true;
     private var _adminTooltip:String = "Administer...";
     private var _adminVisible:Boolean = true;
-    private var _deleteTooltip:String = "Delete...";
-    private var _deleteVisible:Boolean = true;
 
     public function GroupMyDataIconControls()
     {
@@ -131,36 +124,6 @@ public class GroupMyDataIconControls extends HBox
 
     private function notifyRefresh(event:RefreshNotificationEvent):void {
         Alert.show("Your data has begun to refresh and will be available when the refresh completes. This process may take some time depending on the size of the data source. You will receive a notification when the process is complete.");
-    }
-
-
-
-    private function copyCalled(event:MouseEvent):void {
-        var window:CopyDataSourceWindow = new CopyDataSourceWindow();
-        window.dataSourceDescriptor = obj as DataFeedDescriptor;
-        PopUpManager.addPopUp(window, this.parent.parent.parent, true);
-        window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
-        PopUpUtil.centerPopUp(window);
-    }
-
-    private function refreshCalled(event:MouseEvent):void {
-        if (obj is DataFeedDescriptor) {
-            var feedDescriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            switch (feedDescriptor.feedType) {
-                case DataFeedDescriptor.STATIC:
-                case DataFeedDescriptor.EMPTY:
-                    fileData(feedDescriptor);
-                    break;
-                case DataFeedDescriptor.BASECAMP:
-                case DataFeedDescriptor.HIGHRISE:
-                    refreshData(feedDescriptor);
-                    break;
-            }
-        }
-    }
-
-    private function deleteCalled(event:MouseEvent):void {
-        dispatchEvent(new DeleteDataSourceEvent(obj));
     }
 
     private function analyzeCalled(event:MouseEvent):void {
@@ -253,12 +216,6 @@ public class GroupMyDataIconControls extends HBox
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
-        } else if (obj is ReportPackageDescriptor) {
-            var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
-            var window:ReportPackageWindow = new ReportPackageWindow();
-            window.reportPackageID = packageDescriptor.id;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
     }
 

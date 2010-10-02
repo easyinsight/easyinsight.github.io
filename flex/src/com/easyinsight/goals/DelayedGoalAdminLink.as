@@ -1,6 +1,7 @@
 package com.easyinsight.goals
 {
-    import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.framework.User;
+import com.easyinsight.genredata.AnalyzeEvent;
 	import flash.events.EventDispatcher;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
@@ -19,6 +20,7 @@ package com.easyinsight.goals
 		}
 		
 		public function execute():void {
+            if (User.getInstance().guestUser) return;
 			goalService.canAccessGoalTree.send(goalTreeID);
 		}
 

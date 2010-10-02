@@ -6,6 +6,7 @@ import com.easyinsight.core.Key;
 
 import java.util.*;
 
+import org.hibernate.Session;
 import org.hibernate.annotations.MapKey;
 
 import javax.persistence.*;
@@ -548,9 +549,9 @@ public class AnalysisDefinition implements Cloneable {
         return analysisItems;
     }*/
 
-    public List<AnalysisDefinition> containedReports() {
+    public List<AnalysisDefinition> containedReports(Session session) {
         List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
-        reports.addAll(analysisDefinitionState.containedReports());
+        reports.addAll(analysisDefinitionState.containedReports(session));
         return reports;
     }
 

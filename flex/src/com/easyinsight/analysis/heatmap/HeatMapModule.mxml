@@ -6,11 +6,13 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CoordinateValue;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.ReportWindowEvent;
         import com.easyinsight.filtering.FilterRawData;
-
+        import com.easyinsight.filtering.FilterValueDefinition;
+        import com.google.maps.InfoWindowOptions;
         import com.google.maps.LatLng;
         import com.google.maps.MapEvent;
-
+        import com.google.maps.MapMouseEvent;
         import com.google.maps.MapMoveEvent;
         import com.google.maps.MapType;
         import com.google.maps.MapZoomEvent;
@@ -19,15 +21,15 @@
         import com.google.maps.controls.ZoomControl;
         import com.google.maps.interfaces.IMapType;
         import com.google.maps.interfaces.IOverlay;
+        import com.google.maps.overlays.Marker;
         import com.michaelvandaniker.visualization.GradientDictionary;
         import com.michaelvandaniker.visualization.HeatMap;
         import com.sunild.maps.GHeatMapOverlay;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.events.EffectEvent;
 
-        private function onEffectEnd(event:mx.events.EffectEvent):void {
+        private function onEffectEnd(event:EffectEvent):void {
             map.removeOverlay((event.target as Fade).target as IOverlay);
         }
 
@@ -103,7 +105,7 @@
             }
         }
 
-        private function onMapReady(event:com.google.maps.MapEvent):void {
+        private function onMapReady(event:MapEvent):void {
             map.addControl(new ZoomControl());
             map.addControl(new PositionControl());
             map.addControl(new MapTypeControl());
@@ -113,17 +115,106 @@
             prepareMap();
         }
 
+        private var lastDisplayType:int;
+
         private function prepareMap():void {
             for each (var o:Object in overlays) {
-                var fadeOutEffect:Fade = new Fade();
-                fadeOutEffect.target = o;
-                fadeOutEffect.alphaFrom = .57;
-                fadeOutEffect.alphaTo = 0.0;
-                fadeOutEffect.duration = 1000;
-                fadeOutEffect.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
-                fadeOutEffect.play();
+                if (lastDisplayType == HeatMapDefinition.HEAT_MAP) {
+                    var fadeOutEffect:Fade = new Fade();
+                    fadeOutEffect.target = o;
+                    fadeOutEffect.alphaFrom = .57;
+                    fadeOutEffect.alphaTo = 0.0;
+                    fadeOutEffect.duration = 1000;
+                    fadeOutEffect.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
+                    fadeOutEffect.play();
+                } else {
+                    map.removeOverlay(IOverlay(o));
+                }
             }
             overlays.removeAll();
+            if (heatMapDefinition != null) {
+                if (heatMapDefinition.displayType == HeatMapDefinition.HEAT_MAP) {
+                    addHeatMap();
+                } else {
+                    addPointMap();
+                }
+                lastDisplayType = heatMapDefinition.displayType;
+            }
+
+            if (heatMapDefinition != null && heatMapDefinition.mapType != 0) {
+                map.setCenter(new LatLng(heatMapDefinition.latitude, heatMapDefinition.longitude), heatMapDefinition.zoomLevel, getMapType(heatMapDefinition.mapType));
+            }
+            else if (heatMapDefinition != null && map.isLoaded()) {
+                heatMapDefinition.latitude = map.getCenter().lat();
+                heatMapDefinition.longitude = map.getCenter().lng();
+                heatMapDefinition.zoomLevel = map.getZoom();
+                heatMapDefinition.mapType = getMapVal(map.getCurrentMapType());
+            }
+
+        }
+
+        private var pointDictionary:Dictionary = new Dictionary();
+
+        private function addPointMap():void {
+            if (heatMapDefinition != null && dataSet != null) {
+                for each (var point:Object in dataSet) {
+                    var latLng:LatLng;
+                    if (heatMapDefinition.zipCode != null) {
+                        var coordinateValue:CoordinateValue = point[heatMapDefinition.zipCode.qualifiedName()];
+                        latLng = new LatLng(Number(coordinateValue.y), Number(coordinateValue.x));
+                    } else {
+                        latLng = new LatLng(Number(point[heatMapDefinition.latitudeItem.qualifiedName()]), Number(point[heatMapDefinition.longitudeItem.qualifiedName()]));
+                    }
+                    pointDictionary[latLng.lat() + "-" + latLng.lng()] = point;
+                    var marker:Marker = new Marker(latLng);
+
+                    marker.addEventListener(MapMouseEvent.CLICK, onEvent);
+                    overlays.addItem(marker);
+                    map.addOverlay(marker);
+                }
+            }
+        }
+
+        private function onEvent(event:MapMouseEvent):void {
+            var marker:Marker = event.currentTarget as Marker;
+            var ll:LatLng = marker.getLatLng();
+            var lookup:String = ll.lat() + "-" + ll.lng();
+            var point:Object = pointDictionary[lookup];
+            if (heatMapDefinition.pointReportID > 0) {
+                var filters:ArrayCollection = new ArrayCollection(heatMapDefinition.filterDefinitions.toArray());
+                if (heatMapDefinition.zipCode != null) {
+                    var coordinateValue:CoordinateValue = point[heatMapDefinition.zipCode.qualifiedName()];
+                    var zipFilter:FilterValueDefinition = new FilterValueDefinition();
+                    zipFilter.inclusive = true;
+                    zipFilter.field = heatMapDefinition.zipCode;
+                    zipFilter.filteredValues = new ArrayCollection([coordinateValue.zip]);
+                    filters.addItem(zipFilter);
+                } else {
+                    var latFilter:FilterValueDefinition = new FilterValueDefinition();
+                    latFilter.inclusive = true;
+                    latFilter.field = heatMapDefinition.latitudeItem;
+                    latFilter.filteredValues = new ArrayCollection([ll.lat()]);
+                    var lngFilter:FilterValueDefinition = new FilterValueDefinition();
+                    lngFilter.inclusive = true;
+                    lngFilter.field = heatMapDefinition.longitudeItem;
+                    lngFilter.filteredValues = new ArrayCollection([ll.lng()]);
+                    filters.addItem(latFilter);
+                    filters.addItem(lngFilter);
+                }
+                dispatchEvent(new ReportWindowEvent(heatMapDefinition.pointReportID, 0, 0, filters, heatMapDefinition.dataFeedID, 1));
+            } else {
+                var options:InfoWindowOptions = new InfoWindowOptions();
+                options.contentHTML = "<p>" + heatMapDefinition.measure.display + ": <b>" + point[heatMapDefinition.measure.qualifiedName()] + "</b></p>";
+                marker.openInfoWindow(options);
+            }
+            /*var lookup:String = ll.lat() + "-" + ll.lng();
+            var obj:Object = pointDictionary[lookup];
+            var options:InfoWindowOptions = new InfoWindowOptions();
+            options.contentHTML = "<p>" + heatMapDefinition.measure.display + ": <b>" + obj[heatMapDefinition.measure.qualifiedName()] + "</b></p>";
+            marker.openInfoWindow(options);*/
+        }
+
+        private function addHeatMap():void {
             var heatMap:HeatMap = new HeatMap();
             heatMap.setStyle("backgroundColor", "0");
             heatMap.setStyle("backgroundAlpha", "0");
@@ -140,16 +231,6 @@
             map.addOverlay(overlay);
             fadeInEffect.target = heatMap;
             fadeInEffect.play();
-            if (heatMapDefinition != null && heatMapDefinition.mapType != 0) {
-                map.setCenter(new LatLng(heatMapDefinition.latitude, heatMapDefinition.longitude), heatMapDefinition.zoomLevel, getMapType(heatMapDefinition.mapType));
-            }
-            else if (heatMapDefinition != null && map.isLoaded()) {
-                heatMapDefinition.latitude = map.getCenter().lat();
-                heatMapDefinition.longitude = map.getCenter().lng();
-                heatMapDefinition.zoomLevel = map.getZoom();
-                heatMapDefinition.mapType = getMapVal(map.getCurrentMapType());
-            }
-
         }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
@@ -186,7 +267,6 @@
             if (heatMapDefinition.zipCode != null) {
                 var coordinateValue:CoordinateValue = o[heatMapDefinition.zipCode.qualifiedName()];
                 return map.fromLatLngToViewport(new LatLng(Number(coordinateValue.y), Number(coordinateValue.x)));
-                //return map.fromLatLngToViewport(new LatLng(0, 0));
             } else {
                 return map.fromLatLngToViewport(new LatLng(Number(o[heatMapDefinition.latitudeItem.qualifiedName()]), Number(o[heatMapDefinition.longitudeItem.qualifiedName()])));
             }
