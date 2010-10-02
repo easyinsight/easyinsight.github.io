@@ -6,6 +6,7 @@ package com.easyinsight.analysis
 	{
 		public var x:String;
 		public var y:String;
+        public var zip:String;
 
 		public function CoordinateValue()
 		{

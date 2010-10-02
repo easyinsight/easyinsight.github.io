@@ -7,6 +7,7 @@ package com.easyinsight.analysis
 	{
 		public var aggregation:int;
 		public var analysisMeasureID:int;
+        public var rowCountField:Boolean;
 		
 		public function AnalysisMeasure(aggregation:int = 1)
 		{

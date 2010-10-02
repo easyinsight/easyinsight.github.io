@@ -66,6 +66,7 @@ import mx.formatters.Formatter;
 			var stringValue:StringValue;
 			var dateValue:DateValue;
 			var emptyValue:EmptyValue;
+            var analysisDimension:AnalysisDimension;            
 		}
 		
 		public function getFormatter():Formatter {

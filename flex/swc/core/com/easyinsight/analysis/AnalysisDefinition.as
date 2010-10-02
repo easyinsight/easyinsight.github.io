@@ -35,12 +35,13 @@ package com.easyinsight.analysis
         public static const TIMELINE:int = 26;
         public static const HEATMAP:int = 27;
         public static const MAP_AFRICA:int = 28;
+        public static const GANTT:int = 29;
 
 		public var dataFeedID:int;
         public var urlKey:String;
 		public var name:String;
 		public var analysisID:int;
-		public var filterDefinitions:ArrayCollection;
+		public var filterDefinitions:ArrayCollection = new ArrayCollection();
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
 		public var tagCloud:ArrayCollection = new ArrayCollection();
         public var reportType:int;

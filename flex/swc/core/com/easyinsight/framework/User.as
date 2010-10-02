@@ -35,6 +35,7 @@ public class User extends EventDispatcher
     public var personaID:int;
     public var dateFormat:int;
     public var defaultReportSharing:Boolean;
+    public var guestUser:Boolean;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -94,6 +95,7 @@ public class User extends EventDispatcher
         _user.personaID = response.personaID;
         _user.dateFormat = response.dateFormat;
         _user.defaultReportSharing = response.defaultReportSharing;
+        _user.guestUser = response.guestUser;
         if (_user.firstLogin) {
             User.getEventNotifier().dispatchEvent(new Event("firstLogin"));
         } else if (response.renewalOptionPossible) {

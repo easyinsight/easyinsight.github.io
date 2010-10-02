@@ -116,7 +116,7 @@
 
         private function onFault(event:FaultEvent):void {
             failed = true;
-            errorText = event.fault.faultString;
+            errorText = event.fault.faultString + " - " + event.fault.faultDetail + " - " + event.statusCode + " - " + event.message.body;
             currentState = "Failure";
         }
 
