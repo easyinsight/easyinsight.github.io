@@ -308,7 +308,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileCoreSWC, compileFlexOptimized, compileSelenium, compileAdmin, compileEmbeddedInsight, modules1, modules2, modules3, modules4, modules5, modules6, modules7, modules8">
+    <target name="compileFlex" depends="compileJava, compileCoreSWC, apps, modules1, modules2, modules3, modules4, modules5, modules6, modules7, modules8">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -347,1008 +347,199 @@
         <delete dir="${teamcity.build.checkoutDir}/flex/libs/rsl/tmp"/>
     </target>
 
-<target name="compileSelenium">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/SeleniumReportView.mxml" output="${flex.path}/SeleniumReportView.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/selenium-report.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
+    <macrodef name="buildSWF">
+        <attribute name="mainMXML"/>
+        <attribute name="swfName"/>
+        <attribute name="buildFile"/>
+        <sequential>
+            <mxmlc file="${teamcity.build.checkoutDir}/flex/src/@{mainMXML}" output="${flex.path}/@{swfName}.swf" keep-generated-actionscript="false"
+                   static-rsls="false" target-player="10.0.0" actionscript-file-encoding="utf8" incremental="true">
+                <load-config filename="${teamcity.build.checkoutDir}/flex/@{buildFile}"/>
+                <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                    <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
+                    <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
+                </runtime-shared-library-path>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
+                <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                    <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
+                    <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
+                </runtime-shared-library-path>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-    </target>
+                <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                    <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
+                    <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
+                </runtime-shared-library-path>
+                <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
+                    <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+                </runtime-shared-library-path>
+            </mxmlc>
+        </sequential>
+    </macrodef>
+
+    <target name="modules1" depends="report.area3dchart, report.areachart, report.bar3dchart, report.barchart, report.bubblechart"/>
+    <target name="modules2" depends="report.column3dchart, report.columnchart, report.linechart, report.line3dchart, report.list"/>
+    <target name="modules3" depends="report.pie3dchart, report.piechart, report.plotchart"/>
+    <target name="modules4" depends="report.gauge, report.crosstab, report.tree, report.treemap"/>
+    <target name="modules5" depends="report.worldmap, report.usmap, report.americasmap, report.asiamap, report.europemap, report.middleeastmap"/>
+    <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.kpitreeadmin, perspective.groupdetail"/>
+    <target name="modules7" depends="perspective.kpiwindow, perspective.kpitreeview, perspective.datasourceadmin, perspective.analysisitemeditor"/>
+    <target name="modules8" depends="report.africamap"/>
+    <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin"/>
 
     <target name="compileFlexOptimized">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
-               static-rsls="false" link-report="${basedir}/optimized.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/core-optimized-config.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+        <buildSWF mainMXML="PrimaryWorkspace.mxml" swfName="PrimaryWorkspace" buildFile="core-optimized-config.xml"/>
     </target>
 
-    <target name="compileEmbeddedInsight">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf"
-               static-rsls="false" link-report="${basedir}/embedded.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/embedded-insight.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
-
+    <target name="app.embeddedreport">
+        <buildSWF mainMXML="EmbeddedInsight.mxml" swfName="EmbeddedInsight" buildFile="embedded-insight.xml"/>
     </target>
 
-    <target name="compileAdmin">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/AdministrationApplication.mxml" output="${flex.path}/AdministrationApplication.swf"
-               static-rsls="true">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/administration-app.xml"/>
-        </mxmlc>
+    <target name="app.selenium">
+        <buildSWF mainMXML="SeleniumReportView.mxml" swfName="SeleniumReportView" buildFile="selenium-report.xml"/>
     </target>
 
-    <target name="compileSpreadsheet">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" output="${flex.path}/SpreadsheetWizard.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/spreadsheet-wizard-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="app.admin">
+        <buildSWF mainMXML="AdministrationApplication.mxml" swfName="AdministrationApplication" buildFile="administration-app.xml"/>
     </target>
 
-    <target name="compileConnectionDetail">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/solutions/ConnectionDetail.mxml" output="${flex.path}/ConnectionDetail.swf"
-               static-rsls="false" link-report="connection.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/connection-detail-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-
-        </mxmlc>
+    <target name="perspective.spreadsheetwizard">
+        <buildSWF mainMXML="com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" swfName="SpreadsheetWizard" buildFile="perspectives/spreadsheet-wizard-module.xml"/>
     </target>
 
-    <target name="compileGroupDetailModule">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/groups/GroupDetail.mxml" output="${flex.path}/GroupDetail.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/group-detail-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.connectiondetail">
+        <buildSWF mainMXML="com/easyinsight/solutions/ConnectionDetail.mxml" swfName="ConnectionDetail" buildFile="perspectives/connection-detail-module.xml"/>
     </target>
 
-    <target name="compileAnalysisItemEditor">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/AnalysisItemEditor.mxml" output="${flex.path}/AnalysisItemEditor.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/analysis-item-editor-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.kpitreeadmin">
+        <buildSWF mainMXML="com/easyinsight/goals/GoalTreeAdminContainer.mxml" swfName="KPITreeAdmin" buildFile="perspectives/kpitree-admin-module.xml"/>
     </target>
 
-    <target name="compileKPIWindow">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/kpi/KPIModule.mxml" output="${flex.path}/KPIModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/kpi-window-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.groupdetail">
+        <buildSWF mainMXML="com/easyinsight/groups/GroupDetail.mxml" swfName="GroupDetail" buildFile="perspectives/group-detail-module.xml"/>
     </target>
 
-    <target name="compileKPITreeAdmin">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/goals/GoalTreeAdminContainer.mxml" output="${flex.path}/KPITreeAdmin.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/kpitree-admin-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.analysisitemeditor">
+        <buildSWF mainMXML="com/easyinsight/analysis/AnalysisItemEditor.mxml" swfName="AnalysisItemEditor" buildFile="perspectives/analysis-item-editor-module.xml"/>
     </target>
 
-    <target name="compileKPITreeView">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/goals/GoalTreeViewContainer.mxml" output="${flex.path}/KPITreeView.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/kpitree-view-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.kpiwindow">
+        <buildSWF mainMXML="com/easyinsight/kpi/KPIModule.mxml" swfName="KPIModule" buildFile="perspectives/kpi-window-module.xml"/>
     </target>
 
-    <target name="compileDataSourceAdmin">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" output="${flex.path}/DataSourceAdmin.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/perspectives/datasource-admin-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.kpitreeview">
+        <buildSWF mainMXML="com/easyinsight/goals/GoalTreeViewContainer.mxml" swfName="KPITreeView" buildFile="perspectives/kpitree-view-module.xml"/>
     </target>
 
-    <target name="modules1" depends="module.area3dchart, module.areachart, module.bar3dchart, module.barchart, module.bubblechart"/>
-    <target name="modules2" depends="module.column3dchart, module.columnchart, module.line3dchart, module.list"/>
-    <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart, module.linechart, module.timeline"/>
-    <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap, module.mmlinechart, module.heatmap"/>
-    <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap, module.africamap"/>
-    <target name="modules6" depends="compileDataSourceAdmin, compileKPITreeView, compileKPITreeAdmin, compileSpreadsheet"/>
-    <target name="modules7" depends="compileKPIWindow, compileAnalysisItemEditor, compileConnectionDetail, compileGroupDetailModule"/>
-    <target name="modules8" depends="module.gantt"/>
-
-    <target name="module.mmlinechart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/MultiMeasureLineChartModule.mxml" output="${flex.path}/MultiMeasureLineChartModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/mm-line-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.datasourceadmin">
+        <buildSWF mainMXML="com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" swfName="DataSourceAdmin" buildFile="perspectives/datasource-admin-module.xml"/>
     </target>
 
-    <target name="module.list">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/list/ListModule.mxml" output="${flex.path}/ListModule.swf"
-               static-rsls="false" link-report="${basedir}/list.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/list-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.list">
+        <buildSWF mainMXML="com/easyinsight/analysis/list/ListModule.mxml" swfName="ListModule" buildFile="modules/list-module.xml"/>
     </target>
 
-    <target name="module.gantt">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/gantt/GanttModule.mxml" output="${flex.path}/GanttModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/gantt-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.columnchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/column/ColumnChartModule.mxml" swfName="ColumnChartModule" buildFile="modules/column-chart-module.xml"/>
     </target>
 
-    <target name="module.columnchart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/column/ColumnChartModule.mxml" output="${flex.path}/ColumnChartModule.swf"
-               static-rsls="false" link-report="${basedir}/column.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/column-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.column3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/column/Column3DChartModule.mxml" swfName="Column3DChartModule" buildFile="modules/column-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.column3dchart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/column/Column3DChartModule.mxml" output="${flex.path}/Column3DChartModule.swf"
-               static-rsls="false" link-report="${basedir}/column3d.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/column-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.gantt">
+        <buildSWF mainMXML="com/easyinsight/analysis/gantt/GanttModule.mxml" swfName="GanttModule" buildFile="modules/gantt-module.xml"/>
     </target>
 
-    <target name="module.piechart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" output="${flex.path}/PieChartModule.swf"
-               static-rsls="false" link-report="${basedir}/pie.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/pie-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.timeline">
+        <buildSWF mainMXML="com/easyinsight/analysis/timeline/TimelineModule.mxml" swfName="TimelineModule" buildFile="modules/timeseries-module.xml"/>
     </target>
 
-    <target name="module.pie3dchart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/pie/Pie3DChartModule.mxml" output="${flex.path}/Pie3DChartModule.swf"
-               static-rsls="false" link-report="${basedir}/pie3d.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/pie-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.piechart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" swfName="PieChartModule" buildFile="modules/pie-chart-module.xml"/>
     </target>
 
-    <target name="module.barchart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/yaxisbased/bar/BarChartModule.mxml" output="${flex.path}/BarChartModule.swf"
-               static-rsls="false" link-report="${basedir}/bar.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bar-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.pie3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/pie/Pie3DChartModule.mxml" swfName="Pie3DChartModule" buildFile="modules/pie-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.bar3dchart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/yaxisbased/bar/Bar3DChartModule.mxml" output="${flex.path}/Bar3DChartModule.swf"
-               static-rsls="false" link-report="${basedir}/bar3d.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bar-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.barchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/yaxisbased/bar/BarChartModule.mxml" swfName="BarChartModule" buildFile="modules/bar-chart-module.xml"/>
     </target>
 
-    <target name="module.areachart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/area/AreaChartModule.mxml" output="${flex.path}/AreaChartModule.swf"
-               static-rsls="false" link-report="${basedir}/area.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/area-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.bar3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/yaxisbased/bar/Bar3DChartModule.mxml" swfName="Bar3DChartModule" buildFile="modules/bar-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.area3dchart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/area/Area3DChartModule.mxml" output="${flex.path}/Area3DChartModule.swf"
-               static-rsls="false" link-report="${basedir}/area3d.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/area-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.areachart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/twoaxisbased/area/AreaChartModule.mxml" swfName="AreaChartModule" buildFile="modules/area-chart-module.xml"/>
     </target>
 
-    <target name="module.linechart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/LineChartModule.mxml" output="${flex.path}/LineChartModule.swf"
-               static-rsls="false" link-report="${basedir}/line.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/line-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.area3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/twoaxisbased/area/Area3DChartModule.mxml" swfName="Area3DChartModule" buildFile="modules/area-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.line3dchart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/Line3DChartModule.mxml" output="${flex.path}/Line3DChartModule.swf"
-               static-rsls="false" link-report="${basedir}/line3d.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/line-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.linechart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/twoaxisbased/line/LineChartModule.mxml" swfName="LineChartModule" buildFile="modules/line-chart-module.xml"/>
     </target>
 
-    <target name="module.bubblechart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/bubble/BubbleChartModule.mxml" output="${flex.path}/BubbleChartModule.swf"
-               static-rsls="false" link-report="${basedir}/bubble.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bubble-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.line3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/twoaxisbased/line/Line3DChartModule.mxml" swfName="Line3DChartModule" buildFile="modules/line-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.timeline">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/timeline/TimelineModule.mxml" output="${flex.path}/TimelineModule.swf"
-               static-rsls="false" link-report="${basedir}/timeline.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/timeseries-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.bubblechart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/bubble/BubbleChartModule.mxml" swfName="BubbleChartModule" buildFile="modules/bubble-chart-module.xml"/>
     </target>
 
-    <target name="module.plotchart">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/plot/PlotChartModule.mxml" output="${flex.path}/PlotChartModule.swf"
-               static-rsls="false" link-report="${basedir}/plot.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/plot-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.plotchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/plot/PlotChartModule.mxml" swfName="PlotChartModule" buildFile="modules/plot-chart-module.xml"/>
     </target>
 
-    <target name="module.usmap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/UnitedStatesMapModule.mxml" output="${flex.path}/UnitedStatesMapModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-us-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.usmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/UnitedStatesMapModule.mxml" swfName="UnitedStatesMapModule" buildFile="modules/map-us-module.xml"/>
     </target>
 
-    <target name="module.europemap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/EuropeMapModule.mxml" output="${flex.path}/EuropeMapModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-europe-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.europemap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/EuropeMapModule.mxml" swfName="EuropeMapModule" buildFile="modules/map-europe-module.xml"/>
     </target>
 
-    <target name="module.asiamap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/AsiaMapModule.mxml" output="${flex.path}/AsiaMapModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-asia-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.asiamap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/AsiaMapModule.mxml" swfName="AsiaMapModule" buildFile="modules/map-asia-module.xml"/>
     </target>
 
-    <target name="module.africamap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/AfricaMapModule.mxml" output="${flex.path}/AfricaMapModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-africa-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.africamap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/AfricaMapModule.mxml" swfName="AfricaMapModule" buildFile="modules/map-africa-module.xml"/>
     </target>
 
-    <target name="module.worldmap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/WorldMapModule.mxml" output="${flex.path}/WorldMapModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-world-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.worldmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/WorldMapModule.mxml" swfName="WorldMapModule" buildFile="modules/map-world-module.xml"/>
     </target>
 
-    <target name="module.americasmap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/AmericasModule.mxml" output="${flex.path}/AmericasModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-americas-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.americasmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/AmericasModule.mxml" swfName="AmericasModule" buildFile="modules/map-americas-module.xml"/>
     </target>
 
-    <target name="module.middleeastmap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/MiddleEastMapModule.mxml" output="${flex.path}/MiddleEastMapModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-middleeast-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.middleeastmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/MiddleEastMapModule.mxml" swfName="MiddleEastMapModule" buildFile="modules/map-middleeast-module.xml"/>
     </target>
 
-    <target name="module.crosstab">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/crosstab/CrosstabModule.mxml" output="${flex.path}/CrosstabModule.swf"
-               static-rsls="false" link-report="${basedir}/crosstab.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/crosstab-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.crosstab">
+        <buildSWF mainMXML="com/easyinsight/analysis/crosstab/CrosstabModule.mxml" swfName="CrosstabModule" buildFile="modules/crosstab-module.xml"/>
     </target>
 
-    <target name="module.gauge">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/gauge/GaugeModule.mxml" output="${flex.path}/GaugeModule.swf"
-               static-rsls="false" link-report="${basedir}/gauge.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/gauge-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.gauge">
+        <buildSWF mainMXML="com/easyinsight/analysis/gauge/GaugeModule.mxml" swfName="GaugeModule" buildFile="modules/gauge-module.xml"/>
     </target>
 
-    <target name="module.treemap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/treemap/TreeMapModule.mxml" output="${flex.path}/TreeMapModule.swf"
-               static-rsls="false" link-report="${basedir}/treemap.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/treemap-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.treemap">
+        <buildSWF mainMXML="com/easyinsight/analysis/treemap/TreeMapModule.mxml" swfName="TreeMapModule" buildFile="modules/treemap-module.xml"/>
     </target>
 
-    <target name="module.heatmap">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/heatmap/HeatMapModule.mxml" output="${flex.path}/HeatMapModule.swf"
-               static-rsls="false" link-report="${basedir}/heatmap.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/heatmap-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.heatmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/heatmap/MapModule.mxml" swfName="HeatMapModule" buildFile="modules/heatmap-module.xml"/>
     </target>
 
-    <target name="module.tree">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/tree/TreeModule.mxml" output="${flex.path}/TreeModule.swf"
-               static-rsls="false" link-report="${basedir}/tree.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/tree-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swz"/>
-                <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-
+    <target name="report.tree">
+        <buildSWF mainMXML="com/easyinsight/analysis/tree/TreeModule.mxml" swfName="TreeModule" buildFile="modules/tree-module.xml"/>
     </target>
 
     <target name="upload">
