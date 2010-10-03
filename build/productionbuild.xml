@@ -308,7 +308,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileCoreSWC, compileFlexOptimized, compileSelenium, compileAdmin, compileEmbeddedInsight, modules1, modules2, modules3, modules4, modules5, modules6, modules7">
+    <target name="compileFlex" depends="compileJava, compileCoreSWC, compileFlexOptimized, compileSelenium, compileAdmin, compileEmbeddedInsight, modules1, modules2, modules3, modules4, modules5, modules6, modules7, modules8">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -633,8 +633,9 @@
     <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart, module.linechart, module.timeline"/>
     <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap, module.mmlinechart, module.heatmap"/>
     <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap, module.africamap"/>
-    <target name="modules6" depends="compileDataSourceAdmin, compileKPITreeView, compileKPITreeAdmin, compileSpreadsheet, module.gantt"/>
+    <target name="modules6" depends="compileDataSourceAdmin, compileKPITreeView, compileKPITreeAdmin, compileSpreadsheet"/>
     <target name="modules7" depends="compileKPIWindow, compileAnalysisItemEditor, compileConnectionDetail, compileGroupDetailModule"/>
+    <target name="modules8" depends="module.gantt"/>
 
     <target name="module.mmlinechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/MultiMeasureLineChartModule.mxml" output="${flex.path}/MultiMeasureLineChartModule.swf"
