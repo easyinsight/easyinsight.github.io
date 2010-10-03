@@ -479,8 +479,6 @@ public class UserAccountAdminService {
             List results = session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
             Account account = (Account) results.get(0);
             account.setApiEnabled(accountAPISettings.isApiEnabled());
-            account.setAccountKey(accountAPISettings.getAccountKey());
-            account.setAccountSecretKey(accountAPISettings.getAccountSecretKey());
             List userResults = session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
             User user = (User) userResults.get(0);
             user.setUserKey(accountAPISettings.getUserKey());
@@ -532,8 +530,7 @@ public class UserAccountAdminService {
                 session.update(user);
                 session.update(account);
             }
-            accountAPISettings = new AccountAPISettings(account.getAccountKey(), account.getAccountSecretKey(),
-                    user.getUserKey(), user.getUserSecretKey(), account.isApiEnabled());
+            accountAPISettings = new AccountAPISettings(user.getUserKey(), user.getUserSecretKey(), account.isApiEnabled());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

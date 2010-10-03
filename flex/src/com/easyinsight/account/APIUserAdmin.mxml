@@ -7,11 +7,6 @@
 
         import mx.managers.PopUpManager;
 
-        [Bindable]
-        private var accountAPIKey:String;
-
-        [Bindable]
-        private var accountAPISecretKey:String;
 
         [Bindable]
         private var userAPIKey:String;
@@ -20,32 +15,18 @@
         private var userAPISecretKey:String;
 
         [Bindable]
-        private var showingSecretAccountKey:Boolean;
-        [Bindable]
         private var showingSecretUserKey:Boolean;
 
         private var accountAPISettings:AccountAPISettings;
 
         [Bindable]
         private var secretKeyButton:String = "Show Secret Key";
-        [Bindable]
-        private var secretAccountButton:String = "Show Secret Key";
 
         [Bindable]
         private var accountAdmin:Boolean;
 
         [Bindable]
         private var apiEnabled:Boolean;
-
-        private function showSecretAccountKey():void {
-            if (showingSecretAccountKey) {
-                showingSecretAccountKey = false;
-                secretAccountButton = "Show Secret Key";
-            } else {
-                showingSecretAccountKey = true;
-                secretAccountButton = "Hide Secret Key";
-            }
-        }
 
         private function showSecretUserKey():void {
             if (showingSecretUserKey) {
@@ -66,25 +47,11 @@
             userAPISecretKey = adminService.regenerateUserSecretKey.lastResult as String;
         }
 
-        private function regeneratedAccountKey():void {
-            accountAPISecretKey = adminService.regenerateAccountSecretKey.lastResult as String;
-        }
-
         private function gotSettings():void {
             accountAPISettings = adminService.getAccountAPISettings.lastResult as AccountAPISettings;
-            accountAPIKey = accountAPISettings.accountKey;
-            accountAPISecretKey = accountAPISettings.accountSecretKey;
             userAPIKey = accountAPISettings.userKey;
             userAPISecretKey = accountAPISettings.userSecretKey;
             apiEnabled = accountAPISettings.apiEnabled;
-        }
-
-        private function copyKeyToClipboard():void {
-            System.setClipboard(accountAPIKey);
-        }
-
-        private function copySecretKeyToClipboard():void {
-            System.setClipboard(accountAPISecretKey);
         }
 
         private function copyUserKeyToClipboard():void {
@@ -100,8 +67,6 @@
             settings.apiEnabled = apiEnabledCheckbox.selected;
             settings.userKey = userAPIKey;
             settings.userSecretKey = userAPISecretKey;
-            settings.accountKey = accountAPIKey;
-            settings.accountSecretKey = accountAPISecretKey;
             ProgressAlert.alert(this, "Saving settings...", null, adminService.saveAccountAPISettings);
             adminService.saveAccountAPISettings.send(settings);
         }
@@ -114,12 +79,11 @@
         <mx:method name="getAccountAPISettings" result="gotSettings()"/>
         <mx:method name="saveAccountAPISettings" result="saved()"/>
         <mx:method name="regenerateUserSecretKey" result="regeneratedUserKey()"/>
-        <mx:method name="regenerateAccountSecretKey" result="regeneratedAccountKey()"/>
     </mx:RemoteObject>
     <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
         <mx:VBox id="accountSettingsBox">
             <mx:CheckBox label="API Enabled for Account" id="apiEnabledCheckbox" enabled="{accountAdmin}" selected="{apiEnabled}" fontSize="16"/>
-            <mx:Label text="The keys below are your personal credentials for publishing data into Easy Insight through the API."/>
+            <mx:Label text="The keys below are your credentials for publishing data into Easy Insight through the API:"/>
             <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">                
                 <mx:FormItem label="API Key: " direction="horizontal">
                     <mx:Text text="{userAPIKey}"/>
@@ -131,21 +95,7 @@
                     <mx:Text text="{userAPISecretKey}" visible="{showingSecretUserKey}"/>
                     <mx:Button label="Copy to Clipboard" click="copyUserSecretKeyToClipboard()" visible="{showingSecretUserKey}"/>
                 </mx:FormItem>
-            </mx:Form>
-            <mx:HRule width="100%"/>
-            <mx:Label text="The keys below are account-wide credentials for publishing data into Easy Insight through the API."/>
-            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-                <mx:FormItem label="API Key: " direction="horizontal">
-                    <mx:Text text="{accountAPIKey}"/>
-                    <mx:Button label="Copy to Clipboard" click="copyKeyToClipboard()"/>
-                </mx:FormItem>
-                <mx:FormItem label="API Secret Key: " direction="horizontal">
-                    <mx:Button label="Regenerate Secret Key" click="adminService.regenerateAccountSecretKey.send()" enabled="{accountAdmin}"/>
-                    <mx:Button label="{secretKeyButton}" click="showSecretAccountKey()()"/>
-                    <mx:Text text="{accountAPISecretKey}" visible="{showingSecretAccountKey}"/>
-                    <mx:Button label="Copy to Clipboard" click="copySecretKeyToClipboard()" visible="{showingSecretAccountKey}"/>
-                </mx:FormItem>
-            </mx:Form>
+            </mx:Form>            
         </mx:VBox>
         <mx:HRule width="100%"/>
         <mx:HBox width="100%" horizontalAlign="center">

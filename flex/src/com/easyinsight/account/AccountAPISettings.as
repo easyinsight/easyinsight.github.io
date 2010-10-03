@@ -3,8 +3,6 @@ package com.easyinsight.account {
 [RemoteClass(alias="com.easyinsight.users.AccountAPISettings")]
 public class AccountAPISettings {
 
-    public var accountKey:String;
-    public var accountSecretKey:String;
     public var apiEnabled:Boolean;
     public var userKey:String;
     public var userSecretKey:String;

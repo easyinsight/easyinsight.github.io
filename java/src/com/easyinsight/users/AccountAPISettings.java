@@ -6,8 +6,6 @@ package com.easyinsight.users;
  * Time: 9:38:01 AM
  */
 public class AccountAPISettings {
-    private String accountKey;
-    private String accountSecretKey;
     private String userKey;
     private String userSecretKey;
     private boolean apiEnabled;
@@ -15,10 +13,8 @@ public class AccountAPISettings {
     public AccountAPISettings() {
     }
 
-    public AccountAPISettings(String accountKey, String accountSecretKey, String userKey, String userSecretKey,
+    public AccountAPISettings(String userKey, String userSecretKey,
                               boolean apiEnabled) {
-        this.accountKey = accountKey;
-        this.accountSecretKey = accountSecretKey;
         this.userKey = userKey;
         this.userSecretKey = userSecretKey;
         this.apiEnabled = apiEnabled;
@@ -39,23 +35,7 @@ public class AccountAPISettings {
     public void setUserSecretKey(String userSecretKey) {
         this.userSecretKey = userSecretKey;
     }
-
-    public String getAccountKey() {
-        return accountKey;
-    }
-
-    public void setAccountKey(String accountKey) {
-        this.accountKey = accountKey;
-    }
-
-    public String getAccountSecretKey() {
-        return accountSecretKey;
-    }
-
-    public void setAccountSecretKey(String accountSecretKey) {
-        this.accountSecretKey = accountSecretKey;
-    }
-
+    
     public boolean isApiEnabled() {
         return apiEnabled;
     }

@@ -13,9 +13,6 @@
         private var uncheckedEnabled:Boolean;
 
         [Bindable]
-        private var validatedEnabled:Boolean;
-
-        [Bindable]
         private var secretKey:String;
 
         [Bindable]
@@ -37,7 +34,7 @@
         override protected function commitProperties():void {
             super.commitProperties();
             apiService.getAPIDescriptor.send(_dataSourceID);
-            userService.getUserAPISettings.send();
+            userService.getAccountAPISettings.send();
         }
 
         private function toggleSecret():void {
@@ -54,20 +51,19 @@
             var apiInfo:DataSourceAPIDescriptor = apiService.getAPIDescriptor.lastResult as DataSourceAPIDescriptor;
             apiKey = apiInfo.apiKey;
             uncheckedEnabled = apiInfo.uncheckedEnabled;
-            validatedEnabled = apiInfo.validatedEnabled;
         }
 
         private function gotSettings():void {
-            var accountAPISettings:AccountAPISettings = userService.getUserAPISettings.lastResult as AccountAPISettings;
-            key = accountAPISettings.accountKey;
-            secretKey = accountAPISettings.accountSecretKey;
+            var accountAPISettings:AccountAPISettings = userService.getAccountAPISettings.lastResult as AccountAPISettings;
+            key = accountAPISettings.userKey;
+            secretKey = accountAPISettings.userSecretKey;
         }
         ]]></mx:Script>
     <mx:RemoteObject id="apiService" destination="apiService">
         <mx:method name="getAPIDescriptor" result="gotAPIInfo()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject destination="login" id="userService">
-        <mx:method name="getUserAPISettings" result="gotSettings()"/>
+    <mx:RemoteObject destination="accountAdmin" id="userService">
+        <mx:method name="getAccountAPISettings" result="gotSettings()"/>
     </mx:RemoteObject>
     <mx:Form>
         <mx:FormItem label="User Key: " direction="horizontal">
@@ -75,7 +71,7 @@
             <mx:Button label="Copy to Clipboard" click="System.setClipboard(key)"/>
         </mx:FormItem>
         <mx:FormItem label="User Secret Key: " direction="horizontal">
-            <mx:Button label="{secretKeyText}" />
+            <mx:Button label="{secretKeyText}" click="toggleSecret()"/>
             <mx:Label text="{secretKey}" visible="{showingSecretKey}"/>
             <mx:Button label="Copy to Clipboard" click="System.setClipboard(secretKey)" visible="{showingSecretKey}"/>
         </mx:FormItem>
@@ -83,11 +79,8 @@
             <mx:Label text="{apiKey}"/>
             <mx:Button label="Copy to Clipboard" click="System.setClipboard(apiKey)"/>
         </mx:FormItem>
-        <mx:FormItem label="Unchecked API Enabled: ">
+        <mx:FormItem label="API Enabled: ">
             <mx:CheckBox id="uncheckedAPICheckbox" selected="{uncheckedEnabled}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Validated API Enabled: ">
-            <mx:CheckBox id="validatedAPICheckbox" selected="{validatedEnabled}"/>
         </mx:FormItem>
     </mx:Form>
 </util:EITitleWindow>

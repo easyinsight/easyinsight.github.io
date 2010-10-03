@@ -7,8 +7,7 @@
         import com.easyinsight.account.APIUserAdmin;
         import com.easyinsight.account.AccountAPISettings;
         import com.easyinsight.customupload.SimpleFeedWindow;
-        import com.easyinsight.customupload.UploadConfigEvent;
-        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.customupload.UploadConfigEvent;        
         import com.easyinsight.framework.User;
         import com.easyinsight.listing.AnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
