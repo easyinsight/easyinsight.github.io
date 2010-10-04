@@ -1,13 +1,11 @@
 package com.easyinsight.administration.feed {
 import flash.events.KeyboardEvent;
+import flash.events.MouseEvent;
 import flash.ui.Keyboard;
 
 import mx.binding.utils.BindingUtils;
-import mx.controls.Alert;
 import mx.events.FlexEvent;
 import mx.collections.ArrayCollection;
-import com.easyinsight.analysis.NamedKey;
-import flash.events.Event;
 import mx.controls.Label;
 import mx.containers.HBox;
 import mx.controls.TextInput;
@@ -15,13 +13,14 @@ import mx.controls.List;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import mx.containers.VBox;
 import mx.validators.StringValidator;
+import mx.validators.Validator;
 
 public class HierarchyAdminBox extends VBox {
     private var _analysisHierarchyItem:AnalysisHierarchyItem;
     private var nameInput:TextInput;
     private var _levels:ArrayCollection;
     public var list:List;
-    private var validators:Array;
+    private var nameValidator:StringValidator;
     
     public function HierarchyAdminBox() {
         nameInput = new TextInput();
@@ -44,15 +43,13 @@ public class HierarchyAdminBox extends VBox {
         nameLabel.text = "Name: ";
         hBox.addChild(nameLabel);
         hBox.addChild(nameInput);
-        nameInput.addEventListener(Event.CHANGE, onNameChange);
         addChild(hBox);
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
-        var validator:StringValidator = new StringValidator();
-        validator.source = nameInput;
-        validator.property = "text";
-        validator.minLength = 3;
-        validators = [ validator ];
+        nameValidator = new StringValidator();
+        nameValidator.source = nameInput;
+        nameValidator.property = "text";
+        nameValidator.minLength = 3;
     }
 
     private function onKey(event:KeyboardEvent):void {
@@ -63,9 +60,24 @@ public class HierarchyAdminBox extends VBox {
         }
     }
 
-    private function onNameChange(event:Event):void {
-        var namedKey:NamedKey = _analysisHierarchyItem.key as NamedKey;
-        namedKey.nameValue = nameInput.text;
+    public function getName():String {
+        return nameInput.text;
+    }
+
+    public function validate():Boolean {
+        var results:Array = Validator.validateAll([nameValidator]);
+        if (results.length > 0) {
+            nameInput.setFocus();
+            nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            return false;
+        }
+        if (list.dataProvider.length < 2) {
+            list.errorString = "You must specify at least two fields in the hierarchy.";
+            list.setFocus();
+            list.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            return false;
+        }
+        return true;
     }
 
     public function set analysisHierarchyItem(val:AnalysisHierarchyItem):void {

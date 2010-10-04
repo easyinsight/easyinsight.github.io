@@ -117,7 +117,7 @@ public class BaseFieldEditButton extends UIComponent implements IListItemRendere
 		
 		private function analysisItemEdited(event:AnalysisItemEditEvent):void {
 			this.analysisItemWrapper.analysisItem = event.analysisItem;
-			this.analysisItemWrapper.displayName = event.analysisItem.displayName;
+			this.analysisItemWrapper.displayName = event.analysisItem.display;
 			this.displayName = event.analysisItem.displayName;			 
 		}
 		

@@ -159,7 +159,6 @@
         private var hidden:Boolean;
 
 
-
         [Bindable]
         private var allItems:ArrayCollection;
 
@@ -274,6 +273,10 @@
             return new ArrayCollection(["Normality", "Step", "Six Sigma"]);
         }
 
+        public function validate():Boolean {
+            return true;
+        }
+
         public function save(dataSourceID:int):AnalysisItem {
             if (detailEditor != null) {
                 if (detailEditor.validate()) {
@@ -282,8 +285,8 @@
                     analysisItem.concrete = startingAnalysisItem.concrete;
                     analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
                     /*if (analysisItem.getType() == existingType) {
-                        analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
-                    }*/
+                     analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
+                     }*/
                     analysisItem.displayName = fieldNameInput.text;
                     analysisItem.key = key;
                     analysisItem.hidden = hiddenCheckbox.selected;

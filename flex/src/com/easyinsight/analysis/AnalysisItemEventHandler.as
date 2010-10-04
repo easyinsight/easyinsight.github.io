@@ -83,7 +83,7 @@ public class AnalysisItemEventHandler extends UIComponent {
         var analysisItemWrapper:AnalysisItemWrapper = event.previousItemWrapper;
         var existingItem:AnalysisItem = analysisItemWrapper.analysisItem;
         analysisItemWrapper.analysisItem = event.analysisItem;
-        analysisItemWrapper.displayName = event.analysisItem.displayName;
+        analysisItemWrapper.displayName = event.analysisItem.display;
         dispatchEvent(new AddedItemUpdateEvent(AddedItemUpdateEvent.UPDATE, existingItem, analysisItemWrapper, event.analysisItem));
     }
 }

@@ -116,6 +116,8 @@ public class DropArea extends HBox
             return CalculationMeasureWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
             return DerivedGroupingWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+            return HierarchyWindow;
         } else {
             return null;
         }

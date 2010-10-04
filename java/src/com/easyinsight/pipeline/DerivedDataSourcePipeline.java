@@ -19,12 +19,12 @@ public class DerivedDataSourcePipeline extends Pipeline {
         components.add(new DataScrubComponent());
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor()));
+                components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor(), null));
             }
         }
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor()));
+                components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null));
             }
         }
         return components;

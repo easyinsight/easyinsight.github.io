@@ -187,7 +187,7 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
 		private function analysisItemEdited(event:AnalysisItemEditEvent):void {
             var existingItem:AnalysisItem = this.analysisItemWrapper.analysisItem;
 			this.analysisItemWrapper.analysisItem = event.analysisItem;
-			this.analysisItemWrapper.displayName = event.analysisItem.displayName;
+			this.analysisItemWrapper.displayName = event.analysisItem.display;
 			this.displayName = event.analysisItem.displayName;
             dispatchEvent(new AddedItemUpdateEvent(AddedItemUpdateEvent.UPDATE, existingItem, this.analysisItemWrapper, event.analysisItem));
 		}

@@ -16,7 +16,9 @@ public class ListTransform {
 
     private Map<Map<Key, Value>, Map<AnalysisMeasure, Aggregation>> keyMap = new HashMap<Map<Key, Value>, Map<AnalysisMeasure, Aggregation>>();
     private Map<Map<Key, Value>, Map<AnalysisDimension, Value>> dimensionMap = new HashMap<Map<Key, Value>, Map<AnalysisDimension, Value>>();
+
     private Set<Map<Key, Value>> compositeKeys = new HashSet<Map<Key, Value>>();
+
     private Map<AnalysisMeasure, AggregationFactory> factoryMap = new HashMap<AnalysisMeasure, AggregationFactory>();
 
     private Set<Integer> skipAggregations;
@@ -67,12 +69,6 @@ public class ListTransform {
             if (dimensions != null) superSet.putAll(dimensions);
             if (measures != null) superSet.putAll(measures);
             for (AnalysisItem column : columns) {
-                /*if (column.hasType(AnalysisItemTypes.CALCULATION)) {
-                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) column;
-                    if (!analysisCalculation.isApplyBeforeAggregation()) {
-                        continue;
-                    }
-                }*/
                 Value obj = superSet.get(column);
                 if (obj == null) { obj = new EmptyValue(); }
                 if (obj instanceof Aggregation) {

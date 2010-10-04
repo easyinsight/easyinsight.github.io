@@ -71,7 +71,8 @@
 
         private function save():void {
             editor.addEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
-            editor.save(_dataSourceID);
+            var valid:Boolean = editor.validate();
+            if (valid) editor.save(_dataSourceID);
         }
 		]]>
 	</mx:Script>

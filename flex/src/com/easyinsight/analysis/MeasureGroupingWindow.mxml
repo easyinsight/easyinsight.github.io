@@ -28,6 +28,13 @@
             availableMeasures.refresh();
         }
 
+        public function set dataSourceID(dataSourceID:int):void {
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
         public function save(dataSourceID:int):AnalysisItem {
             return null;
         }]]></mx:Script>

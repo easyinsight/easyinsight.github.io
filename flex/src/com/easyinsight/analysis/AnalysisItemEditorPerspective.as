@@ -22,5 +22,9 @@ public class AnalysisItemEditorPerspective extends ModulePerspective implements 
         var editor:IAnalysisItemEditor = getChildAt(0) as IAnalysisItemEditor;
         return editor.save(dataSourceID);
     }
+
+    public function validate():Boolean {
+        return true;
+    }
 }
 }

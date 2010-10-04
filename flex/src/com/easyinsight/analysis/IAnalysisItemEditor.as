@@ -8,5 +8,6 @@ public interface IAnalysisItemEditor {
     function set analysisItems(analysisItems:ArrayCollection):void;
     function set dataSourceID(dataSourceID:int):void;
     function save(dataSourceID:int):AnalysisItem;
+    function validate():Boolean;
 }
 }

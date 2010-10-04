@@ -67,6 +67,10 @@
 
         }
 
+        public function validate():Boolean {
+            return true;
+        }
+
         private function dragEnterHandler(event:DragEvent):void {
             var analysisItem:AnalysisItem;
             if (event.dragInitiator is List) {

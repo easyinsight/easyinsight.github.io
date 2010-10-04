@@ -41,9 +41,9 @@ public class FirstValueFilter extends FilterDefinition {
         return start;
     }
 
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor) {
+    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem) {
         if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
-            return Arrays.asList((IComponent) new FirstValueComponent(this));
+            return Arrays.asList((IComponent) new FirstValueComponent(this, sourceItem));
         } else {
             return new ArrayList<IComponent>();
         }

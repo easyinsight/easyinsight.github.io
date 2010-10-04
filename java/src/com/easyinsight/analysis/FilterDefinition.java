@@ -137,7 +137,7 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         }
     }
 
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor) {
+    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem) {
         List<IComponent> components = new ArrayList<IComponent>();
         if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
             components.add(new FilterComponent(this, filterProcessor));

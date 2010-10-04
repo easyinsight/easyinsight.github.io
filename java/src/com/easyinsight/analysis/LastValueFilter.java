@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.pipeline.FirstValueComponent;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.LastValueComponent;
 
@@ -46,7 +45,7 @@ public class LastValueFilter extends FilterDefinition {
         return start;
     }
 
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor) {
+    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem) {
         if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
             return Arrays.asList((IComponent) new LastValueComponent(this));
         } else {
