@@ -370,7 +370,7 @@
                     <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
                 </runtime-shared-library-path>
                 <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                    <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+                    <url rsl-url="https://staging.easy-insight.com/app/easyui-debug/EICore.swf"/>
                 </runtime-shared-library-path>
             </mxmlc>
         </sequential>
@@ -535,7 +535,7 @@
     </target>
 
     <target name="report.heatmap">
-        <buildSWF mainMXML="com/easyinsight/analysis/heatmap/MapModule.mxml" swfName="HeatMapModule" buildFile="modules/heatmap-module.xml"/>
+        <buildSWF mainMXML="com/easyinsight/analysis/heatmap/HeatMapModule.mxml" swfName="HeatMapModule" buildFile="modules/heatmap-module.xml"/>
     </target>
 
     <target name="report.tree">
