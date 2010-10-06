@@ -134,7 +134,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
 
     @Override
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                            Set<AnalysisItem> targetFields, String sourceName, String targetName, Set<AnalysisItem> masterItems) {
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName) {
 
         // start by merging items by to-do to-do ID -> time tracking to-do ID
         // for those items which can't be merged by IDs, merge by project name
@@ -159,7 +159,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
                     }
                 }
                 DataSet sourceCopySet = new DataSet(sourceRows);
-                sourceRows = combinedData(masterItems, getSourceFeedID(), sourceCopySet).getRows();
+                sourceRows = combinedData(sourceFields, getSourceFeedID(), sourceCopySet).getRows();
                 for (IRow row : targetRows) {
                     IRow unjoined = connection.removeTargetValues(row, targetFields);
                     if (connection.isTargetOuterJoin()) {
@@ -173,8 +173,8 @@ public class FallthroughConnection extends CompositeFeedConnection {
             compositeRows.addAll(mergeResults.mergedRows);
             sourceRows = mergeResults.unmergedSourceRows;
             targetRows = mergeResults.unmergedTargetRows;
-            sourceRows = combinedData(masterItems, getSourceFeedID(), new DataSet(sourceRows)).getRows();
-            targetRows = combinedData(masterItems, getTargetFeedID(), new DataSet(targetRows)).getRows();
+            sourceRows = combinedData(sourceFields, getSourceFeedID(), new DataSet(sourceRows)).getRows();
+            targetRows = combinedData(targetFields, getTargetFeedID(), new DataSet(targetRows)).getRows();
             mergeStrings.add(mergeResults.audit);
         }
         //compositeRows.addAll(sourceRows);
