@@ -10,21 +10,23 @@
         import com.easyinsight.AnalysisItemDeleteEvent;
         import com.easyinsight.analysis.AnalysisCalculation;
         import com.easyinsight.analysis.AnalysisChangedEvent;
-        import com.easyinsight.analysis.AnalysisDateDimension;
-        import com.easyinsight.analysis.AnalysisDimension;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
-        import com.easyinsight.analysis.AnalysisItemEditor;
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
+        import com.easyinsight.analysis.AnalysisItemEditWindow;
         import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemTypeRenderer;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItemWrapper;
 
-        import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.AnalysisStep;
         import com.easyinsight.analysis.CalculationMeasureWindow;
         import com.easyinsight.analysis.DerivedAnalysisDimension;
         import com.easyinsight.analysis.DerivedGroupingWindow;
+        import com.easyinsight.analysis.FeedFolder;
+        import com.easyinsight.analysis.FeedNode;
+        import com.easyinsight.analysis.FolderNode;
         import com.easyinsight.analysis.HierarchyWindow;
 
         import com.easyinsight.analysis.IAnalysisItemEditor;
@@ -34,16 +36,10 @@
 
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.binding.utils.BindingUtils;
         import mx.binding.utils.ChangeWatcher;
         import mx.collections.ArrayCollection;
-        import mx.collections.IList;
-        import mx.collections.Sort;
-        import mx.collections.SortField;
         import mx.controls.Alert;
-        import mx.core.UIComponent;
         import mx.events.FlexEvent;
-        import mx.events.ListEvent;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -78,97 +74,54 @@
 
         private var fieldWatcher:ChangeWatcher;
 
-        private function toFocus(wrapper:AnalysisItemWrapper):void {
-            try {
-                if (wrapper == selectedWrapper) return;
-                if (selectedWrapper != null) {
-                    selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
-                    selectedWrapper.displayName = selectedWrapper.analysisItem.display;
-                    selectedWrapper.invalidateItem();
-                    fieldWatcher.unwatch();
-                }
-                selectedWrapper = wrapper;
-                if (wrapper.analysisItem.concrete) {
-                    coreGrid.selectedIndex = coreFields.getItemIndex(wrapper);
-                    derivedGrid.selectedIndex = -1;
-                } else {
-                    derivedGrid.selectedIndex = derivedFields.getItemIndex(wrapper);
-                    coreGrid.selectedIndex = -1;
-                }
-                var editor:IAnalysisItemEditor;
-                var analysisItem:AnalysisItem = wrapper.analysisItem;
-                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                    editor = new HierarchyWindow();
-                } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                    editor = new CalculationMeasureWindow();
-                } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
-                    editor = new DerivedGroupingWindow();
-                } else {
-                    editor = new AnalysisItemEditor();
-                }
-                var editorComp:UIComponent = editor as UIComponent;
-                editorComp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation, false, 0, true);
-                editor.dataSourceID = _dataSourceID;
-                openEditor = editor;
-                fieldWatcher = BindingUtils.bindProperty(editor, "analysisItems", this, "allFields");
-                editor.analysisItem = wrapper.analysisItem;
-                editCanvas.removeAllChildren();
-                editorComp.x = 25;
-                editorComp.y = 25;
-                editCanvas.addChild(editorComp);
-                editCanvas.validateNow();
-            } catch(e:Error) {
-                Alert.show("On toFocus() - " + e.message + " - " + e.getStackTrace());
+        public function customEditor(analysisItem:AnalysisItem):Class {
+            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                return CalculationMeasureWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+                return DerivedGroupingWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                return HierarchyWindow;
+            } else {
+                return null;
             }
+        }
+
+        private function onEdit(event:AnalysisItemCopyEvent):void {
+            var wrapper:AnalysisItemWrapper = event.wrapper;
+            toFocus(wrapper);
+        }
+
+        private function itemEdited(event:AnalysisItemEditEvent):void {
+            selectedWrapper.analysisItem = event.analysisItem;
+            selectedWrapper.displayName = event.analysisItem.display;
+            selectedWrapper.invalidateItem();
+        }
+
+        private function toFocus(wrapper:AnalysisItemWrapper):void {
+            selectedWrapper = wrapper;
+            var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            analysisItemEditor.editorClass = customEditor(wrapper.analysisItem);
+            analysisItemEditor.dataSourceID = _dataSourceID;
+            analysisItemEditor.analysisItems = this.allFields;
+            analysisItemEditor.analysisItem = wrapper.analysisItem;
+            PopUpManager.addPopUp(analysisItemEditor, this, true);
+            PopUpUtil.centerPopUp(analysisItemEditor);
+            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
         }
 
         private function onCreation(event:FlexEvent):void {
             dispatchEvent(new Event("enableControls"));
         }
 
-
-        private function onItemClick(event:ListEvent):void {
-            try {
-                if (loaded) {
-                    loaded = false;
-                    dispatchEvent(new Event("disableControls"));
-                    var grid:DataGrid = event.currentTarget as DataGrid;
-                    var row:int = event.rowIndex;
-                    var list:IList = IList(grid.dataProvider);
-                    if (row < list.length) {
-                        var wrapper:AnalysisItemWrapper = list.getItemAt(row) as AnalysisItemWrapper;
-                        if (wrapper.isAnalysisItem() && wrapper != selectedWrapper) {
-                            toFocus(wrapper);
-                        } else {
-                            dispatchEvent(new Event("enableControls"));
-                        }
-                    }
-                    loaded = true;
-                }
-            } catch(e:Error) {
-                Alert.show("On Item Click - " + e.message + " - " + e.getStackTrace());
-            }
-        }
-
         private function setupListeners():void {
             addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onDelete);
             addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
+            addEventListener(AnalysisItemCopyEvent.ITEM_EDIT, onEdit);
         }
 
         private function onDelete(event:AnalysisItemDeleteEvent):void {
-            var index:int = coreFields.getItemIndex(event.analysisItem);
-            if (index == -1) {
-                derivedFields.removeItemAt(derivedFields.getItemIndex(event.analysisItem));
-            } else {
-                coreFields.removeItemAt(coreFields.getItemIndex(event.analysisItem));
-            }
             allFields.removeItemAt(allFields.getItemIndex(event.analysisItem));
         }
-
-        [Bindable]
-        private var coreFields:ArrayCollection;
-        [Bindable]
-        private var derivedFields:ArrayCollection;
 
         private var _feedDefinition:FeedDefinitionData;
 
@@ -179,34 +132,94 @@
             }
         }
 
+        private function convertFolder(folder:FeedFolder, masterItemList:ArrayCollection):FeedNode {
+            var folderNode:FolderNode = new FolderNode();
+            folderNode.folder = folder;
+            var children:ArrayCollection = new ArrayCollection();
+            for each (var childFolder:FeedFolder in folder.childFolders) {
+                children.addItem(convertFolder(childFolder, masterItemList));
+            }
+            for each (var childItem:AnalysisItem in folder.childItems) {
+                children.addItem(convertAnalysisItem(childItem, masterItemList));
+            }
+            folderNode.children = children;
+            return folderNode;
+        }
+
+        private function convertAnalysisItem(item:AnalysisItem, masterItemList:ArrayCollection):FeedNode {
+            var fieldNode:AnalysisItemNode = new AnalysisItemNode();
+            fieldNode.analysisItem = item;
+            if (masterItemList != null) masterItemList.removeItemAt(masterItemList.getItemIndex(item));
+            return fieldNode;
+        }
+
+        public function getFolders(fields:ArrayCollection):ArrayCollection {
+            var folders:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in availableFields) {
+                var node:FeedNode = wrapper.feedNode;
+                var folder:FeedFolder = convertNode(node, fields);
+                if (folder != null) {
+                    folders.addItem(folder);
+                } else {
+                    var analysisNode:AnalysisItemNode = node as AnalysisItemNode;
+                    fields.addItem(analysisNode.analysisItem);
+                }
+            }
+            return folders;
+        }
+
+        private function convertNode(node:FeedNode, fields:ArrayCollection):FeedFolder {
+            if (node is FolderNode) {
+                var folderNode:FolderNode = node as FolderNode;
+                var feedFolder:FeedFolder = folderNode.folder;
+                var items:ArrayCollection = new ArrayCollection();
+                for each (var child:FeedNode in node.children) {
+                    if (child is FolderNode) {
+                        convertNode(child, fields);
+                    } else {
+                        var aNode:AnalysisItemNode = child as AnalysisItemNode;
+                        items.addItem(aNode.analysisItem);
+                        fields.addItem(aNode.analysisItem);
+                    }
+                }
+                feedFolder.childItems = items;
+                return feedFolder;
+            } else {
+                return null;
+            }
+        }
+
         override protected function commitProperties():void {
             super.commitProperties();
             try {
                 if (_feedDefinition != null) {
-                    derivedFields = new ArrayCollection();
+                    availableFields = new ArrayCollection();
                     allFields = new ArrayCollection();
-                    coreFields = new ArrayCollection();
-                    for each (var item:AnalysisItem in _feedDefinition.fields) {
-                        var aNode:AnalysisItemNode = new AnalysisItemNode();
-                        aNode.analysisItem = item;
-                        var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-                        if (!item.concrete) {
-                            derivedFields.addItem(wrapper);
-                        } else {
-                            coreFields.addItem(wrapper);
-                        }
-                        allFields.addItem(wrapper);
+                    var masterItemList:ArrayCollection = new ArrayCollection(_feedDefinition.fields.toArray());
+                    for each (var folder:FeedFolder in _feedDefinition.folders) {
+                        var folderNode:FeedNode = convertFolder(folder, masterItemList);
+                        var folderWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(folderNode);
+                        availableFields.addItem(folderWrapper);
                     }
-                    var sort:Sort = new Sort();
-                    sort.fields = [ new SortField("displayName", false) ];
-                    coreFields.sort = sort;
-                    coreFields.refresh();
-                    derivedFields.sort = sort;
-                    derivedFields.refresh();
+                    for each (var item:AnalysisItem in masterItemList) {
+                        var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(convertAnalysisItem(item, null));
+                        availableFields.addItem(analysisWrapper);
+                    }
+                    populateAllFields(availableFields, allFields);
                     loaded = true;
                 }
             } catch(e:Error) {
                 Alert.show(e.message);
+            }
+        }
+
+        private function populateAllFields(fields:ArrayCollection, toPopulate:ArrayCollection):void {
+            for each (var wrapper:AnalysisItemWrapper in fields) {
+                if (wrapper.isAnalysisItem()) {
+                    toPopulate.addItem(wrapper);
+                } else if (wrapper.children != null) {
+                    populateAllFields(wrapper.children, toPopulate);
+                }
             }
         }
 
@@ -245,90 +258,14 @@
             return key;
         }
 
-        private function addGrouping():void {
-            var window:NewFieldWindow = new NewFieldWindow();
-            window.addEventListener(NewFieldEvent.NEW_FIELD, gotGroupingName, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function gotGroupingName(event:NewFieldEvent):void {
-            var grouping:AnalysisDimension = new AnalysisDimension();
-            grouping.concrete = true;
-            grouping.key = findName(event.name);
-            var aNode:AnalysisItemNode = new AnalysisItemNode();
-            aNode.analysisItem = grouping;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            coreFields.addItem(wrapper);
-            allFields.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            coreFields.sort = sort;
-            coreFields.refresh();
-            dispatchEvent(new AnalysisChangedEvent());
-            toFocus(wrapper);
-        }
-
-        private function addMeasure():void {
-            var window:NewFieldWindow = new NewFieldWindow();
-            window.addEventListener(NewFieldEvent.NEW_FIELD, gotMeasureName, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function gotMeasureName(event:NewFieldEvent):void {
-            var measure:AnalysisMeasure = new AnalysisMeasure();
-            measure.concrete = true;
-            measure.key = findName(event.name);
-            var aNode:AnalysisItemNode = new AnalysisItemNode();
-            aNode.analysisItem = measure;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            coreFields.addItem(wrapper);
-            allFields.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            coreFields.sort = sort;
-            coreFields.refresh();
-            dispatchEvent(new AnalysisChangedEvent());
-            toFocus(wrapper);
-        }
-
-        private function addDate():void {
-            var window:NewFieldWindow = new NewFieldWindow();
-            window.addEventListener(NewFieldEvent.NEW_FIELD, gotDateName, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function gotDateName(event:NewFieldEvent):void {
-            var date:AnalysisDateDimension = new AnalysisDateDimension(AnalysisItemTypes.DAY_LEVEL);
-            date.concrete = true;
-            date.key = findName(event.name);
-            var aNode:AnalysisItemNode = new AnalysisItemNode();
-            aNode.analysisItem = date;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            coreFields.addItem(wrapper);
-            allFields.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            coreFields.sort = sort;
-            coreFields.refresh();
-            dispatchEvent(new AnalysisChangedEvent());
-            toFocus(wrapper);
-        }
-
         private function addHierarchy():void {
             var hierarchy:AnalysisHierarchyItem = new AnalysisHierarchyItem();
             hierarchy.key = findName("Hierarchy");
             var aNode:AnalysisItemNode = new AnalysisItemNode();
             aNode.analysisItem = hierarchy;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            derivedFields.addItem(wrapper);
+            availableFields.addItem(wrapper);
             allFields.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            derivedFields.sort = sort;
-            derivedFields.refresh();
             dispatchEvent(new AnalysisChangedEvent());
             toFocus(wrapper);
         }
@@ -339,12 +276,7 @@
             var aNode:AnalysisItemNode = new AnalysisItemNode();
             aNode.analysisItem = calculation;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            derivedFields.addItem(wrapper);
-            allFields.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            derivedFields.sort = sort;
-            derivedFields.refresh();
+            availableFields.addItem(wrapper);
             dispatchEvent(new AnalysisChangedEvent());
             toFocus(wrapper);
         }
@@ -355,12 +287,7 @@
             var aNode:AnalysisItemNode = new AnalysisItemNode();
             aNode.analysisItem = calculation;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            derivedFields.addItem(wrapper);
-            allFields.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            derivedFields.sort = sort;
-            derivedFields.refresh();
+            availableFields.addItem(wrapper);
             dispatchEvent(new AnalysisChangedEvent());
             toFocus(wrapper);
         }
@@ -371,12 +298,7 @@
             var aNode:AnalysisItemNode = new AnalysisItemNode();
             aNode.analysisItem = cycle;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            derivedFields.addItem(wrapper);
-            allFields.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            derivedFields.sort = sort;
-            derivedFields.refresh();
+            availableFields.addItem(wrapper);
             dispatchEvent(new AnalysisChangedEvent());
             toFocus(wrapper);
         }
@@ -387,78 +309,45 @@
             var node:AnalysisItemNode = new AnalysisItemNode();
             node.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-            derivedFields.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            derivedFields.sort = sort;
-            derivedFields.refresh();
-            allFields.addItem(wrapper);
+            availableFields.addItem(wrapper);
             dispatchEvent(new AnalysisChangedEvent());
             toFocus(wrapper);
         }
 
+        [Bindable]
+        private var availableFields:ArrayCollection;
+
+        private function iconFunction(item:Object):Class {
+            var wrapper:AnalysisItemWrapper = item as AnalysisItemWrapper;
+            return AnalysisItemTypeRenderer.getImageClass(wrapper);
+        }
+
         ]]></mx:Script>
     <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory"/>
-    <mx:HBox height="100%" width="100%">
-        <mx:VBox height="100%">
-            <mx:Box width="100%" horizontalAlign="center">
-                <mx:Label text="Click on the fields below to edit their properties." fontSize="14"/>
-            </mx:Box>
-            <mx:VDividedBox height="100%">
-                <mx:VBox height="50%" enabled="{loaded}">
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Label text="Concrete Fields"/>
-                        <mx:Label text="?" textDecoration="underline" fontSize="11"
-                                  toolTip="Concrete fields define the core structure of the data source. You can publish data into fields defined here through the API, through flat files, and so on. The Key Name is the name used in API calls, while the Display Name is what shows up in reports."/>
-                    </mx:HBox>
-                    <mx:DataGrid dataProvider="{coreFields}" itemClick="onItemClick(event)" height="100%"
-                                 dragEnabled="true"
-                                 rowHeight="30" id="coreGrid">
-                        <mx:columns>
-                            <util:EIDataGridColumn dataField="displayName" headerText=""
-                                                   itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
-                                                   width="32"/>
-                            <util:EIDataGridColumn dataField="keyName" headerText="Key Name"/>
-                            <util:EIDataGridColumn dataField="displayName" headerText="Display Name"/>
-                            <util:EIDataGridColumn dataField="displayName"
-                                                   itemRenderer="com.easyinsight.analysis.BaseFieldEditButton"
-                                                   rendererIsEditor="true" editorDataField="displayName" width="150"
-                                                   headerText=""/>
-                        </mx:columns>
-                    </mx:DataGrid>
-                </mx:VBox>
-                <mx:VBox height="50%" enabled="{loaded}">
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Label text="Derived Fields"/>
-                        <mx:Label text="?" textDecoration="underline" fontSize="11"
-                                  toolTip="Derived fields are computed in various ways from the above concrete fields."/>
-                    </mx:HBox>
-                    <mx:HBox paddingLeft="5">
-                        <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
-                                   toolTip="Add Hierarchy..." click="addHierarchy()"/>
-                        <mx:Button icon="@Embed(source='../../../../../assets/code.png')"
-                                   toolTip="Add Derived Grouping..." click="addDerivedGrouping()"/>
-                        <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
-                                   toolTip="Add Calculation..." click="addCalculation()"/>
-                        <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"
-                                   toolTip="Add Cycle..." click="addCycle()()"/>
-                    </mx:HBox>
-                    <mx:DataGrid dataProvider="{derivedFields}" itemClick="onItemClick(event)" height="100%"
-                                 dragEnabled="true" rowHeight="30" id="derivedGrid">
-                        <mx:columns>
-                            <mx:DataGridColumn dataField="displayName" headerText=""
-                                               itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
-                                               width="32"/>
-                            <mx:DataGridColumn dataField="displayName" headerText=""/>
-                            <mx:DataGridColumn dataField="displayName"
-                                               itemRenderer="com.easyinsight.analysis.BaseFieldEditButton"
-                                               rendererIsEditor="true" editorDataField="displayName" width="150"
-                                               headerText=""/>
-                        </mx:columns>
-                    </mx:DataGrid>
-                </mx:VBox>
-            </mx:VDividedBox>
+        <mx:VBox height="100%" width="100%" horizontalAlign="center">
+            <mx:Label text="Click on the fields below to edit their properties." fontSize="14"/>
+            <mx:HBox paddingLeft="5">
+                <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
+                           toolTip="Add Hierarchy..." click="addHierarchy()"/>
+                <mx:Button icon="@Embed(source='../../../../../assets/code.png')"
+                           toolTip="Add Derived Grouping..." click="addDerivedGrouping()"/>
+                <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
+                           toolTip="Add Calculation..." click="addCalculation()"/>
+                <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"
+                           toolTip="Add Cycle..." click="addCycle()()"/>
+            </mx:HBox>
+            <mx:AdvancedDataGrid height="100%" dragEnabled="true" iconFunction="iconFunction"
+                         id="fieldGrid" backgroundColor="#FFFFFF"
+                         alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
+                         showHeaders="false">
+                <mx:dataProvider>
+                    <mx:HierarchicalData source="{availableFields}"/>
+                </mx:dataProvider>
+                <mx:columns>
+                    <mx:AdvancedDataGridColumn headerText="" dataField="displayName" width="500"/>
+                    <mx:AdvancedDataGridColumn headerText="" dataField="displayName"
+                                               width="150" itemRenderer="com.easyinsight.analysis.BaseFieldEditButton" sortable="false"/>
+                </mx:columns>
+            </mx:AdvancedDataGrid>
         </mx:VBox>
-        <mx:Canvas id="editCanvas" width="100%" height="100%"/>
-    </mx:HBox>
 </mx:Canvas>

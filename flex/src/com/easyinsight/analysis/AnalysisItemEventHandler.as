@@ -45,7 +45,7 @@ public class AnalysisItemEventHandler extends UIComponent {
         var node:AnalysisItemNode = new AnalysisItemNode();
         node.analysisItem = copyItem;
         var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-        dispatchEvent(new AnalysisItemCopyEvent(copyItem, wrapper));
+        dispatchEvent(new AnalysisItemCopyEvent(AnalysisItemCopyEvent.ITEM_COPY, copyItem, wrapper));
         edit(wrapper);
     }
 

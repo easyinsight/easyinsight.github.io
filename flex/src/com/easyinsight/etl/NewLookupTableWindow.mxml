@@ -3,14 +3,20 @@
         creationComplete="feedService.searchForSubscribedFeeds.send()" title="New Lookup Table">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.administration.feed.GoogleAnalyticsDataSource;
+        import com.easyinsight.administration.feed.GoogleFeedDefinition;
         import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisDimension;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.NamedKey;
+        import com.easyinsight.customupload.CsvFileUploadFormat;
+        import com.easyinsight.customupload.ExcelUploadFormat;
+        import com.easyinsight.customupload.FlatFileUploadFormat;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.salesforce.SalesforceFeedDefinition;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -19,6 +25,19 @@
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
+
+        import com.easyinsight.customupload.RedirectDataSource;
+        import com.easyinsight.customupload.XSSFExcelUploadFormat;
+        import com.easyinsight.datasources.BaseCampDataSource;
+        import com.easyinsight.datasources.CloudWatchDataSource;
+        import com.easyinsight.datasources.FreshbooksDataSource;
+        import com.easyinsight.datasources.HighRiseDataSource;
+        import com.easyinsight.datasources.JiraDataSource;
+        import com.easyinsight.datasources.LinkedInDataSource;
+        import com.easyinsight.datasources.MarketoDataSource;
+        import com.easyinsight.datasources.MeetupDataSource;
+        import com.easyinsight.datasources.PivotalTrackerBaseSource;
+        import com.easyinsight.datasources.SendGridDataSource;
 
         [Bindable]
         private var dataSources:ArrayCollection;
@@ -118,6 +137,27 @@
             availableFields.addItemAt(empty, 0);
             this.availableFields = availableFields;
             fieldIndex = 2;
+        }
+
+        private function blah():void {
+            var excelUploadFormat:ExcelUploadFormat;
+            var xssfExcelUploadFormat:XSSFExcelUploadFormat;
+            var flatFileUploadFormat:FlatFileUploadFormat;
+            var csvFileUploadFormat:CsvFileUploadFormat;
+            var basecamp:BaseCampDataSource;
+            var highrise:HighRiseDataSource;
+            var google:GoogleAnalyticsDataSource;
+            var salesforce:SalesforceFeedDefinition;
+            var jira:JiraDataSource;
+            var cloudwatch:CloudWatchDataSource;
+            var googleDoc:GoogleFeedDefinition;
+            var marketoSource:MarketoDataSource;
+            var pivotal:PivotalTrackerBaseSource;
+            var sendGrid:SendGridDataSource;
+            var meetup:MeetupDataSource;
+            var linked:LinkedInDataSource;
+            var freshbooks:FreshbooksDataSource;
+            var redirect:RedirectDataSource;
         }
 
         [Bindable]

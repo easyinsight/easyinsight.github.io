@@ -188,7 +188,8 @@
                 if (fieldAdministration == null) {
                     analysisItems = feedDefinition.fields;
                 } else {
-                    analysisItems = fieldAdministration.createFields();
+                    analysisItems = new ArrayCollection();
+                    feedDefinition.folders = fieldAdministration.getFolders(analysisItems);
                 }
                 feedDefinition.fields = analysisItems;
                 feedDefinition.feedName = feedNameInput.text;
