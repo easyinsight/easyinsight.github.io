@@ -161,7 +161,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             DataSet dataSet = new DataSet();
             DateFormat dateFormat = new SimpleDateFormat(XMLDATETIMEFORMAT);
             HttpClient httpClient = new HttpClient();
-            Document projects = runRestRequest(httpClient, token, "http://www.pivotaltracker.com/services/v3/projects");
+            Document projects = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects");
             Nodes projectNodes = projects.query("/projects/project");
             for (int i = 0; i < projectNodes.size(); i++) {
                 Node curProject = projectNodes.get(i);
@@ -171,13 +171,13 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 int initialVelocity = Integer.parseInt(queryField(curProject, "initial_velocity/text()"));
                 int currentVelocity = Integer.parseInt(queryField(curProject, "current_velocity/text()"));
                 String labels = queryField(curProject, "labels/text()");
-                Document currentIterations = runRestRequest(httpClient, token, "http://www.pivotaltracker.com/services/v3/projects/" + id +
+                Document currentIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
                     "/iterations/current");
                 parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, currentIterations, "Current");
-                Document backlogIterations = runRestRequest(httpClient, token, "http://www.pivotaltracker.com/services/v3/projects/" + id +
+                Document backlogIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
                     "/iterations/backlog");
                 parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, backlogIterations, "Backlog");
-                Document doneIterations = runRestRequest(httpClient, token, "http://www.pivotaltracker.com/services/v3/projects/" + id +
+                Document doneIterations = runRestRequest(httpClient, token, "https://www.pivotaltracker.com/services/v3/projects/" + id +
                     "/iterations/done");
                 parseIterations(keys, dataSet, dateFormat, id, name, initialVelocity, currentVelocity, labels, doneIterations, "Done");
             }
