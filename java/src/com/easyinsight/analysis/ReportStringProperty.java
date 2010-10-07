@@ -13,7 +13,7 @@ import javax.persistence.Table;
 @Table(name="report_string_property")
 public class ReportStringProperty extends ReportProperty {
     @Column(name="property_value")
-    private String value;
+    private String value = "";
 
     public ReportStringProperty(String propertyName, String value) {
         super(propertyName);
