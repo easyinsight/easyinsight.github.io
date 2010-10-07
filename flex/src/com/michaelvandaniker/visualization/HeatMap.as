@@ -384,9 +384,11 @@ import flash.filters.BlurFilter;
                     bitmapCache[curColor] = heatMapItem;
                 }
 
-                translationMatrix.tx = curPoint.x - itemRadius;
-                translationMatrix.ty = curPoint.y - itemRadius;
-                heatBitmapData.draw(bitmapCache[curColor] as BitmapData,translationMatrix,null,BlendMode.SCREEN);
+                if (translationMatrix != null && curPoint != null) {
+                    translationMatrix.tx = curPoint.x - itemRadius;
+                    translationMatrix.ty = curPoint.y - itemRadius;
+                    heatBitmapData.draw(bitmapCache[curColor] as BitmapData,translationMatrix,null,BlendMode.SCREEN);
+                }
             }
 			
 			// paletteMap leaves some artifacts unless we get rid of the blackest colors 
