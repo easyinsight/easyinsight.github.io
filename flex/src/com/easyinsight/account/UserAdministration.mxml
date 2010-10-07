@@ -43,10 +43,8 @@
             usersAvailableString = String(accountInfo.accountStats.availableUsers);
             usersUsed = accountInfo.accountStats.currentUsers;
             usersAvailable = accountInfo.accountStats.availableUsers;
-            if (User.getInstance().getAccountType() >= Account.PLUS) {
-                preferencesService.getPersonas.send();
-                userIndex = 1;
-            }
+            preferencesService.getPersonas.send();
+            userIndex = 1;
             userService.getUsers.send();
         }
 
