@@ -70,7 +70,6 @@
             </node>
             <node label="Line" icon="">
                 <node label="2D Line" type="{AnalysisDefinition.LINE}"/>
-                <node label="2D Line (Multiple Measures)" type="{AnalysisDefinition.MMLINE}"/>
                 <node label="3D Line" type="{AnalysisDefinition.LINE3D}"/>
             </node>
             <node label="Pie" icon="">
