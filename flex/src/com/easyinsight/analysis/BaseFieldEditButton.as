@@ -30,7 +30,7 @@ public class BaseFieldEditButton extends UIComponent implements IListItemRendere
     }
 
     [Bindable]
-    [Embed(source="../../../../assets/clipboard.png")]
+    [Embed(source="../../../../assets/pencil.png")]
     public var editIcon:Class;
 
     [Bindable]

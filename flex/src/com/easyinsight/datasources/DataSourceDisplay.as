@@ -1,32 +1,22 @@
 package com.easyinsight.datasources {
 import com.easyinsight.analysis.IRetrievable;
-import com.easyinsight.framework.CredentialsCache;
-import com.easyinsight.framework.EIMessageListener;
 import com.easyinsight.framework.User;
-import com.easyinsight.scorecard.DataSourceAsyncEvent;
-import com.easyinsight.scorecard.DataSourceMessageEvent;
 import com.easyinsight.util.AutoSizeTextArea;
+import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.UserAudit;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
-import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
 import mx.controls.Button;
-import mx.controls.Label;
-import mx.controls.ProgressBar;
-import mx.controls.ProgressBarMode;
 import mx.controls.TextArea;
 import mx.formatters.DateFormatter;
-import mx.rpc.events.FaultEvent;
-import mx.rpc.events.ResultEvent;
-import mx.rpc.remoting.RemoteObject;
+import mx.managers.PopUpManager;
 
 public class DataSourceDisplay extends VBox {
 
@@ -34,17 +24,9 @@ public class DataSourceDisplay extends VBox {
     private var sourceLabel:TextArea;
 
     private var _labelText:String;
-
-    private var feedService:RemoteObject;
-
     public function DataSourceDisplay() {
         super();
         setStyle("horizontalAlign", "center");
-        EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
-    }
-
-    public function cleanup():void {
-        EIMessageListener.instance().removeEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage);
     }
 
     private var _dataView:IRetrievable;
@@ -164,105 +146,20 @@ public class DataSourceDisplay extends VBox {
         button.styleName = "blueButton";
         button.addEventListener(MouseEvent.CLICK, onClick);
         outOfDateBox.addChild(button);
-        var asyncBox:VBox = new VBox();
-        progressBar = new ProgressBar();
-        progressBar.indeterminate = false;
-        progressBar.mode = ProgressBarMode.MANUAL;
-        progressBar.label = "";
-        progressBar.labelPlacement = "right";
-        var progressLabel:Label = new Label();
-        progressLabel.maxWidth = 200;
-        //progressBar.indeterminate = true;
-        BindingUtils.bindProperty(progressLabel, "text", this, "asyncLabel");
-        asyncBox.addChild(progressBar);
-        asyncBox.addChild(progressLabel);
-        var doneBox:HBox = new HBox();
-        var doneLabel:Label = new Label();
-        doneLabel.text = "New data is available:";
-        var refreshButton:Button = new Button();
-        refreshButton.styleName = "blueButton";
-        refreshButton.addEventListener(MouseEvent.CLICK, refreshReport);
-        refreshButton.label = "Refresh Report";
-        doneBox.addChild(doneLabel);
-        doneBox.addChild(refreshButton);
+
         viewStack.addChild(emptyBox);
         viewStack.addChild(outOfDateBox);
-        viewStack.addChild(asyncBox);
-        viewStack.addChild(doneBox);
+
         addChild(viewStack);
         BindingUtils.bindProperty(viewStack, "selectedIndex", this, "stackIndex");
     }
 
-    private var progressBar:ProgressBar;
-
-    private function refreshReport(event:MouseEvent):void {
-        _dataView.retrieveData();
-        stackIndex = 1;
-    }
-
-    private var lastMessage:Date;
-
-    private function onMessage(event:DataSourceMessageEvent):void {
-        if (event != null && progressBar != null) {
-            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
-            //Alert.show("got a message with type = " + scorecardEvent.type);
-            if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
-                lastMessage = scorecardEvent.timestamp;
-                if (scorecardEvent.dataSourceID == _dataSource.dataSourceID) {
-                    if (scorecardEvent.type == DataSourceAsyncEvent.NAME_UPDATE) {
-                        asyncLabel = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
-                    } else if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
-                        asyncLabel = scorecardEvent.dataSourceName;
-                        if (scorecardEvent.max > 0 && progressBar != null) {
-                            progressBar.maximum = scorecardEvent.max;
-                            progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
-                        }
-                    } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
-                        asyncLabel = scorecardEvent.dataSourceName;
-                    } else if (scorecardEvent.type == DataSourceAsyncEvent.DONE) {
-                        stackIndex = 3;
-                    }
-                }
-            }
-        }
-    }
-
-    [Bindable(event="asyncLabelChanged")]
-    public function get asyncLabel():String {
-        return _asyncLabel;
-    }
-
-    public function set asyncLabel(value:String):void {
-        if (_asyncLabel == value) return;
-        _asyncLabel = value;
-        dispatchEvent(new Event("asyncLabelChanged"));
-    }
-
-    private var _asyncLabel:String = "Retrieving data source info...";
-
     private function onClick(event:MouseEvent):void {
-        stackIndex = 2;
         UserAudit.instance().audit(UserAudit.REFRESHED_DATA);
-        feedService = new RemoteObject();
-        feedService.destination = "feeds";
-        feedService.launchAsyncRefresh.addEventListener(ResultEvent.RESULT, onResult);
-        feedService.launchAsyncRefresh.addEventListener(FaultEvent.FAULT, onFault);
-        feedService.launchAsyncRefresh.send(_dataSource.dataSourceID, CredentialsCache.getCache().createCredentials());
-    }
-
-    private function onFault(event:FaultEvent):void {
-        Alert.show(event.fault.faultString);
-    }
-
-    private function onResult(event:ResultEvent):void {
-        var credentials:ArrayCollection = feedService.launchAsyncRefresh.lastResult as ArrayCollection;
-        if (credentials.length > 0) {
-            CredentialsCache.getCache().obtainCredentials(this, credentials, onSuccess);
-        }
-    }
-
-    private function onSuccess():void {
-        feedService.launchAsyncRefresh.send(_dataSource.dataSourceID, CredentialsCache.getCache().createCredentials());
+        var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
+        dsRefreshWindow.dataSourceID = _dataSource.dataSourceID;
+        PopUpManager.addPopUp(dsRefreshWindow, this, true);
+        PopUpUtil.centerPopUp(dsRefreshWindow);
     }
 }
 }

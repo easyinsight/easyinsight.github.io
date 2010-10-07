@@ -38,6 +38,8 @@
 
         import mx.binding.utils.ChangeWatcher;
         import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.controls.Alert;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
@@ -120,7 +122,19 @@
         }
 
         private function onDelete(event:AnalysisItemDeleteEvent):void {
+            removeFieldFromTree(event.analysisItem, availableFields);
             allFields.removeItemAt(allFields.getItemIndex(event.analysisItem));
+        }
+
+        private function removeFieldFromTree(analysisItem:AnalysisItemWrapper, fields:ArrayCollection):void {
+            var index:int = fields.getItemIndex(analysisItem);
+            if (index != -1) {
+                fields.removeItemAt(index);
+            } else {
+                for each (var wrapper:AnalysisItemWrapper in fields) {
+                    if (wrapper.children != null) removeFieldFromTree(analysisItem, wrapper.children);
+                }
+            }
         }
 
         private var _feedDefinition:FeedDefinitionData;
@@ -205,6 +219,11 @@
                         var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(convertAnalysisItem(item, null));
                         availableFields.addItem(analysisWrapper);
                     }
+                    var sort:Sort = new Sort();
+                    sort.fields = [ new SortField("sortType"), new SortField("displayName") ];
+                    availableFields.sort = sort;
+                    availableFields.refresh();
+                    //availableFields.sort = null;
                     populateAllFields(availableFields, allFields);
                     loaded = true;
                 }

@@ -352,72 +352,74 @@
     <mx:RemoteObject id="groupService" destination="groupService">
         <mx:method name="getMemberGroups" result="gotGroups()"/>
     </mx:RemoteObject>
-	<mx:VBox width="100%" height="100%" paddingLeft="5">
-		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" enabled="{controlsEnabled}">
-            <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
-			<mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
-			<mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="toReport()" toolTip="Jump to Report Editor"/>
-			<mx:Label fontSize="14" color="#FFFFFF"/>
-		</mx:HBox>
-		<mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
-			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNav" enabled="{haveFeed}">
-			<mx:HBox label="General" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" horizontalGap="40">
-				<mx:VBox>
-					<mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Label text="Fields" fontSize="14"/>
-					</mx:HBox>
-					<mx:Form paddingRight="0" paddingTop="0" paddingBottom="0" paddingLeft="0">
-						<mx:FormItem label="Name:" paddingTop="20">
-							<mx:TextInput id="feedNameInput" text="{feedName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
-						</mx:FormItem>
-						<mx:FormItem label="Tags:">
-							<mx:TextInput id="feedTagsInput" text="{feedTags}" change="dispatchEvent(new AnalysisChangedEvent())"/>
-						</mx:FormItem>
-						<mx:FormItem label="Description:">
-							<mx:TextArea id="feedDescriptionTextArea" width="300" height="100" text="{feedDescription}" change="dispatchEvent(new AnalysisChangedEvent())"
-                                    borderStyle="solid" borderThickness="1"/>
-						</mx:FormItem>
-						<mx:FormItem label="Attribution:">
-							<mx:TextInput id="feedAttributionInput" text="{feedAttribution}" change="dispatchEvent(new AnalysisChangedEvent())"/>
-						</mx:FormItem>
-						<mx:FormItem label="Owner Name:">
-							<mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
-						</mx:FormItem>
-                        <mx:FormItem label="Anyone in the Account Can View:">
-                            <mx:CheckBox selected="{accountVisible}" id="accountVisibleCheckBox"/>
-                        </mx:FormItem>
-                        <mx:FormItem label="Anyone Can View:">
-                            <mx:CheckBox selected="{anyoneCanView}" id="anyoneCheckbox" enabled="{!liveData}"/>
-                        </mx:FormItem>
-						<mx:FormItem id="clearDataFormItem" label="Delete All Data:">
-							<mx:Button label="Clear Data Source Data" click="clearFeedData()"/>
-						</mx:FormItem>
-					</mx:Form>
-				</mx:VBox>
-                <mx:VBox horizontalAlign="center">
-                    <mx:Label text="Data Source Access" fontSize="14"/>
-                    <mx:HBox>
-                        <mx:VBox horizontalAlign="center">
-                            <mx:Label text="Available Groups"/>
-                            <mx:List dataProvider="{availableGroups}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" labelField="name"
-                                    width="180"/>
-                        </mx:VBox>
-                        <mx:VBox horizontalAlign="center">
-                            <mx:Label text="Data Source Groups"/>
-                            <mx:List dataProvider="{sourceGroups}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" labelField="name"
-                                    width="180" id="sourceList"/>
-                        </mx:VBox>
-                    </mx:HBox>
-                </mx:VBox>
-			</mx:HBox>
-            <mx:Box label="Fields" id="fieldsBox">
-                <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
-                        enableControls="enableControls()"/>
-            </mx:Box>            
-			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
+    <mx:HBox width="100%" height="100%" horizontalAlign="center">
+        <mx:VBox width="1000" height="100%" paddingLeft="5">
+            <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" enabled="{controlsEnabled}">
+                <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
+                <mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
+                <mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="toReport()" toolTip="Jump to Report Editor"/>
+                <mx:Label fontSize="14" color="#FFFFFF"/>
+            </mx:HBox>
+            <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
+                paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNav" enabled="{haveFeed}">
+                <mx:HBox label="General" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" horizontalGap="40">
+                    <mx:VBox>
+                        <mx:HBox width="100%" horizontalAlign="center">
+                            <mx:Label text="Fields" fontSize="14"/>
+                        </mx:HBox>
+                        <mx:Form paddingRight="0" paddingTop="0" paddingBottom="0" paddingLeft="0">
+                            <mx:FormItem label="Name:" paddingTop="20">
+                                <mx:TextInput id="feedNameInput" text="{feedName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Tags:">
+                                <mx:TextInput id="feedTagsInput" text="{feedTags}" change="dispatchEvent(new AnalysisChangedEvent())"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Description:">
+                                <mx:TextArea id="feedDescriptionTextArea" width="300" height="100" text="{feedDescription}" change="dispatchEvent(new AnalysisChangedEvent())"
+                                        borderStyle="solid" borderThickness="1"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Attribution:">
+                                <mx:TextInput id="feedAttributionInput" text="{feedAttribution}" change="dispatchEvent(new AnalysisChangedEvent())"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Owner Name:">
+                                <mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Anyone in the Account Can View:">
+                                <mx:CheckBox selected="{accountVisible}" id="accountVisibleCheckBox"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Anyone Can View:">
+                                <mx:CheckBox selected="{anyoneCanView}" id="anyoneCheckbox" enabled="{!liveData}"/>
+                            </mx:FormItem>
+                            <mx:FormItem id="clearDataFormItem" label="Delete All Data:">
+                                <mx:Button label="Clear Data Source Data" click="clearFeedData()"/>
+                            </mx:FormItem>
+                        </mx:Form>
+                    </mx:VBox>
+                    <mx:VBox horizontalAlign="center">
+                        <mx:Label text="Data Source Access" fontSize="14"/>
+                        <mx:HBox>
+                            <mx:VBox horizontalAlign="center">
+                                <mx:Label text="Available Groups"/>
+                                <mx:List dataProvider="{availableGroups}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" labelField="name"
+                                        width="180"/>
+                            </mx:VBox>
+                            <mx:VBox horizontalAlign="center">
+                                <mx:Label text="Data Source Groups"/>
+                                <mx:List dataProvider="{sourceGroups}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" labelField="name"
+                                        width="180" id="sourceList"/>
+                            </mx:VBox>
+                        </mx:HBox>
+                    </mx:VBox>
+                </mx:HBox>
+                <mx:Box label="Fields" id="fieldsBox">
+                    <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
+                            enableControls="enableControls()"/>
+                </mx:Box>
+                <mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
 
-			</mx:Box>
-		</mx:TabNavigator>
-	</mx:VBox>
+                </mx:Box>
+            </mx:TabNavigator>
+        </mx:VBox>
+    </mx:HBox>
 	<mx:StringValidator id="nameValidator" source="{feedNameInput}" property="text" minLength="3" maxLength="40"/>
 </mx:Module>

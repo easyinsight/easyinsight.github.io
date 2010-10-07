@@ -62,7 +62,6 @@
         }
 
         public function cleanup():void {
-            dataSourceDisplay.cleanup();
         }
 
         private function onLogin(event:LoginEvent):void {

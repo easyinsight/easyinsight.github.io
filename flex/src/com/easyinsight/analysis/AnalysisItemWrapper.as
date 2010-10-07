@@ -4,6 +4,8 @@ import flash.events.Event;
 import flash.events.EventDispatcher;
 
 import mx.collections.ArrayCollection;
+import mx.collections.Sort;
+import mx.collections.SortField;
 
 public class AnalysisItemWrapper extends EventDispatcher
 	{
@@ -18,8 +20,18 @@ public class AnalysisItemWrapper extends EventDispatcher
             for each (var child:FeedNode in feedNode.children) {
                 _children.addItem(new AnalysisItemWrapper(child));
             }
+            if (_children.length > 0) {
+                var sort:Sort = new Sort();
+                sort.fields = [ new SortField("sortType"), new SortField("displayName") ];
+                _children.sort = sort;
+                _children.refresh();
+            }
+            //_children.sort = null;
 		}
 
+    public function get sortType():int {
+        return isAnalysisItem() ? 1 : 0;
+    }
 
     public function get children():ArrayCollection {
         return _children;
