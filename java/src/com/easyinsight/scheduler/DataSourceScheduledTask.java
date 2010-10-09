@@ -52,27 +52,28 @@ public class DataSourceScheduledTask extends ScheduledTask {
                 }
             }
             if (dataSourceUser == null) {
-                throw new RuntimeException("No user found for data source.");
-            }
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user FROM USER, ACCOUNT " +
-                    "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
-            queryStmt.setInt(1, Account.ACTIVE);
-            queryStmt.setInt(2, Account.TRIAL);
-            queryStmt.setLong(3, dataSourceUser.getUserID());
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                String userName = rs.getString(1);
-                long userID = rs.getLong(2);
-                long accountID = rs.getLong(3);
-                int accountType = rs.getInt(4);
-                boolean accountAdmin = rs.getBoolean(5);
-                boolean guestUser = rs.getBoolean(6);
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
-                if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                    try {
-                        dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn, null);
-                    } finally {
-                        DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                LogClass.info("No user for data data source refresh.");
+            } else {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user FROM USER, ACCOUNT " +
+                        "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
+                queryStmt.setInt(1, Account.ACTIVE);
+                queryStmt.setInt(2, Account.TRIAL);
+                queryStmt.setLong(3, dataSourceUser.getUserID());
+                ResultSet rs = queryStmt.executeQuery();
+                if (rs.next()) {
+                    String userName = rs.getString(1);
+                    long userID = rs.getLong(2);
+                    long accountID = rs.getLong(3);
+                    int accountType = rs.getInt(4);
+                    boolean accountAdmin = rs.getBoolean(5);
+                    boolean guestUser = rs.getBoolean(6);
+                    SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
+                    if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                        try {
+                            dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn, null);
+                        } finally {
+                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                        }
                     }
                 }
             }
