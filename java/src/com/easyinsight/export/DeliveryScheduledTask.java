@@ -118,10 +118,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 if (deliveryFormat == ReportDelivery.EXCEL) {
                     WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
                     analysisDefinition.updateMetadata();
-                    ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, new InsightRequestMetadata());
-                    byte[] bytes = new ExportService().toExcel(analysisDefinition, listDataResults);
-                    String reportName = analysisDefinition.getName();
-                    sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
+                    DataResults dataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+                    if (dataResults instanceof ListDataResults) {
+                        ListDataResults listDataResults = (ListDataResults) dataResults;
+                        byte[] bytes = new ExportService().toExcel(analysisDefinition, listDataResults);
+                        String reportName = analysisDefinition.getName();
+                        sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
+                    }
                 } else if (deliveryFormat == ReportDelivery.PNG) {
                     new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID);
                 }
