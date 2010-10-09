@@ -246,7 +246,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
-        //DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
+        DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO data_source_refresh_audit (account_id, data_source_id, " +
                     "start_time, server_id) values (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -282,7 +282,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             updateStmt.setLong(2, auditID);
             updateStmt.executeUpdate();
         } finally {
-            //DataTypeMutex.mutex().unlock(getFeedType());
+            DataTypeMutex.mutex().unlock(getFeedType());
         }
         
         //notifyOfDataUpdate();
