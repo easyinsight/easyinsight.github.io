@@ -8,6 +8,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -56,10 +57,10 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
-        try {
-            Thread.sleep(150);
+        /*try {
+            Thread.sleep(250);
         } catch (InterruptedException e) {
-        }
+        }*/
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         boolean successful = false;
@@ -81,6 +82,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 }
                 successful = true;
             } catch (IOException e) {
+                System.out.println("IOException " + e.getMessage());
                 retryCount++;
                 if (e.getMessage().contains("503")) {
                     try {
@@ -91,12 +93,19 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                     throw new RuntimeException(e);
                 }
             } catch (ParsingException e) {
+                System.out.println(e.getMessage());
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
                 } else if (statusLine.indexOf("503") != -1) {
-                    System.out.println(statusLine + " on retrieving " + path);
+                    System.out.println(statusLine + " on retrieving " + path + ", retry time = " + restMethod.getResponseHeader("Retry-After") + " seconds");
+                    System.out.println("status text = " + restMethod.getStatusText());
+                    try {
+                        System.out.println("response body = " + restMethod.getResponseBodyAsString());
+                    } catch (IOException e1) {
+                        e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
                         try {

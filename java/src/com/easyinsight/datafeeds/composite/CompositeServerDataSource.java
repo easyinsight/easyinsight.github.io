@@ -246,7 +246,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
-        DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
+        //DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO data_source_refresh_audit (account_id, data_source_id, " +
                     "start_time, server_id) values (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -254,35 +254,47 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             insertStmt.setLong(2, getDataFeedID());
             insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             insertStmt.setString(4, InetAddress.getLocalHost().getHostAddress());
+            System.out.println("start = " + new Date());
             insertStmt.execute();
             long auditID = Database.instance().getAutoGenKey(insertStmt);
-            if (credentials == null) {
+            /*if (credentials == null) {
                 if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
                     credentials = new Credentials();
                     credentials.setUserName(getUsername());
                     credentials.setPassword(retrievePassword());
                 }
-            }
+            }*/
             boolean changed = false;
             // possibilities...
             // a new data soucrce was added as a child as part of an upgrade
             // a new custom field was added, etc
+
+            initializeForRefresh();
             List<AnalysisItem> allItems = new ArrayList<AnalysisItem>();
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn, credentials);
             for (IServerDataSourceDefinition source : sources) {
                 source.refreshData(credentials, accountID, now, conn, this);
                 allItems.addAll(source.getFields());
             }
+            doneWithRefresh(accountID, conn);
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE data_source_refresh_audit set end_time = ? where data_source_refresh_audit_id = ?");
             updateStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
             updateStmt.setLong(2, auditID);
             updateStmt.executeUpdate();
         } finally {
-            DataTypeMutex.mutex().unlock(getFeedType());
+            //DataTypeMutex.mutex().unlock(getFeedType());
         }
         
         //notifyOfDataUpdate();
         return false;
+    }
+
+    protected void initializeForRefresh() {
+
+    }
+
+    protected void doneWithRefresh(long accountID, EIConnection conn) {
+
     }
 
     /*private void notifyOfDataUpdate() {
