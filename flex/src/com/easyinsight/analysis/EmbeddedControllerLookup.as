@@ -13,6 +13,7 @@ import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartEmbeddedController
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartEmbeddedController;
 import com.easyinsight.analysis.crosstab.CrosstabEmbeddedController;
+import com.easyinsight.analysis.gantt.GanttEmbeddedController;
 import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
 import com.easyinsight.analysis.heatmap.HeatMapEmbeddedController;
 import com.easyinsight.analysis.list.ListEmbeddedController;
@@ -117,6 +118,9 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.HEATMAP:
                 controller = HeatMapEmbeddedController;
+                break;
+            case AnalysisDefinition.GANTT:
+                controller = GanttEmbeddedController;
                 break;
         }
         return controller;
