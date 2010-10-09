@@ -70,14 +70,10 @@ public class TokenStorage {
             queryStmt.setLong(3, dataSourceID);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE TOKEN set token_value = ? WHERE token_id = ? AND data_source_id = ?");
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE TOKEN set token_value = ? WHERE token_id = ?");
                 updateStmt.setString(1, token.getTokenValue());
                 updateStmt.setLong(2, rs.getLong(1));
-                if (dataSourceID == 0) {
-                    updateStmt.setNull(3, Types.BIGINT);
-                } else {
-                    updateStmt.setLong(3, dataSourceID);
-                }
+
                 updateStmt.executeUpdate();
                 updateStmt.close();
             } else {
