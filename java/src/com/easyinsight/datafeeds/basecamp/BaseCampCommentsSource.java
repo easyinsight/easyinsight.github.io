@@ -66,6 +66,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet ds = new DataSet();
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
+        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         if (source.isIncludeComments()) {
 
         String url = source.getUrl();
@@ -86,6 +87,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
+
         Builder builder = new Builder();
         try {
             BaseCampCache basecampCache = source.getOrCreateCache(client);
@@ -131,7 +133,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
                     }
                 }
 
-                if (dataStorage != null) {
+                if (writeDuring) {
                     dataStorage.insertData(ds);
                     ds = new DataSet();
                 }
@@ -141,7 +143,10 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
             throw new RuntimeException(e);
         }
         }
-        if (dataStorage == null) {
+        if (!writeDuring) {
+            if (parentDefinition.isAdjustDates()) {
+                ds = adjustDates(ds);
+            }
             return ds;
         } else {
             return null;
