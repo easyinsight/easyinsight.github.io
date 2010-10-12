@@ -1,15 +1,17 @@
 package com.easyinsight.publisher;
 
 import com.easyinsight.rowutil.RowMethod;
-import com.easyinsight.rowutil.RowUtil;
-import com.easyinsight.rowutil.webservice.BasicAuthUncheckedPublish;
-import com.easyinsight.rowutil.webservice.BasicAuthUncheckedPublishServiceService;
+import com.easyinsight.rowutil.TransactionResults;
+import com.easyinsight.rowutil.TransactionalLoad;
+import com.easyinsight.rowutil.transactional.BasicAuthTransactionalLoadAPIService;
+import com.easyinsight.rowutil.transactional.EITransactionalLoad;
 import org.snaplogic.cc.*;
 import org.snaplogic.cc.prop.SimpleProp;
 import org.snaplogic.cc.prop.SnapProp;
 import org.snaplogic.common.ComponentResourceErr;
 import org.snaplogic.common.Field;
 import org.snaplogic.common.Record;
+import org.snaplogic.common.exceptions.SnapComponentException;
 
 import javax.xml.ws.BindingProvider;
 import java.rmi.RemoteException;
@@ -18,17 +20,16 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
  * User: abaldwin
  * Date: Jun 2, 2010
  * Time: 11:59:16 AM
- * To change this template use File | Settings | File Templates.
  */
-public class Publisher extends ComponentAPI {
+public class EasyInsightWriter extends ComponentAPI {
     private static final String API_KEY = "API Key";
     private static final String API_SECRET_KEY = "API Secret Key";
     private static final String DATA_SOURCE_NAME = "Data Source Name";
     private static final String REPLACE_DATA = "Replace Data";
+    private static final String CHANGE_DATA_SOURCE = "Change Data Source to Match Fields";
 
     public String getAPIVersion() {
         return "1.0";
@@ -40,7 +41,7 @@ public class Publisher extends ComponentAPI {
 
     @Override
     public String getLabel() {
-        return "Easy Insight Data Consumer";    //To change body of overridden methods use File | Settings | File Templates.
+        return "Easy Insight Data Writer";
     }
 
     @Override
@@ -58,41 +59,51 @@ public class Publisher extends ComponentAPI {
         return capabilities;
     }
 
+    
+
     public void execute(Map<String, InputView> stringInputViewMap, Map<String, OutputView> stringOutputViewMap) {
+        if (stringInputViewMap == null || stringInputViewMap.isEmpty()) {
+            throw new SnapComponentException("No input view is connected.");
+        }
         InputView iv = stringInputViewMap.values().iterator().next();
         Record rec;
         ArrayList<String> fieldNames = new ArrayList<String>();
         for(Field f: iv.getFields()) {
             fieldNames.add(f.getName());
         }
-        RowUtil addData = new RowUtil(((Boolean)this.getPropertyValue(REPLACE_DATA)) ? RowMethod.REPLACE : RowMethod.ADD, (String) this.getPropertyValue(API_KEY),
-                (String) this.getPropertyValue(API_SECRET_KEY), (String) this.getPropertyValue(DATA_SOURCE_NAME), fieldNames.toArray(new String[fieldNames.size()]));
-        while((rec = iv.readRecord()) != null) {
-            ArrayList<Object> fields = new ArrayList<Object>();
-            for(Field f : iv.getFields()) {
-                if(f.getType().equals(Field.SnapFieldType.SnapString)) {
-                    System.out.println("field: " + rec.getString(f.getName()));
-                    fields.add(rec.getString(f.getName()));
-                } else if (f.getType().equals(Field.SnapFieldType.SnapDateTime)) {
-                    fields.add(new Date(rec.getDatetime(f.getName()).getTime()));
-                } else if (f.getType().equals(Field.SnapFieldType.SnapNumber)) {
-                    fields.add(rec.getNumber(f.getName()));
-                }
-            }
-            addData.newRow(fields.toArray());
-        }
+        TransactionalLoad addData = new TransactionalLoad(((Boolean)this.getPropertyValue(REPLACE_DATA)) ? RowMethod.REPLACE : RowMethod.ADD, (String) this.getPropertyValue(API_KEY),
+                (String) this.getPropertyValue(API_SECRET_KEY), (String) this.getPropertyValue(DATA_SOURCE_NAME),
+                (Boolean) this.getPropertyValue(CHANGE_DATA_SOURCE), 250, fieldNames.toArray(new String[fieldNames.size()]));
         try {
+            addData.startData();
+            while((rec = iv.readRecord()) != null) {
+                ArrayList<Object> fields = new ArrayList<Object>();
+                for(Field f : iv.getFields()) {
+                    if(f.getType().equals(Field.SnapFieldType.SnapString)) {
+                        fields.add(rec.getString(f.getName()));
+                    } else if (f.getType().equals(Field.SnapFieldType.SnapDateTime)) {
+                        fields.add(new Date(rec.getDatetime(f.getName()).getTime()));
+                    } else if (f.getType().equals(Field.SnapFieldType.SnapNumber)) {
+                        fields.add(rec.getNumber(f.getName()));
+                    }
+                }
+                addData.newRow(fields.toArray());
+            }
             addData.flush();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            throw new SnapComponentException(e.getMessage());
+        }
+        TransactionResults transactionResults = addData.generateResults();
+        if (!transactionResults.isSuccessful()) {
+            error(transactionResults.getFailureMessage());
         }
     }
 
     @Override
     public void validate(ComponentResourceErr componentResourceErr) {
         super.validate(componentResourceErr);
-        BasicAuthUncheckedPublishServiceService service = new BasicAuthUncheckedPublishServiceService();
-        BasicAuthUncheckedPublish port = service.getBasicAuthUncheckedPublishServicePort();
+        BasicAuthTransactionalLoadAPIService service = new BasicAuthTransactionalLoadAPIService();
+        EITransactionalLoad port = service.getBasicAuthTransactionalLoadAPIPort();
         ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, this.getPropertyValue(API_KEY));
         ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, this.getPropertyValue(API_SECRET_KEY));
         try {
@@ -113,5 +124,7 @@ public class Publisher extends ComponentAPI {
         this.setPropertyDef(DATA_SOURCE_NAME, dataSourceName);
         SnapProp replace = new SimpleProp(REPLACE_DATA, SimpleProp.SimplePropType.SnapBoolean, true);
         this.setPropertyDef(REPLACE_DATA, replace);
+        SnapProp changeDataSource = new SimpleProp(CHANGE_DATA_SOURCE, SimpleProp.SimplePropType.SnapBoolean, true);
+        this.setPropertyDef(CHANGE_DATA_SOURCE, changeDataSource);
     }
 }

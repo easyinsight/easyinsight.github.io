@@ -1,1 +1,1 @@
-SnapLogic-Components: com.easyinsight.publisher.Publisher
+SnapLogic-Components: com.easyinsight.publisher.EasyInsightWriter
