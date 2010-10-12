@@ -22,16 +22,26 @@ import com.easyinsight.analysis.ListRow;
 import com.easyinsight.analysis.*;
 
 import com.easyinsight.storage.DataStorage;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPRow;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -71,10 +81,6 @@ public class ExportService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-    }
-
-    public void test(long activityID, long userID, long accountID) {
-        new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID);
     }
 
     public void addOrUpdateSchedule(ScheduledActivity scheduledActivity, int utcOffset) {
@@ -175,7 +181,12 @@ public class ExportService {
             while (rs.next()) {
                 long activityID = rs.getLong(1);
                 int activityType = rs.getInt(2);
-                activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
+                try {
+                    activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
+                } catch (SQLException e) {
+                    LogClass.error(e);
+                    continue;
+                }
             }
             conn.commit();
         } catch (Exception e) {
@@ -260,6 +271,89 @@ public class ExportService {
 
     private byte[] toCSV(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) {
         return null;
+    }
+
+    public byte[] exportReportToPDF(long reportID, byte[] bytes,
+                                  InsightRequestMetadata insightRequestMetadata, int width, int height) {
+        SecurityUtil.authorizeInsight(reportID);
+        try {
+            Document document = new Document();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PdfWriter.getInstance(document, baos);
+            document.open();
+            WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST ||
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB ||
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.TREE) {
+                analysisDefinition.updateMetadata();
+                ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
+                PdfPTable table = new PdfPTable(listDataResults.getHeaders().length);
+                table.setSpacingBefore(20);
+                table.getDefaultCell().setPadding(5);
+                List<AnalysisItem> items = new ArrayList<AnalysisItem>(analysisDefinition.getAllAnalysisItems());
+                items.remove(null);
+                Collections.sort(items, new Comparator<AnalysisItem>() {
+
+                    public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                        return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+                    }
+                });
+                for (AnalysisItem analysisItem : items) {
+                    for (AnalysisItem headerItem : listDataResults.getHeaders()) {
+                        if (headerItem == analysisItem) {
+                            PdfPCell cell = new PdfPCell(new Phrase(analysisItem.toDisplay()));
+                            table.addCell(cell);
+                        }
+                    }
+                }
+                table.setHeaderRows(1);
+
+                for (ListRow listRow : listDataResults.getRows()) {
+                    //PdfPCell[] cells = new PdfPCell[listDataResults.getHeaders().length];
+                    for (AnalysisItem analysisItem : items) {
+                        for (int i = 0; i < listDataResults.getHeaders().length; i++) {
+                            AnalysisItem headerItem = listDataResults.getHeaders()[i];
+                            if (headerItem == analysisItem) {
+                                Value value = listRow.getValues()[i];
+                                String valueString;
+                                if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                    FormattingConfiguration formattingConfiguration = headerItem.getFormattingConfiguration();
+                                    if (formattingConfiguration.getFormattingType() == FormattingConfiguration.CURRENCY) {
+                                        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance();
+                                        valueString = currencyFormatter.format(value.toDouble());
+                                    } else {
+                                        valueString = String.valueOf(value.toDouble());
+                                    }
+                                } else if (headerItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && value.type() == Value.DATE) {
+                                    DateFormat sdf = SimpleDateFormat.getInstance();
+                                    DateValue dateValue = (DateValue) value;
+                                    valueString = sdf.format(dateValue.getDate());
+                                } else {
+                                    valueString = value.toString();
+                                }
+                                PdfPCell valueCell = new PdfPCell(new Phrase(valueString));
+                                table.addCell(valueCell);
+                                //cells[j] = valueCell;
+                            }
+                        }
+                    }
+                }
+                document.add(table);
+            } else {
+                Image image = Image.getInstance(bytes);
+                // ratio = 1.5
+                float pageWidth = document.getPageSize().getWidth();
+                float ratio = pageWidth / width;
+                float adjustedHeight = height * ratio;
+                image.scaleAbsolute(pageWidth, adjustedHeight);
+                document.add(image);
+            }
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public byte[] exportReportIDToExcel(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters, InsightRequestMetadata insightRequestMetadata) {
