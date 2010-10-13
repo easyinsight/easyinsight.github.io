@@ -1,11 +1,8 @@
 <%@ page import="java.text.MessageFormat" %>
 <%@ page import="java.net.URLEncoder" %>
-<%@ page import="com.easyinsight.analysis.DataService" %>
-<%@ page import="com.easyinsight.analysis.InsightRequestMetadata" %>
-<%@ page import="com.easyinsight.analysis.EmbeddedDataResults" %>
 <%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="com.easyinsight.analysis.Tag" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.easyinsight.analysis.*" %>
 <%--
   Created by IntelliJ IDEA.
   User: jamesboe
@@ -27,8 +24,10 @@
     String reportCreatedDate = null;
     String dataAttribution = null;
     String keywords = "";
+    String reportRatingHTML = "";
+    StringBuilder reportRatingHTMLBuilder = new StringBuilder();
     try {
-        EmbeddedDataResults results = new DataService().getEmbeddedResults(Long.parseLong(reportID), Long.parseLong(dataSourceID), null, insightRequestMetadata,
+        EmbeddedResults results = new DataService().getEmbeddedResults(Long.parseLong(reportID), Long.parseLong(dataSourceID), null, insightRequestMetadata,
                 null);
         authorName = results.getDefinition().getAuthorName();
         description = results.getDefinition().getDescription();
@@ -52,6 +51,19 @@
         } else {
             keywords = "easy insight";
         }
+        double ratingsAverage = results.getRatingsAverage();
+        String grayStar = "assets/star_grey.png";
+        String greenStar = "assets/star_green.png";
+        for (int i = 1; i <= 5; i++) {
+            String star;
+            if (i <= ratingsAverage) {
+                star = greenStar;
+            } else {
+                star = grayStar;
+            }
+            reportRatingHTMLBuilder.append("<img src=\""+ star + "\" alt=\"Rating Star\"/>");
+        }
+        reportRatingHTML = reportRatingHTMLBuilder.toString();
     } catch (SecurityException e) {
         response.sendRedirect("login.jsp?error=true");
     }
@@ -116,7 +128,7 @@
                 <tr>
                     <td class="reportViewHeader">Report Rating:</td>
                     <td class="reportView">
-                        <%= authorName %>
+                        <%= reportRatingHTML %>
                     </td>
                 </tr>
                 <tr>

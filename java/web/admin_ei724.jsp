@@ -1,3 +1,4 @@
+<%@ page import="com.easyinsight.users.UserService" %>
 <!-- saved from url=(0014)about:internet -->
 <html lang="en">
 
@@ -45,6 +46,10 @@ var requiredRevision = 0;
 </script>
 </head>
 
+<%
+    String versionDir = new com.easyinsight.users.UserService().getBuildPath();
+%>
+
 <body scroll="no">
 <script language="JavaScript" type="text/javascript">
 <!--
@@ -68,10 +73,10 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 		"width", "100%",
 		"height", "100%",
 		"align", "middle",
-		"id", "PrimaryWorkspace",
+		"id", "AdministrationApplication",
 		"quality", "high",
 		"bgcolor", "#ffffff",
-		"name", "PrimaryWorkspace",
+		"name", "AdministrationApplication",
 		"allowScriptAccess","sameDomain",
 		"type", "application/x-shockwave-flash",
 		"pluginspage", "http://www.adobe.com/go/getflashplayer",
@@ -81,14 +86,14 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	// if we've detected an acceptable version
 	// embed the Flash Content SWF when all tests are passed
 	AC_FL_RunContent(
-			"src", "easyui-debug/PrimaryWorkspace",
+			"src", "<%=versionDir%>/AdministrationApplication",
 			"width", "100%",
 			"height", "100%",
 			"align", "middle",
-			"id", "PrimaryWorkspace",
+			"id", "AdministrationApplication",
 			"quality", "high",
 			"bgcolor", "#ffffff",
-			"name", "PrimaryWorkspace",
+			"name", "AdministrationApplication",
 			"allowScriptAccess","sameDomain",
 			"type", "application/x-shockwave-flash",
 			"pluginspage", "http://www.adobe.com/go/getflashplayer",
@@ -106,15 +111,15 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 <noscript>
     <h1 style="display:none">Easy Insight Application</h1>
   	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
-			id="PrimaryWorkspace" width="100%" height="100%"
+			id="AdministrationApplication" width="100%" height="100%"
 			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
-			<param name="movie" value="PrimaryWorkspace.swf" />
+			<param name="movie" value="AdministrationApplication.swf" />
 			<param name="quality" value="high" />
 			<param name="bgcolor" value="#ffffff" />
 			<param name="allowScriptAccess" value="sameDomain" />
             <param name="allowFullScreen" value="true" />
-			<embed src="easyui-debug/PrimaryWorkspace.swf" quality="high" bgcolor="#ffffff"
-				width="100%" height="100%" name="PrimaryWorkspace" align="middle"
+			<embed src="<%= versionDir%>/AdministrationApplication.swf" quality="high" bgcolor="#ffffff"
+				width="100%" height="100%" name="AdministrationApplication" align="middle"
 				play="true"
 				loop="false"
 				quality="high"

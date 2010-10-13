@@ -17,6 +17,7 @@
         String width = request.getParameter("width");
         String height = request.getParameter("height");
         String seleniumID = request.getParameter("seleniumID");
+        String versionDir = new com.easyinsight.users.UserService().getBuildPath();
     %>
   <object width="<%= width %>" height="<%= height %>" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
       <param name="movie" value="SeleniumReportView.swf" />
@@ -24,7 +25,7 @@
       <param name="bgcolor" value="#869ca7" />
       <param name="allowScriptAccess" value="always" />
       <param name="flashvars" value="analysisID=<%=reportID%>&reportType=<%=reportType%>&dataSourceID=<%=dataSourceID%>&reportName=<%=reportName%>&userName=<%=userName%>&password=<%=password%>&seleniumID=<%=seleniumID%>"/> 
-      <embed src="https://www.easy-insight.com/app/easyui-debug/SeleniumReportView.swf" quality="high" bgcolor="##869ca7" width="<%= width %>" height="<%= height %>"
+      <embed src="https://www.easy-insight.com/app/<%=versionDir%>/SeleniumReportView.swf" quality="high" bgcolor="##869ca7" width="<%= width %>" height="<%= height %>"
              name="PrimaryWorkspace" align="middle" play="true" loop="false" quality="high" allowScriptAccess="always"
              flashvars="analysisID=<%=reportID%>&reportType=<%=reportType%>&dataSourceID=<%=dataSourceID%>&reportName=<%=reportName%>&userName=<%=userName%>&password=<%=password%>&seleniumID=<%=seleniumID%>"
              type="application/x-shockwave-flash" pluginspage="http://www.adobe.com/go/getflashplayer">
