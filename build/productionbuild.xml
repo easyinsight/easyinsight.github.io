@@ -23,7 +23,7 @@
 
     <property name="code.path" value="../java/out/code"/>
     <property name="webapp.path" value="${code.path}/webapp"/>
-    <property name="flex.path" value="${webapp.path}/easyui-debug"/>
+    <property name="flex.path" value="${webapp.path}/${build.vcs.number}"/>
 
     <property name="test.path" value="../java/out/test"/>
     <property name="reports.tests" value="../java/out/test/reports"/>
