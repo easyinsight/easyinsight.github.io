@@ -18,7 +18,7 @@
         import com.easyinsight.framework.ConnectionGoEvent;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
-        import com.easyinsight.framework.FragmentParser;        
+        import com.easyinsight.framework.FragmentParser;
         import com.easyinsight.framework.InitialLoginWindow;
         import com.easyinsight.framework.LoginPage;
         import com.easyinsight.framework.ModulePerspective;
@@ -26,7 +26,7 @@
         import com.easyinsight.framework.PerspectiveFactory;
         import com.easyinsight.framework.PerspectiveFactoryHolder;
         import com.easyinsight.framework.PerspectiveInfo;
-        import com.easyinsight.framework.UserName;
+        import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.WebCredentialsCache;
         import com.easyinsight.guest.FloatingGuestWindow;
         import com.easyinsight.listing.HeaderBar;
@@ -99,7 +99,7 @@
 
         private function startWorkspace():void {
             PerspectiveFactoryHolder.factory = new PerspectiveFactory();
-            UserName.setup();
+            Constants.setup();
             UserAudit.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             CredentialsCache.initialize(new WebCredentialsCache());
@@ -110,6 +110,11 @@
             EIMessageListener.initialize();
             messageListener = EIMessageListener.instance();
             //GAHelper.initialize(tracker);
+            userService.getBuildPath.send();
+        }
+
+        private function gotBuildPath():void {
+            Constants.instance().buildPath = userService.getBuildPath.lastResult as String;
             userService.isSessionLoggedIn.send();
         }
 
@@ -127,8 +132,7 @@
         }
 
         private function handlerFunction(event:Event):void {
-            if (event["error"] is Error)
-            {
+            if (event["error"] is Error) {
                 var error:Error = event["error"] as Error;
                 var errorWindow:ErrorReportView = new ErrorReportView();
                 errorWindow.error = error;
@@ -136,14 +140,12 @@
                 PopUpUtil.centerPopUp(errorWindow);
                 // do something with the error
             }
-            else if (event["error"] is ErrorEvent)
-            {
+            else if (event["error"] is ErrorEvent) {
                 var errorEvent:ErrorEvent = event["error"] as ErrorEvent;
                 Alert.show("error " + errorEvent.text);
                 // do something with the error
             }
-            else
-            {
+            else {
                 // a non-Error, non-ErrorEvent type was thrown and uncaught
             }
 
@@ -152,9 +154,10 @@
         private function onKeyDown(event:KeyboardEvent):void {
             if (event.ctrlKey && event.keyCode == 190 && User.getInstance() != null) {
                 launchQuickSearchWindow(null);
-            } /*else if (event.keyCode == 192) {
-                DisplayListAnalysis.traverse(this);
-            }*/
+            }
+            /*else if (event.keyCode == 192) {
+             DisplayListAnalysis.traverse(this);
+             }*/
         }
 
         private function launchQuickSearchWindow(event:LaunchQuickSearchEvent):void {
@@ -406,7 +409,7 @@
                         coreSpace.removeChildAt(0);
                     }
                     if (event.perspective is IModulePerspective) {
-                        
+
                     }
                     this.perspective = event.perspective;
                     if (event.properties != null) {
@@ -475,10 +478,10 @@
                 CookieUtil.setCookie("eisession", authResult.userName + "-" + authResult.sessionCookie, 90);
                 var token:AsyncToken = userService.channelSet.login(userName, cookie);
                 token.addResponder(new AsyncResponder(
-                    function (event:ResultEvent, token:Object = null):void {
-                        switch (event.result) {
-                            case "success":
-                                dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
+                        function (event:ResultEvent, token:Object = null):void {
+                            switch (event.result) {
+                                case "success":
+                                    dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
                                     if (authResult.accountState == Account.DELINQUENT) {
                                         toLogin(1);
                                     } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
@@ -489,15 +492,15 @@
                                         toMain();
                                     }
                                     browserInit();
-                                break;
-                            default:
-                                trace(event.result);
+                                    break;
+                                default:
+                                    trace(event.result);
+                            }
+                        },
+                        function (event:FaultEvent, token:Object = null):void {
+                            toLogin(0);
                         }
-                    },
-                    function (event:FaultEvent, token:Object = null):void {
-                        toLogin(0);
-                    }
-                ));
+                        ));
 
             } else {
                 toLogin(0);
@@ -519,7 +522,7 @@
         private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
             User.initializeUser(authResponse);
             User.getInstance().userName = authResponse.userName;
-            UserName.instance().userName = authResponse.userName;
+            Constants.instance().userName = authResponse.userName;
             if (User.getInstance().guestUser) {
                 FloatingGuestWindow.newWindow(this);
             }
@@ -637,6 +640,7 @@
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
         <mx:method name="sessionCookieCheck" result="sessionCookieCheck()"/>
+        <mx:method name="getBuildPath" result="gotBuildPath()"/>
     </mx:RemoteObject>
 
     <util:AntiScrollCanvas width="100%" height="100%" id="masterCanvas" disabledOverlayAlpha=".275">

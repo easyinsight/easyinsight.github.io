@@ -60,7 +60,7 @@ public class ModulePerspective extends Canvas implements IPerspective, IModulePe
     }
 
     private function loadModule(name:String, message:String):void {
-        moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + name + ".swf");
+        moduleInfo = ModuleManager.getModule("/app/"+Constants.instance().buildPath+"/" + name + ".swf");
         moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler, false, 0, true);
         moduleInfo.addEventListener(ModuleEvent.ERROR, moduleFailHandler, false, 0, true);
         _loadingDisplay = new LoadingModuleDisplay();

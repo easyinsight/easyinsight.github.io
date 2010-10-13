@@ -15,6 +15,8 @@
         import com.easyinsight.analysis.service.ServiceData;
         import com.easyinsight.filtering.FilterRawData;
 
+        import com.easyinsight.framework.Constants;
+
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.events.ModuleEvent;
@@ -88,7 +90,7 @@
                     factory = controller.createEmbeddedView();
                     var prefix:String = additionalProperties.prefix == null ? "" : additionalProperties.prefix;
                     factory.prefix = prefix;
-                    moduleInfo = ModuleManager.getModule(prefix + "/app/easyui-debug/" + factory.reportRendererModule);
+                    moduleInfo = ModuleManager.getModule(prefix + "/app/"+Constants.instance().buildPath+"/" + factory.reportRendererModule);
                     moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
                     moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
                     moduleInfo.load(ApplicationDomain.currentDomain);

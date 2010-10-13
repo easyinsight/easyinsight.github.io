@@ -2,6 +2,7 @@ package com.easyinsight.analysis {
 
 import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.analysis.service.ReportRetrievalFault;
+import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.HierarchyOverride;
 import com.easyinsight.report.AbstractViewFactory;
@@ -138,7 +139,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
     }
 
     private function loadReportRenderer():void {
-        moduleInfo = ModuleManager.getModule(_prefix + "/app/easyui-debug/" + _reportRendererModule);
+        moduleInfo = ModuleManager.getModule(_prefix + "/app/"+Constants.instance().buildPath+"/" + _reportRendererModule);
         moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
         moduleInfo.load(ApplicationDomain.currentDomain);

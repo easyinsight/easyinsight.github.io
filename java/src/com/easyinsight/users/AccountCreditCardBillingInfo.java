@@ -1,6 +1,11 @@
 package com.easyinsight.users;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -20,6 +25,13 @@ public class AccountCreditCardBillingInfo {
     public void setId(long id) {
         this.id = id;
     }
+
+    public static final String INVOICE_EMAIL = "Thank you for using Easy Insight.\r\n" +
+            "This is an invoice for your Easy Insight account.\r\n" +
+            "SUMMARY\r\nYour credit card has been automatically charged {0} to cover your subscription to Easy Insight.\r\n\r\n" +
+            "NEED TO CANCEL?\r\n" +
+            "Log into your Easy Insight account, go to the Accounts page, and click Cancel Account. " +
+            "Once you cancel you won''t be charged again, but you are responsible for charges already incurred.\r\n\r\n===============================================\r\nINVOICE\r\n{1}         Transaction ID:{2}\r\n..............................\r\nEasy Insight LLC\r\n1401 Wewatta St Unit 606\r\nDenver, CO\r\n\r\nPlease email support@easy-insight.com with any questions or concerns.";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -101,5 +113,13 @@ public class AccountCreditCardBillingInfo {
 
     public void setResponseString(String responseString) {
         this.responseString = responseString;
+    }
+
+    public String toInvoiceText() {
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+        String bill = currencyFormat.format(Double.parseDouble(amount));
+        DateFormat df = SimpleDateFormat.getInstance();
+        String date = df.format(getTransactionTime());
+        return MessageFormat.format(INVOICE_EMAIL, bill, date, String.valueOf(transactionID));
     }
 }

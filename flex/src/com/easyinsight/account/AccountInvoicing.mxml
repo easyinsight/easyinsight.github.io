@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="accountService.retrieveInvoices.send()">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.events.ListEvent;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var invoices:ArrayCollection;
+
+        [Bindable]
+        [Embed(source="../../../../assets/mail.png")]
+        private var mailIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/copy.png")]
+        private var copyIcon:Class;
+
+        [Bindable]
+        private var invoiceText:String;
+
+        private function gotInvoices():void {
+            invoices = accountService.retrieveInvoices.lastResult as ArrayCollection;
+            if (invoices.length > 0) {
+                coreIndex = 1;
+            }
+        }
+
+        private function onClick(event:ListEvent):void {
+            var info:InvoiceInfo = invoices.getItemAt(event.rowIndex) as InvoiceInfo;
+            invoiceText = info.invoiceText;
+            selectedIndex = 1;
+        }
+
+        [Bindable]
+        private var selectedIndex:int;
+
+        private function copy():void {
+            System.setClipboard(invoiceText);
+        }
+
+        [Bindable]
+        private var coreIndex:int;
+        ]]></mx:Script>
+    <mx:RemoteObject id="accountService" destination="accountAdmin">
+        <mx:method name="retrieveInvoices" result="gotInvoices()"/>
+    </mx:RemoteObject>
+    <mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:ViewStack selectedIndex="{coreIndex}" width="650" height="440">
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                <mx:Label text="Your account has not yet received any invoices." fontSize="14"/>
+            </mx:Box>
+            <mx:HBox>
+                <mx:VBox>
+                    <mx:Label text="Invoice Dates"/>
+                    <mx:List dataProvider="{invoices}" width="150" height="400" itemClick="onClick(event)" labelField="invoiceDate"/>
+                </mx:VBox>
+
+                <mx:ViewStack width="470" height="430" selectedIndex="{selectedIndex}">
+                    <mx:Box/>
+                    <mx:VBox>
+                        <mx:HBox>
+                            <mx:Button icon="{copyIcon}" click="copy()" toolTip="Copy Invoice to Clipboard"/>
+                        </mx:HBox>
+                        <mx:TextArea text="{invoiceText}" width="460" height="400" editable="false" selectable="true"/>
+                    </mx:VBox>
+                </mx:ViewStack>
+            </mx:HBox>
+        </mx:ViewStack>
+
+        <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+    </mx:VBox>
+</util:EITitleWindow>

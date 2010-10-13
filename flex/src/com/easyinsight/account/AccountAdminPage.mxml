@@ -21,6 +21,9 @@
                     <mx:Button label="Edit Account Settings..." click="editAccountSettings()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
+                    <mx:Button label="View Invoices..." click="invoices()"/>
+                </mx:FormItem>
+                <mx:FormItem label="">
                     <mx:Button label="Manage Credentials..." click="showPreferences()"/>
                 </mx:FormItem>
                 <mx:FormItem>
@@ -65,6 +68,12 @@
 
         private function showPreferences():void {
             var window:PreferencesWindow = new PreferencesWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function invoices():void {
+            var window:AccountInvoicing = new AccountInvoicing();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

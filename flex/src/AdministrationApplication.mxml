@@ -14,6 +14,7 @@
                         <mx:Button label="Create Data Source" click="externalSources()"/>
                         <mx:Button label="Update Zip Geocodes" click="updateZipCodes()"/>
                         <mx:Button label="Nuke Old Data" click="nukeOldData()"/>
+                        <mx:Button label="Test Selenium" click="testSelenium()"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Solutions">
                         <solutions:SolutionAdministration width="100%" height="100%"/>
@@ -116,6 +117,11 @@
             }
         }
 
+        private function testSelenium():void {
+            ProgressAlert.alert(this, "Testing Selenium...", null, exportService.test);
+            exportService.test.send();
+        }
+
         private function nukeOldData():void {
             ProgressAlert.alert(this, "Clearing orphan data...", null, adminService.clearOrphanData);
             adminService.clearOrphanData.send();
@@ -124,6 +130,9 @@
     </mx:Script>
     <mx:RemoteObject id="authService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="test"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="authAdminService" destination="eiAdmin">
         <mx:method name="authenticateAdmin" result="handleAuthentication()"/>

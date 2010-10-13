@@ -31,7 +31,7 @@ package com.easyinsight.account
         public var maxSize:int;
         public var name:String;
         public var accountState:int;
-        public var apiEnabled:Boolean;
+        public var apiEnabled:Boolean = true;
         public var activated:Boolean;
         public var optInEmail:Boolean;
 		

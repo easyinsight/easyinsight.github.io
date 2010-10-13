@@ -2,23 +2,31 @@ package com.easyinsight.framework {
 import flash.events.Event;
 import flash.events.EventDispatcher;
 
-public class UserName extends EventDispatcher {
+public class Constants extends EventDispatcher {
 
     private var _userName:String;
+    private var _buildPath:String;
 
-    private static var _instance:UserName;
+    private static var _instance:Constants;
 
-    public function UserName() {
+    public function Constants() {
     }
 
     public static function setup():void {
-        _instance = new UserName();
+        _instance = new Constants();
     }
 
-    public static function instance():UserName {
+    public static function instance():Constants {
         return _instance;
     }
 
+    public function get buildPath():String {
+        return _buildPath;
+    }
+
+    public function set buildPath(value:String):void {
+        _buildPath = value;
+    }
 
     [Bindable(event="userNameChanged")]
     public function get userName():String {

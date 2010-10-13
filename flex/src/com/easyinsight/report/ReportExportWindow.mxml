@@ -4,6 +4,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.EmbedReportWindow;
         import com.easyinsight.analysis.ExcelCreator;
+        import com.easyinsight.analysis.PDFCreator;
         import com.easyinsight.analysis.PNGCreator;
         import com.easyinsight.schedule.ReportDelivery;
         import com.easyinsight.schedule.ReportDeliveryScheduleWindow;        
@@ -45,6 +46,13 @@
             new PNGCreator().draw(_coreView);
             PopUpManager.removePopUp(this);
         }
+
+        private function pdf():void {
+            new PDFCreator().exportPDF(_report, _coreView);
+            PopUpManager.removePopUp(this);
+        }
+
+
 
         private function url():void {
             //var escapedName:String = _reportName.replace(/[ @\"&*#$%^~]/g, "-");
@@ -98,11 +106,13 @@
         ]]></mx:Script>
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
+        <mx:method name="exportReportToPDF"/>
     </mx:RemoteObject>
     <mx:VBox paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5" horizontalAlign="center">
         <mx:Label text="Click any of the options below to export the report:"/>
         <mx:HBox>
             <mx:Button icon="@Embed(source='../../../../assets/table.png')" label="Excel" click="excel()" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/document_chart.png')" label="PDF" click="pdf()" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/mail.png')" label="Email" click="email()" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/camera.png')" label="PNG" click="png()" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/link.png')" label="Link" click="url()" labelPlacement="right"/>

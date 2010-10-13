@@ -16,6 +16,10 @@ import com.easyinsight.groups.GroupStorage;
 import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.outboundnotifications.BuyOurStuffTodo;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.util.*;
 import java.sql.PreparedStatement;
@@ -34,6 +38,18 @@ import flex.messaging.FlexContext;
  * Time: 5:34:56 PM
  */
 public class UserService {
+
+    public String getBuildPath() {
+        try {
+            URL url = getClass().getClassLoader().getResource("version.properties");
+            Properties properties = new Properties();
+            properties.load(new FileInputStream(new File(url.getFile())));
+            return (String) properties.get("ei.version");
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public void reactivate() {
         long accountID = SecurityUtil.getAccountID();
@@ -851,6 +867,39 @@ public class UserService {
             LogClass.error(e);
             conn.rollback();
             throw new RuntimeException();
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
+        }
+        return userServiceResponse;
+    }
+
+    public UserServiceResponse loginSmallBiz() {
+        UserServiceResponse userServiceResponse;
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            List results = session.createQuery("from User where userName = ?").setString(0, "guest").list();
+            User user = (User) results.get(0);
+            List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+            Account account = (Account) accountResults.get(0);
+            user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+            userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                    (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                    user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
+                    !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+            userServiceResponse.setActivated(account.isActivated());
+            user.setLastLoginDate(new Date());
+            session.update(user);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
             session.close();

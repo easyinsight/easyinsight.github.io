@@ -197,6 +197,21 @@ public class UserAccountAdminService {
         return message;
     }
 
+    public List<InvoiceInfo> retrieveInvoices() {
+        List<InvoiceInfo> invoices = new ArrayList<InvoiceInfo>();
+        Session session = Database.instance().createSession();
+        try {
+            @SuppressWarnings({"unchecked"}) List<AccountCreditCardBillingInfo> results = session.createQuery("from AccountCreditCardBillingInfo where accountId = ?").setLong(0, SecurityUtil.getAccountID()).list();
+            for (AccountCreditCardBillingInfo info : results) {
+                invoices.add(new InvoiceInfo(info.getTransactionTime(), info.toInvoiceText()));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        return invoices;
+    }
+
     @Nullable
     private String doesUserExist(String userName, String email) {
         Session session = Database.instance().createSession();

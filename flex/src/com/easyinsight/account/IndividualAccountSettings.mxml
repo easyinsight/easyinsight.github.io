@@ -90,6 +90,12 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        private function invoices():void {
+            var window:AccountInvoicing = new AccountInvoicing();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
     <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
             paddingTop="5" paddingBottom="5">
@@ -115,6 +121,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="">
                     <mx:Button label="Upgrade Account..." click="upgrade()"/>
+                </mx:FormItem>
+                <mx:FormItem label="">
+                    <mx:Button label="View Invoices..." click="invoices()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
                     <mx:Button label="Manage Credentials..." click="showPreferences()"/>

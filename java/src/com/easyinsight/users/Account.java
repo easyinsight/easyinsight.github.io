@@ -1,7 +1,10 @@
 package com.easyinsight.users;
 
+import com.braintreegateway.BraintreeGateway;
+import com.braintreegateway.Environment;
 import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
 
 import javax.persistence.*;
@@ -419,12 +422,16 @@ public class Account {
         } else {
             params = billingSystem.billAccount(this.getAccountID(), this.monthlyCharge());
         }
+        boolean successful;
         if(!params.get("response").equals("1")) {
             setAccountState(Account.DELINQUENT);
             LogClass.info("Billing failed!");
+            successful = false;
         }
-        else
+        else {
             LogClass.info("Success!");
+            successful = true;
+        }
         AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
         info.setAmount(String.valueOf(monthlyCharge()));
         info.setAccountId(this.getAccountID());
@@ -433,6 +440,18 @@ public class Account {
         info.setResponseString(params.get("responsetext"));
         info.setTransactionID(params.get("transactionid"));
         info.setTransactionTime(new Date());
+        if (successful) {
+            String invoiceBody = info.toInvoiceText();
+            for (User user : getUsers()) {
+                if (user.isAccountAdmin()) {
+                    try {
+                        new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com");
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                    }
+                }
+            }
+        }
         LogClass.info("Completed billing Account ID:" + this.getAccountID());
         return info;
     }
