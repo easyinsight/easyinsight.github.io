@@ -34,7 +34,7 @@
     <property name="analysis.api.key" value="JeSfljXxeIcw"/>
 
     <target name="testVCS">
-        <echo>Blah ${system.build.vcs.number}</echo>
+        <echo>Blah ${build.vcs.number}</echo>
     </target>
 
     <target name="shutdownInstances">
