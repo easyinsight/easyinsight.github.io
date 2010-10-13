@@ -38,7 +38,7 @@
     <target name="testVCS">
         <echo>Blah ${build.vcs.number}</echo>
         <propertyfile file="../java/src/version.properties">
-            <entry key="ei.version" type="int" operation="=" value="${build.vcs.number}"/>
+            <entry key="ei.version" type="string" operation="=" value="${build.vcs.number}"/>
         </propertyfile>
         <property name="build.number" value="${build.vcs.number}"/>
     </target>
