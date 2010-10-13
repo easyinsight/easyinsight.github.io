@@ -1,7 +1,5 @@
 package com.easyinsight.users;
 
-import com.braintreegateway.BraintreeGateway;
-import com.braintreegateway.Environment;
 import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.email.SendGridEmail;
