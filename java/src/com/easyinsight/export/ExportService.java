@@ -184,6 +184,7 @@ public class ExportService {
                 try {
                     activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
                 } catch (SQLException e) {
+                    LogClass.error(e.getMessage() + " on loading activity " + activityID);
                     LogClass.error(e);
                     continue;
                 }
