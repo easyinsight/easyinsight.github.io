@@ -2,28 +2,29 @@
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" verticalAlign="middle">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.framework.LoginEvent;
-            import com.easyinsight.framework.UserName;
-            import com.easyinsight.util.CookieUtil;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.Constants;
+        import com.easyinsight.util.CookieUtil;
 
-            import mx.messaging.config.ServerConfig;
-            import com.easyinsight.framework.User;
+        import mx.messaging.config.ServerConfig;
 
-            [Bindable]
-            private var message:String;
+        import com.easyinsight.framework.User;
 
-            public function logout():void {
-                User.destroy();
-                CookieUtil.deleteCookie("eisession");
-                ServerConfig.getChannelSet(authService.destination).logout();
-                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
-            }
+        [Bindable]
+        private var message:String;
+
+        public function logout():void {
+            User.destroy();
+            CookieUtil.deleteCookie("eisession");
+            ServerConfig.getChannelSet(authService.destination).logout();
+            User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+        }
         ]]>
 	</mx:Script>
 	<mx:RemoteObject id="authService" destination="login">
 	</mx:RemoteObject>
     <mx:Spacer width="100%"/>
-    <mx:Label text="{UserName.instance().userName}"/>
+    <mx:Label text="{Constants.instance().userName}"/>
     <mx:VRule height="20"/>
 	<mx:Button label="Log Out" click="logout()"/>
 </mx:HBox>
