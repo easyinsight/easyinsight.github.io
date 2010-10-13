@@ -33,8 +33,14 @@
     <property name="size.api.key" value="LeKXRECmALcL"/>
     <property name="analysis.api.key" value="JeSfljXxeIcw"/>
 
+    <property name="flex.prefix" value="${build.flex.prefix}"/>
+
     <target name="testVCS">
         <echo>Blah ${build.vcs.number}</echo>
+        <propertyfile file="../java/src/version.properties">
+            <entry key="ei.version" type="int" operation="=" value="${build.vcs.number}"/>
+        </propertyfile>
+        <property name="build.number" value="${build.vcs.number}"/>
     </target>
 
     <target name="shutdownInstances">
@@ -312,7 +318,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileCoreSWC, apps, modules1, modules2, modules3, modules4, modules5, modules6, modules7, modules8">
+    <target name="compileFlex" depends="testVCS, compileJava, compileCoreSWC, apps, modules1, modules2, modules3, modules4, modules5, modules6, modules7, modules8">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -374,7 +380,7 @@
                     <url rsl-url="http://www.easy-insight.com/rpc_3.5.0.12683.swf"/>
                 </runtime-shared-library-path>
                 <runtime-shared-library-path path-element="${teamcity.build.checkoutDir}/flex/libs/rsl/EICore.swc">
-                    <url rsl-url="https://www.easy-insight.com/app/easyui-debug/EICore.swf"/>
+                    <url rsl-url="https://${flex.prefix}.easy-insight.com/app/${build.number}/EICore.swf"/>
                 </runtime-shared-library-path>
             </mxmlc>
         </sequential>
