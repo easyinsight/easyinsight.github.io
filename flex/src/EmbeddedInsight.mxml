@@ -21,6 +21,7 @@
         import com.easyinsight.analysis.PopupMenuFactory;
 
         import com.easyinsight.analysis.SixSigmaMeasure;
+        import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.LoginEvent;
@@ -43,12 +44,18 @@
         private function handleFlashVars():void {
             CredentialsCache.initialize(new WebCredentialsCache());
             EIMessageListener.initialize();
+            Constants.setup();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);
             this.reportType = int(Application.application.parameters.reportType);
             this.dataSourceID = int(Application.application.parameters.dataSourceID);
-            this.reportName = String(Application.application.parameters.reportName);            
+            this.reportName = String(Application.application.parameters.reportName);
             // session check
+            userService.getBuildPath.send();
+        }
+
+        private function gotBuildPath():void {
+            Constants.instance().buildPath = userService.getBuildPath.lastResult as String;
             userService.isSessionLoggedIn.send();
         }
 
@@ -107,6 +114,7 @@
 	</mx:Script>
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+        <mx:method name="getBuildPath" result="gotBuildPath()"/>
     </mx:RemoteObject>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
     <mx:ViewStack selectedIndex="{stackIndex}" width="100%" height="100%">
