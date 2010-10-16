@@ -126,7 +126,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
                     }
                 } else if (deliveryFormat == ReportDelivery.PNG) {
-                    new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID);
+                    new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
                 }
             }
         }

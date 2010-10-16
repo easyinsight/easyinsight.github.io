@@ -10,6 +10,7 @@ import com.xerox.amazonws.sqs2.SQSUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 
@@ -22,11 +23,7 @@ public class SeleniumLauncher {
 
     private static final String URL = "/app/selenium/selenium.jsp?userName={0}&password={1}&seleniumID={2}&dataSourceID={3}&reportID={4}&reportType={5}&width={6}&height={7}";
 
-    public void requestSeleniumDrawForEmail(long accountActivityID, long userID, long accountID) {
-        // emit the JMS event or whatever we're using
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
+    public void requestSeleniumDrawForEmail(long accountActivityID, long userID, long accountID, EIConnection conn) throws SQLException {
             EmailSeleniumPostProcessor processor = new EmailSeleniumPostProcessor(accountActivityID);
             long id = processor.save(conn);
             String userName = RandomTextGenerator.generateText(50);
@@ -52,16 +49,7 @@ public class SeleniumLauncher {
             String urlKey = rs.getString(4);
             String url = MessageFormat.format(URL, userName, password, seleniumID, dataSourceID, urlKey, reportType, "1000", "800");
             System.out.println(url);
-            conn.commit();
             launchRequest(url);
-        } catch (Throwable e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
     }
 
     private void launchRequest(String url) {
