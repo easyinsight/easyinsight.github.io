@@ -154,6 +154,8 @@
         private function onKeyDown(event:KeyboardEvent):void {
             if (event.ctrlKey && event.keyCode == 190 && User.getInstance() != null) {
                 launchQuickSearchWindow(null);
+            } else if (event.keyCode == 192) {
+                Alert.show(String(System.totalMemory));
             }
             /*else if (event.keyCode == 192) {
              DisplayListAnalysis.traverse(this);

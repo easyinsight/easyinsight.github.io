@@ -807,6 +807,12 @@ public class SolutionService {
                         0, 0, new Date(), "", "", exchangePackageData, solutionID, solutionName);
                 reports.add(item);
             }
+            Collections.sort(reports, new Comparator<SolutionReportExchangeItem>() {
+
+                public int compare(SolutionReportExchangeItem solutionReportExchangeItem, SolutionReportExchangeItem solutionReportExchangeItem1) {
+                    return ((Double)solutionReportExchangeItem1.getRatingAverage()).compareTo(solutionReportExchangeItem.getRatingAverage());
+                }
+            });
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

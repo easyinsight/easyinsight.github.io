@@ -21,6 +21,7 @@ import com.easyinsight.datafeeds.test.TestGammaDataSource;
 import com.easyinsight.datafeeds.wesabe.WesabeAccountDataSource;
 import com.easyinsight.datafeeds.wesabe.WesabeDataSource;
 import com.easyinsight.datafeeds.wesabe.WesabeTransactionDataSource;
+import com.easyinsight.datafeeds.wholefoods.WholeFoodsSource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +85,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.FRESHBOOKS_PROJECTS, FreshbooksProjectSource.class);
         registerType(FeedType.BASECAMP_COMMENTS, BaseCampCommentsSource.class);
         registerType(FeedType.REDIRECT, RedirectDataSource.class);
+        registerType(FeedType.WHOLE_FOODS, WholeFoodsSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

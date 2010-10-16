@@ -186,7 +186,6 @@ public class ExportService {
                 } catch (SQLException e) {
                     LogClass.error(e.getMessage() + " on loading activity " + activityID);
                     LogClass.error(e);
-                    continue;
                 }
             }
             conn.commit();

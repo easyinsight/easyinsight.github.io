@@ -13,7 +13,11 @@ import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Properties;
 
 /**
@@ -78,7 +82,7 @@ public class SendGridEmail {
                 "James Boe<br>" +
                 "CEO, Easy Insight<br>" +
                 "http://www.easy-insight.com/<br>" +
-                "(720)-220-8085 ";
+                "(720)-220-8085 ";    
     
     public static final String TRIAL_ALMOST_UP_EMAIL = "Hi {0},<br><br>" +
             "Your 30 day trial is about to expire.";
@@ -245,11 +249,6 @@ public class SendGridEmail {
         transport.connect();
         transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
         transport.close();
-    }
-
-    public static void main(String[] args) throws MessagingException, UnsupportedEncodingException {
-        new SendGridEmail().sendEmail("jboe99@gmail.com", "Welcome to Easy Insight!",
-                MessageFormat.format(SendGridEmail.BASIC_OR_PRO_EMAIL_WELCOME, "James"), 1);
     }
 
     private class SMTPAuthenticator extends javax.mail.Authenticator {
