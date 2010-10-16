@@ -14,6 +14,7 @@ public class WholeFoodsDataSource extends CompositeServerDataSource {
     public function WholeFoodsDataSource() {
         super();
         this.feedName = "Whole Foods";
+        this.uncheckedAPIEnabled = true;
     }
 
     override public function isLiveData():Boolean {
