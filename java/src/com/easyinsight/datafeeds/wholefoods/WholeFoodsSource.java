@@ -108,6 +108,10 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
         return firstRun ? new DataSet() : null;
     }
 
+    protected boolean clearsData() {
+        return false;
+    }
+
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);

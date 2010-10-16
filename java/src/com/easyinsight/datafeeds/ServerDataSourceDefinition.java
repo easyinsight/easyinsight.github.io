@@ -179,19 +179,22 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         DataStorage dataStorage = null;
         try {
-            if(credentials == null) {
+            /*if(credentials == null) {
                 if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
                     credentials = new Credentials();
                     credentials.setUserName(getUsername());
                     credentials.setPassword(retrievePassword());
                 }
-            }
+            }*/
             Map<String, Key> keys = newDataSourceFields(credentials);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
-            dataStorage.truncate();
+
+            if (clearsData()) {
+                dataStorage.truncate(); 
+            }
             DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition, dataStorage, conn);
             //List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
-            int version = dataStorage.getVersion();
+            //int version = dataStorage.getVersion();
             //int newVersion = dataStorage.migrate(getFields(), items);
             addData(dataStorage, dataSet);
             dataStorage.commit();
@@ -207,6 +210,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                 dataStorage.closeConnection();
             }
         }
+    }
+
+    protected boolean clearsData() {
+        return true;
     }
 
     public String getUsername() {
