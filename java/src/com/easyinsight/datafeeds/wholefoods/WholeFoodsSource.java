@@ -52,6 +52,10 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
                 LAST_YEAR_UNITS_SOLD, ITEM, ITEM_SKU, ARP );
     }
 
+    public int getDataSourceType() {
+        return DataSourceInfo.STORED_PULL;
+    }
+
     @Override
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();

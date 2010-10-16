@@ -452,6 +452,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                 case DataFeedDescriptor.BASECAMP:
                 case DataFeedDescriptor.HIGHRISE:
                 case DataFeedDescriptor.PIVOTAL_TRACKER:
+                case DataFeedDescriptor.WHOLE_FOODS:
                     refreshVisible = true;
                     break;
                 default:
