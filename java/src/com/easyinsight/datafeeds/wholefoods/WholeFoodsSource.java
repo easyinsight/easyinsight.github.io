@@ -12,18 +12,10 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.RefreshHandler;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.*;
 import com.xerox.amazonws.sqs2.MessageQueue;
-import com.xerox.amazonws.sqs2.SQSException;
 import com.xerox.amazonws.sqs2.SQSUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
