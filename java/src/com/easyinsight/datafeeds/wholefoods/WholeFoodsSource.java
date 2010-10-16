@@ -85,6 +85,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
 
     @Override
     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+        boolean firstRun = !initialized;
         try {
             MessageQueue msgQueue = SQSUtils.connectToQueue("EIWFReport", "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             PreparedStatement queryStmt = conn.prepareStatement("SELECT USER_KEY, USER_SECRET_KEY FROM USER WHERE USER_ID = ?");
@@ -104,7 +105,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return null;
+        return firstRun ? new DataSet() : null;
     }
 
     @Override
