@@ -16,6 +16,7 @@
         import com.easyinsight.datasources.MeetupDataSource;
         import com.easyinsight.datasources.PivotalTrackerBaseSource;
         import com.easyinsight.datasources.SendGridDataSource;
+        import com.easyinsight.datasources.WholeFoodsDataSource;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.User;
         import com.easyinsight.listing.DataFeedDescriptor;
@@ -73,6 +74,7 @@
             var linked:LinkedInDataSource;
             var freshbooks:FreshbooksDataSource;
             var redirect:RedirectDataSource;
+            var wholeFoods:WholeFoodsDataSource;
         }
 
         [Bindable]
