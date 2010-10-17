@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation"
+        creationComplete="doCreationComplete(event)">
     <mx:Metadata>
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
 		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
@@ -17,6 +18,7 @@
             var obj:WholeFoodsDataSource = new WholeFoodsDataSource();
             obj.wfUserName = userNameInput.text;
             obj.wfPassword = passwordInput.text;
+            obj.startFile = file.data;
             return obj;
         }
 
@@ -37,10 +39,47 @@
         }
 
         public function get credentials():Credentials {
-            return new Credentials();
+            var wf:WholeFoodsCredentials = new WholeFoodsCredentials();
+            wf.bytes = file.data;
+            return wf;
         }
 
         public function set credentials(c:Credentials):void {
+        }
+
+        public function doSelect( event:Event ):void
+        {
+            txtPhoto.text = file.name;
+            uploadButton.enabled = true;
+        }
+
+        [Bindable]
+        public var file:FileReference = new FileReference();
+
+        public function doBrowse( event:Event ):void
+        {
+            // Prompt the user to select a file from disk
+            file.browse();
+        }
+
+        public function doSubmit( event:Event ):void
+        {
+            progressBar.visible = true;
+            file.load();
+        }
+
+        public function doComplete( event:Event ):void
+        {
+            successMessage.visible = true;
+        }
+
+        // Called when the application has completed startup
+        public function doCreationComplete( event:Event ):void
+        {
+            // Listen for when the user has selected a file
+            // Listen for when the file upload is complete
+            file.addEventListener( Event.SELECT, doSelect );
+            file.addEventListener( Event.COMPLETE, doComplete );
         }
 
         public function validate():Boolean {
@@ -53,5 +92,18 @@
         <mx:FormItem label="Whole Foods Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="passwordInput" fontWeight="normal" fontFamily="Lucida Grande" displayAsPassword="true"/>
 		</mx:FormItem>
+        <mx:FormItem label="Choose a Starting Date Set:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="txtPhoto" editable="false"/>
+            <mx:Button label="Browse..." click="doBrowse( event )" />
+        </mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Upload" click="doSubmit( event )" id="uploadButton" enabled="false"/>
+        </mx:FormItem>
+        <mx:FormItem label="" direction="vertical">
+            <mx:HBox horizontalAlign="center">
+                <mx:ProgressBar id="progressBar" visible="false" source="{file}"/>
+            </mx:HBox>
+            <mx:Label text="Upload successful!" visible="false" id="successMessage" fontFamily="Tahoma" fontWeight="bold"/>
+        </mx:FormItem>
 	</mx:Form>
 </mx:HBox>
