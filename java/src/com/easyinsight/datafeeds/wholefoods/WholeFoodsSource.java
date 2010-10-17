@@ -98,7 +98,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
 
         items.add(new AnalysisMeasure(keys.get(DOLLAR_SALES), DOLLAR_SALES, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         items.add(new AnalysisMeasure(keys.get(LAST_YEAR_SALES), LAST_YEAR_SALES, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
-        items.add(new AnalysisMeasure(keys.get(ARP), LAST_YEAR_SALES, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
+        items.add(new AnalysisMeasure(keys.get(ARP), ARP, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         items.add(new AnalysisMeasure(keys.get(UNITS), AggregationTypes.SUM));
         items.add(new AnalysisMeasure(keys.get(LAST_YEAR_UNITS_SOLD), AggregationTypes.SUM));
 
