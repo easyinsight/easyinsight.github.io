@@ -18,7 +18,6 @@
             var obj:WholeFoodsDataSource = new WholeFoodsDataSource();
             obj.wfUserName = userNameInput.text;
             obj.wfPassword = passwordInput.text;
-            obj.startFile = file.data;
             return obj;
         }
 

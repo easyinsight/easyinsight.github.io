@@ -1,7 +1,8 @@
 package com.easyinsight.datasources {
-import com.easyinsight.customupload.BaseCampDataSourceCreation;
 import com.easyinsight.customupload.WholeFoodsDataSourceCreation;
 import com.easyinsight.listing.DataFeedDescriptor;
+
+import flash.utils.ByteArray;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.wholefoods.WholeFoodsSource")]
