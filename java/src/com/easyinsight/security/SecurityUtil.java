@@ -653,6 +653,8 @@ public class SecurityUtil {
                     long accountID = rs.getLong(1);
                     if (accountID == getAccountID()) {
                         // all good
+                    } else {
+                        throw new SecurityException();
                     }
                 } else {
                     throw new SecurityException();
@@ -720,6 +722,8 @@ public class SecurityUtil {
                     long accountID = rs.getLong(1);
                     if (accountID == getAccountID()) {
                         // all good
+                    } else {
+                        throw new SecurityException();
                     }
                 } else {
                     throw new SecurityException();
@@ -888,6 +892,8 @@ public class SecurityUtil {
                         long accountID = rs.getLong(1);
                         if (accountID == getAccountID()) {
                             // all good
+                        } else {
+                            throw new SecurityException();
                         }
                     } else {
                         throw new SecurityException();
@@ -949,6 +955,8 @@ public class SecurityUtil {
                         long accountID = rs.getLong(1);
                         if (accountID == getAccountID()) {
                             // all good
+                        } else {
+                            throw new SecurityException();
                         }
                     } else {
                         throw new SecurityException();
