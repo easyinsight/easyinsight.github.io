@@ -409,7 +409,20 @@ public class SecurityUtil {
                     if (accountRS.next()) {
                         return accountRS.getInt(1);
                     } else {
-                        return Integer.MAX_VALUE;
+                        PreparedStatement forTimeBeingStmt = conn.prepareStatement("select account_id from user, data_feed, upload_policy_users where " +
+                                "data_feed.data_feed_id = ? and data_feed.data_feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id");
+                        forTimeBeingStmt.setLong(1, feedID);
+                        ResultSet hackRS = forTimeBeingStmt.executeQuery();
+                        if (hackRS.next()) {
+                            long accountID = hackRS.getLong(1);
+                            if (accountID == getAccountID()) {
+                                return Roles.SHARER;
+                            } else {
+                                return Integer.MAX_VALUE;
+                            }
+                        } else {
+                            return Integer.MAX_VALUE;
+                        }
                     }
                 }
             }
