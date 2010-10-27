@@ -201,7 +201,7 @@ public class UserAccountAdminService {
         List<InvoiceInfo> invoices = new ArrayList<InvoiceInfo>();
         Session session = Database.instance().createSession();
         try {
-            @SuppressWarnings({"unchecked"}) List<AccountCreditCardBillingInfo> results = session.createQuery("from AccountCreditCardBillingInfo where accountId = ?").setLong(0, SecurityUtil.getAccountID()).list();
+            @SuppressWarnings({"unchecked"}) List<AccountCreditCardBillingInfo> results = session.createQuery("from AccountCreditCardBillingInfo where accountId = ? and response = ?").setLong(0, SecurityUtil.getAccountID()).setInteger(1, 100).list();
             for (AccountCreditCardBillingInfo info : results) {
                 invoices.add(new InvoiceInfo(info.getTransactionTime(), info.toInvoiceText()));
             }
