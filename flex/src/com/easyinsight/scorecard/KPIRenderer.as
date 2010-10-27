@@ -28,7 +28,7 @@ public class KPIRenderer extends Canvas {
     }    
 
     private function onClick(event:MouseEvent):void {
-        Alert.show("blah");
+        
     }
 
     [Bindable("dataChange")]
