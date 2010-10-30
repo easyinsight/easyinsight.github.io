@@ -501,6 +501,23 @@ public class ExportService {
         }
     }
 
+    public byte[] toExcelEmail(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn) throws IOException, SQLException {
+
+        int dateFormat;
+        PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+        dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet rs = dateFormatStmt.executeQuery();
+        rs.next();
+        dateFormat = rs.getInt(1);
+
+        HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults, dateFormat);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        byte[] bytes = baos.toByteArray();
+        baos.close();
+        return bytes;
+    }
+
     private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ListDataResults listDataResults, int dateFormat) {
         HSSFWorkbook workbook = new HSSFWorkbook();
         Map<String, HSSFCellStyle> styleMap = new HashMap<String, HSSFCellStyle>();
