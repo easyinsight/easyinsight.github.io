@@ -196,18 +196,18 @@
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
     </mx:RemoteObject>
-    <mx:Button id="linkButton" toolTip="Link by URL" click="url()"
-               icon="@Embed(source='../../../../assets/link.png')"/>
-    <mx:Button id="embedButton" toolTip="Embed" click="embed()"
-               icon="@Embed(source='../../../../assets/plasma_tv.png')"/>
-    <mx:Button id="emailButton" toolTip="Email Delivery" click="email()"
-               icon="@Embed(source='../../../../assets/mail.png')"/>
-    <mx:Button id="imageButton" toolTip="Export PNG Image"
-               icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()"/>
     <mx:Button id="excelButton" toolTip="Export to Excel"
                icon="@Embed(source='../../../../assets/table.png')" click="exportExcel()"/>
     <mx:Button id="pdfButton" toolTip="Export to PDF"
                icon="@Embed(source='../../../../assets/document_chart.png')" click="exportPDF()"/>
+    <mx:Button id="emailButton" toolTip="Email Delivery" click="email()"
+               icon="@Embed(source='../../../../assets/mail.png')"/>
+    <mx:Button id="imageButton" toolTip="Export PNG Image"
+               icon="@Embed(source='../../../../assets/camera.png')" click="exportPNG()"/>
+    <mx:Button id="linkButton" toolTip="Link by URL" click="url()"
+               icon="@Embed(source='../../../../assets/link.png')"/>
+    <mx:Button id="embedButton" toolTip="Embed" click="embed()"
+               icon="@Embed(source='../../../../assets/plasma_tv.png')"/>
     <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
                icon="@Embed(source='../../../../assets/data_add.png')"/>
     <mx:Button id="netvibesButton" toolTip="Add to netvibes"
