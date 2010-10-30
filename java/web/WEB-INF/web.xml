@@ -46,6 +46,27 @@
         <load-on-startup>2</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>Image</servlet-name>
+        <display-name>Image</display-name>
+        <servlet-class>com.easyinsight.export.ImageServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Excel</servlet-name>
+        <display-name>Excel</display-name>
+        <servlet-class>com.easyinsight.export.ExcelServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>PDF</servlet-name>
+        <display-name>PDF</display-name>
+        <servlet-class>com.easyinsight.export.PDFServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
     <!-- MessageBroker Servlet -->
     <servlet>
         <servlet-name>MessageBrokerServlet</servlet-name>
@@ -84,6 +105,21 @@
     <servlet-mapping>
         <servlet-name>UnsubscribeServlet</servlet-name>
         <url-pattern>/unsubscribe</url-pattern>
+    </servlet-mapping>
+
+     <servlet-mapping>
+        <servlet-name>Image</servlet-name>
+        <url-pattern>/image</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Excel</servlet-name>
+        <url-pattern>/excel</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>PDF</servlet-name>
+        <url-pattern>/pdf</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
