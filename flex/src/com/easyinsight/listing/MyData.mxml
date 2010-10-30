@@ -139,6 +139,26 @@
             }
         }
 
+        private var openState:Object = new Object();
+
+        private function preserveOpenState():void {
+            if (displayTreeData != null) {
+                openState = new Object();
+                for each (var obj:Object in displayTreeData) {
+                    openState[String(obj.id)] = uploadGrid.isItemOpen(obj);
+                }
+            }
+        }
+
+        private function fromLastState():void {
+            for each (var obj:Object in displayTreeData) {
+                var open:Boolean = openState[String(obj.id)];
+                if (open) {
+                    uploadGrid.expandItem(obj, true);
+                }
+            }
+        }
+
         private function onDelete(event:DeleteDataSourceEvent):void {
             deleteItem(event.descriptor);
         }
@@ -173,7 +193,7 @@
             if (event.detail == Alert.OK) {
                 var feedDescriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
                 ProgressAlert.alert(this, "Deleting data source...", null, uploadService.deleteUserUpload);
-                uploadService.deleteUserUpload.send(feedDescriptor.dataFeedID);
+                uploadService.deleteUserUpload.send(feedDescriptor.id);
             }
         }
 
@@ -222,7 +242,7 @@
         private function alertInsightListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 var definition:InsightDescriptor = uploadGrid.selectedItem as InsightDescriptor;
-                ProgressAlert.alert(this, "Deleting report...", "Deleted report!", analysisService.deleteAnalysisDefinition);
+                ProgressAlert.alert(this, "Deleting report...", null, analysisService.deleteAnalysisDefinition);
                 analysisService.deleteAnalysisDefinition.send(definition.id);
             }
         }
@@ -243,7 +263,7 @@
             var selectedObject:Object = event.currentTarget.selectedItem;
             if (selectedObject is DataFeedDescriptor) {
                 var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
-                analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID);
+                analyzeSource = new DescriptorAnalyzeSource(descriptor.id);
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else if (selectedObject is LookupTableDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
@@ -318,7 +338,7 @@
             if (User.getInstance().uiConfiguration != null) {
                 var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
                 if (!showComposite && !showPackage && !showConnections && !showLookupTable && !addGoalTreeAvailable) {
-                    
+
                 }
                 showSize = uiConfig.getConfiguration(UIConfiguration.SHOW_SIZE_DATA).selected;
                 showLastData = uiConfig.getConfiguration(UIConfiguration.SHOW_TIME_DATA).selected;
@@ -352,10 +372,10 @@
             uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
             if (event.feedID > 0) {
                 var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                descriptor.dataFeedID = event.feedID;
+                descriptor.id = event.feedID;
                 descriptor.name = event.name;
                 if (event.startInAdmin) {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.dataFeedID})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
                 } else {
                     dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID)));
                 }
@@ -364,7 +384,7 @@
 
         private function gotFeedAnalysisTree():void {
 
-
+            preserveOpenState();
             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
             var myDataTree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
 
@@ -386,6 +406,7 @@
             IHierarchicalCollectionView(uploadGrid.dataProvider).filterFunction = filterFunction;
             displayTreeData.sort = sort;
             displayTreeData.refresh();
+            fromLastState();
             showLoading = false;
         }
 

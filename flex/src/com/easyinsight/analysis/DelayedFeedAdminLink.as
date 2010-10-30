@@ -39,7 +39,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
         	var feedResponse:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
         	if (feedResponse.status == FeedResponse.SUCCESS) {
         		//dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(feedResponse.feedDescriptor.dataFeedID)));
-        		dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: feedResponse.feedDescriptor.dataFeedID})));
+        		dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: feedResponse.feedDescriptor.id})));
             } else {
         		// tried to access a data source they don't have rights to, silently fail
         	}        	            

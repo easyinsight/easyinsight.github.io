@@ -35,7 +35,7 @@
 
         private function gotFeedAnalysisTree():void {
             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
-            var myDataTree:MyDataTree = groupService.getFeedAnalysisTree.lastResult as MyDataTree;            
+            var myDataTree:MyDataTree = groupService.getFeedAnalysisTree.lastResult as MyDataTree;
             sourceTreeData = myDataTree.objects;
             displayTreeData = new ArrayCollection(sourceTreeData.toArray());
             var hierarchicalData:HierarchicalData = new HierarchicalData();
@@ -50,7 +50,7 @@
             var selectedObject:Object = event.currentTarget.selectedItem;
             if (selectedObject is DataFeedDescriptor) {
                 var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
-                analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID);
+                analyzeSource = new DescriptorAnalyzeSource(descriptor.id);
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else {
                 analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));

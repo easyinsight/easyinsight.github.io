@@ -351,7 +351,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     private function analyzeCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.id)));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
@@ -367,10 +367,10 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
 
     private function refreshData(feedDescriptor:DataFeedDescriptor):void {
 
-        var c:Credentials = User.getCredentials(feedDescriptor.dataFeedID);
+        var c:Credentials = User.getCredentials(feedDescriptor.id);
         if (c != null) {
             var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
-            dsRefreshWindow.dataSourceID = feedDescriptor.dataFeedID;
+            dsRefreshWindow.dataSourceID = feedDescriptor.id;
             PopUpManager.addPopUp(dsRefreshWindow, this, true);
             PopUpUtil.centerPopUp(dsRefreshWindow);
             //dispatchEvent(new RefreshNotificationEvent());
@@ -381,7 +381,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         feedService.destination = "feeds";
         feedService.needsConfig.addEventListener(ResultEvent.RESULT, gotConfigNeed);
         ProgressAlert.alert(this, "Getting ready to refresh data...", null, feedService.needsConfig);
-        feedService.needsConfig.send(feedDescriptor.dataFeedID);
+        feedService.needsConfig.send(feedDescriptor.id);
     }
 
     private function gotConfigNeed(event:ResultEvent):void {
@@ -389,7 +389,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
         if (config) {
             var refreshWindow:RefreshWindow = new RefreshWindow();
-            refreshWindow.dataSourceID = descriptor.dataFeedID;
+            refreshWindow.dataSourceID = descriptor.id;
             refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured, false, 0, true);
             /*refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
             refreshWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);*/
@@ -397,7 +397,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             PopUpUtil.centerPopUp(refreshWindow);
         } else {
             var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
-            dsRefreshWindow.dataSourceID = descriptor.dataFeedID;
+            dsRefreshWindow.dataSourceID = descriptor.id;
             PopUpManager.addPopUp(dsRefreshWindow, this, true);
             PopUpUtil.centerPopUp(dsRefreshWindow);
         }
@@ -413,7 +413,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
 
     private function fileData(feedDescriptor:DataFeedDescriptor):void {
         var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
-        feedUpdateWindow.feedID = feedDescriptor.dataFeedID;
+        feedUpdateWindow.feedID = feedDescriptor.id;
         feedUpdateWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
         PopUpUtil.centerPopUp(feedUpdateWindow);
 
@@ -422,7 +422,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     private function adminCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.dataFeedID})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));

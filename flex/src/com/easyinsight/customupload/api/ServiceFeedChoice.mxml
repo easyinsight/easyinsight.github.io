@@ -3,31 +3,35 @@
 	creationComplete="apiService.getAvailableFeeds.send()">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.administration.feed.FeedDefinitionData;
-			import mx.managers.PopUpManager;
-			import com.easyinsight.listing.DataFeedDescriptor;
-			import mx.rpc.events.ResultEvent;
-			import mx.collections.ArrayCollection;
-			[Bindable]
-			private var descriptors:ArrayCollection;
-		
-			private function gotFeeds(event:ResultEvent):void {
-				descriptors = apiService.getAvailableFeeds.lastResult as ArrayCollection;				
-			}
-			
-			private function chose():void {
-				var descriptor:DataFeedDescriptor = feedBox.selectedItem as DataFeedDescriptor;
-				apiService.deployService.send(descriptor.dataFeedID);
-			}
-			
-			private function cancel():void {
-				PopUpManager.removePopUp(this);
-			}
-			
-			private function deployed():void {
-				dispatchEvent(new ServiceDefinitionEvent(ServiceDefinitionEvent.SERVICE_DEFINED, feedBox.selectedItem as DataFeedDescriptor));
-				PopUpManager.removePopUp(this);
-			}
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        import mx.managers.PopUpManager;
+
+        import com.easyinsight.listing.DataFeedDescriptor;
+
+        import mx.rpc.events.ResultEvent;
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private function gotFeeds(event:ResultEvent):void {
+            descriptors = apiService.getAvailableFeeds.lastResult as ArrayCollection;
+        }
+
+        private function chose():void {
+            var descriptor:DataFeedDescriptor = feedBox.selectedItem as DataFeedDescriptor;
+            apiService.deployService.send(descriptor.id);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function deployed():void {
+            dispatchEvent(new ServiceDefinitionEvent(ServiceDefinitionEvent.SERVICE_DEFINED, feedBox.selectedItem as DataFeedDescriptor));
+            PopUpManager.removePopUp(this);
+        }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject destination="apiService" id="apiService">

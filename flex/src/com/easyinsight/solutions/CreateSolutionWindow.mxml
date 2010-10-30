@@ -2,184 +2,184 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="goalService.getGoalTrees.send(); addEventListener(DataSourceSolutionEvent.DELETE_DATA_SOURCE, onDelete)">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.goals.GoalTreeDescriptor;
+        import com.easyinsight.goals.GoalTreeDescriptor;
         import com.easyinsight.listing.DataFeedDescriptor;
 
-            import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.PopUpUtil;
 
-            import mx.controls.Alert;
-            import mx.managers.PopUpManager;
-			import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
 
-            private function onDelete(event:DataSourceSolutionEvent):void {
-                includedFeeds.removeItemAt(includedFeeds.getItemIndex(event.descriptor));
+        private function onDelete(event:DataSourceSolutionEvent):void {
+            includedFeeds.removeItemAt(includedFeeds.getItemIndex(event.descriptor));
+        }
+
+        private function updateImage():void {
+            if (_solution == null) {
+                Alert.show("Save the solution before adding an image.");
+            } else {
+                var window:UpdateSolutionImageWindow = new UpdateSolutionImageWindow();
+                window.sourceID = _solution.solutionID;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
             }
+        }
 
-            private function updateImage():void {
-                if (_solution == null) {
-                    Alert.show("Save the solution before adding an image.");
-                } else {
-                    var window:UpdateSolutionImageWindow = new UpdateSolutionImageWindow();
-                    window.sourceID = _solution.solutionID;
-                    PopUpManager.addPopUp(window, this, true);
-                    PopUpUtil.centerPopUp(window);
-                }
+        private function updateArchive():void {
+            if (_solution == null) {
+                Alert.show("Save the solution before adding an archive.");
+            } else {
+                var window:UpdateSolutionArchiveWindow = new UpdateSolutionArchiveWindow();
+                window.sourceID = _solution.solutionID;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
             }
+        }
 
-            private function updateArchive():void {
-                if (_solution == null) {
-                    Alert.show("Save the solution before adding an archive.");
-                } else {
-                    var window:UpdateSolutionArchiveWindow = new UpdateSolutionArchiveWindow();
-                    window.sourceID = _solution.solutionID;
-                    PopUpManager.addPopUp(window, this, true);
-                    PopUpUtil.centerPopUp(window);
-                }
+        [Bindable]
+        private var includedFeeds:ArrayCollection = new ArrayCollection();
+
+        private var _solution:Solution;
+
+        [Bindable]
+        private var solutionCategory:int;
+
+        [Bindable]
+        private var nameText:String;
+        [Bindable]
+        private var logoLink:String;
+        [Bindable]
+        private var descriptionText:String;
+        [Bindable]
+        private var footerText:String;
+        [Bindable]
+        private var includeData:Boolean;
+        [Bindable]
+        private var author:String;
+        [Bindable]
+        private var industry:String;
+        [Bindable]
+        private var tags:String;
+        [Bindable]
+        private var goalTrees:ArrayCollection;
+        [Bindable]
+        private var solutionTier:int;
+        [Bindable]
+        private var archiveName:String;
+        [Bindable]
+        private var solutionImage:Bitmap;
+        [Bindable]
+        private var screencastName:String;
+        [Bindable]
+        private var screencastDirectory:String;
+        [Bindable]
+        private var detailClass:String;
+
+        private function onComplete(event:Event):void {
+            var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+            solutionImage = Bitmap(loaderContent.loader.content);
+            loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
+        }
+
+        public function set solution(solution:Solution):void {
+            this._solution = solution;
+            nameText = this._solution.name;
+            descriptionText = this._solution.description;
+            author = this._solution.author;
+            industry = this._solution.industry;
+            includeData = this._solution.copyData;
+            solutionTier = this._solution.solutionTier - 1;
+            logoLink = this._solution.logoLink;
+            solutionCategory = this._solution.category - 1;
+            archiveName = _solution.solutionArchiveName;
+            screencastName = _solution.screencastName;
+            screencastDirectory = _solution.screencastDirectory;
+            footerText = _solution.footerText;
+            detailClass = _solution.detailPageClass;
+            if (solution.solutionID > 0) {
+                solutionService.getDescriptorsForSolution.send(solution.solutionID);
             }
-
-            [Bindable]
-			private var includedFeeds:ArrayCollection = new ArrayCollection();
-			
-			private var _solution:Solution;
-
-            [Bindable]
-            private var solutionCategory:int;
-			
-			[Bindable]
-			private var nameText:String;
-            [Bindable]
-            private var logoLink:String;
-			[Bindable]
-			private var descriptionText:String;
-            [Bindable]
-			private var footerText:String;
-            [Bindable]
-            private var includeData:Boolean;
-            [Bindable]
-            private var author:String;
-            [Bindable]
-            private var industry:String;
-            [Bindable]
-            private var tags:String;
-            [Bindable]
-            private var goalTrees:ArrayCollection;
-            [Bindable]
-            private var solutionTier:int;
-            [Bindable]
-            private var archiveName:String;
-            [Bindable]
-            private var solutionImage:Bitmap;
-            [Bindable]
-            private var screencastName:String;
-            [Bindable]
-            private var screencastDirectory:String;
-            [Bindable]
-            private var detailClass:String;
-
-            private function onComplete(event:Event):void {
-                var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
-                solutionImage = Bitmap(loaderContent.loader.content);
-                loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
+            if (solution.image != null) {
+                var loader:Loader = new Loader();
+                loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
+                loader.loadBytes(solution.image);
             }
+        }
 
-            public function set solution(solution:Solution):void {
-				this._solution = solution;
-				nameText = this._solution.name;
-				descriptionText = this._solution.description;
-                author = this._solution.author;
-                industry = this._solution.industry;
-                includeData = this._solution.copyData;
-                solutionTier = this._solution.solutionTier - 1;
-                logoLink = this._solution.logoLink;
-                solutionCategory = this._solution.category - 1;
-                archiveName = _solution.solutionArchiveName;
-                screencastName = _solution.screencastName;
-                screencastDirectory = _solution.screencastDirectory;
-                footerText = _solution.footerText;
-                detailClass = _solution.detailPageClass;
-				if (solution.solutionID > 0) {
-					solutionService.getDescriptorsForSolution.send(solution.solutionID);
-				}
-                if (solution.image != null) {
-                    var loader:Loader = new Loader();
-                    loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
-                    loader.loadBytes(solution.image);
-                }
-			}
-			
-			private function save():void {
-				if (_solution == null) {
-					_solution = new Solution();
-				}
-                _solution.name = nameInput.text;
-                _solution.description = descriptionInput.htmlText;
-                _solution.logoLink = logoLinkInput.text;
-                //_solution.author = authorInput.text;
-                //_solution.industry = industryInput.text;
-                _solution.footerText = footerInput.htmlText;
-                _solution.copyData = includeDataCheckbox.selected;
-                _solution.solutionTier = accountTierBox.selectedIndex + 1;
-                _solution.category = solutionCategoryBox.selectedIndex + 1;
-                _solution.detailPageClass = detailClassComboBox.selectedItem as String;
-                if (goalTreeComboBox.selectedIndex > 0) {
-                    _solution.goalTreeID = goalTreeComboBox.selectedItem.id;
-                } else {
-                    _solution.goalTreeID = 0;
-                }
-                _solution.screencastDirectory = screencastDirectoryInput.text;
-                _solution.screencastName = screencastNameInput.text;
-				var feedIDs:ArrayCollection = new ArrayCollection();
-				for each (var feedDescriptor:DataFeedDescriptor in includedFeeds) {
-					feedIDs.addItem(feedDescriptor.dataFeedID);
-				}
-				if (_solution.solutionID == 0) {
-					solutionService.addSolution.send(_solution, feedIDs); 
-				} else {
-					solutionService.updateSolution.send(_solution, feedIDs);
-				}
-			}
-			
-			private function cancel():void {
-				PopUpManager.removePopUp(this);
-			}
-			
-			private function gotDescriptors():void {
-				this.includedFeeds = solutionService.getDescriptorsForSolution.lastResult as ArrayCollection;
-			}
-			
-			private function saveCompleted():void {
-                dispatchEvent(new SolutionAdminEvent());
-				PopUpManager.removePopUp(this);
-			}
-			
-			private function addFeed():void {
-				var window:AddFeedToSolutionWindow = AddFeedToSolutionWindow(PopUpManager.createPopUp(this, AddFeedToSolutionWindow, true));
-				window.addEventListener(FeedSelectionEvent.FEED_SELECTED, feedSelected);
-				PopUpUtil.centerPopUp(window);
-			}
-			
-			private function feedSelected(event:FeedSelectionEvent):void {
-				this.includedFeeds.addItem(event.feedDescriptor);
-			}
+        private function save():void {
+            if (_solution == null) {
+                _solution = new Solution();
+            }
+            _solution.name = nameInput.text;
+            _solution.description = descriptionInput.htmlText;
+            _solution.logoLink = logoLinkInput.text;
+            //_solution.author = authorInput.text;
+            //_solution.industry = industryInput.text;
+            _solution.footerText = footerInput.htmlText;
+            _solution.copyData = includeDataCheckbox.selected;
+            _solution.solutionTier = accountTierBox.selectedIndex + 1;
+            _solution.category = solutionCategoryBox.selectedIndex + 1;
+            _solution.detailPageClass = detailClassComboBox.selectedItem as String;
+            if (goalTreeComboBox.selectedIndex > 0) {
+                _solution.goalTreeID = goalTreeComboBox.selectedItem.id;
+            } else {
+                _solution.goalTreeID = 0;
+            }
+            _solution.screencastDirectory = screencastDirectoryInput.text;
+            _solution.screencastName = screencastNameInput.text;
+            var feedIDs:ArrayCollection = new ArrayCollection();
+            for each (var feedDescriptor:DataFeedDescriptor in includedFeeds) {
+                feedIDs.addItem(feedDescriptor.id);
+            }
+            if (_solution.solutionID == 0) {
+                solutionService.addSolution.send(_solution, feedIDs);
+            } else {
+                solutionService.updateSolution.send(_solution, feedIDs);
+            }
+        }
 
-            private function gotGoalTrees():void {
-                var goalTrees:ArrayCollection = goalService.getGoalTrees.lastResult as ArrayCollection;
-                var treesWithNoneOption:ArrayCollection = new ArrayCollection(goalTrees.source);
-                treesWithNoneOption.addItemAt({name: "[ No Selection ]"}, 0);
-                this.goalTrees = treesWithNoneOption;
-                if (_solution != null) {
-                    if (_solution.goalTreeID > 0) {
-                        for each (var obj:Object in goalTrees) {
-                            if (obj is GoalTreeDescriptor) {
-                                var descriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
-                                if (descriptor.id == _solution.goalTreeID) {
-                                    goalTreeComboBox.selectedItem = descriptor;
-                                }
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function gotDescriptors():void {
+            this.includedFeeds = solutionService.getDescriptorsForSolution.lastResult as ArrayCollection;
+        }
+
+        private function saveCompleted():void {
+            dispatchEvent(new SolutionAdminEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addFeed():void {
+            var window:AddFeedToSolutionWindow = AddFeedToSolutionWindow(PopUpManager.createPopUp(this, AddFeedToSolutionWindow, true));
+            window.addEventListener(FeedSelectionEvent.FEED_SELECTED, feedSelected);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function feedSelected(event:FeedSelectionEvent):void {
+            this.includedFeeds.addItem(event.feedDescriptor);
+        }
+
+        private function gotGoalTrees():void {
+            var goalTrees:ArrayCollection = goalService.getGoalTrees.lastResult as ArrayCollection;
+            var treesWithNoneOption:ArrayCollection = new ArrayCollection(goalTrees.source);
+            treesWithNoneOption.addItemAt({name: "[ No Selection ]"}, 0);
+            this.goalTrees = treesWithNoneOption;
+            if (_solution != null) {
+                if (_solution.goalTreeID > 0) {
+                    for each (var obj:Object in goalTrees) {
+                        if (obj is GoalTreeDescriptor) {
+                            var descriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
+                            if (descriptor.id == _solution.goalTreeID) {
+                                goalTreeComboBox.selectedItem = descriptor;
                             }
                         }
                     }
                 }
             }
+        }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject destination="solutionService" id="solutionService">

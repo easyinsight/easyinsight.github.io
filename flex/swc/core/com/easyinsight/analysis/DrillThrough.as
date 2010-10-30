@@ -3,6 +3,7 @@ package com.easyinsight.analysis {
 [RemoteClass(alias="com.easyinsight.analysis.DrillThrough")]
 public class DrillThrough extends Link{
     public var reportID:int;
+    public var miniWindow:Boolean;
     public function DrillThrough() {
         super();
     }

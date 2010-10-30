@@ -71,25 +71,33 @@
                 visuals.rotationAngle = pieChartDef.rotationAngle;
             }
             graphData = dataSet;
-            labelPosition = pieChartDef.labelPosition;
-            pieChart.setStyle("fontFamily", pieChartDef.fontName);
-            pieChart.setStyle("fontSize", pieChartDef.fontSize);
-            pieSeries.setStyle("fontFamily", pieChartDef.fontName);
-            pieSeries.setStyle("fontSize", pieChartDef.fontSize);
-            if (pieChartDef.colorScheme == FillProvider.spectral) {
-                pieSeries.setStyle("fills", FillProvider.createSpectralColors());
-            } else if (pieChartDef.colorScheme == FillProvider.highContrast) {
-                pieSeries.setStyle("fills", FillProvider.createSAPColors());
-            } else if (pieChartDef.colorScheme == FillProvider.warmColors) {
-                pieSeries.setStyle("fills", FillProvider.createWarmColors());
-            } else {
-                pieSeries.setStyle("fills", FillProvider.createSampleGradient());
-            }
             if (dataSet.length > 0) {
+                stackIndex = 0;
+                pieChart.visible = true;
+                legend.visible = true;
+                labelPosition = pieChartDef.labelPosition;
+                pieChart.setStyle("fontFamily", pieChartDef.fontName);
+                pieChart.setStyle("fontSize", pieChartDef.fontSize);
+                pieSeries.setStyle("fontFamily", pieChartDef.fontName);
+                pieSeries.setStyle("fontSize", pieChartDef.fontSize);
+                if (pieChartDef.colorScheme == FillProvider.spectral) {
+                    pieSeries.setStyle("fills", FillProvider.createSpectralColors());
+                } else if (pieChartDef.colorScheme == FillProvider.highContrast) {
+                    pieSeries.setStyle("fills", FillProvider.createSAPColors());
+                } else if (pieChartDef.colorScheme == FillProvider.warmColors) {
+                    pieSeries.setStyle("fills", FillProvider.createWarmColors());
+                } else {
+                    pieSeries.setStyle("fills", FillProvider.createSampleGradient());
+                }
                 this.measureFormatter = pieChartDef.measure.getFormatter();
                 measureName = pieChartDef.measure.qualifiedName();
                 dimension = pieChartDef.xaxis.qualifiedName();
                 this.dimensionItem = pieChartDef.xaxis;
+            } else {
+                if (pieChartDef.measure != null && pieChartDef.xaxis != null) stackIndex = 2;
+                else stackIndex = 1;
+                pieChart.visible = false;
+                legend.visible = false;
             }
         }
 
@@ -135,21 +143,51 @@
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }
 
+        [Bindable]
+        private var stackIndex:int = 0;
+
         public function preserveValues():Boolean {
             return false;
         }
 		]]>
     </mx:Script>
-    <mx:HBox width="100%" height="100%">
-        <ilog:PieChart3D id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
-                              paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" depth="5" showDataTips="true"
-                itemClick="onClick(event)">
-            <ilog:series>
-                <ilog:PieSeries3D field="{measureName}" nameField="{dimension}" labelPosition="{labelPosition}"
-                                  labelFunction="renderPieLabel" id="pieSeries">
-                </ilog:PieSeries3D>
-            </ilog:series>
-        </ilog:PieChart3D>
-        <mx:Legend dataProvider="{pieChart}" height="100%"/>
-    </mx:HBox>
+    <mx:Canvas width="100%" height="100%">
+        <mx:HBox width="100%" height="100%">
+            <ilog:PieChart3D id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
+                                  paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" depth="5" showDataTips="true"
+                    itemClick="onClick(event)">
+                <ilog:series>
+                    <ilog:PieSeries3D field="{measureName}" nameField="{dimension}" labelPosition="{labelPosition}"
+                                      labelFunction="renderPieLabel" id="pieSeries">
+                    </ilog:PieSeries3D>
+                </ilog:series>
+            </ilog:PieChart3D>
+            <mx:Legend dataProvider="{pieChart}" height="100%" id="legend"/>
+        </mx:HBox>
+
+        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
+                      mouseEnabled="false">
+            <mx:Canvas width="100%" height="100%"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+                </mx:Box>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="We didn't find any data for the fields and filters that you specified in the report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+                </mx:Box>
+            </mx:Box>
+        </mx:ViewStack>
+    </mx:Canvas>
 </mx:Module>

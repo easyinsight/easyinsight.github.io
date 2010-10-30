@@ -46,13 +46,13 @@ import flash.events.MouseEvent;
 		
 		private function refreshData():void {
 			var refreshWindow:RefreshWindow = RefreshWindow(PopUpManager.createPopUp(this.parent, RefreshWindow, true));
-			refreshWindow.feedID = feedDescriptor.dataFeedID;
+			refreshWindow.feedID = feedDescriptor.id;
 			PopUpUtil.centerPopUp(refreshWindow);
 		}
 		
 		private function fileData():void {
 			var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent, FileFeedUpdateWindow, true));
-			feedUpdateWindow.feedID = feedDescriptor.dataFeedID;
+			feedUpdateWindow.feedID = feedDescriptor.id;
 			PopUpUtil.centerPopUp(feedUpdateWindow);
 				
 		}

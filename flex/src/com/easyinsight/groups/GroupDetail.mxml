@@ -24,7 +24,7 @@
 
         import com.easyinsight.framework.NavigationEvent;
 
-        import mx.utils.URLUtil;                                                
+        import mx.utils.URLUtil;
 
         [Bindable]
         public var groupID:int;
@@ -99,19 +99,19 @@
 
         private var selectedItem:Object;
 
-         private function alertFeedListener(event:CloseEvent):void {
+        private function alertFeedListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 var feedDescriptor:DataFeedDescriptor = selectedItem as DataFeedDescriptor;
                 ProgressAlert.alert(this, "Removing data source...", null, groupService.removeDataSourceFromGroup);
-                groupService.removeDataSourceFromGroup.send(feedDescriptor.dataFeedID, groupID);
+                groupService.removeDataSourceFromGroup.send(feedDescriptor.id, groupID);
             }
         }
 
         private function alertPackageListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 /*var reportDescriptor:ReportPackageDescriptor = uploadGrid.selectedItem as ReportPackageDescriptor;
-                ProgressAlert.alert(this, "Deleting package...", "Deleted package!", packageService.deleteReportPackage);
-                packageService.deleteReportPackage.send(reportDescriptor.id);*/
+                 ProgressAlert.alert(this, "Deleting package...", "Deleted package!", packageService.deleteReportPackage);
+                 packageService.deleteReportPackage.send(reportDescriptor.id);*/
             }
         }
 
@@ -121,12 +121,12 @@
                 ProgressAlert.alert(this, "Removing report...", null, groupService.removeReportFromGroup);
                 groupService.removeReportFromGroup.send(definition.id, groupID);
             }
-        }        
+        }
 
         public function gotFocus():void {
             ProgressAlert.alert(this, "Retrieving group data...", null, groupService.getGroup, groupService.getGroupMessages);
             groupService.getGroup.send(groupID);
-            groupService.getGroupMessages.send(groupID, null, null);            
+            groupService.getGroupMessages.send(groupID, null, null);
             groupData.gotFocus();
         }
 
@@ -163,7 +163,7 @@
             if (!foundUser) {
                 joinEnabled = true;
             }
-            
+
             numberMembersText = group.groupUsers.length > 1 ? (group.groupUsers.length + " members") : (group.groupUsers.length + " member");
             this._group = group;
         }
@@ -176,7 +176,6 @@
             gotFocus();
         }
 
-        
 
         private function joinGroup():void {
             groupService.addMemberToGroup.send(_group.groupID);
@@ -195,7 +194,6 @@
         private function addedComment():void {
             groupService.getGroupMessages.send(_group.groupID);
         }
-
 
 
         private function onGroupRefresh(event:GroupRefreshEvent):void {

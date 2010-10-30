@@ -48,7 +48,7 @@
             }
 
             if (scheduleConfiguration.save()) {
-                DataSourceRefreshActivity(activity).dataSourceID = dataSourceComboBox.selectedItem.dataFeedID;
+                DataSourceRefreshActivity(activity).dataSourceID = dataSourceComboBox.selectedItem.id;
                 DataSourceRefreshActivity(activity).dataSourceName = dataSourceComboBox.selectedItem.name;
                 var utcOffset:int = new Date().getTimezoneOffset();
                 exportService.addOrUpdateSchedule.send(_activity, utcOffset);
@@ -75,7 +75,7 @@
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="Data Source:" fontSize="12">
                 <util:SmartComboBox dataProvider="{dataSources}" selectedValue="{dataSourceID}"
-                                    selectedProperty="dataFeedID"
+                                    selectedProperty="id"
                                     id="dataSourceComboBox" labelField="name" fontSize="12"/>
             </mx:FormItem>
         </mx:Form>

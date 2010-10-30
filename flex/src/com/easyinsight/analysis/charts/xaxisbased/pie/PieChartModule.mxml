@@ -43,6 +43,9 @@
             var pieChartDef:PieChartDefinition = analysisDefinition as PieChartDefinition;
             graphData = dataSet;
             if (dataSet.length > 0) {
+                stackIndex = 0;
+                pieChart.visible = true;
+                legend.visible = true;
                 labelPosition = pieChartDef.labelPosition;
                 pieChart.setStyle("fontFamily", pieChartDef.fontName);
                 pieChart.setStyle("fontSize", pieChartDef.fontSize);
@@ -62,6 +65,11 @@
                 measureName = pieChartDef.measure.qualifiedName();
                 dimension = pieChartDef.xaxis.qualifiedName();
                 this.dimensionItem = pieChartDef.xaxis;
+            } else {
+                if (pieChartDef.measure != null && pieChartDef.xaxis != null) stackIndex = 2;
+                else stackIndex = 1;
+                pieChart.visible = false;
+                legend.visible = false;
             }
         }
 
@@ -126,88 +134,51 @@
 
         [Bindable]
         private var labelPosition:String;
+
+        [Bindable]
+        private var stackIndex:int = 0;
 		]]>
-	</mx:Script><!--
-    <mx:Array id="spectral">
-        <mx:SolidColor color="0x9E0142" alpha="1"/>
-        <mx:SolidColor color="0xE6F598" alpha="1"/>
-        <mx:SolidColor color="0xD53E4F" alpha="1"/>
-        <mx:SolidColor color="0xABDDA4" alpha="1"/>
-        <mx:SolidColor color="0xF46D43" alpha="1"/>
-        <mx:SolidColor color="0xFDAE61" alpha="1"/>
-        <mx:SolidColor color="0x66C2A5" alpha="1"/>
-        <mx:SolidColor color="0xFEE08B" alpha="1"/>
-        <mx:SolidColor color="0x3288BD" alpha="1"/>
-        <mx:SolidColor color="0xFFFFBF" alpha="1"/>
+	</mx:Script>
+    <mx:Canvas width="100%" height="100%" id="canvas">
+        <mx:HBox width="100%" height="100%">
+            <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
+                        paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="onClick(event)"
+                    showDataTips="true" fontFamily="Tahoma" fontSize="14">
+                <mx:series>
+                    <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="{labelPosition}"
+                        labelFunction="renderPieLabel" id="pieSeries">
+                        <mx:showDataEffect>
+                            <mx:SeriesInterpolate duration="1000" />
+                        </mx:showDataEffect>
+                    </mx:PieSeries>
+                </mx:series>
+            </mx:PieChart>
+            <mx:Legend id="legend" dataProvider="{pieChart}" height="100%" legendItemClass="com.easyinsight.analysis.charts.EILegendItem"/>
+        </mx:HBox>
 
-
-
-
-
-        <mx:SolidColor color="0x5E4FA2" alpha="1"/>
-    </mx:Array>
-    <mx:Array id="fills">
-        <mx:SolidColor id="sc1" color="#F0B400" alpha="1"/>
-        <mx:SolidColor id="sc2" color="#1E6C0B" alpha="1"/>
-        <mx:SolidColor id="sc3" color="#00488C" alpha="1"/>
-        <mx:SolidColor id="sc4" color="#332600" alpha="1"/>
-        <mx:SolidColor id="sc5" color="#D84000" alpha="1"/>
-        <mx:SolidColor id="sc6" color="#434C43" alpha="1"/>
-        <mx:SolidColor id="sc7" color="#B00023" alpha="1"/>
-
-        <mx:SolidColor id="sc8" color="#F3C01C" alpha="1"/>
-        <mx:SolidColor id="sc15" color="#F8D753" alpha="1"/>
-        <mx:SolidColor id="sc22" color="#FAE16B" alpha="1"/>
-        <mx:SolidColor id="sc29" color="#FFF8A3" alpha="1"/>
-
-        <mx:SolidColor id="sc9" color="#3D8128" alpha="1"/>
-        <mx:SolidColor id="sc16" color="#5C9746" alpha="1"/>
-        <mx:SolidColor id="sc23" color="#82B16A" alpha="1"/>
-        <mx:SolidColor id="sc30" color="#A9CC8F" alpha="1"/>
-
-
-        <mx:SolidColor id="sc10" color="#205F9A" alpha="1"/>
-        <mx:SolidColor id="sc17" color="#3E75A7" alpha="1"/>
-        <mx:SolidColor id="sc24" color="#779DBF" alpha="1"/>
-        <mx:SolidColor id="sc31" color="#B2C8D9" alpha="1"/>
-
-
-        <mx:SolidColor id="sc11" color="#63522B" alpha="1"/>
-        <mx:SolidColor id="sc18" color="#7A653E" alpha="1"/>
-        <mx:SolidColor id="sc25" color="#907A52" alpha="1"/>
-        <mx:SolidColor id="sc32" color="#BEA37A" alpha="1"/>
-
-
-        <mx:SolidColor id="sc12" color="#DC5313" alpha="1"/>
-        <mx:SolidColor id="sc19" color="#E1662A" alpha="1"/>
-        <mx:SolidColor id="sc26" color="#EB8953" alpha="1"/>
-        <mx:SolidColor id="sc33" color="#F3AA79" alpha="1"/>
-
-
-        <mx:SolidColor id="sc13" color="#5D645A" alpha="1"/>
-        <mx:SolidColor id="sc20" color="#74796F" alpha="1"/>
-        <mx:SolidColor id="sc27" color="#8A8D82" alpha="1"/>
-        <mx:SolidColor id="sc34" color="#B5B5A9" alpha="1"/>
-
-
-        <mx:SolidColor id="sc14" color="#BC1C39" alpha="1"/>
-        <mx:SolidColor id="sc21" color="#C4384F" alpha="1"/>
-        <mx:SolidColor id="sc28" color="#D6707B" alpha="1"/>
-        <mx:SolidColor id="sc35" color="#E6A5A4" alpha="1"/>
-    </mx:Array>-->
-    <mx:HBox width="100%" height="100%">
-        <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
-					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="onClick(event)"
-                showDataTips="true" fontFamily="Tahoma" fontSize="14">
-            <mx:series>
-                <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="{labelPosition}"
-                    labelFunction="renderPieLabel" id="pieSeries">
-                    <mx:showDataEffect>
-                        <mx:SeriesInterpolate duration="1000" />
-                    </mx:showDataEffect>                    
-                </mx:PieSeries>
-            </mx:series>
-        </mx:PieChart>
-        <mx:Legend id="legend" dataProvider="{pieChart}" height="100%" legendItemClass="com.easyinsight.analysis.charts.EILegendItem"/>
-    </mx:HBox>
+        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
+                      mouseEnabled="false">
+            <mx:Canvas width="100%" height="100%"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+                </mx:Box>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="We didn't find any data for the fields and filters that you specified in the report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+                </mx:Box>
+            </mx:Box>
+        </mx:ViewStack>
+    </mx:Canvas>
 </mx:Module>

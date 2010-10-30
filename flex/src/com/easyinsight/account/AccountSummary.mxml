@@ -33,7 +33,9 @@
         }
 
         public function gotFocus():void {
-            userService.getAccountInfo.send();
+            if (User.getInstance() != null) {
+                userService.getAccountInfo.send();
+            }
         }
 
         private function gotAccountInfo():void {
@@ -42,7 +44,9 @@
         }
 
         private function onAccountRefresh(event:Event):void {
-            userService.getAccountInfo.send();
+            if (User.getInstance() != null) {
+                userService.getAccountInfo.send();
+            }
         }
 
         private var lastAccountType:int;

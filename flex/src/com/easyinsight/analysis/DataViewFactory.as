@@ -1,7 +1,9 @@
 package com.easyinsight.analysis {
 
 import com.easyinsight.filtering.FilterRawData;
+import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
+import com.easyinsight.pseudocontext.CustomCodeEvent;
 import com.easyinsight.report.ReportEventProcessor;
 import com.easyinsight.util.UserAudit;
 
@@ -283,7 +285,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     private function loadReportRenderer():void {
-        moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + _reportRendererModule);
+        moduleInfo = ModuleManager.getModule("/app/"+Constants.instance().buildPath+"/" + _reportRendererModule);
         moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler, false, 0, true);
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler, false, 0, true);
         _loadingDisplay = new LoadingModuleDisplay();
@@ -306,6 +308,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
             _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
             _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
+            _reportRenderer.addEventListener(CustomCodeEvent.CUSTOM_CODE_LINK, onCustomCode, false, 0, true);
             _dataService.preserveValues = _reportRenderer.preserveValues();
             if (_loadingDisplay != null) {
                 reportCanvas.removeChild(_loadingDisplay);
@@ -320,7 +323,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
         }
     }
 
+    private function onCustomCode(event:CustomCodeEvent):void {
+        CustomCodeWindow.newWindow(this, event, _dataSourceID);
+    }
+
     private function onReportWindow(event:ReportWindowEvent):void {
+        if (event.dataSourceID == 0) {
+            event.dataSourceID = _dataSourceID;
+        }
         ReportEventProcessor.fromEvent(event, this);
     }
 

@@ -6,40 +6,43 @@
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.managers.PopUpManager;
-			import com.easyinsight.listing.DataFeedDescriptor;
-			import mx.collections.ArrayCollection;
-			[Bindable]
-			private var descriptors:ArrayCollection;
 
-            private var _groupID:int;
+        import com.easyinsight.listing.DataFeedDescriptor;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private var _groupID:int;
 
 
-            public function set groupID(val:int):void {
-                _groupID = val;
-            }
+        public function set groupID(val:int):void {
+            _groupID = val;
+        }
 
-			private function gotFeeds():void {
-				var descriptors:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
-                var sort:Sort = new Sort();
-                sort.fields = [ new SortField("name", true) ];
-                descriptors.sort = sort;
-                descriptors.refresh();
-                this.descriptors = descriptors;
-			}
+        private function gotFeeds():void {
+            var descriptors:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+            this.descriptors = descriptors;
+        }
 
-			private function chose():void {
-				var descriptor:DataFeedDescriptor = feedBox.selectedItem as DataFeedDescriptor;
-                groupService.addFeedToGroup.send(descriptor.dataFeedID, _groupID);
-			}
+        private function chose():void {
+            var descriptor:DataFeedDescriptor = feedBox.selectedItem as DataFeedDescriptor;
+            groupService.addFeedToGroup.send(descriptor.id, _groupID);
+        }
 
-            private function addedDataSource():void {
-                dispatchEvent(new GroupRefreshEvent());
-                PopUpManager.removePopUp(this);
-            }
+        private function addedDataSource():void {
+            dispatchEvent(new GroupRefreshEvent());
+            PopUpManager.removePopUp(this);
+        }
 
-			private function cancel():void {
-				PopUpManager.removePopUp(this);
-			}
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService">

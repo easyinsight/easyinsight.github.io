@@ -11,8 +11,9 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
+
         import mx.controls.Alert;
-        
+
         private var _dataSourceClass:Class;
 
         public function set dataSourceClass(val:Class):void {
@@ -50,11 +51,11 @@
         private function created():void {
             var id:int = uploadService.newExternalDataSource.lastResult as int;
             var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-            descriptor.dataFeedID = id;
+            descriptor.id = id;
             //descriptor.policy = new UploadPolicy();
             //descriptor.policy.publiclyVisible = false;
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id));            
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID, "")));
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.id, "")));
         }
 
         ]]></mx:Script>

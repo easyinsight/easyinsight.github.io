@@ -1,33 +1,31 @@
 package com.easyinsight.pseudocontext {
-
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
-
-
 import com.easyinsight.analysis.DrillThrough;
+import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
 import com.easyinsight.analysis.HierarchyDrilldownEvent;
 import com.easyinsight.analysis.HierarchyLevel;
 import com.easyinsight.analysis.HierarchyRollupEvent;
-
 import com.easyinsight.analysis.Link;
+import com.easyinsight.analysis.ReportWindowEvent;
 import com.easyinsight.analysis.URLLink;
 import com.easyinsight.filtering.FilterRawData;
-
 import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
 
+import flash.events.Event;
+import flash.events.EventDispatcher;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
-
 import flash.net.URLRequest;
+import flash.net.navigateToURL;
 import flash.system.System;
 import flash.ui.Keyboard;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.VBox;
-
 import mx.controls.Label;
 import mx.events.FlexEvent;
 import mx.formatters.Formatter;
@@ -40,9 +38,9 @@ public class PseudoContextWindow extends VBox {
     private var analysisItem:AnalysisItem;
 
     private var passthroughFunction:Function;
-    private var passthroughObject:Object;
+    private var passthroughObject:EventDispatcher;
 
-    public function PseudoContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:Object) {
+    public function PseudoContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:EventDispatcher) {
         super();
         this.analysisItem = analysisItem;
         this.passthroughFunction = passthroughFunction;
@@ -179,23 +177,32 @@ public class PseudoContextWindow extends VBox {
     private function urlClick(event:MouseEvent):void {
         var link:URLLink = event.currentTarget.data as URLLink;
         var url:String = data[link.label + "_link"];
-        flash.net.navigateToURL(new URLRequest(url), "_blank");
+        navigateToURL(new URLRequest(url), "_blank");
         destroy();
     }
 
     private function drillthroughClick(event:MouseEvent):void {
         var drillThrough:DrillThrough = event.currentTarget.data as DrillThrough;
+        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough);
+        executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
+        executor.send();
+    }
+
+    private function onDrill(event:DrillThroughEvent):void {
         var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
         filterDefinition.field = analysisItem;
         filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
         filterDefinition.enabled = true;
         filterDefinition.inclusive = true;
-        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough.reportID, new ArrayCollection([ filterDefinition ]));
-        executor.addEventListener(ReportNavigationEvent.TO_REPORT, onReport);
-        executor.send();
+        var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
+        if (event.drillThrough.miniWindow) {
+            onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, event.report.dataFeedID, event.report.reportType));
+        } else {
+            onReport(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+        }
     }
 
-    private function onReport(event:ReportNavigationEvent):void {
+    private function onReport(event:Event):void {
         destroy();
         passthroughFunction.call(passthroughObject, event);
     }

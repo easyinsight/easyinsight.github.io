@@ -13,7 +13,7 @@
         private function gotDataSources():void {
             var dataSources:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
             for each (var desc:DataFeedDescriptor in dataSources) {
-                User.getSharedObject().data[desc.dataFeedID.toString()] = null;
+                User.getSharedObject().data[desc.id.toString()] = null;
             }
             User.getSharedObject().flush();
         }

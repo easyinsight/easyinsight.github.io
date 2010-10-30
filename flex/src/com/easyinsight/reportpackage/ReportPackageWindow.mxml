@@ -55,7 +55,7 @@
                 description = _reportPackage.description;
                 singleSource = _reportPackage.singleDataSource;
                 reports = _reportPackage.reports;
-            } else if (_reportPackageID > 0 ) {
+            } else if (_reportPackageID > 0) {
                 packageService.getReportPackage.send(_reportPackageID);
             }
         }
@@ -80,7 +80,7 @@
             _reportPackage.authorName = "";
             _reportPackage.description = "";
             if (_reportPackage.singleDataSource) {
-                _reportPackage.dataSourceID = dataSourceComboBox.selectedItem.dataFeedID;
+                _reportPackage.dataSourceID = dataSourceComboBox.selectedItem.id;
             } else {
                 _reportPackage.dataSourceID = 0;
             }
@@ -93,13 +93,13 @@
             var savePackage:ReportPackage = packageService.saveReportPackage.lastResult as ReportPackage;
             _reportPackage.reportPackageID = savePackage.reportPackageID;
             _reportPackage.urlKey = savePackage.urlKey;
-            dispatchEvent(new PackageEvent(PackageEvent.PACKAGE_ADDED, _reportPackage))
+            dispatchEvent(new PackageEvent(PackageEvent.PACKAGE_ADDED, _reportPackage));
             PopUpManager.removePopUp(this);
         }
 
         private function addReport():void {
             var window:AddReportToPackageWindow = new AddReportToPackageWindow();
-            window.dataSourceID = singleSourceCheckbox.selected ? dataSourceComboBox.selectedItem.dataFeedID : 0;
+            window.dataSourceID = singleSourceCheckbox.selected ? dataSourceComboBox.selectedItem.id : 0;
             window.addEventListener(PackageReportEvent.ADD_REPORT, onReportAdd, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -121,7 +121,7 @@
             dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
             if (dataSourceID > 0) {
                 for each (var desc:DataFeedDescriptor in dataSources) {
-                    if (desc.dataFeedID == dataSourceID) {
+                    if (desc.id == dataSourceID) {
                         selectedSource = desc;
                     }
                 }

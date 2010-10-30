@@ -156,7 +156,7 @@
                 }
             }
             graph.remove(item);
-            
+
             dispatchEvent(new FeedChangeEvent());
         }
 
@@ -242,14 +242,14 @@
                 for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
                     //allFeeds.removeItemAt(allFeeds.getItemIndex(feedDescriptor));
                     addDescriptorToGraph(feedDescriptor, 0, 0);
-                    dsIDs.addItem(feedDescriptor.dataFeedID);
+                    dsIDs.addItem(feedDescriptor.id);
                 }
                 /*queuedExistings = new ArrayCollection();
-                queuedNews = initialFeedIDs;
+                 queuedNews = initialFeedIDs;
 
-                for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
+                 for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
 
-                }*/
+                 }*/
                 ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
                 feedService.getCredentials.send(dsIDs, CredentialsCache.getCache().createCredentials());
                 //feedService.initialDefine.send(new ArrayCollection(), initialFeedIDs);
@@ -269,7 +269,7 @@
 
         private function findDescriptor(feedID:int):DataFeedDescriptor {
             for each (var descriptor:DataFeedDescriptor in allFeeds) {
-                if (descriptor.dataFeedID == feedID) {
+                if (descriptor.id == feedID) {
                     return descriptor;
                 }
             }
@@ -320,13 +320,13 @@
 
 
         private function addDescriptorToGraph(descriptor:DataFeedDescriptor, xPosition:int, yPosition:int):void {
-            var item:Item = new Item(String(descriptor.dataFeedID));
+            var item:Item = new Item(String(descriptor.id));
             item.data = new Object();
             if (xPosition > 0) {
                 item.initialX = xPosition;
                 item.initialY = yPosition;
             }
-            item.data["feedID"] = String(descriptor.dataFeedID);
+            item.data["feedID"] = String(descriptor.id);
             item.data["feedName"] = descriptor.name;
             graph.add(item);
         }
@@ -357,7 +357,7 @@
             queuedExistings = compositeFeedNodes;
             queuedNews = new ArrayCollection([selectedObject]);
             ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
-            feedService.getCredentials.send(new ArrayCollection([selectedObject.dataFeedID]), CredentialsCache.getCache().createCredentials());
+            feedService.getCredentials.send(new ArrayCollection([selectedObject.id]), CredentialsCache.getCache().createCredentials());
         }
 
 
@@ -366,10 +366,10 @@
 
         private function onCredentials():void {
             /*var detectWindow:AutoDetectJoins = new AutoDetectJoins();
-            detectWindow.addEventListener("autoDetectJoins", autoDetectJoins);
-            detectWindow.addEventListener("noDetectJoins", noDetectJoins);
-            PopUpManager.addPopUp(detectWindow, this, true);
-            PopUpUtil.centerPopUp(detectWindow);*/
+             detectWindow.addEventListener("autoDetectJoins", autoDetectJoins);
+             detectWindow.addEventListener("noDetectJoins", noDetectJoins);
+             PopUpManager.addPopUp(detectWindow, this, true);
+             PopUpUtil.centerPopUp(detectWindow);*/
         }
 
         private function noDetectJoins(event:Event):void {
@@ -406,7 +406,7 @@
                 }
 
                 node.dataFeedID = feedID;
-                
+
                 compositeFeedNodes.addItem(node);
             }
             return compositeFeedNodes;

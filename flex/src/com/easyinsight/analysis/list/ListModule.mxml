@@ -26,6 +26,7 @@
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
         import com.easyinsight.analysis.OrderedSortField;
         import com.easyinsight.analysis.ReportRendererEvent;
+        import com.easyinsight.analysis.ReportWindowEvent;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.TextCellRenderer;
         import com.easyinsight.analysis.Value;
@@ -163,6 +164,12 @@
             var def:ListDefinition = analysisDefinition as ListDefinition;
             dataGrid.setStyle("fontFamily", def.fontName);
             dataGrid.setStyle("fontSize", def.fontSize);
+            if (def.fixedWidth > 0) {
+                dataGrid.width = def.fixedWidth;
+            } else {
+                dataGrid.width = 0;
+                dataGrid.percentWidth = 100;
+            }
             this.listDef = def;
             if (dataSet.length > 0) {
                 stackIndex = 0;
@@ -387,22 +394,24 @@
         }
 
         public function updateExportMetadata():void {
-            for (var i:int = 0; i < listDef.columns.length; i++) {
-                var item:AnalysisItem = listDef.columns.getItemAt(i) as AnalysisItem;
-                var columnIndex:int = findColumnIndex(item.qualifiedName());
-                item.itemPosition = columnIndex;
-                var column:AdvancedDataGridColumn = dataGrid.columns[columnIndex];
-                item.width = column.width;
-                var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
-                if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
-                    item.sortSequence = sortInfo.sequenceNumber;
-                    if (sortInfo.descending) {
-                        item.sort = 2;
+            if (listDef != null) {
+                for (var i:int = 0; i < listDef.columns.length; i++) {
+                    var item:AnalysisItem = listDef.columns.getItemAt(i) as AnalysisItem;
+                    var columnIndex:int = findColumnIndex(item.qualifiedName());
+                    item.itemPosition = columnIndex;
+                    var column:AdvancedDataGridColumn = dataGrid.columns[columnIndex];
+                    item.width = column.width;
+                    var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
+                    if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
+                        item.sortSequence = sortInfo.sequenceNumber;
+                        if (sortInfo.descending) {
+                            item.sort = 2;
+                        } else {
+                            item.sort = 1;
+                        }
                     } else {
-                        item.sort = 1;
+                        item.sort = 0;
                     }
-                } else {
-                    item.sort = 0;
                 }
             }
         }

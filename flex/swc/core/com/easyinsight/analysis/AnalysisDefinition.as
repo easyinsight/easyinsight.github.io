@@ -36,6 +36,7 @@ package com.easyinsight.analysis
         public static const HEATMAP:int = 27;
         public static const MAP_AFRICA:int = 28;
         public static const GANTT:int = 29;
+        public static const FORM:int = 30;
 
 		public var dataFeedID:int;
         public var urlKey:String;
@@ -66,6 +67,7 @@ package com.easyinsight.analysis
         public var temporaryReport:Boolean;
         public var fontName:String = "Tahoma";
         public var fontSize:int = 12;
+        public var fixedWidth:int = 0;
         public var accountVisible:Boolean;
 
 		public function AnalysisDefinition()
@@ -106,6 +108,7 @@ package com.easyinsight.analysis
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", fontName, this, ["Arial", "Arial Black", "Comic Sans MS",
                 "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
             items.addItem(new NumericReportFormItem("Font Size", "fontSize", fontSize, this, 8, 48));
+            items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", fixedWidth, this, 0, 5000));
             return items;
         }
 	}

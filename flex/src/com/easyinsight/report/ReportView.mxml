@@ -5,10 +5,10 @@
          xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
          xmlns:report="com.easyinsight.report.*"
          width="100%" height="100%"
-         creationComplete="onCreation()" backgroundColor="#EEEEEE"
+         creationComplete="onCreation()" backgroundColor="#FFFFFF"
          implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
          paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
-         direction="vertical">
+         direction="vertical" backgroundImage="{background2}" backgroundSize="100%">
     <mx:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{topDisplay}"/>
@@ -21,6 +21,7 @@
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
+        import com.easyinsight.analysis.ReportRatingEvent;
         import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
@@ -261,8 +262,16 @@
 
         private var _originReportID:int;
 
+
+        [Bindable(event="originReportIDChanged")]
+        public function get originReportID():int {
+            return _originReportID;
+        }
+
         public function set originReportID(value:int):void {
+            if (_originReportID == value) return;
             _originReportID = value;
+            dispatchEvent(new Event("originReportIDChanged"));
         }
 
         private var _originReportScore:Number;
@@ -379,16 +388,17 @@
                 dataSource = event.dataSourceInfo;
                 reportName = report.name;
                 var nf:NumberFormatter = new NumberFormatter();
+                nf.precision = 2;
                 if (_originReportID > 0) {
                     _score = _originReportScore;
                     _placeHolderID = _originReportID;
+                    if (ratingText == "") {
+                        analysisService.getReportMetrics.send(_originReportID);
+                    }
                 } else {
                     _score = event.ratingsAverage;
                     _placeHolderID = _dataSourceID;
                 }
-                reportRatingCount = nf.format(event.ratingsCount);
-                reportRating = nf.format(event.ratingsAverage);
-                reportViews = String(report.viewCount);
                 description = report.description;
                 attribution = event.attribution;
                 tags = "";
@@ -460,6 +470,9 @@
                 retrievedDataOnce = true;
             }
         }
+
+        [Bindable]
+        private var reportRatingNumber:int;
 
         private function toggleFilters():void {
             if (filterIndex == 1) {
@@ -734,6 +747,12 @@
         private var showingFilters:Boolean = false;
 
         [Bindable]
+        private var ratingText:String = "";
+
+        [Bindable]
+        private var myRatingNumber:int;
+
+        [Bindable]
         [Embed(source="../../../../assets/arrow_left_blue.png")]
         private var previousReportArrow:Class;
 
@@ -741,8 +760,27 @@
         [Embed(source="../../../../assets/arrow_right_blue.png")]
         private var nextReportArrow:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
+
+        [Bindable]
+        private var whenCreated:String = "5 months ago";
+
+        [Bindable]
+        private var currentRating:String = "5.00";
+
         private function toPreviousReport():void {
 
+        }
+
+        private function gotMetrics():void {
+            var metrics:ReportMetrics = analysisService.getReportMetrics.lastResult as ReportMetrics;
+            var nf:NumberFormatter = new NumberFormatter();
+            nf.precision = 2;
+            currentRating = nf.format(metrics.average);
+            ratingText = report.authorName;
+            myRatingNumber = metrics.myRating;
         }
 
         private function toNextReport():void {
@@ -750,6 +788,12 @@
         }
 
         public function gotFocus():void {
+        }
+
+        private function updateRating(event:ReportRatingEvent):void {
+            var nf:NumberFormatter = new NumberFormatter();
+            nf.precision = 2;
+            currentRating = nf.format(event.newRating);
         }
 
         ]]></mx:Script>
@@ -763,7 +807,7 @@
                     <mx:VRule height="50"/>
                 </mx:HBox>
             </mx:ViewStack>
-            <mx:HBox width="1000" verticalAlign="middle" id="highBox">
+            <mx:HBox width="1000" id="highBox">
                 <mx:VBox>
                     <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
                         <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"
@@ -789,13 +833,31 @@
                                   fontSize="14"/>
                         <mx:Spacer width="100%"/>
                     </mx:HBox>
-                    <util:AutoSizeTextArea text="{description}" visible="true" fontSize="14" width="720"
+                    <util:AutoSizeTextArea text="{description}" visible="true" fontSize="12" width="720"
                                            editable="false" backgroundAlpha="0"/>
                 </mx:VBox>
                 <mx:Spacer width="100%"/>
-                <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"
+                <mx:ViewStack selectedIndex="{exchangeIndex}" resizeToContent="true">
+                    <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"
                                                id="dataSourceDisplay"
                                                visible="false"/>
+                    <mx:VBox verticalGap="3" horizontalAlign="center">
+                        <mx:HBox verticalAlign="middle">
+                            <mx:VBox verticalGap="0">
+                                <mx:Label text="Created by:" color="#555555" fontSize="10" fontStyle="italic"/>
+                                <mx:Label text="{ratingText}" color="#2525D4"/>
+                                <!--<mx:Label text="{whenCreated}" fontSize="10"/>-->
+                            </mx:VBox>
+                            <mx:VBox backgroundColor="#2525D4" borderColor="#2525D4" verticalGap="0" borderStyle="solid" borderThickness="1" cornerRadius="5" horizontalAlign="center">
+                                <mx:Label text="{currentRating}" fontSize="16" color="#FFFFFF"/>
+                                <mx:Label text="Average Score" fontSize="10" color="#FFFFFF"/>
+                            </mx:VBox>
+                        </mx:HBox>
+                        <analysis:ReportRating score="{myRatingNumber}" rateable="true" reportID="{originReportID}"
+                                reportRating="updateRating(event)"/>
+                        <mx:Label text="Rate it yourself!" fontSize="8"/>
+                    </mx:VBox>
+                </mx:ViewStack>
             </mx:HBox>
             <mx:ViewStack resizeToContent="true">
                 <mx:Box/>
@@ -805,26 +867,21 @@
                 </mx:HBox>
             </mx:ViewStack>
         </mx:HBox>
-        <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
-    </mx:VBox>
-    <mx:VBox width="100%" height="100%">
+
         <mx:ViewStack resizeToContent="true" selectedIndex="{exchangeIndex}" width="100%">
             <mx:Box/>
-            <mx:VBox paddingTop="15" width="100%" horizontalAlign="center">
-                <mx:HBox id="addReportBox" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF"
-                         borderColor="#CCCCCC"
-                         borderThickness="1" cornerRadius="5" dropShadowEnabled="true" borderStyle="solid"
-                         paddingLeft="5" paddingRight="5" horizontalGap="20">
+            <mx:HBox paddingTop="15" verticalAlign="middle" width="100%" horizontalAlign="center">
                     <mx:TextArea
                             text="Want to save this report to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
                             editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0"
-                            fontSize="14"/>
+                            fontSize="12"/>
                     <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton"
                                click="saveReport(event)"/>
-                </mx:HBox>
-            </mx:VBox>
+            </mx:HBox>
         </mx:ViewStack>
-
+        <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
+    </mx:VBox>
+    <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0">
         <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
             <mx:Box/>
             <mx:VBox width="100%" horizontalAlign="center">
@@ -837,10 +894,12 @@
                                               backgroundColor="#FFFFFF"/>
             </mx:VBox>
         </mx:ViewStack>
-        <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}" loading="{loading}"/>
+        <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}" loading="{loading}"
+                />
     </mx:VBox>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
         <mx:method name="keepReport" result="confirmedKeep()"/>
+        <mx:method name="getReportMetrics" result="gotMetrics()"/>
     </mx:RemoteObject>
 </mx:VBox>

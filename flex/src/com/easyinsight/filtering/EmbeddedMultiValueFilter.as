@@ -5,6 +5,8 @@ package com.easyinsight.filtering
 
 import com.easyinsight.framework.CredentialsCache;
 
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.Event;
 import flash.events.MouseEvent;
 	
@@ -13,15 +15,15 @@ import flash.events.MouseEvent;
 	import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
-	import mx.rpc.events.ResultEvent;
+import mx.managers.PopUpManager;
+import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 
 	public class EmbeddedMultiValueFilter extends HBox implements IEmbeddedFilter
 	{
 		private var _filterDefinition:FilterValueDefinition;
 		private var _analysisItem:AnalysisItem;
-		private var _feedID:int;		
-		private var deleteButton:Button;
+		private var _feedID:int;
 		private var editButton:Button;
 		private var labelText:Label;
 		private var dataService:RemoteObject;		
@@ -44,16 +46,18 @@ import mx.controls.Label;
             _filterDefinition.enabled = checkbox.selected;
             dispatchEvent(new EmbeddedFilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
+
+        [Bindable]
+        [Embed(source="../../../../assets/pencil.png")]
+        private var editIcon:Class;
 		
 		override protected function createChildren():void {
 			super.createChildren();
-            //if (!_filterEditable) {
-                var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
-                checkbox.toolTip = "Click to disable this filter.";
-                checkbox.addEventListener(Event.CHANGE, onChange);
-                addChild(checkbox);
-            //}
+            var checkbox:CheckBox = new CheckBox();
+            checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
+            checkbox.toolTip = "Click to disable this filter.";
+            checkbox.addEventListener(Event.CHANGE, onChange);
+            addChild(checkbox);
             if (_showLabel) {
                 if (labelText == null) {
                     labelText = new Label();
@@ -63,7 +67,24 @@ import mx.controls.Label;
             } else {
                 this.toolTip = _analysisItem.display + ":";
             }
+            editButton = new Button();
+            editButton.setStyle("icon", editIcon);
+            editButton.addEventListener(MouseEvent.CLICK, onEdit);
+            editButton.toolTip = "Edit the filter...";
+            addChild(editButton);
 		}
+
+        private function onEdit(event:MouseEvent):void {
+            var window:EmbeddedMultiValueFilterWindow = new EmbeddedMultiValueFilterWindow();
+            window.embeddedFilter = _filterDefinition;
+            window.addEventListener("updated", onUpdated, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onUpdated(event:Event):void {
+            dispatchEvent(new EmbeddedFilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+        }
 		
 		override protected function commitProperties():void {
 			super.commitProperties();						
@@ -103,10 +124,6 @@ import mx.controls.Label;
 		
 		public function get inclusive():Boolean {
 			return _filterDefinition.inclusive;
-		}
-		
-		private function deleteSelf(event:MouseEvent):void {
-			dispatchEvent(new EmbeddedFilterDeletionEvent(this));
 		}
 		
 		public function get filterDefinition():FilterDefinition {

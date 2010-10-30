@@ -2,7 +2,6 @@
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
 
         private var _dataProvider:ArrayCollection;
         private var _keyword:String;

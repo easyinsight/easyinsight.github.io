@@ -1,8 +1,11 @@
 package com.easyinsight.pseudocontext {
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.CustomCodeLink;
 import com.easyinsight.analysis.DrillThrough;
+import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
+import com.easyinsight.analysis.ReportWindowEvent;
 import com.easyinsight.analysis.HierarchyDrilldownEvent;
 import com.easyinsight.analysis.HierarchyLevel;
 import com.easyinsight.analysis.HierarchyRollupEvent;
@@ -14,6 +17,7 @@ import com.easyinsight.report.ReportNavigationEvent;
 
 import flash.display.InteractiveObject;
 import flash.events.ContextMenuEvent;
+import flash.events.Event;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 import flash.system.System;
@@ -93,18 +97,34 @@ public class StandardContextWindow {
             var drillThrough:DrillThrough = link as DrillThrough;
             var drillContextItem:ContextMenuItem = new ContextMenuItem(drillThrough.label);
             drillContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-
-                var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-                filterDefinition.field = analysisItem;
-                filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
-                filterDefinition.enabled = true;
-                filterDefinition.inclusive = true;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough.reportID, new ArrayCollection([ filterDefinition ]));
-                executor.addEventListener(ReportNavigationEvent.TO_REPORT, onReport);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough);
+                executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             });
             items.push(drillContextItem);
+        } else if (link is CustomCodeLink) {
+            var customCodeLink:CustomCodeLink = link as CustomCodeLink;
+            var codeLinkItem:ContextMenuItem = new ContextMenuItem(customCodeLink.label);
+            codeLinkItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
+                passthroughObject.dispatchEvent(customCodeLink.createEvent(data[analysisItem.qualifiedName()]));
+            });
+            items.push(codeLinkItem);
         }
+    }
+
+    private function onDrill(event:DrillThroughEvent):void {
+        var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
+        filterDefinition.field = analysisItem;
+        filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
+        filterDefinition.enabled = true;
+        filterDefinition.inclusive = true;
+        var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
+        if (event.drillThrough.miniWindow) {
+            onReport(new ReportWindowEvent(event.report.id, 0, 0, filters, event.report.dataFeedID, event.report.reportType));
+        } else {
+            onReport(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+        }
+
     }
 
     private function onRollup(event:ContextMenuEvent):void {
@@ -130,7 +150,7 @@ public class StandardContextWindow {
         }
     }
 
-    private function onReport(event:ReportNavigationEvent):void {
+    private function onReport(event:Event):void {
         passthroughFunction.call(passthroughObject, event);
     }
 

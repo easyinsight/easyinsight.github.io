@@ -13,6 +13,7 @@ import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartEmbeddedController
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartEmbeddedController;
 import com.easyinsight.analysis.crosstab.CrosstabEmbeddedController;
+import com.easyinsight.analysis.form.FormEmbeddedController;
 import com.easyinsight.analysis.gantt.GanttEmbeddedController;
 import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
 import com.easyinsight.analysis.heatmap.HeatMapEmbeddedController;
@@ -27,8 +28,6 @@ import com.easyinsight.analysis.maps.WorldMapEmbeddedController;
 import com.easyinsight.analysis.timeline.TimelineEmbeddedController;
 import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
-
-import mx.controls.Alert;
 
 public class EmbeddedControllerLookup {
 
@@ -121,6 +120,9 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.GANTT:
                 controller = GanttEmbeddedController;
+                break;
+            case AnalysisDefinition.FORM:
+                controller = FormEmbeddedController;
                 break;
         }
         return controller;

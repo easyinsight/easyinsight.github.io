@@ -25,6 +25,7 @@ package com.easyinsight.account
 		public var licenses:ArrayCollection;
         public var maxUsers:int;
         public var adminUsers:ArrayCollection;
+        public var allUsers:ArrayCollection;
         public var consultants:ArrayCollection;
         public var maxSize:int;
         public var name:String;

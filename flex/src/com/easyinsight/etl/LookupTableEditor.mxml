@@ -171,7 +171,9 @@
                     itemCtr = 0;
                 }
             }
-            lookupTableBox.addChild(pages.getItemAt(0) as LookupTablePage);
+            if (pages.length > 0) {
+                lookupTableBox.addChild(pages.getItemAt(0) as LookupTablePage);
+            }
             this.maxPages = pageCtr;
             pageLabel = maxPages + " pages";
             nextPageEnabled = maxPages > 1;

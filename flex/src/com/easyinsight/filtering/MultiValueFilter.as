@@ -57,15 +57,28 @@ import mx.controls.Label;
 		}		
 		
 		private function edit(event:MouseEvent):void {
-			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
-            window.feedID = _feedID;
-			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
-            window.detailClass = MultiValueFilterWindow;
-			window.analysisItems = _analysisItems;
-			window.filterDefinition = _filterDefinition;			
-			PopUpManager.addPopUp(window, this, true);
-			PopUpUtil.centerPopUpWithY(window, 40);
+            if (_filterEditable) {
+                var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+                window.feedID = _feedID;
+                window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
+                window.detailClass = MultiValueFilterWindow;
+                window.analysisItems = _analysisItems;
+                window.filterDefinition = _filterDefinition;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUpWithY(window, 40);
+            } else {
+                var window2:EmbeddedMultiValueFilterWindow = new EmbeddedMultiValueFilterWindow();
+                window2.embeddedFilter = _filterDefinition;
+                window2.dataSourceID = _feedID;
+                window2.addEventListener("updated", onUpdated, false, 0, true);
+                PopUpManager.addPopUp(window2, this, true);
+                PopUpUtil.centerPopUpWithY(window2, 40);
+            }
 		}
+
+        private function onUpdated(event:Event):void {
+            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+        }
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
@@ -95,14 +108,14 @@ import mx.controls.Label;
             } else {
                 this.toolTip = _analysisItem.display + ":";
             }
+            if (editButton == null) {
+                editButton = new Button();
+                editButton.addEventListener(MouseEvent.CLICK, edit);
+                editButton.setStyle("icon", editIcon);
+                editButton.toolTip = "Edit";
+            }
+            addChild(editButton);
             if (_filterEditable) {
-                if (editButton == null) {
-                    editButton = new Button();
-                    editButton.addEventListener(MouseEvent.CLICK, edit);
-                    editButton.setStyle("icon", editIcon);
-                    editButton.toolTip = "Edit";
-                }
-                addChild(editButton);
                 if (deleteButton == null) {
                     deleteButton = new Button();
                     deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);

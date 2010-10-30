@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+
+        import mx.collections.ArrayCollection;
+        import mx.containers.Form;
+        import mx.containers.FormItem;
+
+        [Bindable]
+        private var prevPageEnabled:Boolean = false;
+
+        [Bindable]
+        private var nextPageEnabled:Boolean = true;
+
+        [Bindable]
+        private var pageLabel:String;
+
+        private var currentPage:int;
+
+        private var forms:ArrayCollection;
+
+        private function previousPage():void {
+            currentPage--;
+            if (currentPage == 0) {
+                prevPageEnabled = false;
+            }
+            nextPageEnabled = true;
+            box.removeAllChildren();
+            var form:Form = forms.getItemAt(currentPage) as Form;
+            box.addChild(form);
+        }
+
+        private function nextPage():void {
+            currentPage++;
+            if (currentPage == _values.length - 1) {
+                nextPageEnabled = false;
+            }
+            prevPageEnabled = true;
+            box.removeAllChildren();
+
+
+            var form:Form;
+            if (currentPage >= forms.length - 1) {
+                form = createForm(_values.getItemAt(currentPage), _formReport);
+                forms.addItem(form);
+            } else {
+                form = forms.getItemAt(currentPage) as Form;
+            }
+            box.addChild(form);
+        }
+
+        private var _formReport:FormReport;
+
+        public function set formReport(value:FormReport):void {
+            _formReport = value;
+        }
+
+        private var _values:ArrayCollection;
+
+        public function set values(value:ArrayCollection):void {
+            _values = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            pageLabel = _values.length + " pages";
+            forms = new ArrayCollection();
+            forms.addItem(createForm(_values.getItemAt(0), _formReport));
+            box.addChild(forms.getItemAt(0) as Form);
+        }
+
+        private function createForm(row:Object, formReport:FormReport):Form {
+            var form:Form = new Form();
+            for each (var item:AnalysisItem in formReport.columns) {
+                var formItem:FormItem = new FormItem();
+
+
+                formItem.label = item.display + ":";
+
+                var renderer:FormCellRenderer = new FormCellRenderer();
+                renderer.analysisItem = item;
+                renderer.data = row;
+                formItem.addChild(renderer);
+
+                form.addChild(formItem);
+            }
+            return form;
+        }
+        ]]></mx:Script>
+    <mx:Box id="box"/>
+    <mx:HBox>
+        <mx:Button label="Previous Page" click="previousPage()" enabled="{prevPageEnabled}"/>
+        <mx:Label text="{pageLabel}"/>
+        <mx:Button label="Next Page" click="nextPage()" enabled="{nextPageEnabled}"/>
+    </mx:HBox>
+</mx:VBox>

@@ -35,7 +35,7 @@ public class DelayedMultiReportLink extends EventDispatcher {
     private function gotFeed(event:ResultEvent):void {
         var feedResponse:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
         if (feedResponse.status == FeedResponse.SUCCESS) {
-            dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(feedResponse.feedDescriptor.dataFeedID)));
+            dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(feedResponse.feedDescriptor.id)));
         } else {
             // tried to access a data source they don't have rights to, silently fail
         }

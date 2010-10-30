@@ -7,14 +7,16 @@ public class AnalysisUtil {
 
     public static function updateReport(analysisDefinition:AnalysisDefinition, savedDef:AnalysisDefinition):void {
         for each (var item:AnalysisItem in analysisDefinition.getFields()) {
-            if (item.analysisItemID > 0) {
+            if (item != null && item.analysisItemID > 0) {
                 continue;
             }
             for each (var savedItem:AnalysisItem in savedDef.getFields()) {
-                if (savedItem.qualifiedName() == item.qualifiedName() &&
-                        savedItem.getType() == item.getType()) {
-                    item.analysisItemID = savedItem.analysisItemID;
-                    break;
+                if (savedItem != null && item != null) {
+                    if (savedItem.qualifiedName() == item.qualifiedName() &&
+                            savedItem.getType() == item.getType()) {
+                        item.analysisItemID = savedItem.analysisItemID;
+                        break;
+                    }
                 }
             }
         }

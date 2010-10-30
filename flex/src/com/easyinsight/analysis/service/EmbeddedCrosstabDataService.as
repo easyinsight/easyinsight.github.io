@@ -57,7 +57,7 @@ public class EmbeddedCrosstabDataService extends EventDispatcher implements IEmb
         }
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, data, listData.definition, listData.dataSourceAccessible,
                 listData.attribution, listData.credentialRequirements, listData.dataSourceInfo, listData.ratingsAverage,
-                listData.ratingsCount, listData.additionalProperties));
+                listData.ratingsCount, listData.myRating, listData.additionalProperties));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

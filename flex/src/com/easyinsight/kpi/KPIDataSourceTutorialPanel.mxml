@@ -28,9 +28,9 @@
         public function gotFocus():void {
             if (kpiData.dataSourceID > 0) {
                 dataSource = new DataFeedDescriptor();
-                dataSource.dataFeedID = kpiData.dataSourceID;
+                dataSource.id = kpiData.dataSourceID;
                 dataSource.name = kpiData.dataSourceName;
-            }            
+            }
             if (_groupID == 0) {
                 dataProvider.searchForSubscribedFeeds.send();
             } else {
@@ -43,7 +43,7 @@
         }
 
         public function saveValues():void {
-            kpiData.dataSourceID = dataSourceComboBox.selectedItem.dataFeedID;
+            kpiData.dataSourceID = dataSourceComboBox.selectedItem.id;
         }
 
         private function gotFeeds():void {
@@ -55,7 +55,7 @@
             descriptors.refresh();
             if (dataSource != null) {
                 for each (var desc:DataFeedDescriptor in descriptors) {
-                    if (desc.dataFeedID == dataSource.dataFeedID) {
+                    if (desc.id == dataSource.id) {
                         dataSource = desc;
                         break;
                     }
@@ -72,7 +72,7 @@
             descriptors.refresh();
             if (dataSource != null) {
                 for each (var desc:DataFeedDescriptor in descriptors) {
-                    if (desc.dataFeedID == dataSource.dataFeedID) {
+                    if (desc.id == dataSource.id) {
                         dataSource = desc;
                         break;
                     }

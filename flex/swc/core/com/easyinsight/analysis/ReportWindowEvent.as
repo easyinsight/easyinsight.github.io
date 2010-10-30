@@ -15,7 +15,7 @@ public class ReportWindowEvent extends Event {
     public var reportType:int;
 
     public function ReportWindowEvent(reportID:int, x:int, y:int, filters:ArrayCollection, dataSourceID:int, reportType:int) {
-        super(REPORT_WINDOW);
+        super(REPORT_WINDOW, true);
         this.reportID = reportID;
         this.x = x;
         this.y = y;

@@ -1,41 +1,39 @@
 package com.easyinsight.analysis {
+import com.easyinsight.util.ProgressAlert;
 
-import com.easyinsight.report.ReportNavigationEvent;
-
+import flash.display.DisplayObject;
 import flash.events.EventDispatcher;
 
-import mx.collections.ArrayCollection;
+
 import mx.controls.Alert;
+import mx.core.Application;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
 public class DrillThroughExecutor extends EventDispatcher {
 
     private var analysisService:RemoteObject;
-    private var reportID:int;
-    private var editor:Boolean;
-    private var filters:ArrayCollection;
+    private var drillThrough:DrillThrough;
 
-    public function DrillThroughExecutor(reportID:int, filters:ArrayCollection) {
+    public function DrillThroughExecutor(drillThrough:DrillThrough) {
         analysisService = new RemoteObject();
         analysisService.destination = "analysisDefinition";
         analysisService.openAnalysisIfPossibleByID.addEventListener(ResultEvent.RESULT, onResult);
-        this.reportID = reportID;
-        this.filters = filters;
+        this.drillThrough = drillThrough;
     }
 
     public function send():void {
-        analysisService.openAnalysisIfPossibleByID.send(reportID);
+        ProgressAlert.alert(Application.application as DisplayObject, "Retrieving report information...", null, analysisService.openAnalysisIfPossibleByID);
+        analysisService.openAnalysisIfPossibleByID.send(drillThrough.reportID);
     }
 
     private function onResult(event:ResultEvent):void {
         var result:InsightResponse = analysisService.openAnalysisIfPossibleByID.lastResult as InsightResponse;
+        analysisService.openAnalysisIfPossibleByID.removeEventListener(ResultEvent.RESULT, onResult);
         if (result.insightDescriptor != null) {
-            if (editor) {
-                //dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(result.insightDescriptor)));
-            } else {
-                dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, result.insightDescriptor, filters));
-            }
+            dispatchEvent(new DrillThroughEvent(result.insightDescriptor, drillThrough));
+        } else {
+            Alert.show("We were unable to load the requested report.");
         }
     }
 }

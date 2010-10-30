@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer"
-        width="100%" height="100%">
+           width="100%" height="100%">
     <mx:Script><![CDATA[
 
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -68,7 +68,7 @@
             var lineSeries:LineSeries = hitData.element as LineSeries;
             var lineSeriesItem:LineSeriesItem = hitData.chartItem as LineSeriesItem;
             string = lineSeries.displayName + "\n" +
-                     xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+                    xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
             return string;
         }
 
@@ -91,32 +91,34 @@
 
             var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
 
-            this.chartData = new ArrayCollection(dataSet.toArray());
-
-            hbox.removeChild(lineChart);
-
-            lineChart = new LineChart();
-            lineChart.percentHeight = 100;
-            lineChart.percentWidth = 100;
-            lineChart.dataProvider = chartData;
-            lineChart.showDataTips = true;
-            //lineChart.selectionMode = "multiple";
-            lineChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
-            lineChart.dataTipFunction = dataTipFunction;
-            var verticalAxis:LinearAxis = new LinearAxis();
-            verticalAxis.baseAtZero = lineChartDef.baseAtZero == "true";
-            lineChart.verticalAxis = verticalAxis;
-
-            var strokes:Array = [];
-            var colors:Array = FillProvider.createSolidColors();
-            for each (var color:SolidColor in colors) {
-                var newStroke:Stroke = new Stroke();
-                newStroke.color = color.color;
-                newStroke.alpha = 1;
-                strokes.push(newStroke);
-            }
-
             if (dataSet.length > 0) {
+
+                stackIndex = 0;
+
+                this.chartData = new ArrayCollection(dataSet.toArray());
+
+                hbox.removeChild(lineChart);
+
+                lineChart = new LineChart();
+                lineChart.percentHeight = 100;
+                lineChart.percentWidth = 100;
+                lineChart.dataProvider = chartData;
+                lineChart.showDataTips = true;
+                //lineChart.selectionMode = "multiple";
+                lineChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
+                lineChart.dataTipFunction = dataTipFunction;
+                var verticalAxis:LinearAxis = new LinearAxis();
+                verticalAxis.baseAtZero = lineChartDef.baseAtZero == "true";
+                lineChart.verticalAxis = verticalAxis;
+
+                var strokes:Array = [];
+                var colors:Array = FillProvider.createSolidColors();
+                for each (var color:SolidColor in colors) {
+                    var newStroke:Stroke = new Stroke();
+                    newStroke.color = color.color;
+                    newStroke.alpha = 1;
+                    strokes.push(newStroke);
+                }
                 var xAxisDimension:AnalysisItem = lineChartDef.xaxis;
 
                 var sort:Sort = new Sort();
@@ -173,7 +175,7 @@
                     }
                     if (additionalProperties != null && additionalProperties["xAxisMaximum"] != null) {
                         dateAxis.maximum = additionalProperties["xAxisMaximum"];
-                    }                    
+                    }
                     xAxis = dateAxis;
                 } else {
                     var categoryAxis:CategoryAxis = new CategoryAxis();
@@ -223,6 +225,7 @@
                     var stroke:IStroke = strokes[i % strokes.length];
                     stroke.weight = lineChartDef.strokeWeight;
                     uniqueLineSeries.setStyle("lineStroke", stroke);
+                    uniqueLineSeries.setStyle("stroke", stroke);
                     uniqueLineSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
                     uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
@@ -235,12 +238,19 @@
                 }
 
                 lineChart.series = mySeries;
+
+                hbox.addChildAt(lineChart, 0);
+
+                legend.dataProvider = lineChart;
+                legend.direction = "vertical";
+            } else {
+                if (lineChartDef.measure != null && lineChartDef.xaxis != null && lineChartDef.yaxis != null) stackIndex = 2;
+                else stackIndex = 1;
+                if (lineChart != null) {
+                    lineChart.visible = false;
+                    legend.visible = false;
+                }
             }
-
-            hbox.addChildAt(lineChart, 0);
-
-            legend.dataProvider = lineChart;
-            legend.direction = "vertical";
         }
 
 
@@ -255,7 +265,37 @@
             return false;
         }
 
+        [Bindable]
+        private var stackIndex:int = 0;
+
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
-    <mx:HBox width="100%" height="100%" id="hbox"/>
+    <mx:Canvas width="100%" height="100%">
+        <mx:HBox width="100%" height="100%" id="hbox"/>
+
+        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
+                      mouseEnabled="false">
+            <mx:Canvas width="100%" height="100%"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="You haven't set up a report yet. Drag two Groupings and one Measure into the labeled areas above the canvas to create a report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+                </mx:Box>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="We didn't find any data for the fields and filters that you specified in the report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+                </mx:Box>
+            </mx:Box>
+        </mx:ViewStack>
+    </mx:Canvas>
 </mx:Module>

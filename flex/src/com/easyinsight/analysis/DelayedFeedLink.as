@@ -36,7 +36,7 @@ import com.easyinsight.listing.DescriptorAnalyzeSource;
 		private function gotFeed(event:ResultEvent):void {
         	var feedResponse:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
         	if (feedResponse.status == FeedResponse.SUCCESS) {
-        		dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedResponse.feedDescriptor.dataFeedID)));
+        		dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedResponse.feedDescriptor.id)));
             } else {
         		// tried to access a data source they don't have rights to, silently fail
         	}        	            

@@ -67,7 +67,7 @@ package com.easyinsight.listing
 				remoteService.destination = "userUpload";
 				remoteService.subscribe.addEventListener(ResultEvent.RESULT, successfulSubscription);
 				remoteService.subscribe.addEventListener(FaultEvent.FAULT, failedSubscription);
-				remoteService.subscribe(_data.dataFeedID);
+				remoteService.subscribe(_data.id);
 			}
 		}
 		
@@ -85,7 +85,7 @@ package com.easyinsight.listing
 				remoteService = new RemoteObject();
 				remoteService.destination = "store";
 				remoteService.buy.addEventListener(FaultEvent.FAULT, failedSubscription);
-				remoteService.buy.send(_data.dataFeedID, 1);
+				remoteService.buy.send(_data.id, 1);
 				//remoteService.createURL.addEventListener(FaultEvent.FAULT, failedSubscription);
 				//remoteService.createURL.addEventListener(ResultEvent.RESULT, gotBillingURL);
 				//remoteService.createURL.send();

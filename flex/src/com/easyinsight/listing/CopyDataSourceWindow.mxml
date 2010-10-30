@@ -40,7 +40,7 @@
 
         private function save():void {
             ProgressAlert.alert(this, "Copying...", null, uploadService.copyDataSource);
-            uploadService.copyDataSource.send(_descriptor.dataFeedID, newNameInput.text, includeData.selected, includeReports.selected);
+            uploadService.copyDataSource.send(_descriptor.id, newNameInput.text, includeData.selected, includeReports.selected);
         }
 
         private function copied():void {

@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
+           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.filtering.FilterRawData;
+
+        import mx.collections.ArrayCollection;
+        import mx.containers.Form;
+        import mx.containers.FormItem;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            var formReport:FormReport = analysisDefinition as FormReport;
+            removeAllChildren();
+            if (dataSet.length == 0) {
+
+            } else if (dataSet.length == 1) {
+                addChild(createForm(dataSet.getItemAt(0), formReport));
+            } else {
+                var pages:FormPages = new FormPages();
+                pages.values = dataSet;
+                pages.formReport = formReport;
+                addChild(pages);
+            }
+        }
+
+        private function createForm(row:Object, formReport:FormReport):Form {
+            var form:Form = new Form();
+            for each (var item:AnalysisItem in formReport.columns) {
+                var formItem:FormItem = new FormItem();
+
+
+                formItem.label = item.display + ":";
+
+                var renderer:FormCellRenderer = new FormCellRenderer();
+                renderer.analysisItem = item;
+                renderer.data = row;
+                formItem.addChild(renderer);
+
+                form.addChild(formItem);
+            }
+            return form;
+        }
+
+        public function createFilterRawData():FilterRawData {
+            return null;
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        public function preserveValues():Boolean {
+            return true;
+        }]]></mx:Script>
+</mx:Module>

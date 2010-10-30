@@ -5,6 +5,7 @@ public class ReportMetrics {
     
     public var count:int;
     public var average:Number;
+    public var myRating:int;
 
     public function ReportMetrics() {
     }

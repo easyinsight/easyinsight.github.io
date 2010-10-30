@@ -32,9 +32,9 @@
 
         private var _fields:ArrayCollection;
 
-    public function set fields(value:ArrayCollection):void {
-        _fields = value;
-    }
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
 
         public function set filterValueDefinition(filterValueDefinition:FilterValueDefinition):void {
             this._filterValueDefinition = filterValueDefinition;
@@ -66,7 +66,7 @@
 
         private function gotMetadata(event:ResultEvent):void {
             var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
-                                                                                  AnalysisDimensionResultMetadata;
+                    AnalysisDimensionResultMetadata;
             var filteredStrings:ArrayCollection = new ArrayCollection();
             for each (var filterValue:Object in _filterValueDefinition.filteredValues) {
                 var filterString:String;
@@ -166,9 +166,24 @@
 
         [Bindable]
         private var stackIndex:int = 0;
+
+        private var _typeChangeAllowed:Boolean = true;
+        
+        [Bindable(event="typeChangeAllowedChanged")]
+        public function get typeChangeAllowed():Boolean {
+            return _typeChangeAllowed;
+        }
+
+        public function set typeChangeAllowed(value:Boolean):void {
+            if (_typeChangeAllowed == value) return;
+            _typeChangeAllowed = value;
+            dispatchEvent(new Event("typeChangeAllowedChanged"));
+        }
+
+
 		]]>
 	</mx:Script>
-    <mx:HBox>
+    <mx:HBox visible="{typeChangeAllowed}">
         <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()"/>
         <mx:RadioButton group="{typeGroup}" label="Single Value" value="single"/>
         <mx:RadioButton group="{typeGroup}" label="Multi Value" selected="true" value="multi"/>

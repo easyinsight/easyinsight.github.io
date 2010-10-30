@@ -1,5 +1,6 @@
 package com.easyinsight.framework
 {
+import com.easyinsight.guest.Scenario;
 import com.easyinsight.preferences.UISettings;
 
 [Bindable]
@@ -32,6 +33,8 @@ public class UserServiceResponse
     public var defaultReportSharing:Boolean;
     public var sessionCookie:String;
     public var nonCookieLogin:Boolean;
+    public var scenario:Scenario;
+    public var password:String;
 
     public function UserServiceResponse()
         {

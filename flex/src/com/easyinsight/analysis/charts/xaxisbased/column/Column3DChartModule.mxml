@@ -199,7 +199,9 @@
                 columnSet.series = [ columnSeries ];
                 columnChart.series = [ columnSet ];
                 columnChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
-                addChild(columnChart);
+                canvas.addChild(columnChart);
+            } else {
+                columnChart.visible = true;
             }
         }
 
@@ -253,11 +255,14 @@
             dispatchEvent(event);
         }
 
+        [Bindable]
+        private var stackIndex:int = 0;
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var columnChartDef:Column3DChartDefinition = analysisDefinition as Column3DChartDefinition;
 
             if (dataSet.length > 0) {
+                stackIndex = 0;
                 xField = columnChartDef.xaxis.qualifiedName();
                 createChart();
 
@@ -312,6 +317,15 @@
                 columnChart.dataProvider = dataSet;
                 columnSeries.dataProvider = dataSet;
                 xAxis.dataProvider = dataSet;
+            } else {
+                if (columnChartDef.measure != null && columnChartDef.xaxis != null) stackIndex = 2;
+                else stackIndex = 1;
+                if (columnChart != null) {
+                    columnChart.dataProvider = new ArrayCollection();
+                    columnSeries.dataProvider = new ArrayCollection();
+                    xAxis.dataProvider = new ArrayCollection();
+                    columnChart.visible = false;
+                }
             }
 
             graphData = dataSet;
@@ -327,5 +341,31 @@
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
-    <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>    
+    <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
+    <mx:Canvas width="100%" height="100%" id="canvas">
+        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
+                      mouseEnabled="false">
+            <mx:Canvas width="100%" height="100%"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+                </mx:Box>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="We didn't find any data for the fields and filters that you specified in the report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+                </mx:Box>
+            </mx:Box>
+        </mx:ViewStack>
+    </mx:Canvas>
 </mx:Module>

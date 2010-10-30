@@ -2,13 +2,6 @@
     <property file="local.build.properties"/>
     <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
 
-    <taskdef resource="ei.tasks" classpath="${flex.sdk.dir}/ant/lib/swfanalysis.jar"/>
-    <property name="ei.key" value="xrnnCqtaFhZN"/>
-    <property name="ei.secret.key" value="IzxHGLKiErchVLdo"/>
-    <property name="analysis.api.key" value="JeSfljXxeIcw"/>
-
-    <taskdef name="SWFAnalysis" classname="com.easyinsight.swfanalysis.SWFAnalysis"/>
-
     <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
 
     <target name="compileFlex">
@@ -45,963 +38,201 @@
         <delete dir="../libs/rsl/tmp"/>
     </target>
 
-    <target name="compileBillingTest">
-        <mxmlc file="../src/BillingTestApplication.mxml" output="${deployment.path}/BillingTestApplication.swf"
-               static-rsls="true" incremental="true">
-            <load-config filename="../billing-config.xml"/>
-        </mxmlc>
-    </target>
-
-    <target name="compileAir">
-        <mkdir dir="../out"/>
-        <mkdir dir="../out/air"/>
-        <mxmlc file="../src/EIAirWidget.mxml" output="${deployment.path}/EIAirWidget.swf"
-               static-rsls="true" incremental="true">
-            <load-config filename="../ei-air-config.xml"/>
-        </mxmlc>
-    </target>
-
-    <target name="compileAirForAssembly">
-        <mkdir dir="../out"/>
-        <mkdir dir="../out/air"/>
-        <copy file="../src/AirWidget.xml" todir="../out/air"/>
-        <mxmlc file="../src/EIAirWidget.mxml" output="../out/air/EIAirWidget.swf"
-               static-rsls="true" incremental="true">
-            <load-config filename="../ei-air-config.xml"/>
-        </mxmlc>
-    </target>
-
-    <property name="ADL" value="${FLEX_HOME}/bin/adl.exe"/>
-    <property name="ADT.JAR" value="${FLEX_HOME}/lib/adt.jar"/>
-
-    <property name="APP_NAME" value="EIAirWidget"/>
-    <property name="APP_ROOT" value="."/>
-    <property name="MAIN_SOURCE_FILE" value="../src/${APP_NAME}.mxml"/>
-    <property name="APP_DESCRIPTOR" value="../src/AirWidget.xml"/>
-    <property name="AIR_NAME" value="EIAirWidget.air"/>
-    <property name="AIR_PREP_NAME" value="EIAirWidget.airi"/>
-    <property name="DEBUG" value="false"/>
-    <property name="STORETYPE" value="pkcs12"/>
-    <property name="KEYSTORE" value="eiwidget.p12"/>
-
-    <target name="assembleAir" depends="compileAir">
-        <java jar="${ADT.JAR}" fork="true" failonerror="true">
-            <arg value="-prepare"/>
-            <arg value="${AIR_PREP_NAME}"/>
-            <arg value="-C"/>
-            <arg value="../out/air"/>
-            <arg value="${APP_DESCRIPTOR}"/>
-            <arg value="${APP_NAME}.swf"/>
-        </java>
-        <java jar="${ADT.JAR}" fork="true" failonerror="true">
-            <arg value="-sign"/>
-            <arg value="-C"/>
-            <arg value="../out/air"/>
-            <arg value="-storetype"/>
-            <arg value="${STORETYPE}"/>
-            <arg value="-keystore"/>
-            <arg value="${KEYSTORE}"/>
-            <arg value="-storepass"/>
-            <arg value="e@symone$"/>
-            <arg value="${AIR_PREP_NAME}"/>
-            <arg value="${AIR_NAME}"/>            
-        </java>
-    </target>
-
     <target name="compileFlexOptimized">
-        <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
-               static-rsls="false" link-report="optimized.txt">
-            <load-config filename="../core-optimized-config.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+        <buildSWF mainMXML="PrimaryWorkspace.mxml" swfName="PrimaryWorkspace" buildFile="core-optimized-config.xml"/>
     </target>
 
-    <target name="compileSpreadsheet">
-        <mxmlc file="../src/com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" output="${deployment.path}/SpreadsheetWizard.swf"
-               static-rsls="false">
-            <load-config filename="../perspectives/spreadsheet-wizard-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
+    <macrodef name="buildSWF">
+        <attribute name="mainMXML"/>
+        <attribute name="swfName"/>
+        <attribute name="buildFile"/>
+        <sequential>
+            <mxmlc file="../src/@{mainMXML}" output="${deployment.path}/@{swfName}.swf" keep-generated-actionscript="false"
+                   static-rsls="false" target-player="10.0.0" actionscript-file-encoding="utf8" incremental="false">
+                <load-config filename="../@{buildFile}"/>
+                <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                    <url rsl-url="framework_3.5.0.12683.swz"/>
+                    <url rsl-url="framework_3.5.0.12683.swf"/>
+                </runtime-shared-library-path>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
+                <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                    <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                    <url rsl-url="datavisualization_3.5.0.12683.swf"/>
+                </runtime-shared-library-path>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+                <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                    <url rsl-url="rpc_3.5.0.12683.swz"/>
+                    <url rsl-url="rpc_3.5.0.12683.swf"/>
+                </runtime-shared-library-path>
+                <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
+                    <url rsl-url="https://localhost:4443/app/1/EICore.swf"/>
+                </runtime-shared-library-path>
+            </mxmlc>
+        </sequential>
+    </macrodef>
+
+    <target name="modules1" depends="report.area3dchart, report.areachart, report.bar3dchart, report.barchart, report.bubblechart"/>
+    <target name="modules2" depends="report.column3dchart, report.columnchart, report.linechart, report.line3dchart, report.list"/>
+    <target name="modules3" depends="report.pie3dchart, report.piechart, report.plotchart"/>
+    <target name="modules4" depends="report.gauge, report.crosstab, report.tree, report.treemap"/>
+    <target name="modules5" depends="report.worldmap, report.usmap, report.americasmap, report.asiamap, report.europemap, report.middleeastmap"/>
+    <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.kpitreeadmin, perspective.groupdetail"/>
+    <target name="modules7" depends="perspective.kpiwindow, perspective.kpitreeview, perspective.datasourceadmin, perspective.analysisitemeditor"/>
+    <target name="modules8" depends="report.africamap"/>
+
+    <target name="perspective.spreadsheetwizard">
+        <buildSWF mainMXML="com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" swfName="SpreadsheetWizard" buildFile="perspectives/spreadsheet-wizard-module.xml"/>
     </target>
 
-    <target name="compileKPITreeAdmin">
-        <mxmlc file="../src/com/easyinsight/goals/GoalTreeAdminContainer.mxml" output="${deployment.path}/KPITreeAdmin.swf"
-               static-rsls="false">
-            <load-config filename="../perspectives/kpitree-admin-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.connectiondetail">
+        <buildSWF mainMXML="com/easyinsight/solutions/ConnectionDetail.mxml" swfName="ConnectionDetail" buildFile="perspectives/connection-detail-module.xml"/>
     </target>
 
-    <target name="compileKPITreeView">
-        <mxmlc file="../src/com/easyinsight/goals/GoalTreeViewContainer.mxml" output="${deployment.path}/KPITreeView.swf"
-               static-rsls="false">
-            <load-config filename="../perspectives/kpitree-view-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.kpitreeadmin">
+        <buildSWF mainMXML="com/easyinsight/goals/GoalTreeAdminContainer.mxml" swfName="KPITreeAdmin" buildFile="perspectives/kpitree-admin-module.xml"/>
     </target>
 
-    <target name="compileDataSourceAdmin">
-        <mxmlc file="../src/com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" output="${deployment.path}/DataSourceAdmin.swf"
-               static-rsls="false" link-report="dsadmin.txt">
-            <load-config filename="../perspectives/datasource-admin-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-        <SWFAnalysis linkReportPath="dsadmin.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="DataSourceAdmin"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+    <target name="perspective.groupdetail">
+        <buildSWF mainMXML="com/easyinsight/groups/GroupDetail.mxml" swfName="GroupDetail" buildFile="perspectives/group-detail-module.xml"/>
     </target>
 
-    <target name="compileReportEditor">
-        <mxmlc file="../src/com/easyinsight/DataAnalysisContainer.mxml" output="${deployment.path}/ReportEditor.swf"
-               static-rsls="false">
-            <load-config filename="../perspectives/reporteditor-admin-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.analysisitemeditor">
+        <buildSWF mainMXML="com/easyinsight/analysis/AnalysisItemEditor.mxml" swfName="AnalysisItemEditor" buildFile="perspectives/analysis-item-editor-module.xml"/>
     </target>
 
-    <target name="compileLogoAnimation">
-        <mxmlc file="../src/LogoAnimation.mxml" output="${deployment.path}/LogoAnimation.swf"
-               static-rsls="false">
-            <load-config filename="../logo-animation.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.kpiwindow">
+        <buildSWF mainMXML="com/easyinsight/kpi/KPIModule.mxml" swfName="KPIModule" buildFile="perspectives/kpi-window-module.xml"/>
     </target>
 
-    <target name="compileEmbeddedInsight">
-        <mxmlc file="../src/EmbeddedInsight.mxml" output="${deployment.path}/EmbeddedInsight.swf"
-               static-rsls="false" link-report="embedded-report.txt">
-            <load-config filename="../embedded-insight.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.kpitreeview">
+        <buildSWF mainMXML="com/easyinsight/goals/GoalTreeViewContainer.mxml" swfName="KPITreeView" buildFile="perspectives/kpitree-view-module.xml"/>
     </target>
 
-    <target name="compileYahooWidget">
-        <mxmlc file="../src/YahooWidgetReport.mxml" output="${deployment.path}/YahooWidgetReport.swf"
-               static-rsls="false" link-report="yahoo.txt">
-            <load-config filename="../yahoo-report.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="perspective.datasourceadmin">
+        <buildSWF mainMXML="com/easyinsight/administration/feed/FeedAdministrationContainer.mxml" swfName="DataSourceAdmin" buildFile="perspectives/datasource-admin-module.xml"/>
     </target>
 
-    <target name="compileYahooGoals">
-        <mxmlc file="../src/YahooWidgetGoals.mxml" output="${deployment.path}/YahooWidgetGoals.swf"
-               static-rsls="false">
-            <load-config filename="../yahoo-goals.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="app.embeddedreport">
+        <buildSWF mainMXML="EmbeddedInsight.mxml" swfName="EmbeddedInsight" buildFile="embedded-insight.xml"/>
     </target>
 
-    <target name="compileAdmin">
-        <mxmlc file="../src/AdministrationApplication.mxml" output="${deployment.path}/AdministrationApplication.swf"
-               static-rsls="true">
-            <load-config filename="../administration-app.xml"/>
-        </mxmlc>
+    <target name="app.selenium">
+        <buildSWF mainMXML="SeleniumReportView.mxml" swfName="SeleniumReportView" buildFile="selenium-report.xml"/>
     </target>
 
-    <target name="modules1" depends="module.area3dchart, module.areachart, module.bar3dchart, module.barchart, module.bubblechart"/>
-    <target name="modules2" depends="module.column3dchart, module.columnchart, module.linechart, module.line3dchart, module.list"/>
-    <target name="modules3" depends="module.mmlinechart, module.pie3dchart, module.piechart, module.plotchart"/>
-    <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap"/>
-    <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap, module.africamap"/>
-    <target name="modules6" depends="compileDataSourceAdmin, compileKPITreeView, compileKPITreeAdmin, compileSpreadsheet"/>
-
-    <target name="module.list">
-        <mxmlc file="../src/com/easyinsight/analysis/list/ListModule.mxml" output="${deployment.path}/ListModule.swf"
-               static-rsls="false" link-report="list.txt">
-            <load-config filename="../modules/list-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
-        <SWFAnalysis linkReportPath="list.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="List"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+    <target name="app.admin">
+        <buildSWF mainMXML="AdministrationApplication.mxml" swfName="AdministrationApplication" buildFile="administration-app.xml"/>
     </target>
 
-    <target name="module.columnchart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/column/ColumnChartModule.mxml" output="${deployment.path}/ColumnChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/column-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.list">
+        <buildSWF mainMXML="com/easyinsight/analysis/list/ListModule.mxml" swfName="ListModule" buildFile="modules/list-module.xml"/>
     </target>
 
-    <target name="module.column3dchart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/column/Column3DChartModule.mxml" output="${deployment.path}/Column3DChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/column-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.form">
+        <buildSWF mainMXML="com/easyinsight/analysis/form/FormModule.mxml" swfName="FormModule" buildFile="modules/form-module.xml"/>
     </target>
 
-    <target name="module.timeline">
-        <mxmlc file="../src/com/easyinsight/analysis/timeline/TimelineModule.mxml" output="${deployment.path}/TimelineModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/timeseries-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.columnchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/column/ColumnChartModule.mxml" swfName="ColumnChartModule" buildFile="modules/column-chart-module.xml"/>
     </target>
 
-    <target name="module.piechart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" output="${deployment.path}/PieChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/pie-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.column3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/column/Column3DChartModule.mxml" swfName="Column3DChartModule" buildFile="modules/column-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.pie3dchart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/pie/Pie3DChartModule.mxml" output="${deployment.path}/Pie3DChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/pie-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.gantt">
+        <buildSWF mainMXML="com/easyinsight/analysis/gantt/GanttModule.mxml" swfName="GanttModule" buildFile="modules/gantt-module.xml"/>
     </target>
 
-    <target name="module.barchart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/yaxisbased/bar/BarChartModule.mxml" output="${deployment.path}/BarChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/bar-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.timeline">
+        <buildSWF mainMXML="com/easyinsight/analysis/timeline/TimelineModule.mxml" swfName="TimelineModule" buildFile="modules/timeseries-module.xml"/>
     </target>
 
-    <target name="module.bar3dchart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/yaxisbased/bar/Bar3DChartModule.mxml" output="${deployment.path}/Bar3DChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/bar-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.piechart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" swfName="PieChartModule" buildFile="modules/pie-chart-module.xml"/>
     </target>
 
-    <target name="module.areachart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/area/AreaChartModule.mxml" output="${deployment.path}/AreaChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/area-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.pie3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/pie/Pie3DChartModule.mxml" swfName="Pie3DChartModule" buildFile="modules/pie-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.area3dchart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/area/Area3DChartModule.mxml" output="${deployment.path}/Area3DChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/area-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.barchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/yaxisbased/bar/BarChartModule.mxml" swfName="BarChartModule" buildFile="modules/bar-chart-module.xml"/>
     </target>
 
-    <target name="module.linechart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/line/LineChartModule.mxml" output="${deployment.path}/LineChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/line-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.bar3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/yaxisbased/bar/Bar3DChartModule.mxml" swfName="Bar3DChartModule" buildFile="modules/bar-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.mmlinechart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/line/MultiMeasureLineChartModule.mxml" output="${deployment.path}/MultiMeasureLineChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/mm-line-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.areachart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/twoaxisbased/area/AreaChartModule.mxml" swfName="AreaChartModule" buildFile="modules/area-chart-module.xml"/>
     </target>
 
-    <target name="module.line3dchart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/line/Line3DChartModule.mxml" output="${deployment.path}/Line3DChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/line-3d-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.area3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/twoaxisbased/area/Area3DChartModule.mxml" swfName="Area3DChartModule" buildFile="modules/area-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.bubblechart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/bubble/BubbleChartModule.mxml" output="${deployment.path}/BubbleChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/bubble-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.linechart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/twoaxisbased/line/LineChartModule.mxml" swfName="LineChartModule" buildFile="modules/line-chart-module.xml"/>
     </target>
 
-    <target name="module.plotchart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/plot/PlotChartModule.mxml" output="${deployment.path}/PlotChartModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/plot-chart-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.line3dchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/twoaxisbased/line/Line3DChartModule.mxml" swfName="Line3DChartModule" buildFile="modules/line-3d-chart-module.xml"/>
     </target>
 
-    <target name="module.usmap">
-        <mxmlc file="../src/com/easyinsight/analysis/maps/UnitedStatesMapModule.mxml" output="${deployment.path}/UnitedStatesMapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/map-us-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.bubblechart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/bubble/BubbleChartModule.mxml" swfName="BubbleChartModule" buildFile="modules/bubble-chart-module.xml"/>
     </target>
 
-    <target name="module.europemap">
-        <mxmlc file="../src/com/easyinsight/analysis/maps/EuropeMapModule.mxml" output="${deployment.path}/EuropeMapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/map-europe-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.plotchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/plot/PlotChartModule.mxml" swfName="PlotChartModule" buildFile="modules/plot-chart-module.xml"/>
     </target>
 
-    <target name="module.asiamap">
-        <mxmlc file="../src/com/easyinsight/analysis/maps/AsiaMapModule.mxml" output="${deployment.path}/AsiaMapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/map-asia-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.usmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/UnitedStatesMapModule.mxml" swfName="UnitedStatesMapModule" buildFile="modules/map-us-module.xml"/>
     </target>
 
-    <target name="module.africamap">
-        <mxmlc file="../src/com/easyinsight/analysis/maps/AfricaMapModule.mxml" output="${deployment.path}/AfricaMapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/map-africa-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.europemap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/EuropeMapModule.mxml" swfName="EuropeMapModule" buildFile="modules/map-europe-module.xml"/>
     </target>
 
-    <target name="module.worldmap">
-        <mxmlc file="../src/com/easyinsight/analysis/maps/WorldMapModule.mxml" output="${deployment.path}/WorldMapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/map-world-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.asiamap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/AsiaMapModule.mxml" swfName="AsiaMapModule" buildFile="modules/map-asia-module.xml"/>
     </target>
 
-    <target name="module.americasmap">
-        <mxmlc file="../src/com/easyinsight/analysis/maps/AmericasModule.mxml" output="${deployment.path}/AmericasModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/map-americas-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.africamap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/AfricaMapModule.mxml" swfName="AfricaMapModule" buildFile="modules/map-africa-module.xml"/>
     </target>
 
-    <target name="module.middleeastmap">
-        <mxmlc file="../src/com/easyinsight/analysis/maps/MiddleEastMapModule.mxml" output="${deployment.path}/MiddleEastMapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/map-middleeast-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.worldmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/WorldMapModule.mxml" swfName="WorldMapModule" buildFile="modules/map-world-module.xml"/>
     </target>
 
-    <target name="module.crosstab">
-        <mxmlc file="../src/com/easyinsight/analysis/crosstab/CrosstabModule.mxml" output="${deployment.path}/CrosstabModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/crosstab-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.americasmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/AmericasModule.mxml" swfName="AmericasModule" buildFile="modules/map-americas-module.xml"/>
     </target>
 
-    <target name="module.gauge">
-        <mxmlc file="../src/com/easyinsight/analysis/gauge/GaugeModule.mxml" output="${deployment.path}/GaugeModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/gauge-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.middleeastmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/maps/MiddleEastMapModule.mxml" swfName="MiddleEastMapModule" buildFile="modules/map-middleeast-module.xml"/>
     </target>
 
-    <target name="module.treemap">
-        <mxmlc file="../src/com/easyinsight/analysis/treemap/TreeMapModule.mxml" output="${deployment.path}/TreeMapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/treemap-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.crosstab">
+        <buildSWF mainMXML="com/easyinsight/analysis/crosstab/CrosstabModule.mxml" swfName="CrosstabModule" buildFile="modules/crosstab-module.xml"/>
     </target>
 
-    <target name="module.heatmap">
-        <mxmlc file="../src/com/easyinsight/analysis/heatmap/HeatMapModule.mxml" output="${deployment.path}/HeatMapModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/heatmap-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.gauge">
+        <buildSWF mainMXML="com/easyinsight/analysis/gauge/GaugeModule.mxml" swfName="GaugeModule" buildFile="modules/gauge-module.xml"/>
     </target>
 
-    <target name="module.tree">
-        <mxmlc file="../src/com/easyinsight/analysis/tree/TreeModule.mxml" output="${deployment.path}/TreeModule.swf"
-               static-rsls="false">
-            <load-config filename="../modules/tree-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.5.0.12683.swz"/>
-                <url rsl-url="framework_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
+    <target name="report.treemap">
+        <buildSWF mainMXML="com/easyinsight/analysis/treemap/TreeMapModule.mxml" swfName="TreeMapModule" buildFile="modules/treemap-module.xml"/>
+    </target>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
-                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
+    <target name="report.heatmap">
+        <buildSWF mainMXML="com/easyinsight/analysis/heatmap/HeatMapModule.mxml" swfName="HeatMapModule" buildFile="modules/heatmap-module.xml"/>
+    </target>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.5.0.12683.swz"/>
-                <url rsl-url="rpc_3.5.0.12683.swf"/>
-            </runtime-shared-library-path>
-            <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                <url rsl-url="easyui-debug/EICore.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+    <target name="report.tree">
+        <buildSWF mainMXML="com/easyinsight/analysis/tree/TreeModule.mxml" swfName="TreeModule" buildFile="modules/tree-module.xml"/>
     </target>
 </project>

@@ -120,7 +120,7 @@
 
         private function gotDataSource():void {
             dataSourceDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
-            ready = true;            
+            ready = true;
             var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
             dataSourceCreation = new configClass();
             if (dataSourceCreation.savesCredentials) {
@@ -177,7 +177,7 @@
         private var lastMessage:Date;
 
         private function onMessage(event:DataSourceMessageEvent):void {
-            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;            
+            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
             if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
                 lastMessage = scorecardEvent.timestamp;
                 if (scorecardEvent.dataSourceID == dataSourceDefinition.dataFeedID) {
@@ -209,7 +209,7 @@
             var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
             if (response.successful) {
                 var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
+                descriptor.id = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
                 dispatchEvent(new DataSourceConfiguredEvent(descriptor));
                 UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);

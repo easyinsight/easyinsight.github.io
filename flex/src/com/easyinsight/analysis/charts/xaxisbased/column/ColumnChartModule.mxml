@@ -1,11 +1,12 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
-        width="100%" height="100%" creationComplete="setupListeners()">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
+           implements="com.easyinsight.analysis.IReportRenderer"
+           width="100%" height="100%" creationComplete="setupListeners()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
 
-        
-import com.easyinsight.analysis.AnalysisItem;
+
+        import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartSortButton;
         import com.easyinsight.analysis.ChartSortEvent;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -14,7 +15,7 @@ import com.easyinsight.analysis.AnalysisItem;
 
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.pseudocontext.PseudoContextWindow;
-        
+
 
         import mx.binding.utils.BindingUtils;
         import mx.charts.AxisRenderer;
@@ -25,7 +26,7 @@ import com.easyinsight.analysis.AnalysisItem;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartItemEvent;
-import mx.charts.series.ColumnSeries;
+        import mx.charts.series.ColumnSeries;
         import mx.charts.series.items.ColumnSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -101,14 +102,14 @@ import mx.charts.series.ColumnSeries;
         }
 
         private function onChartSort(event:ChartSortEvent):void {
-           if (event.sortState == ChartSortButton.ASCENDING ||
-               event.sortState == ChartSortButton.DESCENDING) {
-               var sort:Sort = new Sort();
-               sort.compareFunction = SortFunctionFactory.createSortFunction(event.analysisItem, event.analysisItem.sort == ChartSortButton.DESCENDING);
-               graphData.sort = sort;
-               graphData.refresh();
-           }
-       }
+            if (event.sortState == ChartSortButton.ASCENDING ||
+                    event.sortState == ChartSortButton.DESCENDING) {
+                var sort:Sort = new Sort();
+                sort.compareFunction = SortFunctionFactory.createSortFunction(event.analysisItem, event.analysisItem.sort == ChartSortButton.DESCENDING);
+                graphData.sort = sort;
+                graphData.refresh();
+            }
+        }
 
         private function onClick(event:ChartItemEvent):void {
             if (event.shiftKey) {
@@ -135,9 +136,10 @@ import mx.charts.series.ColumnSeries;
                 columnChart.percentHeight = 100;
                 columnChart.percentWidth = 100;
                 columnChart.showDataTips = true;
+                columnChart.cacheAsBitmap = true;
                 /*if (selectable) {
-                    columnChart.selectionMode = "multiple";
-                }*/
+                 columnChart.selectionMode = "multiple";
+                 }*/
                 columnChart.dataProvider = graphData;
 
                 // define the X axis
@@ -196,18 +198,20 @@ import mx.charts.series.ColumnSeries;
                 var mySeries:Array = new Array();
                 columnChart.series = mySeries;
                 mySeries.push(columnSeries);
-                addChild(columnChart);
+                canvas.addChild(columnChart);
+            } else {
+                columnChart.visible = true;
             }
         }
 
         private function myDataFunction(series:Series, item:Object, fieldName:String):Object {
-              if(fieldName == 'yValue')
-                  return(item[yAxisItem.qualifiedName()].toNumber());
-              else if(fieldName == "xValue")
-                  return(item[xAxisItem.qualifiedName()].toString());
-              else
-                  return null;
-         }
+            if (fieldName == 'yValue')
+                return(item[yAxisItem.qualifiedName()].toNumber());
+            else if (fieldName == "xValue")
+                return(item[xAxisItem.qualifiedName()].toString());
+            else
+                return null;
+        }
 
 
         private function renderChartLabel(element:ChartItem, series:Series):String {
@@ -240,7 +244,7 @@ import mx.charts.series.ColumnSeries;
             var columnChartDef:ColumnChartDefinition = analysisDefinition as ColumnChartDefinition;
 
             if (dataSet.length > 0) {
-
+                stackIndex = 0;
                 if (columnChartDef.xaxis.sort > 0) {
                     var sort:Sort = new Sort();
                     //sort.fields = [ new SortField(columnChartDef.xaxis.qualifiedName(), false, )];
@@ -251,7 +255,7 @@ import mx.charts.series.ColumnSeries;
                     var measureSort:Sort = new Sort();
                     measureSort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, columnChartDef.measure.sort == ChartSortButton.DESCENDING);
                     dataSet.sort = measureSort;
-                    dataSet.refresh();    
+                    dataSet.refresh();
                 }
 
                 xField = columnChartDef.xaxis.qualifiedName();
@@ -305,12 +309,24 @@ import mx.charts.series.ColumnSeries;
 
                 //columnSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill, xAxisItem));
                 columnChart.dataProvider = dataSet;
-            columnSeries.dataProvider = dataSet;
-            xAxis.dataProvider = dataSet;
+                columnSeries.dataProvider = dataSet;
+                xAxis.dataProvider = dataSet;
+            } else {
+                if (columnChartDef.measure != null && columnChartDef.xaxis != null) stackIndex = 2;
+                else stackIndex = 1;
+                if (columnChart != null) {
+                    columnChart.dataProvider = new ArrayCollection();
+                    columnSeries.dataProvider = new ArrayCollection();
+                    xAxis.dataProvider = new ArrayCollection();
+                    columnChart.visible = false;
+                }
             }
 
             graphData = dataSet;
         }
+
+        [Bindable]
+        private var stackIndex:int = 0;
 
         public function preserveValues():Boolean {
             return true;
@@ -323,4 +339,30 @@ import mx.charts.series.ColumnSeries;
         }]]></mx:Script>
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
     <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
+    <mx:Canvas width="100%" height="100%" id="canvas">
+        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
+                      mouseEnabled="false">
+            <mx:Canvas width="100%" height="100%"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+                </mx:Box>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="We didn't find any data for the fields and filters that you specified in the report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+                </mx:Box>
+            </mx:Box>
+        </mx:ViewStack>
+    </mx:Canvas>
 </mx:Module>

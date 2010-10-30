@@ -37,7 +37,7 @@ package com.easyinsight.listing
 		public static const SUBSCRIBER:int = 3;
 		
 		public var name:String;
-		public var dataFeedID:int;		
+		public var id:int;
 		public var genre:String;
         public var groupSourceID:int;
 		//public var policy:UploadPolicy;

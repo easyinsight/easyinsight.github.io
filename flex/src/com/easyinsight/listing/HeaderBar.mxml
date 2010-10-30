@@ -137,7 +137,7 @@
                 currentState = "Persona";
             }
             if (!config.getConfiguration(UIConfiguration.SHOW_REPORT_BUG).selected) {
-                removeChild(bugButton);
+                if (bugButton.parent != null) removeChild(bugButton);
             }
 
         }

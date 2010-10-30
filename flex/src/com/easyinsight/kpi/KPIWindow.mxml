@@ -95,11 +95,11 @@
 
         private function onDataSourceChange(event:CompletionItemEvent):void {
             var descriptor:DataFeedDescriptor = event.selectedItem as DataFeedDescriptor;
-            feedID = descriptor.dataFeedID;
+            feedID = descriptor.id;
             dataSource = descriptor;
             insightBound = true;
             analysisMeasure = null;
-            dataService.getFeedMetadata.send(descriptor.dataFeedID);
+            dataService.getFeedMetadata.send(descriptor.id);
         }
 
         [Bindable]
@@ -131,18 +131,18 @@
         }
 
         /*private function editMeasure():void {
-            var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-            if (analysisMeasure.hasType(AnalysisItemTypes.CALCULATION)) {
-                analysisItemEditor.editorClass = CalculationMeasureWindow;
-            } else {
-                analysisItemEditor.editorClass = MeasureItemEditor;
-            }
-            analysisItemEditor.analysisItems = this.allFields;
-            analysisItemEditor.analysisItem = this.analysisMeasure;
-            PopUpManager.addPopUp(analysisItemEditor, this, true);
-            PopUpUtil.centerPopUp(analysisItemEditor);
-            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
-        }*/
+         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+         if (analysisMeasure.hasType(AnalysisItemTypes.CALCULATION)) {
+         analysisItemEditor.editorClass = CalculationMeasureWindow;
+         } else {
+         analysisItemEditor.editorClass = MeasureItemEditor;
+         }
+         analysisItemEditor.analysisItems = this.allFields;
+         analysisItemEditor.analysisItem = this.analysisMeasure;
+         PopUpManager.addPopUp(analysisItemEditor, this, true);
+         PopUpUtil.centerPopUp(analysisItemEditor);
+         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
+         }*/
 
         private static const NONE:AnalysisItem = new AnalysisItem();
 
@@ -165,7 +165,7 @@
                 analysisMeasure = _kpi.analysisMeasure;
                 insightBound = true;
                 var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                descriptor.dataFeedID = _kpi.coreFeedID;
+                descriptor.id = _kpi.coreFeedID;
                 descriptor.name = _kpi.coreFeedName;
                 //connectionVisible = _kpi.connectionVisible;
                 description = _kpi.description;
@@ -213,7 +213,7 @@
             descriptors.refresh();
             if (dataSource != null) {
                 for each (var desc:DataFeedDescriptor in descriptors) {
-                    if (desc.dataFeedID == dataSource.dataFeedID) {
+                    if (desc.id == dataSource.id) {
                         dataSource = desc;
                         break;
                     }
@@ -230,7 +230,7 @@
             descriptors.refresh();
             if (dataSource != null) {
                 for each (var desc:DataFeedDescriptor in descriptors) {
-                    if (desc.dataFeedID == dataSource.dataFeedID) {
+                    if (desc.id == dataSource.id) {
                         dataSource = desc;
                         break;
                     }
@@ -321,7 +321,7 @@
             //_kpi.dateDimension = dateDimBox.selectedItem as AnalysisDateDimension;
             _kpi.threshold = Number(thresholdInput.text);
             _kpi.dayWindow = timeStepper.value;
-            _kpi.coreFeedID = dataSourceBox.selectedItem.dataFeedID;
+            _kpi.coreFeedID = dataSourceBox.selectedItem.id;
             _kpi.name = kpiNameInput.text;
             _kpi.iconImage = kpiIconPath;
             _kpi.filters = transformContainer.getFilterDefinitions();

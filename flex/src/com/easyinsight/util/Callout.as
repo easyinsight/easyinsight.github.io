@@ -187,6 +187,10 @@ package com.easyinsight.util
         //////////////////////////////
         private static var classConstructed:Boolean = classConstruct();
 
+        public function Callout() {
+
+        }
+
         /**
          * @private
          * Creates default styles that can be overridden by the developer.

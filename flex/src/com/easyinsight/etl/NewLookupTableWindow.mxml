@@ -50,7 +50,7 @@
         public function set selectedDataSource(value:DataFeedDescriptor):void {
             _selectedDataSource = value;
             if (_selectedDataSource != null) {
-                dataSourceID = _selectedDataSource.dataFeedID;
+                dataSourceID = _selectedDataSource.id;
             }
         }
 
@@ -74,7 +74,7 @@
             }
             var lookupTable:LookupTable = new LookupTable();
             lookupTable.name = destinationFieldInput.text;
-            lookupTable.dataSourceID = dataSourceBox.selectedItem.dataFeedID;
+            lookupTable.dataSourceID = dataSourceBox.selectedItem.id;
             lookupTable.sourceField = sourceFieldBox.selectedItem as AnalysisItem;
             var targetField:AnalysisItem = new AnalysisItem();
             if (destinationGroup.selectedValue == "grouping") {
@@ -116,7 +116,7 @@
 
         private function onDSChange():void {
             fieldIndex = 1;
-            feedService.getFeedDefinition.send(dataSourceBox.selectedItem.dataFeedID);
+            feedService.getFeedDefinition.send(dataSourceBox.selectedItem.id);
         }
 
         private function gotFields():void {
@@ -188,7 +188,7 @@
                     </mx:Box>
                     <mx:Box>
                         <util:SmartComboBox id="dataSourceBox" dataProvider="{dataSources}" labelField="name"
-                            change="onDSChange()" selectedProperty="dataFeedID" selectedValue="{dataSourceID}"/>
+                            change="onDSChange()" selectedProperty="id" selectedValue="{dataSourceID}"/>
                     </mx:Box>
                 </mx:ViewStack>
             </mx:FormItem>

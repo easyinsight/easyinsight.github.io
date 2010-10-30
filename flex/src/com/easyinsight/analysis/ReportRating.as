@@ -1,15 +1,16 @@
 package com.easyinsight.analysis {
-import com.easyinsight.framework.User;
+
 import com.easyinsight.report.ReportMetrics;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
-import mx.controls.Alert;
 import mx.controls.Image;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
+
+[Event(name="reportRating", type="com.easyinsight.analysis.ReportRatingEvent")]
 
 public class ReportRating extends HBox{
 
@@ -89,7 +90,8 @@ public class ReportRating extends HBox{
 
     private function onResult(event:ResultEvent):void {
         var metrics:ReportMetrics = analysisService.rateReport.lastResult as ReportMetrics;
-        _score = metrics.average;
+        _score = metrics.myRating;
+        dispatchEvent(new ReportRatingEvent(metrics.average));
     }
 
     private function updateScores():void {
@@ -105,20 +107,18 @@ public class ReportRating extends HBox{
     }
 
     private function onMouseClick(event:MouseEvent):void {
-        if (User.getInstance() != null) {
-            var image:Image = event.currentTarget as Image;
-            var i:int = 0;
-            for each (var testImage:Image in stars) {
-                //testImage.source = greenStar;
-                i++;
-                if (testImage == image) {
-                    break;
-                }
+        var image:Image = event.currentTarget as Image;
+        var i:int = 0;
+        for each (var testImage:Image in stars) {
+            //testImage.source = greenStar;
+            i++;
+            if (testImage == image) {
+                break;
             }
-            score = i;
-            ProgressAlert.alert(this, "Saving your rating...", null, analysisService.rateReport);
-            analysisService.rateReport.send(_reportID, _score);
         }
-    }
+        score = i;
+        ProgressAlert.alert(this, "Saving your rating...", null, analysisService.rateReport);
+        analysisService.rateReport.send(_reportID, _score);
+}
 }
 }

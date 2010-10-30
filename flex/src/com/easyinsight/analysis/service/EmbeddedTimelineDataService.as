@@ -43,7 +43,7 @@ public class EmbeddedTimelineDataService extends EventDispatcher implements IEmb
         }
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, dataSets, results.definition, results.dataSourceAccessible,
                 results.attribution, listData.credentialRequirements, listData.dataSourceInfo, results.ratingsAverage,
-                results.ratingsCount, results.additionalProperties));
+                results.ratingsCount, results.myRating, results.additionalProperties));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

@@ -25,7 +25,7 @@ public class GroupDataSourceItem extends PopularFeed {
 
     private function deleteReport(event:ContextMenuEvent):void {
         var dataSource:DataFeedDescriptor = data as DataFeedDescriptor;
-        dispatchEvent(new RemoveItemFromGroupEvent(RemoveItemFromGroupEvent.REMOVE_DATA_SOURCE_FROM_GROUP, dataSource.dataFeedID));
+        dispatchEvent(new RemoveItemFromGroupEvent(RemoveItemFromGroupEvent.REMOVE_DATA_SOURCE_FROM_GROUP, dataSource.id));
     }
 
     public function set admin(val:Boolean):void {

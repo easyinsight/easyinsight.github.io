@@ -29,9 +29,18 @@ public class ReportEventProcessor extends EITitleWindow {
     private var _overlayIndex:int;
     private var _stackTrace:String;
 
+    [Embed(source="../../../../assets/background2.JPG")]
+    public var backImage:Class;
+
     public function ReportEventProcessor() {
         this.width = 600;
         this.height = 500;
+        setStyle("paddingLeft", 10);
+        setStyle("paddingRight", 10);
+        setStyle("paddingTop", 10);
+        setStyle("paddingBottom", 10);
+        setStyle("backgroundImage", backImage);
+        setStyle("backgroundSize", "100%");
         this.showCloseButton = true;
         addEventListener(Event.CLOSE, onClose);
     }

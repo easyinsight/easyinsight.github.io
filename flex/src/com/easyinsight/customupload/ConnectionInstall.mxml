@@ -158,7 +158,7 @@
             var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
             if (response.successful) {
                 var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
+                descriptor.id = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
                 dispatchEvent(new DataSourceConfiguredEvent(descriptor));
                 if (stage != null) {

@@ -7,6 +7,7 @@ public class ExchangeRatingRenderer extends ReportRating{
 
     public function ExchangeRatingRenderer() {
         super();
+        rateable = true;
     }
 
     override public function set data(val:Object):void {

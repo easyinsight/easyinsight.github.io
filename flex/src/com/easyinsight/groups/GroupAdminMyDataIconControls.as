@@ -225,7 +225,7 @@ public class GroupAdminMyDataIconControls extends HBox
     private function analyzeCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.id)));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
@@ -236,14 +236,14 @@ public class GroupAdminMyDataIconControls extends HBox
     }
 
     private function refreshData(feedDescriptor:DataFeedDescriptor):void {
-        var c:Credentials = User.getCredentials(feedDescriptor.dataFeedID);
+        var c:Credentials = User.getCredentials(feedDescriptor.id);
         if (c != null) {
             userUploadSource = new RemoteObject();
             userUploadSource.destination = "userUpload";
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
             userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
             ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
-            userUploadSource.refreshData.send(feedDescriptor.dataFeedID, c, false, true);
+            userUploadSource.refreshData.send(feedDescriptor.id, c, false, true);
             //dispatchEvent(new RefreshNotificationEvent());
             return;
         }
@@ -253,7 +253,7 @@ public class GroupAdminMyDataIconControls extends HBox
         feedService.needsConfig.addEventListener(ResultEvent.RESULT, gotConfigNeed);
         feedService.needsConfig.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
         ProgressAlert.alert(this, "Getting ready to refresh data...", null, feedService.needsConfig);
-        feedService.needsConfig.send(feedDescriptor.dataFeedID);
+        feedService.needsConfig.send(feedDescriptor.id);
     }
 
     private function gotConfigNeed(event:ResultEvent):void {
@@ -261,7 +261,7 @@ public class GroupAdminMyDataIconControls extends HBox
         var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
         if (config) {
             var refreshWindow:RefreshWindow = new RefreshWindow();
-            refreshWindow.dataSourceID = descriptor.dataFeedID;
+            refreshWindow.dataSourceID = descriptor.id;
             refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured, false, 0, true);
             PopUpManager.addPopUp(refreshWindow, this, true);
             PopUpUtil.centerPopUp(refreshWindow);
@@ -271,7 +271,7 @@ public class GroupAdminMyDataIconControls extends HBox
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
             userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
             ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
-            userUploadSource.refreshData.send(descriptor.dataFeedID, null, false, true);    
+            userUploadSource.refreshData.send(descriptor.id, null, false, true);
         }
     }
 
@@ -299,7 +299,7 @@ public class GroupAdminMyDataIconControls extends HBox
 
     private function fileData(feedDescriptor:DataFeedDescriptor):void {
         var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
-        feedUpdateWindow.feedID = feedDescriptor.dataFeedID;
+        feedUpdateWindow.feedID = feedDescriptor.id;
         feedUpdateWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
         PopUpUtil.centerPopUp(feedUpdateWindow);
 
@@ -308,7 +308,7 @@ public class GroupAdminMyDataIconControls extends HBox
     private function adminCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.dataFeedID})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));

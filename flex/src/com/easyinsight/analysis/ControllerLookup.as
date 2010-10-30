@@ -13,6 +13,7 @@ import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
 import com.easyinsight.analysis.crosstab.CrosstabController;
+import com.easyinsight.analysis.form.FormController;
 import com.easyinsight.analysis.gantt.GanttController;
 import com.easyinsight.analysis.gauge.GaugeController;
 import com.easyinsight.analysis.heatmap.HeatMapController;
@@ -119,6 +120,9 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.GANTT:
                 controller = GanttController;
+                break;
+            case AnalysisDefinition.FORM:
+                controller = FormController;
                 break;
         }
         return controller;

@@ -16,12 +16,14 @@ public class EmbeddedDataServiceEvent extends Event {
     public var credentialRequirements:ArrayCollection;
     public var ratingsAverage:Number;
     public var ratingsCount:int;
+    public var myRating:int;
+    public var reportAuthor:String;
     public var dataSourceInfo:DataSourceInfo;
     public var additionalProperties:Object;
 
     public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, dataSourceAccessible:Boolean,
             attribution:String, credentialRequirements:ArrayCollection, dataSourceInfo:DataSourceInfo, ratingsAverage:Number,
-                ratingsCount:int, additionalProperties:Object) {
+                ratingsCount:int, myRating:int, additionalProperties:Object) {
         super(type);
         this.dataSet = dataSet;
         this.analysisDefinition = analysisDefinition;
@@ -31,12 +33,13 @@ public class EmbeddedDataServiceEvent extends Event {
         this.dataSourceInfo = dataSourceInfo;
         this.ratingsAverage = ratingsAverage;
         this.ratingsCount = ratingsCount;
+        this.myRating = myRating;
         this.additionalProperties = additionalProperties;
     }
 
     override public function clone():Event {
         return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, dataSourceAccessible, attribution,
-                credentialRequirements, dataSourceInfo, ratingsAverage, ratingsCount, additionalProperties);
+                credentialRequirements, dataSourceInfo, ratingsAverage, ratingsCount, myRating, additionalProperties);
     }
 }
 }

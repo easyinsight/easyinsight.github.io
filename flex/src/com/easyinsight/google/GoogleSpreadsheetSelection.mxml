@@ -32,14 +32,8 @@
 
         public function set straightToConnect(value:Boolean):void {
             _straightToConnect = value;
-        }        
-
-        private function worksheetClick():void {
-            if (spreadsheetTree.selectedItem != null) {
-                trace(spreadsheetTree.selectedItem.dataFeedID);
-            }
         }
-
+        
         private function retrieveSpreadsheets():void {
             dataService.getAvailableGoogleSpreadsheets.send();
         }

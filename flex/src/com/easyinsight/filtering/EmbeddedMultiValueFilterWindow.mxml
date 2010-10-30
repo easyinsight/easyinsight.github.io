@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:filtering="com.easyinsight.filtering.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private var _embeddedFilter:FilterValueDefinition;
+        private var _dataSourceID:int;
+
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
+
+        [Bindable(event="embeddedFilterChanged")]
+        public function get embeddedFilter():FilterValueDefinition {
+            return _embeddedFilter;
+        }
+
+        public function set embeddedFilter(value:FilterValueDefinition):void {
+            if (_embeddedFilter == value) return;
+            _embeddedFilter = value;
+            dispatchEvent(new Event("embeddedFilterChanged"));
+        }
+
+        private function save():void {
+            mvWindow.makeUpdates();
+            dispatchEvent(new Event("updated"));
+            PopUpManager.removePopUp(this);
+        }
+
+        ]]></mx:Script>
+    <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <filtering:MultiValueFilterWindow filterValueDefinition="{embeddedFilter}"
+                id="mvWindow" typeChangeAllowed="false" feedID="{dataSourceID}"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

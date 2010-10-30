@@ -28,7 +28,7 @@
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:RedirectDataSource = feedDefinition as RedirectDataSource;
-            ds.redirectDataSourceID = dataSourceComboBox.selectedItem.dataFeedID;
+            ds.redirectDataSourceID = dataSourceComboBox.selectedItem.id;
             ds.feedName = dsNameInput.text;
         }
 

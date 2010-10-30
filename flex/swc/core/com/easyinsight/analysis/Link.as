@@ -4,6 +4,7 @@ package com.easyinsight.analysis {
 public class Link {
     public var label:String;
     public var linkID:int;
+    public var codeGenerated:Boolean;
 
     public function Link() {
     }

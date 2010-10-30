@@ -1,6 +1,7 @@
 package com.easyinsight.framework
 {
 import com.easyinsight.account.Account;
+import com.easyinsight.guest.Scenario;
 import com.easyinsight.preferences.UIConfiguration;
 import com.easyinsight.preferences.UISettings;
 
@@ -35,7 +36,8 @@ public class User extends EventDispatcher
     public var personaID:int;
     public var dateFormat:int;
     public var defaultReportSharing:Boolean;
-    public var guestUser:Boolean;
+    private var _guestUser:Boolean;
+    public var scenario:Scenario;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -57,6 +59,17 @@ public class User extends EventDispatcher
                 break;
         }
         return formatString;
+    }
+
+    [Bindable(event="guestUserChanged")]
+    public function get guestUser():Boolean {
+        return _guestUser;
+    }
+
+    public function set guestUser(value:Boolean):void {
+        if (_guestUser == value) return;
+        _guestUser = value;
+        dispatchEvent(new Event("guestUserChanged"));
     }
 
     [Bindable(event="userNameChanged")]
@@ -95,6 +108,7 @@ public class User extends EventDispatcher
         _user.personaID = response.personaID;
         _user.dateFormat = response.dateFormat;
         _user.defaultReportSharing = response.defaultReportSharing;
+        _user.scenario = response.scenario;
         _user.guestUser = response.guestUser;
         if (_user.firstLogin) {
             User.getEventNotifier().dispatchEvent(new Event("firstLogin"));

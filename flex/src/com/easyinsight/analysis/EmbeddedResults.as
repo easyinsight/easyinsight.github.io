@@ -13,6 +13,7 @@ public class EmbeddedResults {
     public var attribution:String;
     public var ratingsAverage:Number;
     public var ratingsCount:int;
+    public var myRating:int;
     public var credentialRequirements:ArrayCollection;
     public var additionalProperties:Object;
 

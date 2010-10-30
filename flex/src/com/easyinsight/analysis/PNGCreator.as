@@ -1,55 +1,39 @@
-package com.easyinsight.analysis
-{
-	import com.easyinsight.util.PNGEnc;
-	
-	import flash.display.BitmapData;
-	import flash.display.DisplayObject;
-	import flash.events.Event;
-	import flash.events.HTTPStatusEvent;
-	import flash.events.IOErrorEvent;
-	import flash.events.ProgressEvent;
-	import flash.events.SecurityErrorEvent;
-	import flash.net.FileReference;
-	import flash.utils.ByteArray;
-	
-	import mx.controls.Alert;
-	
-	public class PNGCreator
-	{
-		private var fileRef:FileReference;
-		
-		public function PNGCreator()
-		{
-		}
-		
-		private function doEvent(event:Event):void {
-			trace(event);
-		}
-		
-		private function complete(event:Event):void {
-			Alert.show("Image saved!");
-		}
+package com.easyinsight.analysis {
+import com.easyinsight.util.PNGEnc;
 
-        public function drawToBytes(renderable:DisplayObject):ByteArray {
-            var bd:BitmapData = new BitmapData(renderable.width, renderable.height);
-			bd.draw(renderable);
-			return PNGEnc.encode(bd);
-        }
+import com.easyinsight.util.ProgressAlert;
 
-		public function draw(renderable:DisplayObject):void {
-			var bd:BitmapData = new BitmapData(renderable.width, renderable.height);
-			bd.draw(renderable);
-			var ba:ByteArray = PNGEnc.encode(bd);
-            fileRef = new FileReference();
-            fileRef.addEventListener(Event.CANCEL, doEvent);
-            fileRef.addEventListener(Event.COMPLETE, complete);
-            fileRef.addEventListener(Event.OPEN, doEvent);
-            fileRef.addEventListener(Event.SELECT, doEvent);
-            fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
-            fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-            fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
-            fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-            fileRef.save(ba, "export.png");
-		}
-	}
+import flash.display.BitmapData;
+import flash.display.DisplayObject;
+import flash.net.URLRequest;
+import flash.net.navigateToURL;
+import flash.utils.ByteArray;
+
+import mx.core.UIComponent;
+import mx.rpc.events.ResultEvent;
+import mx.rpc.remoting.RemoteObject;
+
+public class PNGCreator {
+
+    public function PNGCreator() {
+        upload = new RemoteObject();
+        upload.destination = "exportService";
+        upload.exportToPNG.addEventListener(ResultEvent.RESULT, exported);
+    }
+
+    private var upload:RemoteObject;
+
+    private function exported(event:ResultEvent):void {
+        var url:URLRequest = new URLRequest("/app/image");
+        navigateToURL(url, "_blank");
+    }
+
+    public function exportPNG(renderable:DisplayObject, parent:UIComponent, reportName:String):void {
+        var bd:BitmapData = new BitmapData(renderable.width, renderable.height);
+        bd.draw(renderable);
+        var ba:ByteArray = PNGEnc.encode(bd);
+        ProgressAlert.alert(parent, "Generating the PNG image...", null, upload.exportToPNG);
+        upload.exportToPNG.send(reportName, ba);
+    }
+}
 }
