@@ -3,6 +3,7 @@ import com.easyinsight.util.PNGEnc;
 
 import com.easyinsight.util.ProgressAlert;
 
+import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.net.URLRequest;
@@ -30,7 +31,14 @@ public class PNGCreator {
 
     public function exportPNG(renderable:DisplayObject, parent:UIComponent, reportName:String):void {
         var bd:BitmapData = new BitmapData(renderable.width, renderable.height);
-        bd.draw(renderable);
+        if (renderable.hasOwnProperty("getPrintableBitmap")) {
+            var f:Function = renderable["getPrintableBitmap"];
+            var bitmap:Bitmap = f.call(renderable);
+            bd.draw(bitmap);
+        } else {
+            bd.draw(renderable);
+        }
+
         var ba:ByteArray = PNGEnc.encode(bd);
         ProgressAlert.alert(parent, "Generating the PNG image...", null, upload.exportToPNG);
         upload.exportToPNG.send(reportName, ba);

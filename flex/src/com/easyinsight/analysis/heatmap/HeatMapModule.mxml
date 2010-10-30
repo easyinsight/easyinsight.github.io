@@ -281,6 +281,10 @@
             return false;
         }
 
+        public function getPrintableBitmap():Bitmap {
+            return map.getPrintableBitmap();
+        }
+
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="onMapReady(event)" 

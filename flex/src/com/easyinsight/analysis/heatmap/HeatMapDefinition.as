@@ -17,12 +17,12 @@ public class HeatMapDefinition extends AnalysisDefinition {
     public var latitudeItem:AnalysisItem;
     public var zipCode:AnalysisItem;
     public var measure:AnalysisItem;
-    public var latitude:Number;
-    public var longitude:Number;
-    public var maxLong:Number;
-    public var minLong:Number;
-    public var maxLat:Number;
-    public var minLat:Number;
+    public var latitude:Number = 0;
+    public var longitude:Number = 0;
+    public var maxLong:Number = 0;
+    public var minLong:Number = 0;
+    public var maxLat:Number = 0;
+    public var minLat:Number = 0;
     public var zoomLevel:int;
     public var precision:int;
     public var mapType:int;
