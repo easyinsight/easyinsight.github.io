@@ -12,7 +12,6 @@ import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
-import com.google.gdata.util.ServiceForbiddenException;
 
 import java.util.*;
 import java.net.URL;
@@ -84,7 +83,7 @@ public class GoogleDataProvider {
                 long dataFeedID = rs.getLong(1);
                 String worksheetURL = rs.getString(2);
                 FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setDataFeedID(dataFeedID);
+                feedDescriptor.setId(dataFeedID);
                 worksheetToFeedMap.put(worksheetURL, feedDescriptor);
             }
             existsStmt.close();            
