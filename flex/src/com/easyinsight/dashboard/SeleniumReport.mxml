@@ -25,6 +25,7 @@
         import com.easyinsight.analysis.PNGCreator;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.DataServiceLoadingEvent;
+        import com.easyinsight.util.PNGEnc;
         import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
@@ -150,7 +151,10 @@
         }
 
         private function onTimer(event:TimerEvent):void {
-            exportService.seleniumDraw.send(_seleniumID, new PNGCreator().drawToBytes(coreVBox));
+            var bd:BitmapData = new BitmapData(coreVBox.width, coreVBox.height);
+            bd.draw(coreVBox);
+            var ba:ByteArray = PNGEnc.encode(bd);
+            exportService.seleniumDraw.send(_seleniumID, ba);
             timer.stop();
             timer = null;
         }
