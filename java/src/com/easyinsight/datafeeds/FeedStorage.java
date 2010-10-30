@@ -949,7 +949,7 @@ public class FeedStorage {
                     "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME" +
                     " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
                     "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
-            PreparedStatement childQueryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE FEED_PERSISTENCE_METADATA.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
+            PreparedStatement childQueryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE, feed_persistence_metadata.last_data_time FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE FEED_PERSISTENCE_METADATA.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
             queryStmt.setLong(1, userID);
             queryStmt.setBoolean(2, true);
             Map<Long, FeedDescriptor> feedMap = new HashMap<Long, FeedDescriptor>();
@@ -973,6 +973,14 @@ public class FeedStorage {
                 ResultSet childRS = childQueryStmt.executeQuery();
                 while (childRS.next()) {
                     size += childRS.getLong(1);
+                    Timestamp childLastTime = childRS.getTimestamp(2);
+                    if (childLastTime != null) {
+                        if (lastDataTime == null) {
+                            lastDataTime = new Date(childLastTime.getTime());
+                        } else if (childLastTime.getTime() > lastDataTime.getTime()) {
+                            lastDataTime = new Date(childLastTime.getTime());
+                        }
+                    }
                 }
 
                 FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, size, feedType, ownerName, description, attribution, lastDataTime);
