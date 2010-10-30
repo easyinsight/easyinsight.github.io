@@ -463,7 +463,7 @@ public class ExportService {
         BufferedInputStream bis = new BufferedInputStream(bais, 1024);
         insertStmt.setLong(1, SecurityUtil.getUserID());
         insertStmt.setBinaryStream(2, bis, bytes.length);
-        insertStmt.setString(3, reportName);
+        insertStmt.setString(3, reportName == null ? "export" : reportName);
         insertStmt.execute();
         long id = Database.instance().getAutoGenKey(insertStmt);
         FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
@@ -491,7 +491,7 @@ public class ExportService {
             BufferedInputStream bis = new BufferedInputStream(bais, 1024);
             insertStmt.setLong(1, SecurityUtil.getUserID());
             insertStmt.setBinaryStream(2, bis, bytes.length);
-            insertStmt.setString(3, analysisDefinition.getName());
+            insertStmt.setString(3, analysisDefinition.getName() == null ? "export" : analysisDefinition.getName());
             insertStmt.execute();
             long id = Database.instance().getAutoGenKey(insertStmt);
             FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
