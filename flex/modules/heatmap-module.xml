@@ -20,7 +20,7 @@
          <path-element>${flexlib}/locale/{locale}</path-element>
          <path-element>../libs/ilog-elixir.swc</path-element>
          <path-element>../libs/ilog-elixir_rb.swc</path-element>
-         <path-element>../libs/map_flex_1_18.swc</path-element>
+         <path-element>../libs/map_flex_1_20.swc</path-element>
         </library-path>
 
         <context-root>/app</context-root>
