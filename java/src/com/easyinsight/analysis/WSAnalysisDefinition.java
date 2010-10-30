@@ -73,7 +73,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private Date dateUpdated;
     private String description;
     private boolean temporaryReport;
-
+    private int fixedWidth;
     private boolean accountVisible;
 
     private String fontName = "Tahoma";
@@ -294,6 +294,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.dataFeedID = dataFeedID;
     }
 
+    public int getFixedWidth() {
+        return fixedWidth;
+    }
+
+    public void setFixedWidth(int fixedWidth) {
+        this.fixedWidth = fixedWidth;
+    }
+
     public void updateMetadata() {
         
     }
@@ -489,11 +497,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public void populateProperties(List<ReportProperty> properties) {
         fontName = findStringProperty(properties, "fontName", "Tahoma");
         fontSize = (int) findNumberProperty(properties, "fontSize", 12);
+        fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
     }
 
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = new ArrayList<ReportProperty>();
         properties.add(new ReportStringProperty("fontName", fontName));
+        properties.add(new ReportNumericProperty("fontSize", fontSize));
+        properties.add(new ReportNumericProperty("fixedWidth", fixedWidth));
         return properties;
     }
 

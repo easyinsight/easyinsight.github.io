@@ -46,6 +46,16 @@ public class FeedService implements IDataFeedService {
         // this goes into a different data provider        
     }
 
+    /*public List<HighriseNotesData> retrieveHighriseDetails(HighriseNotesSpec notesSpec, long dataSourceID) {
+        try {
+            HighRiseCompositeSource highrise = (HighRiseCompositeSource) feedStorage.getFeedDefinitionData(dataSourceID);
+            return highrise.getDataForSpec(notesSpec);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }*/
+
     public HomeState determineHomeState() {
         // has a data source been successfully defined?
         // have any reports been successfully created?
@@ -482,11 +492,11 @@ public class FeedService implements IDataFeedService {
             for (FeedDescriptor newFeed : newFeeds) {
                 for (CompositeFeedNode node : nodes) {
                     Set<Long> ids = new HashSet<Long>();
-                    ids.add(newFeed.getDataFeedID());
+                    ids.add(newFeed.getId());
                     ids.add(node.getDataFeedID());
                     if (!connectionMap.contains(ids)) {
                         connectionMap.add(ids);
-                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(node.getDataFeedID(), newFeed.getDataFeedID(), credentials);
+                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(node.getDataFeedID(), newFeed.getId(), credentials);
                         allNewEdges.addAll(potentialJoins);
                     }
                 }
@@ -495,11 +505,11 @@ public class FeedService implements IDataFeedService {
                         continue;
                     }
                     Set<Long> ids = new HashSet<Long>();
-                    ids.add(newFeed.getDataFeedID());
-                    ids.add(otherNewFeed.getDataFeedID());
+                    ids.add(newFeed.getId());
+                    ids.add(otherNewFeed.getId());
                     if (!connectionMap.contains(ids)) {
                         connectionMap.add(ids);
-                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(otherNewFeed.getDataFeedID(), newFeed.getDataFeedID(), credentials);
+                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(otherNewFeed.getId(), newFeed.getId(), credentials);
                         allNewEdges.addAll(potentialJoins);
                     }
                 }

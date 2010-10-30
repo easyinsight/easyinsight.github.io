@@ -182,7 +182,7 @@ public class APIService {
                 long feedID = rs.getLong(1);
                 String feedName = rs.getString(2);
                 FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setDataFeedID(feedID);
+                feedDescriptor.setId(feedID);
                 feedDescriptor.setName(feedName);
                 descriptors.add(feedDescriptor);
             }

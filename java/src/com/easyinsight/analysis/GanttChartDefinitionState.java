@@ -22,7 +22,9 @@ public class GanttChartDefinitionState extends AnalysisDefinitionState {
 
     @Override
     public WSAnalysisDefinition createWSDefinition() {
-        return new WSGanttChartDefinition();
+        WSGanttChartDefinition gantt = new WSGanttChartDefinition();
+        gantt.setGanttDefinitionID(ganttDefinitionID);
+        return gantt;
     }
 
     public long getGanttDefinitionID() {

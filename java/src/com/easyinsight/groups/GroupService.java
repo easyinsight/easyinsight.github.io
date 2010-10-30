@@ -272,8 +272,8 @@ public class GroupService {
 
             List<FeedDescriptor> groupDataSources = feedStorage.getDataSourcesForGroup(groupID);
             for (FeedDescriptor groupDescriptor : groupDataSources) {
-                if (!descriptorMap.containsKey(groupDescriptor.getDataFeedID())) {
-                    descriptorMap.put(groupDescriptor.getDataFeedID(), groupDescriptor);
+                if (!descriptorMap.containsKey(groupDescriptor.getId())) {
+                    descriptorMap.put(groupDescriptor.getId(), groupDescriptor);
                 }
             }
 
@@ -293,7 +293,7 @@ public class GroupService {
             }
 
             for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
-                Set<EIDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
+                Set<EIDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getId());
                 if (analysisDefList == null) {
                     analysisDefList = new HashSet<EIDescriptor>();
                 }

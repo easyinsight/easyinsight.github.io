@@ -18,6 +18,7 @@ public class EmbeddedResults implements Serializable, Cloneable {
     protected DataSourceInfo dataSourceInfo;
     protected double ratingsAverage;
     protected int ratingsCount;
+    protected int myRating;
     protected String attribution;
     private Set<CredentialRequirement> credentialRequirements;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -28,6 +29,14 @@ public class EmbeddedResults implements Serializable, Cloneable {
 
     public void setAdditionalProperties(Map<String, Object> additionalProperties) {
         this.additionalProperties = additionalProperties;
+    }
+
+    public int getMyRating() {
+        return myRating;
+    }
+
+    public void setMyRating(int myRating) {
+        this.myRating = myRating;
     }
 
     @Override

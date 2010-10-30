@@ -41,7 +41,7 @@ public class EasyInsightLoginCommand implements LoginCommand {
             session.setAttribute("nonCookieLogin", true);
             session.setAttribute("guestUser", userServiceResponse.isGuestUser());
             return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
-                    userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser());
+                    userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser(), null);
         } else {
             userServiceResponse = userService.sessionCookieCheck(password, userName, true);
             if (userServiceResponse != null && userServiceResponse.isSuccessful()) {
@@ -54,7 +54,7 @@ public class EasyInsightLoginCommand implements LoginCommand {
                 session.setAttribute("nonCookieLogin", false);
                 session.setAttribute("guestUser", userServiceResponse.isGuestUser());
                 return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
-                    userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser());
+                    userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser(), null);
             } else {
                 userServiceResponse = userService.seleniumCheck(userName, password);
                 if (userServiceResponse != null) {
@@ -67,7 +67,21 @@ public class EasyInsightLoginCommand implements LoginCommand {
                     session.setAttribute("nonCookieLogin", true);
                     session.setAttribute("guestUser", userServiceResponse.isGuestUser());
                     return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
-                        userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser());
+                        userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser(), null);
+                } else {
+                    userServiceResponse = userService.guestLogin(userName, password);
+                    if (userServiceResponse != null) {
+                        HttpSession session = FlexContext.getHttpRequest().getSession();
+                        session.setAttribute("userID", userServiceResponse.getUserID());
+                        session.setAttribute("accountID", userServiceResponse.getAccountID());
+                        session.setAttribute("userName", userServiceResponse.getUserName());
+                        session.setAttribute("accountType", userServiceResponse.getAccountType());
+                        session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
+                        session.setAttribute("nonCookieLogin", true);
+                        session.setAttribute("guestUser", userServiceResponse.isGuestUser());
+                        return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
+                            userServiceResponse.isAccountAdmin(), userServiceResponse.isGuestUser(), userServiceResponse.getScenario());
+                    }
                 }
             }
             return null;

@@ -71,6 +71,7 @@
         <mapping class="com.easyinsight.analysis.MapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CrosstabDefinitionState"/>
         <mapping class="com.easyinsight.analysis.HeatMapDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.FormDefinitionState"/>
         <mapping class="com.easyinsight.analysis.gauge.GaugeDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeDefinitionState"/>
@@ -102,6 +103,7 @@
         <mapping class="com.easyinsight.users.AccountTimeTask"/>
         <mapping class="com.easyinsight.users.AccountTimeScheduler"/>
         <mapping class="com.easyinsight.users.AccountBillingTask"/>
+        <mapping class="com.easyinsight.users.Scenario"/>
         <mapping class="com.easyinsight.database.VolumeSnapshotTask"/>
         <mapping class="com.easyinsight.database.DatabaseVolumeScheduler"/>
         <mapping class="com.easyinsight.billing.BillingTaskGenerator" />

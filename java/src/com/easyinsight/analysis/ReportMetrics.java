@@ -8,13 +8,23 @@ package com.easyinsight.analysis;
 public class ReportMetrics {
     private int count;
     private double average;
+    private int myRating;
 
     public ReportMetrics() {
     }
 
-    public ReportMetrics(int count, double average) {
+    public ReportMetrics(int count, double average, int myRating) {
         this.count = count;
         this.average = average;
+        this.myRating = myRating;
+    }
+
+    public int getMyRating() {
+        return myRating;
+    }
+
+    public void setMyRating(int myRating) {
+        this.myRating = myRating;
     }
 
     public int getCount() {

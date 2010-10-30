@@ -14,6 +14,7 @@ import java.sql.SQLException;
 
 
 import com.easyinsight.scrubbing.DataScrub;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 import org.hibernate.Query;
@@ -28,6 +29,7 @@ public class AnalysisStorage {
     public ReportMetrics getRating(long analysisID) throws SQLException {
         double ratingAverage = 0;
         int ratingCount = 0;
+        int myRating = 0;
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM USER_REPORT_RATING WHERE " +
@@ -38,10 +40,19 @@ public class AnalysisStorage {
                 ratingAverage = rs.getDouble(1);
                 ratingCount = rs.getInt(2);
             }
+            queryStmt.close();
+            PreparedStatement myRatingStmt = conn.prepareStatement("SELECT RATING FROM USER_REPORT_RATING WHERE USER_ID = ? AND " +
+                    "REPORT_ID = ?");
+            myRatingStmt.setLong(1, SecurityUtil.getUserID());
+            myRatingStmt.setLong(2, analysisID);
+            ResultSet myRS = myRatingStmt.executeQuery();
+            if (myRS.next()) {
+                myRating = myRS.getInt(1);
+            }
         } finally {
             Database.closeConnection(conn);
         }
-        return new ReportMetrics(ratingCount, ratingAverage);
+        return new ReportMetrics(ratingCount, ratingAverage, myRating);
     }
 
     public WSAnalysisDefinition getAnalysisDefinition(long analysisID) {

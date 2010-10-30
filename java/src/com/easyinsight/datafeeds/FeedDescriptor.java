@@ -1,8 +1,6 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.EIDescriptor;
-import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.core.InsightDescriptor;
 
 import java.util.List;
 import java.util.Date;
@@ -14,7 +12,7 @@ import java.util.Date;
  */
 public class FeedDescriptor {
     private String name;
-    private long dataFeedID;
+    private long id;
     private int role;
     private long groupSourceID;
     //private UploadPolicy policy;
@@ -33,10 +31,10 @@ public class FeedDescriptor {
     public FeedDescriptor() {
     }
 
-    public FeedDescriptor(String name, long dataFeedID, long size, int feedType, Integer role, String ownerName, String description, String attribution,
+    public FeedDescriptor(String name, long id, long size, int feedType, Integer role, String ownerName, String description, String attribution,
                           Date lastDataTime) {
         this.name = name;
-        this.dataFeedID = dataFeedID;
+        this.id = id;
         this.size = size;
         this.feedType = feedType;
         this.role = role;
@@ -142,12 +140,12 @@ public class FeedDescriptor {
         this.name = name;
     }
 
-    public long getDataFeedID() {
-        return dataFeedID;
+    public long getId() {
+        return id;
     }
 
-    public void setDataFeedID(long dataFeedID) {
-        this.dataFeedID = dataFeedID;
+    public void setId(long id) {
+        this.id = id;
     }
 
     /*public boolean isSubscribable() {
@@ -181,13 +179,13 @@ public class FeedDescriptor {
 
         FeedDescriptor that = (FeedDescriptor) o;
 
-        if (dataFeedID != that.dataFeedID) return false;
+        if (id != that.id) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return (int) (dataFeedID ^ (dataFeedID >>> 32));
+        return (int) (id ^ (id >>> 32));
     }
 }

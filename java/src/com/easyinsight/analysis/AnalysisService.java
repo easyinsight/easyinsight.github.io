@@ -220,7 +220,16 @@ public class AnalysisService {
         analysisStorage.addAnalysisView(analysisID);
     }
 
-    public ReportMetrics rateReport(long feedID, int rating) throws SQLException {
+    public ReportMetrics getReportMetrics(long reportID) {
+        try {
+            return analysisStorage.getRating(reportID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ReportMetrics rateReport(long reportID, int rating) {
         long userID = SecurityUtil.getUserID();
         double ratingAverage;
         int ratingCount;
@@ -229,7 +238,7 @@ public class AnalysisService {
             PreparedStatement getExistingRatingStmt = conn.prepareStatement("SELECT user_report_rating_id FROM " +
                     "user_report_rating WHERE user_id = ? AND report_id = ?");
             getExistingRatingStmt.setLong(1, userID);
-            getExistingRatingStmt.setLong(2, feedID);
+            getExistingRatingStmt.setLong(2, reportID);
             ResultSet rs = getExistingRatingStmt.executeQuery();
             if (rs.next()) {
                 PreparedStatement updateRatingStmt = conn.prepareStatement("UPDATE user_report_rating " +
@@ -241,13 +250,13 @@ public class AnalysisService {
                 PreparedStatement insertRatingStmt = conn.prepareStatement("INSERT INTO user_report_rating " +
                         "(USER_ID, report_id, rating) values (?, ?, ?)");
                 insertRatingStmt.setLong(1, userID);
-                insertRatingStmt.setLong(2, feedID);
+                insertRatingStmt.setLong(2, reportID);
                 insertRatingStmt.setInt(3, rating);
                 insertRatingStmt.execute();
             }
             PreparedStatement queryStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM USER_REPORT_RATING WHERE " +
                     "REPORT_ID = ?");
-            queryStmt.setLong(1, feedID);
+            queryStmt.setLong(1, reportID);
             ResultSet queryRS = queryStmt.executeQuery();
             queryRS.next();
             ratingAverage = queryRS.getDouble(1);
@@ -259,7 +268,7 @@ public class AnalysisService {
             Database.closeConnection(conn);
         }
 
-        return new ReportMetrics(ratingCount, ratingAverage);
+        return new ReportMetrics(ratingCount, ratingAverage, rating);
     }
 
     public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition) {

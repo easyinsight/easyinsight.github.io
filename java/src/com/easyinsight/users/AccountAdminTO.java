@@ -19,12 +19,21 @@ public class AccountAdminTO {
     private int accountState;
     private long groupID;
     private List<UserTransferObject> adminUsers = new ArrayList<UserTransferObject>();
+    private List<UserTransferObject> allUsers = new ArrayList<UserTransferObject>();
     private boolean apiEnabled;
     private Date creationDate;
     private Date lastUserLoginDate;
     private long defaultPersonaID;
     private boolean optIn;
     private Date trialDate;
+
+    public List<UserTransferObject> getAllUsers() {
+        return allUsers;
+    }
+
+    public void setAllUsers(List<UserTransferObject> allUsers) {
+        this.allUsers = allUsers;
+    }
 
     public Date getTrialDate() {
         return trialDate;

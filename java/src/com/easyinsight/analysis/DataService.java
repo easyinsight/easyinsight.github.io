@@ -234,9 +234,11 @@ public class DataService {
             results = listDataResults.toEmbeddedResults();
             results.setDataSourceAccessible(dataSourceAccessible);
             results.setDefinition(analysisDefinition);
+
             ReportMetrics reportMetrics = new AnalysisStorage().getRating(reportID);
             results.setRatingsAverage(reportMetrics.getAverage());
             results.setRatingsCount(reportMetrics.getCount());
+            results.setMyRating(reportMetrics.getMyRating());
             if (dataSet.getLastTime() == null) {
                 dataSet.setLastTime(new Date());
             }

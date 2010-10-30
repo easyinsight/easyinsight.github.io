@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.analysis.definitions.WSForm;
 import com.easyinsight.analysis.definitions.WSGanttChartDefinition;
 import com.easyinsight.analysis.definitions.WSHeatMap;
 import com.easyinsight.analysis.definitions.WSTimeline;
@@ -68,6 +69,11 @@ public class AnalysisDefinitionFactory {
             TreeDefinitionState treeDefinitionState = new TreeDefinitionState();
             treeDefinitionState.setTreeDefinitionID(wsTree.getTreeDefinitionID());
             analysisDefinitionState = treeDefinitionState;
+         }else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.FORM)) {
+            WSForm wsForm = (WSForm) wsAnalysisDefinition;
+            FormDefinitionState formDefinitionState = new FormDefinitionState();
+            formDefinitionState.setFormID(wsForm.getFormID());
+            analysisDefinitionState = formDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TIMELINE)) {
             WSTimeline wsTimeline = (WSTimeline) wsAnalysisDefinition;
             TimelineDefinitionState timelineDefinitionState = new TimelineDefinitionState();

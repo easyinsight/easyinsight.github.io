@@ -75,15 +75,15 @@ public class UserUploadService implements IUserUploadService {
             objects.addAll(new GoalStorage().getTreesForUser(userID));
             Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
             for (FeedDescriptor descriptor : descriptors) {
-                descriptorMap.put(descriptor.getDataFeedID(), descriptor);
+                descriptorMap.put(descriptor.getId(), descriptor);
             }
             if (includeGroups) {
                 List<FeedDescriptor> groupDataSources = new ArrayList<FeedDescriptor>();
                 groupDataSources.addAll(feedStorage.getDataSourcesFromGroups(userID));
                 groupDataSources.addAll(feedStorage.getDataSourcesFromAccount(SecurityUtil.getAccountID()));
                 for (FeedDescriptor groupDescriptor : groupDataSources) {
-                    if (!descriptorMap.containsKey(groupDescriptor.getDataFeedID())) {
-                        descriptorMap.put(groupDescriptor.getDataFeedID(), groupDescriptor);
+                    if (!descriptorMap.containsKey(groupDescriptor.getId())) {
+                        descriptorMap.put(groupDescriptor.getId(), groupDescriptor);
                     }
                 }
             }
@@ -120,7 +120,7 @@ public class UserUploadService implements IUserUploadService {
             }
 
             for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
-                List<EIDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
+                List<EIDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getId());
                 if (analysisDefList == null) {
                     analysisDefList = new ArrayList<EIDescriptor>();
                 }

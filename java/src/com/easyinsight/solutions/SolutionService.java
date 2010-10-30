@@ -859,7 +859,7 @@ public class SolutionService {
                 long feedID = rs.getLong(1);
                 String name = rs.getString(2);
                 FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setDataFeedID(feedID);
+                feedDescriptor.setId(feedID);
                 feedDescriptor.setName(name);
                 feedDescriptors.add(feedDescriptor);
             }
@@ -886,7 +886,7 @@ public class SolutionService {
                 long feedID = rs.getLong(1);
                 String name = rs.getString(2);
                 FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setDataFeedID(feedID);
+                feedDescriptor.setId(feedID);
                 feedDescriptor.setName(name);
                 feedDescriptors.add(feedDescriptor);
                 queryInsightsStmt.setLong(1, feedID);
@@ -935,7 +935,7 @@ public class SolutionService {
                 long feedID = rs.getLong(1);
                 String name = rs.getString(2);
                 FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setDataFeedID(feedID);
+                feedDescriptor.setId(feedID);
                 feedDescriptor.setName(name);
                 feedDescriptors.add(feedDescriptor);
             }

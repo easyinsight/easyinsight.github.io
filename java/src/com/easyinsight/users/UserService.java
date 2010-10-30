@@ -18,7 +18,6 @@ import com.easyinsight.outboundnotifications.BuyOurStuffTodo;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.*;
@@ -679,6 +678,7 @@ public class UserService {
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                     user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+            response.setScenario(existing.getScenario());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -875,14 +875,66 @@ public class UserService {
         return userServiceResponse;
     }
 
-    public UserServiceResponse loginSmallBiz() {
+    public List<Scenario> getScenarios() {
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            @SuppressWarnings({"unchecked"}) List<Scenario> scenarios = session.createQuery("from Scenario").list();
+            session.getTransaction().commit();
+            return scenarios;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public Scenario saveScenario(Scenario scenario) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            if (scenario.getScenarioID() == 0) {
+                scenario.setScenarioKey(RandomTextGenerator.generateText(15));
+            }
+            session.saveOrUpdate(scenario);
+            session.getTransaction().commit();
+            return scenario;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void deleteScenario(Scenario scenario) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            session.delete(scenario);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public UserServiceResponse loginScenario(String scenarioKey) {
         UserServiceResponse userServiceResponse;
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
-            List results = session.createQuery("from User where userName = ?").setString(0, "guest").list();
-            User user = (User) results.get(0);
+            Scenario scenario = (Scenario) session.createQuery("from Scenario where scenarioKey = ?").setString(0, scenarioKey).list().get(0);
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, scenario.getUserID()).list().get(0);
             List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
             Account account = (Account) accountResults.get(0);
             user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
@@ -1007,5 +1059,52 @@ public class UserService {
         } finally {
             session.close();
         }
+    }
+
+    public UserServiceResponse guestLogin(String userName, String scenarioKey) {
+        UserServiceResponse userServiceResponse;
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        List results;
+        try {
+            conn.setAutoCommit(false);
+            Scenario scenario = (Scenario) session.createQuery("from Scenario where scenarioKey = ?").setString(0, scenarioKey).list().get(0);
+            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            if (results.size() > 0) {
+                User user = (User) results.get(0);
+                if (!user.isGuestUser()) {
+                    throw new RuntimeException();
+                }
+                List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+                Account account = (Account) accountResults.get(0);
+
+                if (user.getPersonaID() != null) {
+                    user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+                }
+                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                     user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                        user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
+                        !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                userServiceResponse.setActivated(account.isActivated());
+                userServiceResponse.setScenario(scenario);
+                user.setLastLoginDate(new Date());
+                session.update(user);
+            } else {
+                throw new RuntimeException();
+            }
+            session.flush();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            session.close();
+            Database.closeConnection(conn);
+        }
+        return userServiceResponse;
     }
 }

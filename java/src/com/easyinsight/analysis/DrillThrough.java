@@ -17,12 +17,23 @@ public class DrillThrough extends Link {
     @Column(name="report_id")
     private long reportID;
 
+    @Column(name="mini_window")
+    private boolean miniWindow;
+
     public long getReportID() {
         return reportID;
     }
 
     public void setReportID(long reportID) {
         this.reportID = reportID;
+    }
+
+    public boolean isMiniWindow() {
+        return miniWindow;
+    }
+
+    public void setMiniWindow(boolean miniWindow) {
+        this.miniWindow = miniWindow;
     }
 
     public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap) {

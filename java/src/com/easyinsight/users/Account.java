@@ -325,6 +325,7 @@ public class Account {
         }
         long latestLoginDate = 0;
         List<UserTransferObject> adminUsers = new ArrayList<UserTransferObject>();
+        List<UserTransferObject> allUsers = new ArrayList<UserTransferObject>();
         for (User user : getUsers()) {
             if (user.isAccountAdmin()) {
                 adminUsers.add(user.toUserTransferObject());
@@ -334,8 +335,10 @@ public class Account {
                     latestLoginDate = user.getLastLoginDate().getTime();
                 }
             }
+            allUsers.add(user.toUserTransferObject());
         }
         transfer.setCreationDate(getCreationDate());
+        transfer.setAllUsers(allUsers);
         transfer.setLastUserLoginDate(new Date(latestLoginDate));
         transfer.setAdminUsers(adminUsers);
         transfer.setAccountState(accountState);

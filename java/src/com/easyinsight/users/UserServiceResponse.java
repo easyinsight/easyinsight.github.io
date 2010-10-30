@@ -36,6 +36,7 @@ public class UserServiceResponse {
     private boolean defaultReportSharing;
     private String sessionCookie;
     private boolean cookieLogin;
+    private Scenario scenario;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -72,6 +73,14 @@ public class UserServiceResponse {
         this.defaultReportSharing = defaultReportSharing;
         this.cookieLogin = cookieLogin;
         this.guestUser = guestUser;
+    }
+
+    public Scenario getScenario() {
+        return scenario;
+    }
+
+    public void setScenario(Scenario scenario) {
+        this.scenario = scenario;
     }
 
     public String getSessionCookie() {

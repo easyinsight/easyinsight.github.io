@@ -1,5 +1,7 @@
 package com.easyinsight.security;
 
+import com.easyinsight.users.Scenario;
+
 import java.security.Principal;
 import java.io.Serializable;
 
@@ -16,18 +18,28 @@ public class UserPrincipal implements Principal, Serializable {
     private int accountType;
     private boolean accountAdmin;
     private boolean guestUser;
+    private Scenario scenario;
 
-    public UserPrincipal(String userName, long accountID, long userID, int accountType, boolean accountAdmin, boolean guestUser) {
+    public UserPrincipal(String userName, long accountID, long userID, int accountType, boolean accountAdmin, boolean guestUser, Scenario scenario) {
         this.userName = userName;
         this.accountID = accountID;
         this.userID = userID;
         this.accountType = accountType;
         this.accountAdmin = accountAdmin;
         this.guestUser = guestUser;
+        this.scenario = scenario;
     }
 
     public boolean isGuestUser() {
         return guestUser;
+    }
+
+    public Scenario getScenario() {
+        return scenario;
+    }
+
+    public void setScenario(Scenario scenario) {
+        this.scenario = scenario;
     }
 
     public void setAccountType(int accountType) {

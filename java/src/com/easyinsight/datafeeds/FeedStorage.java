@@ -691,14 +691,6 @@ public class FeedStorage {
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
             feedDefinition.customLoad(conn);
-            /*if (feedDefinition instanceof IServerDataSourceDefinition) {
-                IServerDataSourceDefinition ds = (IServerDataSourceDefinition) feedDefinition;
-                if (ds.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE)
-                    setSessionIdCredentials(conn, ds);
-                else if (ds.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                    setPasswordCredentials(conn, ds);
-                }
-            }*/
         } else {
             throw new RuntimeException("Could not find data source " + identifier);
         }
@@ -811,14 +803,14 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
-                    "DATA_FEED.PARENT_SOURCE_ID, UPLOAD_POLICY_GROUPS.GROUP_ID " +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, " +
+                    "UPLOAD_POLICY_GROUPS.GROUP_ID " +
                     " FROM (upload_policy_groups, group_to_user_join, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
-                    "upload_policy_groups.group_id = group_to_user_join.group_id AND GROUP_TO_USER_JOIN.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID");
+                    "upload_policy_groups.group_id = group_to_user_join.group_id AND GROUP_TO_USER_JOIN.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND DATA_FEED.VISIBLE = ?");
+            PreparedStatement childQueryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE FEED_PERSISTENCE_METADATA.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
             queryStmt.setLong(1, userID);
-            Map<Long, Long> sizeMap = new HashMap<Long, Long>();
+            queryStmt.setBoolean(2, true);
             Map<Long, FeedDescriptor> feedMap = new HashMap<Long, FeedDescriptor>();
-            Map<Long, Date> lastDateMap = new HashMap<Long, Date>();
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long dataFeedID = rs.getLong(1);
@@ -831,37 +823,24 @@ public class FeedStorage {
                 int userRole = rs.getInt(8);
                 Timestamp lastTime = rs.getTimestamp(11);
                 Date lastDataTime = null;
-                boolean hasSavedCredentials = rs.getString(12) != null;
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                Long parentSourceID = rs.getLong(13);
-                if (!rs.wasNull() && parentSourceID > 0) {
-                    Long size = sizeMap.get(parentSourceID);
-                    if (size == null) {
-                        sizeMap.put(parentSourceID, feedSize);
-                    } else {
-                        sizeMap.put(parentSourceID, feedSize + size);
-                    }
-                    lastDateMap.put(parentSourceID, lastDataTime);
-                } else {
-                    long groupID = rs.getLong(14);
-                    FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
-                    feedDescriptor.setGroupSourceID(groupID);
-                    feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
-                    descriptorList.add(feedDescriptor);
-                    feedMap.put(dataFeedID, feedDescriptor);
+                long size = feedSize;
+                childQueryStmt.setLong(1, dataFeedID);
+                ResultSet childRS = childQueryStmt.executeQuery();
+                while (childRS.next()) {
+                    size += childRS.getLong(1);
                 }
-            }
-            for (Map.Entry<Long, Long> sizeEntry : sizeMap.entrySet()) {
-                FeedDescriptor feedDescriptor = feedMap.get(sizeEntry.getKey());
-                if (feedDescriptor != null) {
-                    feedDescriptor.setSize(sizeEntry.getValue());
-                    feedDescriptor.setLastDataTime(lastDateMap.get(sizeEntry.getKey()));
-                }
+                long groupID = rs.getLong(12);
+                FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, size, feedType, ownerName, description, attribution, lastDataTime);
+                feedDescriptor.setGroupSourceID(groupID);
+                descriptorList.add(feedDescriptor);
+                feedMap.put(dataFeedID, feedDescriptor);
             }
             descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
             queryStmt.close();
+            childQueryStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
@@ -873,15 +852,14 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
-                    "DATA_FEED.PARENT_SOURCE_ID " +
-                    " FROM (upload_policy_users, USER, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
-                    "upload_policy_users.user_id = user.user_id AND user.account_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.account_visible = ?");
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME " +
+                    " FROM (upload_policy_users, USER, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
+                    "upload_policy_users.user_id = user.user_id AND user.account_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.account_visible = ? AND data_feed.visible = ?");
+            PreparedStatement childQueryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE FEED_PERSISTENCE_METADATA.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
             queryStmt.setLong(1, accountID);
             queryStmt.setBoolean(2, true);
-            Map<Long, Long> sizeMap = new HashMap<Long, Long>();
+            queryStmt.setBoolean(3, true);
             Map<Long, FeedDescriptor> feedMap = new HashMap<Long, FeedDescriptor>();
-            Map<Long, Date> lastDateMap = new HashMap<Long, Date>();
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long dataFeedID = rs.getLong(1);
@@ -894,35 +872,22 @@ public class FeedStorage {
                 int userRole = rs.getInt(8);
                 Timestamp lastTime = rs.getTimestamp(11);
                 Date lastDataTime = null;
-                boolean hasSavedCredentials = rs.getString(12) != null;
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                Long parentSourceID = rs.getLong(13);
-                if (!rs.wasNull() && parentSourceID > 0) {
-                    Long size = sizeMap.get(parentSourceID);
-                    if (size == null) {
-                        sizeMap.put(parentSourceID, feedSize);
-                    } else {
-                        sizeMap.put(parentSourceID, feedSize + size);
-                    }
-                    lastDateMap.put(parentSourceID, lastDataTime);
-                } else {
-                    FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
-                    feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
-                    descriptorList.add(feedDescriptor);
-                    feedMap.put(dataFeedID, feedDescriptor);
+                childQueryStmt.setLong(1, dataFeedID);
+                long size = feedSize;
+                ResultSet childRS = childQueryStmt.executeQuery();
+                while (childRS.next()) {
+                    size += childRS.getLong(1);
                 }
-            }
-            for (Map.Entry<Long, Long> sizeEntry : sizeMap.entrySet()) {
-                FeedDescriptor feedDescriptor = feedMap.get(sizeEntry.getKey());
-                if (feedDescriptor != null) {
-                    feedDescriptor.setSize(sizeEntry.getValue());
-                    feedDescriptor.setLastDataTime(lastDateMap.get(sizeEntry.getKey()));
-                }
+                FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, size, feedType, ownerName, description, attribution, lastDataTime);
+                descriptorList.add(feedDescriptor);
+                feedMap.put(dataFeedID, feedDescriptor);
             }
             descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
             queryStmt.close();
+            childQueryStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
@@ -934,14 +899,13 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
-                    "DATA_FEED.PARENT_SOURCE_ID " +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME " +
                     " FROM (upload_policy_groups, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
-                    "upload_policy_groups.group_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID");
+                    "upload_policy_groups.group_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID AND DATA_FEED.VISIBLE = ?");
+            PreparedStatement childQueryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE FEED_PERSISTENCE_METADATA.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
             queryStmt.setLong(1, groupID);
-            Map<Long, Long> sizeMap = new HashMap<Long, Long>();
+            queryStmt.setBoolean(2, true);
             Map<Long, FeedDescriptor> feedMap = new HashMap<Long, FeedDescriptor>();
-            Map<Long, Date> lastDateMap = new HashMap<Long, Date>();
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long dataFeedID = rs.getLong(1);
@@ -954,36 +918,23 @@ public class FeedStorage {
                 int userRole = rs.getInt(8);
                 Timestamp lastTime = rs.getTimestamp(11);
                 Date lastDataTime = null;
-                boolean hasSavedCredentials = rs.getString(12) != null;
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                Long parentSourceID = rs.getLong(13);
-                if (!rs.wasNull() && parentSourceID > 0) {
-                    Long size = sizeMap.get(parentSourceID);
-                    if (size == null) {
-                        sizeMap.put(parentSourceID, feedSize);
-                    } else {
-                        sizeMap.put(parentSourceID, feedSize + size);
-                    }
-                    lastDateMap.put(parentSourceID, lastDataTime);
-                } else {
-                    FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
-                    feedDescriptor.setGroupSourceID(groupID);
-                    feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
-                    descriptorList.add(feedDescriptor);
-                    feedMap.put(dataFeedID, feedDescriptor);
+                childQueryStmt.setLong(1, dataFeedID);
+                long size = feedSize;
+                ResultSet childRS = childQueryStmt.executeQuery();
+                while (childRS.next()) {
+                    size += childRS.getLong(1);
                 }
-            }
-            for (Map.Entry<Long, Long> sizeEntry : sizeMap.entrySet()) {
-                FeedDescriptor feedDescriptor = feedMap.get(sizeEntry.getKey());
-                if (feedDescriptor != null) {
-                    feedDescriptor.setSize(sizeEntry.getValue());
-                    feedDescriptor.setLastDataTime(lastDateMap.get(sizeEntry.getKey()));
-                }
+                FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, size, feedType, ownerName, description, attribution, lastDataTime);
+                feedDescriptor.setGroupSourceID(groupID);
+                descriptorList.add(feedDescriptor);
+                feedMap.put(dataFeedID, feedDescriptor);
             }
             descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
             queryStmt.close();
+            childQueryStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
@@ -995,14 +946,13 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
-                    "DATA_FEED.PARENT_SOURCE_ID, VISIBLE " +
-                    " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME" +
+                    " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) WHERE " +
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
+            PreparedStatement childQueryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE FEED_PERSISTENCE_METADATA.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
             queryStmt.setLong(1, userID);
-            Map<Long, Long> sizeMap = new HashMap<Long, Long>();
+            queryStmt.setBoolean(2, true);
             Map<Long, FeedDescriptor> feedMap = new HashMap<Long, FeedDescriptor>();
-            Map<Long, Date> lastDateMap = new HashMap<Long, Date>();
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long dataFeedID = rs.getLong(1);
@@ -1015,35 +965,21 @@ public class FeedStorage {
                 int userRole = rs.getInt(8);
                 Timestamp lastTime = rs.getTimestamp(11);
                 Date lastDataTime = null;
-                boolean hasSavedCredentials = rs.getString(12) != null;
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                Long parentSourceID = rs.getLong(13);
-                boolean visible = rs.getBoolean(14);
-                if (!rs.wasNull() && parentSourceID > 0) {
-                    Long size = sizeMap.get(parentSourceID);
-                    if (size == null) {
-                        sizeMap.put(parentSourceID, feedSize);
-                    } else {
-                        sizeMap.put(parentSourceID, feedSize + size);
-                    }
-                    lastDateMap.put(parentSourceID, lastDataTime);
-                } else {
-                    if (visible) {
-                        FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
-                        feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
-                        descriptorList.add(feedDescriptor);
-                        feedMap.put(dataFeedID, feedDescriptor);
-                    }
+                childQueryStmt.setLong(1, dataFeedID);
+                long size = feedSize;
+                ResultSet childRS = childQueryStmt.executeQuery();
+                while (childRS.next()) {
+                    size += childRS.getLong(1);
                 }
-            }
-            for (Map.Entry<Long, Long> sizeEntry : sizeMap.entrySet()) {
-                FeedDescriptor feedDescriptor = feedMap.get(sizeEntry.getKey());
-                if (feedDescriptor != null) {
-                    feedDescriptor.setSize(sizeEntry.getValue());
-                    feedDescriptor.setLastDataTime(lastDateMap.get(sizeEntry.getKey()));
-                }
+
+                FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, size, feedType, ownerName, description, attribution, lastDataTime);
+                descriptorList.add(feedDescriptor);
+                feedMap.put(dataFeedID, feedDescriptor);
+
+
             }
             if (SecurityUtil.getAccountTier() == Account.ADMINISTRATOR && feedMap.size() > 0) {
                 StringBuilder sqlBuilder = new StringBuilder("SELECT SOLUTION_ID, FEED_ID FROM SOLUTION_TO_FEED " +
@@ -1054,7 +990,7 @@ public class FeedStorage {
                 PreparedStatement solutionStmt = conn.prepareStatement(sqlBuilder.substring(0, sqlBuilder.length() - 1) + ")");
                 int i = 0;
                 for (FeedDescriptor feedDescriptor : feedMap.values()) {
-                    solutionStmt.setLong(++i, feedDescriptor.getDataFeedID());
+                    solutionStmt.setLong(++i, feedDescriptor.getId());
                 }
                 ResultSet solutionRS = solutionStmt.executeQuery();
                 while (solutionRS.next()) {
@@ -1066,6 +1002,7 @@ public class FeedStorage {
             }
             descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
             queryStmt.close();
+            childQueryStmt.close();
         } finally {
             Database.closeConnection(conn);
         }

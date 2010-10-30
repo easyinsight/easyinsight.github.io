@@ -28,11 +28,22 @@ public class Link implements Cloneable, Serializable {
     @Column(name="link_id")
     private long linkID;
 
+    @Column(name="code_generated")
+    private boolean codeGenerated;
+
     @Override
     public Link clone() throws CloneNotSupportedException {
         Link link = (Link) super.clone();
         link.setLinkID(0);
         return link;
+    }
+
+    public boolean isCodeGenerated() {
+        return codeGenerated;
+    }
+
+    public void setCodeGenerated(boolean codeGenerated) {
+        this.codeGenerated = codeGenerated;
     }
 
     public long getLinkID() {

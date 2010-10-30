@@ -39,8 +39,6 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
     public void process(byte[] bytes, EIConnection conn, long accountID) {
         try {
             DeliveryScheduledTask.sendEmails(conn, bytes, "blah.png", accountID, "image/png", accountActivityID);
-            /*new SendGridEmail().sendAttachmentEmail("jboe@easy-insight.com", "testing selenium", "lalalala testing lalalala",
-                    bytes, "xyz.png", true, "reports@easy-insight.com", "Easy Insight Reports", "image/png");*/
         } catch (Exception e) {
             LogClass.error(e);
         }
