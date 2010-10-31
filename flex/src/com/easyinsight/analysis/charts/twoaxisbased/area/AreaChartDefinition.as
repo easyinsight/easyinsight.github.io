@@ -28,12 +28,5 @@ public class AreaChartDefinition extends TwoAxisDefinition{
     override public function getChartFamily():int {
         return ChartTypes.AREA_FAMILY;
     }
-
-    override public function createFormItems():ArrayCollection {
-        var items:ArrayCollection = super.createFormItems();
-        items.addItem(new ComboBoxReportFormItem("Form", "form", form,
-                this, ["segment", "step", "reverseStep", "horizontal", "curve"]));
-        return items;
-    }
 }
 }

@@ -193,31 +193,8 @@
                 var uniques:ArrayCollection = new ArrayCollection();
 
                 var seriesData:Object = new Object();
-                for (var i:int = 0; i < dataSet.length; i++) {
-                    var object:Object = dataSet.getItemAt(i);
-                    if (object[areaChartDef.xaxis.qualifiedName()] == null ||
-                            object[areaChartDef.xaxis.qualifiedName()] == "") {
-                        continue;
-                    }
-                    var dimensionValue:String = object[areaChartDef.yaxis.qualifiedName()];
-                    if (dimensionValue == null || dimensionValue == "") {
-                        dimensionValue = "[ No Value ]";
-                    }
-                    var newSeriesData:ArrayCollection = seriesData[dimensionValue];
-                    if (newSeriesData == null) {
-                        newSeriesData = new ArrayCollection();
-                        seriesData[dimensionValue] = newSeriesData;
-                    }
-                    var newObject:Object = new Object();
-                    newObject[areaChartDef.xaxis.qualifiedName()] = object[areaChartDef.xaxis.qualifiedName()];
-                    newObject[dimensionValue] = object[analysisMeasure.qualifiedName()];
-                    newSeriesData.addItem(newObject);
-                    //allItems.addItem(newObject);
-                    if (!uniques.contains(dimensionValue)) {
-                        uniques.addItem(dimensionValue);
-                    }
-                }
-                for (i = 0; i < uniques.length; i++) {
+                areaChartDef.populateData(dataSet, seriesData, uniques);
+                for (var i:int = 0; i < uniques.length; i++) {
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:AreaSeries3D = new AreaSeries3D();
                     uniqueLineSeries.xField = areaChartDef.xaxis.qualifiedName();

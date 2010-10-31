@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.heatmap {
+import com.easyinsight.analysis.AnalysisChangedEvent;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -198,6 +200,17 @@ public class HeatMapControlBar extends ReportControlBar implements IReportContro
     }
 
     public function addItem(analysisItem:AnalysisItem):void {
+        if (analysisItem.hasType(AnalysisItemTypes.ZIP_CODE)) {
+            zipGrouping.addAnalysisItem(analysisItem);
+        } else if (analysisItem.hasType(AnalysisItemTypes.LONGITUDE)) {
+            longGrouping.addAnalysisItem(analysisItem);
+        } else if (analysisItem.hasType(AnalysisItemTypes.LATITUDE)) {
+            latGrouping.addAnalysisItem(analysisItem);
+        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            measureGrouping.addAnalysisItem(analysisItem);
+        }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
+        dispatchEvent(new AnalysisChangedEvent(false));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

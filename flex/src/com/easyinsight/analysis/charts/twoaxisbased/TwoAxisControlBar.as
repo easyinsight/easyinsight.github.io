@@ -16,14 +16,19 @@ import com.easyinsight.analysis.charts.ChartRotationEvent;
 
 import com.easyinsight.util.PopUpUtil;
 
+import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.containers.VBox;
+import mx.containers.ViewStack;
 import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;
+import mx.controls.RadioButton;
+import mx.controls.RadioButtonGroup;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
@@ -31,6 +36,7 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
     private var xAxisGrouping:ListDropAreaGrouping;
     private var yAxisGrouping:ListDropAreaGrouping;
     private var measureGrouping:ListDropAreaGrouping;
+    private var measuresGrouping:ListDropAreaGrouping;
 
     private var xAxisDefinition:TwoAxisDefinition;
 
@@ -47,11 +53,27 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
         measureGrouping.maxElements = 1;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        measuresGrouping = new ListDropAreaGrouping();
+        measuresGrouping.unlimited = true;
+        measuresGrouping.dropAreaType = MeasureDropArea;
+        measuresGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
     }
 
     [Embed(source="../../../../../../assets/table_edit.png")]
     public var tableEditIcon:Class;
+
+    private var stack:ViewStack;
+
+    private function onChange(event:Event):void {
+        if (event.currentTarget.selectedValue == "grouping") {
+            stack.selectedIndex = 0;
+            xAxisDefinition.multiMeasure = false;
+        } else {
+            stack.selectedIndex = 1;
+            xAxisDefinition.multiMeasure = true;
+        }
+    }
 
     override protected function createChildren():void {
         super.createChildren();
@@ -60,22 +82,61 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
         pieEditButton.toolTip = "Edit Chart Properties...";
         pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
         addChild(pieEditButton);
-        var groupingLabel:Label = new Label();
-        groupingLabel.text = "Y Axis Grouping:";
-        groupingLabel.setStyle("fontSize", 14);
-        addChild(groupingLabel);
-        addDropAreaGrouping(yAxisGrouping);
+
         var xAxisGroupingLabel:Label = new Label();
         xAxisGroupingLabel.text = "X Axis Grouping:";
         xAxisGroupingLabel.setStyle("fontSize", 14);
         addChild(xAxisGroupingLabel);
         addDropAreaGrouping(xAxisGrouping);
+
+        var displayTypeVBox:VBox = new VBox();
+        var displayTypeRadioGroup:RadioButtonGroup = new RadioButtonGroup();
+        displayTypeRadioGroup.addEventListener(Event.CHANGE, onChange);
+        var heatMapRadio:RadioButton = new RadioButton();
+        heatMapRadio.label = "By Grouping:";
+        heatMapRadio.value = "grouping";
+        heatMapRadio.group = displayTypeRadioGroup;
+        heatMapRadio.selected = !xAxisDefinition.multiMeasure;
+        var pointMapRadio:RadioButton = new RadioButton();
+        pointMapRadio.label = "By Multiple Measures:";
+        pointMapRadio.value = "multimeasure";
+        pointMapRadio.group = displayTypeRadioGroup;
+        pointMapRadio.selected = xAxisDefinition.multiMeasure;
+        displayTypeVBox.addChild(heatMapRadio);
+        displayTypeVBox.addChild(pointMapRadio);
+        addChild(displayTypeVBox);
+
+        stack = new ViewStack();
+        stack.percentWidth = 100;
+        stack.resizeToContent = true;
+        var box1:HBox = new HBox();
+        box1.percentWidth = 100;
+        var box2:HBox = new HBox();
+        box2.percentWidth = 100;
+        var groupingLabel:Label = new Label();
+        groupingLabel.text = "Y Axis Grouping:";
+        groupingLabel.setStyle("fontSize", 14);
+        box1.addChild(groupingLabel);
+        addDropAreaGrouping(yAxisGrouping, box1);
         var measureGroupingLabel:Label = new Label();
         measureGroupingLabel.text = "Measure:";
         measureGroupingLabel.setStyle("fontSize", 14);
-        addChild(measureGroupingLabel);
-        addDropAreaGrouping(measureGrouping);
-         if (xAxisDefinition.xaxis != null) {
+        box1.addChild(measureGroupingLabel);
+        addDropAreaGrouping(measureGrouping, box1);
+
+        var measuresGroupingLabel:Label = new Label();
+        measuresGroupingLabel.text = "Measures:";
+        measuresGroupingLabel.setStyle("fontSize", 14);
+        box2.addChild(measuresGroupingLabel);
+        addDropAreaGrouping(measuresGrouping, box2);
+
+        stack.addChild(box1);
+        stack.addChild(box2);
+        addChild(stack);
+
+        stack.selectedIndex = xAxisDefinition.multiMeasure ? 1 : 0;
+
+        if (xAxisDefinition.xaxis != null) {
             xAxisGrouping.addAnalysisItem(xAxisDefinition.xaxis);
         }
         if (xAxisDefinition.yaxis != null) {
@@ -83,6 +144,11 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
         }
         if (xAxisDefinition.measure != null) {
             measureGrouping.addAnalysisItem(xAxisDefinition.measure);
+        }
+        if (xAxisDefinition.measures != null) {
+            for each (var item:AnalysisItem in xAxisDefinition.measures) {
+                measuresGrouping.addAnalysisItem(item);
+            }
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
@@ -132,14 +198,19 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
     }
 
     public function isDataValid():Boolean {
-        return (xAxisGrouping.getListColumns().length > 0 && measureGrouping.getListColumns().length > 0 &&
+        if (xAxisDefinition.multiMeasure) {
+            return xAxisGrouping.getListColumns().length > 0 && measuresGrouping.getListColumns().length > 0;
+        } else {
+            return (xAxisGrouping.getListColumns().length > 0 && measureGrouping.getListColumns().length > 0 &&
                 yAxisGrouping.getListColumns().length > 0);
+        }
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {
         xAxisDefinition.xaxis = xAxisGrouping.getListColumns()[0];
         xAxisDefinition.yaxis = yAxisGrouping.getListColumns()[0];
         xAxisDefinition.measure = measureGrouping.getListColumns()[0];
+        xAxisDefinition.measures = new ArrayCollection(measuresGrouping.getListColumns());
         return xAxisDefinition;
     }
 

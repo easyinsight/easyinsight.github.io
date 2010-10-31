@@ -1,9 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.ReportProperty;
-import com.easyinsight.analysis.ReportStringProperty;
-import com.easyinsight.analysis.WSChartDefinition;
-import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.*;
 
 import java.util.*;
 
@@ -16,6 +13,24 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
     private AnalysisItem measure;
     private AnalysisItem xaxis;
     private AnalysisItem yaxis;
+    private List<AnalysisItem> measures;
+    private boolean multiMeasure;
+
+    public List<AnalysisItem> getMeasures() {
+        return measures;
+    }
+
+    public void setMeasures(List<AnalysisItem> measures) {
+        this.measures = measures;
+    }
+
+    public boolean isMultiMeasure() {
+        return multiMeasure;
+    }
+
+    public void setMultiMeasure(boolean multiMeasure) {
+        this.multiMeasure = multiMeasure;
+    }
 
     public AnalysisItem getXaxis() {
         return xaxis;
@@ -45,19 +60,26 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         addItems("xAxis", Arrays.asList(xaxis), structure);
         addItems("yAxis", Arrays.asList(yaxis), structure);
         addItems("measure", Arrays.asList(measure), structure);
+        addItems("measures", measures, structure);
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         xaxis = firstItem("xAxis", structure);
         yaxis = firstItem("yAxis", structure);
         measure = firstItem("measure", structure);
+        measures = items("measures", structure);
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
         Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
-        columnList.add(measure);
         columnList.add(xaxis);
-        columnList.add(yaxis);
+        if (multiMeasure) {
+            columnList.addAll(measures);
+        } else {
+            columnList.add(measure);   
+            columnList.add(yaxis);
+        }
+
         return columnList;
     }
 
@@ -95,6 +117,7 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         form = findStringProperty(properties, "form", "segment");
         baseAtZero = findStringProperty(properties, "baseAtZero", "true");
         interpolateValues = findStringProperty(properties, "interpolateValues", "false");
+        multiMeasure = findBooleanProperty(properties, "multiMeasure", false);
     }
 
     @Override
@@ -103,6 +126,7 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         properties.add(new ReportStringProperty("form", form));
         properties.add(new ReportStringProperty("baseAtZero", baseAtZero));
         properties.add(new ReportStringProperty("interpolateValues", interpolateValues));
+        properties.add(new ReportBooleanProperty("multiMeasure", multiMeasure));
         return properties;
     }
 }

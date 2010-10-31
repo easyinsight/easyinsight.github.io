@@ -518,6 +518,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return defaultValue;
     }
 
+    protected boolean findBooleanProperty(List<ReportProperty> properties, String property, boolean defaultValue) {
+        for (ReportProperty reportProperty : properties) {
+            if (reportProperty.getPropertyName().equals(property)) {
+                ReportBooleanProperty reportBooleanProperty = (ReportBooleanProperty) reportProperty;
+                return reportBooleanProperty.getValue();
+            }
+        }
+        return defaultValue;
+    }
+
     protected double findNumberProperty(List<ReportProperty> properties, String property, double defaultValue) {
         for (ReportProperty reportProperty : properties) {
             if (reportProperty.getPropertyName().equals(property)) {

@@ -43,6 +43,8 @@
         private var yAxisItem:AnalysisItem;
         private var measureItem:AnalysisItem;
 
+        private var def:LineChartDefinition;
+
         private var legend:Legend;
 
         override protected function createChildren():void {
@@ -67,8 +69,18 @@
             var string:String;
             var lineSeries:LineSeries = hitData.element as LineSeries;
             var lineSeriesItem:LineSeriesItem = hitData.chartItem as LineSeriesItem;
-            string = lineSeries.displayName + "\n" +
+            if (def.multiMeasure) {
+                for each (var aMeasure:AnalysisMeasure in def.measures) {
+                    if (aMeasure.display == lineSeries.displayName) {
+                        string = lineSeries.displayName + "\n" +
+                            xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + aMeasure.getFormatter().format(lineSeriesItem.yValue);
+                        break;
+                    }
+                }
+            } else {
+                string = lineSeries.displayName + "\n" +
                     xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+            }
             return string;
         }
 
@@ -94,12 +106,14 @@
             if (dataSet.length > 0) {
 
                 stackIndex = 0;
+                this.def = lineChartDef;
 
                 this.chartData = new ArrayCollection(dataSet.toArray());
 
                 hbox.removeChild(lineChart);
 
                 lineChart = new LineChart();
+                legend.visible = true;
                 lineChart.percentHeight = 100;
                 lineChart.percentWidth = 100;
                 lineChart.dataProvider = chartData;
@@ -187,36 +201,12 @@
                 lineChart.horizontalAxis = xAxis;
 
                 var mySeries:Array = new Array();
-                var analysisMeasure:AnalysisMeasure = lineChartDef.measure as AnalysisMeasure;
-                measureItem = analysisMeasure;
+                measureItem = lineChartDef.measure as AnalysisMeasure;
                 var uniques:ArrayCollection = new ArrayCollection();
 
                 var seriesData:Object = new Object();
-                for (var i:int = 0; i < dataSet.length; i++) {
-                    var object:Object = dataSet.getItemAt(i);
-                    if (object[lineChartDef.xaxis.qualifiedName()] == null ||
-                            object[lineChartDef.xaxis.qualifiedName()] == "") {
-                        continue;
-                    }
-                    var dimensionValue:String = object[lineChartDef.yaxis.qualifiedName()];
-                    if (dimensionValue == null || dimensionValue == "") {
-                        dimensionValue = "[ No Value ]";
-                    }
-                    var newSeriesData:ArrayCollection = seriesData[dimensionValue];
-                    if (newSeriesData == null) {
-                        newSeriesData = new ArrayCollection();
-                        seriesData[dimensionValue] = newSeriesData;
-                    }
-                    var newObject:Object = new Object();
-                    newObject[lineChartDef.xaxis.qualifiedName()] = object[lineChartDef.xaxis.qualifiedName()];
-                    newObject[dimensionValue] = object[analysisMeasure.qualifiedName()];
-                    newSeriesData.addItem(newObject);
-                    //allItems.addItem(newObject);
-                    if (!uniques.contains(dimensionValue)) {
-                        uniques.addItem(dimensionValue);
-                    }
-                }
-                for (i = 0; i < uniques.length; i++) {
+                lineChartDef.populateData(dataSet, seriesData, uniques);
+                for (var i:int = 0; i < uniques.length; i++) {
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:LineSeries = new LineSeries();
                     uniqueLineSeries.setStyle("form", lineChartDef.form);

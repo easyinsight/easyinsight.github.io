@@ -16,6 +16,8 @@ public class LineChartDefinition extends TwoAxisDefinition{
 
     public var strokeWeight:int = 2;
 
+
+
     public function LineChartDefinition() {
         super();
     }
