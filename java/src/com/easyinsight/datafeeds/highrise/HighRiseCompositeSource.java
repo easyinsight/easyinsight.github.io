@@ -1,12 +1,14 @@
 package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
+
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
+
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.security.SecurityUtil;
+
 import com.easyinsight.users.Account;
 
 import java.util.*;
@@ -19,15 +21,13 @@ import java.sql.ResultSet;
 
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
-import nu.xom.ParsingException;
+import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
-import nu.xom.Document;
-import nu.xom.Builder;
 
 /**
  * User: jamesboe
@@ -39,6 +39,42 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private String url;
     private boolean includeEmails;
     private boolean joinDealsToContacts;
+    private boolean includeContactNotes;
+    private boolean includeCompanyNotes;
+    private boolean includeDealNotes;
+    private boolean includeCaseNotes;
+
+    public boolean isIncludeCompanyNotes() {
+        return includeCompanyNotes;
+    }
+
+    public void setIncludeCompanyNotes(boolean includeCompanyNotes) {
+        this.includeCompanyNotes = includeCompanyNotes;
+    }
+
+    public boolean isIncludeDealNotes() {
+        return includeDealNotes;
+    }
+
+    public void setIncludeDealNotes(boolean includeDealNotes) {
+        this.includeDealNotes = includeDealNotes;
+    }
+
+    public boolean isIncludeCaseNotes() {
+        return includeCaseNotes;
+    }
+
+    public void setIncludeCaseNotes(boolean includeCaseNotes) {
+        this.includeCaseNotes = includeCaseNotes;
+    }
+
+    public boolean isIncludeContactNotes() {
+        return includeContactNotes;
+    }
+
+    public void setIncludeContactNotes(boolean includeContactNotes) {
+        this.includeContactNotes = includeContactNotes;
+    }
 
     public boolean isJoinDealsToContacts() {
         return joinDealsToContacts;
@@ -87,6 +123,10 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.HIGHRISE_TASKS);
         feedTypes.add(FeedType.HIGHRISE_CASES);
         feedTypes.add(FeedType.HIGHRISE_EMAILS);
+        feedTypes.add(FeedType.HIGHRISE_CONTACT_NOTES);
+        feedTypes.add(FeedType.HIGHRISE_COMPANY_NOTES);
+        feedTypes.add(FeedType.HIGHRISE_CASE_NOTES);
+        feedTypes.add(FeedType.HIGHRISE_DEAL_NOTES);
         return feedTypes;
     }
 
@@ -216,7 +256,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_COMPANY, HighRiseTaskSource.COMPANY_ID,
                         HighRiseCompanySource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_EMAILS, HighRiseContactSource.CONTACT_ID,
-                        HighRiseEmailSource.EMAIL_CONTACT_ID)));
+                        HighRiseEmailSource.EMAIL_CONTACT_ID),
+                new ChildConnection(FeedType.HIGHRISE_CONTACTS, FeedType.HIGHRISE_CONTACT_NOTES, HighRiseContactSource.CONTACT_ID,
+                        HighRiseContactNotesSource.NOTE_CONTACT_ID),
+                new ChildConnection(FeedType.HIGHRISE_DEAL, FeedType.HIGHRISE_DEAL_NOTES, HighRiseDealSource.DEAL_ID,
+                        HighRiseDealNotesSource.NOTE_DEAL_ID),
+                new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_COMPANY_NOTES, HighRiseCompanySource.COMPANY_ID,
+                        HighRiseCompanyNotesSource.NOTE_COMPANY_ID),
+                new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CASE_NOTES, HighRiseCaseSource.CASE_ID,
+                        HighRiseCaseNotesSource.NOTE_CASE_ID)));
         return connections;
     }
 
@@ -255,24 +303,34 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL, INCLUDE_EMAILS, join_deals_to_contacts) VALUES (?, ?, ?, ?)");
+        PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL, INCLUDE_EMAILS, join_deals_to_contacts, include_contact_notes," +
+                "include_company_notes, include_deal_notes, include_case_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
         basecampStmt.setBoolean(3, includeEmails);
         basecampStmt.setBoolean(4, joinDealsToContacts);
+        basecampStmt.setBoolean(5, includeContactNotes);
+        basecampStmt.setBoolean(6, includeCompanyNotes);
+        basecampStmt.setBoolean(7, includeDealNotes);
+        basecampStmt.setBoolean(8, includeCaseNotes);
         basecampStmt.execute();
         basecampStmt.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_EMAILS, join_deals_to_contacts FROM HIGHRISE WHERE FEED_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_EMAILS, join_deals_to_contacts, include_contact_notes," +
+                "include_company_notes, include_deal_notes, include_case_notes FROM HIGHRISE WHERE FEED_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
             this.setUrl(rs.getString(1));
             this.setIncludeEmails(rs.getBoolean(2));
             this.setJoinDealsToContacts(rs.getBoolean(3));
+            this.setIncludeContactNotes(rs.getBoolean(4));
+            this.setIncludeCompanyNotes(rs.getBoolean(5));
+            this.setIncludeDealNotes(rs.getBoolean(6));
+            this.setIncludeCaseNotes(rs.getBoolean(7));
         }
         loadStmt.close();
     }
@@ -323,12 +381,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 3;
+        return 4;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new HighRiseComposite1To2(this), new HighRiseComposite2To3(this));
+        return Arrays.asList(new HighRiseComposite1To2(this), new HighRiseComposite2To3(this), new HighRiseComposite3To4(this));
     }
 
     public void decorateLinks(List<AnalysisItem> analysisItems) {

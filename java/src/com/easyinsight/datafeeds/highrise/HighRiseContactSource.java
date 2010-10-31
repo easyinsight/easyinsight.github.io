@@ -112,6 +112,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
+        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
         try {
             HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
@@ -205,7 +206,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     contactCount++;
                 }
                 offset += 500;
-                if (dataStorage != null) {
+                if (writeDuring) {
                     dataStorage.insertData(ds);
                     ds = new DataSet();
                 }
@@ -214,7 +215,10 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        if (dataStorage == null) {
+        if (!writeDuring) {
+            if (parentDefinition.isAdjustDates()) {
+                ds = adjustDates(ds);
+            }
             return ds;
         } else {
             return null;

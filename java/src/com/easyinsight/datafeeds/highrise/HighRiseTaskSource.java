@@ -91,6 +91,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
+        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
         Map<String, String> categoryCache = new HashMap<String, String>();
@@ -262,6 +263,9 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
 
         } catch (Throwable e) {
             throw new RuntimeException(e);
+        }
+        if (parentDefinition.isAdjustDates()) {
+            ds = adjustDates(ds);
         }
         return ds;
     }

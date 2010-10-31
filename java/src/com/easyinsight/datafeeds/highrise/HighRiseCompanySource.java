@@ -36,6 +36,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
     public static final String TAGS = "Tags";
     public static final String OWNER = "Account Owner";
     public static final String CREATED_AT = "Created At";
+    public static final String UPDATED_AT = "Company Updated At";
     public static final String COUNT = "Count";
 
     public static final String ZIP_CODE = "Company Zip Code";
@@ -47,7 +48,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(COMPANY_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, ZIP_CODE, BACKGROUND);
+        return Arrays.asList(COMPANY_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, ZIP_CODE, BACKGROUND, UPDATED_AT);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
@@ -59,6 +60,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisList(keys.get(TAGS), false, ","));
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
+        analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         return analysisItems;
     }
@@ -88,6 +90,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
+        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
         try {
             HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
@@ -122,6 +125,10 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     }
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
                     row.addValue(CREATED_AT, new DateValue(createdAt));
+                    String updatedAtString = queryField(companyNode, "updated-at/text()");
+                    if (updatedAtString != null) {
+                        row.addValue(UPDATED_AT, new DateValue(deadlineFormat.parse(updatedAtString)));
+                    }
                     row.addValue(COUNT, new NumericValue(1));
                     String personId = queryField(companyNode, "owner-id/text()");
                     String responsiblePartyName = highriseCache.getUserName(personId);
@@ -136,21 +143,9 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                         String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
                         row.addValue(TAGS, tagString);
                     }
-                    /*Nodes tagNodes = tags.query("/tags/tag");
-                    StringBuilder tagBuilder = new StringBuilder();
-                    for (int j = 0; j < tagNodes.size(); j++) {
-                        Node tagNode = tagNodes.get(j);
-                        String tagName = queryField(tagNode, "name/text()");
-                        tagBuilder.append(tagName).append(",");
-                    }
-                    if (tagBuilder.length() > 0) {
-                        String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
-                        row.addValue(TAGS, tagString);
-
-                    }*/
                     companyCount++;
                 }
-                if (dataStorage != null) {
+                if (writeDuring) {
                     dataStorage.insertData(ds);
                     ds = new DataSet();
                 }
@@ -168,11 +163,11 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList((DataSourceMigration) new HighRiseCompany1To2(this));
+        return Arrays.asList(new HighRiseCompany1To2(this), new HighRiseCompany2To3(this));
     }
 }

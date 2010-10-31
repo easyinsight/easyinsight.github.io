@@ -1,13 +1,16 @@
 package com.easyinsight.datafeeds.highrise;
 
+
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.basecamp.BaseCampDataException;
+
 import nu.xom.*;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
 
 import java.io.IOException;
+
 import java.util.Map;
 
 /**

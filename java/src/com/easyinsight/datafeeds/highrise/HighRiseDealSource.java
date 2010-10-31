@@ -33,7 +33,7 @@ import com.easyinsight.datafeeds.FeedType;
 public class HighRiseDealSource extends HighRiseBaseSource {
 
     public static final String DEAL_NAME = "Deal Name";
-    //public static final String DESCRIPTION = "Deal Description";
+    public static final String DESCRIPTION = "Deal Description";
     public static final String DEAL_ID = "Deal ID";
     public static final String COMPANY_ID = "Company ID";
     public static final String CONTACT_ID = "Contact ID";
@@ -56,13 +56,13 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(DEAL_NAME, COMPANY_ID, PRICE, DURATION, PRICE_TYPE, DEAL_OWNER,
-                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID, CONTACT_ID);
+                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID, CONTACT_ID, DESCRIPTION);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_NAME), true));
-        //analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION), true));
+        analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_OWNER), true));
@@ -138,6 +138,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
         }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
+        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
 
         Map<String, String> categoryCache = new HashMap<String, String>();
@@ -170,7 +171,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                         String priceType = queryField(currDeal, "price-type/text()");
                         row.addValue(PRICE_TYPE, priceType);
                         String description = queryField(currDeal, "background/text()");
-                        //row.addValue(DESCRIPTION, description);
+                        row.addValue(DESCRIPTION, description);
                         double totalDealValue;
                         if ("fixed".equals(priceType)) {
                             try {
@@ -222,17 +223,20 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+        if (parentDefinition.isAdjustDates()) {
+            ds = adjustDates(ds);
+        }
         return ds;
     }
 
     @Override
     public int getVersion() {
-        return 5;
+        return 6;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList(new HighRise1To2(this), new HighRiseDeal2To3(this), new HighRiseDeal3To4(this),
-                new HighRiseDeal4To5(this));
+                new HighRiseDeal4To5(this), new HighRiseDeal5To6(this));
     }
 }

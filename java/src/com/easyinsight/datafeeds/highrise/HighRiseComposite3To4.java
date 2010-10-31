@@ -1,8 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
-import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -12,26 +10,29 @@ import java.util.Map;
 
 /**
  * User: jamesboe
- * Date: May 21, 2010
- * Time: 10:10:53 AM
+ * Date: Mar 23, 2010
+ * Time: 2:10:43 PM
  */
-public class HighRiseDeal5To6 extends DataSourceMigration {
-    public HighRiseDeal5To6(FeedDefinition dataSource) {
+public class HighRiseComposite3To4 extends DataSourceMigration {
+    public HighRiseComposite3To4(FeedDefinition dataSource) {
         super(dataSource);
     }
 
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
-        addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseDealSource.DESCRIPTION), true));
+        addChildDataSource(new HighRiseCompanyNotesSource(), conn);
+        addChildDataSource(new HighRiseDealNotesSource(), conn);
+        addChildDataSource(new HighRiseCaseNotesSource(), conn);
+        addChildDataSource(new HighRiseContactNotesSource(), conn);
     }
 
     @Override
     public int fromVersion() {
-        return 5;
+        return 3;
     }
 
     @Override
     public int toVersion() {
-        return 6;
+        return 4;
     }
 }
