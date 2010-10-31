@@ -4,10 +4,14 @@
 		<![CDATA[
         import com.easyinsight.analysis.crosstab.CrosstabDefinition;
 
-import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 		
 			import mx.collections.ICollectionView;
-			import mx.olap.OLAPResult;
+        import mx.olap.IOLAPElement;
+        import mx.olap.IOLAPSet;
+        import mx.olap.OLAPResult;
 			import mx.controls.Alert;
 			import mx.olap.IOLAPCube;
 			import mx.events.CubeEvent;
@@ -41,7 +45,7 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 				var provider:OLAPDataGridItemRendererProvider = new OLAPDataGridItemRendererProvider();
 				provider.formatter = analysisMeasure.getFormatter();
 				provider.type = OLAPDataGrid.OLAP_DIMENSION;
-				provider.uniqueName = "row";
+				provider.uniqueName = crosstabDefinition.columns[0].qualifiedName();
 				grid.itemRendererProviders = [ provider ];
                 /*var headerProvider:OLAPDataGridHeaderRendererProvider = new OLAPDataGridHeaderRendererProvider();
                 var renderer:OLAPDataGridHeaderRenderer = new OLAPDataGridHeaderRenderer();*/
@@ -51,13 +55,17 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
                 headerProvider.type = OLAPDataGrid.OLAP_DIMENSION;
                 headerProvider.uniqueName = "row";*/
                 //grid.headerRendererProviders = [ headerProvider ];
-				var dimensionList:IList = new ArrayCollection(); 
-				dimensionList.addItem(createDimension(crosstabDefinition.columns, "column"));
-				dimensionList.addItem(createDimension(crosstabDefinition.rows, "row"));
+				var dimensionList:IList = new ArrayCollection();
+                for each (var column:OLAPDimension in createDimensions(crosstabDefinition.columns)) {
+                    dimensionList.addItem(column);
+                }
+                for each (var row:OLAPDimension in createDimensions(crosstabDefinition.rows)) {
+                    dimensionList.addItem(row);
+                }
 				var olapMeasure:OLAPMeasure = new OLAPMeasure();
 				olapMeasure.name = analysisMeasure.qualifiedName();
 				olapMeasure.displayName = analysisMeasure.display;
-				olapMeasure.dataField = analysisMeasure.qualifiedName();
+				olapMeasure.dataField = analysisMeasure.qualifiedName();                
 				olapMeasure.aggregator = "SUM";
 				var measures:IList = new ArrayCollection();
 				measures.addItem(olapMeasure);
@@ -99,40 +107,54 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 				}
 				return newData;
 			}
+
+        private function blah(obj1:Object, obj2:Object):int {
+            Alert.show("blah");
+            return -1;
+        }
 			
-			private function createDimension(items:ArrayCollection, dimensionName:String):OLAPDimension {
-				var columnDimension:OLAPDimension = new OLAPDimension();
-				columnDimension.name = dimensionName;
-				var elements:Array = [];				
-				var columnHierarchy:OLAPHierarchy = new OLAPHierarchy();
-				columnHierarchy.name = dimensionName;
-				columnHierarchy.hasAll = true;
-				var columnHierarchyLevelsList:IList = new ArrayCollection();
-				for (var columnIndex:int = 0; columnIndex < items.length; columnIndex++) {
-					var analysisItem:AnalysisItem = items.getItemAt(columnIndex) as AnalysisItem;
-					var olapAttribute:OLAPAttribute = new OLAPAttribute();
-					elements[columnIndex] = olapAttribute;
-					olapAttribute.name = analysisItem.display;
+			private function createDimensions(items:ArrayCollection):Array {
+                var dims:Array = [];
+                for each (var analysisItem:AnalysisItem in items) {
+                    var columnDimension:OLAPDimension = new OLAPDimension();
+                    columnDimension.name = analysisItem.qualifiedName();
+
+                    var attributes:Array = [];
+
+                    var olapAttribute:OLAPAttribute = new OLAPAttribute();
+                    olapAttribute.name = analysisItem.display;
                     olapAttribute.displayName = analysisItem.display;
-					olapAttribute.dataField = analysisItem.qualifiedName();
-					var olapLevel:OLAPLevel = new OLAPLevel();
-					olapLevel.attributeName = analysisItem.display;
+                    olapAttribute.dataCompareFunction = blah;
+                    olapAttribute.dataField = analysisItem.qualifiedName();
+                    attributes.push(olapAttribute);
+                    columnDimension.attributes = new ArrayCollection(attributes);
+
+                    var columnHierarchy:OLAPHierarchy = new OLAPHierarchy();
+                    columnHierarchy.name = analysisItem.qualifiedName();
+                    columnHierarchy.hasAll = false;
+
+                    var columnHierarchyLevelsList:IList = new ArrayCollection();
+                    var olapLevel:OLAPLevel = new OLAPLevel();
+                    olapLevel.attributeName = analysisItem.display;
                     olapLevel.displayName = analysisItem.display;
-					columnHierarchyLevelsList.addItem(olapLevel);					
-				}
-				columnHierarchy.elements = columnHierarchyLevelsList.toArray();
-			 	elements[elements.length] = columnHierarchy;
-			 	columnDimension.elements = elements;
-				return columnDimension;				
+                    columnHierarchyLevelsList.addItem(olapLevel);
+                    
+                    columnHierarchy.elements = columnHierarchyLevelsList.toArray();
+
+                    columnDimension.hierarchies = new ArrayCollection([columnHierarchy]);
+
+                    dims.push(columnDimension);
+                }
+				return dims;
 			}
 			
 			private function createQuery(crosstabDefinition:CrosstabDefinition):IOLAPQuery {
 				var query:OLAPQuery = new OLAPQuery();
 				var rowQueryAxis:IOLAPQueryAxis = query.getAxis(OLAPQuery.ROW_AXIS);
-				var rowSet:OLAPSet = createOLAPSet(crosstabDefinition.rows, "row");
+				var rowSet:IOLAPSet = createOLAPSet(crosstabDefinition.rows);
 				rowQueryAxis.addSet(rowSet);
 				var columnQueryAxis:IOLAPQueryAxis = query.getAxis(OLAPQuery.COLUMN_AXIS);
-				var columnSet:OLAPSet = createOLAPSet(crosstabDefinition.columns, "column");
+				var columnSet:IOLAPSet = createOLAPSet(crosstabDefinition.columns);
 				columnQueryAxis.addSet(columnSet);
 				return query;
 			}
@@ -156,16 +178,22 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 	            grid.dataProvider = result as OLAPResult;            
 	        }       
 			
-			private function createOLAPSet(items:ArrayCollection, dimensionName:String):OLAPSet {
-				var olapSet:OLAPSet = null;
+			private function createOLAPSet(items:ArrayCollection):IOLAPSet {
+				var olapSet:IOLAPSet = null;
 				for (var columnIndex:int = 0; columnIndex < items.length; columnIndex++) {
 					var attributeSet:OLAPSet = new OLAPSet();
 					var analysisItem:AnalysisItem = items.getItemAt(columnIndex) as AnalysisItem;
-					attributeSet.addElements(cube.findDimension(dimensionName).findAttribute(analysisItem.display).children);
+                    var children:IList = cube.findDimension(analysisItem.qualifiedName()).findAttribute(analysisItem.display).children;
+                    var copy:ArrayCollection = new ArrayCollection(children.toArray());
+                    var sort:Sort = new Sort();
+                    sort.fields = [ new SortField("displayName") ];
+                    copy.sort = sort;
+                    copy.refresh();
+					attributeSet.addElements(copy);
 					if (olapSet == null) {
 						olapSet = attributeSet;
 					} else {
-						olapSet.crossJoin(attributeSet);
+						olapSet = olapSet.crossJoin(attributeSet);
 					}
 				}
 				return olapSet;	

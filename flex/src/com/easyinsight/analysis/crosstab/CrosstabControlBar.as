@@ -35,11 +35,11 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
 
     public function CrosstabControlBar() {
         rowGrouping = new ListDropAreaGrouping();
-        rowGrouping.maxElements = 1;
+        rowGrouping.unlimited = true;
         rowGrouping.dropAreaType = DimensionDropArea;
         rowGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         columnGrouping = new ListDropAreaGrouping();
-        columnGrouping.maxElements = 1;
+        columnGrouping.unlimited = true;
         columnGrouping.dropAreaType = DimensionDropArea;
         columnGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         measureGrouping = new ListDropAreaGrouping();
@@ -70,35 +70,26 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
         pieEditButton.toolTip = "Edit Chart Properties...";
         pieEditButton.addEventListener(MouseEvent.CLICK, editLimits);
         addChild(pieEditButton);
-        var grid:Grid = new Grid();
-        var topRow:GridRow = new GridRow();
-        var emptyGridItem:GridItem = new GridItem();
-        var columnGroupingItem:GridItem = new GridItem();
-        var columnGroupingLabel:Label = new Label();
-        columnGroupingLabel.text = "Column Grouping:";
-        columnGroupingLabel.setStyle("fontSize", 14);
-        columnGroupingItem.addChild(columnGroupingLabel);
-        addDropAreaGrouping(columnGrouping, columnGroupingItem);
-        topRow.addChild(emptyGridItem);
-        topRow.addChild(columnGroupingItem);
-        var bottomRow:GridRow = new GridRow();
-        var rowGroupingItem:GridItem = new GridItem();
+
         var rowGroupingLabel:Label = new Label();
         rowGroupingLabel.text = "Row Grouping:";
         rowGroupingLabel.setStyle("fontSize", 14);
-        rowGroupingItem.addChild(rowGroupingLabel);
-        addDropAreaGrouping(rowGrouping, rowGroupingItem);
-        var measureGroupingItem:GridItem = new GridItem();
+        addChild(rowGroupingLabel);
+        addDropAreaGrouping(rowGrouping, this);
+
+        var columnGroupingLabel:Label = new Label();
+        columnGroupingLabel.text = "Column Grouping:";
+        columnGroupingLabel.setStyle("fontSize", 14);
+        addChild(columnGroupingLabel);
+        addDropAreaGrouping(columnGrouping, this);
+
         var measureLabel:Label = new Label();
         measureLabel.text = "Measure:";
         measureLabel.setStyle("fontSize", 14);
-        measureGroupingItem.addChild(measureLabel);
-        addDropAreaGrouping(measureGrouping, measureGroupingItem);
-        bottomRow.addChild(rowGroupingItem);
-        bottomRow.addChild(measureGroupingItem);
-        grid.addChild(topRow);
-        grid.addChild(bottomRow);
-        addChild(grid);
+        addChild(measureLabel);
+        addDropAreaGrouping(measureGrouping, this);
+
+        
         if (xAxisDefinition.columns != null) {
             for each (var column:AnalysisItem in xAxisDefinition.columns) {
                 columnGrouping.addAnalysisItem(column);

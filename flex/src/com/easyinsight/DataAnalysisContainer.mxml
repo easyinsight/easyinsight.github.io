@@ -51,11 +51,13 @@
         import com.easyinsight.analysis.DataServiceEvent;
         import com.easyinsight.analysis.DerivedAnalysisDimension;
         import com.easyinsight.analysis.DrillThrough;
+        import com.easyinsight.analysis.DrillThroughEvent;
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
+        import com.easyinsight.analysis.HighriseDetailsLink;
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
@@ -202,6 +204,9 @@
 
         [Bindable]
         private var originSolution:int;
+
+        [Bindable]
+        private var reportName:String;
 
         private var _tutorialOnStart:int;
 
@@ -356,7 +361,8 @@
                 this.originSolution = feedMetadata.originSolution;
                 this.admin = feedMetadata.dataSourceAdmin;
                 dataSourceName = this.feedMetadata.dataSourceName;
-                BrowserManager.getInstance().setTitle("Easy Insight - " + dataSourceName);
+
+
                 fieldsLabel = this.feedMetadata.dataSourceName + " Fields";
                 availableFields = new ArrayCollection();
                 wrappers = new ArrayCollection();
@@ -377,11 +383,13 @@
                     var fragmentObject:Object = new Object();
                     fragmentObject.feedID = String(feedMetadata.urlKey);
                     var fragmentString:String = URLUtil.objectToString(fragmentObject);
+                    BrowserManager.getInstance().setTitle("Easy Insight - " + dataSourceName);
                     BrowserManager.getInstance().setFragment(fragmentString);
                 } else {
                     var feedFragmentObject:Object = new Object();
                     feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
                     var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
                     BrowserManager.getInstance().setFragment(feedFragmentString);
                 }
 
@@ -396,6 +404,7 @@
 
                 } else {
                     //this.title = analysisDefinition.name;
+                    reportName = analysisDefinition.name;
                     saveAsEnabled = !_previewMode;
                     var controllerClass:Class = ControllerLookup.controllerForType(analysisDefinition.type);
                     var controller:IReportController = new controllerClass();
@@ -589,10 +598,17 @@
                     } else {
                         tabNavigator.removeChild(exportTab);
                     }
+                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_SHARING).selected) {
+                        tabNavigator.removeChild(reportSharingTab);
+                    }
+                    guestMode = User.getInstance().guestUser;
                 }
             } catch(e:Error) {
             }
         }
+
+        [Bindable]
+        private var guestMode:Boolean;
 
         private function addFieldToReport(event:ReportEditorFieldEvent):void {
             dataView.addItem(event.item.analysisItem);
@@ -642,29 +658,6 @@
             transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
         }
 
-        /*private function onKey(event:KeyboardEvent):void {
-            if (event.ctrlKey && event.shiftKey) {
-                if (event.keyCode == 90) {
-                    redo();
-                }
-            } else if (event.ctrlKey) {
-                if (event.keyCode == 90) {
-                    undo();
-                }
-            } else if (event.keyCode == Keyboard.F1) {
-                tabNavigator.selectedIndex = 0;
-            } else if (event.keyCode == Keyboard.F2) {
-                tabNavigator.selectedIndex = 1;
-            } else if (event.keyCode == Keyboard.F3) {
-                tabNavigator.selectedIndex = 2;
-            } else if (event.keyCode == Keyboard.F4) {
-                tabNavigator.selectedIndex = 3;
-            } else if (event.keyCode == Keyboard.F5) {
-                focusManager.setFocus(analysisState.p2);
-                analysisState.openPopup();
-            }
-        }*/
-
         private function createFilterBoxes(filters:Array):void {
             if (filters != null) {
                 transformContainer.loadingFromReport = true;
@@ -709,9 +702,7 @@
         }
 
         private function save():void {
-            if (User.getInstance().guestUser) {
-                GuestWindow.newWindow(this);
-            } else if (analysisDefinition.canSaveDirectly) {
+            if (analysisDefinition.canSaveDirectly) {
                 dataView.updateExportMetadata();
                 var window:ImprovedSaveWindow = new ImprovedSaveWindow();
                 window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saved);
@@ -731,23 +722,21 @@
             feedFragmentObject.analysisID = String(savedDef.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
+            reportName = event.report.name;
             BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
+            aboutReportTab.invalidateProperties();
             reportSaveable = true;
             this.analysisChanged = false;
             saveAsEnabled = true;
         }
 
         private function saveAs():void {
-            if (User.getInstance().guestUser) {
-                GuestWindow.newWindow(this);
-            } else {
-                // if we're in admin mode, this should be disabled...
-                var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
-                dataView.updateExportMetadata();
-                saveDialog.analysisDefinition = analysisDefinition;
-                saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
-                PopUpUtil.centerPopUp(saveDialog);
-            }
+            // if we're in admin mode, this should be disabled...
+            var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
+            dataView.updateExportMetadata();
+            saveDialog.analysisDefinition = analysisDefinition;
+            saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
+            PopUpUtil.centerPopUp(saveDialog);
         }
 
         private function savedAnalysis(event:SavedAnalysisEvent):void {
@@ -756,6 +745,8 @@
             feedFragmentObject.analysisID = String(event.report.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
+            reportName = analysisDefinition.name;
+            aboutReportTab.invalidateProperties();
             BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
             this.analysisChanged = false;
         }
@@ -993,6 +984,8 @@
             var drillthrough:DrillThrough;
             var coordinate:CoordinateValue;
             var stringValue:StringValue;
+            var hrLink:HighriseDetailsLink;
+            var drill:DrillThroughEvent;
         }
 
         [Bindable]
@@ -1023,9 +1016,9 @@
                toolTip="Close"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
-                       toolTip="Save" enabled="{!_previewMode}"/>
+                       toolTip="Save" enabled="{!_previewMode &amp;&amp; !guestMode}"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
-                       toolTip="Save As" enabled="{saveAsEnabled}"/>
+                       toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !guestMode}"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="refreshButton" toolTip="Refresh Data"
                icon="@Embed(source='../../../assets/refresh.png')"
@@ -1039,13 +1032,19 @@
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
-                       toolTip="Adminster" visible="{admin}"/>            
+                       toolTip="Adminster" visible="{admin}"/>
+            <!--<mx:Spacer width="100"/>
+            <mx:Box horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF" borderStyle="solid"
+                    borderThickness="1" cornerRadius="5" paddingLeft="8" paddingRight="8">
+                <mx:Label text="{reportName}" fontSize="16"/>
+            </mx:Box>-->
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"
                          paddingLeft="0" paddingRight="0" resizeToContent="true">
             <analysis:ReportMetadataTab id="reportMetadataTab" dataSourceInfo="{dataSourceInfo}"
                     dataView="{dataView}"/>
+            <analysis:AboutReportTab id="aboutReportTab" report="{analysisDefinition}"/>
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
                     wrappers="{wrappers}" availableFields="{availableFields}"
                     dataView="{dataView}" analysisItemEdit="sortFields()"
