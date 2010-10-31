@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="10"
-        paddingLeft="10" paddingRight="10" paddingTop="10" backgroundColor="#FFFFFF" headerHeight="0">
+        paddingLeft="10" paddingRight="10" paddingTop="10" backgroundColor="#FFFFFF" headerHeight="0"
+        width="500">
     <mx:Script><![CDATA[
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.solutions.DataSourceDescriptor;
@@ -8,6 +9,7 @@
         import mx.collections.ArrayCollection;
         import mx.containers.GridItem;
         import mx.containers.GridRow;
+        import mx.containers.HBox;
         import mx.controls.Button;
         import mx.controls.Label;
         import mx.managers.PopUpManager;
@@ -23,8 +25,7 @@
         protected override function createChildren():void {
             super.createChildren();
             for each (var ds:DataSourceDescriptor in dataSources) {
-                var gridRow:GridRow = new GridRow();
-                var buttonGridItem:GridItem = new GridItem();
+
                 var dsButton:Button = new Button();
                 dsButton.label = ds.name;
                 dsButton.data = ds;
@@ -32,23 +33,14 @@
                 dsButton.setStyle("fontSize", 14);
                 dsButton.width = 220;
                 dsButton.addEventListener(MouseEvent.CLICK, onChoice);
-                buttonGridItem.addChild(dsButton);
-                var labelGridItem:GridItem = new GridItem();
-                var desc:Label = new Label();
-                desc.y = 5;
-                desc.text = ds.description;
-                desc.setStyle("fontSize", 14);
-                labelGridItem.addChild(desc);
-                gridRow.addChild(buttonGridItem);
-                gridRow.addChild(labelGridItem);
-                grid.addChild(gridRow);
+                grid.addChild(dsButton);                
             }
         }]]></mx:Script>
     <mx:VBox horizontalAlign="center">
         <mx:Label text="Which data source do you want to build a report against?" fontSize="16"/>
-        <mx:Grid id="grid">
+        <mx:VBox id="grid" verticalScrollPolicy="auto" maxHeight="300" width="100%" horizontalAlign="center">
 
-        </mx:Grid>
+        </mx:VBox>
         <mx:LinkButton click="PopUpManager.removePopUp(this)" label="Cancel" fontSize="14" textDecoration="underline"/>
     </mx:VBox>
 </util:EITitleWindow>
