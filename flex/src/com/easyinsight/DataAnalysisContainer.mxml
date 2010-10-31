@@ -57,7 +57,7 @@
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
-        import com.easyinsight.analysis.HighriseDetailsLink;
+
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
@@ -71,7 +71,6 @@
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.guest.GuestWindow;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.MultiReportAnalyzeSource;
@@ -984,7 +983,6 @@
             var drillthrough:DrillThrough;
             var coordinate:CoordinateValue;
             var stringValue:StringValue;
-            var hrLink:HighriseDetailsLink;
             var drill:DrillThroughEvent;
         }
 
