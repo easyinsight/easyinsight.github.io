@@ -96,7 +96,7 @@
 		</mx:FormItem>
         <mx:FormItem label="You can find the token on your Highrise page under My Info - API Token." fontSize="10"/>
     </mx:Form>
-    <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" width="700" height="50" selectable="false" focusEnabled="false"
+    <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" width="700" height="60" selectable="false" focusEnabled="false"
                  text="The next set of options enable you to control just what data Easy Insight pulls over from your Highrise account. Each of these options will significantly increase the time required to synchronize data, so we recommend that you only enable a given option if you need to report against that particular subject matter."
             fontSize="12"/>
     <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
