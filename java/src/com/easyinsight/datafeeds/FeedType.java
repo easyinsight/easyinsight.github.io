@@ -60,11 +60,14 @@ public class FeedType {
     public static final FeedType FRESHBOOKS_RECURRING = new FeedType(52);
     public static final FeedType BASECAMP_COMMENTS = new FeedType(53);
     public static final FeedType REDIRECT = new FeedType(54);
-    public static final FeedType HIGHRISE_NOTES = new FeedType(55);
+    public static final FeedType HIGHRISE_CONTACT_NOTES = new FeedType(55);
     public static final FeedType WHOLE_FOODS = new FeedType(56);
     public static final FeedType RALLY_COMPOSITE = new FeedType(57);
     public static final FeedType RALLY_DEFECT = new FeedType(58);
     public static final FeedType RALLY_STORY = new FeedType(59);
+    public static final FeedType HIGHRISE_DEAL_NOTES = new FeedType(60);
+    public static final FeedType HIGHRISE_COMPANY_NOTES = new FeedType(61);
+    public static final FeedType HIGHRISE_CASE_NOTES = new FeedType(62);
 
     private int type;
 

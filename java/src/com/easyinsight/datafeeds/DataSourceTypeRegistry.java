@@ -86,6 +86,10 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BASECAMP_COMMENTS, BaseCampCommentsSource.class);
         registerType(FeedType.REDIRECT, RedirectDataSource.class);
         registerType(FeedType.WHOLE_FOODS, WholeFoodsSource.class);
+        registerType(FeedType.HIGHRISE_CASE_NOTES, HighRiseCaseNotesSource.class);
+        registerType(FeedType.HIGHRISE_COMPANY_NOTES, HighRiseCompanyNotesSource.class);
+        registerType(FeedType.HIGHRISE_CONTACT_NOTES, HighRiseContactNotesSource.class);
+        registerType(FeedType.HIGHRISE_DEAL_NOTES, HighRiseDealNotesSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
