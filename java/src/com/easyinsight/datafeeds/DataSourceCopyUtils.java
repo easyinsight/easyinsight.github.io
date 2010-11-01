@@ -12,7 +12,6 @@ import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.security.Roles;
-import com.easyinsight.outboundnotifications.ConfigureDataFeedTodo;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.DataSourceDescriptor;
 
@@ -43,6 +42,11 @@ public class DataSourceCopyUtils {
 
         DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID, userName);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
+        if (solutionID > 0) {
+            if (clonedFeedDefinition.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS) {
+                clonedFeedDefinition.setVisible(false);
+            }
+        }
         clonedFeedDefinition.setDateCreated(new Date());
         clonedFeedDefinition.setDateUpdated(new Date());
         if (newDataSourceName != null) {
@@ -68,9 +72,8 @@ public class DataSourceCopyUtils {
                 clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
                 clonedInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
                 analysisStorage.saveAnalysis(clonedInsight, conn);
-                // TODO: Add urlKey
                 InsightDescriptor insightDescriptor = new InsightDescriptor(clonedInsight.getAnalysisID(), clonedInsight.getTitle(),
-                        clonedInsight.getDataFeedID(), clonedInsight.getReportType(), null);
+                        clonedInsight.getDataFeedID(), clonedInsight.getReportType(), clonedInsight.getUrlKey());
                 infos.add(new SolutionInstallInfo(insight.getAnalysisID(), insightDescriptor, null, false));
                 List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
                 for (FeedDefinition insightFeed : insightFeeds) {
@@ -79,22 +82,16 @@ public class DataSourceCopyUtils {
             }
         }
 
-        ConfigureDataFeedTodo todo = null;        
+        boolean requiresConfig = false;
+
         if (clonedFeedDefinition instanceof IServerDataSourceDefinition) {
             IServerDataSourceDefinition def = (IServerDataSourceDefinition) clonedFeedDefinition;
-            if (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS || def.getFeedType() == FeedType.LINKEDIN || def.getFeedType() == FeedType.FRESHBOOKS_COMPOSITE) {
-                Session session = Database.instance().createSession(conn);
+            requiresConfig = (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS || def.getFeedType() == FeedType.LINKEDIN || def.getFeedType() == FeedType.FRESHBOOKS_COMPOSITE);
 
-                todo = new ConfigureDataFeedTodo();
-                todo.setFeedID(clonedFeedDefinition.getDataFeedID());
-                todo.setUserID(userID);
-                session.save(todo);
-                session.flush();
-            }
         }
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID(),
                 clonedFeedDefinition.getFeedType().getType());
-        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, todo, clonedFeedDefinition.getFeedName(), todo != null));
+        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, clonedFeedDefinition.getFeedName(), requiresConfig));
 
         if (solutionID > 0) {
             PreparedStatement installStmt = conn.prepareStatement("INSERT INTO SOLUTION_INSTALL (SOLUTION_ID, installed_data_source_id, original_data_source_id) VALUES (?, ?, ?)");
@@ -153,11 +150,6 @@ public class DataSourceCopyUtils {
         FeedStorage feedStorage = new FeedStorage();
         DataSourceCloneResult result = feedDefinition.cloneDataSource(conn);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
-        if (installingFromConnection) {
-            if (clonedFeedDefinition.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS) {
-                clonedFeedDefinition.setVisible(false);
-            }
-        }
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID, accountID));
         clonedFeedDefinition.setOwnerName(userName);
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);

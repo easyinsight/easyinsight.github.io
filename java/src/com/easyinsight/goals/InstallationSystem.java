@@ -13,15 +13,10 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.DataSourceCopyUtils;
-import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.outboundnotifications.ConfigureDataFeedTodo;
-import com.easyinsight.outboundnotifications.ConfigureDataFeedInfo;
-import com.easyinsight.outboundnotifications.TodoEventInfo;
-import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.email.UserStub;
 
 import java.sql.Connection;
@@ -104,21 +99,6 @@ public class InstallationSystem {
         allSolutions.add(new SolutionInstallInfo(goalTree.getGoalTreeID(), new GoalTreeDescriptor(clonedTree.getGoalTreeID(), clonedTree.getName(), Roles.OWNER,
                 clonedTree.getIconImage(), null), null, false));
         return clonedTree.getGoalTreeID();
-    }
-
-    private void sendTodos() {
-        for (SolutionInstallInfo info : allSolutions) {
-            if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE && info.getTodoItem() != null) {
-                ConfigureDataFeedTodo todo = info.getTodoItem();
-                ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
-                todoInfo.setTodoID(todo.getId());
-                todoInfo.setAction(TodoEventInfo.ADD);
-                todoInfo.setUserId(todo.getUserID());
-                todoInfo.setFeedID(todo.getFeedID());
-                todoInfo.setFeedName(info.getFeedName());
-                MessageUtils.sendMessage("generalNotifications", todoInfo);
-            }
-        }
     }
 
     private void installDataSourcesAndReports(GoalTree goalTree) throws SQLException, CloneNotSupportedException {

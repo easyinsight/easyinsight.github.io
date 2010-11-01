@@ -1,6 +1,5 @@
 package com.easyinsight.solutions;
 
-import com.easyinsight.outboundnotifications.ConfigureDataFeedTodo;
 import com.easyinsight.core.EIDescriptor;
 
 /**
@@ -13,18 +12,16 @@ public class SolutionInstallInfo {
     private long previousID;
     private EIDescriptor descriptor;
     private boolean requiresConfiguration;
-    private ConfigureDataFeedTodo todoItem;
     private String feedName;
 
-    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, ConfigureDataFeedTodo todoItem, boolean requiresConfiguration) {
+    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, boolean requiresConfiguration) {
         this.previousID = previousID;
         this.descriptor = descriptor;
-        this.todoItem = todoItem;
         this.requiresConfiguration = requiresConfiguration;
     }
 
-    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, ConfigureDataFeedTodo todoItem, String feedName, boolean requiresConfiguration) {
-        this(previousID, descriptor, todoItem, requiresConfiguration);
+    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, String feedName, boolean requiresConfiguration) {
+        this(previousID, descriptor, requiresConfiguration);
         this.feedName = feedName;
     }
 
@@ -50,14 +47,6 @@ public class SolutionInstallInfo {
 
     public void setPreviousID(long previousID) {
         this.previousID = previousID;
-    }
-
-    public ConfigureDataFeedTodo getTodoItem() {
-        return todoItem;
-    }
-
-    public void setTodoItem(ConfigureDataFeedTodo todoItem) {
-        this.todoItem = todoItem;
     }
 
     public String getFeedName() {
