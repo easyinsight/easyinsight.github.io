@@ -278,7 +278,8 @@ public class ExportService {
 
     public void exportToPDF(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata,
                               byte[] bytes, int width, int height) {
-        SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
+        if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
+        else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
@@ -433,7 +434,8 @@ public class ExportService {
     }
 
     public byte[] exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
+        if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
+        else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
             analysisDefinition.updateMetadata();
             ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
