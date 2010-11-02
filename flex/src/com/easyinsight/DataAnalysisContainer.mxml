@@ -616,7 +616,7 @@
 
         private function filterField(event:ReportEditorFieldEvent):void {
             transformContainer.createNewFilter(event.item.analysisItem, event.x, event.y);
-            tabNavigator.selectedIndex = 2;
+            tabNavigator.selectedIndex = 3;
         }
 
         private function gotReport():void {

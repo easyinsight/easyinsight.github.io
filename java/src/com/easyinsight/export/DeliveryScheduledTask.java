@@ -115,18 +115,22 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 boolean accountAdmin = queryRS.getBoolean(5);
                 SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false);
 
-                if (deliveryFormat == ReportDelivery.EXCEL) {
-                    WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-                    analysisDefinition.updateMetadata();
-                    DataResults dataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
-                    if (dataResults instanceof ListDataResults) {
-                        ListDataResults listDataResults = (ListDataResults) dataResults;
-                        byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn);
-                        String reportName = analysisDefinition.getName();
-                        sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
+                try {
+                    if (deliveryFormat == ReportDelivery.EXCEL) {
+                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                        analysisDefinition.updateMetadata();
+                        DataResults dataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+                        if (dataResults instanceof ListDataResults) {
+                            ListDataResults listDataResults = (ListDataResults) dataResults;
+                            byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn);
+                            String reportName = analysisDefinition.getName();
+                            sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
+                        }
+                    } else if (deliveryFormat == ReportDelivery.PNG) {
+                        new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
                     }
-                } else if (deliveryFormat == ReportDelivery.PNG) {
-                    new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
+                } finally {
+                    SecurityUtil.clearThreadLocal();
                 }
             }
         }
