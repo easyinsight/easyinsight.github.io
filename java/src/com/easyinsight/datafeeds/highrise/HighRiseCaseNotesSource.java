@@ -125,7 +125,7 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
                         if (updatedAtString != null) {
                             updatedAt = deadlineFormat.parse(updatedAtString);
                         }
-                        IRow row = new Row();
+                        IRow row = ds.createRow();
                         row.addValue(BODY, body);
                         row.addValue(NOTE_ID, noteID);
                         row.addValue(NOTE_AUTHOR, highriseCache.getUserName(authorID));
