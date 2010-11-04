@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+        horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="290"
+                     width="390" cornerRadius="8" buttonMode="true"
+                     mouseOver="setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="setStyle('backgroundColor', 0xFFFFFF)"
+                     click="select()"
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+    <mx:Metadata>
+        [Event(name="scenarioSelection", type="flash.events.Event")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        private function select():void {
+            dispatchEvent(new Event("scenarioSelection"));
+        }
+
+        private var _scenario:Scenario;
+
+        public function set scenario(value:Scenario):void {
+            _scenario = value;
+            invalidateProperties();
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_scenario != null) {
+                scenarioName = _scenario.name;
+                summary = _scenario.description;
+            }
+        }
+
+        [Bindable]
+        private var scenarioName:String;
+        [Bindable]
+        private var summary:String;
+        ]]></mx:Script>
+    <mx:Text text="{scenarioName}" fontSize="24" selectable="false"/>
+    <mx:Image source="@Embed('../../../../assets/userx48.png')"/>
+    <mx:TextArea
+            text="{summary}"
+            fontSize="18" backgroundAlpha="0" editable="false" selectable="false"
+            height="185"
+            width="350" textAlign="center"/>
+</mx:VBox>

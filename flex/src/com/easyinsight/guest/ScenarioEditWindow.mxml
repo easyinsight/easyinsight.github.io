@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="adminService.getAccounts.send()">
+    <mx:Script><![CDATA[
+
+        import com.easyinsight.account.AccountAdminTO;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var accounts:ArrayCollection;
+
+        [Bindable]
+        private var users:ArrayCollection;
+
+        [Bindable]
+        private var scenarioName:String;
+
+        [Bindable]
+        private var description:String;
+
+        [Bindable]
+        private var summary:String;
+
+        [Bindable]
+        private var accountID:int;
+
+        [Bindable]
+        private var userID:int;
+
+        [Bindable]
+        private var image:String;
+
+        private var _scenario:Scenario;
+
+
+        public function set scenario(value:Scenario):void {
+            _scenario = value;
+        }
+
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_scenario != null) {
+                scenarioName = _scenario.name;
+                summary = _scenario.summary;
+                accountID = _scenario.accountID;
+                userID = _scenario.userID;
+                image = _scenario.image;
+                description = _scenario.description;
+            }
+        }
+
+        private function gotAccounts():void {
+            accounts = adminService.getAccounts.lastResult as ArrayCollection;
+            if (accountID > 0) {
+                for each (var account:AccountAdminTO in accounts) {
+                    if (accountID == account.accountID) {
+                        users = account.allUsers;
+                        break;
+                    }
+                }
+            } else {
+                users = accounts.getItemAt(0).allUsers;
+            }
+        }
+
+        private function updateUsers():void {
+            var account:AccountAdminTO = accountBox.selectedItem as AccountAdminTO;
+            userID = 0;
+            userBox.dataProvider = account.allUsers;
+            userBox.dropdown.dataProvider = account.allUsers;
+        }
+
+        private function save():void {
+            if (_scenario == null) {
+                _scenario = new Scenario();
+            }
+            _scenario.name = nameInput.text;
+            _scenario.description = descriptionInput.text;
+            _scenario.summary = summaryInput.text;
+            _scenario.accountID = accountBox.selectedItem.accountID;
+            _scenario.userID = userBox.selectedItem.userID;
+            _scenario.image = imageInput.text;
+            ProgressAlert.alert(this, "Saving scenario...", null, userService.saveScenario);
+            userService.saveScenario.send(_scenario);
+        }
+
+        private function savedScenario():void {
+            dispatchEvent(new Event("refresh", true));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="eiAdmin" id="adminService">
+        <mx:method name="getAccounts" result="gotAccounts()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="login" id="userService">
+        <mx:method name="saveScenario" result="savedScenario()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="Name:">
+                <mx:TextInput id="nameInput" text="{scenarioName}" width="400"/>
+            </mx:FormItem>
+            <mx:FormItem label="Summary:">
+                <mx:TextInput id="summaryInput" text="{summary}" width="400"/>
+            </mx:FormItem>
+            <mx:FormItem label="Description:">
+                <mx:TextArea id="descriptionInput" text="{description}" width="400"/>
+            </mx:FormItem>
+            <mx:FormItem label="Account:">
+                <util:SmartComboBox dataProvider="{accounts}" labelField="name" selectedProperty="accountID" selectedValue="{accountID}" id="accountBox" change="updateUsers()"/>
+            </mx:FormItem>
+            <mx:FormItem label="User:">
+                <util:SmartComboBox dataProvider="{users}" labelField="userName" selectedProperty="userID" selectedValue="{userID}" id="userBox"/>
+            </mx:FormItem>
+            <mx:FormItem label="Image:">
+                <mx:TextInput id="imageInput" text="{image}"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+
+</util:EITitleWindow>

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:TextArea text="This small business senario provides you with sample business data for Zaveo, a fictional deal-a-day tech startup. Two roles are available for you to explore--given that it's a tech startup scenaro, the two roles are 'Business Guy' and 'Tech Guy.' "
+            width="100%" fontSize="18" editable="false" selectable="false" height="50"/>
+    <mx:Spacer height="100%"/>
+    <mx:HBox width="100%" height="100%">
+        <mx:VBox width="50%" horizontalAlign="center">
+            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="185"
+                     width="350" cornerRadius="8" buttonMode="true" id="smallBizBox"
+                     mouseOver="smallBizBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="smallBizBox.setStyle('backgroundColor', 0xFFFFFF)"
+                     click="smallBiz()"
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                <mx:Text text="Biz Guy" fontSize="24" selectable="false"/>
+                <mx:TextArea
+                        text="Click here to log in as "
+                        fontSize="18" backgroundAlpha="0" editable="false" selectable="false"
+                        height="110"
+                        width="310" textAlign="center"/>
+            </mx:VBox>
+        </mx:VBox>
+        <mx:VBox width="50%" horizontalAlign="center">
+            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                     backgroundColor="#FFFFFF" height="185"
+                     width="350" cornerRadius="8" buttonMode="true" id="investorBox"
+                     mouseOver="investorBox.setStyle('backgroundColor', 0xDDDDDD)"
+                     mouseOut="investorBox.setStyle('backgroundColor', 0xFFFFFF)"
+
+                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                <mx:Text text="Tech Guy" fontSize="24" selectable="false"/>
+                <mx:TextArea
+                        text="Click here to see a sample analysis of custom data gathered through the Crunchbase wiki"
+                        fontSize="18" backgroundAlpha="0" editable="false" selectable="false"
+                        height="80"
+                        width="310" textAlign="center"/>
+            </mx:VBox>
+        </mx:VBox>
+    </mx:HBox>
+    <mx:Spacer height="100%"/>
+</mx:VBox>
