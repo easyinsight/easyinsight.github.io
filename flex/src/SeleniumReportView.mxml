@@ -20,11 +20,9 @@
         import com.easyinsight.analysis.DerivedAnalysisDimension;
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.analysis.SixSigmaMeasure;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
-        import com.easyinsight.framework.WebCredentialsCache;
 
         import mx.controls.Alert;
         import mx.messaging.config.ServerConfig;
@@ -53,7 +51,6 @@
         private var requestID:int;
 
         private function handleFlashVars():void {
-            CredentialsCache.initialize(new WebCredentialsCache());
             EIMessageListener.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);
