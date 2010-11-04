@@ -18,6 +18,10 @@ public class Sine extends Function {
         return new NumericValue(Math.sin(params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("sin(Number)", "Calculate the sine of Number", Arrays.asList("Number - what you want the sine of"));
     }

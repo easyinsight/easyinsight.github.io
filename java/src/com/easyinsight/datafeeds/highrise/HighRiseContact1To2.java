@@ -8,7 +8,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -22,7 +21,7 @@ public class HighRiseContact1To2 extends DataSourceMigration {
     }
 
     @Override
-    public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseContactSource.BACKGROUND), true));
         addAnalysisItem(new AnalysisZipCode(new NamedKey(HighRiseContactSource.ZIP_CODE), true));
     }

@@ -7,7 +7,6 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -21,7 +20,7 @@ public class HighRiseComposite1To2 extends DataSourceMigration {
     }
 
     @Override
-    public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         HighRiseContactSource contactSource = new HighRiseContactSource();
         addChildDataSource(contactSource, conn);
         addConnection(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,

@@ -55,6 +55,10 @@ public class CastFunction extends Function {
         return new FunctionExplanation(name + "(Number)", description);
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public int getAggregationType() {
         return aggregationType;
     }

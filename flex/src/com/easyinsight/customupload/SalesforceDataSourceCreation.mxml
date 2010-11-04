@@ -22,8 +22,6 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:SalesforceFeedDefinition = feedDefinition as SalesforceFeedDefinition;
-            usernameInputText = ds.username;
-            passwordText = ds.password;
         }
 
         public function get credentials():Credentials {

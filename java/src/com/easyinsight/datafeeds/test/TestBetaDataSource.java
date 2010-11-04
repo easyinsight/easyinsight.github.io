@@ -8,7 +8,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -39,7 +38,7 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
         return FeedType.TEST_BETA;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet dataSet = new DataSet();
         IRow row1 = dataSet.createRow();
         row1.addValue(keys.get(DIM), "Beta Row 1");
@@ -54,7 +53,7 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
         return dataSet;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DIM), true));
         analysisItems.add(new AnalysisDimension(keys.get(TODO_DIM), true));

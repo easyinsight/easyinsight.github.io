@@ -6,7 +6,6 @@ import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.Value;
-import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.InsightRequestMetadata;
@@ -70,14 +69,14 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
             }
             data.addItem(endObject);
         }
-        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, listData.dataSourceInfo, null, listData.auditMessages));
+        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, listData.dataSourceInfo, null, listData.auditMessages,
+                listData.reportFault));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
     public function retrieveData(definition:AnalysisDefinition, refreshAll:Boolean):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
-        metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         dataRemoteSource.list.send(definition, metadata);
     }
 }

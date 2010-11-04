@@ -1,10 +1,8 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Refresh Scorecard Values">
     <mx:Script><![CDATA[
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIOutcome;
-        import com.easyinsight.kpi.KPIValue;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -17,24 +15,8 @@
         }
 
         public function refreshData():void {
-            ProgressAlert.alert(this, "Determining needed credentials...", null, scorecardService.getCredentialsForScorecard);
-            scorecardService.getCredentialsForScorecard.send(allDataSourcesCheckbox.selected,
-                    CredentialsCache.getCache().createCredentials());
-        }
-
-        private function onCredentials():void {
             ProgressAlert.alert(this, "Refreshing the scorecard...", null, scorecardService.refreshValues);
-            scorecardService.refreshValues.send(allDataSourcesCheckbox.selected, CredentialsCache.getCache().createCredentials());
-        }
-
-        private function gotCredentials():void {
-            var credentials:ArrayCollection = scorecardService.getCredentialsForScorecard.lastResult as ArrayCollection;
-            if (credentials.length == 0) {
-                ProgressAlert.alert(this, "Refreshing the scorecard...", null, scorecardService.refreshValues);
-                scorecardService.refreshValues.send(allDataSourcesCheckbox.selected, CredentialsCache.getCache().createCredentials());
-            } else {
-                CredentialsCache.getCache().obtainCredentials(this, credentials, onCredentials);
-            }
+            scorecardService.refreshValues.send(allDataSourcesCheckbox.selected);
         }
 
         private function gotRefresh():void {
@@ -59,7 +41,6 @@
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="scorecardService" id="scorecardService">
-        <mx:method name="getCredentialsForScorecard" result="gotCredentials()"/>
         <mx:method name="refreshValues" result="gotRefresh()"/>
     </mx:RemoteObject>
     <mx:Form styleName="TitleWindowContents">

@@ -4,7 +4,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.easyinsight.kpi.KPI" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardStorage" %>
-<%@ page import="com.easyinsight.datafeeds.CredentialFulfillment" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardWrapper" %>
 <%@ page import="java.text.DecimalFormat" %>

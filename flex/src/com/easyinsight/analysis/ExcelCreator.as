@@ -1,5 +1,4 @@
 package com.easyinsight.analysis {
-import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.util.ProgressAlert;
 import com.easyinsight.util.UserAudit;
@@ -38,7 +37,6 @@ public class ExcelCreator {
     public function exportExcel(definition:AnalysisDefinition, parent:UIComponent):void {
         report = definition;
         var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
-        insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         insightMetadata.utcOffset = new Date().getTimezoneOffset();
         UserAudit.instance().audit(UserAudit.EXPORTED_TO_EXCEL);
         ProgressAlert.alert(parent, "Generating the Excel spreadsheet...", null, upload.exportToExcel);

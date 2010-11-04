@@ -163,7 +163,7 @@ public class InstallationSystem {
         idReplacementVisitor.visit(goalTree.getRootNode());
     }
 
-    private void duplicateGoalDataSources(GoalTree goalTree, long solutionID) throws CloneNotSupportedException, SQLException {
+    private void duplicateGoalDataSources(GoalTree goalTree, long solutionID) throws Exception {
         final Set<Long> dataSourceIDs = new HashSet<Long>();
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
@@ -212,7 +212,7 @@ public class InstallationSystem {
         solutionInstallationVisitor.visit(goalTree.getRootNode());
     }
 
-    private List<SolutionInstallInfo> generateFeedsForSolution(long solutionID, long userID, Connection conn, boolean copyData) throws SQLException, CloneNotSupportedException {
+    private List<SolutionInstallInfo> generateFeedsForSolution(long solutionID, long userID, Connection conn, boolean copyData) throws Exception {
         List<SolutionInstallInfo> descriptors = new ArrayList<SolutionInstallInfo>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_ID FROM SOLUTION_TO_FEED WHERE SOLUTION_ID = ?");
         queryStmt.setLong(1, solutionID);

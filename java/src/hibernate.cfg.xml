@@ -56,6 +56,7 @@
         <mapping class="com.easyinsight.analysis.AnalysisZipCode"/>
         <mapping class="com.easyinsight.analysis.AnalysisCalculation"/>
         <mapping class="com.easyinsight.analysis.DerivedAnalysisDimension"/>
+        <mapping class="com.easyinsight.analysis.DerivedAnalysisDateDimension"/>
         <mapping class="com.easyinsight.analysis.ComplexAnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisHierarchyItem"/>
         <mapping class="com.easyinsight.analysis.Hierarchy"/>

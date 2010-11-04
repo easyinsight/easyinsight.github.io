@@ -9,6 +9,7 @@ public class DataResults {
     public var credentialRequirements:ArrayCollection;
     public var invalidAnalysisItemIDs:ArrayCollection;
     public var feedMetadata:FeedMetadata;
+    public var reportFault:ReportFault;
     public var dataSourceInfo:DataSourceInfo;
     public var additionalProperties:Object;
     public var auditMessages:ArrayCollection;

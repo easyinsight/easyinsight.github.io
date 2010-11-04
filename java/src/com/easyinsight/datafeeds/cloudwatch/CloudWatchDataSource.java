@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.cloudwatch;
 
+import com.easyinsight.PasswordStorage;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
@@ -7,11 +8,12 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.core.Key;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -46,6 +48,33 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
 
     public static final String DATE = "Date";
 
+    private String cwUserName;
+    private String cwPassword;
+
+    public String getCwUserName() {
+        return cwUserName;
+    }
+
+    public void setCwUserName(String cwUserName) {
+        this.cwUserName = cwUserName;
+    }
+
+    public String getCwPassword() {
+        return cwPassword;
+    }
+
+    public void setCwPassword(String cwPassword) {
+        this.cwPassword = cwPassword;
+    }
+
+    @Override
+    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
+        CloudWatchDataSource cloudWatchDataSource = (CloudWatchDataSource) super.clone(conn);
+        cloudWatchDataSource.setCwUserName(null);
+        cloudWatchDataSource.setCwPassword(null);
+        return cloudWatchDataSource;
+    }
+
     public int getDataSourceType() {
         return DataSourceInfo.LIVE;
     }
@@ -55,16 +84,12 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
         return FeedType.CLOUD_WATCH;
     }
 
-    public int getCredentialsDefinition() {
-        return CredentialsDefinition.STANDARD_USERNAME_PW;
-    }
-
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
         return new CloudWatchFeed();
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
     }
 
@@ -79,7 +104,7 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
         return Account.BASIC;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> standardItems = new ArrayList<AnalysisItem>();
 
         standardItems.add(new AnalysisDimension(keys.get(IMAGE_ID), "Image ID"));
@@ -111,16 +136,38 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
         return 2;
     }
 
+    @Override
     public void customStorage(Connection conn) throws SQLException {
-    }
-
-    public void customLoad(Connection conn) throws SQLException {
+        super.customStorage(conn);
+        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM cloudwatch WHERE data_source_id = ?");
+        deleteStmt.setLong(1, getDataFeedID());
+        deleteStmt.executeUpdate();
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO cloudwatch (data_source_id, cg_username, cg_password) values (?, ?, ?)");
+        insertStmt.setLong(1, getDataFeedID());
+        insertStmt.setString(2, cwUserName);
+        insertStmt.setString(3, cwPassword != null ? PasswordStorage.encryptString(cwPassword) : null);
+        insertStmt.execute();
     }
 
     @Override
-    public String validateCredentials(Credentials credentials) {
+    public void customLoad(Connection conn) throws SQLException {
+        super.customLoad(conn);
+        PreparedStatement stmt = conn.prepareStatement("SELECT CG_USERNAME, CG_PASSWORD FROM cloudwatch WHERE DATA_SOURCE_ID = ?");
+        stmt.setLong(1, getDataFeedID());
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            cwUserName = rs.getString(1);
+            String password = rs.getString(2);
+            if (password != null) {
+                cwPassword = PasswordStorage.decryptString(password);
+            }
+        }
+    }
+
+    @Override
+    public String validateCredentials() {
         try {
-            EC2Util.getInstances(credentials.getUserName(), credentials.getPassword());
+            EC2Util.getInstances(cwUserName, cwPassword);
         } catch (RuntimeException re) {
             if (re.getMessage().indexOf("401") != -1) {
                 return "Your credentials were invalid.";

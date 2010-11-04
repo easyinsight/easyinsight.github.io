@@ -9,7 +9,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UploadPolicy;
@@ -43,9 +42,6 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         return FeedType.REDIRECT;
     }
 
-    public void setCredentialsDefinition(int i) {
-    }
-
     @Override
     public int getRequiredAccountTier() {
         return Account.PERSONAL;
@@ -56,7 +52,7 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         return DataSourceInfo.LIVE;
     }
 
-    public long create(Credentials credentials, EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws SQLException, CloneNotSupportedException {
+    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws Exception {
         setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
         UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         setUploadPolicy(uploadPolicy);
@@ -117,11 +113,11 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         redirectDataSourceID = rs.getLong(1);
     }
 
-    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition) {
         throw new UnsupportedOperationException();
     }
 
-    public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         throw new UnsupportedOperationException();
     }
 
@@ -153,7 +149,7 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         throw new UnsupportedOperationException();
     }
 
-    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn) {
         throw new UnsupportedOperationException();
     }
 }

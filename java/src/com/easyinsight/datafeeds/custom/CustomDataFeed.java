@@ -2,14 +2,11 @@ package com.easyinsight.datafeeds.custom;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
-import com.easyinsight.datafeeds.CredentialRequirement;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.custom.client.*;
 import com.easyinsight.datafeeds.custom.client.DateValue;
 import com.easyinsight.datafeeds.custom.client.StringValue;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.users.Credentials;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
@@ -26,13 +23,15 @@ public class CustomDataFeed extends Feed {
 
     private String wsdl;
     private DataProvider port;
+    private String cdUserName;
+    private String cdPassword;
     private static final QName SERVICE_NAME = new QName("http://db.easyinsight.com/", "DatabaseServerService");
 
     public CustomDataFeed(String wsdl) {
         this.wsdl = wsdl;
     }
 
-    public DataProvider getPort(Credentials credentials) {
+    public DataProvider getPort() {
         try {
             if (port == null) {
                 URL url = new URL(wsdl);
@@ -40,8 +39,8 @@ public class CustomDataFeed extends Feed {
                 port = ss.getDataProviderPort();
                 BindingProvider provider = (BindingProvider) port;
                 Map<String, Object> requestContext = provider.getRequestContext();
-                requestContext.put(BindingProvider.USERNAME_PROPERTY, credentials.getUserName());
-                requestContext.put(BindingProvider.PASSWORD_PROPERTY, credentials.getPassword());
+                requestContext.put(BindingProvider.USERNAME_PROPERTY, cdUserName);
+                requestContext.put(BindingProvider.PASSWORD_PROPERTY, cdPassword);
             }
             return port;
         } catch (MalformedURLException e) {
@@ -53,15 +52,14 @@ public class CustomDataFeed extends Feed {
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
-        Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-            List<DateValue> dateValues = getPort(credentials).getPossibleDateValues(analysisItem.getKey().toKeyString(), new ArrayList<Property>());
+            List<DateValue> dateValues = getPort().getPossibleDateValues(analysisItem.getKey().toKeyString(), new ArrayList<Property>());
             metadata.addValue(analysisItem, new com.easyinsight.core.DateValue(dateValues.get(0).getValue().toGregorianCalendar().getTime()), insightRequestMetadata);
             metadata.addValue(analysisItem, new com.easyinsight.core.DateValue(dateValues.get(1).getValue().toGregorianCalendar().getTime()), insightRequestMetadata);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-            List<StringValue> stringValues = getPort(credentials).getPossibleStringValues(analysisItem.getKey().toKeyString(), new ArrayList<Property>());
+            List<StringValue> stringValues = getPort().getPossibleStringValues(analysisItem.getKey().toKeyString(), new ArrayList<Property>());
             for (StringValue stringValue : stringValues) {
                 Value value;
                 if (stringValue.getValue() == null) {
@@ -74,17 +72,9 @@ public class CustomDataFeed extends Feed {
         }
         return metadata;
     }
-
+    
     @Override
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        CredentialRequirement credentialRequirement = new CredentialRequirement(getFeedID(), getName(), CredentialsDefinition.STANDARD_USERNAME_PW);
-        Set<CredentialRequirement> set = new HashSet<CredentialRequirement>();
-        set.add(credentialRequirement);
-        return set;
-    }
-
-    @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         List<Field> keys = new ArrayList<Field>();
         for (AnalysisItem analysisItem : analysisItems) {
             Field field = new Field();
@@ -98,8 +88,7 @@ public class CustomDataFeed extends Feed {
             }
             keys.add(field);
         }
-        Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
-        List<com.easyinsight.datafeeds.custom.client.Row> rows = getPort(credentials).getRows(keys, new Where(), new ArrayList<Property>());
+        List<com.easyinsight.datafeeds.custom.client.Row> rows = getPort().getRows(keys, new Where(), new ArrayList<Property>());
         DataSet dataSet = new DataSet();
         for (com.easyinsight.datafeeds.custom.client.Row row : rows) {
             IRow localRow = dataSet.createRow();
@@ -120,10 +109,5 @@ public class CustomDataFeed extends Feed {
             }
         }
         return dataSet;
-    }
-
-    @Override
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

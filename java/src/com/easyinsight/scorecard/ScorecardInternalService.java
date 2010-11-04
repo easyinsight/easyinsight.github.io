@@ -3,7 +3,6 @@ package com.easyinsight.scorecard;
 import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.userupload.UserUploadService;
@@ -93,11 +92,10 @@ public class ScorecardInternalService {
         return new ScorecardList(scorecards, hasData);
     }
 
-    public ScorecardWrapper getScorecard(long scorecardID, long userID, List<CredentialFulfillment> credentials, boolean forceRefresh,
+    public ScorecardWrapper getScorecard(long scorecardID, long userID, boolean forceRefresh,
                                          InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeScorecard(scorecardID, userID);
         try {
-            insightRequestMetadata.setCredentialFulfillmentList(credentials);
             return new ScorecardStorage().getScorecard(scorecardID, insightRequestMetadata, forceRefresh);
         } catch (Exception e) {
             LogClass.error(e);

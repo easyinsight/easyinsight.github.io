@@ -1,11 +1,9 @@
 <?xml version="1.0" ?>
 <mx:ViewStack xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
                             xmlns:solutions="com.easyinsight.solutions.*"
-                            creationComplete="var metadata:InsightRequestMetadata = new InsightRequestMetadata();
-            metadata.utcOffset = new Date().getTimezoneOffset(); kpiService.getKPIsForStart.send(_dataSourceDescriptor.id, CredentialsCache.getCache().createCredentials(), metadata)"
+                            creationComplete="onCreation()"
         width="100%" height="100%" implements="com.easyinsight.listing.IPerspective" selectedIndex="{coreStackIndex}">
     <mx:Script><![CDATA[
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.NavigationEvent;
 
@@ -14,6 +12,10 @@
 
         private var _dataSourceDescriptor:DataSourceDescriptor;
 
+        private function onCreation():void {
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset(); kpiService.getKPIsForStart.send(_dataSourceDescriptor.id, metadata)
+        }
 
         [Bindable(event="dataSourceDescriptorChanged")]
         public function get dataSourceDescriptor():DataSourceDescriptor {

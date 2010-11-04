@@ -1,21 +1,17 @@
 package com.easyinsight.scorecard;
 
 import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.analysis.ReportCache;
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.eventing.MessageUtils;
-import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.users.Credentials;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 /**
  * User: jamesboe
@@ -168,214 +164,14 @@ public class ScorecardStorage {
     }
 
     private ScorecardWrapper updateScorecard(Scorecard scorecard, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean forceRefresh) throws Exception {
-        List<KPI> longRefreshKPIs = new ArrayList<KPI>();
-        List<KPI> shortRefreshKPIs = new ArrayList<KPI>();
-        for (KPI kpi : scorecard.getKpis()) {
-            if (forceRefresh || needsUpdate(kpi, conn)) {
-                if (isLongRefresh(kpi, conn)) {
-                    longRefreshKPIs.add(kpi);
-                } else {
-                    shortRefreshKPIs.add(kpi);
-                }
-            }
-        }
-        List<CredentialRequirement> credentialRequirements = new ArrayList<CredentialRequirement>();
-
-        List<KPI> credentialedLongRefreshKPIs = pareKPIs(longRefreshKPIs, insightRequestMetadata, credentialRequirements);
-        List<KPI> credentialedShortRefreshKPIs = pareKPIs(shortRefreshKPIs, insightRequestMetadata, credentialRequirements);
 
         ScorecardWrapper scorecardWrapper = new ScorecardWrapper();
-
-        if (credentialRequirements.isEmpty()) {
-            new ScorecardService().refreshValuesForList(credentialedShortRefreshKPIs, conn, insightRequestMetadata, false);
-            if (credentialedLongRefreshKPIs != null && credentialedLongRefreshKPIs.size() > 0) {
-                scorecardWrapper.setAsyncRefresh(true);
-                scorecardWrapper.setAsyncRefreshKpis(credentialedLongRefreshKPIs);
-                longKPIs(credentialedLongRefreshKPIs, insightRequestMetadata, scorecard.getScorecardID());
-            }
+        try {
+            new ScorecardService().refreshValuesForList(scorecard.getKpis(), conn, insightRequestMetadata, forceRefresh);
+        } catch (ReportException re) {
+            scorecardWrapper.setReportFault(re.getReportFault());
         }
-
-        scorecardWrapper.setCredentials(credentialRequirements);
         return scorecardWrapper;
-    }
-
-    public List<CredentialRequirement> blah(final long dataSourceID, final List<CredentialFulfillment> credentialsList) throws SQLException {
-        List<CredentialRequirement> credentialRequirements = new ArrayList<CredentialRequirement>();
-        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-        if (feedDefinition.needsCredentials(credentialsList)) {
-            credentialRequirements.add(new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
-                        CredentialsDefinition.STANDARD_USERNAME_PW));
-            return credentialRequirements;
-        }
-
-        final long userID = SecurityUtil.getUserID();
-        final long accountID = SecurityUtil.getAccountID();
-        final int accountType = SecurityUtil.getAccountTier();
-        final boolean accountAdmin = SecurityUtil.isAccountAdmin();
-        final String userName = SecurityUtil.getUserName();
-        final boolean guestUser = SecurityUtil.isGuestUser();
-
-        final Set<Long> dataSourceIDs = new HashSet<Long>();
-        dataSourceIDs.add(dataSourceID);
-        Thread thread = new Thread(new Runnable() {
-
-            public void run() {
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
-                try {
-                    for (Long dataSourceID : dataSourceIDs) {
-                        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                        Credentials credentials = null;
-                        for (CredentialFulfillment fulfillment : credentialsList) {
-                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                                credentials = fulfillment.getCredentials();
-                            }
-                        }
-                        if (credentials != null && credentials.isEncrypted()) {
-                            credentials = credentials.decryptCredentials();
-                        }
-                        DataSourceRefreshEvent info = new DataSourceRefreshEvent();
-                        info.setDataSourceID(dataSourceID);
-                        info.setDataSourceName(feedDefinition.getFeedName());
-                        info.setType(DataSourceRefreshEvent.DATA_SOURCE_NAME);
-                        info.setUserId(userID);
-                        MessageUtils.sendMessage("generalNotifications", info);
-                        if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                            try {
-                                dataSource.refreshData(credentials, accountID, new Date(), null);
-                            } finally {
-                                DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());    
-                            }
-                        }
-                    }
-                    DataSourceRefreshEvent info = new DataSourceRefreshEvent();
-                    info.setDataSourceID(dataSourceID);
-                    info.setType(DataSourceRefreshEvent.DONE);
-                    info.setUserId(userID);
-                    ReportCache.instance().flushResults(dataSourceID);
-                    MessageUtils.sendMessage("generalNotifications", info);
-                } catch (Exception e) {
-                    LogClass.error(e);
-                }
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
-        return credentialRequirements;
-    }
-
-    private void longKPIs(final List<KPI> kpiList, final InsightRequestMetadata insightRequestMetadata, final long scorecardID) {
-        final List<CredentialFulfillment> credentialsList = insightRequestMetadata.getCredentialFulfillmentList();
-        final Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
-        for (KPI kpi : kpiList) {
-            List<KPI> kpis = kpiMap.get(kpi.getCoreFeedID());
-            if (kpis == null) {
-                kpis = new ArrayList<KPI>();
-                kpiMap.put(kpi.getCoreFeedID(), kpis);
-            }
-            kpis.add(kpi);
-        }
-        final long userID = SecurityUtil.getUserID();
-        final long accountID = SecurityUtil.getAccountID();
-        final int accountType = SecurityUtil.getAccountTier();
-        final boolean accountAdmin = SecurityUtil.isAccountAdmin();
-        final String userName = SecurityUtil.getUserName();
-        final boolean guestUser = SecurityUtil.isGuestUser();
-
-        Thread thread = new Thread(new Runnable() {
-
-            public void run() {
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
-                try {
-                    for (Long dataSourceID : kpiMap.keySet()) {
-                        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                        Credentials credentials = null;
-                        for (CredentialFulfillment fulfillment : credentialsList) {
-                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                                credentials = fulfillment.getCredentials();
-                            }
-                        }
-                        if (credentials != null && credentials.isEncrypted()) {
-                            credentials = credentials.decryptCredentials();
-                        }
-                        ScorecardRefreshEvent info = new ScorecardRefreshEvent();
-                        info.setScorecardID(scorecardID);
-                        info.setDataSourceName(feedDefinition.getFeedName());
-                        info.setType(ScorecardRefreshEvent.DATA_SOURCE_NAME);
-                        info.setUserId(userID);
-                        MessageUtils.sendMessage("generalNotifications", info);
-                        if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                            try {
-                                dataSource.refreshData(credentials, accountID, new Date(), null);
-                            } finally {
-                                DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());    
-                            }
-                        }
-                    }
-                    List<KPI> kpis;
-                    EIConnection conn = Database.instance().getConnection();
-                    try {
-                        conn.setAutoCommit(false);
-                        new ScorecardService().refreshValuesForList(kpiList, conn, insightRequestMetadata, false);
-                        PreparedStatement getKPIStmt = conn.prepareStatement("SELECT SCORECARD_TO_KPI.KPI_ID FROM SCORECARD_TO_KPI WHERE " +
-                                "scorecard_to_kpi.scorecard_id = ?");
-                        getKPIStmt.setLong(1, scorecardID);
-
-                        kpis = new ArrayList<KPI>();
-                        ResultSet kpiRS = getKPIStmt.executeQuery();
-                        while (kpiRS.next()) {
-                            long kpiID = kpiRS.getLong(1);
-                            kpis.add(new KPIStorage().getKPI(kpiID, conn));
-                        }
-                        conn.commit();
-                    } catch (Exception e) {
-                        conn.rollback();
-                        throw new RuntimeException(e);
-                    } finally {
-                        conn.setAutoCommit(true);
-                        Database.closeConnection(conn);
-                    }
-                    ScorecardRefreshEvent info = new ScorecardRefreshEvent();
-                    info.setScorecardID(scorecardID);
-                    info.setType(ScorecardRefreshEvent.DONE);
-                    info.setKpis(kpis);
-                    info.setUserId(userID);
-                    LongKPIRefreshEvent event = new LongKPIRefreshEvent();
-                    event.setEvent(info);
-                    event.setSendDate(new Date());
-                    EventDispatcher.instance().dispatch(event);
-                    MessageUtils.sendMessage("generalNotifications", info);
-                } catch (Exception e) {
-                    LogClass.error(e);
-                }
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    public List<KPI> pareKPIs(List<KPI> kpiList, InsightRequestMetadata insightRequestMetadata, List<CredentialRequirement> credentialRequirements) throws SQLException {
-        List<KPI> credentialedKPIs = new ArrayList<KPI>();
-        Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
-        for (KPI kpi : kpiList) {
-            List<KPI> kpis = kpiMap.get(kpi.getCoreFeedID());
-            if (kpis == null) {
-                kpis = new ArrayList<KPI>();
-                kpiMap.put(kpi.getCoreFeedID(), kpis);
-            }
-            kpis.add(kpi);
-        }
-        for (Long dataSourceID : kpiMap.keySet()) {
-            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-            if (feedDefinition.needsCredentials(insightRequestMetadata.getCredentialFulfillmentList())) {
-                credentialRequirements.add(new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
-                            CredentialsDefinition.STANDARD_USERNAME_PW));
-            } else {
-                credentialedKPIs.addAll(kpiMap.get(dataSourceID));
-            }            
-        }
-        return credentialedKPIs;
     }
 
     public boolean needsUpdate(KPI kpi, EIConnection conn) throws SQLException {

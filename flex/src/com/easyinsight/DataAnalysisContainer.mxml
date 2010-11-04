@@ -111,15 +111,10 @@
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.analysis.FeedMetadata;
-        import com.easyinsight.framework.CredentialsCache;
 
         import mx.collections.ArrayCollection;
 
         import com.easyinsight.analysis.AnalysisDefinition;
-
-        /*private function cleanupStage():void {
-            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
-        }*/
 
         [Bindable]
         [Embed(source="../../../assets/background2.JPG")]
@@ -628,25 +623,13 @@
 
         private function initializeState():void {
             if (analysisDefinition != null) {
-                ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForInsight, detailService.getCredentialRequirements);
+                ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForInsight);
                 analysisService.getUserCapabilitiesForInsight.send(dataSourceID, analysisDefinition.analysisID);
             } else {
-                ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForFeed, detailService.getCredentialRequirements);
+                ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForFeed);
                 analysisService.getUserCapabilitiesForFeed.send(dataSourceID);
             }
-            // need to identify credential requirements at this point...
-
-            //dataService.reloadInitialContent(this, onMetadataReceipt);
-            detailService.getCredentialRequirements.send(dataSourceID);
-        }
-
-        private function onCredentials():void {
             dataService.reloadInitialContent(this, onMetadataReceipt);
-        }
-
-        private function gotCredentialRequirements():void {
-            var requirements:ArrayCollection = detailService.getCredentialRequirements.lastResult as ArrayCollection;
-            CredentialsCache.getCache().obtainCredentials(this, requirements, onCredentials);
         }
 
         private function onRollup(event:HierarchyRollupEvent):void {
@@ -1003,9 +986,6 @@
         <mx:method name="openAnalysisDefinition" result="gotReport()"/>
         <mx:method name="getUserCapabilitiesForFeed" result="gotUserCapabilitiesForFeed()"/>
         <mx:method name="getUserCapabilitiesForInsight" result="gotUserCapabilitiesForInsight()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="detailService" destination="data">
-        <mx:method name="getCredentialRequirements" result="gotCredentialRequirements()"/>
     </mx:RemoteObject>
     <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}"/>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275">

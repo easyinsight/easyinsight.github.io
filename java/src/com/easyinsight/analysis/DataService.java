@@ -8,8 +8,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.Value;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
 
@@ -30,7 +28,7 @@ public class DataService {
 
 
 
-    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials, int utfOffset) {
+    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset) {
         try {
             SecurityUtil.authorizeFeedAccess(feedID);
             if (analysisItem == null) {
@@ -40,19 +38,7 @@ public class DataService {
             Feed feed = feedRegistry.getFeed(feedID);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(utfOffset);
-            insightRequestMetadata.setCredentialFulfillmentList(credentials);
             return feed.getMetadata(analysisItem, insightRequestMetadata);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Set<CredentialRequirement> getCredentialRequirements(long feedID) {
-        try {
-            SecurityUtil.authorizeFeedAccess(feedID);
-            Feed feed = feedRegistry.getFeed(feedID);
-            return feed.getCredentialRequirement(false);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -63,7 +49,6 @@ public class DataService {
         try {
             SecurityUtil.authorizeFeedAccess(feedID);
             Feed feed = feedRegistry.getFeed(feedID);
-            Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
@@ -76,7 +61,6 @@ public class DataService {
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];
             sortedList.toArray(feedItemArray);
             FeedMetadata feedMetadata = new FeedMetadata();
-            feedMetadata.setCredentials(credentialRequirements);
             feedMetadata.setFilterExampleMessage(feed.getFilterExampleMessage());
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
@@ -128,20 +112,6 @@ public class DataService {
         try {
             SecurityUtil.authorizeInsight(reportID);
             Feed feed = feedRegistry.getFeed(dataSourceID);
-            Set<CredentialRequirement> credentialsRequired = feed.getCredentialRequirement(insightRequestMetadata.isRefreshAllSources());
-            if (credentialsRequired.size() > 0) {
-                int count = 0;
-                for (CredentialRequirement credentialRequirement : credentialsRequired) {
-                    if (insightRequestMetadata.getCredentialForDataSource(credentialRequirement.getDataSourceID()) != null) {
-                        count++;
-                    }
-                }
-                if (count < credentialsRequired.size()) {
-                    EmbeddedResults embeddedResults = new EmbeddedDataResults();
-                    embeddedResults.setCredentialRequirements(credentialsRequired);
-                    return embeddedResults;
-                }
-            }
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID, drillThroughFilters);
             Map<EmbeddedCacheKey, EmbeddedResults> resultsCache = null;
             if (!insightRequestMetadata.isNoCache()) {
@@ -258,6 +228,10 @@ public class DataService {
             //}
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
+        } catch (ReportException re) {
+            EmbeddedResults results = new EmbeddedResults();
+            results.setReportFault(re.getReportFault());
+            return results;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -293,6 +267,8 @@ public class DataService {
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             return pipeline.toDataSet(dataSet);
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -306,20 +282,6 @@ public class DataService {
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
-            }
-            Set<CredentialRequirement> credentialsRequired = feed.getCredentialRequirement(insightRequestMetadata.isRefreshAllSources());
-            if (credentialsRequired.size() > 0) {
-                int count = 0;
-                for (CredentialRequirement credentialRequirement : credentialsRequired) {
-                    if (insightRequestMetadata.getCredentialForDataSource(credentialRequirement.getDataSourceID()) != null) {
-                        count++;
-                    }
-                }
-                if (count < credentialsRequired.size()) {
-                    ListDataResults embeddedDataResults = new ListDataResults();
-                    embeddedDataResults.setCredentialRequirements(credentialsRequired);
-                    return embeddedDataResults;
-                }
             }
             DataResults results;
             
@@ -367,38 +329,15 @@ public class DataService {
             // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
-        } catch (DataAccessException dae) {
+        } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();
-            embeddedDataResults.setCredentialRequirements(new HashSet<CredentialRequirement>(Arrays.asList(dae.getCredentialRequirement())));
+            embeddedDataResults.setReportFault(dae.getReportFault());            
             return embeddedDataResults;
         } catch (Throwable e) {
             LogClass.error(e);
-            throw new RuntimeException(e);
+            ListDataResults embeddedDataResults = new ListDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));            
+            return embeddedDataResults;
         }
-    }
-
-    public List<Map<String, Object>> getAllData(long dataSourceID, List<FilterDefinition> filterDefinitions) {
-        SecurityUtil.authorizeFeedAccess(dataSourceID);
-        List<Map<String, Object>> objList = new ArrayList<Map<String, Object>>();
-        try {
-            Feed feed = feedRegistry.getFeed(dataSourceID);
-            DataSet dataSet = feed.getDetails(filterDefinitions);
-            for (IRow row : dataSet.getRows()) {
-                Map<String, Object> map = new HashMap<String, Object>();
-                for (Key key : row.getKeys()) {
-                    Value value = row.getValue(key);
-                    if (value == null) {
-                        map.put(key.toDisplayName(), "");
-                    } else {
-                        map.put(key.toDisplayName(), value.toString());
-                    }
-                }
-                objList.add(map);
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-        return objList;
     }
 }

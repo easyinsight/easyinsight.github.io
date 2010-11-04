@@ -32,9 +32,7 @@
         import com.easyinsight.datasources.CloudWatchDataSource;
         import com.easyinsight.datasources.FreshbooksDataSource;
         import com.easyinsight.datasources.HighRiseDataSource;
-        import com.easyinsight.datasources.JiraDataSource;
         import com.easyinsight.datasources.LinkedInDataSource;
-        import com.easyinsight.datasources.MarketoDataSource;
         import com.easyinsight.datasources.MeetupDataSource;
         import com.easyinsight.datasources.PivotalTrackerBaseSource;
         import com.easyinsight.datasources.SendGridDataSource;
@@ -148,10 +146,8 @@
             var highrise:HighRiseDataSource;
             var google:GoogleAnalyticsDataSource;
             var salesforce:SalesforceFeedDefinition;
-            var jira:JiraDataSource;
             var cloudwatch:CloudWatchDataSource;
             var googleDoc:GoogleFeedDefinition;
-            var marketoSource:MarketoDataSource;
             var pivotal:PivotalTrackerBaseSource;
             var sendGrid:SendGridDataSource;
             var meetup:MeetupDataSource;

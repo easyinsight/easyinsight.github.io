@@ -12,7 +12,6 @@ import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.Credentials;
 import flex.messaging.FlexContext;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -23,6 +22,7 @@ import oauth.signpost.OAuthProvider;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Connection;
@@ -58,7 +58,7 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public String validateCredentials(Credentials credentials) {
+    public String validateCredentials() {
         return null;
     }
 
@@ -70,7 +70,7 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         URLLink nameLink = new URLLink();
         nameLink.setUrl("[Public Profile URL]");
@@ -105,7 +105,7 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public void customStorage(Connection conn) throws SQLException {
+    public void exchangeTokens(EIConnection conn) throws Exception {
         try {
             if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecret == null) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
@@ -118,6 +118,10 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void customStorage(Connection conn) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM LINKEDIN_DATA_SOURCE WHERE FEED_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
@@ -153,11 +157,8 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
-
-
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet dataSet = new DataSet();
-        if (tokenKey == null && tokenSecret == null) return dataSet;
         try {
             Builder builder = new Builder();
             OAuthConsumer consumer = new DefaultOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
@@ -192,6 +193,8 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
                 Node person = people.get(i);
                 fromPerson(keys, dataSet, person);
             }
+        } catch (IOException ioe) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your LinkedIn data.", this));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

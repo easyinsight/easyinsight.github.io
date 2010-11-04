@@ -6,8 +6,6 @@ import com.easyinsight.analysis.AnalysisRangeResultMetadata;
 import com.easyinsight.analysis.AnalysisTagsResultMetadata;
 import com.easyinsight.analysis.Value;
 
-import com.easyinsight.framework.CredentialsCache;
-
 import flash.events.Event;
 import flash.events.MouseEvent;
 
@@ -110,7 +108,7 @@ public class ComboBoxFilter extends HBox implements IFilter
                 dataService = new RemoteObject();
 			    dataService.destination = "data";
 			    dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-                dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+                dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset());
             }
 
 			//
@@ -192,7 +190,7 @@ public class ComboBoxFilter extends HBox implements IFilter
             dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset());
 		}
 
     private var newFilter:Boolean = true;
@@ -232,7 +230,7 @@ public class ComboBoxFilter extends HBox implements IFilter
 
         private function blah():void {
             var metadata:AnalysisTagsResultMetadata;
-            var metadata2:AnalysisRangeResultMetadata;;
+            var metadata2:AnalysisRangeResultMetadata;
         }
 		
 		private function gotMetadata(event:ResultEvent):void {

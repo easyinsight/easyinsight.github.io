@@ -7,8 +7,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.FreshbooksDataSource;
-        import com.easyinsight.framework.Credentials;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
@@ -16,8 +14,6 @@
 
         [Bindable]
         private var url:String;
-        [Bindable]
-        private var usernameInputText:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:FreshbooksDataSource = new FreshbooksDataSource();
@@ -27,9 +23,7 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
-            CredentialsCache.getCache().nukeCredentials(ds.dataFeedID);
             url = ds.url;
-            usernameInputText = ds.username;
         }
 
         public function get savesCredentials():Boolean {
@@ -40,14 +34,6 @@
             var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
             ds.url = urlInput.text;
             ds.pin = verifierInput.text;
-        }
-
-        public function get credentials():Credentials {
-            return new Credentials();
-        }
-
-        public function set credentials(c:Credentials):void {
-            usernameInputText = c.userName;
         }
 
         private function install():void {

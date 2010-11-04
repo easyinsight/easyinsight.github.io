@@ -1,8 +1,8 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.analysis.AnalysisItem;
@@ -27,7 +27,7 @@ public interface IServerDataSourceDefinition {
      */
     int getRequiredAccountTier();
 
-    long create(Credentials credentials, EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws SQLException, CloneNotSupportedException;
+    long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws Exception;
 
     UploadPolicy getUploadPolicy();
 
@@ -35,26 +35,23 @@ public interface IServerDataSourceDefinition {
 
     String getFeedName();
 
+    void exchangeTokens(EIConnection conn) throws Exception;
+
     /**
      * The FeedType constant associated with this data source, used for loading purposes
      * @return the FeedType constant
      */
     FeedType getFeedType();
 
-    int getCredentialsDefinition();
-
-    void setCredentialsDefinition(int i);
-
-    String validateCredentials(Credentials credentials);
+    String validateCredentials();
 
     /**
      * Retrieves the actual data of the data source
-     * @param credentials the credentials required for cnonection to the external source
      * @param keys the keys defined earlier by the getKeys() call
      * @param now
      * @return the data set
      */
-    DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition feedDefinition, DataStorage dataStorage, EIConnection conn);
+    DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition feedDefinition, DataStorage dataStorage, EIConnection conn) throws ReportException;
 
     /**
      * Retrieves the analysis items for the data source, defining such traits as dimensions, measures, dates, and so on. Use
@@ -62,10 +59,9 @@ public interface IServerDataSourceDefinition {
      * For example, analysisItem.setKey(keys.get(CONSTANT));
      * @param keys the keys defined in the earlier getKeys() call
      * @param dataSet the data set retrieved by getDataSet()
-     * @param credentials
      * @return the analysis items for the data source
      */
-    List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn);
+    List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn);
 
     /**
      * Any custom logic for storage of the data source. Will execute in the transactional scope of saving the data source, on
@@ -82,29 +78,15 @@ public interface IServerDataSourceDefinition {
      */
     void customLoad(Connection conn) throws SQLException;
 
-    Map<String, Key> newDataSourceFields(Credentials credentials);
+    Map<String, Key> newDataSourceFields();
 
-    CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition);
+    CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition);
 
-    boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception;
-
-    String getUsername();
-
-    void setUsername(String username);
-
-    String retrievePassword();
-
-    String getPassword();
-
-    void setPassword(String password);
-
-    String getSessionId();
-
-    void setSessionId(String sessionId);
+    boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception;    
 
     Key getField(String sourceKey);
 
     List<AnalysisItem> getFields();
 
-    CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn);
+    CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn);
 }

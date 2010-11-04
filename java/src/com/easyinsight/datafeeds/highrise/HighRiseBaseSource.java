@@ -1,6 +1,9 @@
 package com.easyinsight.datafeeds.highrise;
 
 
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
+import com.easyinsight.analysis.ReportException;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.basecamp.BaseCampDataException;
 
@@ -31,13 +34,13 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         return client;
     }
 
-    protected String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException, ParsingException {
+    protected String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url, FeedDefinition parentDefinition) throws HighRiseLoginException, ParsingException {
         try {
             String contactName = null;
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false, false);
+                    Document contactInfo = runRestRequest("/people/person/" + contactId, client, builder, url, false, false, parentDefinition);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -50,13 +53,13 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    protected String retrieveUserInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws HighRiseLoginException, ParsingException {
+    protected String retrieveUserInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url, FeedDefinition parentDefinition) throws HighRiseLoginException, ParsingException {
         try {
             String contactName = null;
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/users/" + contactId, client, builder, url, false, false);
+                    Document contactInfo = runRestRequest("/users/" + contactId, client, builder, url, false, false, parentDefinition);
                     contactName = queryField(contactInfo, "/user/name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -69,7 +72,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError, boolean logRequest) throws HighRiseLoginException, ParsingException {
+    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, boolean badCredentialsOnError, boolean logRequest, FeedDefinition parentDefinition) throws HighRiseLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
         try {
             Thread.sleep(150);
@@ -107,7 +110,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                    throw new HighRiseLoginException("Could not locate a Highrise instance at " + url);
+                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Highrise instance at " + url, parentDefinition));
                 } else if (statusLine.indexOf("503") != -1 ||
                         statusLine.indexOf("403") != -1) {
                     System.out.println("Highrise 503, retrying");
@@ -126,7 +129,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                     }
                 } else {
                     if (badCredentialsOnError) {
-                        throw new HighRiseLoginException("Invalid Highrise authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Highrise page.");
+                        throw new ReportException(new DataSourceConnectivityReportFault("Invalid Highrise authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Highrise page.", parentDefinition));
                     } else {
                         throw e;
                     }

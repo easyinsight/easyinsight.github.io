@@ -19,6 +19,10 @@ public class NConcat extends Function {
         return new NumericValue(Double.parseDouble(sb.toString()));
     }
 
+    public int getParameterCount() {
+        return -1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("nconcat(value...)", "Combines the numeric parameters passed in");
     }

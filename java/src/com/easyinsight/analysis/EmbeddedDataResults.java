@@ -1,11 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.datafeeds.CredentialRequirement;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
-
 public class EmbeddedDataResults extends EmbeddedResults {
     private AnalysisItem[] headers;
     private ListRow[] rows;

@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.datafeeds.FeedDefinition;
 import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
@@ -19,16 +20,16 @@ public class HighriseCache extends HighRiseBaseSource {
     Map<String, List<String>> companyTagMap = new HashMap<String, List<String>>();
     Map<String, String> userCache = new HashMap<String, String>();
 
-    public void populateCaches(HttpClient client, String url) throws HighRiseLoginException, ParsingException {
+    public void populateCaches(HttpClient client, String url, FeedDefinition parentDefinition) throws HighRiseLoginException, ParsingException {
         Builder builder = new Builder();
-        Document tagDoc = runRestRequest("/tags.xml", client, builder, url, true, false);
+        Document tagDoc = runRestRequest("/tags.xml", client, builder, url, true, false, parentDefinition);
         Nodes tagNodes = tagDoc.query("/tags/tag");
         for (int i = 0; i < tagNodes.size(); i++) {
             loadingProgress(i, tagNodes.size(), "Synchronizing with tags...", true);
             Node tagNode = tagNodes.get(i);
             String tag = queryField(tagNode, "name/text()");            
             String id = queryField(tagNode, "id/text()");
-            Document ppl = runRestRequest("/tags/" + id + ".xml", client, builder, url, false, false);
+            Document ppl = runRestRequest("/tags/" + id + ".xml", client, builder, url, false, false, parentDefinition);
             Nodes pplNodes = ppl.query("/records/record");
             for (int j = 0; j < pplNodes.size(); j++) {
                 Node person = pplNodes.get(j);
@@ -73,7 +74,7 @@ public class HighriseCache extends HighRiseBaseSource {
                 tags.add(tag);
             }
         }
-        Document userDoc = runRestRequest("/users.xml", client, builder, url, true, false);
+        Document userDoc = runRestRequest("/users.xml", client, builder, url, true, false, parentDefinition);
         Nodes usersDoc = userDoc.query("/users/user");
         for (int i = 0; i < usersDoc.size(); i++) {
             Node userNode = usersDoc.get(i);

@@ -43,7 +43,7 @@ public class TwitterFeed extends Feed {
     private ArrayList<String> searches;
 
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         if(dataSet == null)
             return null;
         if(Arrays.asList(TwitterDataSource.PUBLISHED, TwitterDataSource.UPDATED).contains(analysisItem.getKey().toKeyString())) {
@@ -64,7 +64,7 @@ public class TwitterFeed extends Feed {
         return null;
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         try {
             DateFormat df = new XmlSchemaDateFormat();
             DataSet dataSet = new DataSet();

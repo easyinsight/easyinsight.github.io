@@ -16,9 +16,7 @@
         import com.easyinsight.datasources.FreshbooksDataSource;
         import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.datasources.JiraDataSource;
         import com.easyinsight.datasources.LinkedInDataSource;
-        import com.easyinsight.datasources.MarketoDataSource;
         import com.easyinsight.datasources.MeetupDataSource;
         import com.easyinsight.datasources.PivotalTrackerBaseSource;
         import com.easyinsight.datasources.SendGridDataSource;
@@ -61,14 +59,6 @@
         private var feedType:int;
         [Bindable]
         private var feedDefinition:FeedDefinitionData;
-        [Bindable]
-        private var refreshInterval:int;
-        [Bindable]
-        private var usernameInputText:String;
-        [Bindable]
-        private var passwordInputText:String;
-        [Bindable]
-        private var sessionIdInputText:String;
 
         [Bindable]
         private var accountVisible:Boolean;
@@ -152,12 +142,6 @@
             this.feedAttribution = feedDefinition.attribution;
             this.anyoneCanView = feedDefinition.uploadPolicy.publiclyVisible;
             this.accountVisible = feedDefinition.accountVisible;
-
-            //this.activated = User.getInstance().activated;
-
-            this.refreshInterval = feedDefinition.refreshDataInterval / (1000 * 60 * 60);
-            this.sessionIdInputText = feedDefinition.sessionId;
-            this.usernameInputText = feedDefinition.username;
 
             var fragmentObject:Object = new Object();
             fragmentObject.feedAdminID = String(feedDefinition.apiKey);
@@ -278,10 +262,8 @@
             var highrise:HighRiseDataSource;
             var google:GoogleAnalyticsDataSource;
             var salesforce:SalesforceFeedDefinition;
-            var jira:JiraDataSource;
             var cloudwatch:CloudWatchDataSource;
             var googleDoc:GoogleFeedDefinition;
-            var marketoSource:MarketoDataSource;
             var pivotal:PivotalTrackerBaseSource;
             var sendGrid:SendGridDataSource;
             var meetup:MeetupDataSource;

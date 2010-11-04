@@ -73,6 +73,8 @@ public class FunctionFactory {
             return new Concat();
         } else if (s.equals("parseint")) {
             return new ParseIntFunction();
+        } else if (s.equals("namedbracketdate")) {
+            return new NamedBracketDateFunction();
         } else {
             return null;
         }

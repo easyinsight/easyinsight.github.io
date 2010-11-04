@@ -4,11 +4,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.StringValue;
-import com.easyinsight.datafeeds.CredentialRequirement;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.users.Credentials;
 import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
@@ -28,16 +25,6 @@ public class SendGridFeed extends Feed {
     private static final String GET_STRING = "https://sendgrid.com/api/stats.get.xml";
     private static DateFormat outboundDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
-        CredentialRequirement requirement = new CredentialRequirement();
-        requirement.setDataSourceID(getFeedID());
-        requirement.setDataSourceName(getName());
-        requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
-        credentials.add(requirement);
-        return credentials;
-    }
-
     public List<FilterDefinition> getIntrinsicFilters() {
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         AnalysisItem dateField = null;
@@ -53,17 +40,26 @@ public class SendGridFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
+    private String getUserName() {
+        SendGridDataSource sendGridDataSource = (SendGridDataSource) getDataSource();
+        return sendGridDataSource.getSgUserName();
+    }
+
+    private String getPassword() {
+        SendGridDataSource sendGridDataSource = (SendGridDataSource) getDataSource();
+        return sendGridDataSource.getSgPassword();
+    }
+
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         try {
-            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
             AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
             if (SendGridDataSource.CATEGORY.equals(analysisItem.getKey().toKeyString())) {
                 HttpClient httpClient = new HttpClient();
                 String url = "https://sendgrid.com/api/stats.get.xml";
                 GetMethod getMethod = new GetMethod(url);
-                getMethod.setQueryString(new NameValuePair[] { new NameValuePair("api_user", credentials.getUserName()),
-                    new NameValuePair("api_key", credentials.getPassword()), new NameValuePair("list", "true")});
+                getMethod.setQueryString(new NameValuePair[] { new NameValuePair("api_user", getUserName()),
+                    new NameValuePair("api_key", getPassword()), new NameValuePair("list", "true")});
                 httpClient.executeMethod(getMethod);
                 Document doc = new Builder().build(getMethod.getResponseBodyAsStream());
                 Nodes categories = doc.query("/categories/category");
@@ -85,7 +81,7 @@ public class SendGridFeed extends Feed {
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         try {
 
             Date startDate = null;
@@ -119,7 +115,6 @@ public class SendGridFeed extends Feed {
             }
             String startDateString = outboundDateFormat.format(startDate);
             String endDateString = outboundDateFormat.format(endDate);
-            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
             DataSet dataSet = new DataSet();
 
             Document statsDocs = null;
@@ -127,17 +122,17 @@ public class SendGridFeed extends Feed {
                 HttpClient httpClient = new HttpClient();
                 String url = "https://sendgrid.com/api/stats.get.xml";
                 GetMethod getMethod = new GetMethod(url);
-                getMethod.setQueryString(new NameValuePair[] { new NameValuePair("api_user", credentials.getUserName()),
-                    new NameValuePair("api_key", credentials.getPassword()), new NameValuePair("list", "true")});
+                getMethod.setQueryString(new NameValuePair[] { new NameValuePair("api_user", getUserName()),
+                    new NameValuePair("api_key", getPassword()), new NameValuePair("list", "true")});
                 httpClient.executeMethod(getMethod);
                 Document doc = new Builder().build(getMethod.getResponseBodyAsStream());
                 if (doc.toString().indexOf("error") != -1) {
-                    throw new DataAccessException(new CredentialRequirement(getFeedID(), getName(), CredentialsDefinition.STANDARD_USERNAME_PW));
+                    //throw new ReportException(new CredentialRequirement(getFeedID(), getName(), CredentialsDefinition.STANDARD_USERNAME_PW));
                 }
                 System.out.println(getMethod.getResponseBodyAsString());
                 Nodes categories = doc.query("/categories/category");
-                List<NameValuePair> pairs = Arrays.asList(new NameValuePair("api_user", credentials.getUserName()),
-                    new NameValuePair("api_key", credentials.getPassword()), new NameValuePair("start_date", startDateString), new NameValuePair("end_date", endDateString));
+                List<NameValuePair> pairs = Arrays.asList(new NameValuePair("api_user", getUserName()),
+                    new NameValuePair("api_key", getPassword()), new NameValuePair("start_date", startDateString), new NameValuePair("end_date", endDateString));
                 pairs = new ArrayList<NameValuePair>(pairs);
                 for (int i = 0; i < categories.size(); i++) {
                     Node categoryNode = categories.get(i);
@@ -163,8 +158,8 @@ public class SendGridFeed extends Feed {
                 HttpClient httpClient = new HttpClient();
                 String url = "https://sendgrid.com/api/stats.get.xml";
                 GetMethod getMethod = new GetMethod(url);
-                getMethod.setQueryString(new NameValuePair[] { new NameValuePair("api_user", credentials.getUserName()),
-                    new NameValuePair("api_key", credentials.getPassword()), new NameValuePair("start_date", startDateString), new NameValuePair("end_date", endDateString)});
+                getMethod.setQueryString(new NameValuePair[] { new NameValuePair("api_user", getUserName()),
+                    new NameValuePair("api_key", getPassword()), new NameValuePair("start_date", startDateString), new NameValuePair("end_date", endDateString)});
 
                 httpClient.executeMethod(getMethod);
                 statsDocs = new Builder().build(getMethod.getResponseBodyAsStream());
@@ -208,8 +203,6 @@ public class SendGridFeed extends Feed {
                 }
             }
             return dataSet;
-        } catch (DataAccessException dae) {
-            throw dae;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -223,10 +216,5 @@ public class SendGridFeed extends Feed {
         } else {
             return 0;
         }
-    }
-
-    @Override
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        throw new UnsupportedOperationException();
     }
 }

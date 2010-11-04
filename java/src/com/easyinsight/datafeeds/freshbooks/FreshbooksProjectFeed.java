@@ -23,7 +23,7 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
 
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         Set<AnalysisItem> set = new HashSet<AnalysisItem>();
         set.add(analysisItem);
@@ -35,7 +35,7 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         try {
             Map<String, Key> keys = new HashMap<String, Key>();
             for (AnalysisItem analysisItem : analysisItems) {
@@ -79,12 +79,5 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-
-
-    @Override
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

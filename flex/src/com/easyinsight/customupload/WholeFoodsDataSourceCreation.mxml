@@ -8,8 +8,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.WholeFoodsDataSource;
-        import com.easyinsight.framework.Credentials;
-        import com.easyinsight.framework.CredentialsCache;
 
         [Bindable]
         private var userName:String;
@@ -23,7 +21,6 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:WholeFoodsDataSource = feedDefinition as WholeFoodsDataSource;
-            CredentialsCache.getCache().nukeCredentials(ds.dataFeedID);
             userName = ds.wfUserName;
         }
 
@@ -35,15 +32,7 @@
             var ds:WholeFoodsDataSource = feedDefinition as WholeFoodsDataSource;
             ds.wfUserName = userNameInput.text;
             ds.wfPassword = passwordInput.text;
-        }
-
-        public function get credentials():Credentials {
-            var wf:WholeFoodsCredentials = new WholeFoodsCredentials();
-            wf.bytes = file.data;
-            return wf;
-        }
-
-        public function set credentials(c:Credentials):void {
+            ds.startFile = file.data;
         }
 
         public function doSelect( event:Event ):void

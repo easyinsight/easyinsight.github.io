@@ -5,7 +5,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -19,7 +18,7 @@ public class HighRiseComposite3To4 extends DataSourceMigration {
     }
 
     @Override
-    public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         addChildDataSource(new HighRiseCompanyNotesSource(), conn);
         addChildDataSource(new HighRiseDealNotesSource(), conn);
         addChildDataSource(new HighRiseCaseNotesSource(), conn);

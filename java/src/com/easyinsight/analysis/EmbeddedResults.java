@@ -1,11 +1,8 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.datafeeds.CredentialRequirement;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * User: jamesboe
@@ -20,7 +17,7 @@ public class EmbeddedResults implements Serializable, Cloneable {
     protected int ratingsCount;
     protected int myRating;
     protected String attribution;
-    private Set<CredentialRequirement> credentialRequirements;
+    private ReportFault reportFault;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     public Map<String, Object> getAdditionalProperties() {
@@ -29,6 +26,14 @@ public class EmbeddedResults implements Serializable, Cloneable {
 
     public void setAdditionalProperties(Map<String, Object> additionalProperties) {
         this.additionalProperties = additionalProperties;
+    }
+
+    public ReportFault getReportFault() {
+        return reportFault;
+    }
+
+    public void setReportFault(ReportFault reportFault) {
+        this.reportFault = reportFault;
     }
 
     public int getMyRating() {
@@ -58,14 +63,6 @@ public class EmbeddedResults implements Serializable, Cloneable {
 
     public void setRatingsCount(int ratingsCount) {
         this.ratingsCount = ratingsCount;
-    }
-
-    public Set<CredentialRequirement> getCredentialRequirements() {
-        return credentialRequirements;
-    }
-
-    public void setCredentialRequirements(Set<CredentialRequirement> credentialRequirements) {
-        this.credentialRequirements = credentialRequirements;
     }
 
     public String getAttribution() {

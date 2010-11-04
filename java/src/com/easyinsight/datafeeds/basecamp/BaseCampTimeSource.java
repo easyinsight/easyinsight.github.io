@@ -11,7 +11,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
@@ -59,7 +58,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
     
 
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) throws ReportException {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
         String url = baseCampCompositeSource.getUrl();
 
@@ -68,28 +67,17 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
-        if (token == null && credentials.getUserName() != null) {
-            token = new Token();
-            token.setTokenValue(credentials.getUserName());
-            token.setTokenType(TokenStorage.BASECAMP_TOKEN);
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        } else if (token != null && credentials != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
-                !credentials.getUserName().equals(token.getTokenValue())) {
-            token.setTokenValue(credentials.getUserName());
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
+        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
         try {
             BaseCampCache basecampCache = baseCampCompositeSource.getOrCreateCache(client);
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
-                String projectName = queryField(curProject, "name/text()");                
+                String projectName = queryField(curProject, "name/text()");
                 loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", false);
                 String projectStatus = queryField(curProject, "status/text()");
                 if ("template".equals(projectStatus)) {
@@ -109,9 +97,9 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                         try {
                             Document todoLists;
                             if (info.currentPage == 1) {
-                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml", client, builder, url, info, false);
+                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml", client, builder, url, info, false, parentDefinition);
                             } else {
-                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false);
+                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false, parentDefinition);
                             }
 
                             Nodes todoListNodes = todoLists.query("/time-entries/time-entry");
@@ -147,7 +135,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                                 break;
                             } else {
                                 LogClass.error("Error " + e.getMessage() + " while retrieving page " + info.currentPage + " of "+ info.MaxPages);
-                                LogClass.error(e);   
+                                LogClass.error(e);
                             }
                         }
                     } while(info.currentPage++ < info.MaxPages);
@@ -155,16 +143,21 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                     IRow row = ds.createRow();
                     row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
                     row.addValue(keys.get(PROJECTNAME), projectName);
-                    if (dataStorage != null) {
+                    if (writeDuring) {
                         dataStorage.insertData(ds);
                         ds = new DataSet();
                     }
                 }
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        if (dataStorage == null) {
+        if (!writeDuring) {
+            if (parentDefinition.isAdjustDates()) {
+                ds = adjustDates(ds);
+            }
             return ds;
         } else {
             return null;
@@ -176,7 +169,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
         return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTNAME, PROJECTID, COUNT, TODOID, DATE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension projectDim = new AnalysisDimension(keys.get(PROJECTID), true);
         projectDim.setHidden(true);

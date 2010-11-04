@@ -25,7 +25,7 @@ public class SaveAsTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public void testSaveAs() throws SQLException {
+    public void testSaveAs() throws Exception {
         TestUtil.getIndividualTestUser();
         AnalysisDimension blah = new AnalysisDimension("blah", true);
         AnalysisMeasure count = new AnalysisMeasure("count", AggregationTypes.SUM);

@@ -12,16 +12,8 @@
         [Bindable]
         private var jiraURL:String;
 
-        [Bindable]
-        private var usernameInputText:String;
-
-        [Bindable]
-        private var passwordText:String;
-
         public function set dataSourceDefinition(definition:FeedDefinitionData):void {
             var jiraDef:GoogleAnalyticsDataSource = definition as GoogleAnalyticsDataSource;
-            usernameInputText = definition.username;
-            passwordText = definition.password;
         }
 
         public function get dataSourceDefinition():FeedDefinitionData {
@@ -36,8 +28,6 @@
         }
 
         public function set credentials(c:Credentials):void {
-            usernameInputText = c.userName;
-            passwordText = c.password;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -53,10 +43,10 @@
         }]]></mx:Script>
     <mx:Form>
 		<mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
 		</mx:FormItem>
 		<mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
+			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
 		</mx:FormItem>
 	</mx:Form>
 </mx:VBox>

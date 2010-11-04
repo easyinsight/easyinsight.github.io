@@ -16,6 +16,10 @@ public class LowerCaseFunction extends Function {
         return new StringValue(substringValue.toLowerCase());
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("lower(String)", "Returns a fully lower case version of String.");
     }

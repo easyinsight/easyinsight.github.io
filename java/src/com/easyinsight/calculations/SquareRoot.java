@@ -18,6 +18,10 @@ public class SquareRoot extends Function {
         return new NumericValue(Math.sqrt(params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("sqrt(Number)", "Calculate the square root of Number", Arrays.asList("Number - what you want the square root of"));
     }

@@ -34,7 +34,7 @@ public class CopyTest extends TestCase {
         System.out.println("TearDown - Active Connections: " + Database.instance().getActiveConnections());
     }
 
-    public void testDataSourceCopy() throws SQLException {
+    public void testDataSourceCopy() throws Exception {
         System.out.println("Test - Active Connections: " + Database.instance().getActiveConnections());
         TestUtil.getIndividualTestUser();
         AnalysisDateDimension startedDate = new AnalysisDateDimension("Started", true, AnalysisDateDimension.DAY_LEVEL);

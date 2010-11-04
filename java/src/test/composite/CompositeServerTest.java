@@ -37,7 +37,7 @@ public class CompositeServerTest extends TestCase {
         TestUtil.getIndividualTestUser();
         UserUploadService uploadService = new UserUploadService();
         TestCompositeDataSource source = new TestCompositeDataSource();
-        long sourceID = uploadService.newExternalDataSource(source, new Credentials());
+        long sourceID = uploadService.newExternalDataSource(source);
         DataService dataService = new DataService();
         WSListDefinition listDef = new WSListDefinition();
         listDef.setDataFeedID(sourceID);

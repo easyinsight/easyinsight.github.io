@@ -41,13 +41,10 @@
                     <mx:Image source="../assets/LinkedInReport.jpg"/>
                 </mx:HBox>
                 <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" width="820" height="40" text="Measure your connections and network. Analyze your network by company--how many of your former coworkers are still stuck at that horrible place you worked before? Share your results with friends!" fontSize="14"/>
-                <mx:Box id="authBox"/>
-                <mx:VBox id="controlsBox" paddingTop="0" paddingBottom="10" width="100%" horizontalAlign="center">
-                    <mx:Label text="Start Here:" fontSize="14" id="startHereLabel"/>
-                    <mx:Button label="Authorize Access" fontSize="14" click="install()" styleName="blueButton" id="installButton"/>
-                    <mx:Label text="Then copy that value here:" fontSize="14" id="thenLabel"/>
-                    <mx:Button label="Enter a Pin" fontSize="14" click="installSolution()" styleName="blueButton" id="pinButton"/>
-                </mx:VBox>
+                <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
+                    <mx:Button label="Get Started Now!" fontSize="14" click="installSolution()" styleName="blueButton"
+                               id="installButton"/>
+                </mx:Box>
             </mx:VBox>
     </mx:HBox>
 </solutions:SolutionDetailRenderer>

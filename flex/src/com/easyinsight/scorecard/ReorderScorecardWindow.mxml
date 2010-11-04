@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
     <mx:Script><![CDATA[
         import com.easyinsight.util.ProgressAlert;
 

@@ -11,7 +11,6 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.*;
@@ -63,7 +62,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                 CONTACT_STREET, CONTACT_CITY, CONTACT_STATE, CONTACT_COUNTRY);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_NAME), true));
         analysisItems.add(new AnalysisZipCode(keys.get(ZIP_CODE), true));
@@ -92,7 +91,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_CONTACTS;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
@@ -100,17 +99,6 @@ public class HighRiseContactSource extends HighRiseBaseSource {
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
-        if (token == null) {
-            token = new Token();
-            token.setTokenValue(credentials.getUserName());
-            token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        } else if (token != null && credentials != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
-                !credentials.getUserName().equals(token.getTokenValue())) {
-            token.setTokenValue(credentials.getUserName());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
@@ -121,9 +109,9 @@ public class HighRiseContactSource extends HighRiseBaseSource {
             do {
                 Document companies;
                 if (offset == 0) {
-                    companies = runRestRequest("/people.xml?", client, builder, url, true, false);
+                    companies = runRestRequest("/people.xml?", client, builder, url, true, false, parentDefinition);
                 } else {
-                    companies = runRestRequest("/people.xml?n=" + offset, client, builder, url, true, false);
+                    companies = runRestRequest("/people.xml?n=" + offset, client, builder, url, true, false, parentDefinition);
                 }
                 Nodes companyNodes = companies.query("/people/person");
                 loadingProgress(0, 1, "Synchronizing with contacts...", true);
@@ -212,6 +200,8 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                 }
             } while(contactCount == 500);
 
+        } catch (ReportException re) {
+            throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

@@ -5,14 +5,12 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.Credentials;
 import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
 import org.jetbrains.annotations.NotNull;
@@ -65,14 +63,6 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
         return wfUserName != null;
     }
 
-    public int getCredentialsDefinition() {
-        return wfUserName == null ? CredentialsDefinition.STANDARD_USERNAME_PW : CredentialsDefinition.NO_CREDENTIALS;
-    }
-
-    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
-        return wfUserName == null;
-    }
-
     public List<KPI> createKPIs() {
         List<KPI> kpis = new ArrayList<KPI>();
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
@@ -85,7 +75,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         
         items.add(new AnalysisDimension(keys.get(STORE), true));
@@ -118,13 +108,12 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet dataSet = new DataSet();
         boolean firstRun = !initialized;
         try {
             if (!initialized) {
-                WholeFoodsCredentials wholeFoodsCredentials = (WholeFoodsCredentials) credentials;
-                dataSet = new WFCSVParse().createData(dataStorage, keys, wholeFoodsCredentials.getBytes());
+                dataSet = new WFCSVParse().createData(dataStorage, keys, startFile);
                 startFile = null;
                 initialized = true;
             } else {
@@ -195,7 +184,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
         insertStmt.execute();
     }
 
-    public String validateCredentials(Credentials credentials) {
+    public String validateCredentials() {
         return null;
     }
 

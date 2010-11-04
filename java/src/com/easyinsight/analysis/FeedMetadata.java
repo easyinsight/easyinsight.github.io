@@ -1,13 +1,10 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.datafeeds.CredentialRequirement;
 import com.easyinsight.datafeeds.FeedNode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * User: James Boe
@@ -25,8 +22,16 @@ public class FeedMetadata implements Serializable {
     private long originSolution;
     private String filterExampleMessage;
     private DataSourceInfo dataSourceInfo;
-    private Set<CredentialRequirement> credentials = new HashSet<CredentialRequirement>();
+    private ReportFault reportFault;
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
+
+    public ReportFault getReportFault() {
+        return reportFault;
+    }
+
+    public void setReportFault(ReportFault reportFault) {
+        this.reportFault = reportFault;
+    }
 
     public String getUrlKey() {
         return urlKey;
@@ -74,14 +79,6 @@ public class FeedMetadata implements Serializable {
 
     public void setIntrinsicFilters(List<FilterDefinition> intrinsicFilters) {
         this.intrinsicFilters = intrinsicFilters;
-    }
-
-    public Set<CredentialRequirement> getCredentials() {
-        return credentials;
-    }
-
-    public void setCredentials(Set<CredentialRequirement> credentials) {
-        this.credentials = credentials;
     }
 
     public boolean isDataSourceAdmin() {

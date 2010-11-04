@@ -14,7 +14,7 @@ public class EmbeddedResults {
     public var ratingsAverage:Number;
     public var ratingsCount:int;
     public var myRating:int;
-    public var credentialRequirements:ArrayCollection;
+    public var reportFault:ReportFault;
     public var additionalProperties:Object;
 
     public function EmbeddedResults() {

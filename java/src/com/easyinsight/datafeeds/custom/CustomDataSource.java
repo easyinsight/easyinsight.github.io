@@ -58,12 +58,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public int getCredentialsDefinition() {
-        return CredentialsDefinition.STANDARD_USERNAME_PW;
-    }
-
-    @Override
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
     }
 
@@ -82,15 +77,15 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public String validateCredentials(Credentials credentials) {
+    public String validateCredentials() {
         try {
             URL url = new URL(wsdl);
             DataProviderService ss = new DataProviderService(url, SERVICE_NAME);
             DataProvider dataProvider = ss.getDataProviderPort();
             BindingProvider provider = (BindingProvider) dataProvider;
             Map<String, Object> requestContext = provider.getRequestContext();
-            requestContext.put(BindingProvider.USERNAME_PROPERTY, credentials.getUserName());
-            requestContext.put(BindingProvider.PASSWORD_PROPERTY, credentials.getPassword());
+            /*requestContext.put(BindingProvider.USERNAME_PROPERTY, credentials.getUserName());
+            requestContext.put(BindingProvider.PASSWORD_PROPERTY, credentials.getPassword());*/
             dataProvider.getFields();
             return null;
         } catch (Exception e) {
@@ -122,14 +117,15 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public Map<String, Key> newDataSourceFields(Credentials credentials) {
-        Map<String, Key> fieldMap = new HashMap<String, Key>();
+    public Map<String, Key> newDataSourceFields() {
+        /*Map<String, Key> fieldMap = new HashMap<String, Key>();
         Folder folder = getPort(credentials).getFields();
         List<String> keys = recurseFields(folder);
         for (String field : keys) {
             fieldMap.put(field, new NamedKey(field));
         }
-        return fieldMap;
+        return fieldMap;*/
+        throw new UnsupportedOperationException();
     }
 
     private List<String> recurseFields(Folder folder) {
@@ -165,9 +161,10 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
-        Folder base = getPort(credentials).getFields();
-        return recurseItems(keys, base);
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+        /*Folder base = getPort(credentials).getFields();
+        return recurseItems(keys, base);*/
+        throw new UnsupportedOperationException();
     }
 
     private AnalysisItem createAnalysisItem(Key key, Field field) {

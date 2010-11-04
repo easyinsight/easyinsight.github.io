@@ -29,20 +29,7 @@ public class StaticFeed extends Feed implements Serializable {
         return FeedType.STATIC;
     }
 
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        if (allSources && getType() == DataSourceInfo.STORED_PULL) {
-            Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
-            CredentialRequirement requirement = new CredentialRequirement();
-            requirement.setDataSourceID(getFeedID());
-            requirement.setDataSourceName(getName());
-            requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
-            credentials.add(requirement);
-            return credentials;
-        }
-        return super.getCredentialRequirement(allSources);
-    }
-
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
             AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
             Map<Value, Value> lookupMap = new HashMap<Value, Value>();
@@ -105,7 +92,7 @@ public class StaticFeed extends Feed implements Serializable {
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         if (analysisItems.size() == 0) {
             return new DataSet();
         }

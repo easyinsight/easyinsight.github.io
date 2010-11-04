@@ -82,7 +82,7 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
         GoogleFeedDefinition googleFeedDefinition = new GoogleFeedDefinition();
         googleFeedDefinition.setFeedName(name);
         googleFeedDefinition.setWorksheetURL(worksheetURL);
-        return googleFeedDefinition.create(null, conn, analysisItems);
+        return googleFeedDefinition.create(conn, analysisItems);
     }
 
     @Override

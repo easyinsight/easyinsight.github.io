@@ -482,42 +482,13 @@ public class UserUploadService implements IUserUploadService {
         existingLinkQuery.executeUpdate();
     }
 
-    public int getCredentialsForFeed(long feedID) {
-        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
-        try {
-            FeedDefinition feedDefinition = getDataFeedConfiguration(feedID);
-            return feedDefinition.getCredentialsDefinition();
-        } catch (Throwable e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
+    public CredentialsResponse refreshData(long feedID) {
+        return refreshData(feedID, false);
     }
 
-    public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials) {
-        return refreshData(feedID, credentials, saveCredentials, false);
-    }
-
-    public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials, boolean synchronous) {
+    public CredentialsResponse refreshData(long feedID, boolean synchronous) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
-        if(credentials != null && credentials.isEncrypted()) {
-            try {
-            credentials = decryptCredentials(credentials);
-            }
-            catch(MalformedCredentialsException e) {
-                LogClass.error(e); // TODO: Remove this or make it a warning once we're sure this works
-                throw new RuntimeException(e);
-            }
-        }
         try {
-            if(saveCredentials && credentials != null) {
-                EIConnection conn = Database.instance().getConnection();
-                try {
-                    PasswordStorage.setPasswordCredentials(credentials.getUserName(), credentials.getPassword(), feedID, conn);
-                }
-                finally {
-                    Database.closeConnection(conn);
-                }
-            }
             CredentialsResponse credentialsResponse;
             IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
             if (SecurityUtil.getAccountTier() < dataSource.getRequiredAccountTier()) {
@@ -528,7 +499,7 @@ public class UserUploadService implements IUserUploadService {
                 if (synchronous) {
                     if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                         try {
-                            credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                            credentialsResponse = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null);
                             if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
                                 feedDefinition.setVisible(true);
                                 feedStorage.updateDataFeedConfiguration(feedDefinition);
@@ -540,7 +511,7 @@ public class UserUploadService implements IUserUploadService {
                         credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                     }
                 } else {
-                    String message = dataSource.validateCredentials(credentials);
+                    String message = dataSource.validateCredentials();
                     if (message == null) {
                         credentialsResponse = new CredentialsResponse(true, feedID);
                         ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
@@ -548,7 +519,6 @@ public class UserUploadService implements IUserUploadService {
                         task.setUserID(SecurityUtil.getUserID());
                         task.setExecutionDate(new Date());
                         task.setStatus(ScheduledTask.INMEMORY);
-                        task.setRefreshCreds(credentials);
                         Scheduler.instance().saveTask(task);
                     } else {
                         credentialsResponse = new CredentialsResponse(false, message, feedID);
@@ -634,33 +604,18 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public CredentialsResponse validateCredentials(FeedDefinition feedDefinition, Credentials credentials, boolean needsEncryption) {
+    public CredentialsResponse validateCredentials(FeedDefinition feedDefinition) {
         try {
-            
-            if(credentials.isEncrypted()) {
-                credentials = decryptCredentials(credentials);
-            }
-            String failureMessage = feedDefinition.validateCredentials(credentials);
+            String failureMessage = feedDefinition.validateCredentials();
             CredentialsResponse credentialsResponse;
             if (failureMessage == null) {
                 credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
-                if (needsEncryption) {
-                    credentialsResponse.setEncryptedResponse(encryptCredentials(credentials));
-                }
             } else {
                 credentialsResponse = new CredentialsResponse(false, failureMessage, feedDefinition.getDataFeedID());
             }
             return credentialsResponse;
-        } catch (Throwable e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public CredentialsResponse validateCredentialsForID(long id, Credentials credentials, boolean needsEncryption) {
-        try {
-            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(id);
-            return validateCredentials(feedDefinition, credentials, needsEncryption);
+        } catch (ReportException re) {
+            return new CredentialsResponse(false, re.getReportFault());
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -873,18 +828,15 @@ public class UserUploadService implements IUserUploadService {
     }
 
 
-    public long newExternalDataSource(FeedDefinition feedDefinition, Credentials credentials) {
+    public long newExternalDataSource(FeedDefinition feedDefinition) {
         if (SecurityUtil.getAccountTier() < feedDefinition.getRequiredAccountTier()) {
             throw new RuntimeException("You are not allowed to create data sources of this type with your account.");
         }
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            if (credentials != null && credentials.isEncrypted()) {
-                credentials = decryptCredentials(credentials);
-            }
             IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) feedDefinition;
-            long id = serverDataSourceDefinition.create(credentials, conn, null);
+            long id = serverDataSourceDefinition.create(conn, null);
             conn.commit();
             return id;
         } catch (Throwable e) {

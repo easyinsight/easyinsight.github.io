@@ -6,7 +6,7 @@
         [Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
-        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.kpi.KPI;
@@ -34,7 +34,7 @@
             forcedRefresh = true;
             var metadata:InsightRequestMetadata = new InsightRequestMetadata();
             metadata.utcOffset = new Date().getTimezoneOffset();
-            scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), true, metadata);
+            scorecardService.getScorecard.send(_scorecardDescriptor.id, true, metadata);
         }
 
         private var forcedRefresh:Boolean = false;
@@ -47,7 +47,7 @@
                     baseIndex = 0;
                     var metadata:InsightRequestMetadata = new InsightRequestMetadata();
                     metadata.utcOffset = new Date().getTimezoneOffset();
-                    scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), false, metadata);
+                    scorecardService.getScorecard.send(_scorecardDescriptor.id, false, metadata);
                 }
             }
         }
@@ -126,9 +126,9 @@
             retrieving = false;
             var scorecardWrapper:ScorecardWrapper = scorecardService.getScorecard.lastResult as ScorecardWrapper;
             _scorecard = scorecardWrapper.scorecard;
-            if (scorecardWrapper.credentials != null && scorecardWrapper.credentials.length > 0) {
+            if (scorecardWrapper.reportFault != null) {
+                scorecardWrapper.reportFault.popup(this, onProblem);
                 refreshIndex = 2;
-                this.credentials = scorecardWrapper.credentials;
             } else if (scorecardWrapper.asyncRefresh) {
                 asyncMessage = "Refreshing data sources in the background...";
                 refreshIndex = 1;
@@ -246,17 +246,15 @@
             invalidateSize();
         }
 
-        private var credentials:ArrayCollection;
-
         private function refreshValues():void {
-            CredentialsCache.getCache().obtainCredentials(this, credentials, onCredentials);
-        }
-
-        private function onCredentials():void {
             baseIndex = 4;
             var metadata:InsightRequestMetadata = new InsightRequestMetadata();
             metadata.utcOffset = new Date().getTimezoneOffset();
-            scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), forcedRefresh, metadata);
+            scorecardService.getScorecard.send(_scorecardDescriptor.id, forcedRefresh, metadata);
+        }
+
+        private function onProblem(event:ProblemDataEvent):void {
+            refreshValues();
         }
 
         private var callout:Callout;

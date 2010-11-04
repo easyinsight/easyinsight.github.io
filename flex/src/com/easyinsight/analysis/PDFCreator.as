@@ -1,6 +1,5 @@
 package com.easyinsight.analysis {
 import com.adobe.images.JPGEncoder;
-import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.InsightRequestMetadata;
 
 import com.easyinsight.util.ProgressAlert;
@@ -11,7 +10,6 @@ import flash.net.URLRequest;
 import flash.net.navigateToURL;
 import flash.utils.ByteArray;
 
-import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -44,7 +42,6 @@ public class PDFCreator {
             jpgStream = jpgEncoder.encode(jpgSource);
         }
         var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
-        insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         insightMetadata.utcOffset = new Date().getTimezoneOffset();
         ProgressAlert.alert(parent, "Generating the PDF...", null, upload.exportToPDF);
         upload.exportToPDF.send(report, insightMetadata, jpgStream, coreView.width, coreView.height);

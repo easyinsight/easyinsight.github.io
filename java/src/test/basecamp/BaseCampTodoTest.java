@@ -41,7 +41,7 @@ public class BaseCampTodoTest extends TestCase {
 
         EIConnection conn = Database.instance().getConnection();
         try {
-            DataSet dataSet = ds.getDataSet(c, ds.newDataSourceFields(c), new Date(), comp, null, conn);
+            DataSet dataSet = ds.getDataSet(ds.newDataSourceFields(), new Date(), comp, null, conn);
             dataSet.toString();
         } finally {
             Database.closeConnection(conn);

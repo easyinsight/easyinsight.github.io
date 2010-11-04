@@ -1,16 +1,10 @@
 package com.easyinsight.groups
 {
-import com.easyinsight.framework.ModulePerspective;
+import com.easyinsight.datasources.DataSourceRefreshWindow;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.*;
-import com.easyinsight.administration.feed.CredentialsResponse;
-import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
-import com.easyinsight.customupload.RefreshWindow;
 import com.easyinsight.customupload.UploadConfigEvent;
-import com.easyinsight.framework.Credentials;
-import com.easyinsight.framework.GenericFaultHandler;
-import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
@@ -18,7 +12,6 @@ import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
-import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -28,9 +21,6 @@ import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Button;
 import mx.managers.PopUpManager;
-import mx.rpc.events.FaultEvent;
-import mx.rpc.events.ResultEvent;
-import mx.rpc.remoting.RemoteObject;
 
 public class GroupAdminMyDataIconControls extends HBox
 {
@@ -47,10 +37,6 @@ public class GroupAdminMyDataIconControls extends HBox
 
     [Embed(source="../../../../assets/navigate_cross.png")]
     public var deleteIcon:Class;
-
-    private var userUploadSource:RemoteObject;
-
-    private var feedService:RemoteObject;
 
     private var refreshButton:Button;
     private var adminButton:Button;
@@ -236,65 +222,14 @@ public class GroupAdminMyDataIconControls extends HBox
     }
 
     private function refreshData(feedDescriptor:DataFeedDescriptor):void {
-        var c:Credentials = User.getCredentials(feedDescriptor.id);
-        if (c != null) {
-            userUploadSource = new RemoteObject();
-            userUploadSource.destination = "userUpload";
-            userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
-            userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
-            ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
-            userUploadSource.refreshData.send(feedDescriptor.id, c, false, true);
-            //dispatchEvent(new RefreshNotificationEvent());
-            return;
-        }
-
-        feedService = new RemoteObject();
-        feedService.destination = "feeds";
-        feedService.needsConfig.addEventListener(ResultEvent.RESULT, gotConfigNeed);
-        feedService.needsConfig.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
-        ProgressAlert.alert(this, "Getting ready to refresh data...", null, feedService.needsConfig);
-        feedService.needsConfig.send(feedDescriptor.id);
-    }
-
-    private function gotConfigNeed(event:ResultEvent):void {
-        var config:Boolean = feedService.needsConfig.lastResult as Boolean;
-        var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-        if (config) {
-            var refreshWindow:RefreshWindow = new RefreshWindow();
-            refreshWindow.dataSourceID = descriptor.id;
-            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured, false, 0, true);
-            PopUpManager.addPopUp(refreshWindow, this, true);
-            PopUpUtil.centerPopUp(refreshWindow);
-        } else {
-            userUploadSource = new RemoteObject();
-            userUploadSource.destination = "userUpload";
-            userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
-            userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
-            ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
-            userUploadSource.refreshData.send(descriptor.id, null, false, true);
-        }
-    }
-
-    private function dsConfigured(event:DataSourceConfiguredEvent):void {
-        dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+        var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
+        dsRefreshWindow.dataSourceID = feedDescriptor.id;
+        PopUpManager.addPopUp(dsRefreshWindow, this, true);
+        PopUpUtil.centerPopUp(dsRefreshWindow);
     }
 
     private function passEvent(event:UploadConfigEvent):void {
         dispatchEvent(event);
-    }
-
-
-    private function completedRefresh(event:ResultEvent):void {
-        var credentialsResponse:CredentialsResponse = userUploadSource.refreshData.lastResult as CredentialsResponse;
-        if (!credentialsResponse.successful) {
-            var refreshWindow:RefreshWindow = new RefreshWindow();
-            refreshWindow.dataSourceID = credentialsResponse.dataSourceID;
-            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured, false, 0, true);
-            PopUpManager.addPopUp(refreshWindow, this, true);
-            PopUpUtil.centerPopUp(refreshWindow);
-        } else {
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
-        }
     }
 
     private function fileData(feedDescriptor:DataFeedDescriptor):void {

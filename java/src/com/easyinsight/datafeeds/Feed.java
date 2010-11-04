@@ -1,11 +1,9 @@
 package com.easyinsight.datafeeds;
 
 
-import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.Key;
 import com.easyinsight.kpi.KPI;
 
 import java.sql.PreparedStatement;
@@ -20,6 +18,7 @@ import java.io.Serializable;
  * Time: 11:46:38 AM
  */
 public abstract class Feed implements Serializable {
+    private FeedDefinition dataSource;
     private long feedID;
     private List<AnalysisItem> fields;
     private List<FeedNode> fieldHierarchy;
@@ -32,6 +31,14 @@ public abstract class Feed implements Serializable {
     private long originSolution;
     private String urlKey;
     private Map<String, String> properties;
+
+    public FeedDefinition getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(FeedDefinition dataSource) {
+        this.dataSource = dataSource;
+    }
 
     public String getUrlKey() {
         return urlKey;
@@ -78,7 +85,7 @@ public abstract class Feed implements Serializable {
         dataSourceInfo.setType(type);
         dataSourceInfo.setDataSourceID(feedID);
         dataSourceInfo.setDataSourceName(name);
-        dataSourceInfo.setLiveDataSource(!getCredentialRequirement(false).isEmpty());
+        dataSourceInfo.setLiveDataSource(getDataSource().getDataSourceType() == DataSourceInfo.LIVE);
         dataSourceInfo.setOriginSolution(originSolution);
         return dataSourceInfo;
     }
@@ -143,26 +150,15 @@ public abstract class Feed implements Serializable {
         this.feedID = feedID;
     }
 
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        return new HashSet<CredentialRequirement>();
-    }
-
     public List<Long> getDataSourceIDs() {
         List<Long> ids = new ArrayList<Long>();
         ids.add(feedID);
         return ids;
     }
 
-    public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata);
+    public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException;
 
-    public abstract DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException;
-
-    /*public DataSet getDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
-        // okay, credentials may be necessary here...
-        return getUncachedDataSet(columns, maxRows, admin, insightRequestMetadata);
-    }*/
-
-    public abstract DataSet getDetails(Collection<FilterDefinition> filters);
+    public abstract DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException;
 
     public List<KPI> createKPIs() {
         return new ArrayList<KPI>();

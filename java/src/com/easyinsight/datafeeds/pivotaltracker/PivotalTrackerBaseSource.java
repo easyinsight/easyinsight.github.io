@@ -64,9 +64,23 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     public static final String STORY_URL = "Story URL";
     public static final String STORY_COUNT = "Story Count";
 
-    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials, long userID) {
-        Token token = new TokenStorage().getToken(userID, TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false);
-        return token == null;
+    private String ptUserName;
+    private String ptPassword;
+
+    public String getPtUserName() {
+        return ptUserName;
+    }
+
+    public void setPtUserName(String ptUserName) {
+        this.ptUserName = ptUserName;
+    }
+
+    public String getPtPassword() {
+        return ptPassword;
+    }
+
+    public void setPtPassword(String ptPassword) {
+        this.ptPassword = ptPassword;
     }
 
     @Override
@@ -76,11 +90,6 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         kpis.add(KPIUtil.createKPIWithFilters("Stories Remaining in Current Iterations", "user.png", (AnalysisMeasure) findAnalysisItem(PivotalTrackerBaseSource.STORY_COUNT),
                 Arrays.asList((FilterDefinition) filterValueDefinition), KPI.BAD, 7));
         return kpis;
-    }
-
-    public int getCredentialsDefinition() {
-        return new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false) == null ? CredentialsDefinition.STANDARD_USERNAME_PW :
-                CredentialsDefinition.NO_CREDENTIALS;
     }
 
     protected String getToken(String userName, String password) throws IOException, ParsingException {
@@ -94,14 +103,18 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         Document doc;
         client.executeMethod(restMethod);
         doc = new Builder().build(restMethod.getResponseBodyAsStream());
-        return doc.query("/token/guid/text()").get(0).getValue();
+        String token = doc.query("/token/guid/text()").get(0).getValue();
+        System.out.println(token);
+        return token;
     }
 
     @Override
-    public String validateCredentials(com.easyinsight.users.Credentials credentials) {
+    public String validateCredentials() {
         try {
-            getToken(credentials.getUserName(), credentials.getPassword());
+            getToken(ptUserName, ptPassword);
             return null;
+        } catch (ParsingException pe) {
+            return "These credentials were rejected as invalid by Pivotal Tracker. Please double check your values for username and password.";
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -142,11 +155,11 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         return DataSourceInfo.STORED_PULL;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
-        Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false);
+    public void exchangeTokens(EIConnection conn) throws Exception {
+        Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
         try {
             if (tokenObj == null) {
-                String tokenValue = getToken(credentials.getUserName(), credentials.getPassword());
+                String tokenValue = getToken(ptUserName, ptPassword);
                 tokenObj = new Token();
                 tokenObj.setTokenValue(tokenValue);
                 tokenObj.setTokenType(TokenStorage.PIVOTAL_TRACKER_TOKEN);
@@ -156,6 +169,10 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+        Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
         String token = tokenObj.getTokenValue();
         try {
             DataSet dataSet = new DataSet();
@@ -268,7 +285,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 STORY_UPDATED_AT, STORY_ACCEPTED_AT, STORY_URL, STORY_COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_ID), true));
         analysisItems.add(new AnalysisMeasure(keys.get(PROJECT_INITIAL_VELOCITY), AggregationTypes.AVERAGE));

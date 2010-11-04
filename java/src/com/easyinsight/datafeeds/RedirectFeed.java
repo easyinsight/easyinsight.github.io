@@ -32,17 +32,12 @@ public class RedirectFeed extends Feed implements Serializable {
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         return FeedRegistry.instance().getFeed(redirectID).getMetadata(analysisItem, insightRequestMetadata);
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         return FeedRegistry.instance().getFeed(redirectID).getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode);
-    }
-
-    @Override
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return FeedRegistry.instance().getFeed(redirectID).getDetails(filters);
     }
 }

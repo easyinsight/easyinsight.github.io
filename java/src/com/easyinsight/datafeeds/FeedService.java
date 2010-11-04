@@ -36,7 +36,7 @@ import org.hibernate.Session;
  * Date: Jan 3, 2008
  * Time: 3:30:22 PM
  */
-public class FeedService implements IDataFeedService {
+public class FeedService {
 
     private FeedStorage feedStorage = new FeedStorage();
     private MarketplaceStorage marketplaceStorage = new MarketplaceStorage();
@@ -192,32 +192,17 @@ public class FeedService implements IDataFeedService {
         descriptor.setDescription(description);
         queryReportCountStmt.close();
     }
-
-    public boolean needsConfig(long dataSourceID) {
-        SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
+    
+    public ReportFault getCredentials(List<Integer> dataSourceIDs) {
         try {
-            return feedStorage.getFeedDefinitionData(dataSourceID).getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS;
-        } catch (Throwable e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<CredentialRequirement> getCredentials(List<Integer> dataSourceIDs, List<CredentialFulfillment> existingCredentials) {
-        try {
-            List<CredentialRequirement> neededCredentials = new ArrayList<CredentialRequirement>();
-            InsightRequestMetadata metadata = new InsightRequestMetadata();
-            metadata.setCredentialFulfillmentList(existingCredentials);
             for (Integer dataSourceID : dataSourceIDs) {
                 Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-                Set<CredentialRequirement> requirements = feed.getCredentialRequirement(false);
-                for (CredentialRequirement credentialRequirement : requirements) {
-                    if (metadata.getCredentialForDataSource(credentialRequirement.getDataSourceID()) == null) {
-                        neededCredentials.add(credentialRequirement);
-                    }
+                ReportFault reportFault = feed.getDataSource().validateDataConnectivity();
+                if (reportFault != null) {
+                    return reportFault;
                 }
             }
-            return neededCredentials;
+            return null;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -263,15 +248,6 @@ public class FeedService implements IDataFeedService {
             }
         }
         return new MultiReportInfo(apiKey, validDescriptors);
-    }
-
-    public List<CredentialRequirement> launchAsyncRefresh(long dataSourceID, List<CredentialFulfillment> credentials) {
-        try {
-            return new ScorecardStorage().blah(dataSourceID, credentials);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
     }
 
     public List<EIDescriptor> getDescriptors() {
@@ -475,16 +451,16 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public JoinAnalysis testJoin(CompositeFeedConnection connection, List<CredentialFulfillment> credentials) {
+    public JoinAnalysis testJoin(CompositeFeedConnection connection) {
         try {
-            return new JoinTester(connection).generateReport(credentials);
+            return new JoinTester(connection).generateReport();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
 
-    public List<CompositeFeedConnection> initialDefine(List<CompositeFeedNode> nodes, List<FeedDescriptor> newFeeds, List<CredentialFulfillment> credentials) {
+    public List<CompositeFeedConnection> initialDefine(List<CompositeFeedNode> nodes, List<FeedDescriptor> newFeeds) {
         try {
             Set<Set<Long>> connectionMap = new HashSet<Set<Long>>();
             List<CompositeFeedConnection> allNewEdges = new ArrayList<CompositeFeedConnection>();
@@ -496,7 +472,7 @@ public class FeedService implements IDataFeedService {
                     ids.add(node.getDataFeedID());
                     if (!connectionMap.contains(ids)) {
                         connectionMap.add(ids);
-                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(node.getDataFeedID(), newFeed.getId(), credentials);
+                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(node.getDataFeedID(), newFeed.getId());
                         allNewEdges.addAll(potentialJoins);
                     }
                 }
@@ -509,7 +485,7 @@ public class FeedService implements IDataFeedService {
                     ids.add(otherNewFeed.getId());
                     if (!connectionMap.contains(ids)) {
                         connectionMap.add(ids);
-                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(otherNewFeed.getId(), newFeed.getId(), credentials);
+                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(otherNewFeed.getId(), newFeed.getId());
                         allNewEdges.addAll(potentialJoins);
                     }
                 }

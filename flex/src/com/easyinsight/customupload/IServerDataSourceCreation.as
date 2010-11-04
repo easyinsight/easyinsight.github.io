@@ -6,8 +6,5 @@ import com.easyinsight.framework.Credentials;
 public interface IServerDataSourceCreation extends IFeedAdminDetail {
     function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void;
     function get dataSourceDefinition():FeedDefinitionData;
-    function set credentials(credentials:Credentials):void;
-    function get credentials():Credentials;
-    function get savesCredentials():Boolean;
 }
 }

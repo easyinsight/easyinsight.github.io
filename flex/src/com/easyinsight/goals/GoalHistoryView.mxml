@@ -2,7 +2,6 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" width="100%" height="100%"
         implements="com.easyinsight.util.IAsyncScreen">
     <mx:Script><![CDATA[
-        import com.easyinsight.framework.CredentialsCache;
 
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -66,7 +65,7 @@
                 _endDate = new Date();
             }
             dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
-            goalService.getCredentialsForNode.send(_goalID, CredentialsCache.getCache().createCredentials(), false);
+            goalService.getGoalValues.send(_goalID, _startDate, _endDate);
             /*goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
              if (_goalTreeNodeData.milestone != null) {
              goalService.calculateSlope.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
@@ -92,12 +91,7 @@
         }
 
         private function onCredentials():void {
-            goalService.getGoalValues.send(_goalID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
-        }
 
-        private function gotCredentials():void {
-            var credentials:ArrayCollection = goalService.getCredentialsForNode.lastResult as ArrayCollection;
-            CredentialsCache.getCache().obtainCredentials(this, credentials, onCredentials);            
         }
 
         private function gotValues():void {
@@ -111,7 +105,7 @@
         private function onDatesChanged():void {
             _startDate = startChooser.selectedDate;
             _endDate = endChooser.selectedDate;
-            goalService.getGoalValues.send(_goalID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
+            goalService.getGoalValues.send(_goalID, _startDate, _endDate);
         }
 
         private function subscribe():void {
@@ -176,7 +170,7 @@
         }
 
         public function refreshData():void {
-            goalService.getCredentialsForNode.send(_goalID, CredentialsCache.getCache().createCredentials(), false);
+            goalService.getGoalValues.send(_goalID, _startDate, _endDate);
         }
 
         public function canRefresh():Boolean {
@@ -184,7 +178,6 @@
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalValues" result="gotValues()"/>
-        <mx:method name="getCredentialsForNode" result="gotCredentials()"/>
         <mx:method name="calculateSlope" result="gotSlope()"/>
         <mx:method name="subscribeToGoal" result="subscribedToGoal()"/>
     </mx:RemoteObject>

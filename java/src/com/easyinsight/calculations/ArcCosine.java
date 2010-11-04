@@ -18,6 +18,10 @@ public class ArcCosine extends Function {
         return new NumericValue(Math.acos(params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("acos(Number)", "Calculate the arccosine of Number", Arrays.asList("Number - what you want the arccosine of"));
     }

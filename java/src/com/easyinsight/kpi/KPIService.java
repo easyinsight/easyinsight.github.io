@@ -6,7 +6,6 @@ import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.logging.LogClass;
@@ -91,17 +90,16 @@ public class KPIService {
         }
     }
 
-    public List<KPIValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate,
-                                           List<CredentialFulfillment> credentials) {
+    public List<KPIValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate) {
         try {
-            return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate, credentials);
+            return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
 
-    public List<KPI> getKPIsForStart(long targetDataSourceID, List<CredentialFulfillment> credentials, InsightRequestMetadata insightRequestMetadata) {
+    public List<KPI> getKPIsForStart(long targetDataSourceID, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -114,7 +112,6 @@ public class KPIService {
                 kpi.setCoreFeedID(targetDataSourceID);
                 kpiStorage.saveKPI(kpi, conn);
             }
-            insightRequestMetadata.setCredentialFulfillmentList(credentials);
             new ScorecardService().refreshValuesForList(kpis, conn, insightRequestMetadata, false);
             conn.commit();
             return kpis;
@@ -166,12 +163,11 @@ public class KPIService {
         }
     }
 
-    public KPI saveKPI(KPI kpi, List<CredentialFulfillment> credentials, InsightRequestMetadata insightRequestMetadata) {
+    public KPI saveKPI(KPI kpi, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             kpiStorage.saveKPI(kpi, conn);
-            insightRequestMetadata.setCredentialFulfillmentList(credentials);
             new ScorecardService().refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
             conn.commit();
             return kpi;

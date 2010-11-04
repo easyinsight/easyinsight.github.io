@@ -4,23 +4,9 @@
         import com.easyinsight.customupload.IServerDataSourceCreation;
 
         import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.framework.Credentials;
-
-        import com.easyinsight.framework.User;
 
         import mx.controls.Alert;
 
-        private function encryptedResults():void {
-            var c:Credentials = uploadService.encryptCredentials.lastResult as Credentials;
-            if (User.getSharedObject() == null) {
-                Alert.show("You must enable local storage for easy-insight.com in order to save credentials to your computer.");
-            }
-            var def:FeedDefinitionData = _dataSourceDefinition as FeedDefinitionData;
-            User.getSharedObject().data[def.dataFeedID.toString()] = new Object();
-            User.getSharedObject().data[def.dataFeedID.toString()].username = c.userName;
-            User.getSharedObject().data[def.dataFeedID.toString()].password = c.password;
-            User.getSharedObject().flush();
-        }
 
         private var _dataSourceClass:Class;
         private var dataSourceCreation:IServerDataSourceCreation;
@@ -30,23 +16,11 @@
         [Bindable]
         private var ready:Boolean;
 
-        [Bindable]
-        private var refreshValue:int;
-
-        [Bindable]
-        private var clientCredentialsSaved:Boolean;
-
         override protected function createChildren():void {
             super.createChildren();
             ready = true;
             dataSourceCreation = new _dataSourceClass();
-            var def:FeedDefinitionData = _dataSourceDefinition as FeedDefinitionData;
-            dataSourceCreation.dataSourceDefinition = def;
-            if (dataSourceCreation.savesCredentials) {
-                credentialsIndex = 1;
-            }
-            refreshValue = def.refreshDataInterval;
-            clientCredentialsSaved = User.getSharedObject() != null && User.getSharedObject().data[def.dataFeedID.toString()] != null;
+            dataSourceCreation.dataSourceDefinition = _dataSourceDefinition as FeedDefinitionData;
             coreContent.addChild(dataSourceCreation as DisplayObject);
         }
 
@@ -65,7 +39,7 @@
         private function serverValidate():void {
             progressBar.visible = true;
             dataSourceCreation.updateDataSource(dataSourceDefinition as FeedDefinitionData);
-            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox != null ? saveCredentialsCheckbox.selected : false);
+            uploadService.validateCredentials.send(dataSourceDefinition);
         }
 
         private function validated():void {
@@ -83,33 +57,18 @@
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            feedDefinition.refreshDataInterval = 0;
-            feedDefinition.username = null;
-            feedDefinition.password = null;
             dataSourceCreation.updateDataSource(feedDefinition);
         }
-
-        [Bindable]
-        private var credentialsIndex:int;
 
         public function validate():Boolean {
             return true;
         }]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="validateCredentials" result="validated()" fault="Alert.show(event.fault.message)"/>
-        <mx:method name="encryptCredentials" result="encryptedResults()"  fault="Alert.show(event.fault.message)"/>
     </mx:RemoteObject>
     <mx:VBox>
         <mx:Box id="coreContent"/>
-        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="Validating..."/>
-        <mx:ViewStack selectedIndex="{credentialsIndex}">
-            <mx:Box/>
-            <mx:HBox>
-                <mx:Label text="Save Credentials:"/>
-                <mx:CheckBox id="saveCredentialsCheckbox" selected="{clientCredentialsSaved}"/>
-                <mx:Label text="Security Note" fontSize="10" textDecoration="underline" toolTip="Your credentials will be saved in an encrypted form on your local system, so do not do this if you're using a public machine."/>
-            </mx:HBox>
-        </mx:ViewStack>
+        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="Validating..."/>        
         <mx:Button label="Validate" click="serverValidate()" enabled="{ready}"/>
     </mx:VBox>
 </mx:Canvas>

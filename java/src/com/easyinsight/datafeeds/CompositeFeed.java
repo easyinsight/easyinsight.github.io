@@ -44,23 +44,6 @@ public class CompositeFeed extends Feed {
         return ids;
     }
 
-    @Override
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        Set<CredentialRequirement> requirements = super.getCredentialRequirement(allSources);
-        if (allSources && getType() == DataSourceInfo.COMPOSITE_PULL) {
-            CredentialRequirement requirement = new CredentialRequirement();
-            requirement.setDataSourceID(getFeedID());
-            requirement.setDataSourceName(getName());
-            requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
-            requirements.add(requirement);
-        }
-        for (CompositeFeedNode child : compositeFeedNodes) {
-            Feed childDataSource = FeedRegistry.instance().getFeed(child.getDataFeedID());
-            requirements.addAll(childDataSource.getCredentialRequirement(allSources));
-        }
-        return requirements;
-    }
-
     public FeedType getDataFeedType() {
         return FeedType.COMPOSITE;
     }
@@ -85,7 +68,7 @@ public class CompositeFeed extends Feed {
         return filters;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         if (analysisItem.getKey() instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
             for (CompositeFeedNode compositeFeedNode : getCompositeFeedNodes()) {
@@ -115,7 +98,7 @@ public class CompositeFeed extends Feed {
         return null;
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         try {
             return getDataSet(analysisItems, filters, insightRequestMetadata);
         } catch (Exception e) {
@@ -127,7 +110,7 @@ public class CompositeFeed extends Feed {
         return null;
     }
 
-    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
+    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws ReportException {
 
         if (analysisItems.size() == 0) {
             return new DataSet();
@@ -374,7 +357,7 @@ public class CompositeFeed extends Feed {
             }
         }
 
-        public void produceDataSet(InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
+        public void produceDataSet(InsightRequestMetadata insightRequestMetadata) throws ReportException {
 
             Feed feed = FeedRegistry.instance().getFeed(feedID);
 

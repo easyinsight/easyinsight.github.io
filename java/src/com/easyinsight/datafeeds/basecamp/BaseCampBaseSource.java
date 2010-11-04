@@ -1,5 +1,8 @@
 package com.easyinsight.datafeeds.basecamp;
 
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
+import com.easyinsight.analysis.ReportException;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.logging.LogClass;
 import nu.xom.*;
@@ -28,13 +31,13 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
         return client;
     }
 
-    protected String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws BaseCampLoginException, ParsingException {
+    protected String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url, FeedDefinition parentDefinition) throws BaseCampLoginException, ParsingException, ReportException {
         String contactName = null;
         try {
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null, false);
+                    Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null, false, parentDefinition);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -55,7 +58,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
+    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError, FeedDefinition parentDefinition) throws BaseCampLoginException, ParsingException, ReportException {
         HttpMethod restMethod = new GetMethod(url + path);
         /*try {
             Thread.sleep(250);
@@ -97,15 +100,8 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                    throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
+                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Basecamp instance at " + url, parentDefinition));
                 } else if (statusLine.indexOf("503") != -1) {
-                    System.out.println(statusLine + " on retrieving " + path + ", retry time = " + restMethod.getResponseHeader("Retry-After") + " seconds");
-                    System.out.println("status text = " + restMethod.getStatusText());
-                    try {
-                        System.out.println("response body = " + restMethod.getResponseBodyAsString());
-                    } catch (IOException e1) {
-                        e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                    }
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
                         try {
@@ -124,7 +120,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                     throw new RuntimeException("403 error");
                 } else {
                     if (badCredentialsOnError) {
-                        throw new BaseCampLoginException("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
+                        throw new ReportException(new DataSourceConnectivityReportFault("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.", parentDefinition));
                     } else {
                         LogClass.error("Unrelated parse error with status line " + statusLine);
                         throw e;

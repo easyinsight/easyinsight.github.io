@@ -172,6 +172,13 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
             Map<Long, FeedFolder> folderMap = new HashMap<Long, FeedFolder>();
             for (CompositeFeedNode feed : getCompositeFeedNodes()) {
+                //
+                List<String> parentFolders = null;
+                if (parentFolders != null) {
+                    for (String parentFolder : parentFolders) {
+                        defineFolder(parentFolder);    
+                    }
+                }
                 String name = getCompositeFeedName(feed.getDataFeedID(), conn);
                 folderMap.put(feed.getDataFeedID(), defineFolder(name));
             }
@@ -259,7 +266,6 @@ public class CompositeFeedDefinition extends FeedDefinition {
             List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID(), conn);
             List<FeedFolder> folders = new FeedStorage().getFolders(compositeFeedNode.getDataFeedID(), analysisItemList, conn);
 
-
             for (AnalysisItem analysisItem : analysisItemList) {
                 AnalysisItem clonedItem;
                 try {
@@ -305,7 +311,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
     }
 
     @Override
-    public DataSourceCloneResult cloneDataSource(Connection conn) throws CloneNotSupportedException, SQLException {
+    public DataSourceCloneResult cloneDataSource(Connection conn) throws Exception {
         DataSourceCloneResult dataSourceCloneResult = super.cloneDataSource(conn);
         CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) dataSourceCloneResult.getFeedDefinition();
 
@@ -357,7 +363,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
     }
 
-    public void postClone(Connection conn) throws SQLException {
+    public void postClone(Connection conn) throws Exception {
         FeedStorage feedStorage = new FeedStorage();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(child.getDataFeedID(), conn);

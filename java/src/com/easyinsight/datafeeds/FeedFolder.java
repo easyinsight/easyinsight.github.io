@@ -115,4 +115,9 @@ public class FeedFolder implements Cloneable, Serializable {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

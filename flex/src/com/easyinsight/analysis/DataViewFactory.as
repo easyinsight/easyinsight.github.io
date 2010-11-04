@@ -1,10 +1,11 @@
 package com.easyinsight.analysis {
-
+import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.pseudocontext.CustomCodeEvent;
 import com.easyinsight.report.ReportEventProcessor;
+import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
@@ -17,7 +18,9 @@ import mx.containers.Canvas;
 import mx.containers.VBox;
 import mx.controls.Alert;
 import mx.controls.ProgressBar;
+import mx.core.UIComponent;
 import mx.events.ModuleEvent;
+import mx.managers.PopUpManager;
 import mx.modules.IModuleInfo;
 import mx.modules.ModuleManager;
 
@@ -279,9 +282,17 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private function gotData(event:DataServiceEvent):void {
         dispatchEvent(event);
-        _controlBar.onDataReceipt(event);
-        _lastData = event.dataSet;
-        _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
+        if (event.reportFault != null) {
+            event.reportFault.popup(this, onProblem);
+        } else {
+            _controlBar.onDataReceipt(event);
+            _lastData = event.dataSet;
+            _reportRenderer.renderReport(event.dataSet, _analysisDefinition, new Object(), event.additionalProperties);
+        }
+    }
+
+    private function onProblem(event:ProblemDataEvent):void {
+        _dataService.retrieveData(_analysisDefinition, false);
     }
 
     private function loadReportRenderer():void {
@@ -308,7 +319,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
             _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
             _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
-            _reportRenderer.addEventListener(CustomCodeEvent.CUSTOM_CODE_LINK, onCustomCode, false, 0, true);
             _dataService.preserveValues = _reportRenderer.preserveValues();
             if (_loadingDisplay != null) {
                 reportCanvas.removeChild(_loadingDisplay);
@@ -321,10 +331,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 retrieveData();
             }
         }
-    }
-
-    private function onCustomCode(event:CustomCodeEvent):void {
-        CustomCodeWindow.newWindow(this, event, _dataSourceID);
     }
 
     private function onReportWindow(event:ReportWindowEvent):void {

@@ -83,7 +83,7 @@ public class CalculationIntegrationTest extends TestCase {
 
     }
 
-    public void testExclusiveFilterScenario() throws SQLException {
+    public void testExclusiveFilterScenario() throws Exception {
         TestUtil.getIndividualTestUser();
         AnalysisDimension otherDim = new AnalysisDimension("Other", true);
         AnalysisMeasure count = new AnalysisMeasure("Count", AggregationTypes.SUM);
@@ -120,7 +120,7 @@ public class CalculationIntegrationTest extends TestCase {
         assertEquals(30., doubleValue.toDouble(), .1);
     }
 
-    public void testEmpty() throws SQLException {
+    public void testEmpty() throws Exception {
         TestUtil.getIndividualTestUser();
         AnalysisDimension otherDim = new AnalysisDimension("Other", true);
         AnalysisMeasure count = new AnalysisMeasure("Count", AggregationTypes.SUM);
@@ -159,7 +159,7 @@ public class CalculationIntegrationTest extends TestCase {
         assertEquals(0.0, total.toDouble());
     }
 
-    public void testCasts() throws SQLException {
+    public void testCasts() throws Exception {
         TestUtil.getIndividualTestUser();
         AnalysisDimension otherDim = new AnalysisDimension("Other", true);
         AnalysisMeasure count = new AnalysisMeasure("Count", AggregationTypes.SUM);

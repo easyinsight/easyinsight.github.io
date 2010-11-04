@@ -39,7 +39,6 @@
                                 <mx:Array>
                                     <mx:String>Google Spreadsheet</mx:String>
                                     <mx:String>Google Analytics</mx:String>
-                                    <mx:String>JIRA</mx:String>
                                     <mx:String>BaseCamp</mx:String>                                    
                                     <mx:String>Salesforce</mx:String>
                                     <mx:String>Admin Server Stats</mx:String>
@@ -47,7 +46,6 @@
                                     <mx:String>Highrise</mx:String>
                                     <mx:String>Custom</mx:String>
                                     <mx:String>Twitter</mx:String>
-                                    <mx:String>Marketo</mx:String>
                                     <mx:String>Pivotal Tracker</mx:String>
                                     <mx:String>SendGrid</mx:String>
                                     <mx:String>Meetup</mx:String>
@@ -69,10 +67,6 @@
                                                            straightToConnect="{_straightToConnect}"/>
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.GoogleAnalyticsSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.JiraDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)"/>
                         <customupload:ExternalDataSourceCreation
@@ -100,10 +94,6 @@
                                 userConfigCancel="cancel(event)"/>
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.TwitterDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.MarketoDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)" />
                         <customupload:ExternalDataSourceCreation

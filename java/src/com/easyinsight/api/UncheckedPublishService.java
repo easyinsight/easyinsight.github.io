@@ -184,7 +184,7 @@ public abstract class UncheckedPublishService extends PublishService {
         }
     }
 
-    private CallData getMetadata(String dataSourceName, Row row, Connection conn) throws SQLException {
+    private CallData getMetadata(String dataSourceName, Row row, Connection conn) throws Exception {
         String apiKey;
         DataStorage dataStorage;
         Map<Long, Boolean> dataSourceIDs = findDataSourceIDsByName(dataSourceName, conn);

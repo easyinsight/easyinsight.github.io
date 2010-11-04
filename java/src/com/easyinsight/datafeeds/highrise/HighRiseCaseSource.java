@@ -10,7 +10,6 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.Builder;
@@ -51,7 +50,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
         return Arrays.asList(CASE_NAME, CASE_ID, OWNER, CREATED_AT, COUNT, AUTHOR, CLOSED_AT, TAGS, UPDATED_AT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();        
         analysisItems.add(new AnalysisDimension(keys.get(CASE_NAME), true));
         analysisItems.add(new AnalysisList(keys.get(CASE_ID), false, ","));
@@ -70,7 +69,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_CASES;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
@@ -78,15 +77,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
-        if (token == null) {
-            token = new Token();
-            token.setTokenValue(credentials.getUserName());
-            token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
-        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
         try {
@@ -94,7 +85,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
             info.currentPage = 1;
             do {*/
                 loadingProgress(0, 1, "Synchronizing with cases...", true);
-                Document companies = runRestRequest("/kases/open.xml", client, builder, url, true, false);
+                Document companies = runRestRequest("/kases/open.xml", client, builder, url, true, false, parentDefinition);
                 Nodes companyNodes = companies.query("/kases/kase");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
@@ -118,11 +109,11 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                     }
                     row.addValue(COUNT, new NumericValue(1));
                     String personId = queryField(companyNode, "owner-id/text()");
-                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, personId, url));
+                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, personId, url, parentDefinition));
                     String authorID = queryField(companyNode, "author-id/text()");
-                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url));
+                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition));
 
-                    Document tags = runRestRequest("/kases/"+id+"/tags.xml", client, builder, url, true, false);
+                    Document tags = runRestRequest("/kases/"+id+"/tags.xml", client, builder, url, true, false, parentDefinition);
                     Nodes tagNodes = tags.query("/tags/tag");
                     StringBuilder tagBuilder = new StringBuilder();
                     for (int j = 0; j < tagNodes.size(); j++) {
@@ -137,6 +128,8 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                 }
             //} while(info.currentPage++ < info.MaxPages);
 
+        } catch (ReportException re) {
+            throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

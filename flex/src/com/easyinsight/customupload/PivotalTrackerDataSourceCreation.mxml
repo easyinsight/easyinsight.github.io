@@ -31,18 +31,8 @@
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:PivotalTrackerBaseSource = feedDefinition as PivotalTrackerBaseSource;
-        }
-
-        public function get credentials():Credentials {
-            var credentials:Credentials = new Credentials();
-            credentials.userName = userNameInput.text;
-            credentials.password = passwordInput.text;
-            return credentials;
-        }
-
-        public function set credentials(c:Credentials):void {
-            usernameInputText = c.userName;
-            password = c.password;
+            ds.ptUserName = userNameInput.text;
+            ds.ptPassword = passwordInput.text;
         }
 
         public function validate():Boolean {

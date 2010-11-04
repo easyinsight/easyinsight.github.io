@@ -7,12 +7,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.BaseCampDataSource;
-        import com.easyinsight.framework.Credentials;
-        import com.easyinsight.framework.CredentialsCache;
-        import com.easyinsight.help.ScreencastWindow;
-        import com.easyinsight.util.PopUpUtil;
-
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var url:String;
@@ -22,8 +16,6 @@
         private var inactiveIncluded:Boolean;
         [Bindable]
         private var commentsIncluded:Boolean;
-        [Bindable]
-        private var usernameInputText:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:BaseCampDataSource = new BaseCampDataSource();
@@ -33,12 +25,10 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
-            CredentialsCache.getCache().nukeCredentials(ds.dataFeedID);
             url = ds.url;
             archivedIncluded = ds.includeArchived;
             inactiveIncluded = ds.includeInactive;
             commentsIncluded = ds.includeComments;
-            usernameInputText = ds.username;
         }
 
         public function get savesCredentials():Boolean {
@@ -51,23 +41,7 @@
             ds.includeArchived = archivedCheckbox.selected;
             ds.includeComments = commentsCheckbox.selected;
             ds.includeInactive = inactiveCheckbox.selected;
-        }
-
-        public function get credentials():Credentials {
-            var credentials:Credentials = new Credentials();
-            credentials.userName = userNameInput.text;
-            return credentials;
-        }
-
-        public function set credentials(c:Credentials):void {
-            usernameInputText = c.userName;
-        }
-
-        private function video1():void {
-            var window:ScreencastWindow = new ScreencastWindow();
-            window.screencastSource = "http://eivideo.s3.amazonaws.com/basecamp1.mp4";
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);                                                                                                  
+            ds.token = userNameInput.text;
         }
 
         public function validate():Boolean {
@@ -79,7 +53,7 @@
 		</mx:FormItem>
         <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.basecamphq.com&quot;" fontSize="10"/>            
 		<mx:FormItem label="Basecamp API Authentication Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
 		</mx:FormItem>
         <mx:FormItem label="You can find the token on your Basecamp page under My Info - API Token." fontSize="10"/>
         <mx:FormItem label="Include On Hold/Inactive Projects:" direction="horizontal">

@@ -42,7 +42,6 @@
         import com.easyinsight.analysis.AnalysisMeasure;
 
         import com.easyinsight.filtering.TransformContainer;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.kpi.KPIValue;
         import com.easyinsight.util.ProgressAlert;
 
@@ -156,7 +155,7 @@
         private function generateHistory():void {
             ProgressAlert.alert(this, "Generating goal history...", null, kpiService.generateHistory);
             kpiService.generateHistory.send(analysisMeasure, _transformContainer.getFilterDefinitions(),
-                    feedID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
+                    feedID, startChooser.selectedDate, endChooser.selectedDate);
         }
 
 

@@ -20,6 +20,10 @@ public class Concat extends Function {
         return new StringValue(sb.toString());
     }
 
+    public int getParameterCount() {
+        return -1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("concat(value...)", "Combines the numeric parameters passed in");
     }

@@ -22,6 +22,10 @@ public class Minimum extends Function {
         return new NumericValue(min);
     }
 
+    public int getParameterCount() {
+        return -1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("", "");
     }

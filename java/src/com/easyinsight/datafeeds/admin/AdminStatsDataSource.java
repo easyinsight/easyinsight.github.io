@@ -4,14 +4,10 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
-import com.easyinsight.admin.AdminService;
-import com.easyinsight.admin.HealthInfo;
 import com.easyinsight.storage.DataStorage;
 
 import java.util.*;
@@ -51,15 +47,11 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
         return FeedType.ADMIN_STATS;
     }
 
-    public int getCredentialsDefinition() {
-        return 0;
-    }
-
-    public String validateCredentials(Credentials credentials) {
+    public String validateCredentials() {
         return null;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         //HealthInfo healthInfo = new AdminService().getHealthInfo();
         DataSet dataSet = new DataSet();
         /*IRow row = dataSet.createRow();
@@ -88,7 +80,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
                 MAJOR_COLLECTION_TIME, CLIENT_COUNT, SERVER, DATE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(SERVER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(DATE), true, AnalysisDateDimension.DAY_LEVEL));

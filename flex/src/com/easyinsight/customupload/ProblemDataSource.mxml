@@ -3,11 +3,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.CredentialsResponse;
         import com.easyinsight.administration.feed.FeedDefinitionData;
-
         import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.framework.User;
-        import com.easyinsight.listing.DataFeedDescriptor;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
@@ -64,12 +60,15 @@
                 feedService.getFeedDefinition.send(_dataSourceID);
             } else {
                 ready = true;
-                if (dataSourceCreation.savesCredentials) {
-                    credentialsIndex = 1;
-                }
                 dataSourceCreation = new _dataSourceClass();
+                var uicomp:UIComponent = dataSourceCreation as UIComponent;
+                uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
                 coreContent.addChild(dataSourceCreation as DisplayObject);
             }
+        }
+
+        private function onCreation(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
         }
 
         private function gotDataSource():void {
@@ -77,16 +76,13 @@
             ready = true;
             var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
             dataSourceCreation = new configClass();
-            if (dataSourceCreation.savesCredentials) {
-                credentialsIndex = 1;
-            }
-            dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
-            var uicomp:UIComponent = dataSourceCreation as UIComponent;
-            uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
-            coreContent.addChild(dataSourceCreation as DisplayObject);
+            var dispObject:DisplayObject = dataSourceCreation as DisplayObject;
+            dispObject.addEventListener(FlexEvent.CREATION_COMPLETE, onDataCreation, false, 0, true);
+            coreContent.addChild(dispObject);
+
         }
 
-        private function onCreation(event:FlexEvent):void {
+        private function onDataCreation(event:FlexEvent):void {
             PopUpUtil.centerPopUp(this);
         }
 
@@ -103,45 +99,34 @@
         }
 
         private function validate():void {
+            ready = false;
             progressBar.visible = true;
             dataSourceCreation.updateDataSource(dataSourceDefinition);
-            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox != null ? saveCredentialsCheckbox.selected : false);
+            uploadService.validateCredentials.send(dataSourceDefinition);
         }
 
         private function validated():void {
             var validation:CredentialsResponse = uploadService.validateCredentials.lastResult as CredentialsResponse;
             if (validation.successful) {
-                if (validation.encryptedResponse) {
-                    User.saveCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
-                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
-                } else {
-                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials);
-                }
-                //dataSourceDefinition.refreshDataInterval = (dailyRefresh.selected ? 1 : 0) * 24 * 1000 * 60 * 60;
-                dataSourceCreation.updateDataSource(dataSourceDefinition);
                 feedService.updateFeedDefinition.send(dataSourceDefinition, "");
             } else {
+                ready = true;
                 progressBar.visible = false;
                 Alert.show(validation.failureMessage);
             }
         }
 
-        private function created():void {
-            uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
-        }
+        private var lastMessage:Date;
 
-        private function refreshed():void {
-            progressBar.visible = true;
-            var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
-            if (response.successful) {
-                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                descriptor.id = dataSourceDefinition.dataFeedID;
-                descriptor.name = dataSourceDefinition.feedName;
-                dispatchEvent(new DataSourceConfiguredEvent(descriptor));
-                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+        private function created():void {
+            var string:String = feedService.updateFeedDefinition.lastResult as String;
+            if (string == null) {
+                dispatchEvent(new ProblemDataEvent());
                 PopUpManager.removePopUp(this);
             } else {
-                Alert.show(response.failureMessage);
+                Alert.show(string);
+                ready = true;
+                progressBar.visible = false;
             }
         }
 
@@ -150,33 +135,37 @@
         }
 
         [Bindable]
-        private var credentialsIndex:int = 0;
-        ]]></mx:Script>
+        private var asyncLabel:String = "Validating changes...";
+
+        private var _problemMessage:String;
+
+        [Bindable(event="problemMessageChanged")]
+        public function get problemMessage():String {
+            return _problemMessage;
+        }
+
+        public function set problemMessage(value:String):void {
+            if (_problemMessage == value) return;
+            _problemMessage = value;
+            dispatchEvent(new Event("problemMessageChanged"));
+        }]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="validateCredentials" result="validated()"/>
-        <mx:method name="refreshData" result="refreshed()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)" />
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Box id="coreContent"/>
-        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="Retrieving data, this may take a few minutes..."/>
-        <mx:ViewStack selectedIndex="{credentialsIndex}">
-            <mx:Box/>
-            <mx:HBox>
-                <mx:Label text="Save Credentials:"/>
-                <mx:CheckBox id="saveCredentialsCheckbox"/>
-                <mx:Label text="Security Note" fontSize="10" textDecoration="underline" toolTip="Your credentials will be saved in an encrypted form on your local system, so do not do this if you're using a public machine."/>
-            </mx:HBox>
-        </mx:ViewStack>
-        <!--<mx:FormItem label="Daily Refresh:" enabled="{credentialsSaved}">
-            <mx:CheckBox id="dailyRefresh"/>
-        </mx:FormItem>-->
+    <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Refresh" click="validate()" enabled="{ready}"/>
-            <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)"/>
+            <mx:TextArea text="{problemMessage}" fontSize="14" width="100%" editable="false" selectable="false" backgroundAlpha="0" borderStyle="none" focusEnabled="false"
+                    height="60"/>
+        </mx:HBox>
+        <mx:Box id="coreContent"/>
+        <mx:ProgressBar id="progressBar" indeterminate="false" mode="manual" visible="false" label="{asyncLabel}"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Update" click="validate()" enabled="{ready}"/>
+            <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); dispatchEvent(new Event(Event.CANCEL)); PopUpManager.removePopUp(this)"/>
         </mx:HBox>
 	</mx:VBox>
 </util:EITitleWindow>

@@ -18,6 +18,10 @@ public class ArcSine extends Function {
         return new NumericValue(Math.asin(params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("asin(Number)", "Calculate the arcsine of Number", Arrays.asList("Number - what you want the arcsine of"));
     }

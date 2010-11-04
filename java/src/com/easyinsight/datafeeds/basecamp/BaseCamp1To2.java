@@ -19,7 +19,7 @@ public class BaseCamp1To2 extends DataSourceMigration {
         super(dataSource);
     }
 
-    public void migrate(Map<String, Key> keys, EIConnection conn) {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         AnalysisDimension startTodoDim = (AnalysisDimension) findAnalysisItem(BaseCampTodoSource.TODOLISTNAME);
         if (startTodoDim != null) {
             AnalysisDimension todoDimension = new AnalysisDimension(startTodoDim.getKey(), BaseCampTodoSource.TODOLISTNAME);

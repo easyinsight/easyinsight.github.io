@@ -4,7 +4,6 @@ import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.EmbeddedTimelineResults;
 import com.easyinsight.analysis.IEmbeddedDataService;
 import com.easyinsight.analysis.ListDataResults;
-import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.InsightRequestMetadata;
 
@@ -33,7 +32,7 @@ public class EmbeddedTimelineDataService extends EventDispatcher implements IEmb
     private function processListData(event:ResultEvent):void {
         var results:EmbeddedTimelineResults = dataRemoteSource.getEmbeddedResults.lastResult as EmbeddedTimelineResults;
         var dataSets:ArrayCollection = new ArrayCollection();
-        if (results.credentialRequirements == null || results.credentialRequirements.length == 0) {
+        if (results.reportFault == null) {
 
 
             for each (var listData:ListDataResults in results.listDatas) {
@@ -42,7 +41,7 @@ public class EmbeddedTimelineDataService extends EventDispatcher implements IEmb
             results.additionalProperties.seriesValues = results.seriesValues;
         }
         dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, dataSets, results.definition, results.dataSourceAccessible,
-                results.attribution, listData.credentialRequirements, listData.dataSourceInfo, results.ratingsAverage,
+                results.attribution, listData.reportFault, listData.dataSourceInfo, results.ratingsAverage,
                 results.ratingsCount, results.myRating, results.additionalProperties));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
@@ -52,7 +51,6 @@ public class EmbeddedTimelineDataService extends EventDispatcher implements IEmb
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.refreshAllSources = refreshAll;
-        insightRequestMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         insightRequestMetadata.noCache = noCache;
         insightRequestMetadata.hierarchyOverrides = hierarchyOverrides;
         dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata, drillthroughFilters);

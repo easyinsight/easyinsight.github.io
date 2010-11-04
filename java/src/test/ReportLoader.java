@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * Time: 3:08:20 PM
  */
 public class ReportLoader {
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws Exception {
         Database.initialize();
         TestUtil.getIndividualTestUser();
         for (int i = 0; i < 5000; i++) {

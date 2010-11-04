@@ -1,5 +1,6 @@
 package com.easyinsight.administration.feed
 {
+import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.framework.Credentials;
 
 [Bindable]
@@ -11,6 +12,7 @@ import com.easyinsight.framework.Credentials;
 		public var failureMessage:String;
         public var encryptedResponse:Credentials;
         public var dataSourceID:int;
+        public var reportFault:ReportFault;
 		
 		public function CredentialsResponse()
 		{

@@ -11,7 +11,6 @@ import com.easyinsight.pipeline.HistoryRun;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.userupload.UserUploadService;
 
 import java.sql.PreparedStatement;
@@ -170,10 +169,9 @@ public class ScorecardService {
         return new ScorecardList(scorecards, hasData);
     }
 
-    public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh, InsightRequestMetadata insightRequestMetadata) {
+    public ScorecardWrapper getScorecard(long scorecardID, boolean forceRefresh, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeScorecard(scorecardID);
         try {
-            insightRequestMetadata.setCredentialFulfillmentList(credentials);
             return scorecardStorage.getScorecard(scorecardID, insightRequestMetadata, forceRefresh);
         } catch (Exception e) {
             LogClass.error(e);
@@ -217,13 +215,12 @@ public class ScorecardService {
 
     }
 
-    public KPI addKPIToScorecard(KPI kpi, long scorecardID, List<CredentialFulfillment> credentials, InsightRequestMetadata insightRequestMetadata) {
+    public KPI addKPIToScorecard(KPI kpi, long scorecardID, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeScorecard(scorecardID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             scorecardStorage.addKPIToScorecard(kpi, scorecardID, conn);
-            insightRequestMetadata.setCredentialFulfillmentList(credentials);
             refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
             conn.commit();
             return kpi;
@@ -257,13 +254,12 @@ public class ScorecardService {
         }
     }
 
-    public KPI updateKPI(KPI kpi, List<CredentialFulfillment> credentials, InsightRequestMetadata insightRequestMetadata) {
+    public KPI updateKPI(KPI kpi, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeKPI(kpi.getKpiID());
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             new KPIStorage().saveKPI(kpi, conn);
-            insightRequestMetadata.setCredentialFulfillmentList(credentials);
             refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
             conn.commit();
             return kpi;
@@ -274,51 +270,6 @@ public class ScorecardService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
-        }
-    }
-
-    public void getCredentialsForDataSources(boolean allSources, List<CredentialFulfillment> existingCredentials, Map<Long, CredentialRequirement> credentialMap, Set<Long> dataSourceIDs) throws SQLException {
-        if (allSources) {
-            for (Long dataSourceID : dataSourceIDs) {
-                FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                    Credentials credentials = null;
-                    for (CredentialFulfillment fulfillment : existingCredentials) {
-                        if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                            credentials = fulfillment.getCredentials();
-                        }
-                    }
-                    boolean noCredentials = true;
-                    if (credentials != null) {
-                        noCredentials = dataSource.validateCredentials(credentials) != null;
-                    }
-                    if (noCredentials) {
-                        credentialMap.put(feedDefinition.getDataFeedID(), new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
-                                CredentialsDefinition.STANDARD_USERNAME_PW));
-                    }
-                }
-            }
-        } else {
-            for (Long dataSourceID : dataSourceIDs) {
-                Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-                Credentials credentials = null;
-                for (CredentialFulfillment fulfillment : existingCredentials) {
-                    if (fulfillment.getDataSourceID() == dataSourceID) {
-                        credentials = fulfillment.getCredentials();
-                    }
-                }
-                boolean noCredentials = true;
-                if (credentials != null) {
-                    noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
-                }
-                if (noCredentials) {
-                    Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
-                    for (CredentialRequirement credentialRequirement : credentialRequirements) {
-                        credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
-                    }
-                }
-            }
         }
     }
 
@@ -450,23 +401,12 @@ public class ScorecardService {
             }
             for (Long dataSourceID : dataSourceIDs) {
                 FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-                if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                    Credentials credentials = null;
-                    for (CredentialFulfillment fulfillment : insightRequestMetadata.getCredentialFulfillmentList()) {
-                        if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                            credentials = fulfillment.getCredentials();
-                        }
-                    }
-                    if (credentials != null && credentials.isEncrypted()) {
-                        credentials = credentials.decryptCredentials();
-                    }
-                    if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                        try {
-                            dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
-                        } finally {
-                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
-                        }
+                IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                    try {
+                        dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null);
+                    } finally {
+                        DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                     }
                 }
             }

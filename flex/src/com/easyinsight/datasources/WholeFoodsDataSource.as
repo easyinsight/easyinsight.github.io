@@ -11,6 +11,7 @@ public class WholeFoodsDataSource extends CompositeServerDataSource {
     public var initialized:Boolean = false;
     public var wfUserName:String;
     public var wfPassword:String;
+    public var startFile:ByteArray;
 
     public function WholeFoodsDataSource() {
         super();

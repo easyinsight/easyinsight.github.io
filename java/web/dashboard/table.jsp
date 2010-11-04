@@ -1,15 +1,7 @@
-<%@ page import="com.easyinsight.datafeeds.CredentialFulfillment" %>
-<%@ page import="com.easyinsight.datafeeds.CredentialRequirement" %>
-<%@ page import="com.easyinsight.datafeeds.CredentialsDefinition" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardInternalService" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardWrapper" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="com.easyinsight.users.SalesforceCredentials" %>
-<%@ page import="com.easyinsight.users.UserNamePWCredentials" %>
 <%@ page import="java.text.NumberFormat" %>
-<%@ page import="java.util.HashSet" %>
-<%@ page import="java.util.LinkedList" %>
-<%@ page import="java.util.List" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.users.User" %>
@@ -40,95 +32,6 @@
         refresh = true;
     }
     ScorecardWrapper scorecardWrapper = service.getScorecard(scorecardID, userID, new java.util.ArrayList<com.easyinsight.datafeeds.CredentialFulfillment>(), refresh, new InsightRequestMetadata());
-    if (scorecardWrapper.getCredentials() != null && scorecardWrapper.getCredentials().size() > 0) {
-        List<CredentialFulfillment> newCreds = new LinkedList<CredentialFulfillment>();
-        HashSet<Long> dataSets = new HashSet<Long>();
-        %>
-        <div id="refreshDialogInfo" style="display:none">
-        <% for(CredentialRequirement creds : scorecardWrapper.getCredentials()) {
-            if(!dataSets.contains(creds.getDataSourceID())) {
-                dataSets.add(creds.getDataSourceID());
-                switch(creds.getCredentialsDefinition()) {
-                        case CredentialsDefinition.STANDARD_USERNAME_PW:
-                            if(request.getParameter("username_" + creds.getDataSourceID()) != null && !request.getParameter("username_" + creds.getDataSourceID()).isEmpty() &&
-                                    request.getParameter("password_" + creds.getDataSourceID()) != null && !request.getParameter("password_" + creds.getDataSourceID()).isEmpty()) {
-                                CredentialFulfillment cf = new CredentialFulfillment();
-                                cf.setDataSourceID(creds.getDataSourceID());
-                                UserNamePWCredentials credInfo = new UserNamePWCredentials();
-                                credInfo.setUserName(request.getParameter("username_" + creds.getDataSourceID()));
-                                credInfo.setPassword(request.getParameter("password_" + creds.getDataSourceID()));
-                                cf.setCredentials(credInfo);
-                                newCreds.add(cf);
-                            } else {
-                            %>
-                            <div>
-                                Please enter the credentials for <%= creds.getDataSourceName() %>:<br />
-                                <label for="username_<%= creds.getDataSourceID() %>">Username:</label><input type="text" id="username_<%=creds.getDataSourceID()%>" name="username_<%=creds.getDataSourceID()%>" /><br />
-                                <label for="password_<%= creds.getDataSourceID() %>">Password:</label><input type="password" id="password_<%=creds.getDataSourceID()%>" name="password_<%=creds.getDataSourceID()%>" />
-                            </div>
-                            <% }
-                            break;
-                        case CredentialsDefinition.SALESFORCE:
-                            if(request.getParameter("publickey_" + creds.getDataSourceID()) != null && !request.getParameter("publickey_" + creds.getDataSourceID()).isEmpty() &&
-                                    request.getParameter("privatekey_" + creds.getDataSourceID()) != null && !request.getParameter("privatekey_" + creds.getDataSourceID()).isEmpty()) {
-
-                                CredentialFulfillment cf = new CredentialFulfillment();
-                                cf.setDataSourceID(creds.getDataSourceID());
-                                SalesforceCredentials credInfo = new SalesforceCredentials();
-                                credInfo.setUserName(request.getParameter("publickey_" + creds.getDataSourceID()));
-                                credInfo.setPassword(request.getParameter("privatekey_" + creds.getDataSourceID()));
-                                cf.setCredentials(credInfo);
-                                newCreds.add(cf);
-                            }
-                            else {
-                            %>
-                            <div>
-                                Please enter the public/private keys for <%= creds.getDataSourceName() %>:<br />
-                                <label for="publickey_<%= creds.getDataSourceID() %>">Public Key:</label><input type="text" id="publickey_<%=creds.getDataSourceID()%>" name="publickey_<%=creds.getDataSourceID()%>" /><br />
-                                <label for="privatekey_<%= creds.getDataSourceID() %>">Private Key:</label><input type="text" id="privatekey_<%=creds.getDataSourceID()%>" name="privatekey_<%=creds.getDataSourceID()%>" />
-                            </div>
-                            <% }
-                            break;
-                        case CredentialsDefinition.NO_CREDENTIALS:
-                        default:
-                        break;
-                    }
-                }
-
-            }
-
-        %>
-        </div>
-        <script type="text/javascript">$("#credentialsData").html($("#refreshDialogInfo").html());
-        resetCredentialsDialog();
-        </script>
-    <%
-            if(scorecardWrapper.getCredentials().size() == newCreds.size()) { 
-                scorecardWrapper = service.getScorecard(scorecardID, userID, newCreds, refresh, new InsightRequestMetadata());
-                if(scorecardWrapper.getCredentials().size() > 0){ %>
-                    <script type="text/javascript">$("#credentialsDialog").dialog('open');</script>
-                <%
-                } else {
-                    completeRefresh = true;
-                %>
-                    <script type="text/javascript">$("#credentialsDialog").dialog("close");</script>
-                <%
-                }
-            } else {
-                    %>
-                    <script type="text/javascript">$("#credentialsDialog").dialog("open");</script>
-                    <%
-                }
-        } else {
-            completeRefresh = true;
-        }
-
-        if(completeRefresh) {
-            %>
-                <script type="text/javascript">$("#credentialsDialog").dialog("close");</script>
-            <%
-        }
-
     scorecard = scorecardWrapper.getScorecard();
 
 %>

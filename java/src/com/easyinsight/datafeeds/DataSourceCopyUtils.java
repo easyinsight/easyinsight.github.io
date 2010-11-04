@@ -32,7 +32,7 @@ public class DataSourceCopyUtils {
 
     public static List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID,
                                                         FeedDefinition feedDefinition, boolean includeChildren, String newDataSourceName,
-                                                        long solutionID, long accountID, String userName) throws CloneNotSupportedException, SQLException {
+                                                        long solutionID, long accountID, String userName) throws Exception {
         FeedStorage feedStorage = new FeedStorage();
         AnalysisStorage analysisStorage = new AnalysisStorage();
         List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
@@ -43,9 +43,7 @@ public class DataSourceCopyUtils {
         DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID, userName);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
         if (solutionID > 0) {
-            if (clonedFeedDefinition.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS) {
-                clonedFeedDefinition.setVisible(false);
-            }
+            clonedFeedDefinition.setVisible(false);
         }
         clonedFeedDefinition.setDateCreated(new Date());
         clonedFeedDefinition.setDateUpdated(new Date());
@@ -59,7 +57,11 @@ public class DataSourceCopyUtils {
         } else {
             DataStorage.liveDataSource(result.getFeedDefinition().getDataFeedID(), conn);
         }
-        clonedFeedDefinition.postClone(conn);
+        try {
+            clonedFeedDefinition.postClone(conn);
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         if (includeChildren) {
             List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
             for (AnalysisDefinition insight : insights) {
@@ -82,13 +84,8 @@ public class DataSourceCopyUtils {
             }
         }
 
-        boolean requiresConfig = false;
+        boolean requiresConfig = solutionID > 0;
 
-        if (clonedFeedDefinition instanceof IServerDataSourceDefinition) {
-            IServerDataSourceDefinition def = (IServerDataSourceDefinition) clonedFeedDefinition;
-            requiresConfig = (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS || def.getFeedType() == FeedType.LINKEDIN || def.getFeedType() == FeedType.FRESHBOOKS_COMPOSITE);
-
-        }
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID(),
                 clonedFeedDefinition.getFeedType().getType());
         infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, clonedFeedDefinition.getFeedName(), requiresConfig));
@@ -146,7 +143,7 @@ public class DataSourceCopyUtils {
     }
 
     public static DataSourceCloneResult cloneFeed(long userID, Connection conn, FeedDefinition feedDefinition,
-                                                  boolean installingFromConnection, long accountID, String userName) throws CloneNotSupportedException, SQLException {
+                                                  boolean installingFromConnection, long accountID, String userName) throws Exception {
         FeedStorage feedStorage = new FeedStorage();
         DataSourceCloneResult result = feedDefinition.cloneDataSource(conn);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();

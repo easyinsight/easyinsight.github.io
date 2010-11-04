@@ -200,21 +200,21 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
         }
     }
 
-    private CallData convertData(String dataSourceName, Row row, EIConnection conn, boolean updateIfNecessary) throws SQLException {
+    private CallData convertData(String dataSourceName, Row row, EIConnection conn, boolean updateIfNecessary) throws Exception {
         if (row == null) {
             throw new ServiceRuntimeException("You must include at least one row for this operation.");
         }
         return convertData(dataSourceName, Arrays.asList(row), conn, updateIfNecessary);
     }
 
-    private CallData convertData(String dataSourceName, Row[] rows, EIConnection conn, boolean updateIfNecessary) throws SQLException {
+    private CallData convertData(String dataSourceName, Row[] rows, EIConnection conn, boolean updateIfNecessary) throws Exception {
         if (rows == null) {
             throw new ServiceRuntimeException("You must include at least one row for this operation.");
         }
         return convertData(dataSourceName, Arrays.asList(rows), conn, updateIfNecessary);
     }
 
-    private CallData convertData(String dataSourceName, List<Row> rows, EIConnection conn, boolean updateIfNecessary) throws SQLException {
+    private CallData convertData(String dataSourceName, List<Row> rows, EIConnection conn, boolean updateIfNecessary) throws Exception {
         if (dataSourceName == null) {
             throw new ServiceRuntimeException("You must specify a data source name or API key.");
         }

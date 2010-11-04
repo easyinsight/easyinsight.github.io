@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -56,10 +55,10 @@ public abstract class DataSourceMigration {
         compositeServerDataSource.getConnections().add(connection);
     }
 
-    protected void addChildDataSource(FeedDefinition childDataSource, EIConnection conn) throws SQLException {
+    protected void addChildDataSource(FeedDefinition childDataSource, EIConnection conn) throws Exception {
         CompositeServerDataSource compositeServerDataSource = (CompositeServerDataSource) dataSource;
         UploadPolicy uploadPolicy = dataSource.getUploadPolicy();
-        compositeServerDataSource.newDefinition((IServerDataSourceDefinition) childDataSource, conn, null, "", uploadPolicy);        
+        compositeServerDataSource.newDefinition((IServerDataSourceDefinition) childDataSource, conn, "", uploadPolicy);
         CompositeFeedNode compositeFeedNode = new CompositeFeedNode(childDataSource.getDataFeedID(), 50, 50);
         compositeServerDataSource.getCompositeFeedNodes().add(compositeFeedNode);
         compositeServerDataSource.populateFields(conn);
@@ -93,7 +92,7 @@ public abstract class DataSourceMigration {
         dataSource.getFields().add(analysisItem);
     }
 
-    public abstract void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException;
+    public abstract void migrate(Map<String, Key> keys, EIConnection conn) throws Exception;
 
     public abstract int fromVersion();
 

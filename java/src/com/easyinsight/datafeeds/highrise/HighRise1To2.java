@@ -19,7 +19,7 @@ public class HighRise1To2 extends DataSourceMigration {
         super(dataSource);
     }
 
-    public void migrate(Map<String, Key> keys, EIConnection conn) {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         addAnalysisItem(new AnalysisDateDimension(new NamedKey(HighRiseDealSource.STATUS_CHANGED_ON), true, AnalysisDateDimension.DAY_LEVEL));
     }
 

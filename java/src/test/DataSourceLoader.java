@@ -37,7 +37,7 @@ public class DataSourceLoader {
     public static final Key MEASURE = new NamedKey("Measure");
     public static final Key DATE = new NamedKey("Date");
 
-    public static void main(String[] args) throws SQLException, IOException {
+    public static void main(String[] args) throws Exception {
         Database.initialize();
         TestUtil.getProUser();
         Connection conn = Database.instance().getConnection();

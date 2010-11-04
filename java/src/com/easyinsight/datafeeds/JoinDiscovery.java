@@ -2,12 +2,9 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DerivedKey;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.DataStorage;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -22,7 +19,7 @@ public class JoinDiscovery {
 
     private FeedStorage feedStorage = new FeedStorage();
 
-    public List<CompositeFeedConnection> findPotentialJoins(long sourceFeedID, long targetFeedID, List<CredentialFulfillment> credentials) throws SQLException {
+    public List<CompositeFeedConnection> findPotentialJoins(long sourceFeedID, long targetFeedID) throws SQLException {
         FeedDefinition sourceFeed = feedStorage.getFeedDefinitionData(sourceFeedID);
         FeedDefinition targetFeed = feedStorage.getFeedDefinitionData(targetFeedID);
 
@@ -48,7 +45,7 @@ public class JoinDiscovery {
         List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
         for (FeedDefinition sourceDefinition : sourceFeeds) {
             for (FeedDefinition targetDefinition : targetFeeds) {
-                connections.addAll(explore(sourceDefinition, targetDefinition, credentials));
+                connections.addAll(explore(sourceDefinition, targetDefinition));
             }
         }
         for (CompositeFeedConnection connection : connections) {
@@ -91,7 +88,7 @@ public class JoinDiscovery {
         }
     }
 
-    private List<CompositeFeedConnection> explore(FeedDefinition sourceFeed, FeedDefinition targetFeed, List<CredentialFulfillment> credentials) throws SQLException {
+    private List<CompositeFeedConnection> explore(FeedDefinition sourceFeed, FeedDefinition targetFeed) throws SQLException {
         Connection conn = Database.instance().getConnection();
         List<CompositeFeedConnection> potentialJoins;
         try {
@@ -100,7 +97,7 @@ public class JoinDiscovery {
             for (AnalysisItem analysisItem : sourceFeed.getFields()) {
                 if (!analysisItem.isDerived()) {
                     if (analysisItem.getType() == AnalysisItemTypes.DIMENSION) {
-                        AnalysisDimensionResultMetadata metadata = (AnalysisDimensionResultMetadata) new DataService().getAnalysisItemMetadata(sourceFeed.getDataFeedID(), analysisItem, credentials, 0);
+                        AnalysisDimensionResultMetadata metadata = (AnalysisDimensionResultMetadata) new DataService().getAnalysisItemMetadata(sourceFeed.getDataFeedID(), analysisItem, 0);
                         valueMap.put(analysisItem.getKey(), metadata.getValues());
                     }
                 }
@@ -108,7 +105,7 @@ public class JoinDiscovery {
             for (AnalysisItem analysisItem : targetFeed.getFields()) {
                 if (!analysisItem.isDerived()) {
                     if (analysisItem.getType() == AnalysisItemTypes.DIMENSION) {
-                        AnalysisDimensionResultMetadata metadata = (AnalysisDimensionResultMetadata) new DataService().getAnalysisItemMetadata(targetFeed.getDataFeedID(), analysisItem, credentials, 0);
+                        AnalysisDimensionResultMetadata metadata = (AnalysisDimensionResultMetadata) new DataService().getAnalysisItemMetadata(targetFeed.getDataFeedID(), analysisItem, 0);
                         Set<Value> valueSet = new HashSet<Value>(metadata.getValues());
                         for (Map.Entry<Key, List<Value>> entry : valueMap.entrySet()) {
                             boolean matched = false;

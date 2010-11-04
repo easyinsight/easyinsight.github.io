@@ -36,14 +36,14 @@ public class AnalysisBasedFeed extends Feed {
         return feed.getFields();
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
         return feed.getMetadata(analysisItem, null);
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
 
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());

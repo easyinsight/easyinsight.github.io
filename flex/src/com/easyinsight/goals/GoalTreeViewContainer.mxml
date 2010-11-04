@@ -12,7 +12,6 @@
         import com.easyinsight.administration.feed.FeedConsumer;
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.analysis.AnalysisCloseEvent;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.User;
@@ -90,7 +89,7 @@
             ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.getGoalDataTree);
             var metadata:InsightRequestMetadata = new InsightRequestMetadata();
             metadata.utcOffset = new Date().getTimezoneOffset();
-            goalService.getGoalDataTree.send(_goalTreeID, CredentialsCache.getCache().createCredentials(), metadata);
+            goalService.getGoalDataTree.send(_goalTreeID, metadata);
         }
 
 

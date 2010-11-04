@@ -21,7 +21,7 @@ public class DataSourceInternalService {
 
     private FeedStorage feedStorage = new FeedStorage();
 
-    public void updateComposites(FeedDefinition feedDefinition, Connection conn) throws SQLException {
+    public void updateComposites(FeedDefinition feedDefinition, Connection conn) throws Exception {
         PreparedStatement stmt = conn.prepareStatement("SELECT COMPOSITE_FEED.data_feed_id FROM COMPOSITE_NODE, COMPOSITE_FEED WHERE COMPOSITE_NODE.DATA_FEED_ID = ? AND " +
                 "COMPOSITE_NODE.composite_feed_id = COMPOSITE_FEED.composite_feed_id");
         stmt.setLong(1, feedDefinition.getDataFeedID());

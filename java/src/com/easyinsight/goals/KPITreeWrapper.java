@@ -1,8 +1,6 @@
 package com.easyinsight.goals;
 
-import com.easyinsight.datafeeds.CredentialRequirement;
-
-import java.util.List;
+import com.easyinsight.analysis.ReportFault;
 
 /**
  * User: jamesboe
@@ -11,8 +9,16 @@ import java.util.List;
  */
 public class KPITreeWrapper {
     private GoalTree goalTree;
-    private List<CredentialRequirement> credentials;
+    private ReportFault reportFault;
     private boolean asyncRefresh;
+
+    public ReportFault getReportFault() {
+        return reportFault;
+    }
+
+    public void setReportFault(ReportFault reportFault) {
+        this.reportFault = reportFault;
+    }
 
     public GoalTree getGoalTree() {
         return goalTree;
@@ -20,14 +26,6 @@ public class KPITreeWrapper {
 
     public void setGoalTree(GoalTree goalTree) {
         this.goalTree = goalTree;
-    }
-
-    public List<CredentialRequirement> getCredentials() {
-        return credentials;
-    }
-
-    public void setCredentials(List<CredentialRequirement> credentials) {
-        this.credentials = credentials;
     }
 
     public boolean isAsyncRefresh() {

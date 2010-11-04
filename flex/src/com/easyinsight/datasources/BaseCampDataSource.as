@@ -10,6 +10,7 @@ public class BaseCampDataSource extends CompositeServerDataSource {
     public var includeArchived:Boolean;
     public var includeInactive:Boolean;
     public var includeComments:Boolean;
+    public var token:String;
 
     public function BaseCampDataSource() {
         super();

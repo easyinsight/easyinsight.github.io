@@ -20,7 +20,7 @@ public class CloudWatch1To2 extends DataSourceMigration {
         super(dataSource);
     }
 
-    public void migrate(Map<String, Key> keys, EIConnection conn) {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         migrateAnalysisItem(CloudWatchDataSource.NETWORK_IN, new AnalysisMeasure(keys.get(CloudWatchDataSource.NETWORK_IN), "Network Bytes Received", AggregationTypes.SUM,
                 false, FormattingConfiguration.BYTES));
         migrateAnalysisItem(CloudWatchDataSource.NETWORK_OUT, new AnalysisMeasure(keys.get(CloudWatchDataSource.NETWORK_OUT), "Network Bytes Sent", AggregationTypes.SUM,

@@ -7,16 +7,13 @@ import com.easyinsight.analysis.EmptyValue;
 import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.Value;
-import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.framework.InvalidFieldsEvent;
 
-import flash.display.DisplayObject;
 import flash.events.EventDispatcher;
 import mx.collections.ArrayCollection;
-import mx.core.Application;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -84,13 +81,10 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         if (listData.invalidAnalysisItemIDs != null && listData.invalidAnalysisItemIDs.length > 0) {
             dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
         }
-        if (listData.credentialRequirements != null && listData.credentialRequirements.length > 0) {
-            CredentialsCache.getCache().obtainCredentials(DisplayObject(Application.application), listData.credentialRequirements, retrieve);
-        }
         var serviceData:ServiceData = translate(listData);
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data, 
-                listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.limitedResults, listData.maxResults,
-                listData.limitResults));
+                listData.dataSourceInfo, listData.additionalProperties, listData.auditMessages, listData.reportFault,
+                listData.limitedResults, listData.maxResults, listData.limitResults));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
@@ -103,7 +97,6 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();
         metadata.refreshAllSources = refreshAllSources;
-        metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         dataRemoteSource.list.send(definition, metadata);
     }
 

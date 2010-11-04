@@ -3,25 +3,9 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.CredentialsResponse;
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.administration.feed.GoogleAnalyticsDataSource;
-        import com.easyinsight.administration.feed.GoogleFeedDefinition;
-        import com.easyinsight.datasources.BaseCampDataSource;
-        import com.easyinsight.datasources.CloudWatchDataSource;
-        import com.easyinsight.datasources.FreshbooksDataSource;
-        import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.datasources.JiraDataSource;
-        import com.easyinsight.datasources.LinkedInDataSource;
-        import com.easyinsight.datasources.MarketoDataSource;
-        import com.easyinsight.datasources.MeetupDataSource;
-        import com.easyinsight.datasources.PivotalTrackerBaseSource;
-        import com.easyinsight.datasources.SendGridDataSource;
-        import com.easyinsight.datasources.WholeFoodsDataSource;
         import com.easyinsight.framework.EIMessageListener;
-        import com.easyinsight.framework.User;
         import com.easyinsight.listing.DataFeedDescriptor;
-        import com.easyinsight.framework.CredentialsCache;
-        import com.easyinsight.salesforce.SalesforceFeedDefinition;
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
         import com.easyinsight.scorecard.DataSourceMessageEvent;
         import com.easyinsight.util.PopUpUtil;
@@ -55,28 +39,6 @@
 
         private var _onlyDataSource:Boolean;
 
-        private function blah():void {
-            var excelUploadFormat:ExcelUploadFormat;
-            var xssfExcelUploadFormat:XSSFExcelUploadFormat;
-            var flatFileUploadFormat:FlatFileUploadFormat;
-            var csvFileUploadFormat:CsvFileUploadFormat;
-            var basecamp:BaseCampDataSource;
-            var highrise:HighRiseDataSource;
-            var google:GoogleAnalyticsDataSource;
-            var salesforce:SalesforceFeedDefinition;
-            var jira:JiraDataSource;
-            var cloudwatch:CloudWatchDataSource;
-            var googleDoc:GoogleFeedDefinition;
-            var marketoSource:MarketoDataSource;
-            var pivotal:PivotalTrackerBaseSource;
-            var sendGrid:SendGridDataSource;
-            var meetup:MeetupDataSource;
-            var linked:LinkedInDataSource;
-            var freshbooks:FreshbooksDataSource;
-            var redirect:RedirectDataSource;
-            var wholeFoods:WholeFoodsDataSource;
-        }
-
         [Bindable]
         private var ready:Boolean;
 
@@ -105,9 +67,6 @@
             } else {
                 ready = true;
                 dataSourceCreation = new _dataSourceClass();
-                if (dataSourceCreation.savesCredentials) {
-                    credentialsIndex = 1;
-                }
                 var uicomp:UIComponent = dataSourceCreation as UIComponent;
                 uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
                 coreContent.addChild(dataSourceCreation as DisplayObject);
@@ -123,9 +82,6 @@
             ready = true;
             var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
             dataSourceCreation = new configClass();
-            if (dataSourceCreation.savesCredentials) {
-                credentialsIndex = 1;
-            }
             var dispObject:DisplayObject = dataSourceCreation as DisplayObject;
             dispObject.addEventListener(FlexEvent.CREATION_COMPLETE, onDataCreation, false, 0, true);
             coreContent.addChild(dispObject);
@@ -152,20 +108,12 @@
             ready = false;
             progressBar.visible = true;
             dataSourceCreation.updateDataSource(dataSourceDefinition);
-            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox != null ? saveCredentialsCheckbox.selected : false);
+            uploadService.validateCredentials.send(dataSourceDefinition);
         }
 
         private function validated():void {
             var validation:CredentialsResponse = uploadService.validateCredentials.lastResult as CredentialsResponse;
-            if (validation.successful) {
-                if (validation.encryptedResponse) {
-                    User.saveCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
-                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
-                } else {
-                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials);
-                }
-                //dataSourceDefinition.refreshDataInterval = (dailyRefresh.selected ? 1 : 0) * 24 * 1000 * 60 * 60;
-                dataSourceCreation.updateDataSource(dataSourceDefinition);
+            if (validation.successful) {                
                 feedService.updateFeedDefinition.send(dataSourceDefinition, "");
             } else {
                 ready = true;
@@ -196,7 +144,7 @@
 
         private function created():void {
             var string:String = feedService.updateFeedDefinition.lastResult as String;
-            if (string == null) uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
+            if (string == null) uploadService.refreshData.send(dataSourceDefinition.dataFeedID, true);
             else {
                 Alert.show(string);
                 ready = true;
@@ -227,9 +175,6 @@
 
         [Bindable]
         private var asyncLabel:String = "Retrieving data, this may take a few minutes...";
-
-        [Bindable]
-        private var credentialsIndex:int;
         ]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="validateCredentials" result="validated()"/>
@@ -245,17 +190,6 @@
         </mx:HBox>
         <mx:Box id="coreContent"/>
         <mx:ProgressBar id="progressBar" indeterminate="false" mode="manual" visible="false" label="{asyncLabel}"/>
-        <mx:ViewStack selectedIndex="{credentialsIndex}">
-            <mx:Box/>
-            <mx:HBox>
-                <mx:Label text="Save Credentials:"/>
-                <mx:CheckBox id="saveCredentialsCheckbox"/>
-                <mx:Label text="Security Note" fontSize="10" textDecoration="underline" toolTip="Your credentials will be saved in an encrypted form on your local system, so do not do this if you're using a public machine."/>
-            </mx:HBox>
-        </mx:ViewStack>
-        <!--<mx:FormItem label="Daily Refresh:" enabled="{credentialsSaved}">
-            <mx:CheckBox id="dailyRefresh"/>
-        </mx:FormItem>-->
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Create" click="validate()" enabled="{ready}"/>
             <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)"/>

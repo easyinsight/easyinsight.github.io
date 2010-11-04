@@ -2,7 +2,6 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"  implements="com.easyinsight.filtering.IFilterDetailEditor">
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.framework.CredentialsCache;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.Sort;
@@ -55,7 +54,7 @@
             dataService = new RemoteObject();
             dataService.destination = "data";
             dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+            dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, new Date().getTimezoneOffset());
         }
 
         private function compare(obj1:Object, obj2:Object, fields:Array = null):int {

@@ -69,7 +69,7 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
         if (dataSourceUser == null) {
             throw new RuntimeException();
         }
-        dataSource.refreshData(refreshCreds, dataSourceUser.getAccountID(), now, null);
+        dataSource.refreshData(dataSourceUser.getAccountID(), now, null);
     }
 
     @Override

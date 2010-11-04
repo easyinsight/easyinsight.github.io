@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -43,6 +44,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private boolean includeCompanyNotes;
     private boolean includeDealNotes;
     private boolean includeCaseNotes;
+    private String token;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public boolean isIncludeCompanyNotes() {
         return includeCompanyNotes;
@@ -93,7 +103,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     public HighriseCache getOrCreateCache(HttpClient httpClient) throws HighRiseLoginException, ParsingException {
         if (highriseCache == null) {
             highriseCache = new HighriseCache();
-            highriseCache.populateCaches(httpClient, getUrl());
+            highriseCache.populateCaches(httpClient, getUrl(), this);
         }
         return highriseCache;
     }
@@ -130,40 +140,6 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         return feedTypes;
     }
 
-    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
-        String userName = null;
-        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, getDataFeedID(), false);
-        CredentialFulfillment ourFulfillment = null;
-        for (CredentialFulfillment credentialFulfillment : existingCredentials) {
-            if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
-                ourFulfillment = credentialFulfillment;
-            }
-        }
-        if (token == null && ourFulfillment != null) {
-            userName = ourFulfillment.getCredentials().getUserName();
-        } else if (token != null && ourFulfillment != null) {
-            com.easyinsight.users.Credentials credentials = ourFulfillment.getCredentials();
-            if (credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
-                !credentials.getUserName().equals(token.getTokenValue())) {
-                token.setTokenValue(credentials.getUserName());
-                new TokenStorage().saveToken(token, getDataFeedID());
-            }
-            userName = token.getTokenValue();
-        } else if (token != null) {
-            userName = token.getTokenValue();
-        }
-        if (userName == null) {
-            return true;
-        }
-        HttpClient client = getHttpClient(userName, "");
-        try {
-            runRestRequest("/companies.xml", client, new Builder());
-        } catch (HighRiseLoginException e) {
-            return true;
-        }
-        return false;
-    }
-
     private static HttpClient getHttpClient(String username, String password) {
         HttpClient client = new HttpClient();
         client.getParams().setAuthenticationPreemptive(true);
@@ -196,8 +172,8 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         return doc;
     }
 
-    public String validateCredentials(com.easyinsight.users.Credentials credentials) {
-        HttpClient client = getHttpClient(credentials.getUserName(), credentials.getPassword());
+    public String validateCredentials() {
+        HttpClient client = getHttpClient(token, "");
         Pattern p = Pattern.compile("(http(s?)://)?([A-Za-z0-9]|\\-)+(\\.highrisehq\\.com)?");
         Matcher m = p.matcher(url);
         String result = null;
@@ -315,6 +291,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         basecampStmt.setBoolean(8, includeCaseNotes);
         basecampStmt.execute();
         basecampStmt.close();
+        if (this.token != null && !"".equals(this.token.trim())) {
+            Token token = new Token();
+            token.setTokenValue(this.token.trim());
+            token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
+            token.setUserID(SecurityUtil.getUserID());
+            new TokenStorage().saveToken(token, getDataFeedID(), (EIConnection) conn);
+        }
     }
 
     public void customLoad(Connection conn) throws SQLException {
@@ -334,13 +317,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         }
         loadStmt.close();
     }
-
-    @Override
-    public int getCredentialsDefinition() {
-        return new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, getDataFeedID(), false) == null ? CredentialsDefinition.STANDARD_USERNAME_PW :
-                CredentialsDefinition.NO_CREDENTIALS;
-    }
-
+    
     public List<KPI> createKPIs() {
         KPI dealValueKPI = new KPI();
         dealValueKPI.setName("Pending Dollar Value of the Sales Pipeline");

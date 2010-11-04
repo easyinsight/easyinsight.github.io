@@ -34,7 +34,7 @@ public class SalesForceDataSourceTest extends TestCase {
         SalesforceBaseDataSource sbds = new SalesforceBaseDataSource();
         Credentials credentials = new Credentials("jboe99@gmail.com", "e@symone$rKxLSrt0eol9SbnHAr8UbZOR");
 
-        long dataSourceID = new UserUploadService().newExternalDataSource(sbds, credentials);
+        long dataSourceID = new UserUploadService().newExternalDataSource(sbds);
         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
         System.out.println("blah");
     }

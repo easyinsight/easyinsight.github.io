@@ -8,7 +8,6 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.Builder;
@@ -51,7 +50,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_COMMENTS;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(COMMENT_AUTHOR), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMMENT_ID), true));
@@ -63,7 +62,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
         return analysisItems;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet ds = new DataSet();
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
@@ -74,24 +73,12 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
 
 
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
-        if (token == null && credentials.getUserName() != null) {
-            token = new Token();
-            token.setTokenValue(credentials.getUserName());
-            token.setTokenType(TokenStorage.BASECAMP_TOKEN);
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        } else if (token != null && credentials != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
-                !credentials.getUserName().equals(token.getTokenValue())) {
-            token.setTokenValue(credentials.getUserName());
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
 
         Builder builder = new Builder();
         try {
             BaseCampCache basecampCache = source.getOrCreateCache(client);
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
@@ -106,13 +93,13 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
                 }
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
 
-                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false);
+                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false, parentDefinition);
 
                 Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
                 for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
                     Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
                     String milestoneID = queryField(milestoneNode, "id/text()");
-                    Document comments = runRestRequest("/milestones/" + milestoneID + "/comments.xml", client, builder, url, null, false);
+                    Document comments = runRestRequest("/milestones/" + milestoneID + "/comments.xml", client, builder, url, null, false, parentDefinition);
                     Nodes commentNodes = comments.query("/comments/comment");
                     for (int j = 0; j < commentNodes.size(); j++) {
                         Node commentNode = commentNodes.get(j);
@@ -139,6 +126,8 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
                 }
 
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

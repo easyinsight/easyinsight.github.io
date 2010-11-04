@@ -8,7 +8,6 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -44,7 +43,7 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
         return FeedType.FRESHBOOKS_PROJECTS;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksProjectSource.PROJECT_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksProjectSource.CLIENT_ID), true));
@@ -56,7 +55,7 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
         return items;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
     }
 

@@ -7,7 +7,6 @@ import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.util.RandomTextGenerator;
@@ -23,6 +22,7 @@ import java.sql.ResultSet;
 import java.io.Serializable;
 
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -110,25 +110,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return "On the left, you'll see the list of fields available to you. Drag a field from that list into the area to the right to create a filter.";
     }
 
-    private Credentials cachedCredentials;
-
     public FeedDefinition() {
-    }
-
-    public long getRefreshDataInterval() {
-        return refreshDataInterval;
-    }
-
-    public void setRefreshDataInterval(long refreshDataInterval) {
-        this.refreshDataInterval = refreshDataInterval;
-    }
-
-    public Credentials getCachedCredentials() {
-        return cachedCredentials;
-    }
-
-    public void setCachedCredentials(Credentials cachedCredentials) {
-        this.cachedCredentials = cachedCredentials;
     }
 
     public int getRequiredAccountTier() {
@@ -349,6 +331,7 @@ public class FeedDefinition implements Cloneable, Serializable {
             }
         }
         Feed feed = createFeedObject(parentSource);
+        feed.setDataSource(this);
         feed.setFeedID(getDataFeedID());
         feed.setAttribution(getAttribution());
         feed.setProperties(createProperties());
@@ -423,6 +406,9 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setFields(clones);
     }
 
+    public void exchangeTokens(EIConnection conn) throws Exception {
+    }
+
     public void customStorage(Connection conn) throws SQLException {
         
     }
@@ -435,7 +421,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return (FeedDefinition) super.clone();
     }
 
-    public DataSourceCloneResult cloneDataSource(Connection conn) throws CloneNotSupportedException, SQLException {
+    public DataSourceCloneResult cloneDataSource(Connection conn) throws Exception {
         FeedDefinition feedDefinition = clone(conn);
         List<AnalysisItem> clonedFields = new ArrayList<AnalysisItem>();
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
@@ -466,8 +452,6 @@ public class FeedDefinition implements Cloneable, Serializable {
         feedDefinition.setVisible(visible);
         feedDefinition.setDataFeedID(0);
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
-        feedDefinition.setCachedCredentials(null);
-        feedDefinition.setRefreshDataInterval(0);
         feedDefinition.setAccountVisible(false);
         List<FeedFolder> clonedFolders = new ArrayList<FeedFolder>();
         for (FeedFolder feedFolder : getFolders()) {
@@ -481,14 +465,6 @@ public class FeedDefinition implements Cloneable, Serializable {
         }
         feedDefinition.setFolders(clonedFolders);
         return new DataSourceCloneResult(feedDefinition, keyReplacementMap);
-    }
-
-    public InitialAnalysis initialAnalysisDefinition() {
-        return new InitialAnalysis();
-    }
-
-    public int getCredentialsDefinition() {
-        return CredentialsDefinition.NO_CREDENTIALS;
     }
 
     public List<KPI> createKPIs() {
@@ -515,7 +491,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return item;
     }
     
-     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) throws ReportException {
         throw new UnsupportedOperationException();
     }
 
@@ -535,15 +511,20 @@ public class FeedDefinition implements Cloneable, Serializable {
         this.marketplaceVisible = marketplaceVisible;
     }
 
-    public String validateCredentials(Credentials credentials) {
+    public String validateCredentials() {
         throw new UnsupportedOperationException();
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    @Nullable
+    public ReportFault validateDataConnectivity() {
+        return null;
+    }
+
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         throw new UnsupportedOperationException();
     }
 
-    public Map<String, Key> newDataSourceFields(Credentials credentials) {
+    public Map<String, Key> newDataSourceFields() {
         throw new UnsupportedOperationException();
     }
 
@@ -566,7 +547,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return key;
     }
 
-    public void postClone(Connection conn) throws SQLException {
+    public void postClone(Connection conn) throws Exception {
         
     }
 
@@ -643,10 +624,6 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public boolean isLongRefresh() {
-        return false;
-    }
-
-    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
         return false;
     }
 

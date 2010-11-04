@@ -14,6 +14,10 @@ public class Now extends Function {
         return new NumericValue(System.currentTimeMillis());
     }
 
+    public int getParameterCount() {
+        return 0;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("now()", "Returns the current time in milliseconds");
     }

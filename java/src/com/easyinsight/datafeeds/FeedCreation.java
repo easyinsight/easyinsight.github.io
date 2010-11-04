@@ -24,7 +24,7 @@ public class FeedCreation {
 
     private FeedStorage feedStorage = new FeedStorage();
 
-    public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, UploadPolicy uploadPolicy) throws SQLException {
+    public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, UploadPolicy uploadPolicy) throws Exception {
         long feedID = feedStorage.addFeedDefinitionData(feedDefinition, conn);
         long accountID = 0;
         for (FeedConsumer feedConsumer : uploadPolicy.getOwners()) {

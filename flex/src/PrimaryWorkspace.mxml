@@ -16,7 +16,6 @@
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.bugreports.BugReportWindow;
         import com.easyinsight.framework.ConnectionGoEvent;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FragmentParser;
         import com.easyinsight.framework.InitialLoginWindow;
@@ -27,7 +26,6 @@
         import com.easyinsight.framework.PerspectiveFactoryHolder;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.Constants;
-        import com.easyinsight.framework.WebCredentialsCache;
         import com.easyinsight.guest.FloatingGuestWindow;
         import com.easyinsight.listing.HeaderBar;
         import com.easyinsight.listing.IModulePerspective;
@@ -103,7 +101,6 @@
             Constants.setup();
             UserAudit.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
-            CredentialsCache.initialize(new WebCredentialsCache());
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
@@ -155,8 +152,6 @@
         private function onKeyDown(event:KeyboardEvent):void {
             if (event.ctrlKey && event.keyCode == 190 && User.getInstance() != null) {
                 launchQuickSearchWindow(null);
-            } else if (event.keyCode == 192) {
-                Alert.show(String(System.totalMemory));
             }
             /*else if (event.keyCode == 192) {
              DisplayListAnalysis.traverse(this);
@@ -236,6 +231,12 @@
                     if (o.resetPassword != null && o.resetPassword != "") {
                         new PasswordReset(o.resetPassword, this).reset();
                     }
+                    if (o.startType != null && o.startType != "") {
+                        startType = int(o.startType);
+                    }
+                    if (o.scenarioKey != null && o.scenarioKey != "") {
+                        scenarioKey = o.scenarioKey;
+                    }
                     configureInline = !(o.configureInline != null && o.configureInline != "");
                 }
             }
@@ -266,6 +267,33 @@
             if (_solutionID == value) return;
             _solutionID = value;
             dispatchEvent(new Event("solutionIDChanged"));
+        }
+
+        private var _startType:int;
+
+        [Bindable(event="startTypeChanged")]
+        public function get startType():int {
+            return _startType;
+        }
+
+        public function set startType(value:int):void {
+            if (_startType == value) return;
+            _startType = value;
+            dispatchEvent(new Event("startTypeChanged"));
+        }
+
+        private var _scenarioKey:String;
+
+
+        [Bindable(event="scenarioKeyChanged")]
+        public function get scenarioKey():String {
+            return _scenarioKey;
+        }
+
+        public function set scenarioKey(value:String):void {
+            if (_scenarioKey == value) return;
+            _scenarioKey = value;
+            dispatchEvent(new Event("scenarioKeyChanged"));
         }
 
         private var passwordResetValue:String;
@@ -546,6 +574,7 @@
         private function loginEvent(event:LoginEvent):void {
             loggedIn = event.type == LoginEvent.LOGIN;
             if (event.type == LoginEvent.LOGOUT) {
+                startType = event.startType;
                 toLogin(0);
             }
         }
@@ -568,6 +597,8 @@
             BindingUtils.bindProperty(loginPage, "solutionID", this, "solutionID");
             BindingUtils.bindProperty(loginPage, "requiredTier", this, "requiredTier");
             BindingUtils.bindProperty(loginPage, "configureInline", this, "configureInline");
+            BindingUtils.bindProperty(loginPage, "scenarioKey", this, "scenarioKey");
+            BindingUtils.bindProperty(loginPage, "startType", this, "startType");
             masterCanvas.addChildAt(loginPage, 0);
         }
 

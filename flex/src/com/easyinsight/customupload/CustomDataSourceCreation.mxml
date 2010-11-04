@@ -26,8 +26,6 @@
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:CustomDataSource = feedDefinition as CustomDataSource;
             url = ds.wsdl;
-            usernameInputText = ds.username;
-            passwordText = ds.password;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {

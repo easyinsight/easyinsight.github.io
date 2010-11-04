@@ -26,7 +26,7 @@ public class ReportItemTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public void testReportItems() throws SQLException {
+    public void testReportItems() throws Exception {
         TestUtil.getIndividualTestUser();
         AnalysisDimension blah = new AnalysisDimension("blah", true);
         AnalysisMeasure count = new AnalysisMeasure("count", AggregationTypes.SUM);

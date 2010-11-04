@@ -14,5 +14,6 @@ public interface IFunction {
 
     public Value evaluate();
     public void setParameters(List<Value> parameters);
+    public int getParameterCount();
     public FunctionExplanation explain();
 }

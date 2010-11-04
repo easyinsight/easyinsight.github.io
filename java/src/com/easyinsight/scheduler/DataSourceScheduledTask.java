@@ -70,7 +70,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
                     if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                         try {
-                            dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn, null);
+                            dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null);
                         } finally {
                             DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                         }

@@ -10,16 +10,18 @@ package com.easyinsight.framework
 
         public var targetURL:String;
         public var newAccount:Boolean;
+        public var startType:int;
 
         public var authResponse:UserServiceResponse;
 		
-		public function LoginEvent(type:String, authResponse:UserServiceResponse = null) {
+		public function LoginEvent(type:String, authResponse:UserServiceResponse = null, startType:int = 0) {
 			super(type);
             this.authResponse = authResponse;
+            this.startType = startType;
 		}
 		
 		override public function clone():Event {
-            return new LoginEvent(type, authResponse);
+            return new LoginEvent(type, authResponse, startType);
         }
 	}
 }

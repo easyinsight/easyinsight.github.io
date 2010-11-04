@@ -1,15 +1,11 @@
 package com.easyinsight.listing
 {
-import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
-import com.easyinsight.customupload.RefreshWindow;
 import com.easyinsight.customupload.UploadConfigEvent;
 import com.easyinsight.datasources.DataSourceRefreshWindow;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableSource;
-import com.easyinsight.framework.Credentials;
 import com.easyinsight.framework.PerspectiveInfo;
-import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.goals.GoalDataAnalyzeSource;
 import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
@@ -21,7 +17,6 @@ import com.easyinsight.reportpackage.ReportPackageWindow;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
-import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -33,8 +28,6 @@ import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
-import mx.rpc.events.ResultEvent;
-import mx.rpc.remoting.RemoteObject;
 
 public class MyDataIconControls extends UIComponent implements IListItemRenderer
 {
@@ -54,8 +47,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
 
     [Embed(source="../../../../assets/navigate_cross.png")]
     public var deleteIcon:Class;
-
-    private var feedService:RemoteObject;
 
     private var refreshButton:Button;
     private var adminButton:Button;
@@ -338,6 +329,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                 case DataFeedDescriptor.BASECAMP:
                 case DataFeedDescriptor.HIGHRISE:
                 case DataFeedDescriptor.PIVOTAL_TRACKER:
+                case DataFeedDescriptor.LINKEDIN:
                     refreshData(feedDescriptor);
                     break;
             }
@@ -366,45 +358,10 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     }
 
     private function refreshData(feedDescriptor:DataFeedDescriptor):void {
-
-        var c:Credentials = User.getCredentials(feedDescriptor.id);
-        if (c != null) {
-            var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
-            dsRefreshWindow.dataSourceID = feedDescriptor.id;
-            PopUpManager.addPopUp(dsRefreshWindow, this, true);
-            PopUpUtil.centerPopUp(dsRefreshWindow);
-            //dispatchEvent(new RefreshNotificationEvent());
-            return;
-        }
-
-        feedService = new RemoteObject();
-        feedService.destination = "feeds";
-        feedService.needsConfig.addEventListener(ResultEvent.RESULT, gotConfigNeed);
-        ProgressAlert.alert(this, "Getting ready to refresh data...", null, feedService.needsConfig);
-        feedService.needsConfig.send(feedDescriptor.id);
-    }
-
-    private function gotConfigNeed(event:ResultEvent):void {
-        var config:Boolean = feedService.needsConfig.lastResult as Boolean;
-        var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-        if (config) {
-            var refreshWindow:RefreshWindow = new RefreshWindow();
-            refreshWindow.dataSourceID = descriptor.id;
-            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured, false, 0, true);
-            /*refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
-            refreshWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);*/
-            PopUpManager.addPopUp(refreshWindow, this, true);
-            PopUpUtil.centerPopUp(refreshWindow);
-        } else {
-            var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
-            dsRefreshWindow.dataSourceID = descriptor.id;
-            PopUpManager.addPopUp(dsRefreshWindow, this, true);
-            PopUpUtil.centerPopUp(dsRefreshWindow);
-        }
-    }
-
-    private function dsConfigured(event:DataSourceConfiguredEvent):void {
-        dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+        var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
+        dsRefreshWindow.dataSourceID = feedDescriptor.id;
+        PopUpManager.addPopUp(dsRefreshWindow, this, true);
+        PopUpUtil.centerPopUp(dsRefreshWindow);
     }
 
     private function passEvent(event:UploadConfigEvent):void {

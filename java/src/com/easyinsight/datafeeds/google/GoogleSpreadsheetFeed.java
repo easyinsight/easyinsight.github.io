@@ -1,7 +1,5 @@
 package com.easyinsight.datafeeds.google;
 
-import com.easyinsight.datafeeds.CredentialRequirement;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -37,24 +35,24 @@ public class GoogleSpreadsheetFeed extends Feed {
         this.worksheetURL = worksheetURL;
     }
 
-    private String getToken() throws TokenMissingException {
+    private String getToken() throws ReportException {
         if (token == null) {
             Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_DOCS_TOKEN, getFeedID(), true);
             if (tokenObject == null) {
-                throw new TokenMissingException(new CredentialRequirement(getFeedID(), getName(), CredentialsDefinition.STANDARD_USERNAME_PW));
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reset your connection to Google Analytics.", getDataSource()));
             }
             token = tokenObject.getTokenValue();
         }
         return token;
     }
 
-    private SpreadsheetService getService() throws AuthenticationException, TokenMissingException {
+    private SpreadsheetService getService() throws AuthenticationException, ReportException {
         if (as == null) {
             as = new SpreadsheetService("easyinsight_eidocs_v1.0");
             try {
                 String token = getToken();
                 as.setAuthSubToken(token, Utility.getPrivateKey());
-            } catch (TokenMissingException e) {
+            } catch (ReportException e) {
                 if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
                     as.setUserCredentials(ConfigLoader.instance().getGoogleUserName(), ConfigLoader.instance().getGooglePassword());
                 } else {
@@ -65,7 +63,7 @@ public class GoogleSpreadsheetFeed extends Feed {
         return as;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         try {
             AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
             SpreadsheetService myService = getService();
@@ -92,7 +90,7 @@ public class GoogleSpreadsheetFeed extends Feed {
         }
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         try {
             SpreadsheetService myService = getService();
             URL listFeedUrl = new URL(worksheetURL);

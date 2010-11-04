@@ -402,7 +402,7 @@ public class APIService {
             deleteCodeStmt.executeUpdate();
             feedDefinition.setDynamicServiceDefinitionID(0);
             feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }

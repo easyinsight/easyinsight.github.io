@@ -31,7 +31,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public void testHierarchies() throws SQLException {
+    public void testHierarchies() throws Exception {
         long userID = TestUtil.getIndividualTestUser();
         long dataSourceID = TestUtil.createDefaultTestDataSource(userID);
         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);

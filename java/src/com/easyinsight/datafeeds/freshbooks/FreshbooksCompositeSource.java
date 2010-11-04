@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.UserMessageException;
@@ -8,9 +9,7 @@ import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.Credentials;
 import flex.messaging.FlexContext;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
@@ -62,7 +61,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public String validateCredentials(Credentials credentials) {
+    public String validateCredentials() {
         return null;
     }
 
@@ -96,7 +95,8 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         return Account.BASIC;
     }
 
-    public void customStorage(Connection conn) throws SQLException {
+    @Override
+    public void exchangeTokens(EIConnection conn) throws Exception {
         try {
             if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecretKey == null) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
@@ -110,6 +110,9 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM FRESHBOOKS WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());

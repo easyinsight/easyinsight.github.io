@@ -1,14 +1,12 @@
 package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisZipCode;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -22,7 +20,7 @@ public class HighRiseContact2To3 extends DataSourceMigration {
     }
 
     @Override
-    public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseContactSource.CONTACT_WORK_EMAIL), true));
         addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseContactSource.CONTACT_HOME_EMAIL), true));
         addAnalysisItem(new AnalysisDimension(new NamedKey(HighRiseContactSource.CONTACT_OFFICE_PHONE), true));

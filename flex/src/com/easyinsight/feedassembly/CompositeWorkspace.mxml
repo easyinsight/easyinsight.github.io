@@ -12,7 +12,8 @@
         import com.adobe.flex.extras.controls.springgraph.SpringGraph;
         import com.easyinsight.administration.feed.FeedChangeEvent;
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.analysis.ReportFault;
+        import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.util.EdgeSelectionEvent;
         import com.easyinsight.util.GraphEvent;
@@ -100,7 +101,7 @@
 
         private function onEdgeTest(edgeEvent:EdgeEditEvent):void {
             var compositeFeedConnection:CompositeFeedConnection = graph.getLinkData(graph.find(edgeEvent.sourceID), graph.find(edgeEvent.targetID)) as CompositeFeedConnection;
-            feedService.testJoin.send(compositeFeedConnection, CredentialsCache.getCache().createCredentials());
+            feedService.testJoin.send(compositeFeedConnection);
         }
 
         private function tested():void {
@@ -132,15 +133,22 @@
         }
 
         private function join(event:GraphEvent):void {
-            var manualJoinWindow:ManualJoinWindow = new ManualJoinWindow();
             var state:GraphSelectionState = determineCounts();
             var firstNode:GraphFeedNode = state.nodeCount[0];
             var secondNode:GraphFeedNode = state.nodeCount[1];
-            manualJoinWindow.sourceFeedID = firstNode.feedID;
-            manualJoinWindow.targetFeedID = secondNode.feedID;
-            manualJoinWindow.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
-            PopUpManager.addPopUp(manualJoinWindow, this, true);
-            PopUpUtil.centerPopUp(manualJoinWindow);
+            if (secondNode != null) {
+                var manualJoinWindow:ManualJoinWindow = new ManualJoinWindow();
+                manualJoinWindow.sourceFeedID = firstNode.feedID;
+                manualJoinWindow.targetFeedID = secondNode.feedID;
+                manualJoinWindow.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
+                PopUpManager.addPopUp(manualJoinWindow, this, true);
+                PopUpUtil.centerPopUp(manualJoinWindow);
+            } else {
+                /*var window:DSPickJoinWindow = new DSPickJoinWindow();
+                window.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);*/
+            }
         }
 
         private function deleteItem(event:GraphEvent):void {
@@ -250,8 +258,6 @@
                  for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
 
                  }*/
-                ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
-                feedService.getCredentials.send(dsIDs, CredentialsCache.getCache().createCredentials());
                 //feedService.initialDefine.send(new ArrayCollection(), initialFeedIDs);
             } else {
                 for each (var compositeFeedNode:CompositeFeedNode in definedNodes) {
@@ -356,20 +362,14 @@
             dispatchEvent(new FeedChangeEvent());
             queuedExistings = compositeFeedNodes;
             queuedNews = new ArrayCollection([selectedObject]);
-            ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
-            feedService.getCredentials.send(new ArrayCollection([selectedObject.id]), CredentialsCache.getCache().createCredentials());
         }
 
 
         private var queuedExistings:ArrayCollection;
         private var queuedNews:ArrayCollection;
 
-        private function onCredentials():void {
-            /*var detectWindow:AutoDetectJoins = new AutoDetectJoins();
-             detectWindow.addEventListener("autoDetectJoins", autoDetectJoins);
-             detectWindow.addEventListener("noDetectJoins", noDetectJoins);
-             PopUpManager.addPopUp(detectWindow, this, true);
-             PopUpUtil.centerPopUp(detectWindow);*/
+        private function onProblem(event:ProblemDataEvent):void {
+            
         }
 
         private function noDetectJoins(event:Event):void {
@@ -378,12 +378,14 @@
 
         private function autoDetectJoins(event:Event):void {
             ProgressAlert.alert(this, "Trying to automatically find joins...", null, feedService.initialDefine);
-            feedService.initialDefine.send(queuedExistings, queuedNews, CredentialsCache.getCache().createCredentials());
+            feedService.initialDefine.send(queuedExistings, queuedNews);
         }
 
         private function gotCredentials():void {
-            var requirements:ArrayCollection = feedService.getCredentials.lastResult as ArrayCollection;
-            CredentialsCache.getCache().obtainCredentials(this, requirements, onCredentials);
+            var fault:ReportFault = feedService.getCredentials.lastResult as ReportFault;
+            if (fault != null) {
+                fault.popup(this, onProblem);
+            }
         }
 
         private function dragOverHandler(event:DragEvent):void {
@@ -457,7 +459,6 @@
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="initialDefine" result="gotDefine()"/>
         <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
-        <mx:method name="getCredentials" result="gotCredentials()"/>
         <mx:method name="testJoin" result="tested()"/>
     </mx:RemoteObject>
     <mx:VBox width="250" paddingLeft="5" paddingRight="10" height="100%" backgroundColor="#333333" paddingBottom="10" paddingTop="10">

@@ -25,9 +25,9 @@
         import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.framework.NavigationEvent;
@@ -373,15 +373,15 @@
         }
 
 
-        private function onCredentials():void {
+        private function onProblem(event:ProblemDataEvent):void {
             viewFactory.retrieveData(false);
         }
 
         private var report:AnalysisDefinition;
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
-            if (event.credentialRequirements != null) {
-                CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
+            if (event.reportFault != null) {
+                event.reportFault.popup(this, onProblem);
             } else {
                 UserAudit.instance().audit(UserAudit.OPEN_REPORT_VIEW);
                 report = event.analysisDefinition;

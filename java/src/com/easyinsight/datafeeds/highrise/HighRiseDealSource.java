@@ -5,7 +5,6 @@ import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.*;
@@ -59,7 +58,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID, CONTACT_ID, DESCRIPTION);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION), true));
@@ -90,13 +89,13 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
 
 
-    private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url) throws HighRiseLoginException, ParsingException {
+    private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url, FeedDefinition parentDefinition) throws HighRiseLoginException, ParsingException {
         try {
             String contactName = null;
             if(categoryID != null) {
                 contactName = categoryCache.get(categoryID);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url, false, false);
+                    Document contactInfo = runRestRequest("/deal_categories/" + categoryID + ".xml", client, builder, url, false, false, parentDefinition);
                     Nodes dealNodes = contactInfo.query("/deal-category");
                     if (dealNodes.size() > 0) {
                         Node deal = dealNodes.get(0);
@@ -118,7 +117,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_DEAL;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
@@ -126,26 +125,14 @@ public class HighRiseDealSource extends HighRiseBaseSource {
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
-        if (token == null) {
-            token = new Token();
-            token.setTokenValue(credentials.getUserName());
-            token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        } else if (token != null && credentials != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
-                !credentials.getUserName().equals(token.getTokenValue())) {
-            token.setTokenValue(credentials.getUserName());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
-        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
 
         Map<String, String> categoryCache = new HashMap<String, String>();
         try {
             HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
             //do {
-            Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true, false);
+            Document userDoc = runRestRequest("/deal_categories.xml", client, builder, url, true, false, parentDefinition);
             Nodes dealCategoryDoc = userDoc.query("/deal-catgories/deal-category");
             for (int i = 0; i < dealCategoryDoc.size(); i++) {
                 Node categoryNode = dealCategoryDoc.get(i);
@@ -153,7 +140,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 String categoryID = queryField(categoryNode, "id/text()");
                 categoryCache.put(categoryID, categoryName);
             }
-                Document deals = runRestRequest("/deals.xml", client, builder, url, true, false);
+                Document deals = runRestRequest("/deals.xml", client, builder, url, true, false, parentDefinition);
                 loadingProgress(0, 1, "Synchronizing with deals...", true);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
@@ -202,7 +189,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                         String responsibleParty = queryField(currDeal, "responsible-party-id/text()");
                         row.addValue(RESPONSIBLE_PARTY, highriseCache.getUserName(responsibleParty));
                         String categoryID = queryField(currDeal, "category-id/text()");
-                        row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
+                        row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url, parentDefinition));
                         row.addValue(COUNT, new NumericValue(1));
 
                         String partyID = queryField(currDeal, "party-id/text()");
@@ -220,6 +207,8 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 }
             //} while(info.currentPage++ < info.MaxPages);
 
+        } catch (ReportException re) {
+            throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

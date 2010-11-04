@@ -12,6 +12,9 @@ import com.easyinsight.core.Value;
  */
 public class NamedBracketValueFunction extends Function {
     public Value evaluate() {
+        if (params.size() < 2) {
+            throw new RuntimeException("namedbracketvalue() requires two parameters, such as namedbracketvalue(Deal Name, \"Type\").");
+        }
         Value stringValue = params.get(0);
         Value pair = params.get(1);
         String pairValue = pair.toString();
@@ -43,6 +46,10 @@ public class NamedBracketValueFunction extends Function {
             return new EmptyValue();
         }
         return new StringValue(result);
+    }
+
+    public int getParameterCount() {
+        return 2;
     }
 
     public FunctionExplanation explain() {

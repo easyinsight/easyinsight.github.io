@@ -1,14 +1,10 @@
 package com.easyinsight.datafeeds.salesforce;
 
 import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.CredentialRequirement;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.core.StringValue;
 import com.easyinsight.users.Credentials;
 import com.sforce.soap.partner.*;
-import com.sforce.soap.partner.sobject.SObject;
 
 import javax.persistence.Transient;
 import javax.xml.ws.BindingProvider;
@@ -33,8 +29,8 @@ public class SalesforceFeed extends Feed {
     @Transient
     protected Soap service;
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
-        AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+        /*AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         try {
             if (sessionHeader == null)
                 login(insightRequestMetadata.getCredentialForDataSource(getFeedID()));
@@ -50,10 +46,10 @@ public class SalesforceFeed extends Feed {
             queryBuilder.deleteCharAt(queryBuilder.length() - 1);
             queryBuilder.append(" from ");
             queryBuilder.append(findCoreSubject(subjects));
-            /*for (String querySubject : querySubjects) {
+            *//*for (String querySubject : querySubjects) {
                 queryBuilder.append(querySubject);
                 queryBuilder.append(",");
-            }*/
+            }*//*
             QueryResultType queryResultType = service.query(sessionHeader, queryBuilder.toString());
             if (queryResultType.isDone()) {
                 List<SObject> objects = queryResultType.getRecords();
@@ -68,19 +64,10 @@ public class SalesforceFeed extends Feed {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return metadata;
+        return metadata;*/
+        throw new UnsupportedOperationException();
     }
-
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
-        CredentialRequirement requirement = new CredentialRequirement();
-        requirement.setDataSourceID(getFeedID());
-        requirement.setDataSourceName(getName());
-        requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
-        credentials.add(requirement);
-        return credentials;
-    }
-
+    
     public String findCoreSubject(Set<String> subjects) {
         List<String> subjectList = new ArrayList<String>(subjects);
         Collections.sort(subjectList, new Comparator<String>() {
@@ -104,8 +91,8 @@ public class SalesforceFeed extends Feed {
         return -1;
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) {
-        DataSet dataSet = new DataSet();
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+        /*DataSet dataSet = new DataSet();
         try {
             if (sessionHeader == null)
                 login(insightRequestMetadata.getCredentialForDataSource(getFeedID()));
@@ -125,10 +112,10 @@ public class SalesforceFeed extends Feed {
             queryBuilder.deleteCharAt(queryBuilder.length() - 1);
             queryBuilder.append(" from ");
             queryBuilder.append(findCoreSubject(subjects));
-            /*for (String querySubject : querySubjects) {
+            for (String querySubject : querySubjects) {
                 queryBuilder.append(querySubject);
                 queryBuilder.append(",");
-            }*/
+            }
             QueryResultType queryResultType = service.query(sessionHeader, queryBuilder.toString());
             if (queryResultType.isDone()) {
                 List<SObject> objects = queryResultType.getRecords();
@@ -145,7 +132,8 @@ public class SalesforceFeed extends Feed {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return dataSet;
+        return dataSet;*/
+        throw new UnsupportedOperationException();
     }
 
     private void parseElement(Element element, IRow row, Map<String, AnalysisItem> keyLookupMap, String type) {

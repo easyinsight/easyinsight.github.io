@@ -4,14 +4,10 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.User;
-import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
-	import flash.geom.Point;
-
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
@@ -66,7 +62,7 @@ import mx.rpc.events.ResultEvent;
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
             dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, new Date().getTimezoneOffset());
 		}
 
         private function onFault(event:FaultEvent):void {

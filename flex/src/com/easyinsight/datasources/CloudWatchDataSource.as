@@ -6,6 +6,9 @@ import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 	[RemoteClass(alias="com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource")]
 	public class CloudWatchDataSource extends ServerDataSourceDefinition
 	{
+        public var cwUserName:String;
+        public var cwPassword:String;
+
 		public function CloudWatchDataSource()
 		{
 			super();

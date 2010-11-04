@@ -5,7 +5,6 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
@@ -208,7 +207,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return new GoogleAnalyticsFeed();
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
     }
 
@@ -231,7 +230,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 TOTAL_EVENTS, EVENT_VALUE, UNIQUE_EVENTS);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> standardItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> adItems = new ArrayList<AnalysisItem>();

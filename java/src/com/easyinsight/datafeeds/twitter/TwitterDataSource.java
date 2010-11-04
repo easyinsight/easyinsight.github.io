@@ -7,7 +7,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.Credentials;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import org.jetbrains.annotations.NotNull;
@@ -86,11 +85,7 @@ secret token token = QhfbN4AKz0Hb5HfllD5oWn7NGVdDoYh7xDOIUva0I
     public int getRequiredAccountTier() {
         return Account.ADMINISTRATOR;
     }
-
-    public int getCredentialsDefinition() {
-        return CredentialsDefinition.NO_CREDENTIALS;
-    }
-
+    
     public FeedType getFeedType() {
         return FeedType.TWITTER;
     }
@@ -110,7 +105,7 @@ secret token token = QhfbN4AKz0Hb5HfllD5oWn7NGVdDoYh7xDOIUva0I
         this.searches = searches;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet ds = new DataSet();
         return ds;
     }
@@ -121,7 +116,7 @@ secret token token = QhfbN4AKz0Hb5HfllD5oWn7NGVdDoYh7xDOIUva0I
                 LANGUAGE, AUTHOR_NAME, AUTHOR_URL, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(TWEET_ID), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(PUBLISHED), true, AnalysisDateDimension.MINUTE_LEVEL));

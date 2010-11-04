@@ -4,7 +4,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedRegistry;
-import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.core.Value;
 import com.easyinsight.kpi.KPIValue;
 
@@ -18,7 +17,7 @@ import java.util.*;
 public class HistoryRun {
 
     public List<KPIValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
-                                                     int timeWindow, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
+                                                     int timeWindow, InsightRequestMetadata insightRequestMetadata) {
         // the way this should work...
 
         // if date dimension and time window
@@ -31,8 +30,6 @@ public class HistoryRun {
                 filter.getField().setSort(2);
             }
         }
-
-        Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
 
 
         Date endDate = new Date();
@@ -86,7 +83,7 @@ public class HistoryRun {
         return goalValue;
     }
 
-    public List<KPIValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, Date startDate, Date endDate, List<CredentialFulfillment> credentials) {
+    public List<KPIValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, Date startDate, Date endDate) {
         Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
         return null;
     }

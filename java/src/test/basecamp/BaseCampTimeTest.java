@@ -1,5 +1,6 @@
 package test.basecamp;
 
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import junit.framework.TestCase;
 import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
@@ -41,8 +42,10 @@ public class BaseCampTimeTest extends TestCase {
 
         EIConnection conn = Database.instance().getConnection();
         try {
-            DataSet dataSet = ds.getDataSet(c, ds.newDataSourceFields(c), new Date(), comp, null, conn);
+            DataSet dataSet = ds.getDataSet(ds.newDataSourceFields(), new Date(), comp, null, conn);
             dataSet.toString();
+        } catch (ReportException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } finally {
             Database.closeConnection(conn);
         }

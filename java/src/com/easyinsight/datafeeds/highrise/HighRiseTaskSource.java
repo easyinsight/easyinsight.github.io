@@ -10,7 +10,6 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.*;
@@ -53,7 +52,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         return Arrays.asList(BODY, CATEGORY, DUE_AT, DONE_AT, CREATED_AT, COUNT, OWNER, AUTHOR, CASE_ID, COMPANY_ID, TASK_ID, DEAL_ID);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(BODY), true));
         analysisItems.add(new AnalysisDimension(keys.get(TASK_ID), true));
@@ -75,7 +74,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_TASKS;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
@@ -83,13 +82,6 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
-        if (token == null) {
-            token = new Token();
-            token.setTokenValue(credentials.getUserName());
-            token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        }
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
@@ -100,7 +92,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
             info.currentPage = 1;
             do {*/
                 loadingProgress(0, 1, "Synchronizing with tasks...", true);
-                Document companies = runRestRequest("/tasks/upcoming.xml", client, builder, url, true, false);
+                Document companies = runRestRequest("/tasks/upcoming.xml", client, builder, url, true, false, parentDefinition);
                 Nodes companyNodes = companies.query("/tasks/task");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
@@ -110,11 +102,11 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
                     String id = queryField(taskNode, "id/text()");
                     row.addValue(TASK_ID, id);
                     String categoryID = queryField(taskNode, "category-id/text()");
-                    row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
+                    row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url, parentDefinition));
                     String authorID = queryField(taskNode, "author-id/text()");
-                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url));
+                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition));
                     String ownerID = queryField(taskNode, "owner-id/text()");
-                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, ownerID, url));
+                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, ownerID, url, parentDefinition));
                     Date createdAt = deadlineFormat.parse(queryField(taskNode, "created-at/text()"));
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     String doneAtString = queryField(taskNode, "done-at/text()");
@@ -153,7 +145,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
 
                     row.addValue(COUNT, new NumericValue(1));
                 }
-            companies = runRestRequest("/tasks/assigned.xml", client, builder, url, true, false);
+            companies = runRestRequest("/tasks/assigned.xml", client, builder, url, true, false, parentDefinition);
                 companyNodes = companies.query("/tasks/task");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
@@ -163,11 +155,11 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
                     String id = queryField(taskNode, "id/text()");
                     row.addValue(TASK_ID, id);
                     String categoryID = queryField(taskNode, "category-id/text()");
-                    row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
+                    row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url, parentDefinition));
                     String authorID = queryField(taskNode, "author-id/text()");
-                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url));
+                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition));
                     String ownerID = queryField(taskNode, "owner-id/text()");
-                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, ownerID, url));
+                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, ownerID, url, parentDefinition));
                     Date createdAt = deadlineFormat.parse(queryField(taskNode, "created-at/text()"));
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     String doneAtString = queryField(taskNode, "done-at/text()");
@@ -206,7 +198,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
 
                     row.addValue(COUNT, new NumericValue(1));
                 }
-            companies = runRestRequest("/tasks/completed.xml", client, builder, url, true, false);
+            companies = runRestRequest("/tasks/completed.xml", client, builder, url, true, false, parentDefinition);
                 companyNodes = companies.query("/tasks/task");
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
@@ -216,11 +208,11 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
                     String id = queryField(taskNode, "id/text()");
                     row.addValue(TASK_ID, id);
                     String categoryID = queryField(taskNode, "category-id/text()");
-                    row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
+                    row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url, parentDefinition));
                     String authorID = queryField(taskNode, "author-id/text()");
-                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url));
+                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition));
                     String ownerID = queryField(taskNode, "owner-id/text()");
-                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, ownerID, url));
+                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, ownerID, url, parentDefinition));
                     Date createdAt = deadlineFormat.parse(queryField(taskNode, "created-at/text()"));
                     row.addValue(CREATED_AT, new DateValue(createdAt));
                     String doneAtString = queryField(taskNode, "done-at/text()");
@@ -261,6 +253,8 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
                 }
             //} while(info.currentPage++ < info.MaxPages);
 
+        } catch (ReportException re) {
+            throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -270,13 +264,13 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         return ds;
     }
 
-    private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url) throws HighRiseLoginException, ParsingException {
+    private String retrieveCategoryInfo(HttpClient client, Builder builder, Map<String, String> categoryCache, String categoryID, String url, FeedDefinition parentDefinition) throws HighRiseLoginException, ParsingException {
         try {
             String contactName = null;
             if(categoryID != null) {
                 contactName = categoryCache.get(categoryID);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/task_categories/" + categoryID + ".xml", client, builder, url, false, false);
+                    Document contactInfo = runRestRequest("/task_categories/" + categoryID + ".xml", client, builder, url, false, false, parentDefinition);
                     Nodes dealNodes = contactInfo.query("/task-category");
                     if (dealNodes.size() > 0) {
                         Node deal = dealNodes.get(0);

@@ -19,6 +19,10 @@ public class SubstringFunction extends Function {
         return new StringValue(string);
     }
 
+    public int getParameterCount() {
+        return 3;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("", "");
     }

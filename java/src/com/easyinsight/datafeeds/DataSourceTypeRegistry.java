@@ -18,9 +18,6 @@ import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
-import com.easyinsight.datafeeds.wesabe.WesabeAccountDataSource;
-import com.easyinsight.datafeeds.wesabe.WesabeDataSource;
-import com.easyinsight.datafeeds.wesabe.WesabeTransactionDataSource;
 import com.easyinsight.datafeeds.wholefoods.WholeFoodsSource;
 
 import java.util.HashMap;
@@ -56,9 +53,6 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BASECAMP_TIME, BaseCampTimeSource.class);
         registerType(FeedType.BASECAMP_COMPANY, BaseCampCompanySource.class);
         registerType(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampCompanyProjectJoinSource.class);
-        registerType(FeedType.WESABE, WesabeDataSource.class);
-        registerType(FeedType.WESABE_ACCOUNTS, WesabeAccountDataSource.class);
-        registerType(FeedType.WESABE_TRANSACTIONS, WesabeTransactionDataSource.class);
         registerType(FeedType.CLOUD_WATCH, CloudWatchDataSource.class);
         registerType(FeedType.HIGHRISE_COMPOSITE, HighRiseCompositeSource.class);
         registerType(FeedType.HIGHRISE_COMPANY, HighRiseCompanySource.class);

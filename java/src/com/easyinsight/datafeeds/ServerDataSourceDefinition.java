@@ -1,10 +1,10 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.ReportCache;
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
@@ -31,13 +31,6 @@ import org.hibernate.Session;
  */
 public abstract class ServerDataSourceDefinition extends FeedDefinition implements IServerDataSourceDefinition {
 
-    private String username;
-    private String password;
-    private String sessionId;
-
-
-    public void setCredentialsDefinition(int i) { }
-
     public void loadingProgress(int current, int total, String message, boolean async) {
         DataSourceRefreshEvent info = new DataSourceRefreshEvent();
         info.setDataSourceID(getParentSourceID() == 0 ? getDataFeedID() : getParentSourceID());
@@ -50,31 +43,21 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     }
 
-    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
-        if (getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-            Credentials credentials = null;
-            for (CredentialFulfillment credentialFulfillment : existingCredentials) {
-                if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
-                    credentials = credentialFulfillment.getCredentials();
-                }
-            }
-            return credentials == null || validateCredentials(credentials) != null;
-        }
-        return false;
+    public void exchangeTokens(EIConnection conn) throws Exception {        
     }
 
-    public long create(Credentials credentials, EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws SQLException, CloneNotSupportedException {
+    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws Exception {
         DataStorage metadata = null;
         try {
-            Map<String, Key> keys = newDataSourceFields(credentials);
-            DataSet dataSet = getDataSet(credentials, keys, new Date(), null, null, conn);
+            Map<String, Key> keys = newDataSourceFields();
+            DataSet dataSet = getDataSet(keys, new Date(), null, null, conn);
             if (externalAnalysisItems != null) {
                 /*for (AnalysisItem field : externalAnalysisItems) {
                     dataSet.refreshKey(field.getKey());
                 }*/
                 setFields(externalAnalysisItems);
             } else {
-                setFields(createAnalysisItems(keys, dataSet, credentials, conn));
+                setFields(createAnalysisItems(keys, dataSet, conn));
             }
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
@@ -127,7 +110,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     @NotNull
     protected abstract List<String> getKeys();
 
-    public Map<String, Key> newDataSourceFields(Credentials credentials) {
+    public Map<String, Key> newDataSourceFields() {
         Map<String, Key> keyMap = new HashMap<String, Key>();
         if (getDataFeedID() == 0) {
             List<String> keys = getKeys();
@@ -149,14 +132,16 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            refreshData(credentials, accountID, now, conn, null);
+            refreshData(accountID, now, conn, null);
             conn.commit();
             ReportCache.instance().flushResults(getDataFeedID());
             return new CredentialsResponse(true, getDataFeedID());
+        } catch (ReportException re) {
+            return new CredentialsResponse(false, re.getReportFault());
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -167,32 +152,27 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn) {
         try {
-            refreshData(credentials, accountID, now, conn, null);
+            refreshData(accountID, now, conn, null);
             return new CredentialsResponse(true, getDataFeedID());
+        } catch (ReportException re) {
+            return new CredentialsResponse(false, re.getReportFault());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public boolean refreshData(Credentials credentials, long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         DataStorage dataStorage = null;
         try {
-            /*if(credentials == null) {
-                if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                    credentials = new Credentials();
-                    credentials.setUserName(getUsername());
-                    credentials.setPassword(retrievePassword());
-                }
-            }*/
-            Map<String, Key> keys = newDataSourceFields(credentials);
+            Map<String, Key> keys = newDataSourceFields();
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
 
             if (clearsData()) {
                 dataStorage.truncate(); 
             }
-            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition, dataStorage, conn);
+            DataSet dataSet = getDataSet(newDataSourceFields(), now, parentDefinition, dataStorage, conn);
             //List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             //int version = dataStorage.getVersion();
             //int newVersion = dataStorage.migrate(getFields(), items);
@@ -214,37 +194,6 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     protected boolean clearsData() {
         return true;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    // This is not a getter so that we don't pass the value on to the client
-
-    public String retrievePassword() {
-        return password;
-    }
-
-    public String getPassword() {
-        return null;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
     }
 
 }

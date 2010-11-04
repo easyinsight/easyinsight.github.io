@@ -1062,40 +1062,40 @@ public class UserService {
     }
 
     public UserServiceResponse guestLogin(String userName, String scenarioKey) {
-        UserServiceResponse userServiceResponse;
+        UserServiceResponse userServiceResponse = null;
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         List results;
         try {
             conn.setAutoCommit(false);
-            Scenario scenario = (Scenario) session.createQuery("from Scenario where scenarioKey = ?").setString(0, scenarioKey).list().get(0);
-            results = session.createQuery("from User where userName = ?").setString(0, userName).list();
-            if (results.size() > 0) {
-                User user = (User) results.get(0);
-                if (!user.isGuestUser()) {
-                    throw new RuntimeException();
-                }
-                List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-                Account account = (Account) accountResults.get(0);
+            @SuppressWarnings({"unchecked"}) List<Scenario> scenarios = session.createQuery("from Scenario where scenarioKey = ?").setString(0, scenarioKey).list();
+            if (scenarios.size() > 0) {
+                Scenario scenario = scenarios.get(0);
+                results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+                if (results.size() > 0) {
+                    User user = (User) results.get(0);
+                    if (user.isGuestUser()) {
+                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+                        Account account = (Account) accountResults.get(0);
 
-                if (user.getPersonaID() != null) {
-                    user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+                        if (user.getPersonaID() != null) {
+                            user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+                        }
+                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                                (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                                user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
+                                !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                                user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                        userServiceResponse.setActivated(account.isActivated());
+                        userServiceResponse.setScenario(scenario);
+                        user.setLastLoginDate(new Date());
+                        session.update(user);
+                    }
                 }
-                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                     user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                        (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
-                        user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                        !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
-                userServiceResponse.setActivated(account.isActivated());
-                userServiceResponse.setScenario(scenario);
-                user.setLastLoginDate(new Date());
-                session.update(user);
-            } else {
-                throw new RuntimeException();
+                session.flush();
+                conn.commit();
             }
-            session.flush();
-            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();

@@ -18,6 +18,10 @@ public class Tangent extends Function {
         return new NumericValue(Math.tan(params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("tan(Number)", "Calculate the tangent of Number", Arrays.asList("Number - what you want the tangent of"));
     }

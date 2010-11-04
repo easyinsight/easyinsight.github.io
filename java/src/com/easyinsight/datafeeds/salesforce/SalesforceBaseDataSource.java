@@ -39,8 +39,8 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     protected Soap service;
 
     @Override
-    public Map<String, Key> newDataSourceFields(Credentials credentials) {
-        try {
+    public Map<String, Key> newDataSourceFields() {
+        /*try {
             Map<String, Key> keys = new HashMap<String, Key>();
             if(service == null || sessionHeader == null)
                 login(credentials);
@@ -54,19 +54,15 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
         }
         catch(Exception e) {
             throw new RuntimeException(e);
-        }
-
+        }*/
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int getRequiredAccountTier() {
         return Account.PROFESSIONAL;
     }
-
-    public int getCredentialsDefinition() {
-        return CredentialsDefinition.STANDARD_USERNAME_PW;
-    }
-
+    
     public boolean isConfigured() {
         return true;
     }
@@ -92,8 +88,8 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
-        try {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+        /*try {
             if(sessionHeader == null)
                 login(credentials);
 
@@ -120,7 +116,8 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
         }
         catch(Exception e) {
             throw new RuntimeException(e);
-        }
+        }*/
+        throw new UnsupportedOperationException();
     }
 
     public int getDataSourceType() {
@@ -169,18 +166,19 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
         return items;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
     }
 
     @Override
-    public String validateCredentials(Credentials credentials) {
-        try {
+    public String validateCredentials() {
+        /*try {
             if (sessionHeader == null) login(credentials);
             return null;
         } catch (Exception e) {
             return e.getMessage();
-        }
+        }*/
+        throw new UnsupportedOperationException();
     }
 
     private void login(Credentials c) throws InvalidIdFault, UnexpectedErrorFault, LoginFault {

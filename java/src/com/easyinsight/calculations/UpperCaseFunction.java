@@ -16,6 +16,10 @@ public class UpperCaseFunction extends Function {
         return new StringValue(substringValue.toUpperCase());
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("upper(String)", "Returns a fully upper case version of String.");
     }

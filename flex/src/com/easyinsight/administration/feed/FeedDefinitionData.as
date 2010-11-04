@@ -42,10 +42,6 @@ package com.easyinsight.administration.feed
         public var visible:Boolean = true;
         public var parentSourceID:int;
         public var folders:ArrayCollection = new ArrayCollection();
-
-        public var username:String;
-        public var password:String;
-        public var sessionId:String;
 		
 		public function FeedDefinitionData()
 		{

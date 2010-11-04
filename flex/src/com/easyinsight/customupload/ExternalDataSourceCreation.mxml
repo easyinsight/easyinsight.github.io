@@ -6,7 +6,6 @@
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
 
@@ -36,7 +35,8 @@
 
         private function validate():void {
             progressBar.visible = true;
-            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials);
+            dataSourceCreation.updateDataSource(dataSourceDefinition);
+            uploadService.validateCredentials.send(dataSourceDefinition);
         }
 
         private function validated():void {
@@ -52,14 +52,11 @@
         private function create():void {
             dataSourceName = dataSourceDefinition.feedName;
             ProgressAlert.alert(this, "Creating the data source...", null, uploadService.newExternalDataSource);
-            uploadService.newExternalDataSource.send(dataSourceDefinition, dataSourceCreation.credentials);
+            uploadService.newExternalDataSource.send(dataSourceDefinition);
         }
 
         private function created():void {
             var id:int = uploadService.newExternalDataSource.lastResult as int;
-            if (CredentialsCache.getCache() != null) {
-                CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);
-            }
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, dataSourceName));
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(id)));
         }

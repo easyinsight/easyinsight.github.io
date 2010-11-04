@@ -1,12 +1,12 @@
 package com.easyinsight.goals {
-import mx.collections.ArrayCollection;
+import com.easyinsight.analysis.ReportFault;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.goals.KPITreeWrapper")]
 public class KPITreeWrapper {
 
     public var goalTree:GoalTree;
-    public var credentials:ArrayCollection;
+    public var reportFault:ReportFault;
     public var asyncRefresh:Boolean;
 
     public function KPITreeWrapper() {

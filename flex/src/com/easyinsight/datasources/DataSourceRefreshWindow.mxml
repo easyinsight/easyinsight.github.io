@@ -2,10 +2,18 @@
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="setupListeners()" headerHeight="4">
     <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.CredentialsResponse;
+        import com.easyinsight.analysis.DataSourceConnectivityReportFault;
+        import com.easyinsight.analysis.ServerError;
+        import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
         import com.easyinsight.scorecard.DataSourceMessageEvent;
 
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.controls.Alert;
+        import mx.core.UIComponent;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
@@ -18,7 +26,7 @@
 
         private function setupListeners():void {
             EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
-            uploadService.refreshData.send(_dataSourceID, null, false, true);
+            uploadService.refreshData.send(_dataSourceID, true);
         }
 
 
@@ -33,7 +41,35 @@
         private var errorText:String;
 
         private function onResult(event:ResultEvent):void {
-            PopUpManager.removePopUp(this);           
+            var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+            if (!response.successful) {
+                if (response.reportFault != null) {
+                    var window:UIComponent = response.reportFault.createFaultWindow();
+                    window.addEventListener(ProblemDataEvent.PROBLEM_RESOLVED, onProblem, false, 0, true);
+                    window.addEventListener(Event.CANCEL, onCancel, false, 0, true);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpUtil.centerPopUp(window);
+                } else {
+                    Alert.show(response.failureMessage);
+                    PopUpManager.removePopUp(this);
+                }
+            } else {
+                PopUpManager.removePopUp(this);
+            }
+
+        }
+
+        private function onCancel(event:Event):void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function blah():void {
+            var fault:DataSourceConnectivityReportFault;
+            var serverError:ServerError;
+        }
+
+        private function onProblem(event:ProblemDataEvent):void {
+            uploadService.refreshData.send(_dataSourceID, true);
         }
 
         private function onFault(event:FaultEvent):void {

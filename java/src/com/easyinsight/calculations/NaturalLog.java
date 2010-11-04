@@ -18,6 +18,10 @@ public class NaturalLog extends Function {
         return new NumericValue(Math.log(params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return -1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("ln(value)", "Calculate the natural logarithm of value", Arrays.asList("Value - what you want the ln of"));
     }

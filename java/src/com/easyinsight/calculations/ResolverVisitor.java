@@ -90,6 +90,10 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
             }
         }
         else {
+            int parameters = node.getFunction().getParameterCount();
+            if (parameters != -1 && parameters != node.getChildCount() - 1) {
+                throw new RuntimeException(node.getChild(0).toString() + " requires " + parameters + " parameters. ");
+            }
             for(int i = 1;i < node.getChildCount();i++) {
                 ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(analysisItems, functionResolver));
             }

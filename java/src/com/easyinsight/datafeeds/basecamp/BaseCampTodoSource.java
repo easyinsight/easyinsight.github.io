@@ -11,7 +11,6 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.*;
@@ -80,7 +79,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return FeedType.BASECAMP;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();
@@ -88,23 +87,13 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
-        if (token == null && credentials.getUserName() != null) {
-            token = new Token();
-            token.setTokenValue(credentials.getUserName());
-            token.setTokenType(TokenStorage.BASECAMP_TOKEN);
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        } else if (token != null && credentials != null && credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
-                !credentials.getUserName().equals(token.getTokenValue())) {
-            token.setTokenValue(credentials.getUserName());
-            token.setUserID(SecurityUtil.getUserID());
-            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID(), conn);
-        }
+
+        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
         try {
             BaseCampCache basecampCache = source.getOrCreateCache(client);
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
@@ -125,7 +114,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 }
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
 
-                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false);
+                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false, parentDefinition);
 
                 Map<String, MilestoneInfo> milestoneMap = new HashMap<String, MilestoneInfo>();
                 
@@ -153,7 +142,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
 
 
-                Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null, false);
+                Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null, false, parentDefinition);
                 Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");
                 if (todoListNodes.size() > 0) {
                     for(int j = 0;j < todoListNodes.size();j++) {
@@ -180,7 +169,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                         }
 
                         try {
-                            Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null, false);
+                            Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null, false, parentDefinition);
 
                             Nodes todoItemNodes = todoItems.query("/todo-items/todo-item");
                             if (todoItemNodes.size() > 0) {
@@ -299,16 +288,21 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     }
                 }
 
-                if (dataStorage != null) {
+                if (writeDuring) {
                     dataStorage.insertData(ds);
                     ds = new DataSet();
                 }
 
             }
+        } catch (ReportException re) {
+            throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        if (dataStorage == null) {
+        if (!writeDuring) {
+            if (parentDefinition.isAdjustDates()) {
+                ds = adjustDates(ds);
+            }
             return ds;
         } else {
             return null;
@@ -341,7 +335,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 MILESTONE_CREATED_ON, MILESTONE_OWNER, MILESTONE_OWNER, ANNOUNCEMENT, PROJECT_CREATION_DATE, MILESTONE_ID);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension itemDim = new AnalysisDimension(keys.get(ITEMID), true);
         analysisItems.add(itemDim);

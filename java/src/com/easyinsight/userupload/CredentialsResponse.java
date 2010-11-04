@@ -1,5 +1,6 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.users.Credentials;
 
 /**
@@ -12,6 +13,7 @@ public class CredentialsResponse {
     private String failureMessage;
     private Credentials encryptedResponse;
     private long dataSourceID;
+    private ReportFault reportFault;
 
     public CredentialsResponse() {
     }
@@ -21,10 +23,23 @@ public class CredentialsResponse {
         this.dataSourceID = dataSourceID;
     }
 
+    public CredentialsResponse(boolean successful, ReportFault reportFault) {
+        this.successful = successful;
+        this.reportFault = reportFault;
+    }
+
     public CredentialsResponse(boolean successful, String failureMessage, long dataSourceID) {
         this.successful = successful;
         this.failureMessage = failureMessage;
         this.dataSourceID = dataSourceID;
+    }
+
+    public ReportFault getReportFault() {
+        return reportFault;
+    }
+
+    public void setReportFault(ReportFault reportFault) {
+        this.reportFault = reportFault;
     }
 
     public long getDataSourceID() {

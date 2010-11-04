@@ -14,6 +14,10 @@ public class AbsoluteValue extends Function {
         return new NumericValue(Math.abs(this.params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("abs(Number)", "Returns the absolute value of Number.");
     }

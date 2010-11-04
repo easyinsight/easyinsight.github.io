@@ -6,7 +6,6 @@
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.framework.Credentials;
 
         [Bindable]
         private var url:String;
@@ -16,34 +15,22 @@
         private var passwordText:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:CloudWatchDataSource = new CloudWatchDataSource();
-            return obj;
+            return new CloudWatchDataSource();
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:CloudWatchDataSource = feedDefinition as CloudWatchDataSource;
-            usernameInputText = ds.username;
-            passwordText = ds.password;
+            usernameInputText = ds.cwUserName;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:CloudWatchDataSource = feedDefinition as CloudWatchDataSource;
+            ds.cwUserName = userNameInput.text;
+            ds.cwPassword = passwordInput.text;
         }
 
         public function get savesCredentials():Boolean {
             return true;
-        }
-
-        public function get credentials():Credentials {
-            var credentials:Credentials = new Credentials();
-            credentials.userName = userNameInput.text;
-            credentials.password = passwordInput.text;
-            return credentials;
-        }
-
-        public function set credentials(c:Credentials):void {
-            usernameInputText = c.userName;
-            passwordText = c.password;
         }
 
         public function validate():Boolean {

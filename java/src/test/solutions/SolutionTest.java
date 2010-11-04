@@ -126,7 +126,7 @@ public class SolutionTest extends TestCase {
         Credentials c = new Credentials();
         c.setUserName("apiuser");
         c.setPassword("@p!user");
-        long sourceId = uploadService.newExternalDataSource(ds, c);
+        long sourceId = uploadService.newExternalDataSource(ds);
         AnalysisHierarchyItem responsibility = new AnalysisHierarchyItem();
         responsibility.setKey(new NamedKey("Responsibility"));
         HierarchyLevel respPartyLevel = new HierarchyLevel();
@@ -180,7 +180,7 @@ public class SolutionTest extends TestCase {
         }
         ds = (BaseCampCompositeSource) new FeedService().getFeedDefinition(newSourceID);
         ds.setUrl("easyinsight.basecamphq.com");
-        ds.refreshData(c, SecurityUtil.getAccountID(), new Date(), null);
+        ds.refreshData(SecurityUtil.getAccountID(), new Date(), null);
         WSListDefinition defaultQuery = new WSListDefinition();
         defaultQuery.setDataFeedID(newSourceID);
         defaultQuery.setColumns(Arrays.asList(getItem(BaseCampTodoSource.CREATORNAME, ds)));

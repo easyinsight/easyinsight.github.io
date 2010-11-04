@@ -7,7 +7,6 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
@@ -15,7 +14,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.Credentials;
 import org.apache.cxf.headers.Header;
 import org.apache.cxf.jaxb.JAXBDataBinding;
 import org.jetbrains.annotations.NotNull;
@@ -84,11 +82,6 @@ public class MarketoDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public int getCredentialsDefinition() {
-        return CredentialsDefinition.STANDARD_USERNAME_PW;
-    }
-
-    @Override
     public FeedType getFeedType() {
         return FeedType.MARKETO;
     }
@@ -102,7 +95,7 @@ public class MarketoDataSource extends ServerDataSourceDefinition {
           return result;
         }
     
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         DataSet dataSet = new DataSet();
         try {
             DatatypeFactory fac = DatatypeFactory.newInstance();
@@ -197,7 +190,7 @@ public class MarketoDataSource extends ServerDataSourceDefinition {
                 FIRST_NAME, LAST_NAME, POSTAL_CODE, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(LEAD_EMAIL), true));
         items.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.COUNT));

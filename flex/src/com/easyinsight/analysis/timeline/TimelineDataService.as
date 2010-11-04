@@ -5,7 +5,6 @@ import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.SeriesDataResults;
 import com.easyinsight.analysis.service.ListDataService;
-import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.InsightRequestMetadata;
@@ -58,7 +57,7 @@ public class TimelineDataService extends EventDispatcher implements IReportDataS
         }
         seriesData.additionalProperties.seriesValues = seriesData.seriesValues;
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, dataSets, seriesData.dataSourceInfo,
-                seriesData.additionalProperties, seriesData.auditMessages, false, 0, 0));
+                seriesData.additionalProperties, seriesData.auditMessages, seriesData.reportFault, false, 0, 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
@@ -67,7 +66,6 @@ public class TimelineDataService extends EventDispatcher implements IReportDataS
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();
         metadata.refreshAllSources = refreshAllSources;
-        metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         dataRemoteSource.list.send(definition, metadata);
     }
 }

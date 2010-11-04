@@ -18,6 +18,10 @@ public class Cosine extends Function {
         return new NumericValue(Math.cos(params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("cos(Number)", "Calculate the cosine of Number", Arrays.asList("Number - what you want the cosine of"));
     }

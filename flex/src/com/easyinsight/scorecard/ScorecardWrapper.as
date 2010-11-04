@@ -1,4 +1,6 @@
 package com.easyinsight.scorecard {
+import com.easyinsight.analysis.ReportFault;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -6,7 +8,7 @@ import mx.collections.ArrayCollection;
 public class ScorecardWrapper {
 
     public var scorecard:Scorecard;
-    public var credentials:ArrayCollection;
+    public var reportFault:ReportFault;
     public var asyncRefresh:Boolean;
     public var asyncRefreshKpis:ArrayCollection;
 

@@ -18,6 +18,10 @@ public class Floor extends Function {
         return new NumericValue(Math.floor(params.get(0).toDouble()));
     }
 
+    public int getParameterCount() {
+        return 1;
+    }
+
     public FunctionExplanation explain() {
         return new FunctionExplanation("floor(Number)", "Calculate the floor of Number", Arrays.asList("Number - what you want the floor of"));
     }

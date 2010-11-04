@@ -136,9 +136,6 @@
                 states = [ state ];
                 currentState = "Persona";
             }
-            if (!config.getConfiguration(UIConfiguration.SHOW_REPORT_BUG).selected) {
-                if (bugButton.parent != null) removeChild(bugButton);
-            }
 
         }
 
@@ -196,8 +193,6 @@
         <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <mx:Spacer width="100%"/>
-    <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug" id="bugButton"/>
-    <mx:Spacer width="10"/>
     <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)"/>
     <mx:Spacer width="10"/>
     <easyinsight:LoggedOnStatus/>

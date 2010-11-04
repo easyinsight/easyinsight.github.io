@@ -1,12 +1,9 @@
 package com.easyinsight.datafeeds.cloudwatch;
 
 import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.CredentialRequirement;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.DateValue;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.logging.LogClass;
 
 import java.util.*;
@@ -17,7 +14,18 @@ import java.util.*;
  * Time: 3:32:14 PM
  */
 public class CloudWatchFeed extends Feed {
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+
+    private String getUserName() {
+        CloudWatchDataSource cloudWatchDataSource = (CloudWatchDataSource) getDataSource();
+        return cloudWatchDataSource.getCwUserName();
+    }
+
+    private String getPassword() {
+        CloudWatchDataSource cloudWatchDataSource = (CloudWatchDataSource) getDataSource();
+        return cloudWatchDataSource.getCwPassword();
+    }
+
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         if (analysisItem.getKey().toKeyString().equals(CloudWatchDataSource.DATE)) {
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_YEAR, -13);
@@ -26,12 +34,8 @@ public class CloudWatchFeed extends Feed {
             dateMeta.setLatestDate(new Date());
             return dateMeta;
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
-            if (credentials == null) {
-                throw new RuntimeException();
-            }
             try {
-                List<EC2Info> ec2Infos = EC2Util.getInstances(credentials.getUserName(), credentials.getPassword());
+                List<EC2Info> ec2Infos = EC2Util.getInstances(getUserName(), getPassword());
                 DataSet childSet = EC2Util.createDataSet(ec2Infos, Arrays.asList((AnalysisDimension) analysisItem));
                 AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
                 for (IRow row : childSet.getRows()) {
@@ -63,13 +67,9 @@ public class CloudWatchFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         // do we need a dimension?
         try {
-            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
-            if (credentials == null) {
-                throw new RuntimeException();
-            }
             Collection<AnalysisDimension> dimensions = new ArrayList<AnalysisDimension>();
             Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
             for (AnalysisItem analysisItem : analysisItems) {
@@ -121,10 +121,10 @@ public class CloudWatchFeed extends Feed {
             if (measures.size() > 0) {
                 if (dimensions.size() > 0) {
                     // retrieve via instance IDs and aggregate
-                    List<EC2Info> ec2Infos = EC2Util.getInstances(credentials.getUserName(), credentials.getPassword());
+                    List<EC2Info> ec2Infos = EC2Util.getInstances(getUserName(), getPassword());
                     for (EC2Info info : ec2Infos) {
                         for (AnalysisMeasure analysisMeasure : measures) {
-                            DataSet childSet = CloudWatchUtil.getDataSet(credentials.getUserName(), credentials.getPassword(), info, analysisMeasure, dimensions, startDate, endDate,
+                            DataSet childSet = CloudWatchUtil.getDataSet(getUserName(), getPassword(), info, analysisMeasure, dimensions, startDate, endDate,
                                     period, analysisDateDimension);
                             for (IRow row : childSet.getRows()) {
                                 dataSet.addRow(row);
@@ -134,7 +134,7 @@ public class CloudWatchFeed extends Feed {
                 } else {
                     // just retrieve with no instance IDs
                     for (AnalysisMeasure analysisMeasure : measures) {
-                        DataSet childSet = CloudWatchUtil.getDataSet(credentials.getUserName(), credentials.getPassword(), null, analysisMeasure, dimensions, startDate, endDate,
+                        DataSet childSet = CloudWatchUtil.getDataSet(getUserName(), getPassword(), null, analysisMeasure, dimensions, startDate, endDate,
                                 period, analysisDateDimension);
                         for (IRow row : childSet.getRows()) {
                             dataSet.addRow(row);
@@ -143,7 +143,7 @@ public class CloudWatchFeed extends Feed {
                 }
             } else {
                 // just retrieve via EC2Util
-                List<EC2Info> ec2Infos = EC2Util.getInstances(credentials.getUserName(), credentials.getPassword());
+                List<EC2Info> ec2Infos = EC2Util.getInstances(getUserName(), getPassword());
                 DataSet childSet = EC2Util.createDataSet(ec2Infos, dimensions);
                 for (IRow row : childSet.getRows()) {
                     DateValue dummyDateValue = new DateValue(endDate);
@@ -156,16 +156,6 @@ public class CloudWatchFeed extends Feed {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
-        CredentialRequirement requirement = new CredentialRequirement();
-        requirement.setDataSourceID(getFeedID());
-        requirement.setDataSourceName(getName());
-        requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
-        credentials.add(requirement);
-        return credentials;
     }
 
     public DataSet getDetails(Collection<FilterDefinition> filters) {

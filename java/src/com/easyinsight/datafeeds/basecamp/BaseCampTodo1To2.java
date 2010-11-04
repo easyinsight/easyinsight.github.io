@@ -1,6 +1,5 @@
 package com.easyinsight.datafeeds.basecamp;
 
-import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
@@ -8,7 +7,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -22,7 +20,7 @@ public class BaseCampTodo1To2 extends DataSourceMigration {
     }
 
     @Override
-    public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         addAnalysisItem(new AnalysisDimension(new NamedKey(BaseCampTodoSource.MILESTONE_LAST_COMMENT), true));
     }
 

@@ -3,10 +3,10 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataService;
-import com.easyinsight.analysis.IRow;
+
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
-import com.easyinsight.logging.LogClass;
+
 
 import java.sql.SQLException;
 import java.util.*;
@@ -23,14 +23,14 @@ public class JoinTester {
         this.connection = connection;
     }
 
-    public JoinAnalysis generateReport(List<CredentialFulfillment> credentials) throws SQLException {
+    public JoinAnalysis generateReport() throws SQLException {
         DataService dataService = new DataService();
         FeedDefinition sourceData = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
         AnalysisItem sourceItem = getAnalysisItem(sourceData, connection.getSourceJoin());
-        AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) dataService.getAnalysisItemMetadata(connection.getSourceFeedID(), sourceItem, credentials, 0);
+        AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) dataService.getAnalysisItemMetadata(connection.getSourceFeedID(), sourceItem, 0);
         FeedDefinition targetData = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
         AnalysisItem targetItem = getAnalysisItem(targetData, connection.getTargetJoin());
-        AnalysisDimensionResultMetadata targetMetadata = (AnalysisDimensionResultMetadata) dataService.getAnalysisItemMetadata(connection.getTargetFeedID(), targetItem, credentials, 0);
+        AnalysisDimensionResultMetadata targetMetadata = (AnalysisDimensionResultMetadata) dataService.getAnalysisItemMetadata(connection.getTargetFeedID(), targetItem, 0);
 
         // how many items matched, how many didn't match from each side
 

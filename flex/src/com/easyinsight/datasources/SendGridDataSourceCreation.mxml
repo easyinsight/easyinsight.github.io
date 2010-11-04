@@ -6,14 +6,11 @@
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.framework.Credentials;
 
         [Bindable]
         private var url:String;
         [Bindable]
         private var usernameInputText:String;
-        [Bindable]
-        private var passwordText:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
             return new SendGridDataSource();
@@ -21,28 +18,17 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:SendGridDataSource = feedDefinition as SendGridDataSource;
-            usernameInputText = ds.username;
-            passwordText = ds.password;
+            usernameInputText = ds.sgUserName;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:SendGridDataSource = feedDefinition as SendGridDataSource;
+            ds.sgUserName = userNameInput.text;
+            ds.sgPassword = passwordInput.text;
         }
 
         public function get savesCredentials():Boolean {
             return true;
-        }
-
-        public function get credentials():Credentials {
-            var credentials:Credentials = new Credentials();
-            credentials.userName = userNameInput.text;
-            credentials.password = passwordInput.text;
-            return credentials;
-        }
-
-        public function set credentials(c:Credentials):void {
-            usernameInputText = c.userName;
-            passwordText = c.password;
         }
 
         public function validate():Boolean {
@@ -53,7 +39,7 @@
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
 		<mx:FormItem label="SendGrid Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
+			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
 		</mx:FormItem>
 	</mx:Form>
 </mx:VBox>

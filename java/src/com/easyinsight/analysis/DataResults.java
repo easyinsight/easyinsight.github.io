@@ -1,11 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.datafeeds.CredentialRequirement;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -13,12 +8,21 @@ import java.util.Set;
  * Time: 9:15:12 AM
  */
 public abstract class DataResults {
-    private Set<CredentialRequirement> credentialRequirements;
+    
     private Set<Long> invalidAnalysisItemIDs;
     private FeedMetadata feedMetadata;
     private DataSourceInfo dataSourceInfo;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
     private List<String> auditMessages;
+    private ReportFault reportFault;
+
+    public ReportFault getReportFault() {
+        return reportFault;
+    }
+
+    public void setReportFault(ReportFault reportFault) {
+        this.reportFault = reportFault;
+    }
 
     public List<String> getAuditMessages() {
         return auditMessages;
@@ -35,15 +39,7 @@ public abstract class DataResults {
     public void setAdditionalProperties(Map<String, Object> additionalProperties) {
         this.additionalProperties = additionalProperties;
     }
-
-    public Set<CredentialRequirement> getCredentialRequirements() {
-        return credentialRequirements;
-    }
-
-    public void setCredentialRequirements(Set<CredentialRequirement> credentialRequirements) {
-        this.credentialRequirements = credentialRequirements;
-    }
-
+    
     public DataSourceInfo getDataSourceInfo() {
         return dataSourceInfo;
     }

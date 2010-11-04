@@ -57,14 +57,14 @@ public class FeedStorage {
         }
     }
 
-    public long addFeedDefinitionData(FeedDefinition feedDefinition, Connection conn) throws SQLException {
+    public long addFeedDefinitionData(FeedDefinition feedDefinition, Connection conn) throws Exception {
         PreparedStatement insertDataFeedStmt;
         insertDataFeedStmt = conn.prepareStatement("INSERT INTO DATA_FEED (FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, FEED_SIZE, " +
                 "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
                 "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
-                "REFRESH_INTERVAL, CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, ADJUST_DATES) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, ADJUST_DATES) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -96,7 +96,6 @@ public class FeedStorage {
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isValidatedAPIUsingBasicAuth());
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isValidatedAPIEnabled());
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isInheritAccountAPISettings());
-        insertDataFeedStmt.setLong(i++, feedDefinition.getRefreshDataInterval());
         insertDataFeedStmt.setInt(i++, 1);
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isVisible());
         insertDataFeedStmt.setLong(i++, feedDefinition.getParentSourceID());
@@ -111,7 +110,9 @@ public class FeedStorage {
         saveFields(feedID, conn, feedDefinition.getFields());
         saveFolders(feedID, conn, feedDefinition.getFolders());
         saveTags(feedID, conn, feedDefinition.getTags());
+        feedDefinition.exchangeTokens((EIConnection) conn);
         feedDefinition.customStorage(conn);
+
         insertDataFeedStmt.close();
         return feedID;
     }
@@ -236,7 +237,7 @@ public class FeedStorage {
         return feedFolder;
     }
 
-    public long addFeedDefinitionData(FeedDefinition feedDefinition) throws SQLException {
+    public long addFeedDefinitionData(FeedDefinition feedDefinition) throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -244,7 +245,7 @@ public class FeedStorage {
             conn.commit();
             EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
             return feedID;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             conn.rollback();
             throw e;
         } finally {
@@ -381,16 +382,6 @@ public class FeedStorage {
             }
             insertLinkStmt.close();
         }
-    }
-
-    public void setSessionIdCredentials(Connection conn, IServerDataSourceDefinition ds) throws SQLException {
-        PreparedStatement selectStmt = conn.prepareStatement("SELECT session_id from session_id_storage WHERE data_feed_id = ?");
-        selectStmt.setLong(1, ds.getDataFeedID());
-        ResultSet rs = selectStmt.executeQuery();
-        if (rs.next()) {
-            ds.setSessionId(rs.getString(1));
-        }
-        selectStmt.close();
     }
 
     public Set<Tag> getTags(long feedID, Connection conn) throws SQLException {
@@ -555,7 +546,7 @@ public class FeedStorage {
         }
     }
 
-    public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws SQLException {
+    public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws Exception {
         try {
             if (feedCache != null)
                 feedCache.remove(feedDefinition.getDataFeedID());
@@ -565,7 +556,7 @@ public class FeedStorage {
         }
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
-                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
+                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
                 "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, ADJUST_DATES = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
@@ -584,7 +575,6 @@ public class FeedStorage {
         updateDataFeedStmt.setString(i++, feedDefinition.getApiKey());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isValidatedAPIEnabled());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isUncheckedAPIEnabled());
-        updateDataFeedStmt.setLong(i++, feedDefinition.getRefreshDataInterval());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isVisible());
         updateDataFeedStmt.setLong(i++, feedDefinition.getParentSourceID());
         updateDataFeedStmt.setLong(i++, feedDefinition.getVersion());
@@ -602,19 +592,20 @@ public class FeedStorage {
         saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
         saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
+        feedDefinition.exchangeTokens((EIConnection) conn);
         feedDefinition.customStorage(conn);
 
         updateDataFeedStmt.close();
     }
 
-    public void updateDataFeedConfiguration(FeedDefinition feedDefinition) throws SQLException {
+    public void updateDataFeedConfiguration(FeedDefinition feedDefinition) throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             updateDataFeedConfiguration(feedDefinition, conn);
             conn.commit();
             EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
-        } catch (SQLException e) {
+        } catch (Exception e) {
             conn.rollback();
             throw e;
         } finally {
@@ -640,7 +631,7 @@ public class FeedStorage {
         PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, CREATE_DATE," +
                 "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE," +
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, validated_api_enabled," +
-                "REFRESH_INTERVAL, VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, ADJUST_DATES " +
+                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, ADJUST_DATES " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
@@ -680,7 +671,6 @@ public class FeedStorage {
             feedDefinition.setApiKey(rs.getString(i++));
             feedDefinition.setUncheckedAPIEnabled(rs.getBoolean(i++));
             feedDefinition.setValidatedAPIEnabled(rs.getBoolean(i++));
-            feedDefinition.setRefreshDataInterval(rs.getLong(i++));
             feedDefinition.setVisible(rs.getBoolean(i++));
             long parentSourceID = rs.getLong(i++);
             if (!rs.wasNull()) {

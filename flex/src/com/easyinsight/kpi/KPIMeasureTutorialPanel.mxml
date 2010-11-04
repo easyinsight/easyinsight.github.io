@@ -6,7 +6,6 @@
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.FeedMetadata;
-        import com.easyinsight.framework.CredentialsCache;
 
         import mx.collections.ArrayCollection;
 
@@ -20,21 +19,16 @@
             dataService.getFeedMetadata.send(kpiData.dataSourceID);
         }
 
-        private function onCredentials():void {
-        }
-
         public function saveValues():void {
             kpiData.measure = availableItemBox.selectedItem as AnalysisMeasure;
         }
 
         private function gotDefinition():void {
             var feedDefinition:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
-            CredentialsCache.getCache().obtainCredentials(this, feedDefinition.credentials, onCredentials);
             // allFields = new ArrayCollection();
 
             var measures:ArrayCollection = new ArrayCollection();
             var dimensions:ArrayCollection = new ArrayCollection();
-            var dates:ArrayCollection = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedDefinition.fields) {                
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     measures.addItem(analysisItem);

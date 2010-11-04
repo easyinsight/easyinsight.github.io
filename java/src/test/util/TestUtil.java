@@ -71,7 +71,7 @@ public class TestUtil {
         throw new NoSuchElementException();
     }
 
-    public static long createTestDataSource(DataSet dataSet, List<AnalysisItem> analysisItems) throws SQLException {
+    public static long createTestDataSource(DataSet dataSet, List<AnalysisItem> analysisItems) throws Exception {
         Connection conn = Database.instance().getConnection();
         conn.setAutoCommit(false);
         FeedDefinition feedDefinition = new FeedDefinition();

@@ -66,7 +66,7 @@ public class StepTest extends TestCase {
         DataSet aggregateSet = new AggregationComponent().apply(result, pipelineData);
     }
 
-    public void testFull() throws SQLException {
+    public void testFull() throws Exception {
 
         TestUtil.getIndividualTestUser();
         

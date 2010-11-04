@@ -8,8 +8,6 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -23,7 +21,7 @@ public class BaseCamp2To3 extends DataSourceMigration {
     }
 
     @Override
-    public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         BaseCampCompanySource companySource = new BaseCampCompanySource();
         BaseCampCompanyProjectJoinSource joinSource = new BaseCampCompanyProjectJoinSource();
         addChildDataSource(companySource, conn);

@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.basecamp;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -29,7 +30,6 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
 import nu.xom.Builder;
-import nu.xom.Document;
 
 /**
  * User: James Boe
@@ -42,15 +42,24 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     private boolean includeArchived;
     private boolean includeInactive;
     private boolean includeComments;
+    private String token;
 
     private transient BaseCampCache basecampCache;
 
-    public BaseCampCache getOrCreateCache(HttpClient httpClient) throws ParsingException, BaseCampLoginException {
+    public BaseCampCache getOrCreateCache(HttpClient httpClient) throws ParsingException, BaseCampLoginException, ReportException {
         if (basecampCache == null) {
             basecampCache = new BaseCampCache();
-            basecampCache.populateCaches(httpClient, getUrl());
+            basecampCache.populateCaches(httpClient, getUrl(), this);
         }
         return basecampCache;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public boolean isIncludeInactive() {
@@ -102,46 +111,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.BASECAMP_COMMENTS);
         return feedTypes;
     }
-
-    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials, long userID) {
-        String userName = null;
-        Token token = new TokenStorage().getToken(userID, TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false);
-        CredentialFulfillment ourFulfillment = null;
-        for (CredentialFulfillment credentialFulfillment : existingCredentials) {
-            if (credentialFulfillment.getDataSourceID() == getDataFeedID() && credentialFulfillment.getCredentials() != null) {
-                ourFulfillment = credentialFulfillment;
-            }
-        }
-        if (token == null && ourFulfillment != null) {
-            userName = ourFulfillment.getCredentials().getUserName();
-        } else if (token != null && ourFulfillment != null) {
-            com.easyinsight.users.Credentials credentials = ourFulfillment.getCredentials();
-            if (credentials.getUserName() != null && !"".equals(credentials.getUserName()) &&
-                !credentials.getUserName().equals(token.getTokenValue())) {
-                token.setTokenValue(credentials.getUserName());
-                new TokenStorage().saveToken(token, getDataFeedID());
-            }
-            userName = token.getTokenValue();
-        } else if (token != null) {
-            userName = token.getTokenValue();
-        }
-        if (userName == null) {
-            return true;
-        }
-        HttpClient client = getHttpClient(userName, "");
-        try {
-            runRestRequest("/projects.xml", client, new Builder());
-        } catch (BaseCampLoginException e) {
-            return true;
-        }
-        return false;
-    }
-
-    public int getCredentialsDefinition() {
-        return new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false) == null ? CredentialsDefinition.STANDARD_USERNAME_PW :
-                CredentialsDefinition.NO_CREDENTIALS;        
-    }
-
+    
     public boolean isConfigured() {
         return url != null && !url.isEmpty();
     }
@@ -154,46 +124,41 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         return client;
     }
 
-    private Document runRestRequest(String path, HttpClient client, Builder builder) throws BaseCampLoginException {
+    private String runRestRequest(String path, HttpClient client, Builder builder) {
+        String failureMessage = null;
         HttpMethod restMethod = new GetMethod(getUrl() + path);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
-        Document doc;
         try {
             client.executeMethod(restMethod);
-            doc = builder.build(restMethod.getResponseBodyAsStream());
+            builder.build(restMethod.getResponseBodyAsStream());
         } catch (UnknownHostException uhe) {
-            throw new RuntimeException("Could not recognize host " + getUrl() + " ");
+            failureMessage = "Could not recognize host " + getUrl() + " ";
         }
         catch (nu.xom.ParsingException e) {
             String statusLine = restMethod.getStatusLine().toString();
             if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                throw new BaseCampLoginException("Could not locate a Basecamp instance at " + getUrl());
+                failureMessage = "Could not locate a Basecamp instance at " + getUrl();
             } else {
-                throw new BaseCampLoginException("Invalid Basecamp authentication token connecting to " + getUrl() + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
+                failureMessage = "Invalid Basecamp authentication token connecting to " + getUrl() + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.";
             }
 
         }
         catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        return doc;
+        return failureMessage;
     }
 
-    public String validateCredentials(com.easyinsight.users.Credentials credentials) {
-        HttpClient client = getHttpClient(credentials.getUserName(), credentials.getPassword());
+    public String validateCredentials() {
+        HttpClient client = getHttpClient(token, "");
         Pattern p = Pattern.compile("(http(s?)://)?([A-Za-z0-9]|\\-)+(\\.(basecamphq|projectpath|seework|clientsection|grouphub|updatelog)\\.com)?");
         Matcher m = p.matcher(url);
-        String result = null;
+        String result;
         if(!m.matches()) {
             result = "Invalid url. Please input a proper URL.";
-        }
-        else {
-            try {
-                runRestRequest("/projects.xml", client, new Builder());
-            } catch (BaseCampLoginException e) {
-               result = e.getMessage();
-            }
+        } else {
+            result = runRestRequest("/projects.xml", client, new Builder());
         }
         return result;
     }
@@ -239,6 +204,13 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         basecampStmt.setBoolean(5, isIncludeComments());
         basecampStmt.execute();
         basecampStmt.close();
+        if (this.token != null && !"".equals(this.token.trim())) {
+            Token token = new Token();
+            token.setTokenValue(this.token.trim());
+            token.setTokenType(TokenStorage.BASECAMP_TOKEN);
+            token.setUserID(SecurityUtil.getUserID());
+            new TokenStorage().saveToken(token, getDataFeedID(), (EIConnection) conn);
+        }
     }
 
     public void customLoad(Connection conn) throws SQLException {

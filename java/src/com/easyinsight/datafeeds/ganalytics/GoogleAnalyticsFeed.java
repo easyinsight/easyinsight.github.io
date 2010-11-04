@@ -1,7 +1,5 @@
 package com.easyinsight.datafeeds.ganalytics;
 
-import com.easyinsight.datafeeds.CredentialRequirement;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -41,7 +39,7 @@ public class GoogleAnalyticsFeed extends Feed {
     public GoogleAnalyticsFeed() {
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         try {
             AnalysisItem queryItem;
@@ -104,24 +102,24 @@ public class GoogleAnalyticsFeed extends Feed {
 
     private String token;
 
-    private String getToken() throws TokenMissingException {
+    private String getToken() throws ReportException {
         if (token == null) {
             Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_ANALYTICS_TOKEN, getFeedID(), true);
             if (tokenObject == null) {
-                throw new TokenMissingException(new CredentialRequirement(getFeedID(), getName(), CredentialsDefinition.STANDARD_USERNAME_PW));
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reset your connection to Google Analytics.", getDataSource()));
             }
             token = tokenObject.getTokenValue();
         }
         return token;
     }
 
-    private AnalyticsService getAnalyticsService() throws AuthenticationException, TokenMissingException {
+    private AnalyticsService getAnalyticsService() throws AuthenticationException, ReportException {
         if (as == null) {
             as = new AnalyticsService("easyinsight_eianalytics_v1.0");
             try {
                 String token = getToken();
                 as.setAuthSubToken(token, Utility.getPrivateKey());
-            } catch (TokenMissingException e) {
+            } catch (ReportException e) {
                 if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
                     as.setUserCredentials(ConfigLoader.instance().getGoogleUserName(), ConfigLoader.instance().getGooglePassword());    
                 } else {
@@ -147,7 +145,7 @@ public class GoogleAnalyticsFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         try {
             Collection<AnalysisDimension> dimensions = new HashSet<AnalysisDimension>();
             Collection<AnalysisMeasure> measures = new HashSet<AnalysisMeasure>();
@@ -268,7 +266,7 @@ public class GoogleAnalyticsFeed extends Feed {
             }
             //String ids = "ga:16750246";
             return dataSet;
-        } catch (TokenMissingException tme) {
+        } catch (ReportException tme) {
             throw tme;
         } catch (Exception e) {
             as = null;

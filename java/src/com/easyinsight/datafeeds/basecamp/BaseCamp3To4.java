@@ -1,14 +1,10 @@
 package com.easyinsight.datafeeds.basecamp;
 
-import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.composite.ChildConnection;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -22,7 +18,7 @@ public class BaseCamp3To4 extends DataSourceMigration {
     }
 
     @Override
-    public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
+    public void migrate(Map<String, Key> keys, EIConnection conn) throws Exception {
         BaseCampCommentsSource commentsSource = new BaseCampCommentsSource();
         addChildDataSource(commentsSource, conn);
     }

@@ -10,7 +10,6 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.ProgressAlert;
@@ -122,18 +121,18 @@
                     ProgressAlert.alert(this, "Saving the KPI...", null, scorecardService.addKPIToScorecard);
                     var metadata:InsightRequestMetadata = new InsightRequestMetadata();
                     metadata.utcOffset = new Date().getTimezoneOffset();
-                    scorecardService.addKPIToScorecard(_kpi, _scorecardID, CredentialsCache.getCache().createCredentials(), metadata);
+                    scorecardService.addKPIToScorecard(_kpi, _scorecardID, metadata);
                 } else {
                     ProgressAlert.alert(this, "Saving the KPI...", null, scorecardService.updateKPI);
                     var metadata2:InsightRequestMetadata = new InsightRequestMetadata();
                     metadata2.utcOffset = new Date().getTimezoneOffset();
-                    scorecardService.updateKPI(_kpi, CredentialsCache.getCache().createCredentials(), metadata2);
+                    scorecardService.updateKPI(_kpi, metadata2);
                 }
             } else {
                 ProgressAlert.alert(this, "Saving the KPI...", null, kpiService.saveKPI);
                 var metadata3:InsightRequestMetadata = new InsightRequestMetadata();
                 metadata3.utcOffset = new Date().getTimezoneOffset();
-                kpiService.saveKPI(_kpi, CredentialsCache.getCache().createCredentials(), metadata3);
+                kpiService.saveKPI(_kpi, metadata3);
             }
         }
 

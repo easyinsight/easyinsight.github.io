@@ -21,8 +21,6 @@ import flash.events.Event;
 		private var _dataFeedID:int;
 		private var _availableMeasures:ArrayCollection = new ArrayCollection();
 		private var _availableDimensions:ArrayCollection = new ArrayCollection();
-		private var onPivotData:Function;
-		private var onPivotDataCaller:Object;
 		private var onListData:Function;
 		private var onListDataCaller:Object;
 		private var onMetadata:Function;
@@ -34,9 +32,7 @@ import flash.events.Event;
 			dataRemoteSource = new RemoteObject();
 			dataRemoteSource.destination = "data";			
 			dataRemoteSource.getFeedMetadata.addEventListener(ResultEvent.RESULT, processFeedMetadata);
-			dataRemoteSource.getFeedMetadata.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);			 		
-			dataRemoteSource.pivot.addEventListener(ResultEvent.RESULT, processPivotData);
-			dataRemoteSource.pivot.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
+			dataRemoteSource.getFeedMetadata.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
 			dataRemoteSource.list.addEventListener(ResultEvent.RESULT, processListData);
 			dataRemoteSource.list.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
 		}
@@ -67,14 +63,6 @@ import flash.events.Event;
 			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));	
 		}					
 		
-		public function get availableMeasures():ArrayCollection {
-			return _availableMeasures;		
-		}
-		
-		public function get availableDimensions():ArrayCollection {
-			return _availableDimensions;
-		}
-		
 		public function getListData(analysisDefinition:AnalysisDefinition, onListDataCaller:Object,
 			functionCall:Function):void {
 			onListData = functionCall;
@@ -89,20 +77,6 @@ import flash.events.Event;
                 dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
             }
 			onListData.call(onListDataCaller, listData);
-			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
-		}
-		
-		public function getPivotData(analysisDefinition:AnalysisDefinition, onPivotDataCaller:Object, 
-			functionCall:Function):void {
-			onPivotData = functionCall;
-			this.onPivotDataCaller = onPivotDataCaller;
-			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
-			dataRemoteSource.pivot.send(analysisDefinition, previewMode, null);				
-		}
-		
-		public function processPivotData(resultEvent:Event):void {			
-			var pivotData:Object = dataRemoteSource.pivot.lastResult;
-			onPivotData.call(onPivotDataCaller, pivotData);
 			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
 		}
 	}

@@ -5,7 +5,6 @@ import junit.framework.TestCase;
 import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.dataset.DataSet;
 import com.easyinsight.database.Database;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.analysis.DataService;
@@ -34,7 +33,7 @@ public class BaseCampTest extends TestCase {
         Credentials c = new Credentials();
         c.setUserName("apiuser");
         c.setPassword("@p!user");
-        long sourceId = uploadService.newExternalDataSource(ds, c);
+        long sourceId = uploadService.newExternalDataSource(ds);
         DataService dataService = new DataService();
         dataService.getFeedMetadata(sourceId);
     }
@@ -79,7 +78,7 @@ public class BaseCampTest extends TestCase {
         c.setUserName("failure");
         c.setPassword("isnotanoption");
         ds.setUrl("easyinsight.basecamphq.com");
-        String result = ds.validateCredentials(c);
+        String result = ds.validateCredentials();
         assertEquals("Invalid username/password. Please try again.", result);
     }
     
@@ -88,7 +87,7 @@ public class BaseCampTest extends TestCase {
         c.setUserName("apiuser");
         c.setPassword("@p!user");
         ds.setUrl("easyinsight.basecamphq.com");
-        String result = ds.validateCredentials(c);
+        String result = ds.validateCredentials();
         assertEquals(null, result);
     }
 }

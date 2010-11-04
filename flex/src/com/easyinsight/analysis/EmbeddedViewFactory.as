@@ -2,6 +2,7 @@ package com.easyinsight.analysis {
 
 import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.analysis.service.ReportRetrievalFault;
+import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.HierarchyOverride;
@@ -123,8 +124,17 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         return _report;
     }
 
+    private function onProblem(event:ProblemDataEvent):void {
+        var overrides:ArrayCollection = new ArrayCollection();
+        for each (var hierarchyOverride:HierarchyOverride in overrideObj) {
+            overrides.addItem(hierarchyOverride);
+        }
+        _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, false, drillthroughFilters, _noCache, overrides);
+    }
+
     override public function gotData(event:EmbeddedDataServiceEvent):void {
-        if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
+        if (event.reportFault != null) {
+            event.reportFault.popup(this, onProblem);
         } else {
             event.additionalProperties.prefix = _prefix;
             try {
