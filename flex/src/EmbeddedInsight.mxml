@@ -22,12 +22,10 @@
 
         import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.framework.Constants;
-        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
-        import com.easyinsight.framework.WebCredentialsCache;
 
         [Bindable]
         private var urlKey:String;
@@ -42,7 +40,6 @@
         private var reportName:String;
 
         private function handleFlashVars():void {
-            CredentialsCache.initialize(new WebCredentialsCache());
             EIMessageListener.initialize();
             Constants.setup();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
