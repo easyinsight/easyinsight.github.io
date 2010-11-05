@@ -574,7 +574,6 @@
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CALCULATION).selected) reportDataTab.removeCalculationButton();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_HIERARCHY).selected) reportDataTab.removeHierarchy();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_REPORT_EDITOR_API).selected) reportDataTab.removeAPI();
-                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_TEXT_REPLACES).selected) reportDataTab.removeScrubs();
                     } else {
                         tabNavigator.removeChild(reportDataTab);
                     }
@@ -585,9 +584,7 @@
                     if (uiConfig.getConfiguration(UIConfiguration.SHOW_EXPORT).selected) {
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_DLS).selected) exportTab.removeDLS();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_PNG).selected) exportTab.removePNG();
-                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();
-                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_NETVIBES).selected) exportTab.removeNetvibes();
-                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_IGOOGLE).selected) exportTab.removeIGoogle();
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();                        
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMAIL).selected) exportTab.removeEmail();
                     } else {
                         tabNavigator.removeChild(exportTab);
@@ -722,7 +719,9 @@
         }
 
         private function savedAnalysis(event:SavedAnalysisEvent):void {
-            //title = event.title;            
+            //title = event.title;
+            var savedDef:AnalysisDefinition = event["report"];
+            analysisDefinition.canSaveDirectly = true;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.analysisID = String(event.report.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
