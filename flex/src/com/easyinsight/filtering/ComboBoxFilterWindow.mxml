@@ -6,6 +6,7 @@
         private var _filterDefinition:FilterDefinition;
 
         public function makeUpdates():FilterDefinition {
+            FilterValueDefinition(_filterDefinition).singleValue = true;
             return _filterDefinition;
         }
 

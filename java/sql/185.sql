@@ -1,0 +1,1 @@
+alter table value_based_filter add single_value tinyint(4) not null default 1;  

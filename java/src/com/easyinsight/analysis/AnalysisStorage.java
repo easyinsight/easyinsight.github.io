@@ -13,7 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
-import com.easyinsight.scrubbing.DataScrub;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
@@ -188,11 +187,6 @@ public class AnalysisStorage {
                         session.saveOrUpdate(persistableValue);
                     }
                 }
-            }
-        }
-        if (analysisDefinition.getDataScrubs() != null) {
-            for (DataScrub dataScrub : analysisDefinition.getDataScrubs()) {
-                dataScrub.beforeSave();
             }
         }
         if (analysisDefinition.getAddedItems() != null) {

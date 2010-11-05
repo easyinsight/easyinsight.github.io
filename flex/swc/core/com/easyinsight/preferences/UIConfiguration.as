@@ -1,6 +1,5 @@
 package com.easyinsight.preferences {
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 
 public class UIConfiguration {
 
@@ -39,7 +38,6 @@ public class UIConfiguration {
     public static const SHOW_DELETE_DATA:String = "SHOW_DELETE_DATA";
     public static const SHOW_SIZE_DATA:String = "SHOW_SIZE_DATA";
     public static const SHOW_TIME_DATA:String = "SHOW_TIME_DATA";
-    public static const SHOW_REPORT_BUG:String = "SHOW_REPORT_BUG";
     public static const SHOW_KPI_TREE_ADD:String = "SHOW_KPI_TREE_ADD";
     public static const SHOW_REFRESH_DATA:String = "SHOW_REFRESH_DATA";
     public static const SHOW_SCORECARD_CONTROLS:String = "SHOW_SCORECARD_CONTROLS";
@@ -117,14 +115,13 @@ public class UIConfiguration {
         var showAccount:UIOption = new UIOption(SHOW_ACCOUNT, "Account", []);
         var showAPI:UIOption = new UIOption(SHOW_APIS, "API", []);
         var showGroups:UIOption = new UIOption(SHOW_GROUPS, "Groups", []);
-        var showReportBug:UIOption = new UIOption(SHOW_REPORT_BUG, "Report Bug", []);
         var showMyData:UIOption = new UIOption(SHOW_MY_DATA, "My Data", [
             showCombineSources, showCreatePackage, showAdminDataSource, copyData, showLookupTables, showRefreshData, deleteData,
                 sizeData, timeData, kpiTreeAdd
         ]);
 
         var headerConfiguration:UIOption = new UIOption(null, "Header Configuration", [
-            showMyData, showConnections, showExchange, showGroups, showAccount, showAPI, showReportBug
+            showMyData, showConnections, showExchange, showGroups, showAccount, showAPI
         ]);
 
         var scorecardConfiguration:UIOption = new UIOption(null, "Scorecard Configuration", [

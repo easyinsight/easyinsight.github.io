@@ -161,14 +161,6 @@
             removeChild(imageButton);
         }
 
-        public function removeNetvibes():void {
-            removeChild(netvibesButton);
-        }
-
-        public function removeIGoogle():void {
-            removeChild(igoogleButton);
-        }
-
         public function removeEmail():void {
             removeChild(emailButton);
         }
@@ -210,8 +202,4 @@
                icon="@Embed(source='../../../../assets/plasma_tv.png')"/>
     <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
                icon="@Embed(source='../../../../assets/data_add.png')"/>
-    <mx:Button id="netvibesButton" toolTip="Add to netvibes"
-               icon="@Embed(source='../../../../assets/uwa-netvibes.png')" click="netvibes()"/>
-    <mx:Button id="igoogleButton" toolTip="Add to iGoogle"
-               icon="@Embed(source='../../../../assets/uwa-google.png')" click="igoogle()"/>
 </mx:HBox>

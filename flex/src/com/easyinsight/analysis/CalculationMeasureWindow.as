@@ -21,13 +21,15 @@ public class CalculationMeasureWindow extends CalculationWindow {
             formattingConfiguration = analysisCalculation.formattingConfiguration;
             applyBefore = analysisCalculation.applyBeforeAggregation;
         }
+        detailIndex = 2;
+        detailItemLabel = "Aggregation:";
     }
 
     override protected function get calculationItem():AnalysisItem {
         return analysisCalculation;
     }
 
-    override public function save(dataSourceID:int):AnalysisItem {
+    override protected function actualSave():AnalysisItem {
         if (analysisCalculation == null) {
             analysisCalculation = new AnalysisCalculation();
             analysisCalculation.concrete = false;
@@ -41,7 +43,6 @@ public class CalculationMeasureWindow extends CalculationWindow {
         analysisCalculation.aggregation = measureAggregationBox.selectedItem.value;
         analysisCalculation.calculationString = calculationInput.text;
         analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
-        analysisService.validateCalculation.send(analysisCalculation.calculationString, dataSourceID, items);
         return analysisCalculation;
     }
 }

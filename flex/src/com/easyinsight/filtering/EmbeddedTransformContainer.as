@@ -119,12 +119,6 @@ import mx.events.DragEvent;
                 }
 			}			
 		}
-		
-		override protected function measure():void {
-			super.measure();			
-			var childrenHeight:int = 0;
-			var childrenWidth:int = 0;
-		}
 
 		public function addFilterDefinition(filterDefinition:FilterDefinition):void {								
 			var filter:IEmbeddedFilter = createFilter(filterDefinition);
@@ -151,7 +145,7 @@ import mx.events.DragEvent;
 			var filter:IEmbeddedFilter;
 			if (filterDefinition.getType() == FilterDefinition.VALUE) {
 				var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;
-				if (filterValueDefinition.inclusive && filterValueDefinition.filteredValues.length == 1) {
+				if (filterValueDefinition.singleValue) {
 					filter = new EmbeddedComboBoxFilter(_feedID, filterDefinition.field);
 				} else {
 					filter = new EmbeddedMultiValueFilter(_feedID, filterDefinition.field);

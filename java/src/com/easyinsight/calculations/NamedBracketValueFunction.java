@@ -13,12 +13,10 @@ import com.easyinsight.core.Value;
 public class NamedBracketValueFunction extends Function {
     public Value evaluate() {
         if (params.size() < 2) {
-            throw new RuntimeException("namedbracketvalue() requires two parameters, such as namedbracketvalue(Deal Name, \"Type\").");
+            throw new FunctionException("namedbracketvalue() requires two parameters, such as namedbracketvalue(Deal Name, \"Type\").");
         }
         Value stringValue = params.get(0);
-        Value pair = params.get(1);
-        String pairValue = pair.toString();
-        pairValue = pairValue.substring(1, pairValue.length() - 1);
+        String pairValue = minusQuotes(1);
         String string = stringValue.toString();
         boolean found = false;
         String result = null;

@@ -3,9 +3,9 @@ import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
-import com.easyinsight.pseudocontext.CustomCodeEvent;
+
 import com.easyinsight.report.ReportEventProcessor;
-import com.easyinsight.util.PopUpUtil;
+
 import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
@@ -18,9 +18,7 @@ import mx.containers.Canvas;
 import mx.containers.VBox;
 import mx.controls.Alert;
 import mx.controls.ProgressBar;
-import mx.core.UIComponent;
 import mx.events.ModuleEvent;
-import mx.managers.PopUpManager;
 import mx.modules.IModuleInfo;
 import mx.modules.ModuleManager;
 

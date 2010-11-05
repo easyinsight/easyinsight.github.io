@@ -53,7 +53,7 @@ import mx.controls.Label;
 			_analysisItems = analysisItems;
 		}		
 		
-		private function edit(event:MouseEvent):void {
+		public function edit(event:MouseEvent):void {
             if (_filterEditable) {
                 var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
                 window.feedID = _feedID;

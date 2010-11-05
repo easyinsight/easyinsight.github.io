@@ -118,7 +118,6 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setDateUpdated(wsAnalysisDefinition.getDateUpdated());
         analysisDefinition.setReportType(wsAnalysisDefinition.getReportType());
         analysisDefinition.setReportStructure(wsAnalysisDefinition.createStructure());
-        analysisDefinition.setDataScrubs(wsAnalysisDefinition.getDataScrubs());
         analysisDefinition.setAddedItems(wsAnalysisDefinition.getAddedItems());
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromFilters(wsAnalysisDefinition.getFilterDefinitions()));
         analysisDefinition.setAnalysisID(wsAnalysisDefinition.getAnalysisID());

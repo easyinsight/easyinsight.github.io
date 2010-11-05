@@ -6,7 +6,6 @@ import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.core.Key;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ResultsBridge;
-import com.easyinsight.scrubbing.DataScrub;
 
 import java.util.*;
 import java.io.Serializable;
@@ -59,7 +58,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int reportType;
     private long reportStateID;
     private List<FilterDefinition> filterDefinitions;
-    private List<DataScrub> dataScrubs;
     private int policy;
     private List<Tag> tagCloud = new ArrayList<Tag>();
     private List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
@@ -173,7 +171,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
      */
     public void optimizeSize() {
         filterDefinitions = null;
-        dataScrubs = null;
         tagCloud = null;
         addedItems = null;
     }
@@ -252,14 +249,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.policy = policy;
     }
 
-    public List<DataScrub> getDataScrubs() {
-        return dataScrubs;
-    }
-
-    public void setDataScrubs(List<DataScrub> dataScrubs) {
-        this.dataScrubs = dataScrubs;
-    }
-
     public List<FilterDefinition> getFilterDefinitions() {
         return filterDefinitions;
     }
@@ -329,11 +318,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     //}
                 }
                 //columnSet.add(filterDefinition.getField().getKey());
-            }
-        }
-        if (getDataScrubs() != null) {
-            for (DataScrub dataScrub : getDataScrubs()) {
-                columnSet.addAll(dataScrub.createNeededKeys(analysisItems));
             }
         }
         for (AnalysisItem analysisItem : getLimitFields()) {

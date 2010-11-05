@@ -640,6 +640,10 @@ public class SolutionService {
             // okay, we might have multiple reports here...
             // find all the other reports in the dependancy graph here
             List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
+            Set<Long> containedReportIDs = originalBaseReport.containedReportIDs();
+            for (Long containedReportID : containedReportIDs) {
+                reports.add(new AnalysisStorage().getPersistableReport(containedReportID, session));
+            }
             reports.add(originalBaseReport);
             Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
             List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
@@ -651,18 +655,19 @@ public class SolutionService {
                 reportList.add(copyReport);
             }
 
+            for (AnalysisDefinition copiedReport : reportList) {
+                new AnalysisStorage().saveAnalysis(copiedReport, session);
+            }
+
             for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
                 copiedReport.updateReportIDs(reportReplacementMap);
             }
 
-            session.close();
-            session = Database.instance().createSession(conn);
-            //Collections.reverse(reportList);
-
             for (AnalysisDefinition copiedReport : reportList) {
                 new AnalysisStorage().saveAnalysis(copiedReport, session);
-                session.flush();
             }
+
+            session.flush();
 
             AnalysisDefinition copiedBaseReport = reportReplacementMap.get(reportID);
             // TODO: Add urlKey

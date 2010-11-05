@@ -7,9 +7,6 @@
         [Event(name="analysisItemEdit", type="com.easyinsight.analysis.AnalysisItemEditEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.scrub.DataScrubEvent;
-        import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
-        import com.easyinsight.analysis.scrub.TextReplaceScrubWindow;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.DataService;
         import com.easyinsight.util.PopUpUtil;
@@ -143,6 +140,16 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function createCalculatedDate():void {
+            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.editorClass = DerivedDateWindow;
+            window.dataSourceID = _dataService.dataFeedID;
+            window.analysisItems = wrappers;
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
+            PopUpManager.addPopUp(window, this);
+            PopUpUtil.centerPopUp(window);
+        }
+
         private function onNewItem(event:AnalysisItemEditEvent):void {
             if (event.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                 UserAudit.instance().audit(UserAudit.CREATED_CALCULATION);
@@ -171,51 +178,12 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function newTextReplaceScrub():void {
-            var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));
-            textWindow.fields = wrappers;
-            textWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
-            PopUpUtil.centerPopUp(textWindow);
-        }
-
-
-        private function editTextReplaceScrubs():void {
-            var scrubListWindow:TextReplaceScrubListWindow = TextReplaceScrubListWindow(PopUpManager.createPopUp(this, TextReplaceScrubListWindow, false));
-            scrubListWindow.definition = _analysisDefinition;
-            scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
-            scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
-            scrubListWindow.initState(wrappers, _dataSourceID);
-            PopUpUtil.centerPopUp(scrubListWindow);
-        }
-
-        private function scrubAdded(event:DataScrubEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            _analysisDefinition.dataScrubs.addItem(event.dataScrub);
-            _dataView.retrieveData();
-        }
-
-        private function scrubUpdated(event:DataScrubEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            _dataView.retrieveData();
-        }
-
-        private function scrubDeleted(event:DataScrubEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            _analysisDefinition.dataScrubs.removeItemAt(_analysisDefinition.dataScrubs.getItemIndex(event.dataScrub));
-            _dataView.retrieveData();
-        }
-
         public function removeCalculationButton():void {
             removeChild(calculationButton);
         }
 
         public function removeHierarchy():void {
             removeChild(hierarchyButton);
-        }
-
-        public function removeScrubs():void {
-            removeChild(textScrubButton);
-            removeChild(textListButton);
         }
 
         public function removeAPI():void {
@@ -238,18 +206,12 @@
                icon="@Embed(source='../../../../assets/code.png')"
                click="createCalculatedGrouping()"/>
     <mx:Button id="derivedDateButton" toolTip="Create Derived Date"
-               icon="@Embed(source='../../../../assets/code.png')"
+               icon="@Embed(source='../../../../assets/calendar.png')"
                click="createCalculatedGrouping()"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
                toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton"/>
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
                icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
-        <mx:Button id="textScrubButton" toolTip="Text Replace"
-               icon="@Embed(source='../../../../assets/text_find.png')"
-               click="newTextReplaceScrub()"/>
-    <mx:Button id="textListButton" toolTip="Edit Text Replaces..."
-               icon="@Embed(source='../../../../assets/document_edit.png')"
-               click="editTextReplaceScrubs()"/>
     <mx:Button toolTip="Explain Report..."
                icon="@Embed(source='../../../../assets/information.png')"
                click="explainReport()"/>

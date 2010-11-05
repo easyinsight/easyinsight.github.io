@@ -26,6 +26,8 @@ public class FilterValueDefinition extends FilterDefinition {
                joinColumns=@JoinColumn(name="filter_id"),
                inverseJoinColumns=@JoinColumn(name="value_id"))
     private Set<PersistableValue> persistedValues;
+    @Column(name="single_value")
+    private boolean singleValue;
 
     public FilterValueDefinition() {        
     }
@@ -42,6 +44,14 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public void setPersistedValues(Set<PersistableValue> persistedValues) {
         this.persistedValues = persistedValues;
+    }
+
+    public boolean isSingleValue() {
+        return singleValue;
+    }
+
+    public void setSingleValue(boolean singleValue) {
+        this.singleValue = singleValue;
     }
 
     public boolean isInclusive() {

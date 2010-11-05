@@ -241,7 +241,7 @@ public class TransformContainer extends HBox
         var filter:IFilter;
         if (filterDefinition.getType() == FilterDefinition.VALUE) {
             var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;
-            if (filterValueDefinition.inclusive && filterValueDefinition.filteredValues.length == 1) {
+            if (filterValueDefinition.singleValue) {
                 filter = new ComboBoxFilter(_feedID, filterDefinition.field);
             } else {
                 filter = new MultiValueFilter(_feedID, filterDefinition.field);
@@ -406,6 +406,8 @@ public class TransformContainer extends HBox
             SliderMeasureFilter(filter).edit(null);
         } else if (filter is PatternFilter) {
             PatternFilter(filter).edit(null);
+        } else if (filter is MultiValueFilter) {
+            MultiValueFilter(filter).edit(null);
         }
     }
 

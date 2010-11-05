@@ -136,6 +136,9 @@ public class DataStorage {
         dataStorage.version = dataStorage.metadata.getVersion();
         dataStorage.coreDBConn = conn;
         dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
+        if (dataStorage.database == null) {
+            throw new DatabaseShardException();
+        }
         dataStorage.storageConn = dataStorage.database.getConnection();
         dataStorage.storageConn.setAutoCommit(false);
         return dataStorage;

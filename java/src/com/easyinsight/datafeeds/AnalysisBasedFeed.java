@@ -3,7 +3,6 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.scrubbing.DataScrub;
 import com.easyinsight.core.Key;
 import com.easyinsight.pipeline.DerivedDataSourcePipeline;
 
@@ -53,12 +52,6 @@ public class AnalysisBasedFeed extends Feed {
                 filters = new ArrayList<FilterDefinition>();
             }
             filters.addAll(analysisDefinition.retrieveFilterDefinitions());
-        }
-        Set<Key> additionalKeys = new HashSet<Key>();
-        if (analysisDefinition.getDataScrubs() != null) {
-            for (DataScrub dataScrub : analysisDefinition.getDataScrubs()) {
-                additionalKeys.addAll(dataScrub.createNeededKeys(feed.getFields()));
-            }
         }
         DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode);
 

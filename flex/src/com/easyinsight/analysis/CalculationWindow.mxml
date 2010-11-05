@@ -11,8 +11,8 @@
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
+        import mx.collections.XMLListCollection;
         import mx.controls.AdvancedDataGrid;
-        import mx.controls.Alert;
         import mx.controls.DataGrid;
         import mx.controls.TextArea;
         import mx.events.ListEvent;
@@ -28,6 +28,42 @@
 
         [Bindable]
         protected var calcName:String;
+
+        [Bindable]
+        private var functions:XMLListCollection = new XMLListCollection(new XMLList(<functions><group label="Math">
+                            <function label="abs" signature="abs(Number)" description="Calculate the absolute value of Number"/>
+                            <function label="acos" signature="acos(Number)" description="Calculate the arccosine of Number"/>
+                            <function label="asin" signature="asin(Number)" description="Calculate the arcsine of Number"/>
+                            <function label="atan" signature="atan(Number)" description="Calculate the arctangent of Number"/>
+                            <function label="ceil" signature="ceil(Number)" description="Calculate the ceiling of Number"/>
+                            <function label="cos" signature="cos(Number)" description="Calculate the cosine of Number"/>
+                            <function label="floor" signature="floor(Number)" description="Calculate the floor of Number"/>
+                            <function label="ln" signature="ln(Number)" description="Calculate the natural logarithm of Number"/>
+                            <function label="sin" signature="sin(Number)" description="Calculate the sine of Number"/>
+                            <function label="sqrt" signature="sqrt(Number)" description="Calculate the square root of Number"/>
+                            <function label="tan" signature="tan(Number)" description="Calculate the tangent of Number"/>
+                        </group>
+                        <group label="Data Type">
+                            <function label="castsum" signature="castsum(Field)" description="Forces Field to be calculated as a Sum"/>
+                            <function label="castaverage" signature="castaverage(Field)" description="Forces Field to be calculated as an Average"/>
+                            <function label="castmax" signature="castmax(Field)" description="Forces Field to be calculated as a Maximum"/>
+                            <function label="castmin" signature="castmin(Field)" description="Forces Field to be calculated as a Minimum"/>
+                            <function label="castcount" signature="castcount(Field)" description="Forces Field to be calculated as a Count"/>
+                            <function label="castmedian" signature="castmedian(Field)" description="Forces Field to be calculated as a Median"/>
+                            <function label="castvariance" signature="castvariance(Field)" description="Forces Field to be calculated as a Variance"/>
+                        </group>
+                        <group label="Dates">
+                            <function label="now" signature="now()" description="Returns the current time in milliseconds"/>
+                        </group>
+                        <group label="Text">
+                            <function label="bracketvalue" signature="bracketvalue(String)" description="Returns the first bracketed value found in String. For example, bracketvalue(Deal [John]) would produce a value of John."/>
+                            <function label="lower" signature="lower(String)" description="Returns a fully lower case version of String."/>
+                            <function label="namedbracketdate" signature="namedbracketdate(String, Name, Date Pattern)" description="Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Description, &quot;Target Close&quot;, &quot;MM-dd-YYYY&quot;) will construct a date of &quot;12-15-2010&quot; out of a sample value of [Target Close: 12-15-2010] in the Deal Description field."/>
+                            <function label="namedbracketvalue" signature="namedbracketvalue(String, String)" description="Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Name, &quot;Type&quot;) will construct the string &quot;Direct Sales&quot; out of a sample value of [Type: Direct Sales] in the Deal Name field."/>
+                            <function label="replace" signature="replace(Field, Regular Expression, Target String)" description="Replace each substring of this string that matches the given regular expression with the given replacement."/>
+                            <function label="substring" signature="substring(String, Start Index, End Index)" description="Returns the value found between Start Index and End Index on String."/>
+                            <function label="upper" signature="upper(String)" description="Returns a fully upper case version of String."/>
+                        </group></functions>));
 
         [Bindable]
         protected var formattingConfiguration:FormattingConfiguration;
@@ -51,20 +87,26 @@
             dispatchEvent(new Event("applyBeforeChanged"));
         }
 
-        public function save(dataSourceID:int):AnalysisItem {
-            return null;
+        public function save(dataSourceID:int):void {
+            calculationInput.errorString = null;
+            analysisService.validateCalculation.send(calculationInput.text, dataSourceID, items);
         }
 
         public function validatedCalculation():void {
             failureMessage = analysisService.validateCalculation.lastResult as String;
-            if (failureMessage == null)
+            if (failureMessage == null) {
+                actualSave();
                 dispatchEvent(new AnalysisItemSaveEvent(calculationItem));
-            else {
+            } else {
                 calculationInput.errorString = failureMessage;
                 calculationInput.setFocus();
                 calculationInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             }
 
+        }
+
+        protected function actualSave():AnalysisItem {
+            return null;
         }
 
         public function validate():Boolean {
@@ -73,47 +115,74 @@
 
         private function dragEnterHandler(event:DragEvent):void {
             var analysisItem:AnalysisItem;
-            if (event.dragInitiator is List) {
+            var accept:Boolean = false;
+            if (event.dragInitiator is Tree) {
+                var tree:Tree = event.dragInitiator as Tree;
+                var xml:XML = tree.selectedItem as XML;
+                if (xml != null) {
+                    var name:String = String(xml.name());
+                    if (name == "function") {
+                        accept = true;
+                    }
+                }
+            } else if (event.dragInitiator is List) {
                 var initialList:List = List(event.dragInitiator);
                 analysisItem = initialList.selectedItem as AnalysisItem;
+                accept = analysisItem != null;
             } else if (event.dragInitiator is DropArea) {
                 var dropArea:DropArea = event.dragInitiator as DropArea;
-                analysisItem = dropArea.analysisItem;
+                accept = dropArea.analysisItem != null;
             } else if (event.dragInitiator is AdvancedDataGrid) {
                 var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
                 var analysisItemWrapper:AnalysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
                 if (analysisItemWrapper.isAnalysisItem()) {
                     analysisItem = analysisItemWrapper.analysisItem;
                 }
+                accept = analysisItemWrapper.isAnalysisItem();
             }
-            DragManager.acceptDragDrop(event.target as TextArea);
+            if (accept) DragManager.acceptDragDrop(event.target as TextArea);
         }
 
+        private var savedExplanation:FunctionExplanation;
+        private var explanationFunction:String;
+
         private function dragDropHandler(event:DragEvent):void {
-            var analysisItem:AnalysisItem;
+            var functionOutput:Boolean = false;
+            var outputStr:String;
             if (event.dragInitiator is DataGrid) {
                 var initialList:DataGrid = DataGrid(event.dragInitiator);
                 var analysisItemWrapper:AnalysisItemWrapper = initialList.selectedItem as AnalysisItemWrapper;
-                analysisItem = analysisItemWrapper.analysisItem;
+                outputStr = analysisItemWrapper.analysisItem.key.createString();
             } else if (event.dragInitiator is DropArea) {
                 var dropArea:DropArea = event.dragInitiator as DropArea;
-                analysisItem = dropArea.analysisItem;
+                outputStr = dropArea.analysisItem.key.createString();
             } else if (event.dragInitiator is AdvancedDataGrid) {
                 var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
                 analysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
                 if (analysisItemWrapper.isAnalysisItem()) {
-                    analysisItem = analysisItemWrapper.analysisItem;
+                    outputStr = analysisItemWrapper.analysisItem.key.createString();
+                }
+            } else if (event.dragInitiator is Tree) {
+                var tree:Tree = event.dragInitiator as Tree;
+                var xml:XML = tree.selectedItem as XML;
+                if (xml != null) {
+                    var name:String = String(xml.name());
+                    if (name == "function") {
+                        functionOutput = true;
+                        outputStr = String(xml.@signature);
+                    }
                 }
             }
-            var outputStr:String = analysisItem.key.createString();
-            var str:String = ":<>,.;/?\"\'{}-=+";
-            var foundSpecialChar:Boolean = false;
-            for (var i:int = 0; i < str.length; i++) {
-                if (outputStr.indexOf(str.charAt(i)) != -1)
-                    foundSpecialChar = true;
-            }
-            if (foundSpecialChar) {
-                outputStr = "[" + outputStr + "]";
+            if (!functionOutput) {
+                var str:String = ":<>,.;/?\"\'{}-=+";
+                var foundSpecialChar:Boolean = false;
+                for (var i:int = 0; i < str.length; i++) {
+                    if (outputStr.indexOf(str.charAt(i)) != -1)
+                        foundSpecialChar = true;
+                }
+                if (foundSpecialChar) {
+                    outputStr = "[" + outputStr + "]";
+                }
             }
             calculationInput.insertTextAtCursor(outputStr);
         }
@@ -155,62 +224,63 @@
             if (xml != null) {
                 var name:String = String(xml.name());
                 if (name == "function") {
-                    analysisService.explain.send(String(xml.@label));
+                    explanationFunction = String(xml.@label);
+                    functionExplanation = String(xml.@description);
+                    functionSignature = String(xml.@signature);
                 }
             }
         }
 
-        private function explained():void {
-            var explanation:FunctionExplanation = analysisService.explain.lastResult as FunctionExplanation;
-            functionExplanation = explanation.description;
-            functionSignature = explanation.signature;
+        private var _detailItemLabel:String;
+
+        private var _detailIndex:int;
+
+        private var _dateLevel:int;
+
+        [Bindable(event="detailItemLabelChanged")]
+        public function get detailItemLabel():String {
+            return _detailItemLabel;
         }
+
+        public function set detailItemLabel(value:String):void {
+            if (_detailItemLabel == value) return;
+            _detailItemLabel = value;
+            dispatchEvent(new Event("detailItemLabelChanged"));
+        }
+
+        [Bindable(event="detailIndexChanged")]
+        public function get detailIndex():int {
+            return _detailIndex;
+        }
+
+        public function set detailIndex(value:int):void {
+            if (_detailIndex == value) return;
+            _detailIndex = value;
+            dispatchEvent(new Event("detailIndexChanged"));
+        }
+
+        [Bindable(event="dateLevelChanged")]
+        public function get dateLevel():int {
+            return _dateLevel;
+        }
+
+        public function set dateLevel(value:int):void {
+            if (_dateLevel == value) return;
+            _dateLevel = value;
+            dispatchEvent(new Event("dateLevelChanged"));
+        }
+
 
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="validateCalculation" result="validatedCalculation()"/>
-        <mx:method name="explain" result="explained()"/>
     </mx:RemoteObject>
     <mx:HBox width="100%" height="100%">
         <mx:VBox horizontalAlign="center">
             <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
-            <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)">
-                <mx:XMLListCollection>
-                    <mx:XMLList>
-                        <group label="Math">
-                            <function label="abs"/>
-                            <function label="acos"/>
-                            <function label="asin"/>
-                            <function label="atan"/>
-                            <function label="ceil"/>
-                            <function label="cos"/>
-                            <function label="floor"/>
-                            <function label="ln"/>
-                            <function label="sin"/>
-                            <function label="sqrt"/>
-                            <function label="tan"/>
-                        </group>
-                        <group label="Data Type">
-                            <function label="castsum"/>
-                            <function label="castaverage"/>
-                            <function label="castmax"/>
-                            <function label="castmin"/>
-                            <function label="castcount"/>
-                            <function label="castmedian"/>
-                            <function label="castvariance"/>
-                        </group>
-                        <group label="Dates">
-                            <function label="now"/>
-                        </group>
-                        <group label="Text">
-                            <function label="bracketvalue"/>
-                            <function label="lower"/>
-                            <function label="namedbracketvalue"/>
-                            <function label="upper"/>
-                        </group>
-                    </mx:XMLList>
-                </mx:XMLListCollection>
+            <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
+                    dataProvider="{functions}" showRoot="false">
             </mx:Tree>
             <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
                 <mx:Label text="{functionSignature}"/>
@@ -236,21 +306,45 @@
                 <mx:CheckBox id="rowLevelCheckbox" selected="{applyBefore}"/>
                 <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you specify row level calculation, Easy Insight will apply your calculation before aggregating the data together."/>
             </mx:FormItem>
-            <mx:FormItem label="Aggregation: " visible="{applyBefore}" direction="horizontal">
-                <util:SmartComboBox id="measureAggregationBox" rowCount="8" selectedProperty="value" selectedValue="{aggregation}">
-                    <util:dataProvider>
-                        <mx:Array>
-                            <mx:Object label="Sum" value="{AggregationTypes.SUM}"/>
-                            <mx:Object label="Average" value="{AggregationTypes.AVERAGE}"/>
-                            <mx:Object label="Min" value="{AggregationTypes.MIN}"/>
-                            <mx:Object label="Max" value="{AggregationTypes.MAX}"/>
-                            <mx:Object label="Count" value="{AggregationTypes.COUNT}"/>
-                            <mx:Object label="Median" value="{AggregationTypes.MEDIAN}"/>
-                            <mx:Object label="Variance" value="{AggregationTypes.VARIANCE}"/>
-                            <mx:Object label="Ranking" value="{AggregationTypes.RANK}"/>
-                        </mx:Array>
-                    </util:dataProvider>
-                </util:SmartComboBox>
+            <mx:FormItem label="{detailItemLabel}" visible="{applyBefore}" direction="horizontal">
+                <mx:ViewStack resizeToContent="true" selectedIndex="{detailIndex}">
+                    <mx:Box/>
+                    <mx:Box>
+                        <util:SmartComboBox id="dateBox" rowCount="10" selectedValue="{dateLevel}" selectedProperty="dateLevel">
+                            <mx:ArrayCollection>
+                                <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
+                                <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
+                                <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+                                <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
+                                <mx:Object label="Day - Month - Year - Hour - Minute"
+                                           data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
+
+                                <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
+                                <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
+                                <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
+                                <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
+                                <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
+                            </mx:ArrayCollection>
+                        </util:SmartComboBox>
+                    </mx:Box>
+                </mx:ViewStack>
+                <mx:Box>
+                    <util:SmartComboBox id="measureAggregationBox" rowCount="8" selectedProperty="value" selectedValue="{aggregation}">
+                        <util:dataProvider>
+                            <mx:Array>
+                                <mx:Object label="Sum" value="{AggregationTypes.SUM}"/>
+                                <mx:Object label="Average" value="{AggregationTypes.AVERAGE}"/>
+                                <mx:Object label="Min" value="{AggregationTypes.MIN}"/>
+                                <mx:Object label="Max" value="{AggregationTypes.MAX}"/>
+                                <mx:Object label="Count" value="{AggregationTypes.COUNT}"/>
+                                <mx:Object label="Median" value="{AggregationTypes.MEDIAN}"/>
+                                <mx:Object label="Variance" value="{AggregationTypes.VARIANCE}"/>
+                                <mx:Object label="Ranking" value="{AggregationTypes.RANK}"/>
+                            </mx:Array>
+                        </util:dataProvider>
+                    </util:SmartComboBox>
+                </mx:Box>
+
             </mx:FormItem>
         </mx:Form>
     </mx:HBox>

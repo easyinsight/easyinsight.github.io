@@ -60,7 +60,7 @@ public class FunctionFactory {
         } else if (s.equals("upper")) {
             return new UpperCaseFunction();
         } else if (s.equals("lower")) {
-            return new UpperCaseFunction();
+            return new LowerCaseFunction();
         } else if (s.equals("abs")) {
             return new AbsoluteValue();
         } else if (s.equals("min")) {
@@ -75,6 +75,8 @@ public class FunctionFactory {
             return new ParseIntFunction();
         } else if (s.equals("namedbracketdate")) {
             return new NamedBracketDateFunction();
+        } else if (s.equals("replace")) {
+            return new Replace();
         } else {
             return null;
         }

@@ -1,14 +1,14 @@
 package com.easyinsight.analysis {
-public class DerivedGroupingWindow extends CalculationWindow {
+public class DerivedDateWindow extends CalculationWindow {
 
-    private var derivedGrouping:DerivedAnalysisDimension;
+    private var derivedGrouping:DerivedAnalysisDateDimension;
 
-    public function DerivedGroupingWindow() {
+    public function DerivedDateWindow() {
         super();
     }
 
     override public function set analysisItem(analysisItem:AnalysisItem):void {
-        derivedGrouping = analysisItem as DerivedAnalysisDimension;
+        derivedGrouping = analysisItem as DerivedAnalysisDateDimension;
     }
 
     override protected function commitProperties():void {
@@ -17,7 +17,10 @@ public class DerivedGroupingWindow extends CalculationWindow {
         if (derivedGrouping != null) {
             calcText = derivedGrouping.derivationCode;
             calcName = derivedGrouping.display;
+            dateLevel = derivedGrouping.dateLevel;
         }
+        detailIndex = 1;
+        detailItemLabel = "Date Level:";
     }
 
     override protected function get calculationItem():AnalysisItem {
@@ -26,7 +29,7 @@ public class DerivedGroupingWindow extends CalculationWindow {
 
     override protected function actualSave():AnalysisItem {
         if (derivedGrouping == null) {
-            derivedGrouping = new DerivedAnalysisDimension();
+            derivedGrouping = new DerivedAnalysisDateDimension();
             derivedGrouping.concrete = false;
             var namedKey:NamedKey = new NamedKey();
             namedKey.name = nameInput.text;

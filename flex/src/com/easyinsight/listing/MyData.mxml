@@ -253,11 +253,6 @@
             uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
         }
 
-        public function search():void {
-            this.keyword = searchText.text.toLowerCase();
-            IHierarchicalCollectionView(uploadGrid.dataProvider).refresh();
-        }
-
         private function gridDoubleClick(event:ListEvent):void {
             var analyzeSource:PerspectiveInfo = null;
             var selectedObject:Object = event.currentTarget.selectedItem;
@@ -633,11 +628,8 @@
                 <mx:ProgressBar indeterminate="true" visible="{showLoading}" x="458" y="10"/>
                 <mx:Label text="Need to add data?" fontSize="16" x="482" y="34" visible="{showConnections}"/>
                 <mx:Button toolTip="Go to connections..." click="toConnections()" icon="{connectionsIcon}"
-                               label="Go to Connections" labelPlacement="bottom" x="635" y="10" visible="{showConnections}"/>
-                <mx:TextInput id="searchText" keyUp="search()" x="773" y="10"/>
-                <mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')"
-                                   id="searchButton" x="946" y="10"/>
-                <mx:CheckBox id="groupInclude" change="groupIncludeChanged()" selected="{includeGroups}" x="786" y="43" label="Include Data in My Groups"/>
+                               label="Go to Connections" labelPlacement="bottom" x="635" y="10" visible="{showConnections}"/>                
+                <mx:CheckBox id="groupInclude" change="groupIncludeChanged()" selected="{includeGroups}" x="786" y="10" label="Include Data from Other Users"/>
 
             <mx:TextArea text="The tree below shows your data sources and reports. You can click on the arrow to the left of any data source to show reports associated with that data source. Use the icons on the right side of the table to create new reports, open existing reports, or take admin actions."
                     width="980" editable="false" selectable="false" fontSize="14" x="10" y="93"/>

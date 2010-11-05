@@ -49,8 +49,7 @@ public class StandardReportPipeline extends Pipeline {
                 components.add(new LookupTableComponent(lookupTable, refMap.get(lookupTable.getTargetField().createAggregateKey())));
             }
         }
-
-        components.add(new DataScrubComponent());
+        
         for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
             AnalysisList analysisList = (AnalysisList) tag;
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));

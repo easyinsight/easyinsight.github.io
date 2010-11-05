@@ -8,6 +8,7 @@ import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableUtil;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.scorecard.ScorecardStorage;
+import com.easyinsight.storage.DatabaseShardException;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -372,6 +373,8 @@ public class FeedService {
             metadata.truncate();
             metadata.commit();
             conn.commit();
+        } catch (DatabaseShardException dse) {
+            // all fine
         } catch (Exception e) {
             LogClass.error(e);
             if (metadata != null) {

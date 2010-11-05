@@ -74,11 +74,17 @@
                 } else {
                     filterString = String(filterValue);
                 }
+                if (filterString == null || filterString == "") {
+                    filterString = "[ No Value ]";
+                }
                 filteredStrings.addItem(filterString);
             }
             var strings:ArrayCollection = new ArrayCollection();
             for each (var value:Value in analysisDimensionResultMetadata.values) {
                 var string:String = String(value.getValue());
+                if (string == null || string == "") {
+                    string = "[ No Value ]";
+                }
                 if (!strings.contains(string) && !filteredStrings.contains(string)) {
                     strings.addItem(string);
                 }
@@ -144,7 +150,13 @@
 
         public function makeUpdates():FilterDefinition {
             _filterValueDefinition.filteredValues = targetList.dataProvider as ArrayCollection;
+            var index:int = _filterValueDefinition.filteredValues.getItemIndex("[ No Value ]");
+            if (index != -1) {
+                _filterValueDefinition.filteredValues.removeItemAt(index);
+                _filterValueDefinition.filteredValues.addItem("");
+            }
             _filterValueDefinition.inclusive = includeCheckbox.selected;
+            _filterValueDefinition.singleValue = false;
             return _filterValueDefinition;
         }
 
@@ -161,6 +173,22 @@
             } else if (typeGroup.selectedValue == "pattern") {
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, PatternFilterWindow));
             }
+        }
+
+        private function addAll():void {
+            var values:Array = sourceValues.toArray();
+            for each (var o:* in values) {
+                targetValues.addItem(o);
+            }
+            sourceValues.removeAll();
+        }
+
+        private function removeAll():void {
+            var values:Array = targetValues.toArray();
+            for each (var o:* in values) {
+                sourceValues.addItem(o);
+            }
+            targetValues.removeAll();
         }
 
         [Bindable]
@@ -201,11 +229,12 @@
                         <mx:Label text="Available Values"/>
                     </mx:ApplicationControlBar>
                     <mx:TextInput id="availableSearch" change="sourceChange()"/>
-                    <mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="200"/>
+                    <mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="200"
+                            allowMultipleSelection="true"/>
                 </mx:VBox>
                 <mx:VBox>
-                    <mx:Button label="Add All"/>
-                    <mx:Button label="Remove All"/>
+                    <mx:Button label="Add All" click="addAll()"/>
+                    <mx:Button label="Remove All" click="removeAll()"/>
                 </mx:VBox>
                 <mx:VBox>
                     <mx:ApplicationControlBar width="200">
@@ -213,7 +242,7 @@
                     </mx:ApplicationControlBar>
                     <mx:TextInput id="includedSearch" change="includedChange()"/>
                     <mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"
-                        width="200"/>
+                        width="200" allowMultipleSelection="true"/>
                 </mx:VBox>
             </mx:HBox>
         </mx:VBox>

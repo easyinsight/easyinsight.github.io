@@ -122,21 +122,6 @@ public class User extends EventDispatcher
         if (response.uiSettings != null) {
             _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);
         }
-        try {
-            sharedObject = SharedObject.getLocal(response.userID.toString());
-            var credentialIDs:String = sharedObject.data["credentials"];
-            if (credentialIDs != null && credentialIDs != "") {
-                var ids:Array = credentialIDs.split(",");
-                for each (var idString:String in ids) {
-                    var credentials:Credentials = getCredentials(int(idString));
-                    if (credentials != null) {
-                        CredentialsCache.getCache().addCredentials(int(idString), credentials);
-                    }
-                }
-            }
-        } catch (e:Error) {
-
-        }
     }
 
     public function changeSettings(settings:UISettings):void {
@@ -189,41 +174,6 @@ public class User extends EventDispatcher
 
     static public function getSharedObject():SharedObject {
         return sharedObject;
-    }
-
-    static public function getCredentials(dataSourceID:int):Credentials {
-        var idString:String = dataSourceID.toString();
-        if (getSharedObject() != null && getSharedObject().data[idString] != null) {
-            var c:Credentials = new Credentials();
-            c.userName = User.getSharedObject().data[idString].username;
-            c.password = User.getSharedObject().data[idString].password;
-            c.encrypted = true;
-            var credentialIDs:String = getSharedObject().data["credentials"];
-            if (credentialIDs == null || credentialIDs == "") {
-                credentialIDs = String(dataSourceID);
-                getSharedObject().data["credentials"] = credentialIDs;
-                getSharedObject().flush();
-            }
-            return c;
-        }
-        return CredentialsCache.getCache().getCredentials(dataSourceID);
-    }
-
-    static public function saveCredentials(dataSourceID:int, c:Credentials):void {
-        var idString:String = dataSourceID.toString();
-        if (getSharedObject() != null) {
-            getSharedObject().data[idString] = new Object();
-            getSharedObject().data[idString].username = c.userName;
-            getSharedObject().data[idString].password = c.password;
-            var credentialIDs:String = getSharedObject().data["credentials"];
-            if (credentialIDs == null && credentialIDs != "") {
-                credentialIDs = String(dataSourceID);
-            } else {
-                credentialIDs = credentialIDs + "," + String(dataSourceID);
-            }
-            getSharedObject().data["credentials"] = credentialIDs;
-            getSharedObject().flush();
-        }
     }
 
 }

@@ -8,7 +8,7 @@
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0"
                 right="0" paddingRight="0"
                 bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIPreloader"
-        implements="com.easyinsight.framework.ITutorialRegistrar">
+        implements="com.easyinsight.framework.ITutorialRegistrar" frameRate="60">
     <mx:Script>
 		<![CDATA[        
         import com.easyinsight.account.Account;
@@ -124,6 +124,15 @@
 
         private function applicationListeners():void {
             stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+            addUncaughtErrorListener(stage.loaderInfo);
+            addUncaughtErrorListener(this.loaderInfo);
+
+            for (var o:Object in systemManager.preloadedRSLs) {
+                addUncaughtErrorListener(LoaderInfo(o));
+            }
+        }
+
+        private function addUncaughtErrorListener(loaderInfo:LoaderInfo):void {
             if (loaderInfo.hasOwnProperty("uncaughtErrorEvents")) {
                 IEventDispatcher(loaderInfo["uncaughtErrorEvents"]).addEventListener("uncaughtError", handlerFunction);
             }

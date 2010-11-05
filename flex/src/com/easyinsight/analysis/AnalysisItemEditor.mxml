@@ -277,7 +277,7 @@
             return true;
         }
 
-        public function save(dataSourceID:int):AnalysisItem {
+        public function save(dataSourceID:int):void {
             if (detailEditor != null) {
                 if (detailEditor.validate()) {
                     var existingType:int = startingAnalysisItem.getType();
@@ -299,12 +299,7 @@
                     detailEditor.save(analysisItem);
                     dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
                     UserAudit.instance().audit(UserAudit.EDITED_FIELD);
-                    return analysisItem;
-                } else {
-                    return null;
                 }
-            } else {
-                return null;
             }
         }
 

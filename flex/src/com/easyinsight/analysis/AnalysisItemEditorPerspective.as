@@ -18,9 +18,9 @@ public class AnalysisItemEditorPerspective extends ModulePerspective implements 
     public function set dataSourceID(dataSourceID:int):void {
     }
 
-    public function save(dataSourceID:int):AnalysisItem {
+    public function save(dataSourceID:int):void {
         var editor:IAnalysisItemEditor = getChildAt(0) as IAnalysisItemEditor;
-        return editor.save(dataSourceID);
+        editor.save(dataSourceID);
     }
 
     public function validate():Boolean {

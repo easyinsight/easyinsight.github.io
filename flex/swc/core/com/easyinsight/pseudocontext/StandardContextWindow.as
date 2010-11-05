@@ -1,7 +1,6 @@
 package com.easyinsight.pseudocontext {
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.CustomCodeLink;
 import com.easyinsight.analysis.DrillThrough;
 import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
@@ -102,13 +101,6 @@ public class StandardContextWindow {
                 executor.send();
             });
             items.push(drillContextItem);
-        } else if (link is CustomCodeLink) {
-            var customCodeLink:CustomCodeLink = link as CustomCodeLink;
-            var codeLinkItem:ContextMenuItem = new ContextMenuItem(customCodeLink.label);
-            codeLinkItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                passthroughObject.dispatchEvent(customCodeLink.createEvent(data[analysisItem.qualifiedName()]));
-            });
-            items.push(codeLinkItem);
         }
     }
 

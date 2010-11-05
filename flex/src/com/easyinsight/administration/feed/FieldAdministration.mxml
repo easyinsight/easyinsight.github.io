@@ -243,15 +243,10 @@
         }
 
         public function createFields():ArrayCollection {
-            trace("saving fields");
-            if (selectedWrapper != null) {
-                selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
-            }
             var fields:ArrayCollection = new ArrayCollection();
             for each (var wrapper:AnalysisItemWrapper in allFields) {
                 fields.addItem(wrapper.analysisItem);
             }
-            trace("saved fields");
             return fields;
         }
 

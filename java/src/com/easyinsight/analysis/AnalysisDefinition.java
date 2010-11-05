@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.scrubbing.DataScrub;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.core.Key;
 
@@ -52,12 +51,6 @@ public class AnalysisDefinition implements Cloneable {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "analysis_id", nullable = false)
     private List<UserToAnalysisBinding> userBindings = new ArrayList<UserToAnalysisBinding>();
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name = "analysis_to_data_scrub",
-            joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "data_scrub_id", nullable = false))
-    private List<DataScrub> dataScrubs = new ArrayList<DataScrub>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "analysis_to_tag",
@@ -284,14 +277,6 @@ public class AnalysisDefinition implements Cloneable {
         this.analysisPolicy = analysisPolicy;
     }
 
-    public List<DataScrub> getDataScrubs() {
-        return dataScrubs;
-    }
-
-    public void setDataScrubs(List<DataScrub> dataScrubs) {
-        this.dataScrubs = dataScrubs;
-    }
-
     public List<UserToAnalysisBinding> getUserBindings() {
         return userBindings;
     }
@@ -373,15 +358,6 @@ public class AnalysisDefinition implements Cloneable {
         allFields = new ArrayList<AnalysisItem>(allFields);
         allFields.addAll(addedItems);
 
-        List<DataScrub> scrubs = new ArrayList<DataScrub>();
-        if (getDataScrubs() != null) {
-            for (DataScrub scrub : getDataScrubs()) {
-                scrubs.add(scrub.clone());
-                scrub.updateReplacementMap(replacementMap);                
-            }
-        }
-        analysisDefinition.setDataScrubs(scrubs);
-
         Collection<AnalysisItem> reportItems = createBlazeDefinition().getAllAnalysisItems();
         reportItems.remove(null);
         for (AnalysisItem baseItem : reportItems) {
@@ -444,9 +420,6 @@ public class AnalysisDefinition implements Cloneable {
         for (FilterDefinition filter : filterDefinitions) {
             filter.updateIDs(replacementMap);
         }
-        for (DataScrub dataScrub : scrubs) {
-            dataScrub.updateIDs(replacementMap);
-        }
         analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap, keyMap);
         analysisDefinition.setReportStructure(clonedStructure);
         analysisDefinition.setAddedItems(addedItems);
@@ -461,12 +434,6 @@ public class AnalysisDefinition implements Cloneable {
             clonedProperties.add(reportProperty.clone());
         }
         analysisDefinition.setProperties(clonedProperties);
-        List<DataScrub> dataScrubs = new ArrayList<DataScrub>();
-        for (DataScrub dataScrub : this.dataScrubs) {
-            DataScrub clonedScrub = dataScrub.clone();
-            dataScrubs.add(clonedScrub);
-        }
-        analysisDefinition.setDataScrubs(dataScrubs);
         analysisDefinition.setTemporaryReport(temporaryReport);
         return analysisDefinition;
     }
@@ -507,19 +474,11 @@ public class AnalysisDefinition implements Cloneable {
             }*/
         }
         analysisDefinition.populateFromReportStructure(reportStructure);
-        List<DataScrub> newScrubs = new ArrayList<DataScrub>();
-        if (dataScrubs != null) {
-            for (DataScrub dataScrub : dataScrubs) {
-                dataScrub.afterLoad();
-                newScrubs.add(dataScrub);
-            }
-        }
         analysisDefinition.setDescription(getDescription());
         analysisDefinition.setCanSaveDirectly(isOwner(SecurityUtil.getUserID(false)));
         analysisDefinition.setAuthorName(getAuthorName());
         analysisDefinition.setDateCreated(getDateCreated());
         analysisDefinition.setDateUpdated(getDateUpdated());
-        analysisDefinition.setDataScrubs(newScrubs);
         analysisDefinition.setUrlKey(urlKey);
         analysisDefinition.setTagCloud(new ArrayList<Tag>(getTags()));
         analysisDefinition.setMarketplaceVisible(marketplaceVisible);
@@ -562,5 +521,21 @@ public class AnalysisDefinition implements Cloneable {
                 link.updateReportIDs(reportReplacementMap);    
             }
         }
+    }
+
+    public Set<Long> containedReportIDs() {
+        Set<Long> drillIDs = new HashSet<Long>();
+        for (AnalysisItem analysisItem : reportStructure.values()) {
+            List<Link> links = analysisItem.getLinks();
+            if (links != null) {
+                for (Link link : links) {
+                    if (link instanceof DrillThrough) {
+                        DrillThrough drillThrough = (DrillThrough) link;
+                        drillIDs.add(drillThrough.getReportID());
+                    }
+                }
+            }
+        }
+        return drillIDs;
     }
 }

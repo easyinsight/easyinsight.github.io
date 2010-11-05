@@ -257,6 +257,7 @@ public class ComboBoxFilter extends HBox implements IFilter
                 _filterDefinition.filteredValues = new ArrayCollection();
                 _filterDefinition.inclusive = true;
                 _filterDefinition.enabled = true;
+                _filterDefinition.singleValue = true;
             }
 			var selectedValue:String;
 			if (_filterDefinition.filteredValues.length == 0) {

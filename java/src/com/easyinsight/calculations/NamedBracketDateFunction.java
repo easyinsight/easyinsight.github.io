@@ -18,10 +18,8 @@ import java.util.Date;
 public class NamedBracketDateFunction extends Function {
     public Value evaluate() {
         Value stringValue = params.get(0);
-        Value pair = params.get(1);
-        Value format = params.get(3);
-        String pairValue = pair.toString();
-        pairValue = pairValue.substring(1, pairValue.length() - 1);
+        String pairValue = minusQuotes(1);
+        String formatString = minusQuotes(2);        
         String string = stringValue.toString();
         boolean found = false;
         String result = null;
@@ -48,7 +46,6 @@ public class NamedBracketDateFunction extends Function {
         if (result == null) {
             return new EmptyValue();
         }
-        String formatString = format.toString();
         Value returnValue;
         try {
             Date date = new SimpleDateFormat(formatString).parse(result);
@@ -64,6 +61,6 @@ public class NamedBracketDateFunction extends Function {
     }
 
     public FunctionExplanation explain() {
-        return new FunctionExplanation("namedbracketdate(String, String, String)", "Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Name, \"Type\").");
+        return new FunctionExplanation("namedbracketdate(Field, Name, Date Pattern)", "Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Description, \"Target Close\", \"MM-dd-YYYY\") will construct a date out of a sample value of [Target Close: 12-15-2010] in the Deal Description field.");
     }
 }

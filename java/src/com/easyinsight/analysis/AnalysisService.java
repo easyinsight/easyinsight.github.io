@@ -211,6 +211,12 @@ public class AnalysisService {
             }
 
             return null;
+        } catch (ClassCastException cce) {
+            if ("org.antlr.runtime.tree.CommonErrorNode cannot be cast to com.easyinsight.calculations.CalculationTreeNode".equals(cce.getMessage())) {
+                return "There was a syntax error in your expression.";
+            } else {
+                return cce.getMessage();
+            }
         } catch (Exception e) {
             return e.getMessage();
         }

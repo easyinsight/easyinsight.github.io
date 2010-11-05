@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+        horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private var _message:String;
+
+        [Bindable(event="messageChanged")]
+        public function get message():String {
+            return _message;
+        }
+
+        public function set message(value:String):void {
+            if (_message == value) return;
+            _message = value;
+            dispatchEvent(new Event("messageChanged"));
+        }]]></mx:Script>
+    <mx:TextArea text="{message}" width="500" height="80" fontSize="14" editable="false" backgroundAlpha="0"
+            selectable="false" focusEnabled="false" borderStyle="none"/>
+    <mx:HBox>
+        <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</mx:VBox>

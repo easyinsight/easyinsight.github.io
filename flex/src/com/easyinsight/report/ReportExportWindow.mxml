@@ -76,16 +76,6 @@
             PopUpManager.removePopUp(this);
         }
 
-        private function netvibes():void {
-            navigateToURL(new URLRequest("http://www.netvibes.com/subscribe.php?module=UWA&moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(_report.analysisID)) + "&reportName=" + escape(_reportName) + "&reportType=" + escape(String(_reportType)) + "&dataSourceID=" + escape(String(_dataSourceID)))));
-            PopUpManager.removePopUp(this);
-        }
-
-        private function igoogle():void {
-            navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=" + escape("http://www.netvibes.com/api/uwa/compile/google.php?moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(_report.analysisID)) + "&reportName=" + escape(_reportName) + "&reportType=" + escape(String(_reportType)) + "&dataSourceID=" + escape(String(_dataSourceID))))));
-            PopUpManager.removePopUp(this);
-        }
-
         private function email():void {
             exportService.getReportDelivery.send(_report.analysisID, new Date().getTimezoneOffset());
         }
@@ -105,7 +95,6 @@
         ]]></mx:Script>
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
-        <mx:method name="exportReportToPDF"/>
     </mx:RemoteObject>
     <mx:VBox paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5" horizontalAlign="center">
         <mx:Label text="Click any of the options below to export the report:"/>
@@ -116,8 +105,6 @@
             <mx:Button icon="@Embed(source='../../../../assets/camera.png')" label="PNG" click="png()" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/link.png')" label="Link" click="url()" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/plasma_tv.png')" label="Embed" click="embed()" labelPlacement="right"/>
-            <mx:Button icon="@Embed(source='../../../../assets/uwa-netvibes.png')" click="netvibes()"/>
-            <mx:Button icon="@Embed(source='../../../../assets/uwa-google.png')" click="igoogle()"/>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>

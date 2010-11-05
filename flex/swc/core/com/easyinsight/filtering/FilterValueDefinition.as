@@ -8,6 +8,7 @@ package com.easyinsight.filtering
 	{
 		public var filteredValues:ArrayCollection = new ArrayCollection();
 		public var inclusive:Boolean;
+        public var singleValue:Boolean;
 		
 		public function FilterValueDefinition()
 		{

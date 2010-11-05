@@ -150,6 +150,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
         } catch (RecognitionException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } catch (FunctionException fe) {
+            throw new ReportException(new AnalysisItemFault(fe.getMessage(), this));
         }
 
         ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
