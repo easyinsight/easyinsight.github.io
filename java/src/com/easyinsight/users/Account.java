@@ -460,7 +460,7 @@ public class Account {
     public double monthlyCharge() {
         switch(getAccountType()) {
             case Account.PLUS:
-                return Account.PLUS;
+                return PLUS_BILLING_AMOUNT;
             case Account.BASIC:
                 return INDIVIDUAL_BILLING_AMOUNT;
             case Account.PROFESSIONAL:
