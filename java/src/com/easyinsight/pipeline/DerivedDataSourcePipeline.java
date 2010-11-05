@@ -16,7 +16,6 @@ import java.util.*;
 public class DerivedDataSourcePipeline extends Pipeline {
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap, List<AnalysisItem> allItems) {
         List<IComponent> components = new ArrayList<IComponent>();
-        components.add(new DataScrubComponent());
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
                 components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor(), null));
