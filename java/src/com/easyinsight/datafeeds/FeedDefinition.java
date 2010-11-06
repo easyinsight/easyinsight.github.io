@@ -62,6 +62,10 @@ public class FeedDefinition implements Cloneable, Serializable {
     private long parentSourceID;
     private boolean adjustDates;
 
+    public boolean requiresConfiguration() {
+        return true;
+    }
+
     public boolean isAdjustDates() {
         return adjustDates;
     }

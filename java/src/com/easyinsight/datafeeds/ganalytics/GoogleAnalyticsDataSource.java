@@ -185,6 +185,10 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return compiledMap.get(dimension);
     }
 
+    public boolean requiresConfiguration() {
+        return false;
+    }
+
     public int getRequiredAccountTier() {
         return Account.PERSONAL;
     }

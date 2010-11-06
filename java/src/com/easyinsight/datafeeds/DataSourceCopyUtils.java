@@ -42,7 +42,7 @@ public class DataSourceCopyUtils {
 
         DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition, solutionID > 0, accountID, userName);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
-        if (solutionID > 0) {
+        if (solutionID > 0 && feedDefinition.requiresConfiguration()) {
             clonedFeedDefinition.setVisible(false);
         }
         clonedFeedDefinition.setDateCreated(new Date());
@@ -57,11 +57,7 @@ public class DataSourceCopyUtils {
         } else {
             DataStorage.liveDataSource(result.getFeedDefinition().getDataFeedID(), conn);
         }
-        try {
-            clonedFeedDefinition.postClone(conn);
-        } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+        clonedFeedDefinition.postClone(conn);
         if (includeChildren) {
             List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
             for (AnalysisDefinition insight : insights) {
@@ -84,7 +80,7 @@ public class DataSourceCopyUtils {
             }
         }
 
-        boolean requiresConfig = solutionID > 0;
+        boolean requiresConfig = solutionID > 0 && feedDefinition.requiresConfiguration();
 
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID(),
                 clonedFeedDefinition.getFeedType().getType());
