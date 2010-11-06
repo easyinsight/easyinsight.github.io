@@ -3,19 +3,14 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
-
-import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.User;
-import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
-	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 import mx.controls.Alert;
-import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.DateField;
 	import mx.controls.HSlider;
@@ -23,7 +18,6 @@ import mx.controls.Label;
 import mx.events.CalendarLayoutChangeEvent;
 	import mx.events.SliderEvent;
 import mx.formatters.DateFormatter;
-import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
@@ -56,7 +50,7 @@ import mx.rpc.events.ResultEvent;
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
             dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, new Date().getTimezoneOffset());
 		}
 
         private function onFault(event:FaultEvent):void {

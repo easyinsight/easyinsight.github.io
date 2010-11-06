@@ -5,8 +5,6 @@ package com.easyinsight.filtering
 import com.easyinsight.analysis.AnalysisTagsResultMetadata;
 import com.easyinsight.analysis.Value;
 
-import com.easyinsight.framework.CredentialsCache;
-
 import flash.events.Event;
 import flash.events.MouseEvent;	
 	
@@ -116,7 +114,7 @@ import mx.events.DropdownEvent;
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset());
 		}
 
         private function blah():void {

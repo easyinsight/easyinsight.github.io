@@ -3,8 +3,6 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
 
-import com.easyinsight.framework.CredentialsCache;
-
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
@@ -91,7 +89,7 @@ import mx.rpc.events.ResultEvent;
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, new Date().getTimezoneOffset());
 		}
 		
 		private function gotMetadata(event:ResultEvent):void {
