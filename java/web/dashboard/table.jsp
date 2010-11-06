@@ -31,7 +31,7 @@
     if("true".equals(request.getParameter("refresh"))) {
         refresh = true;
     }
-    ScorecardWrapper scorecardWrapper = service.getScorecard(scorecardID, userID, new java.util.ArrayList<com.easyinsight.datafeeds.CredentialFulfillment>(), refresh, new InsightRequestMetadata());
+    ScorecardWrapper scorecardWrapper = service.getScorecard(scorecardID, userID, refresh, new InsightRequestMetadata());
     scorecard = scorecardWrapper.getScorecard();
 
 %>
