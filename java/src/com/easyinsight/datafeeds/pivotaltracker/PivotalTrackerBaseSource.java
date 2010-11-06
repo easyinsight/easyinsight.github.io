@@ -158,7 +158,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     public void exchangeTokens(EIConnection conn) throws Exception {
         Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
         try {
-            if (tokenObj == null) {
+            if (tokenObj == null && ptUserName != null && ptPassword != null) {
                 String tokenValue = getToken(ptUserName, ptPassword);
                 tokenObj = new Token();
                 tokenObj.setTokenValue(tokenValue);
