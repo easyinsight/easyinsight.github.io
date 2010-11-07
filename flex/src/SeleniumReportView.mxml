@@ -52,6 +52,7 @@
         private var requestID:int;
 
         private function handleFlashVars():void {
+            Constants.setup();
             EIMessageListener.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);
