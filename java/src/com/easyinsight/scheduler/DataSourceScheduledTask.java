@@ -79,8 +79,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
                 }
             }
         } catch (ReportException re) {
-            LogClass.error(re.getMessage(), re);
-            throw re;
+            LogClass.error(re.getReportFault().toString(), re);
         } catch (Exception e) {
             LogClass.error("Data source " + dataSourceID + " had error " + e.getMessage() + " in trying to refresh data.");
             throw e;
