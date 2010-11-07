@@ -1,5 +1,6 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMutex;
 import com.easyinsight.datafeeds.FeedStorage;
@@ -77,6 +78,9 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     }
                 }
             }
+        } catch (ReportException re) {
+            LogClass.error(re.getMessage(), re);
+            throw re;
         } catch (Exception e) {
             LogClass.error("Data source " + dataSourceID + " had error " + e.getMessage() + " in trying to refresh data.");
             throw e;

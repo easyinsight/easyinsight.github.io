@@ -5,10 +5,8 @@ import com.easyinsight.email.AuthSMTPConnection;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.security.SecurityUtil;
 
-import java.io.StringWriter;
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 
 /**
  * User: James Boe
@@ -41,6 +39,28 @@ public class LogClass {
                 } catch(Exception e) {
                 }
                 new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, message , "donotreply@easy-insight.com");
+            }
+            catch(Exception ex) {
+                // do nothing, wtf do you do at this point?
+                ex.printStackTrace();
+            }
+        }
+        log.error(message);
+    }
+
+    public static void error(String message, Throwable e) {
+        if(ConfigLoader.instance().isProduction()) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream writer = new PrintStream(baos);
+            e.printStackTrace(writer);
+            try {
+                String username = null;
+                try {
+                    username = SecurityUtil.getUserName();
+                } catch(Exception se) {
+                }
+                String msg = new String(baos.toByteArray());
+                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, msg , "donotreply@easy-insight.com");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
