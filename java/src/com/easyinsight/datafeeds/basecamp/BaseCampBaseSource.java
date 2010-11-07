@@ -11,7 +11,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.IOException;
-import java.util.Date;
+
 import java.util.Map;
 
 /**
@@ -100,7 +100,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Basecamp instance at " + url, parentDefinition));
+                    throw new BaseCampLoginException("Could not locate a Highrise instance at " + url);
                 } else if (statusLine.indexOf("503") != -1) {
                     Header retryHeader = restMethod.getResponseHeader("Retry-After");
                     if (retryHeader == null) {
