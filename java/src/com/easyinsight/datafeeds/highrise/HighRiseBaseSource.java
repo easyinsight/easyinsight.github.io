@@ -110,7 +110,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Highrise instance at " + url, parentDefinition));
+                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Highrise instance at " + url, parentDefinition, "URL was " + url + path));
                 } else if (statusLine.indexOf("503") != -1 ||
                         statusLine.indexOf("403") != -1) {
                     System.out.println("Highrise 503, retrying");

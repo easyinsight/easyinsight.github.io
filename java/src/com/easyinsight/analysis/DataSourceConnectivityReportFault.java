@@ -10,13 +10,24 @@ import com.easyinsight.datafeeds.FeedDefinition;
 public class DataSourceConnectivityReportFault extends ReportFault {
     private FeedDefinition dataSource;
     private String message;
+    private String debug;
 
     public DataSourceConnectivityReportFault(String message, FeedDefinition dataSource) {
         this.dataSource = dataSource;
         this.message = message;
     }
 
+    public DataSourceConnectivityReportFault(String message, FeedDefinition dataSource, String debug) {
+        this.dataSource = dataSource;
+        this.message = message;
+        this.debug = debug;
+    }
+
     public DataSourceConnectivityReportFault() {
+    }
+
+    public String getDebug() {
+        return debug;
     }
 
     public FeedDefinition getDataSource() {
@@ -37,6 +48,10 @@ public class DataSourceConnectivityReportFault extends ReportFault {
 
     @Override
     public String toString() {
-        return message;
+        if (debug != null) {
+            return message + " - " + debug;
+        } else {
+            return message;
+        }
     }
 }
