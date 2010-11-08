@@ -28,7 +28,7 @@ public class BracketValueFunction extends Function {
     }
 
     public int getParameterCount() {
-        return 2;
+        return 1;
     }
 
     public FunctionExplanation explain() {
