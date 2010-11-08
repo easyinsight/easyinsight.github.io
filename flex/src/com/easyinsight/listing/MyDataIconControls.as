@@ -39,9 +39,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     [Embed(source="../../../../assets/businessman_edit.png")]
     public var adminIcon:Class;
 
-    [Embed(source="../../../../assets/copy.png")]
-    public var copyIcon:Class;
-
     [Embed(source="../../../../assets/media_play_green.png")]
     public var playIcon:Class;
 
@@ -52,7 +49,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     private var adminButton:Button;
     private var analyzeButton:Button;
     private var deleteButton:Button;
-    private var copyButton:Button;
 
     private var _analyzeTooltip:String = "Analyze...";
     private var _analyzeVisible:Boolean = true;
@@ -60,8 +56,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     private var _refreshVisible:Boolean = true;
     private var _adminTooltip:String = "Administer...";
     private var _adminVisible:Boolean = true;
-    private var _copyTooltip:String = "Copy...";
-    private var _copyVisible:Boolean = true;
     private var _deleteTooltip:String = "Delete...";
     private var _deleteVisible:Boolean = true;
 
@@ -80,7 +74,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     private var _showAnalyze:Boolean = true;
     private var _showRefresh:Boolean = true;
     private var _showAdmin:Boolean = true;
-    private var _showCopy:Boolean = true;
     private var _showDelete:Boolean = true;
 
     public function set showAnalyze(value:Boolean):void {
@@ -93,10 +86,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
 
     public function set showAdmin(value:Boolean):void {
         _showAdmin = value;
-    }
-
-    public function set showCopy(value:Boolean):void {
-        _showCopy = value;
     }
 
     public function set showDelete(value:Boolean):void {
@@ -138,17 +127,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             addChild(adminButton);
         }
 
-        if (_showCopy) {
-            if (copyButton == null) {
-                copyButton = new Button();
-                copyButton.setStyle("icon", copyIcon);
-                BindingUtils.bindProperty(copyButton, "toolTip", this, "copyTooltip");
-                BindingUtils.bindProperty(copyButton, "visible", this, "copyVisible");
-                copyButton.addEventListener(MouseEvent.CLICK, copyCalled);
-            }
-            addChild(copyButton);
-        }
-
         if (_showDelete) {
             if (deleteButton == null) {
                 deleteButton = new Button();
@@ -180,11 +158,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         if (adminButton != null) {
             adminButton.move((padding * i) + (buttonWidth * (i - 1)),0);
             adminButton.setActualSize(buttonWidth, buttonHeight);
-            i++;
-        }
-        if (copyButton != null) {
-            copyButton.move((padding * i) + (buttonWidth * (i - 1)),0);
-            copyButton.setActualSize(buttonWidth, buttonHeight);
             i++;
         }
         if (deleteButton != null) {
@@ -260,28 +233,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         dispatchEvent(new Event("adminVisibleChanged"));
     }
 
-    [Bindable(event="copyTooltipChanged")]
-    public function get copyTooltip():String {
-        return _copyTooltip;
-    }
-
-    public function set copyTooltip(value:String):void {
-        if (_copyTooltip == value) return;
-        _copyTooltip = value;
-        dispatchEvent(new Event("copyTooltipChanged"));
-    }
-
-    [Bindable(event="copyVisibleChanged")]
-    public function get copyVisible():Boolean {
-        return _copyVisible;
-    }
-
-    public function set copyVisible(value:Boolean):void {
-        if (_copyVisible == value) return;
-        _copyVisible = value;
-        dispatchEvent(new Event("copyVisibleChanged"));
-    }
-
     [Bindable(event="deleteTooltipChanged")]
     public function get deleteTooltip():String {
         return _deleteTooltip;
@@ -330,6 +281,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                 case DataFeedDescriptor.HIGHRISE:
                 case DataFeedDescriptor.PIVOTAL_TRACKER:
                 case DataFeedDescriptor.LINKEDIN:
+                case DataFeedDescriptor.CONSTANT_CONTACT:
                     refreshData(feedDescriptor);
                     break;
             }
@@ -401,7 +353,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             var descriptor:DataFeedDescriptor = value as DataFeedDescriptor;
             adminVisible = descriptor.role == DataFeedDescriptor.OWNER;
             adminTooltip = "Administer the data source...";
-            copyVisible = true;
             deleteVisible = descriptor.groupSourceID == 0;
             switch (descriptor.feedType) {
                 case DataFeedDescriptor.STATIC:
@@ -410,6 +361,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                 case DataFeedDescriptor.HIGHRISE:
                 case DataFeedDescriptor.PIVOTAL_TRACKER:
                 case DataFeedDescriptor.WHOLE_FOODS:
+                case DataFeedDescriptor.LINKEDIN:
+                case DataFeedDescriptor.CONSTANT_CONTACT:
                     refreshVisible = true;
                     break;
                 default:
@@ -421,20 +374,16 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             refreshVisible = false;
             adminVisible = true;
             adminTooltip = "Open report in the report editor...";
-            copyVisible = false;
         } else if (value is ReportPackageDescriptor) {
             refreshVisible = false;
             adminVisible = true;
             adminTooltip = "Edit the package definition...";
-            copyVisible = false;
         } else if (value is LookupTableDescriptor) {
             refreshVisible = false;
             adminVisible = false;
-            copyVisible = false;
         } else if (value is GoalTreeDescriptor) {
             refreshVisible = false;
             adminVisible = true;
-            copyVisible = false;
         }
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }

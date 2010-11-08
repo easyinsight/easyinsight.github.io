@@ -38,6 +38,7 @@
             var i:MySQLSolutionDetail;
             var j:FreshbooksSolutionDetail;
             var k:CrunchbaseSolutionDetail;
+            var l:ConstantContactSolutionDetail;
         }
 
         public function gotFocus():void {

@@ -277,6 +277,7 @@
                                 <mx:String>com.easyinsight.solutions.MySQLSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.FreshbooksSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.CrunchbaseSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.ConstantContactSolutionDetail</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>

@@ -83,33 +83,34 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 "DATA_FEED_ID = ?");
         getCustomFeedIDStmt.setLong(1, getDataFeedID());
         ResultSet rs = getCustomFeedIDStmt.executeQuery();
-        rs.next();
-        long compositeFeedID = rs.getLong(1);
-        getCustomFeedIDStmt.close();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, X, Y FROM COMPOSITE_NODE WHERE COMPOSITE_FEED_ID = ?");
-        queryStmt.setLong(1, compositeFeedID);
-        ResultSet nodeRS = queryStmt.executeQuery();
-        List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
-        while (nodeRS.next()) {
-            long feedID = nodeRS.getLong(1);
-            nodes.add(new CompositeFeedNode(feedID, nodeRS.getInt(2), nodeRS.getInt(3)));
+        if (rs.next()) {
+            long compositeFeedID = rs.getLong(1);
+            getCustomFeedIDStmt.close();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, X, Y FROM COMPOSITE_NODE WHERE COMPOSITE_FEED_ID = ?");
+            queryStmt.setLong(1, compositeFeedID);
+            ResultSet nodeRS = queryStmt.executeQuery();
+            List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
+            while (nodeRS.next()) {
+                long feedID = nodeRS.getLong(1);
+                nodes.add(new CompositeFeedNode(feedID, nodeRS.getInt(2), nodeRS.getInt(3)));
+            }
+            queryStmt.close();
+            PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
+                    "SOURCE_JOIN, TARGET_JOIN FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
+            queryConnStmt.setLong(1, compositeFeedID);
+            List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
+            ResultSet connectionRS = queryConnStmt.executeQuery();
+            while (connectionRS.next()) {
+                long sourceID = connectionRS.getLong(1);
+                long targetID = connectionRS.getLong(2);
+                Key sourceKey = getKey(conn, connectionRS.getLong(3));
+                Key targetKey = getKey(conn, connectionRS.getLong(4));
+                edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey));
+            }
+            this.compositeFeedNodes = nodes;
+            this.connections = edges;
+            queryConnStmt.close();
         }
-        queryStmt.close();
-        PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
-                "SOURCE_JOIN, TARGET_JOIN FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
-        queryConnStmt.setLong(1, compositeFeedID);
-        List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
-        ResultSet connectionRS = queryConnStmt.executeQuery();
-        while (connectionRS.next()) {
-            long sourceID = connectionRS.getLong(1);
-            long targetID = connectionRS.getLong(2);
-            Key sourceKey = getKey(conn, connectionRS.getLong(3));
-            Key targetKey = getKey(conn, connectionRS.getLong(4));
-            edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey));
-        }
-        this.compositeFeedNodes = nodes;
-        this.connections = edges;
-        queryConnStmt.close();
     }
 
     public Feed createFeedObject(FeedDefinition parent) {

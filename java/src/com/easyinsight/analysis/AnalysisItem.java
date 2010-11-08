@@ -87,6 +87,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @JoinColumn(name="virtual_dimension_id")
     private VirtualDimension virtualDimension;*/
 
+    @Transient
+    private transient String folder;
+
     public AnalysisItem() {
     }
 
@@ -101,6 +104,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public String getFolder() {
+        return folder;
+    }
+
+    public void setFolder(String folder) {
+        this.folder = folder;
     }
 
     public Long getLookupTableID() {

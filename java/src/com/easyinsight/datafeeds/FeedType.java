@@ -68,6 +68,12 @@ public class FeedType {
     public static final FeedType HIGHRISE_DEAL_NOTES = new FeedType(60);
     public static final FeedType HIGHRISE_COMPANY_NOTES = new FeedType(61);
     public static final FeedType HIGHRISE_CASE_NOTES = new FeedType(62);
+    public static final FeedType CONSTANT_CONTACT = new FeedType(63);
+    public static final FeedType CONSTANT_CONTACT_CAMPAIGN = new FeedType(64);
+    public static final FeedType CONSTANT_CONTACT_CAMPAIGN_RESULTS = new FeedType(65);
+    public static final FeedType CONSTANT_CONTACT_CONTACTS = new FeedType(66);
+    public static final FeedType CONSTANT_CONTACT_CONTACT_LISTS = new FeedType(67);
+    public static final FeedType CONSTANT_CONTACT_CONTACT_TO_CONTACT_LIST = new FeedType(68);
 
     private int type;
 

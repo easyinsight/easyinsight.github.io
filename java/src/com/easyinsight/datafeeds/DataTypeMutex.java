@@ -27,6 +27,9 @@ public class DataTypeMutex {
         lockRequiredTypes = new HashSet<FeedType>();
         lockRequiredTypes.add(FeedType.BASECAMP_MASTER);
         lockRequiredTypes.add(FeedType.HIGHRISE_COMPOSITE);
+        lockRequiredTypes.add(FeedType.PIVOTAL_TRACKER);
+        lockRequiredTypes.add(FeedType.WHOLE_FOODS);
+        lockRequiredTypes.add(FeedType.CONSTANT_CONTACT);
         for (FeedType feedType : lockRequiredTypes) {
             Semaphore semaphore = new Semaphore(3, true);
             mutexMap.put(feedType, semaphore);

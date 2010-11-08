@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * User: jamesboe
@@ -62,7 +64,13 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
 
     @Override
     public String validateCredentials() {
-        return null;
+        Pattern p = Pattern.compile("(http(s?)://)?([A-Za-z0-9]|\\-)+(\\.(freshbooks)\\.com)?");
+        Matcher m = p.matcher(url);
+        String result = null;
+        if(!m.matches()) {
+            result = "Invalid url. Please input a proper URL.";
+        }
+        return result;
     }
 
     private String url;
@@ -173,10 +181,17 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         rollingFilterDefinition.setField(findAnalysisItem(FreshbooksInvoiceSource.INVOICE_DATE));
         rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.QUARTER);
-        List<KPI> kpis = Arrays.asList(KPIUtil.createKPIWithFilters("Outstanding Invoice Amount", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT_OUTSTANDING),
-                new ArrayList<FilterDefinition>(), KPI.GOOD, 1),
-                KPIUtil.createKPIWithFilters("Invoiced Dollars in the Last 90 Days", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT),
-                Arrays.asList((FilterDefinition) rollingFilterDefinition), KPI.GOOD, 1));        
+        List<KPI> kpis = new ArrayList<KPI>();
+        kpis.add(KPIUtil.createKPIWithFilters("Outstanding Invoice Amount", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT_OUTSTANDING),
+            new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
+        kpis.add(KPIUtil.createKPIWithFilters("Invoiced Dollars in the Last 90 Days", "document.png", (AnalysisMeasure) findAnalysisItem(FreshbooksInvoiceSource.AMOUNT),
+            Arrays.asList((FilterDefinition) rollingFilterDefinition), KPI.GOOD, 90));
+        kpis.add(KPIUtil.createKPIForDateFilter("Hours Tracked in the Last 90 Days", "clock.png", (AnalysisMeasure) findAnalysisItem(FreshbooksTimeEntrySource.HOURS),
+            (AnalysisDimension) findAnalysisItem(FreshbooksTimeEntrySource.DATE), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
+        kpis.add(KPIUtil.createKPIForDateFilter("Expenses in the Last 90 Days", "money.png", (AnalysisMeasure) findAnalysisItem(FreshbooksExpenseSource.AMOUNT),
+            (AnalysisDimension) findAnalysisItem(FreshbooksExpenseSource.DATE), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
+        kpis.add(KPIUtil.createKPIForDateFilter("Payment Received in the Last 90 Days", "credit_card.png", (AnalysisMeasure) findAnalysisItem(FreshbooksPaymentSource.AMOUNT),
+            (AnalysisDimension) findAnalysisItem(FreshbooksPaymentSource.PAYMENT_DATE), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
         return kpis;
     }
 

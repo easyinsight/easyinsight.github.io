@@ -41,6 +41,16 @@ public class AnalysisDimension extends AnalysisItem {
         return keyDimension;
     }
 
+    public AnalysisDimension(Key key) {
+        super(key);
+    }
+
+    public static AnalysisDimension withFolder(Key key, String folder) {
+        AnalysisDimension dim = new AnalysisDimension(key);
+        dim.setFolder(folder);
+        return dim;
+    }
+
     public void setKeyDimension(AnalysisDimension keyDimension) {
         this.keyDimension = keyDimension;
     }

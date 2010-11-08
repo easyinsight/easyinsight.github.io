@@ -147,7 +147,9 @@ public class ExportService {
     }
 
     private boolean isRefreshable(int feedType) {
-        return (feedType == FeedType.BASECAMP_MASTER.getType() || feedType == FeedType.HIGHRISE_COMPOSITE.getType());
+        return (feedType == FeedType.BASECAMP_MASTER.getType() || feedType == FeedType.HIGHRISE_COMPOSITE.getType() ||
+            feedType == FeedType.PIVOTAL_TRACKER.getType() || feedType == FeedType.WHOLE_FOODS.getType() ||
+            feedType == FeedType.CONSTANT_CONTACT.getType());
     }
 
     public ReportDelivery getReportDelivery(long reportID, int utcOffset) {

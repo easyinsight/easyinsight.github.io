@@ -41,7 +41,9 @@
             syncLabel = "Easy Insight synchronizes with data from " + value.name + " in order to provide an optimal user experience. You can set the data source to refresh on demand or on a scheduled basis.";
             if (value.dataSourceType == DataFeedDescriptor.BASECAMP ||
                     value.dataSourceType == DataFeedDescriptor.HIGHRISE ||
-                    value.dataSourceType == DataFeedDescriptor.PIVOTAL_TRACKER) {
+                    value.dataSourceType == DataFeedDescriptor.PIVOTAL_TRACKER ||
+                    value.dataSourceType == DataFeedDescriptor.WHOLE_FOODS ||
+                    value.dataSourceType == DataFeedDescriptor.CONSTANT_CONTACT) {
                 syncButton = "Next";
             } else {
                 syncButton = "Finish";

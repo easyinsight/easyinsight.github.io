@@ -198,6 +198,10 @@ public class GroupAdminMyDataIconControls extends HBox
                     break;
                 case DataFeedDescriptor.BASECAMP:
                 case DataFeedDescriptor.HIGHRISE:
+                case DataFeedDescriptor.PIVOTAL_TRACKER:
+                case DataFeedDescriptor.WHOLE_FOODS:
+                case DataFeedDescriptor.LINKEDIN:
+                case DataFeedDescriptor.CONSTANT_CONTACT:
                     refreshData(feedDescriptor);
                     break;
             }
@@ -262,6 +266,10 @@ public class GroupAdminMyDataIconControls extends HBox
                 case DataFeedDescriptor.EMPTY:
                 case DataFeedDescriptor.BASECAMP:
                 case DataFeedDescriptor.HIGHRISE:
+                case DataFeedDescriptor.PIVOTAL_TRACKER:
+                case DataFeedDescriptor.WHOLE_FOODS:
+                case DataFeedDescriptor.LINKEDIN:
+                case DataFeedDescriptor.CONSTANT_CONTACT:
                     refreshVisible = true;
                     break;
                 default:

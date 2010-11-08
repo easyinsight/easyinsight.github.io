@@ -57,7 +57,7 @@
                 if (response.error == OAuthResponse.BAD_HOST) {
                     Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight.");
                 } else {
-                    Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight.");
+                    Alert.show("Freshbooks rejected the specified verifier token. Please try authorizing again.");
                 }
             }
         }
@@ -66,6 +66,31 @@
         private var stackIndex:int = 0;
 
         public function validate():Boolean {
+            urlInput.errorString = null;
+            installButton.errorString = null;
+            if (verifierInput != null) {
+                verifierInput.errorString = null;
+            }
+            if (urlInput.text.length == 0) {
+                urlInput.errorString = "You need to specify the location of your Freshbooks account.";
+                urlInput.setFocus();
+                urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
+
+            if (stackIndex == 0) {
+                installButton.errorString = "You need to authorize Easy Insight to access your Freshbooks data.";
+                installButton.setFocus();
+                installButton.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
+
+            if (verifierInput.text.length == 0) {
+                verifierInput.errorString = "You need to enter your Verifier from Freshbooks here.";
+                verifierInput.setFocus();
+                verifierInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
             return true;
         }]]></mx:Script>
     <mx:RemoteObject destination="tokenService" id="tokenService">
@@ -73,10 +98,10 @@
     </mx:RemoteObject>
     <mx:HBox>
         <mx:Label text="Freshbooks Account Name:"/>
-        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
+        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="300"/>
     </mx:HBox>
-    <mx:Label text="For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight."/>
-    <mx:Button label="Authorize Easy Insight Access" click="install()"/>
+    <mx:Label text="For example, if you access Freshbooks by https://easyinsight.freshbooks.com, your account name would be easyinsight."/>
+    <mx:Button label="Authorize Easy Insight Access" click="install()" id="installButton"/>
     <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your Freshbooks account. Upon granting access, you will receive a verification token. Copy that value, return to this tab or window, and paste that value below." borderStyle="none"
             backgroundAlpha="0" editable="false" selectable="false" width="100%" height="50"/>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">

@@ -603,7 +603,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return null;
     }
 
-    protected FeedFolder defineFolder(String name) {
+    public FeedFolder defineFolder(String name) {
         for (FeedFolder feedFolder : getFolders()) {
             if (name.equals(feedFolder.getName())) {
                 return feedFolder;

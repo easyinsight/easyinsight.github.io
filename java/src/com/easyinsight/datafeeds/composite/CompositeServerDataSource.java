@@ -134,7 +134,14 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             } else {
                 dataSet = new DataSet();
             }
-            feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet, conn));
+            List<AnalysisItem> fields = feedDefinition.createAnalysisItems(keys, dataSet, conn);
+            feedDefinition.setFields(fields);
+            for (AnalysisItem field : fields) {
+                if (field.getFolder() != null) {
+                    FeedFolder folder = feedDefinition.defineFolder(field.getFolder());
+                    folder.addAnalysisItem(field);
+                }
+            }
             feedDefinition.setOwnerName(userName);
             feedDefinition.setParentSourceID(getDataFeedID());
             //UploadPolicy uploadPolicy = new UploadPolicy(userID);

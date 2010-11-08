@@ -14,6 +14,8 @@
         import com.easyinsight.customupload.CsvFileUploadFormat;
         import com.easyinsight.customupload.ExcelUploadFormat;
         import com.easyinsight.customupload.FlatFileUploadFormat;
+        import com.easyinsight.datasources.ConstantContactDataSource;
+        import com.easyinsight.datasources.WholeFoodsDataSource;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.salesforce.SalesforceFeedDefinition;
@@ -154,6 +156,8 @@
             var linked:LinkedInDataSource;
             var freshbooks:FreshbooksDataSource;
             var redirect:RedirectDataSource;
+            var constantContact:ConstantContactDataSource;
+            var wf:WholeFoodsDataSource;
         }
 
         [Bindable]

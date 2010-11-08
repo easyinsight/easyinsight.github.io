@@ -32,6 +32,7 @@ package com.easyinsight.listing
         public static const FRESHBOOKS:int = 49;
         public static const REDIRECT:int = 54;
         public static const WHOLE_FOODS:int = 56;
+        public static const CONSTANT_CONTACT:int = 63;
 
 		public static const OWNER:int = 1;
 		public static const SUBSCRIBER:int = 3;

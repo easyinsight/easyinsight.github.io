@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
 import com.easyinsight.datafeeds.basecamp.*;
 import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
+import com.easyinsight.datafeeds.constantcontact.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
@@ -84,6 +85,12 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HIGHRISE_COMPANY_NOTES, HighRiseCompanyNotesSource.class);
         registerType(FeedType.HIGHRISE_CONTACT_NOTES, HighRiseContactNotesSource.class);
         registerType(FeedType.HIGHRISE_DEAL_NOTES, HighRiseDealNotesSource.class);
+        registerType(FeedType.CONSTANT_CONTACT, ConstantContactCompositeSource.class);
+        registerType(FeedType.CONSTANT_CONTACT_CONTACT_LISTS, CCContactListSource.class);
+        registerType(FeedType.CONSTANT_CONTACT_CONTACTS, CCContactSource.class);
+        registerType(FeedType.CONSTANT_CONTACT_CONTACT_TO_CONTACT_LIST, CCContactToContactListSource.class);
+        registerType(FeedType.CONSTANT_CONTACT_CAMPAIGN, CCCampaignSource.class);
+        registerType(FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS, CCCampaignResultsSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

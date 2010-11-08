@@ -147,8 +147,11 @@
                 for each (var obj:Object in displayTreeData) {
                     openState[String(obj.id)] = uploadGrid.isItemOpen(obj);
                 }
+                scrollPosition = uploadGrid.verticalScrollPosition;
             }
         }
+
+        private var scrollPosition:int = 0;
 
         private function fromLastState():void {
             for each (var obj:Object in displayTreeData) {
@@ -156,6 +159,8 @@
                 if (open) {
                     uploadGrid.expandItem(obj, true);
                 }
+                uploadGrid.validateNow();
+                uploadGrid.verticalScrollPosition = scrollPosition;
             }
         }
 
@@ -339,17 +344,17 @@
                 showLastData = uiConfig.getConfiguration(UIConfiguration.SHOW_TIME_DATA).selected;
                 var i:int = 1;
                 if (uiConfig.getConfiguration(UIConfiguration.SHOW_REFRESH_DATA).selected) i++;
-                if (uiConfig.getConfiguration(UIConfiguration.SHOW_COPY_DATA_SOURCES).selected) i++;
                 if (uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected) i++;
                 if (uiConfig.getConfiguration(UIConfiguration.SHOW_DELETE_DATA).selected) i++;
                 factory.properties = {
                     showAnalyze: true,
                     showRefresh: uiConfig.getConfiguration(UIConfiguration.SHOW_REFRESH_DATA).selected,
-                    showCopy: uiConfig.getConfiguration(UIConfiguration.SHOW_COPY_DATA_SOURCES).selected,
                     showAdmin: uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected,
                     showDelete: uiConfig.getConfiguration(UIConfiguration.SHOW_DELETE_DATA).selected
                 };
-                controlsColumn.width = i * 46 + 10;
+                controlsColumn.width = i * 45 + 10;
+            } else {
+                controlsColumn.width = 184;
             }
             columns.push(nameColumn);
             if (showSize) columns.push(sizeColumn);

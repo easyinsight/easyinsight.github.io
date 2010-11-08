@@ -68,6 +68,11 @@ public class TokenService {
                 provider = new DefaultOAuthProvider(
                         "https://"+extra+".freshbooks.com/oauth/oauth_request.php", "https://"+extra+".freshbooks.com/oauth/oauth_access.php",
                         "https://"+extra+".freshbooks.com/oauth/oauth_authorize.php");
+            } else if (type == FeedType.CONSTANT_CONTACT.getType()) {
+                consumer = new DefaultOAuthConsumer("cec7e39c-25fc-43e6-a423-bf02de492d87", "ee72ddd074804402966863aad91b9687");
+                provider = new DefaultOAuthProvider(
+                        "https://oauth.constantcontact.com/ws/oauth/request_token", "https://oauth.constantcontact.com/ws/oauth/access_token",
+                        "https://oauth.constantcontact.com/ws/oauth/confirm_access");
             } else {
                 throw new RuntimeException();
             }
@@ -76,6 +81,7 @@ public class TokenService {
 
             //return provider.retrieveRequestToken(consumer, "http://www.easy-insight.com/solutions.html?sourceType=5&connectionID=" + connectionID);
             String requestToken = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
+            System.out.println("request token = " + requestToken);
             return new OAuthResponse(requestToken, true);
         } catch (OAuthCommunicationException oauthException) {
             if (oauthException.getMessage().indexOf("302") != -1) {
