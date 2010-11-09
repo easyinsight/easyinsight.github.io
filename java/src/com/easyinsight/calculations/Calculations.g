@@ -51,7 +51,7 @@ Decimal	:	UInteger (Dot UInteger)? ('E' Integer)?;
 
 Variable:	BracketedVariable | NoBracketsVariable;
 
-String	:	Quote (VariableWhitespace)* Variable? Quote;
+String	:	'\"' (Character | Digit | VariableWhitespace | SpecialChars)* '\"';
 
 
 // Last rule to make sure whitespace incorporated in earlier rules is counted.
@@ -81,7 +81,7 @@ fragment Character
 	:	LowerCase | UpperCase;
 	
 fragment BracketedVariable
-	:	OpenBrace (Character | Digit) (Character | Digit | SpecialChars | VariableWhitespace)* CloseBrace;
+	:	OpenBrace (Character | Digit) (Character | Digit | VariableSpecialChars | VariableWhitespace)* CloseBrace;
 
 fragment NoBracketsVariable
 	:	(Character | Digit) (Character | Digit | VariableWhitespace)*;
@@ -89,7 +89,10 @@ fragment NoBracketsVariable
 // List any special characters that should be part of variable names here.
 fragment NoBracketSpecialChars
 	:	'_';
+
+fragment VariableSpecialChars
+	:	'\"' | SpecialChars;	
 	
 fragment SpecialChars
-	:	NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '"' | '\'' | '{' | '}' | '-' | '=' | '+' | '(' | ')' | '!' | '@' | '#' | '$' | '%' | '^' | '&' | '*' | '~' | '`' | '|' | '\\';
+	:	NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '\'' | '-' | '=' | '+' | '(' | ')' | '!' | '@' | '#' | '$' | '%' | '^' | '&' | '*' | '~' | '`' | '|' | '\\';
 	
