@@ -66,8 +66,21 @@ public class CCCampaignSource extends ConstantContactBaseSource {
                 hasMoreData = false;
                 Nodes nodes = doc.query("/feed/entry");
                 for (int i = 0; i < nodes.size(); i++) {
-                    IRow row = dataSet.createRow();
+
                     Node node = nodes.get(i);
+                    Date date = null;
+                    String dateString = queryField(node, "content/Campaign/Date/text()");
+                    if (dateString != null) {
+                        date = DATE_FORMAT.parse(dateString);
+                        long time = date.getTime();
+                        
+                        long delta = System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 90;
+                        if (time < delta) {
+                            continue;
+                        }
+
+                    }
+                    IRow row = dataSet.createRow();
                     String idString = node.query("id/text()").get(0).getValue();
                     String id = idString.split("/")[7];
                     String name = node.query("content/Campaign/Name/text()").get(0).getValue();
@@ -75,10 +88,7 @@ public class CCCampaignSource extends ConstantContactBaseSource {
                     row.addValue(CAMPAIGN_ID, id);
                     row.addValue(CAMPAIGN_NAME, name);
                     row.addValue(CAMPAIGN_STATUS, status);
-                    String dateString = queryField(node, "content/Campaign/Date/text()");
-                    if (dateString != null) {
-                        row.addValue(CAMPAIGN_DATE, new DateValue(DATE_FORMAT.parse(dateString)));
-                    }
+                    row.addValue(CAMPAIGN_DATE, new DateValue(date));
                     row.addValue(CAMPAIGN_STATUS, status);
                     row.addValue(CAMPAIGN_COUNT, 1);
                 }
