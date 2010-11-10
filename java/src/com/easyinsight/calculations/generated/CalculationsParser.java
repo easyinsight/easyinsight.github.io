@@ -1,4 +1,4 @@
-// $ANTLR 3.1.2 C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g 2010-09-05 12:27:50
+// $ANTLR 3.1.2 C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g 2010-11-09 21:38:43
  package com.easyinsight.calculations.generated; 
 
 import org.antlr.runtime.*;
@@ -11,12 +11,12 @@ import org.antlr.runtime.tree.*;
 
 public class CalculationsParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "FuncEval", "OpenParen", "CloseParen", "Add", "Subtract", "Multiply", "Divide", "Comma", "Dot", "Exp", "OpenBrace", "CloseBrace", "Quote", "Variable", "Decimal", "String", "UInteger", "Integer", "BracketedVariable", "NoBracketsVariable", "VariableWhitespace", "Whitespace", "HideWhiteSpace", "Digit", "LowerCase", "UpperCase", "Character", "SpecialChars", "NoBracketSpecialChars"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "FuncEval", "OpenParen", "CloseParen", "Add", "Subtract", "Multiply", "Divide", "Comma", "Dot", "Exp", "OpenBrace", "CloseBrace", "Quote", "Variable", "Decimal", "String", "UInteger", "Integer", "BracketedVariable", "NoBracketsVariable", "Character", "Digit", "VariableWhitespace", "SpecialChars", "Whitespace", "HideWhiteSpace", "LowerCase", "UpperCase", "VariableSpecialChars", "NoBracketSpecialChars"
     };
     public static final int OpenBrace=14;
     public static final int CloseBrace=15;
     public static final int CloseParen=6;
-    public static final int HideWhiteSpace=26;
+    public static final int HideWhiteSpace=29;
     public static final int FuncEval=4;
     public static final int Subtract=8;
     public static final int Multiply=9;
@@ -24,25 +24,26 @@ public class CalculationsParser extends Parser {
     public static final int Decimal=18;
     public static final int Quote=16;
     public static final int BracketedVariable=22;
-    public static final int Digit=27;
+    public static final int Digit=25;
     public static final int Add=7;
     public static final int EOF=-1;
     public static final int Divide=10;
-    public static final int VariableWhitespace=24;
+    public static final int VariableWhitespace=26;
     public static final int Variable=17;
     public static final int OpenParen=5;
-    public static final int UpperCase=29;
-    public static final int Character=30;
+    public static final int UpperCase=31;
+    public static final int Character=24;
     public static final int Dot=12;
-    public static final int LowerCase=28;
+    public static final int LowerCase=30;
     public static final int NoBracketsVariable=23;
     public static final int String=19;
-    public static final int Whitespace=25;
+    public static final int Whitespace=28;
     public static final int UInteger=20;
+    public static final int VariableSpecialChars=32;
     public static final int Comma=11;
-    public static final int SpecialChars=31;
+    public static final int SpecialChars=27;
     public static final int Integer=21;
-    public static final int NoBracketSpecialChars=32;
+    public static final int NoBracketSpecialChars=33;
 
     // delegates
     // delegators
@@ -922,7 +923,7 @@ public class CalculationsParser extends Parser {
 
 
             // AST REWRITE
-            // elements: Variable, expr, expr
+            // elements: expr, expr, Variable
             // token labels: 
             // rule labels: retval
             // token list labels: 
