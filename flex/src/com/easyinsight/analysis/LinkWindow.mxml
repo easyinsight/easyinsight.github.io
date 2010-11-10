@@ -2,24 +2,22 @@
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                     creationComplete="analysisService.getInsightDescriptors.send()" width="500" height="400">
     <mx:Script><![CDATA[
-        import com.easyinsight.solutions.InsightDescriptor;
 
         import mx.collections.ArrayCollection;
 
+        import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.managers.PopUpManager;
-        
+
         import mx.validators.Validator;
 
         private function gotReports():void {
-            this.reports = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
-            if (reportID > 0) {
-                for each (var desc:InsightDescriptor in reports) {
-                    if (desc.id == reportID) {
-                        reportChooser.selectedItem = desc;
-                        break;
-                    }
-                }
-            }
+            var reportList:ArrayCollection = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            reportList.sort = sort;
+            reportList.refresh();
+            this.reports = reportList;
         }
 
         private var _link:Link;
@@ -44,7 +42,7 @@
         private var reportID:int;
 
         [Bindable]
-        private var miniWindow:Boolean;
+        private var miniWindow:Boolean = true;
 
         [Bindable]
         private var stackIndex:int = 0;

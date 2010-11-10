@@ -69,7 +69,7 @@ public abstract class FreshbooksFeed extends Feed {
 
             String string = client.execute(httpRequest, responseHandler);
             string = string.replace("xmlns=\"http://www.freshbooks.com/api/\"", "");            
-            return builder.build(new ByteArrayInputStream(string.getBytes()));
+            return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
