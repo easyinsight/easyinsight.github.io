@@ -207,7 +207,7 @@
                click="createCalculatedGrouping()"/>
     <mx:Button id="derivedDateButton" toolTip="Create Derived Date"
                icon="@Embed(source='../../../../assets/calendar.png')"
-               click="createCalculatedGrouping()"/>
+               click="createCalculatedDate()"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
                toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton"/>
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
