@@ -1,0 +1,1 @@
+alter table whole_foods_source add upload_file longblob default null;

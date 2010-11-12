@@ -15,11 +15,11 @@ import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -68,7 +68,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         rollingFilterDefinition.setField(findAnalysisItem(WholeFoodsSource.DATE));
         rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.LAST_FULL_MONTH);
-        kpis.add(KPIUtil.createKPIForDateFilter("Total Open Todo Items", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName(DOLLAR_SALES),
+        kpis.add(KPIUtil.createKPIForDateFilter("Total Sales in the Last 30 Days", "symbol_dollar.png", (AnalysisMeasure) findAnalysisItemByDisplayName(DOLLAR_SALES),
                 (AnalysisDateDimension) findAnalysisItem(DATE), MaterializedRollingFilterDefinition.MONTH,
                 new ArrayList<FilterDefinition>(), KPI.GOOD, 30));
         return kpis;
@@ -113,7 +113,12 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
         boolean firstRun = !initialized;
         try {
             if (!initialized) {
-                dataSet = new WFCSVParse().createData(dataStorage, keys, startFile);
+                PreparedStatement stmt = conn.prepareStatement("SELECT UPLOAD_FILE FROM whole_foods_source WHERE data_source_id = ?");
+                stmt.setLong(1, getDataFeedID());
+                ResultSet rs = stmt.executeQuery();
+                rs.next();
+                byte[] file = rs.getBytes(1);
+                dataSet = new WFCSVParse().createData(dataStorage, keys, file);
                 startFile = null;
                 initialized = true;
             } else {
@@ -176,11 +181,18 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM whole_foods_source WHERE data_source_id = ?");
         deleteStmt.setLong(1, getDataFeedID());
         deleteStmt.executeUpdate();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO whole_foods_source (data_source_id, username, wf_password, initialized) values (?, ?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO whole_foods_source (data_source_id, username, wf_password, initialized, upload_file) values (?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, wfUserName);
         insertStmt.setString(3, wfPassword != null ? PasswordStorage.encryptString(wfPassword) : null);
         insertStmt.setBoolean(4, initialized);
+        if (startFile == null) {
+            insertStmt.setNull(5, Types.BLOB);
+        } else {
+            ByteArrayInputStream bais = new ByteArrayInputStream(startFile);
+            BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+            insertStmt.setBinaryStream(5, bis, startFile.length);
+        }
         insertStmt.execute();
     }
 
