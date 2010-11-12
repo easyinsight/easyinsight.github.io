@@ -7,9 +7,7 @@ import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.listing.ReportEditorAnalyzeSource;
 import com.easyinsight.report.MultiReportAnalyzeSource;
-import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
-import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.ContextMenuEvent;
@@ -55,19 +53,8 @@ public class ScorecardContextWindow {
 
                 for each (var report:InsightDescriptor in kpi.reports) {
                     var reportContextItem:ContextMenuItem = new ContextMenuItem(report.name);
-                    reportContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-                        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportAnalyzeSource(report, kpi.filters)));
-                    });
+                    reportContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, createReport(report, kpi.filters));
                     items.push(reportContextItem);
-                }
-            }
-            if (kpi.packages != null && kpi.packages.length > 0) {
-                for each (var reportPackage:ReportPackageDescriptor in kpi.packages) {
-                    var packageItem:ContextMenuItem = new ContextMenuItem(reportPackage.name);
-                    packageItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
-                        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new PackageAnalyzeSource(reportPackage)));
-                    });
-                    items.push(packageItem);
                 }
             }
             if (kpi.kpiTrees != null && kpi.kpiTrees.length > 0) {
@@ -84,6 +71,12 @@ public class ScorecardContextWindow {
         menu.hideBuiltInItems();
         menu.customItems = items;
         passthroughObject.contextMenu = menu; 
+    }
+
+    private function createReport(report:InsightDescriptor, filters:ArrayCollection):Function {
+        return function(event:ContextMenuEvent):void {
+            passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportAnalyzeSource(report, filters)));
+        };
     }
 
     private function multiReports(event:ContextMenuEvent):void {
