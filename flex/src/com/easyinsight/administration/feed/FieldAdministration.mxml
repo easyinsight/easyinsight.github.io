@@ -23,6 +23,7 @@
         import com.easyinsight.analysis.AnalysisStep;
         import com.easyinsight.analysis.CalculationMeasureWindow;
         import com.easyinsight.analysis.DerivedAnalysisDimension;
+        import com.easyinsight.analysis.DerivedDateWindow;
         import com.easyinsight.analysis.DerivedGroupingWindow;
         import com.easyinsight.analysis.FeedFolder;
         import com.easyinsight.analysis.FeedNode;
@@ -83,6 +84,8 @@
                 return DerivedGroupingWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                 return HierarchyWindow;
+            }  else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                return DerivedDateWindow;
             } else {
                 return null;
             }

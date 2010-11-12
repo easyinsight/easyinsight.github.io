@@ -144,7 +144,7 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
 
     private function onCopy(event:ResultEvent):void {
         var copyItem:AnalysisItem = analysisService.cloneItem.lastResult as AnalysisItem;
-        dispatchEvent(new AnalysisItemCopyEvent(copyItem));
+        dispatchEvent(new AnalysisItemCopyEvent(AnalysisItemCopyEvent.ITEM_COPY, copyItem));
     }
 		
 		[Bindable]
@@ -173,6 +173,8 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
                 editor = CalculationMeasureWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
                 editor = DerivedGroupingWindow;
+            }  else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                editor = DerivedDateWindow;
             }
 			var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
 			analysisItemEditor.editorClass = editor; 			

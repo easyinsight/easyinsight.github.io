@@ -50,10 +50,6 @@
         [Bindable]
         private var apiLabel:String;
 
-        [Bindable]
-        [Embed(source="../../../../../assets/helpx48.png")]
-        public var helpIcon:Class;
-
         private function setupListeners():void {
             factory = new DataSourceAPIEditControlsFactory(this);
             servicesGrid.addEventListener(ServiceDefinitionEvent.SERVICE_REMOVED, serviceRemoved);
