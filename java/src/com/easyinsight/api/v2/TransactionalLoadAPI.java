@@ -331,10 +331,11 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.UNCHECKED_API_ENABLED" +
                     " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
                     "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND (DATA_FEED.FEED_NAME = ? OR " +
-                "DATA_FEED.API_KEY = ?)");
+                "DATA_FEED.API_KEY = ?) AND DATA_FEED.VISIBLE = ?");
         queryStmt.setLong(1, getUserID());
         queryStmt.setString(2, dataSourceName);
         queryStmt.setString(3, dataSourceName);
+        queryStmt.setBoolean(4, true);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
             dataSourceIDs.put(rs.getLong(1), rs.getBoolean(2));
