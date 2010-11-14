@@ -10,10 +10,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.goals.GoalDataAnalyzeSource;
 import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
 import com.easyinsight.goals.GoalTreeDescriptor;
-import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
-import com.easyinsight.reportpackage.ReportPackageDescriptor;
-import com.easyinsight.reportpackage.ReportPackageWindow;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
@@ -259,16 +256,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         Alert.show("Your data has begun to refresh and will be available when the refresh completes. This process may take some time depending on the size of the data source. You will receive a notification when the process is complete.");
     }
 
-
-
-    private function copyCalled(event:MouseEvent):void {
-        var window:CopyDataSourceWindow = new CopyDataSourceWindow();
-        window.dataSourceDescriptor = obj as DataFeedDescriptor;
-        PopUpManager.addPopUp(window, this.parent.parent.parent, true);
-        window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent, false, 0, true);
-        PopUpUtil.centerPopUp(window);
-    }
-
     private function refreshCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var feedDescriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
@@ -299,9 +286,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
-        } else if (obj is ReportPackageDescriptor) {
-            var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
-            dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor)));
         } else if (obj is LookupTableDescriptor) {
             dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(obj).id)));
         } else if (obj is GoalTreeDescriptor) {
@@ -335,12 +319,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
-        } else if (obj is ReportPackageDescriptor) {
-            var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
-            var window:ReportPackageWindow = new ReportPackageWindow();
-            window.reportPackageID = packageDescriptor.id;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         } else if (obj is GoalTreeDescriptor) {
             dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(GoalTreeDescriptor(obj).id)));
         }
@@ -374,10 +352,6 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             refreshVisible = false;
             adminVisible = true;
             adminTooltip = "Open report in the report editor...";
-        } else if (value is ReportPackageDescriptor) {
-            refreshVisible = false;
-            adminVisible = true;
-            adminTooltip = "Edit the package definition...";
         } else if (value is LookupTableDescriptor) {
             refreshVisible = false;
             adminVisible = false;

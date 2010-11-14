@@ -11,8 +11,6 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.eventing.EventDispatcher;
-import com.easyinsight.eventing.TodoCompletedEvent;
 
 import com.easyinsight.users.Account;
 
@@ -243,7 +241,6 @@ public class FeedStorage {
             conn.setAutoCommit(false);
             long feedID = addFeedDefinitionData(feedDefinition, conn);
             conn.commit();
-            EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
             return feedID;
         } catch (Exception e) {
             conn.rollback();
@@ -604,7 +601,6 @@ public class FeedStorage {
             conn.setAutoCommit(false);
             updateDataFeedConfiguration(feedDefinition, conn);
             conn.commit();
-            EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
         } catch (Exception e) {
             conn.rollback();
             throw e;

@@ -8,9 +8,6 @@ import com.easyinsight.exchange.ExchangePackageData;
 import com.easyinsight.exchange.ExchangeReportData;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.reportpackage.ReportPackage;
-import com.easyinsight.reportpackage.ReportPackageDescriptor;
-import com.easyinsight.reportpackage.ReportPackageStorage;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.AuthorizationManager;
 import com.easyinsight.security.AuthorizationRequirement;
@@ -554,78 +551,7 @@ public class SolutionService {
         }
     }
 
-    public ReportPackageDescriptor installPackage(long packageID, long dataSourceID) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            FeedStorage feedStorage = new FeedStorage();
-
-            Session session = Database.instance().createSession(conn);
-            ReportPackageStorage reportPackageStorage = new ReportPackageStorage();
-            ReportPackage reportPackage = reportPackageStorage.getReportPackage(packageID, conn);
-            List<InsightDescriptor> packageReports = reportPackage.getReports();
-            List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
-            Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
-            FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-            for (InsightDescriptor report : packageReports) {
-                AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(report.getId(), session);
-                FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
-                List<AnalysisDefinition> reports = originalBaseReport.containedReports(session);
-                reports.add(originalBaseReport);
-
-
-                for (AnalysisDefinition child : reports) {
-
-                    Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
-                    AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, keyReplacementMap, session);
-                    reportReplacementMap.put(child.getAnalysisID(), copyReport);
-                    reportList.add(copyReport);
-                }
-            }
-
-            session.close();
-            session = Database.instance().createSession(conn);
-            //Collections.reverse(reportList);
-
-            List<InsightDescriptor> newReports = new ArrayList<InsightDescriptor>();
-            for (AnalysisDefinition copiedReport : reportList) {
-                new AnalysisStorage().saveAnalysis(copiedReport, session);
-                session.flush();
-                // TODO: Add urlKey
-                newReports.add(new InsightDescriptor(copiedReport.getAnalysisID(), copiedReport.getTitle(), copiedReport.getDataFeedID(),
-                        copiedReport.getReportType(),null));
-            }
-            for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
-                copiedReport.updateReportIDs(reportReplacementMap);
-            }
-
-            for (AnalysisDefinition copiedReport : reportList) {
-                new AnalysisStorage().saveAnalysis(copiedReport, session);
-                session.flush();
-            }
-            ReportPackage clonedPackage = reportPackage.clone();
-            clonedPackage.setTemporaryPackage(true);
-            clonedPackage.setConnectionVisible(false);
-            clonedPackage.setPubliclyVisible(false);
-            clonedPackage.setMarketplaceVisible(false);
-            clonedPackage.setReports(newReports);
-            long id = reportPackageStorage.saveReportPackage(clonedPackage, conn);
-
-            conn.commit();
-            session.close();
-            ReportPackageDescriptor clonedDescriptor = new ReportPackageDescriptor();
-            clonedDescriptor.setId(id);
-            clonedDescriptor.setName(clonedPackage.getName());
-            return clonedDescriptor;
-        }  catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-    }
+    
 
     public InsightDescriptor installReport(long reportID, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();

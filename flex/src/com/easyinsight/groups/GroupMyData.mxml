@@ -7,7 +7,6 @@
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.MyDataTree;
         import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
@@ -63,10 +62,6 @@
         public var listIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/package.png")]
-        public var packageIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/chart_column.png")]
         public var crosstabIcon:Class;
 
@@ -75,8 +70,6 @@
                 return listIcon;
             } else if (item is InsightDescriptor) {
                 return crosstabIcon;
-            } else if (item is ReportPackageDescriptor) {
-                return packageIcon;
             }
             return null;
         }

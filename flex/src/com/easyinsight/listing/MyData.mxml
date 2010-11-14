@@ -17,16 +17,10 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
-        import com.easyinsight.goals.GoalTreeDescriptor;
-        import com.easyinsight.help.HelpWindow;
-        import com.easyinsight.help.MyDataHelp;
+        import com.easyinsight.goals.GoalTreeDescriptor;        
         import com.easyinsight.outboundnotifications.RefreshEventInfo;
         import com.easyinsight.preferences.UIConfiguration;
-        import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.reportpackage.PackageEvent;
-        import com.easyinsight.reportpackage.ReportPackageDescriptor;
-        import com.easyinsight.reportpackage.ReportPackageWindow;
         import com.easyinsight.schedule.ScheduleManagement;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
@@ -40,7 +34,6 @@
         import mx.collections.Sort;
         import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
-        import mx.events.AdvancedDataGridEvent;
         import mx.events.CloseEvent;
         import mx.events.ListEvent;
         import mx.managers.BrowserManager;
@@ -52,45 +45,34 @@
         private var initialEntry:Boolean = true;
 
         [Embed(source="../../../../assets/data_blue_x16.png")]
-        public var listIcon:Class;
-
-        [Embed(source="../../../../assets/package.png")]
-        public var packageIcon:Class;
+        private var listIcon:Class;
 
         [Embed(source="../../../../assets/branch_add.png")]
-        public var kpiTreeIcon:Class;
+        private var kpiTreeIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/components_x_48.png")]
-        public var connectionsIcon:Class;
+        private var connectionsIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/chart_column.png")]
-        public var crosstabIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/data_connection.png")]
-        public var dataConnectionIcon:Class;
+        private var crosstabIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/data_table.png")]
-        public var joinIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/package_add.png")]
-        public var packageAddIcon:Class;
+        private var joinIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/tables_x16.png")]
-        public var tablesAddIcon:Class;
+        private var tablesAddIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/calendar.png")]
-        public var calendarIcon:Class;
+        private var calendarIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/tables.png")]
-        public var tablesIcon:Class;
+        private var tablesIcon:Class;
 
         [Bindable]
         private var displayTreeData:ArrayCollection;
@@ -182,9 +164,6 @@
             } else if (selectedItem is InsightDescriptor) {
                 Alert.show("Are you sure you want to delete this report? You will not be able to undo this operation.", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
-            } else if (selectedItem is ReportPackageDescriptor) {
-                Alert.show("Are you sure you want to delete this package? You will not be able to undo this operation.", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertPackageListener, null, Alert.CANCEL);
             } else if (selectedItem is LookupTableDescriptor) {
                 Alert.show("Are you sure you want to delete this lookup table? You will not be able to undo this operation.", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertLookupListener, null, Alert.CANCEL);
@@ -215,14 +194,6 @@
                 var feedDescriptor:LookupTableDescriptor = uploadGrid.selectedItem as LookupTableDescriptor;
                 ProgressAlert.alert(this, "Deleting lookup table...", null, etlService.deleteLookupTable);
                 etlService.deleteLookupTable.send(feedDescriptor.id);
-            }
-        }
-
-        private function alertPackageListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var reportDescriptor:ReportPackageDescriptor = uploadGrid.selectedItem as ReportPackageDescriptor;
-                ProgressAlert.alert(this, "Deleting package...", null, packageService.deleteReportPackage);
-                packageService.deleteReportPackage.send(reportDescriptor.id);
             }
         }
 
@@ -267,8 +238,6 @@
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else if (selectedObject is LookupTableDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
-            } else if (selectedObject is ReportPackageDescriptor) {
-                dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(ReportPackageDescriptor(selectedObject))));
             } else if (selectedObject is GoalTreeDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(GoalTreeDescriptor(selectedObject).id)));
             } else {
@@ -422,8 +391,6 @@
                 return listIcon;
             } else if (item is InsightDescriptor) {
                 return crosstabIcon;
-            } else if (item is ReportPackageDescriptor) {
-                return packageIcon;
             } else if (item is LookupTableDescriptor) {
                 return tablesIcon;
             } else if (item is GoalTreeDescriptor) {
@@ -437,8 +404,6 @@
                 return listIcon;
             } else if (item is InsightDescriptor) {
                 return crosstabIcon;
-            } else if (item is ReportPackageDescriptor) {
-                return packageIcon;
             } else if (item is LookupTableDescriptor) {
                 return tablesIcon;
             } else if (item is GoalTreeDescriptor) {
@@ -470,16 +435,6 @@
             dispatchEvent(new AnalyzeEvent(new CompositeFeedCreationSource(descriptors)));
         }
 
-        private function help():void {
-            HelpWindow.createHelpWindow(MyDataHelp, this);
-        }
-
-        private function onItemOpen(event:AdvancedDataGridEvent):void {
-            var item:Object = event.item;
-            var children:ArrayCollection = item.children;
-
-        }
-
         public function cleanup():void {
         }
 
@@ -502,18 +457,6 @@
         }
 
         private function groupIncludeChanged():void {
-            showLoading = true;
-            uploadService.getFeedAnalysisTree.send(groupInclude.selected, initialEntry);
-        }
-
-        private function createPackage():void {
-            var window:ReportPackageWindow = new ReportPackageWindow();
-            window.addEventListener(PackageEvent.PACKAGE_ADDED, onPackageAdded, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function onPackageAdded(event:PackageEvent):void {
             showLoading = true;
             uploadService.getFeedAnalysisTree.send(groupInclude.selected, initialEntry);
         }
@@ -604,9 +547,6 @@
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="deleteAnalysisDefinition" result="deletedAnalysis()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject id="packageService" destination="reportPackageService">
-        <mx:method name="deleteReportPackage" result="deletedPackage()"/>
-    </mx:RemoteObject>
     <mx:RemoteObject id="etlService" destination="feeds">
         <mx:method name="deleteLookupTable" result="deletedLookupTable()"/>
     </mx:RemoteObject>
@@ -622,14 +562,12 @@
             <mx:Canvas width="1000" height="100%" backgroundColor="#FFFFFF">
                 <mx:Button toolTip="Create composite data source..." click="createCompositeFeed()"
                            id="compositeFeedButton" icon="{joinIcon}" visible="{showComposite}" x="10" y="10"/>
-                <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton"
-                           icon="{packageAddIcon}" visible="{showPackage}" x="58" y="10"/>
                 <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton"
-                           icon="{tablesAddIcon}" visible="{showLookupTable}" x="106" y="10"/>
+                           icon="{tablesAddIcon}" visible="{showLookupTable}" x="58" y="10"/>
                 <mx:Button toolTip="Scheduling..." click="toScheduling()" id="schedulingButton" icon="{calendarIcon}"
-                           visible="{showLookupTable}" x="154" y="10"/>
+                           visible="{showLookupTable}" x="106" y="10"/>
                 <mx:Button toolTip="Add KPI Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
-                           visible="{addGoalTreeAvailable}" x="202" y="10"/>
+                           visible="{addGoalTreeAvailable}" x="154" y="10"/>
                 <mx:ProgressBar indeterminate="true" visible="{showLoading}" x="458" y="10"/>
                 <mx:Label text="Need to add data?" fontSize="16" x="482" y="34" visible="{showConnections}"/>
                 <mx:Button toolTip="Go to connections..." click="toConnections()" icon="{connectionsIcon}"
@@ -641,7 +579,6 @@
             <mx:AdvancedDataGrid width="980" height="100%" id="uploadGrid" allowMultipleSelection="true"
                                  fontSize="12"
                                  itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader"
-                                 itemOpen="onItemOpen(event)"
                                  iconFunction="simpleIconFunction" x="10" y="147">
                 <mx:dataProvider>
                     <mx:HierarchicalData source="{displayTreeData}"/>

@@ -6,8 +6,6 @@ import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableUtil;
-import com.easyinsight.reportpackage.ReportPackageDescriptor;
-import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.storage.DatabaseShardException;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
@@ -280,17 +278,6 @@ public class FeedService {
             while (goalTreeRS.next()) {
                 // TODO: Add urlKey
                 descriptorList.add(new GoalTreeDescriptor(goalTreeRS.getLong(1), goalTreeRS.getString(2), goalTreeRS.getInt(3), goalTreeRS.getString(4), null));
-            }
-            PreparedStatement getPackageStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.package_name, REPORT_PACKAGE.report_package_id, REPORT_PACKAGE.url_key FROM REPORT_PACKAGE, user_to_report_package WHERE " +
-                    "user_to_report_package.user_id = ? AND report_package.report_package_id = user_to_report_package.report_package_id AND REPORT_PACKAGE.TEMPORARY_PACKAGE = ?");
-            getPackageStmt.setLong(1, SecurityUtil.getUserID());
-            getPackageStmt.setBoolean(2, false);
-            ResultSet packageRS = getPackageStmt.executeQuery();
-            while (packageRS.next()) {
-                String packageName = packageRS.getString(1);
-                long packageID = packageRS.getLong(2);
-                String urlKey = packageRS.getString(3);
-                descriptorList.add(new ReportPackageDescriptor(packageName, packageID, urlKey));
             }
             Map<String, Integer> countMap = new HashMap<String, Integer>();
             Set<String> dupeNames = new HashSet<String>();

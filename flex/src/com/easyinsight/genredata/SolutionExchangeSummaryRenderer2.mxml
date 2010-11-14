@@ -6,9 +6,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.framework.User;
         import com.easyinsight.listing.ListingChangeEvent;
-        import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
 
         import com.easyinsight.util.PopUpUtil;
@@ -24,13 +22,6 @@
             var insightDescriptor:InsightDescriptor = solutionService.installReport.lastResult as InsightDescriptor;
             // has to emit special property here to let us decide whether or not we want to keep this report
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, reportID, score, ExchangeReportData(_item.exchangeData).reportUrlKey)));
-        }
-
-        private function installedPackage():void {
-            var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
-            var packageDescriptor:ReportPackageDescriptor = solutionService.installPackage.lastResult as ReportPackageDescriptor;
-            // has to emit special property here to let us decide whether or not we want to keep this report
-            dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor, true, packageData.packageID, score)));
         }
 
         private function onListingEvent(event:ListingChangeEvent):void {
@@ -64,42 +55,9 @@
             solutionService.installReport.send(reportID, event.dataSource.id);
         }
 
-        private function gotMatchingDataSourcesForPackage():void {
-            var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
-            var dataSources:ArrayCollection = solutionService.determineDataSourceForPackage.lastResult as ArrayCollection;
-            if (dataSources.length == 0) {
-                var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
-                window.solution = _item.solutionID;
-                window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent, false, 0, true);
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            } else if (dataSources.length == 1) {
-                ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
-                solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
-            } else {
-                var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
-                dsWindow.sources = dataSources;
-                dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourcePackageChoice, false, 0, true);
-                PopUpManager.addPopUp(dsWindow, this, true);
-                PopUpUtil.centerPopUp(dsWindow);
-            }
-        }
-
-        private function dataSourcePackageChoice(event:DataSourceSelectionEvent):void {
-            var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
-            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
-            solutionService.installPackage.send(packageData.packageID, event.dataSource.id);
-        }
-
         private function addReport():void {
-            if (_item.exchangeData is ExchangeReportData) {
-                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSource);
-                solutionService.determineDataSource.send(dataSourceID);
-            } else if (_item.exchangeData is ExchangePackageData) {
-                ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.determineDataSourceForPackage);
-                var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
-                solutionService.determineDataSourceForPackage.send(packageData.packageID);
-            }
+            ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSource);
+            solutionService.determineDataSource.send(dataSourceID);
         }
         
         private var _item:SolutionReportExchangeItem;
@@ -175,10 +133,6 @@
         private var grid:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/report/package.png")]
-        private var packageIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/report/control_panel2.png")]
         private var gaugeIcon:Class;
 
@@ -250,14 +204,10 @@
                 reportName = _item.name;
                 reportDescription = _item.description;
                 reportID = _item.id;
-                if (_item.exchangeData is ExchangeReportData) {
-                    var exchangeReportData:ExchangeReportData = _item.exchangeData as ExchangeReportData;
-                    reportType = exchangeReportData.reportType;
-                    dataSourceID = exchangeReportData.dataSourceID;
-                    assignIcon();
-                } else {
-                    reportImage = packageIcon;
-                }
+                var exchangeReportData:ExchangeReportData = _item.exchangeData as ExchangeReportData;
+                reportType = exchangeReportData.reportType;
+                dataSourceID = exchangeReportData.dataSourceID;
+                assignIcon();
 
                 score = _item.ratingAverage;
                 var df:DateFormatter = new DateFormatter();
@@ -281,9 +231,7 @@
         ]]></mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="determineDataSource" result="gotMatchingDataSources()"/>
-        <mx:method name="determineDataSourceForPackage" result="gotMatchingDataSourcesForPackage()"/>
         <mx:method name="installReport" result="installedReport()"/>
-        <mx:method name="installPackage" result="installedPackage()"/>
     </mx:RemoteObject>
 
         <mx:VBox borderStyle="solid" borderThickness="1" backgroundColor="#FFFFFF" verticalAlign="middle" horizontalAlign="center" backgroundAlpha="1" height="180">

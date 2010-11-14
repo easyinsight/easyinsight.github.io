@@ -4,8 +4,6 @@ import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.goals.GoalStorage;
-import com.easyinsight.reportpackage.ReportPackageDescriptor;
-import com.easyinsight.reportpackage.ReportPackageStorage;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
@@ -19,7 +17,6 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
-import com.easyinsight.outboundnotifications.*;
 import com.easyinsight.scheduler.*;
 import com.easyinsight.solutions.SolutionInstallInfo;
 
@@ -70,8 +67,6 @@ public class UserUploadService implements IUserUploadService {
         try {
             List<Object> objects = new ArrayList<Object>();
             List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
-            List<ReportPackageDescriptor> packages = new ReportPackageStorage().getReportPackagesForUser();
-            objects.addAll(packages);
             objects.addAll(new GoalStorage().getTreesForUser(userID));
             Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
             for (FeedDescriptor descriptor : descriptors) {
@@ -496,33 +491,18 @@ public class UserUploadService implements IUserUploadService {
             }
             FeedDefinition feedDefinition = (FeedDefinition) dataSource;
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
-                if (synchronous) {
-                    if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                        try {
-                            credentialsResponse = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null);
-                            if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
-                                feedDefinition.setVisible(true);
-                                feedStorage.updateDataFeedConfiguration(feedDefinition);
-                            }
-                        } finally {
-                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());    
+                if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                    try {
+                        credentialsResponse = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null);
+                        if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
+                            feedDefinition.setVisible(true);
+                            feedStorage.updateDataFeedConfiguration(feedDefinition);
                         }
-                    } else {
-                        credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
+                    } finally {
+                        DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                     }
                 } else {
-                    String message = dataSource.validateCredentials();
-                    if (message == null) {
-                        credentialsResponse = new CredentialsResponse(true, feedID);
-                        ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
-                        task.setDataSourceID(feedID);
-                        task.setUserID(SecurityUtil.getUserID());
-                        task.setExecutionDate(new Date());
-                        task.setStatus(ScheduledTask.INMEMORY);
-                        Scheduler.instance().saveTask(task);
-                    } else {
-                        credentialsResponse = new CredentialsResponse(false, message, feedID);
-                    }
+                    credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                 }
             } else {
                 feedDefinition.setVisible(true);
@@ -542,25 +522,10 @@ public class UserUploadService implements IUserUploadService {
         try {
             conn.setAutoCommit(false);
             FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
-            task.setStatus(ScheduledTask.SCHEDULED);
-            task.setExecutionDate(new Date());
             task.setFeedID(feedID);
             task.setUpdate(update);
             task.setUserID(SecurityUtil.getUserID());
             task.setAccountID(SecurityUtil.getAccountID());
-            /*if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
-                Scheduler.instance().saveTask(task, conn);
-                AsyncCreatedEvent e = new AsyncCreatedEvent();
-                e.setTask(task);
-                e.setUserID(SecurityUtil.getUserID());
-                LinkedList<Long> l = new LinkedList<Long>();
-                l.add(feedID);
-                Map<Long, String> map = FeedUtil.getFeedNames(l, conn);
-                e.setFeedName(map.get(feedID));
-                e.setFeedID(feedID);
-                EventDispatcher.instance().dispatch(e);
-            }
-            else*/
             task.updateData(feedID, update, conn, bytes);
             conn.commit();
         } catch (Throwable e) {
@@ -616,211 +581,6 @@ public class UserUploadService implements IUserUploadService {
             return credentialsResponse;
         } catch (ReportException re) {
             return new CredentialsResponse(false, re.getReportFault());
-        } catch (Throwable e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void deleteTodo(long todoID) {
-        long userID = SecurityUtil.getUserID();
-        try {
-            Session s = Database.instance().createSession();
-            try {
-                s.getTransaction().begin();
-                TodoBase todo = (TodoBase) s.get(TodoBase.class, todoID);
-                if(todo != null && todo.getUserID() == userID && todo.getType() != TodoBase.BUY_OUR_STUFF)
-                    s.delete(todo);
-                s.getTransaction().commit();
-            }
-            catch(Exception e) {
-                LogClass.error(e);
-                s.getTransaction().rollback();
-            }
-            finally {
-                s.close();
-            }
-
-
-        }
-        catch(Exception e) {
-            LogClass.error(e);
-        }
-    }
-
-    public List<TodoEventInfo> getTodoEvents() {
-        long userID = SecurityUtil.getUserID();
-        try {
-            EIConnection conn = Database.instance().getConnection();
-            conn.setAutoCommit(false);
-            Session session = Database.instance().createSession(conn);
-            List results;
-            List<TodoEventInfo> translatedResults = new LinkedList<TodoEventInfo>();
-            try {
-                session.beginTransaction();
-                results = session.createQuery("from TodoBase where userID = ?").setLong(0, userID).list();
-
-                if(results.size() > 0) {
-                    Map<Integer, List<TodoBase> > mapping = new HashMap<Integer, List<TodoBase>>();
-                    for(Object o : results) {
-                        TodoBase item = (TodoBase) o;
-                        if(!mapping.containsKey(item.getType()))
-                            mapping.put(item.getType(), new LinkedList<TodoBase>());
-                        mapping.get(item.getType()).add(item);
-
-                    }
-                    for(Map.Entry<Integer, List<TodoBase>> listPair : mapping.entrySet()) {
-                        addTodosForTypes(conn, translatedResults, listPair);
-                    }
-
-                }
-                session.flush();
-                conn.commit();
-            } catch (Throwable e) {
-                conn.rollback();
-                throw new RuntimeException(e);
-            } finally {
-                session.close();
-                conn.close();
-            }
-            return translatedResults;
-        }
-        catch (Throwable e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void addTodosForTypes(EIConnection conn, List<TodoEventInfo> translatedResults, Map.Entry<Integer, List<TodoBase>> listPair) throws SQLException {
-        List<TodoEventInfo> result = new LinkedList<TodoEventInfo>();
-        switch(listPair.getKey()) {
-            case TodoBase.CONFIGURE_DATA_SOURCE:
-                List<Long> feedIDs = new LinkedList<Long>();
-                for(TodoBase cur : listPair.getValue()) {
-                    ConfigureDataFeedTodo configTodo = (ConfigureDataFeedTodo) cur;
-                    ConfigureDataFeedInfo resultInfo = new ConfigureDataFeedInfo();
-                    resultInfo.setUserId(configTodo.getUserID());
-                    resultInfo.setTodoID(configTodo.getId());
-                    resultInfo.setAction(TodoEventInfo.ADD);
-                    resultInfo.setFeedID(configTodo.getFeedID());
-                    feedIDs.add(configTodo.getFeedID());
-                    result.add(resultInfo);
-                }
-                if(feedIDs.size() > 0) {
-                    Map<Long, String> dataFeedMapping = FeedUtil.getFeedNames(feedIDs, conn);
-                    for(TodoEventInfo cur : result) {
-                        ConfigureDataFeedInfo configInfo = (ConfigureDataFeedInfo) cur;
-                        configInfo.setFeedName(dataFeedMapping.get(configInfo.getFeedID()));
-                    }
-                }
-                translatedResults.addAll(result);
-                break;
-            case TodoBase.BUY_OUR_STUFF:
-                for(TodoBase cur: listPair.getValue()) {
-                    BuyOurStuffTodo buyOurStuff = (BuyOurStuffTodo) cur;
-                    BuyOurStuffInfo resultInfo = new BuyOurStuffInfo();
-                    resultInfo.setUserId(buyOurStuff.getUserID());
-                    resultInfo.setTodoID(buyOurStuff.getId());
-                    resultInfo.setAction(TodoEventInfo.ADD);
-                    result.add(resultInfo);
-                }
-                translatedResults.addAll(result);
-                break;
-            default:
-                throw new RuntimeException("Invalid type of todo found!");
-        }
-    }
-
-
-    public List<RefreshEventInfo> getOngoingTasks() {
-
-        long userID = SecurityUtil.getUserID();
-        try {
-            EIConnection conn = Database.instance().getConnection();
-            conn.setAutoCommit(false);
-            Session session = Database.instance().createSession(conn);
-            List results;
-            List<RefreshEventInfo> translatedResults = new LinkedList<RefreshEventInfo>();
-            try {
-                session.beginTransaction();
-                results = session.createQuery("from ServerRefreshScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED + " and status != " + ScheduledTask.FAILED).setLong(0, userID).list();
-
-                List<Long> feedIds = new LinkedList<Long>();
-                if(results.size()  > 0) {
-                    for(Object o : results) {
-                        RefreshEventInfo result = new RefreshEventInfo();
-                        ServerRefreshScheduledTask s = (ServerRefreshScheduledTask) o;
-                        result.setFeedId(s.getDataSourceID());
-                        result.setUserId(s.getUserID());
-                        result.setTaskId(s.getScheduledTaskID());
-                        result.setAction(RefreshEventInfo.ADD);
-                        result.setMessage(null);
-                        feedIds.add(s.getDataSourceID());
-                        translatedResults.add(result);
-                    }
-                }
-
-                results = session.createQuery("from FileProcessUpdateScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED).setLong(0, userID).list();
-                if(results.size() > 0) {
-                    for(Object o : results) {
-                        RefreshEventInfo result = new RefreshEventInfo();
-                        FileProcessUpdateScheduledTask task = (FileProcessUpdateScheduledTask) o;
-                        result.setFeedId(task.getFeedID());
-                        if(task.getStatus() == ScheduledTask.RUNNING) {
-                            result.setAction(RefreshEventInfo.ADD);
-                            result.setMessage(null);
-                        }
-                        else {
-                            result.setAction(RefreshEventInfo.CREATE);
-                            result.setMessage("Waiting...");
-                        }
-                        result.setUserId(task.getUserID());
-                        result.setTaskId(task.getScheduledTaskID());
-                        feedIds.add(task.getFeedID());
-                        translatedResults.add(result);
-                    }
-                }
-
-                results = session.createQuery("from FileProcessCreateScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED).setLong(0, userID).list();
-                if(results.size() > 0) {
-                    for(Object o : results) {
-                        RefreshEventInfo result = new RefreshEventInfo();
-                        FileProcessCreateScheduledTask task = (FileProcessCreateScheduledTask) o;
-                        result.setFeedId(0);
-                        if(task.getStatus() == ScheduledTask.RUNNING) {
-                            result.setAction(RefreshEventInfo.ADD);
-                            result.setMessage(null);
-                        }
-                        else {
-                            result.setAction(RefreshEventInfo.CREATE);
-                            result.setMessage("Waiting...");
-                        }
-                        result.setUserId(task.getUserID());
-                        result.setTaskId(task.getScheduledTaskID());
-                        result.setFeedName(task.getName());
-                        translatedResults.add(result);
-                    }
-                }
-                
-                if(feedIds.size() > 0) {
-                    Map<Long, String> feedNames = FeedUtil.getFeedNames(feedIds ,conn);
-
-                    for(RefreshEventInfo info : translatedResults) {
-                            if(info.getFeedId() != 0)
-                                info.setFeedName(feedNames.get(info.getFeedId()));
-                    }
-                }
-
-                session.flush();
-                conn.commit();
-            } catch (Throwable e) {
-                conn.rollback();
-                throw new RuntimeException(e);
-            } finally {
-                session.close();
-                conn.close();
-            }
-            return translatedResults;
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);

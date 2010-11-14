@@ -136,7 +136,6 @@
         }
 
         public function gotFocus():void {
-            primaryStackIndex = 0;
             retrieveScorecards();
         }
 
@@ -206,40 +205,63 @@
 
         protected function handleDescriptors(scorecardList:ScorecardList):void {
             if (!anyDataCase() || scorecardList.anyData) {
-                scorecards = scorecardList.scorecardDescriptors;
-                scorecardStack.removeAllChildren();
-                for each (var watcher:ChangeWatcher in watchers) {
-                    watcher.unwatch();
-                }
-                watchers = new ArrayCollection();
-                for each (var scorecard:ScorecardDescriptor in scorecards) {
-                    var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
-                    scorecardRenderer.setStyle("hideEffect", rightEffect);
-                    scorecardRenderer.setStyle("showEffect", rightEffect);
-                    configureRenderer(scorecardRenderer);
-                    scorecardRenderer.groupID = scorecard.groupID;
-                    scorecardRenderer.scorecardDescriptor = scorecard;
-                    scorecardStack.addChild(scorecardRenderer);
-                }
-
-                if (scorecards.length > 0) {
-                    selectedScorecard = scorecards.getItemAt(0) as ScorecardDescriptor;
-                    var renderer:ScorecardRenderer = scorecardStack.getChildAt(0) as ScorecardRenderer;
-                    renderer.retrieveData();
-                    if (selectedScorecard.groupID > 0 && selectedScorecard.groupRole > 2) {
-                        sideBarControlsIndex = 1;
+                var changed:Boolean = true;
+                if (scorecards != null) {
+                    changed = false;
+                    if (scorecardList.scorecardDescriptors.length == scorecards.length) {
+                        for (var i:int = 0; i < scorecards.length; i++) {
+                            var existing:ScorecardDescriptor = scorecards.getItemAt(i) as ScorecardDescriptor;
+                            var newCard:ScorecardDescriptor = scorecardList.scorecardDescriptors.getItemAt(i) as ScorecardDescriptor;
+                            if (existing.name != newCard.name) {
+                                changed = true;
+                                break;
+                            }
+                        }
                     } else {
-                        sideBarControlsIndex = 0;
+                        changed = true;
                     }
-                    groupText = createGroupText(selectedScorecard);
-                    primaryStackIndex = 2;
-                    if (scorecards.length > 1) {
-                        tabsIndex = 1;
+                }
+                if (changed) {
+                    scorecards = scorecardList.scorecardDescriptors;
+                    scorecardStack.removeAllChildren();
+                    for each (var watcher:ChangeWatcher in watchers) {
+                        watcher.unwatch();
+                    }
+                    watchers = new ArrayCollection();
+                    for each (var scorecard:ScorecardDescriptor in scorecards) {
+                        var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
+                        scorecardRenderer.setStyle("hideEffect", rightEffect);
+                        scorecardRenderer.setStyle("showEffect", rightEffect);
+                        configureRenderer(scorecardRenderer);
+                        scorecardRenderer.groupID = scorecard.groupID;
+                        scorecardRenderer.scorecardDescriptor = scorecard;
+                        scorecardStack.addChild(scorecardRenderer);
+                    }
+
+                    if (scorecards.length > 0) {
+                        selectedScorecard = scorecards.getItemAt(0) as ScorecardDescriptor;
+                        var renderer:ScorecardRenderer = scorecardStack.getChildAt(0) as ScorecardRenderer;
+                        renderer.retrieveData();
+                        if (selectedScorecard.groupID > 0 && selectedScorecard.groupRole > 2) {
+                            sideBarControlsIndex = 1;
+                        } else {
+                            sideBarControlsIndex = 0;
+                        }
+                        groupText = createGroupText(selectedScorecard);
+                        primaryStackIndex = 2;
+                        if (scorecards.length > 1) {
+                            tabsIndex = 1;
+                        } else {
+                            tabsIndex = 0;
+                        }
                     } else {
-                        tabsIndex = 0;
+                        primaryStackIndex = 1;
                     }
                 } else {
-                    primaryStackIndex = 1;
+                    for (var j:int = 0; j < scorecardStack.getChildren().length; j++) {
+                        var existingRenderer:ScorecardRenderer = scorecardStack.getChildAt(j) as ScorecardRenderer;
+                        existingRenderer.scorecardDescriptor = scorecardList.scorecardDescriptors.getItemAt(j) as ScorecardDescriptor;
+                    }
                 }
                 dispatchEvent(new Event("gotData"));
             } else {

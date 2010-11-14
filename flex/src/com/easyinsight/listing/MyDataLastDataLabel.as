@@ -2,7 +2,8 @@ package com.easyinsight.listing
 {
 import com.easyinsight.framework.User;
 
-import mx.controls.Alert;
+import com.easyinsight.solutions.InsightDescriptor;
+
 import mx.controls.Label;
 import mx.formatters.DateFormatter;
 
@@ -45,6 +46,13 @@ import mx.formatters.DateFormatter;
                         this.text = "( No Data )";
                     } else {
 					    this.text = formatter.format(descriptor.lastDataTime);
+                    }
+                } else if (value is InsightDescriptor) {
+                    var insightDescriptor:InsightDescriptor = value as InsightDescriptor;
+                    if (insightDescriptor.lastDataTime == null) {
+                        this.text = "";
+                    } else {
+                        this.text = formatter.format(insightDescriptor.lastDataTime);
                     }
 				} else {
 					this.text = "";

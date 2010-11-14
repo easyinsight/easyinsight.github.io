@@ -12,7 +12,6 @@ import com.easyinsight.goals.DelayedGoalLink;
 import com.easyinsight.groups.DelayedGroupLink;
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.report.DelayedMultiReportLink;
-import com.easyinsight.report.DelayedPackageLink;
 import com.easyinsight.solutions.DelayedSolutionLink;
 
 public class FragmentParser {
@@ -60,11 +59,6 @@ public class FragmentParser {
                 var multiReportLink:DelayedMultiReportLink = new DelayedMultiReportLink(key);
                 multiReportLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 multiReportLink.execute();
-            }),
-            new FragmentTester("packageID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var delayedPackageLink:DelayedPackageLink = new DelayedPackageLink(key);
-                delayedPackageLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
-                delayedPackageLink.execute();
             }),
             new FragmentTester("reportID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var deepReportLink:DelayedReportLink = new DelayedReportLink(key);

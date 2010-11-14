@@ -29,10 +29,6 @@
         private var goalTreeIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/package.png")]
-        private var packageIcon:Class;
-
-        [Bindable]
         private var factory:ClassFactory;                     
 
 
@@ -62,8 +58,6 @@
                         descriptor.icon = dataSourceIcon;
                     } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
                         descriptor.icon = goalTreeIcon;
-                    } else if (descriptor.getType() == EIDescriptor.PACKAGE) {
-                        descriptor.icon = packageIcon;
                     } else {
                         descriptor.icon = reportIcon;
                     }
@@ -113,8 +107,6 @@
                     descriptor.icon = dataSourceIcon;
                 } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
                     descriptor.icon = goalTreeIcon;
-                } else if (descriptor.getType() == EIDescriptor.PACKAGE) {
-                    descriptor.icon = packageIcon;
                 } else {
                     descriptor.icon = reportIcon;
                 }

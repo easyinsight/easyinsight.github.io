@@ -576,45 +576,6 @@ public class SecurityUtil {
         }
     }
 
-    public static long authorizePackage(String urlKey) {
-        boolean publiclyVisible = false;
-        long packageID;
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, REPORT_PACKAGE_ID FROM REPORT_PACKAGE WHERE REPORT_PACKAGE.URL_KEY = ?");
-            authorizeStmt.setString(1, urlKey);
-            ResultSet rs = authorizeStmt.executeQuery();
-            if (rs.next()) {
-                publiclyVisible = rs.getBoolean(1);
-                packageID = rs.getLong(2);
-            } else {
-                throw new SecurityException();
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-
-        if (publiclyVisible) {
-            // we're okay
-        } else {
-            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
-            if (userPrincipal == null) {
-                userPrincipal = threadLocal.get();
-                if(userPrincipal == null) {
-                    throw new SecurityException();
-                }
-            }
-            int role = getPackageRole(userPrincipal.getUserID(), packageID);
-            if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
-                throw new SecurityException();
-            }
-        }
-        return packageID;
-    }
-
     public static void authorizeInsight(long insightID) {
         boolean publiclyVisible = false;
         boolean feedVisibility = false;

@@ -9,7 +9,6 @@
 		<![CDATA[
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DeleteDataSourceEvent;
-        import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
@@ -17,7 +16,7 @@
         import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
 
-        import com.easyinsight.help.HelpWindow;
+
         import com.easyinsight.framework.User;
 
         import mx.collections.ArrayCollection;
@@ -91,9 +90,6 @@
             } else if (selectedItem is InsightDescriptor) {
                 Alert.show("Are you sure you want to remove this report from the group?", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
-            } else if (selectedItem is ReportPackageDescriptor) {
-                Alert.show("Are you sure you want to remove this package from the group?", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertPackageListener, null, Alert.CANCEL);
             }
         }
 
@@ -166,10 +162,6 @@
 
             numberMembersText = group.groupUsers.length > 1 ? (group.groupUsers.length + " members") : (group.groupUsers.length + " member");
             this._group = group;
-        }
-
-        private function help():void {
-            HelpWindow.createHelpWindow(GroupHelp, this);
         }
 
         private function groupUpdated(event:GroupCreatedEvent):void {

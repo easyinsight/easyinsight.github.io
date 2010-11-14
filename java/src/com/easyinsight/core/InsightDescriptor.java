@@ -1,5 +1,7 @@
 package com.easyinsight.core;
 
+import java.util.Date;
+
 /**
  * User: James Boe
  * Date: Jan 24, 2009
@@ -9,6 +11,7 @@ public class InsightDescriptor extends EIDescriptor {
 
     private long dataFeedID;
     private int reportType;
+    private Date lastDataTime;
 
     @Override
     public int getType() {
@@ -22,6 +25,21 @@ public class InsightDescriptor extends EIDescriptor {
         super(name, id, urlKey);
         this.dataFeedID = dataFeedID;
         this.reportType = reportType;
+    }
+
+    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, Date lastDataTime) {
+        super(name, id, urlKey);
+        this.dataFeedID = dataFeedID;
+        this.reportType = reportType;
+        this.lastDataTime = lastDataTime;
+    }
+
+    public Date getLastDataTime() {
+        return lastDataTime;
+    }
+
+    public void setLastDataTime(Date lastDataTime) {
+        this.lastDataTime = lastDataTime;
     }
 
     public int getReportType() {

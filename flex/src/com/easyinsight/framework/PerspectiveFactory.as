@@ -12,7 +12,6 @@ import com.easyinsight.listing.MyData;
 import com.easyinsight.listing.SimpleIntro;
 import com.easyinsight.report.MultiReportView;
 import com.easyinsight.report.MultiScreenView;
-import com.easyinsight.report.ReportPackageView;
 import com.easyinsight.report.ReportView;
 import com.easyinsight.scorecard.LoggedInHome;
 import com.easyinsight.solutions.PostInstallPage;
@@ -52,9 +51,6 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.POST_CONNECTION_INSTALL:
                 perspective = new DirectUIComponent(new PostInstallPage());
                 break;
-            case PerspectiveInfo.PACKAGE:
-                perspective = new DirectUIComponent(new ReportPackageView());
-                break;
             case PerspectiveInfo.ACCOUNT_CREATION:
                 perspective = new DirectUIComponent(new AccountSetupWizard());
                 break;
@@ -93,7 +89,6 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.GROUP_DETAIL:
                 perspective = new ModuleUIComponent("GroupDetail", "Loading the group detail information...");
-                //inline(new GroupDetail());
                 break;
             case PerspectiveInfo.CONNECTION_DETAIL:
                 perspective = new ModuleUIComponent("ConnectionDetail", "Loading the connection information...");

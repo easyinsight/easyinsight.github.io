@@ -59,7 +59,6 @@
         <mapping class="com.easyinsight.analysis.DerivedAnalysisDateDimension"/>
         <mapping class="com.easyinsight.analysis.ComplexAnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisHierarchyItem"/>
-        <mapping class="com.easyinsight.analysis.Hierarchy"/>
         <mapping class="com.easyinsight.analysis.HierarchyLevel"/>
         <mapping class="com.easyinsight.analysis.UserToAnalysisBinding"/>
         <mapping class="com.easyinsight.analysis.LimitsMetadata"/>
@@ -94,9 +93,6 @@
         <mapping class="com.easyinsight.scheduler.DataSourceTaskGenerator"/>
         <mapping class="com.easyinsight.scheduler.ScheduledTask"/>
         <mapping class="com.easyinsight.scheduler.DataSourceScheduledTask"/>
-        <mapping class="com.easyinsight.scheduler.ServerRefreshScheduledTask" />
-        <mapping class="com.easyinsight.scheduler.FileProcessCreateScheduledTask" />
-        <mapping class="com.easyinsight.scheduler.FileProcessUpdateScheduledTask" />
         <mapping class="com.easyinsight.export.DeliveryTaskGenerator" />
         <mapping class="com.easyinsight.export.DeliveryScheduledTask" />
         <mapping class="com.easyinsight.users.AccountTimeTask"/>
@@ -123,10 +119,6 @@
         <mapping class="com.easyinsight.users.Account"/>
         <mapping class="com.easyinsight.users.BandwidthUsage" />
         <mapping class="com.easyinsight.users.AccountCreditCardBillingInfo" />
-
-        <mapping class="com.easyinsight.outboundnotifications.TodoBase" />
-        <mapping class="com.easyinsight.outboundnotifications.ConfigureDataFeedTodo" />
-        <mapping class="com.easyinsight.outboundnotifications.BuyOurStuffTodo" />
 
         <mapping class="com.easyinsight.notifications.NotificationBase" />
         <mapping class="com.easyinsight.notifications.UserNotification" />

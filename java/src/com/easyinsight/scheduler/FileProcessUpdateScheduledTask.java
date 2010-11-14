@@ -3,21 +3,14 @@ package com.easyinsight.scheduler;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.userupload.UserUploadService;
-import com.easyinsight.eventing.AsyncRunningEvent;
-import com.easyinsight.eventing.EventDispatcher;
-import com.easyinsight.eventing.AsyncCompletedEvent;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import org.hibernate.Session;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,20 +18,12 @@ import org.hibernate.Session;
  * Date: Jun 11, 2009
  * Time: 4:27:39 PM
  */
-@Entity
-@Table(name="file_process_update_scheduled_task")
-@PrimaryKeyJoinColumn(name="task_id")
-public class FileProcessUpdateScheduledTask extends ScheduledTask {
+public class FileProcessUpdateScheduledTask {
 
-    @Column(name = "feed_id")
     private long feedID;
-    @Column(name="update_flag")
     private boolean update;
-    @Column(name="upload_id")
     private long uploadID;
-    @Column(name="user_id")
     private long userID;
-    @Column(name="account_id")
     private long accountID;
 
     @Transient
@@ -57,25 +42,6 @@ public class FileProcessUpdateScheduledTask extends ScheduledTask {
 
     public long getUploadID() {
         return uploadID;
-    }
-
-
-    protected void execute(Date now, EIConnection conn) throws Exception {
-        /*UserUploadService.RawUploadData rawUploadData = UserUploadService.retrieveRawData(uploadID, conn);
-        background = true;
-        updateData(feedID, update, conn, rawUploadData);*/
-
-    }
-
-    @Override
-    protected void onComplete(Session session) {
-        AsyncCompletedEvent ev = new AsyncCompletedEvent();
-        ev.setTask(this);
-        ev.setUserID(userID);
-        ev.setFeedID((int) feedID);
-        ev.setFeedName(feedName);
-        EventDispatcher.instance().dispatch(ev);
-        super.onComplete(session);
     }
 
     public void updateData(long feedID, boolean update, Connection conn, byte[] bytes) throws SQLException {

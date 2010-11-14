@@ -4,7 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.scheduler.FileProcessCreateScheduledTask;
-import com.easyinsight.scheduler.ScheduledTask;
+
 import com.easyinsight.security.SecurityUtil;
 
 import java.sql.SQLException;
@@ -57,21 +57,8 @@ public class FlatFileUploadContext extends UploadContext {
 
         FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
         task.setName(name);
-        task.setStatus(ScheduledTask.SCHEDULED);
-        task.setExecutionDate(new Date());
         task.setUserID(SecurityUtil.getUserID());
         task.setAccountID(SecurityUtil.getAccountID());
-        /*if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
-            Scheduler.instance().saveTask(task, conn);
-            AsyncCreatedEvent e = new AsyncCreatedEvent();
-            e.setTask(task);
-            e.setUserID(SecurityUtil.getUserID());
-            e.setFeedName(name);
-            e.setFeedID(0);
-            EventDispatcher.instance().dispatch(e);
-            uploadResponse = new UploadResponse("Your file has been uploaded and verified, and will be processed shortly.");
-        }
-        else {*/
         task.createFeed(conn, bytes, uploadFormat, analysisItems);
         return task.getFeedID();
     }

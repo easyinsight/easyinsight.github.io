@@ -14,7 +14,6 @@ import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.groups.Group;
 import com.easyinsight.groups.GroupStorage;
 import com.easyinsight.billing.BrainTreeBillingSystem;
-import com.easyinsight.outboundnotifications.BuyOurStuffTodo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -600,11 +599,6 @@ public class UserService {
                 group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
                 account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
                 session.update(account);
-            }
-            if(account.getAccountType() != Account.PERSONAL) {
-                BuyOurStuffTodo todo = new BuyOurStuffTodo();
-                todo.setUserID(user.getUserID());
-                session.save(todo);
             }
             new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
                     new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);

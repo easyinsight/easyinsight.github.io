@@ -50,7 +50,6 @@ public class DMSServlet extends HttpServlet {
                 new APIManager().start();
                 scheduler = Scheduler.instance();
                 EventDispatcher.instance().start();
-                EventDispatcher.instance().registerListener(TodoCompletedEvent.TODO_COMPLETED, new TodoCompletedListener());
                 EventDispatcher.instance().registerListener(AsyncCreatedEvent.ASYNC_CREATED, new AsyncCreatedListener());
                 EventDispatcher.instance().registerListener(AsyncRunningEvent.ASYNC_RUNNING, new AsyncRunningListener());
                 EventDispatcher.instance().registerListener(AsyncCompletedEvent.ASYNC_COMPLETED, new AsyncCompletedListener());

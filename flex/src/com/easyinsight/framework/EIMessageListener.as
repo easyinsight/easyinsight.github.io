@@ -3,7 +3,6 @@ import com.easyinsight.outboundnotifications.BroadcastInfo;
 import com.easyinsight.outboundnotifications.BroadcastInfoEvent;
 import com.easyinsight.outboundnotifications.RefreshEventInfo;
 
-import com.easyinsight.outboundnotifications.TodoEventInfo;
 import com.easyinsight.scorecard.DataSourceAsyncEvent;
 import com.easyinsight.scorecard.DataSourceMessageEvent;
 import com.easyinsight.scorecard.ScorecardAsyncEvent;
@@ -11,7 +10,6 @@ import com.easyinsight.scorecard.ScorecardMessageEvent;
 
 import flash.events.EventDispatcher;
 
-import mx.controls.Alert;
 import mx.messaging.Consumer;
 import mx.messaging.events.MessageEvent;
 import mx.messaging.events.MessageFaultEvent;
@@ -56,12 +54,7 @@ public class EIMessageListener extends EventDispatcher {
         if(event.message.body is RefreshEventInfo) {
             var info:RefreshEventInfo = event.message.body as RefreshEventInfo;
             dispatchEvent(new AsyncInfoEvent(info));
-        }
-        else if(event.message.body is TodoEventInfo) {
-            var todoInfo:TodoEventInfo = event.message.body as TodoEventInfo;
-            dispatchEvent(new TodoInfoEvent(todoInfo));
-        }
-        else if(event.message.body is BroadcastInfo) {
+        } else if(event.message.body is BroadcastInfo) {
             var broadcastInfo:BroadcastInfo = event.message.body as BroadcastInfo;
             dispatchEvent(new BroadcastInfoEvent(broadcastInfo));
         } else if (event.message.body is ScorecardAsyncEvent) {

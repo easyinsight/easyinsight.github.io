@@ -4,11 +4,8 @@ import com.easyinsight.datasources.DataSourceRefreshWindow;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.*;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
-import com.easyinsight.customupload.UploadConfigEvent;
 import com.easyinsight.genredata.AnalyzeEvent;
-import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
-import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
@@ -178,16 +175,6 @@ public class GroupAdminMyDataIconControls extends HBox
         Alert.show("Your data has begun to refresh and will be available when the refresh completes. This process may take some time depending on the size of the data source. You will receive a notification when the process is complete.");
     }
 
-
-
-    private function copyCalled(event:MouseEvent):void {
-        var window:CopyDataSourceWindow = new CopyDataSourceWindow();
-        window.dataSourceDescriptor = obj as DataFeedDescriptor;
-        PopUpManager.addPopUp(window, this.parent.parent.parent, true);
-        window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent, false, 0, true);
-        PopUpUtil.centerPopUp(window);
-    }
-
     private function refreshCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var feedDescriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
@@ -219,9 +206,6 @@ public class GroupAdminMyDataIconControls extends HBox
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
-        } else if (obj is ReportPackageDescriptor) {
-            var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
-            dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor)));
         }
     }
 
@@ -230,10 +214,6 @@ public class GroupAdminMyDataIconControls extends HBox
         dsRefreshWindow.dataSourceID = feedDescriptor.id;
         PopUpManager.addPopUp(dsRefreshWindow, this, true);
         PopUpUtil.centerPopUp(dsRefreshWindow);
-    }
-
-    private function passEvent(event:UploadConfigEvent):void {
-        dispatchEvent(event);
     }
 
     private function fileData(feedDescriptor:DataFeedDescriptor):void {
@@ -281,10 +261,6 @@ public class GroupAdminMyDataIconControls extends HBox
             refreshVisible = false;
             adminVisible = true;
             adminTooltip = "Open report in the report editor...";
-        } else if (value is ReportPackageDescriptor) {
-            refreshVisible = false;
-            adminVisible = true;
-            adminTooltip = "Edit the package definition...";            
         }
     }
 

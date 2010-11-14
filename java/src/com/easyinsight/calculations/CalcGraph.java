@@ -1,9 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.AnalysisCalculation;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.analysis.DerivedAnalysisDimension;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.pipeline.*;
 import org.jgrapht.DirectedGraph;
@@ -29,6 +26,8 @@ public class CalcGraph {
                 AnalysisCalculation calc = (AnalysisCalculation) item;
                 if (calc.isApplyBeforeAggregation() == rowLevel) derivedItems.add(item);
             } else if (rowLevel && item.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                derivedItems.add(item);
+            } else if (rowLevel && item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                 derivedItems.add(item);
             }
         }
@@ -63,6 +62,9 @@ public class CalcGraph {
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                     components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
                     components.add(new DerivedDimensionCleanupComponent((DerivedAnalysisDimension) calcNode));
+                } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                    components.add(new DerivedDateComponent((DerivedAnalysisDateDimension) calcNode));
+                    components.add(new DerivedDateDimensionCleanupComponent((DerivedAnalysisDateDimension) calcNode));
                 }
             }
         }

@@ -14,7 +14,6 @@
         import com.easyinsight.account.Account;
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.PopupMenuFactory;
-        import com.easyinsight.bugreports.BugReportWindow;
         import com.easyinsight.framework.ConnectionGoEvent;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FragmentParser;
@@ -30,12 +29,10 @@
         import com.easyinsight.listing.HeaderBar;
         import com.easyinsight.listing.IModulePerspective;
         import com.easyinsight.listing.LaunchQuickSearchEvent;
-        import com.easyinsight.listing.ReportBugEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.quicksearch.QuickSearchEvent;
         import com.easyinsight.quicksearch.QuickSearchWindow;
         import com.easyinsight.report.ReportPerspectiveInfo;
-        import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.tour.TutorialFramework;
@@ -175,15 +172,6 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function launchBugReportWindow(event:ReportBugEvent):void {
-            var window:BugReportWindow = new BugReportWindow();
-            PopUpManager.addPopUp(window, this, false);
-            PopUpUtil.centerPopUp(window);
-            /*var window:DiagnosticsWindow = new DiagnosticsWindow();
-             PopUpManager.addPopUp(window, this, true);
-             PopUpUtil.centerPopUp(window);*/
-        }
-
 
         private function onQuickSearch(event:QuickSearchEvent):void {
             event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
@@ -197,8 +185,6 @@
                     internalAnalyze(new AnalyzeEvent(new ReportPerspectiveInfo(event.eiDescriptor as InsightDescriptor)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
                     internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.KPI_TREE_VIEW, {goalTreeID: event.eiDescriptor.id})));
-                } else if (event.eiDescriptor.getType() == EIDescriptor.PACKAGE) {
-                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.PACKAGE, event.eiDescriptor as ReportPackageDescriptor)));
                 }
             }
         }
@@ -646,7 +632,6 @@
             headerBar.setStyle("paddingRight", 10);
             headerBar.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
             headerBar.addEventListener(LaunchQuickSearchEvent.LAUNCH_QUICK_SEARCH, launchQuickSearchWindow);
-            headerBar.addEventListener(ReportBugEvent.REPORT_BUG, launchBugReportWindow);
             masterCanvas.addChild(headerBar);
             var box:Box = new Box();
             box.percentWidth = 100;

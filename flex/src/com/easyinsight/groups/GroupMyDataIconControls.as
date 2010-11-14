@@ -3,9 +3,7 @@ package com.easyinsight.groups
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.*;
 import com.easyinsight.genredata.AnalyzeEvent;
-import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
-import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.Event;
@@ -114,9 +112,6 @@ public class GroupMyDataIconControls extends HBox
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
-        } else if (obj is ReportPackageDescriptor) {
-            var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
-            dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor)));
         }
     }
 
@@ -137,9 +132,6 @@ public class GroupMyDataIconControls extends HBox
         } else if (value is InsightDescriptor) {
             adminVisible = true;
             adminTooltip = "Open report in the report editor...";
-        } else if (value is ReportPackageDescriptor) {
-            adminVisible = true;
-            adminTooltip = "Edit the package definition...";            
         }
     }
 
