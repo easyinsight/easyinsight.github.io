@@ -648,7 +648,7 @@ public class AnalysisStorage {
             dsShareStmt.setLong(2, groupID);
             ResultSet shareRS = dsShareStmt.executeQuery();
             while (shareRS.next()) {
-                reports.add(new InsightDescriptor(shareRS.getLong(1), shareRS.getString(2), shareRS.getLong(3), shareRS.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime())));
+                reports.add(new InsightDescriptor(shareRS.getLong(1), shareRS.getString(2), shareRS.getLong(3), shareRS.getInt(4), shareRS.getString(5), new Date(shareRS.getTimestamp(6).getTime())));
             }
         } finally {
             Database.closeConnection(conn);

@@ -42,7 +42,7 @@
 
         private function onClose(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                ProgressAlert.alert(this, "Deleting the scorecard...", null, scorecardService.deleteScorecard, scorecardService.getScorecardDescriptors);
+                ProgressAlert.alert(this, "Deleting the scorecard...", null, scorecardService.deleteScorecard, scorecardService.getScorecardDescriptorsForGroup);
                 scorecardService.deleteScorecard.send(selectedScorecard.id);
             }
         }

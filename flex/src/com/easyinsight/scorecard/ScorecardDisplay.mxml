@@ -86,8 +86,12 @@
         }
 
         private function addKPI():void {
-            var renderer:ScorecardRenderer = scorecardStack.selectedChild as ScorecardRenderer;
-            renderer.addKPI();
+            if (scorecardStack.getChildren().length == 0) {
+                Alert.show("Create a new scorecard before you add a KPI.");
+            } else {
+                var renderer:ScorecardRenderer = scorecardStack.selectedChild as ScorecardRenderer;
+                renderer.addKPI();
+            }
         }
 
         protected function configureNewScorecardWindow(scorecardWindow:ScorecardWindow):void {
