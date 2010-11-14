@@ -32,6 +32,10 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
     public static final String OPT_OUT_COUNT = "Opt Out Count";
     public static final String SPAM_REPORT_COUNT = "Spam Report Count";
     public static final String EVENT_DATE = "Event Date";
+    public static final String OPEN_RATE = "Open Rate";
+    public static final String CLICK_RATE = "Click Rate";
+    public static final String FORWARD_RATE = "Forward Rate";
+
 
     public CCCampaignResultsSource() {
         setFeedName("Campaign Results");
@@ -41,7 +45,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
     @Override
     protected List<String> getKeys() {
         return Arrays.asList(CAMPAIGN_ID, CONTACT_ID, SENT_COUNT, CLICK_COUNT, OPEN_COUNT,
-                BOUNCE_COUNT, FORWARD_COUNT, OPT_OUT_COUNT, SPAM_REPORT_COUNT, EVENT_DATE);
+                BOUNCE_COUNT, FORWARD_COUNT, OPT_OUT_COUNT, SPAM_REPORT_COUNT, EVENT_DATE, OPEN_RATE, CLICK_RATE, FORWARD_RATE);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
@@ -56,6 +60,31 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
         items.add(new AnalysisMeasure(keys.get(FORWARD_COUNT), AggregationTypes.SUM));
         items.add(new AnalysisMeasure(keys.get(OPT_OUT_COUNT), AggregationTypes.SUM));
         items.add(new AnalysisMeasure(keys.get(SPAM_REPORT_COUNT), AggregationTypes.SUM));
+
+        AnalysisCalculation openRate = new AnalysisCalculation();
+        openRate.setKey(keys.get(OPEN_RATE));
+        openRate.setCalculationString("([Open Count] / [Sent Count]) * 100");
+        FormattingConfiguration openConfiguration = openRate.getFormattingConfiguration();
+        openConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        openRate.setFormattingConfiguration(openConfiguration);
+        items.add(openRate);
+
+        AnalysisCalculation clickRate = new AnalysisCalculation();
+        clickRate.setKey(keys.get(CLICK_RATE));
+        clickRate.setCalculationString("([Click Count] / [Sent Count]) * 100");
+        FormattingConfiguration clickConfiguration = clickRate.getFormattingConfiguration();
+        clickConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        clickRate.setFormattingConfiguration(clickConfiguration);
+        items.add(clickRate);
+
+        AnalysisCalculation forwardRate = new AnalysisCalculation();
+        forwardRate.setKey(keys.get(FORWARD_RATE));
+        forwardRate.setCalculationString("([Forward Count] / [Sent Count]) * 100");
+        FormattingConfiguration forwardConfiguration = forwardRate.getFormattingConfiguration();
+        forwardConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        forwardRate.setFormattingConfiguration(forwardConfiguration);
+        items.add(forwardRate);
+
         return items;
     }
 
@@ -193,7 +222,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                                 } while (hasMoreEvents);
                             }
                         } catch (Exception e) {
-                            LogClass.error(e);
+                            LogClass.debug(e.getMessage());
                         }
 
                 }

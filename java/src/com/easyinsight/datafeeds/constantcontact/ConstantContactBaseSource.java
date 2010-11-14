@@ -1,13 +1,13 @@
 package com.easyinsight.datafeeds.constantcontact;
 
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
+import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.http.HttpRequest;
 import oauth.signpost.signature.HmacSha1MessageSigner;
 import oauth.signpost.signature.PlainTextMessageSigner;
@@ -57,28 +57,24 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
             return null;
     }
 
-    protected Document query(String queryString, String tokenKey, String tokenSecretKey) {
+    protected Document query(String queryString, String tokenKey, String tokenSecretKey) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException {
         Builder builder = new Builder();
-        try {
-            OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
-            consumer.setMessageSigner(new HmacSha1MessageSigner());
-            consumer.setTokenWithSecret(tokenKey, tokenSecretKey);
-            HttpGet httpRequest = new HttpGet(queryString);
-            httpRequest.setHeader("Accept", "application/xml");
-            httpRequest.setHeader("Content-Type", "application/xml");
-            consumer.sign(httpRequest);
+        OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
+        consumer.setMessageSigner(new HmacSha1MessageSigner());
+        consumer.setTokenWithSecret(tokenKey, tokenSecretKey);
+        HttpGet httpRequest = new HttpGet(queryString);
+        httpRequest.setHeader("Accept", "application/xml");
+        httpRequest.setHeader("Content-Type", "application/xml");
+        consumer.sign(httpRequest);
 
-            org.apache.http.client.HttpClient client = new DefaultHttpClient();
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+        org.apache.http.client.HttpClient client = new DefaultHttpClient();
+        ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
-            String string = client.execute(httpRequest, responseHandler);
-            string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
-            string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
-            string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
-            //System.out.println(string);
-            return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        String string = client.execute(httpRequest, responseHandler);
+        string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
+        string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
+        string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
+        //System.out.println(string);
+        return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
     }
 }
