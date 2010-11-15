@@ -39,6 +39,7 @@ public class ImageServlet extends HttpServlet {
                 reportName = URLEncoder.encode(reportName, "UTF-8");
                 resp.setHeader("Content-disposition","inline; filename=" + reportName+".png" );
                 resp.getOutputStream().write(bytes);
+                resp.getOutputStream().flush();
             }
         } catch (Exception e) {
             LogClass.error(e);

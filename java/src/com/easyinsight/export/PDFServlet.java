@@ -39,6 +39,7 @@ public class PDFServlet extends HttpServlet {
                     reportName = URLEncoder.encode(reportName, "UTF-8");
                     resp.setHeader("Content-disposition","attachment; filename=" + reportName+".pdf" );
                     resp.getOutputStream().write(bytes);
+                    resp.getOutputStream().flush();
                 }
             } catch (Exception e) {
                 LogClass.error(e);
