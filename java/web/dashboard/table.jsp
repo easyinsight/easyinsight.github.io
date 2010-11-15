@@ -7,7 +7,6 @@
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="com.easyinsight.core.InsightDescriptor" %>
 <%@ page import="com.easyinsight.goals.GoalTreeDescriptor" %>
-<%@ page import="com.easyinsight.reportpackage.ReportPackageDescriptor" %>
 <%@ page import="com.easyinsight.analysis.InsightRequestMetadata" %>
 <%
     try {
@@ -94,9 +93,6 @@
                     <% } %>
                     <% for(GoalTreeDescriptor goalTree: kpi.getKpiTrees()) { %>
                         <li class="separator"><a target="_blank" href="/app/#goalTreeID=<%= goalTree.getUrlKey() %>"><%= goalTree.getName() %></a> </li>
-                    <% } %>
-                    <% for(ReportPackageDescriptor reportPackage : kpi.getPackages()) { %>
-                        <li class="separator"><a target="_blank" href="/app/#packageID=<%=reportPackage.getUrlKey()%>"><%=reportPackage.getName()%></a></li>
                     <% } %>
                 </ul>
             <% } %>
