@@ -79,7 +79,7 @@ public class WFCSVParse {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, year);
         cal.set(Calendar.WEEK_OF_YEAR, weekOfYear);
-        cal.set(Calendar.DAY_OF_WEEK, 2);
+        cal.set(Calendar.DAY_OF_WEEK, 3);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
