@@ -22,10 +22,12 @@
         import com.easyinsight.solutions.PostInstallSource;
         import com.easyinsight.solutions.Solution;
         import com.easyinsight.solutions.SolutionInstallInfo;
+        import com.easyinsight.util.CookieUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
         import mx.effects.Effect;
+        import mx.messaging.config.ServerConfig;
 
         [Bindable]
         private var panelIndex:int;
@@ -157,7 +159,7 @@
             } else if (event.authResponse.accountState == Account.REACTIVATION_POSSIBLE) {
                 panelIndex = 6;
                 dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
-            } else if (!event.authResponse.activated) {
+            } else if (event.authResponse.accountState == Account.INACTIVE) {
                 panelIndex = 4;
             } else {
                 dispatchEvent(event);
@@ -187,6 +189,7 @@
         private var slideEffect:Effect = rightEffect;
 
         private function resendActivationEmail():void {
+            ProgressAlert.alert(this, "Resending activation email...", null, userService.resendActivationEmail);
             userService.resendActivationEmail.send();
         }
 
@@ -194,12 +197,19 @@
             panelIndex++;
         }
 
+        private function logout():void {
+            CookieUtil.deleteCookie("eisession");
+            ServerConfig.getChannelSet(userService.destination).logout();
+            panelIndex = 0;
+            loginComponent.setupFocus();
+        }
+
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/mail.png")]
+        [Embed(source="../../../../assets/mailx48.png")]
         private var mailIcon:Class;
 
         [Bindable]
@@ -224,81 +234,101 @@
     </mx:RemoteObject>
 
 
-       <!-- <mx:Box width="100%" height="440" paddingLeft="0" paddingBottom="0" paddingRight="0" paddingTop="0"
-                id="centerBox"
-                backgroundColor="0xFFFFFF" y="122">-->
-            <mx:ViewStack selectedIndex="{panelIndex}"
-                          id="viewStack" resizeToContent="true" width="100%" height="440"
-                          paddingTop="10">
-                <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="{slideEffect}"
-                         showEffect="{slideEffect}">
-                    <!-- login page -->
-                    <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent"
-                                              y="114"/>
+    <mx:ViewStack selectedIndex="{panelIndex}"
+                  id="viewStack" resizeToContent="true"
+                  paddingTop="10">
+        <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="{slideEffect}"
+                 showEffect="{slideEffect}">
+            <!-- login page -->
+            <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent"
+                                      y="114"/>
+        </mx:HBox>
+        <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
+            <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
+                                         kpiTutorialNext="slideEffect = rightEffect; remaining()"
+                                         accountType="{accountType}"/>
+        </mx:VBox>
+        <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
+            <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
+                                        kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"/>
+        </mx:VBox>
+
+        <!--
+            additional emails
+        -->
+
+        <!-- welcome back panel -->
+        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" cornerRadius="10"
+                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
+                <mx:Image source="{moneyIcon}"/>
+                <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                             fontSize="18"
+                             text="Your trial has expired. You'll need to enter billing information to continue using Easy Insight."
+                             width="350" height="80"/>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:Button label="Enter Billing" click="toBilling()" fontSize="18" styleName="grayButton"/>
+                    <mx:Button label="Log Out" click="logout()" fontSize="18" styleName="grayButton"/>
                 </mx:HBox>
-                <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
-                    <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
-                                                 kpiTutorialNext="slideEffect = rightEffect; remaining()"
-                                                 accountType="{accountType}"/>
-                </mx:VBox>
-                <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
-                    <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
-                                                kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"/>
-                </mx:VBox>
-
-                <!--
-                        additional emails
-                    -->
-
-                <!-- welcome back panel -->
-                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="{slideEffect}" showEffect="{slideEffect}" backgroundColor="0xFFFFFF" borderStyle="solid"
-                        borderThickness="1" cornerRadius="10">
-                    <mx:Image source="{moneyIcon}"/>
-                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
-                                 fontSize="18"
-                                 text="Your trial has expired. You'll need to enter billing information to continue using Easy Insight."
-                                 width="350" height="80"/>
-                    <mx:Button label="Enter Billing" click="toBilling()" fontSize="18"/>
-                </mx:VBox>
-                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="{slideEffect}" showEffect="{slideEffect}"  backgroundColor="0xFFFFFF" borderStyle="solid"
-                        borderThickness="1" cornerRadius="10">
-                    <mx:Image source="{mailIcon}"/>
-                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
-                                 fontSize="18"
-                                 text="You haven't activated your account yet. Need a new activation email?"
-                                 width="350" height="80"/>
-                    <mx:Button label="Resend Activation Email" click="resendActivationEmail()" fontSize="18"/>
-                </mx:VBox>
-                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="{slideEffect}" showEffect="{slideEffect}" backgroundColor="0xFFFFFF" borderStyle="solid"
-                        borderThickness="1" cornerRadius="10">
-                    <mx:Image source="{mailIcon}"/>
-                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
-                                 fontSize="18"
-                                 text="You should've received a new email with information about activating your account."
-                                 width="350" height="80"/>
-                </mx:VBox>
-                <!-- delinquent panel -->
-                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="{slideEffect}" showEffect="{slideEffect}" verticalGap="25" backgroundColor="0xFFFFFF" borderStyle="solid"
-                        borderThickness="1" cornerRadius="10">
-                    <mx:Image source="{connectionsIcon}"/>
-                    <mx:Label text="Ready to give Easy Insight another try?" fontSize="18"/>
-                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
-                                 fontSize="18"
-                                 text="When you reactivate your account, you'll receive a fresh 30 day trial."
-                                 width="350" height="80" textAlign="center"/>
-                    <mx:Button label="Reactivate" click="reactivate()" fontSize="18"/>
-                </mx:VBox>
-                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="{slideEffect}" showEffect="{slideEffect}" verticalGap="25" backgroundColor="0xFFFFFF" borderStyle="solid"
-                        borderThickness="1" cornerRadius="10">
-                    <mx:Image source="{connectionsIcon}"/>
-                    <mx:Label text="Your account is now active again with a new 30 day trial!" fontSize="20"/>
-                    <mx:Button label="Onward to the Application!" click="onward()" fontSize="18"/>
-                </mx:VBox>
-            </mx:ViewStack>
-        <!--</mx:Box>-->
+            </mx:VBox>
+        </mx:Box>
+        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" cornerRadius="10"
+                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF"
+                     borderThickness="1">
+                <mx:Image source="{mailIcon}"/>
+                <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                             fontSize="18"
+                             text="You haven't activated your account yet. Need a new activation email?"
+                             width="350" height="80"/>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:Button label="Resend Activation Email" click="resendActivationEmail()" fontSize="18"
+                           styleName="grayButton"/>
+                    <mx:Button label="Log Out" click="logout()" fontSize="18" styleName="grayButton"/>
+                </mx:HBox>
+            </mx:VBox>
+        </mx:Box>
+        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" cornerRadius="10"
+                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
+                <mx:Image source="{mailIcon}"/>
+                <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                             fontSize="18"
+                             text="You should've received a new email. Click on the link in that email to activate your account."
+                             width="350" height="80"/>
+                <mx:Button label="Log Out" click="logout()" fontSize="18" styleName="grayButton"/>
+            </mx:VBox>
+        </mx:Box>
+        <!-- delinquent panel -->
+        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" cornerRadius="10"
+                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
+                <mx:Image source="{connectionsIcon}"/>
+                <mx:Label text="Ready to give Easy Insight another try?" fontSize="18"/>
+                <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                             fontSize="18"
+                             text="When you reactivate your account, you'll receive a fresh 30 day trial."
+                             width="350" height="80" textAlign="center"/>
+                <mx:Button label="Reactivate" click="reactivate()" fontSize="18"/>
+            </mx:VBox>
+        </mx:Box>
+        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" cornerRadius="10"
+                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
+                <mx:Image source="{connectionsIcon}"/>
+                <mx:Label text="Your account is now active again with a new 30 day trial!" fontSize="20"/>
+                <mx:Button label="Onward to the Application!" click="onward()" fontSize="18"/>
+            </mx:VBox>
+        </mx:Box>
+    </mx:ViewStack>
 </mx:Box>

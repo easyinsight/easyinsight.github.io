@@ -104,7 +104,7 @@ public class SecurityUtil {
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                         account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
                         user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                        user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
+                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
                         account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
             } else {
                 /*results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();

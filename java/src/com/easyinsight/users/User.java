@@ -55,9 +55,6 @@ public class User {
     @Column(name="last_login_date")
     private Date lastLoginDate;
 
-    @Column(name="renewal_option_available")
-    private boolean renewalOptionAvailable;
-
     @Column(name="opt_in_email")
     private boolean optInEmail;
 
@@ -110,14 +107,6 @@ public class User {
 
     public void setInitialSetupDone(boolean initialSetupDone) {
         this.initialSetupDone = initialSetupDone;
-    }
-
-    public boolean isRenewalOptionAvailable() {
-        return renewalOptionAvailable;
-    }
-
-    public void setRenewalOptionAvailable(boolean renewalOptionAvailable) {
-        this.renewalOptionAvailable = renewalOptionAvailable;
     }
 
     public UISettings getUiSettings() {

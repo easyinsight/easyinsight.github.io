@@ -615,14 +615,7 @@ public class UserService {
                 group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
                 account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
                 session.update(account);
-            }
-            new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
-                    new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);
-            if (account.getAccountType() != Account.PERSONAL) {
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_YEAR, 30);
-                new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
-            }
+            }            
             String activationKey = RandomTextGenerator.generateText(20);
             if (sourceURL == null) {
                 sourceURL = "https://www.easy-insight.com/app";
@@ -675,12 +668,7 @@ public class UserService {
     }
 
     private void configureNewAccount(Account account) {
-        if (account.getAccountType() == Account.PERSONAL) {
-            account.setAccountState(Account.ACTIVE);
-        } else {
-            account.setAccountState(Account.TRIAL);
-        }
-        account.setActivated(false);
+        account.setAccountState(Account.INACTIVE);
         AccountLimits.configureAccount(account);
     }
    
@@ -717,11 +705,10 @@ public class UserService {
             UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
-                    user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                    user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                     userInfo.settings);
             response.setScenario(existing.getScenario());
-            response.setActivated(account.isActivated());
             return response;
         }
     }
@@ -750,10 +737,9 @@ public class UserService {
                          user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                            !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                            !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                             ApplicationSkinSettings.retrieveSkin(userID, session));
-                    userServiceResponse.setActivated(account.isActivated());
                 } else {
                     userServiceResponse = null;
                 }
@@ -796,10 +782,9 @@ public class UserService {
                          user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                            !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                            !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                             ApplicationSkinSettings.retrieveSkin(userID, session));
-                    userServiceResponse.setActivated(account.isActivated());
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     userServiceResponse.setSessionCookie(sessionCookie);
                     user.setLastLoginDate(new Date());
@@ -896,10 +881,9 @@ public class UserService {
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
+                                user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
 
-                        userServiceResponse.setActivated(account.isActivated());
 
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Invalid username or password, please try again.");
@@ -987,10 +971,9 @@ public class UserService {
                  user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                     (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                     user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                    !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                    !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                     ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
-            userServiceResponse.setActivated(account.isActivated());
             user.setLastLoginDate(new Date());
             session.update(user);
             conn.commit();
@@ -1075,10 +1058,9 @@ public class UserService {
                      user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                         (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                         user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                        !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                        !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                         ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
-                userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);
 
@@ -1132,10 +1114,9 @@ public class UserService {
                              user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                                 user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
-                                !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                                !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                                 ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
-                        userServiceResponse.setActivated(account.isActivated());
                         userServiceResponse.setScenario(scenario);
                         user.setLastLoginDate(new Date());
                         session.update(user);

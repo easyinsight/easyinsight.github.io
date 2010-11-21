@@ -91,6 +91,7 @@
         }
 
         public function setupFocus():void {
+            stackIndex = 0;
             focusManager.setFocus(userName);
         }
 

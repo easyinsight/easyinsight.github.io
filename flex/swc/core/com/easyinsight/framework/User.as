@@ -25,7 +25,6 @@ public class User extends EventDispatcher
     private var _userName:String;
     public var accountAdmin:Boolean;
     public var userID:int;
-    public var activated:Boolean;
     public var billingInformationGiven:Boolean;
     public var accountState:int;
     public var uiConfiguration:UIConfiguration;
@@ -99,15 +98,13 @@ public class User extends EventDispatcher
         _user.accountAdmin = response.accountAdmin;
         _user.spaceAllowed = response.spaceAllowed;
         _user.accountType = response.accountType;
-        _user.userID = response.userID;
-        _user.activated = response.activated;
+        _user.userID = response.userID;        
         _user.billingInformationGiven = response.billingInformationGiven;
         _user.accountState = response.accountState;
         _user.freeUpgradePossible = response.freeUpgradePossible;
         _user.lastLoginDate = response.lastLoginDate;
         _user.firstLogin = response.firstLogin;
         _user.accountName = response.accountName;
-        _user.renewalOptionPossible = response.renewalOptionPossible;
         _user.nonCookieLogin = response.nonCookieLogin;
         _user.personaID = response.personaID;
         _user.dateFormat = response.dateFormat;
@@ -118,8 +115,6 @@ public class User extends EventDispatcher
         _user.guestUser = response.guestUser;
         if (_user.firstLogin) {
             User.getEventNotifier().dispatchEvent(new Event("firstLogin"));
-        } else if (response.renewalOptionPossible) {
-            User.getEventNotifier().dispatchEvent(new Event("renewalOption"));
         } else if (response.accountType == Account.DELINQUENT) {
             User.getEventNotifier().dispatchEvent(new Event("accountDelinquent"));
         } else if (response.accountType == Account.REACTIVATION_POSSIBLE) {

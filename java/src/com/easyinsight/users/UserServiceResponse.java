@@ -22,7 +22,6 @@ public class UserServiceResponse {
     private long spaceAllowed;
     private String email;
     private boolean accountAdmin;
-    private boolean activated;
     private boolean billingInformationGiven;
     private int accountState;
     private UISettings uiSettings;
@@ -31,7 +30,6 @@ public class UserServiceResponse {
     private boolean firstLogin;
     private Date lastLoginDate;
     private String accountName;
-    private boolean renewalOptionPossible;
     private long personaID;
     private int dateFormat;
     private boolean defaultReportSharing;
@@ -50,7 +48,7 @@ public class UserServiceResponse {
                                long spaceAllowed, String email, String userName, boolean accountAdmin,
                                boolean billingInformationGiven, int accountState,
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
-                               boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible,
+                               boolean firstLogin, Date lastLoginDate, String accountName,
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin) {
         this.successful = successful;
@@ -70,7 +68,6 @@ public class UserServiceResponse {
         this.firstLogin = firstLogin;
         this.lastLoginDate = lastLoginDate;
         this.accountName = accountName;
-        this.renewalOptionPossible = renewalOptionPossible;
         this.personaID = personaID == null ? 0 : personaID;
         this.dateFormat = dateFormat;
         this.defaultReportSharing = defaultReportSharing;
@@ -150,14 +147,6 @@ public class UserServiceResponse {
 
     public void setPersonaID(long personaID) {
         this.personaID = personaID;
-    }
-
-    public boolean isRenewalOptionPossible() {
-        return renewalOptionPossible;
-    }
-
-    public void setRenewalOptionPossible(boolean renewalOptionPossible) {
-        this.renewalOptionPossible = renewalOptionPossible;
     }
 
     public String getAccountName() {
@@ -289,14 +278,6 @@ public class UserServiceResponse {
 
     public void setAccountAdmin(boolean accountAdmin) {
         this.accountAdmin = accountAdmin;
-    }
-
-    public boolean isActivated() {
-        return activated;
-    }
-
-    public void setActivated(boolean activated) {
-        this.activated = activated;
     }
 
     public boolean isBillingInformationGiven() {

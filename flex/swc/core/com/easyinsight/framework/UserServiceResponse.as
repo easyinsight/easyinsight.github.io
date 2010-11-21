@@ -18,7 +18,6 @@ public class UserServiceResponse
     public var email:String;
     public var userName:String;
     public var accountAdmin:Boolean;
-    public var activated:Boolean;
     public var billingInformationGiven:Boolean;
     public var accountState:int;
     public var uiSettings:UISettings;
@@ -28,7 +27,6 @@ public class UserServiceResponse
     public var guestUser:Boolean;
     public var lastLoginDate:Date;
     public var accountName:String;
-    public var renewalOptionPossible:Boolean;
     public var personaID:int;
     public var dateFormat:int;
     public var defaultReportSharing:Boolean;

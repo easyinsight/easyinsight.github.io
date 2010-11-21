@@ -64,7 +64,7 @@ public class AccountMemberInvitation {
             "Please click the link below to activate your account:\r\n\r\n"+
             "{1}\r\n\r\n"+
             "Once you've activated your account, you can always log back in to your account at:\r\n\r\n"+
-            "https://www.easy-insight.com/app\r\n\r\n"+
+            "https://www.easy-insight.com/app/\r\n\r\n"+
             "Thank you for choosing Easy Insight. Introductory screencasts that may help you out are available at http://www.youtube.com/user/easyinsight. In particular, you may find the following screencasts helpful as starting points:\r\n\r\n"+
             "Easy Insight and Basecamp - http://www.youtube.com/watch?v=XISV8DLN2XA\r\n"+
             "Easy Insight and Highrise - http://www.youtube.com/watch?v=XISV8DLN2XA\r\n"+

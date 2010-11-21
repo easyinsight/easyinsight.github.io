@@ -149,7 +149,6 @@ public class UserAccountAdminService {
             session.beginTransaction();
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
             Account account = (Account) results.get(0);
-            User user = null;
             for (User checkingUser : account.getUsers()) {
                 for (UserTransferObject transferObject : userTransferObject) {
                     if (checkingUser.getUserID() == transferObject.getUserID()) {
@@ -348,18 +347,18 @@ public class UserAccountAdminService {
         try {
             conn.setAutoCommit(false);
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
-            if (!user.isRenewalOptionAvailable()) {
-                throw new RuntimeException();
-            }
-            user.setRenewalOptionAvailable(true);
-            user.setFirstName(welcomeBackInfo.getFirstName());
-            user.setName(welcomeBackInfo.getLastName());
-            user.setAccountAdmin(true);
             Account account = user.getAccount();
-            account.setName(welcomeBackInfo.getAccountName());
-            session.update(user);
-            session.flush();
-            conn.commit();
+            if (account.getAccountState() == Account.REACTIVATION_POSSIBLE) {
+                
+                user.setFirstName(welcomeBackInfo.getFirstName());
+                user.setName(welcomeBackInfo.getLastName());
+                user.setAccountAdmin(true);
+
+                account.setName(welcomeBackInfo.getAccountName());
+                session.update(user);
+                session.flush();
+                conn.commit();
+            }
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -557,53 +556,12 @@ public class UserAccountAdminService {
         return accountAPISettings;
     }
 
-    public String activateAccount(String activationID) {
-        EIConnection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
-        try {
-            conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_ID, target_url FROM ACCOUNT_ACTIVATION WHERE ACTIVATION_KEY = ?");
-            queryStmt.setString(1, activationID);
-            String url = null;            
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                long accountID = rs.getLong(1);
-                url = rs.getString(2);
-                List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
-                Account account = (Account) results.get(0);
-                account.setActivated(true);
-                session.update(account);
-                session.flush();
-                if (account.getAccountType() == Account.PERSONAL) {
-                    new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
-                        new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);
-                } else {
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.DAY_OF_YEAR, 30);
-                    new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
-                        new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.TRIAL), conn);
-                    new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
-                }
-            }
-            conn.commit();
-            return url;
-        } catch (SQLException e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-    }
-
     private AccountStats getAccountStats(EIConnection conn) throws SQLException {
         long accountID = SecurityUtil.getAccountID();
         long usedSize = 0;
-        long maxSize = 0;
+        long maxSize;
         int currentUsers = 0;
-        int maxUsers = 0;
+        int maxUsers;
         long usedAPI = 0;
         long maxAPI = Account.getMaxCount(SecurityUtil.getAccountTier());
             PreparedStatement queryUsedStmt = conn.prepareStatement("select sum(feed_persistence_metadata.size) from feed_persistence_metadata, " +

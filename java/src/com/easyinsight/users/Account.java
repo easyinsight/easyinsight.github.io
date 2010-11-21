@@ -63,9 +63,6 @@ public class Account {
     @Column(name="upgraded")
     private boolean upgraded;
 
-    @Column(name="activated")
-    private boolean activated;
-
     @Column(name="group_id")
     private Long groupID;
 
@@ -107,9 +104,6 @@ public class Account {
 
     @Column(name="default_reporting_sharing")
     private boolean defaultReportSharing;
-
-    @Column(name="renewal_option_available")
-    private boolean renewalOptionAvailable;
 
     @Column(name="creation_date")
     private Date creationDate;
@@ -179,14 +173,6 @@ public class Account {
 
     public void setPublicDataEnabled(boolean publicDataEnabled) {
         this.publicDataEnabled = publicDataEnabled;
-    }
-
-    public boolean isRenewalOptionAvailable() {
-        return renewalOptionAvailable;
-    }
-
-    public void setRenewalOptionAvailable(boolean renewalOptionAvailable) {
-        this.renewalOptionAvailable = renewalOptionAvailable;
     }
 
     public boolean isReportSharingEnabled() {
@@ -483,14 +469,6 @@ public class Account {
 
     public double yearlyCharge() {
         return monthlyCharge() * 11.0;
-    }
-
-    public boolean isActivated() {
-        return activated;
-    }
-
-    public void setActivated(boolean activated) {
-        this.activated = activated;
     }
 
     public Integer getBillingMonthOfYear() {

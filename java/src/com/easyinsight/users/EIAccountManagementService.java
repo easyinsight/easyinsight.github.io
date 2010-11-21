@@ -1,12 +1,11 @@
 package com.easyinsight.users;
 
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
+
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.UISettingRetrieval;
-import com.easyinsight.security.Roles;
+
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.database.Database;
@@ -206,7 +205,7 @@ public class EIAccountManagementService {
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded(),
-                            !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
+                            !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
                             account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
                     // FlexContext.getFlexSession().getRemoteCredentials();

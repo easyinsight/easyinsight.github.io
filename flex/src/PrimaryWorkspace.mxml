@@ -439,7 +439,7 @@
                 } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
                     quietLogin(authResult, false);
                     toLogin(2);
-                } else if (!authResult.activated) {
+                } else if (authResult.accountState == Account.INACTIVE) {
                     toLogin(3);
                 } else {
                     quietLogin(authResult, false);

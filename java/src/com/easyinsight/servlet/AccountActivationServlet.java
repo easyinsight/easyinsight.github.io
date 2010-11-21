@@ -4,6 +4,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
+import com.easyinsight.users.AccountActivityStorage;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Calendar;
 
 /**
  * User: jamesboe
@@ -46,10 +48,17 @@ public class AccountActivationServlet extends HttpServlet {
                 }
                 updateStmt.setLong(2, accountID);
                 updateStmt.executeUpdate();
+
                 okay = true;
                 PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM ACCOUNT_ACTIVATION WHERE ACTIVATION_KEY = ?");
                 clearStmt.setString(1, activationID);
                 clearStmt.executeUpdate();
+
+                if (accountType != Account.PERSONAL) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.DAY_OF_YEAR, 30);
+                    new AccountActivityStorage().saveAccountTimeChange(accountID, Account.ACTIVE, cal.getTime(), conn);
+                }
             } else {
                 resp.getWriter().write("This activation key was no longer valid. You can log into the application directly at https://www.easy-insight.com/app.");
                 resp.getWriter().close();
