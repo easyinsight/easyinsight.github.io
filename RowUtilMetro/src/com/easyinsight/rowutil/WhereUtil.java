@@ -1,6 +1,6 @@
 package com.easyinsight.rowutil;
 
-import com.easyinsight.rowutil.webservice.*;
+import com.easyinsight.rowutil.v2web.*;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;

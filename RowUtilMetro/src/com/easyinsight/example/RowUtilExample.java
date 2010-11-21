@@ -26,19 +26,19 @@ public class RowUtilExample {
             int threadCount = ManagementFactory.getThreadMXBean().getThreadCount();
             Date now = new Date();
 
-            RowUtil addData = new RowUtil(RowMethod.ADD, myAPIKey, myAPISecretKey, dataSourceName,
+            RowUtil addData = new RowUtil(RowMethod.ADD, myAPIKey, myAPISecretKey, dataSourceName, true,
                     "Host", "Memory", "Threads", "Date");
             addData.newRow(hostAddress, currentMemory, threadCount, now);
             addData.flush();
 
             currentMemory = Runtime.getRuntime().maxMemory();
 
-            RowUtil replaceData = new RowUtil(RowMethod.REPLACE, myAPIKey, myAPISecretKey, dataSourceName,
+            RowUtil replaceData = new RowUtil(RowMethod.REPLACE, myAPIKey, myAPISecretKey, dataSourceName, true,
                     "Host", "Memory", "Threads", "Date");
             replaceData.newRow(hostAddress, currentMemory, threadCount, now);
             replaceData.flush();
 
-            RowUtil whereData = new RowUtil(RowMethod.UPDATE, myAPIKey, myAPISecretKey, dataSourceName,
+            RowUtil whereData = new RowUtil(RowMethod.UPDATE, myAPIKey, myAPISecretKey, dataSourceName, true,
                     "Host", "Memory", "Threads", "Date");
             whereData.newRow(hostAddress, currentMemory, threadCount, now);
             whereData.where().and("Host", hostAddress);

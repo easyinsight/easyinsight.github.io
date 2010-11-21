@@ -1,21 +1,20 @@
 package com.easyinsight.rowutil;
 
-import java.rmi.RemoteException;
-import java.util.*;
-
-import com.easyinsight.rowutil.v2web.*;
+import com.easyinsight.rowutil.transactional.*;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
+import java.rmi.RemoteException;
+import java.util.*;
 
 /**
  * User: jamesboe
  * Date: Oct 2, 2009
  * Time: 10:38:16 PM
  */
-public class RowUtil {
+public class TransactionalLoad {
 
     private List<Row> rows = new ArrayList<Row>();
 
@@ -26,10 +25,11 @@ public class RowUtil {
     private String secretKey;
     private RowMethod rowMethod;
 
-    private WhereUtil whereUtil;
-    private Where where;
-
     private boolean changeDataSourceToMatch;
+
+    private int bufferSize;
+
+    private String transactionString;
 
     /**
      * Creates a utility object for passing data into Easy Insight.
@@ -40,60 +40,90 @@ public class RowUtil {
      * @param changeDataSourceToMatch change the data source if the fields don't match
      * @param params the set of fields you're passing data in for on the data source. The data source metadata will be changed dynamically to match this set of fields.
      */
-    public RowUtil(RowMethod rowMethod, String key, String secretKey, String dataSource, boolean changeDataSourceToMatch, String... params) {
+    public TransactionalLoad(RowMethod rowMethod, String key, String secretKey, String dataSource, boolean changeDataSourceToMatch,
+                             int bufferSize, String... params) {
         this.rowMethod = rowMethod;
         this.key = key;
         this.secretKey = secretKey;
         this.dataSource = dataSource;
         this.changeDataSourceToMatch = changeDataSourceToMatch;
+        this.bufferSize = bufferSize;
         paramNames = params;
+    }
+
+    public void startData() throws RemoteException {
+        BasicAuthTransactionalLoadAPIService service = new BasicAuthTransactionalLoadAPIService();
+        EITransactionalLoad port = service.getBasicAuthTransactionalLoadAPIPort();
+        ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, key);
+        ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, secretKey);
+        transactionString = port.beginTransaction(dataSource, rowMethod == RowMethod.REPLACE, changeDataSourceToMatch);
     }
 
     /**
      * Sends the accumulated data across into Easy Insight and clears out all data state.
-     * @throws RemoteException if something goes wrong in sending the data to Easy Insight
+     * @throws java.rmi.RemoteException if something goes wrong in sending the data to Easy Insight
      */
     public void flush() throws RemoteException {
-        if (rowMethod == RowMethod.UPDATE && whereUtil == null) {
-            throw new RowException("You need to specify a Where clause via where() when you have a RowMethod of UPDATE.");
+        if (rows.size() > 0) {
+            BasicAuthTransactionalLoadAPIService service = new BasicAuthTransactionalLoadAPIService();
+            EITransactionalLoad port = service.getBasicAuthTransactionalLoadAPIPort();
+            ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, key);
+            ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, secretKey);
+            port.loadRows(rows, transactionString);
+            CommitResult commitResult = port.commit(transactionString);
+            successful = successful && commitResult.isSuccessful();
+            if (commitResult.getFailedRows() != null) {
+                failureMessage = commitResult.getFailureMessage();
+                for (RowStatus rowStatus : commitResult.getFailedRows()) {
+                    failedRows.add(toRowResult(rowStatus));
+                }
+            }
+            rows = new ArrayList<Row>();
         }
-        BasicAuthEIV2APIService service = new BasicAuthEIV2APIService();
-        EIDataV2 port = service.getBasicAuthEIV2APIPort();
-        ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, key);
-        ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, secretKey);
-        if (rowMethod == RowMethod.ADD) {
-            port.addRows(dataSource, this.rows, changeDataSourceToMatch);
-        } else if (rowMethod == RowMethod.REPLACE) {
-            port.replaceRows(dataSource, this.rows, changeDataSourceToMatch);
-        } else if (rowMethod == RowMethod.UPDATE) {
-            port.updateRows(dataSource, this.rows, where, changeDataSourceToMatch);
-        }
-        rows = new ArrayList<Row>();
-        where = null;
-        whereUtil = null;
     }
 
-    /**
-     * Creates or returns a where clause defining a conditional update on the data.
-     * @return the Where object
-     */
-    public WhereUtil where() {
-        if (rowMethod != RowMethod.UPDATE) {
-            throw new RowException("You can only specify a Where clause when you have a RowMethod of UPDATE.");
-        }
+    private String failureMessage = null;
 
-        if (whereUtil == null) {
-            this.where = new Where();
-            whereUtil = new WhereUtil(this.where);
+    public TransactionResults generateResults() {
+        return new TransactionResults(successful, failedRows, failureMessage);
+    }
+
+    private RowResult toRowResult(RowStatus rowStatus) {
+        List<StringPair> stringPairs;
+        if (rowStatus.getRow().getStringPairs() == null) {
+            stringPairs = new ArrayList<StringPair>();
+        } else {
+            stringPairs = rowStatus.getRow().getStringPairs();
         }
-        return whereUtil;
+        List<NumberPair> numberPairs;
+        if (rowStatus.getRow().getNumberPairs() == null) {
+            numberPairs = new ArrayList<NumberPair>();
+        } else {
+            numberPairs = rowStatus.getRow().getNumberPairs();
+        }
+        List<DatePair> datePairs;
+        if (rowStatus.getRow().getDatePairs() == null) {
+            datePairs = new ArrayList<DatePair>();
+        } else {
+            datePairs = rowStatus.getRow().getDatePairs();
+        }
+        return new RowResult(stringPairs, numberPairs, datePairs, rowStatus.getFailureMessage());
+    }
+
+    private List<RowResult> failedRows = new ArrayList<RowResult>();
+    private boolean successful = true;
+
+    private void checkCapacity() throws RemoteException {
+        if (rows.size() == bufferSize) {
+            flush();
+        }
     }
 
     /**
      * Defines a row of data. Parameters will be matched by order with the parameter names defined in the constructor. Accepted types are String, Number, and Date.
      * @param params the set of parameters being passed into the row
      */
-    public void newRow(Object... params) {
+    public void newRow(Object... params) throws RemoteException {
         try {
             Row row = new Row();
             List<StringPair> stringValues = new ArrayList<StringPair>();
@@ -126,6 +156,7 @@ public class RowUtil {
             row.getNumberPairs().addAll(doubleValues);
             row.getDatePairs().addAll(dateValues);
             rows.add(row);
+            checkCapacity();
         } catch (DatatypeConfigurationException e) {
             throw new RuntimeException(e);
         }
