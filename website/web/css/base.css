@@ -163,6 +163,25 @@ body {
     background-image:url(../images/docs/Banner1.jpg);
 }
 
+#sideBar {
+    background-image:url(../images/SideGradient.png);
+    background-repeat:repeat-y;
+    height: 470px;
+    float: right;
+    width: 250px;
+    text-align: center;
+}
+
+.sideBarHeader {
+    font-size:16px;
+    font-weight:bold;
+}
+
+.sideBarLine {
+    font-size:14px;
+    font-weight:normal;
+}
+
 .headline > a {
 	padding-left:40px;
 	text-decoration:none;
@@ -237,25 +256,28 @@ a > img {
 ul.menuList > li {
 	float:left;
 	font-family: Tahoma, Geneva, sans-serif;
-    font-weight: bold;
+    font-weight: bold;
 }
 ul.menuList > li.first {
 	padding-left:5px;
 }
-li > a {
-	color:#000000;
-	text-decoration:none;
-}
 
 .menuList {
 	list-style:none;
-	width:100%;
-	margin:0px;
-	padding:0px;
+	width:1000px;
+	margin-top:10px;
+    margin-left:1px;
+    margin-right:0px;
 	height:20px;
-	background-color:#DDDDDD;
+	background-color:#595555;
 	font-size:12px;
+    color:#FCE9E9;
 	padding:4px 0px 4px 0px;
+}
+
+.menuList a {
+    text-decoration:none;
+    color:#FCE9E9;
 }
 
 #moreinfo p {

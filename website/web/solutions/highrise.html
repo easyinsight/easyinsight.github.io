@@ -32,6 +32,12 @@ sample_image.src = "/images/SampleReports2.png";
 sample_mouseover_image = new Image();
 sample_mouseover_image.src = "/images/SampleReports1.png";
 
+doc_image = new Image();
+doc_image.src = "/images/doc2.png";
+
+doc_mouseover_image = new Image();
+doc_mouseover_image.src = "/images/doc1.png";
+
 
 <!-- repeat the 4 lines above for any subsequent images. -->
 
@@ -71,12 +77,12 @@ document[swap.arguments[x]].src = eval(swap.arguments[x+1] + ".src");
               <p style="padding-top:10px;padding-bottom:10px">Want the ability to perform custom Highrise reporting? Whether it's simple reports on your sales pipeline or in depth CRM analysis, Easy Insight can get you that visibility in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation.</p>
 
                 <div style="width:100%" align="center">
-                    <a style="padding-right:40px" href="https://www.easy-insight.com/app/#solutionID=19&requiredTier=2" onMouseOver="swap('getstarted','normal_image')"
+                    <a style="padding-right:20px" href="https://www.easy-insight.com/app/#solutionID=19&requiredTier=2" onMouseOver="swap('getstarted','normal_image')"
 onMouseOut="swap('getstarted','mouseover_image')">
 <img name="getstarted" src="/images/GetStartedNow1.png" border="0" alt="Start Highrise Reporting Now!"></a>
-                    <a style="padding-left:40px" href="../images/ContactReports.png" rel="lightbox-highrise" onMouseOver="swap('samplereports','sample_image')"
-onMouseOut="swap('samplereports','sample_mouseover_image')">
-<img name="samplereports" src="/images/SampleReports1.png" border="0"></a>
+                    <a style="padding-left:20px" href="http://www.easy-insight.com/documentation/highrise.html" onMouseOver="swap('docs','doc_image')"
+onMouseOut="swap('docs','doc_mouseover_image')">
+<img name="docs" src="/images/doc1.png" border="0" alt="View Highrise Documentation"></a>
                 </div>
                 
               <div style="padding-top:35px;padding-left:10px;padding-right:30px;float:left">
