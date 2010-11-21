@@ -18,7 +18,7 @@
 %>
 <html>
   <head>
-    <title>Easy Insight Database Solution</title>
+    <title>Easy Insight Database Connection</title>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/dbsolution.js"></script>
@@ -278,9 +278,6 @@
   <div>
       <div id="header">
           <a href="https://www.easy-insight.com/"><img id="logo" src="images/logo.jpg" alt="Easy Insight Logo" /></a>
-          <div id="signupHeadline">
-              <a href="https://www.easy-insight.com/app/" class="signupButton"></a>
-          </div>
       </div>
       <div id="mainTabs">
           <ul>

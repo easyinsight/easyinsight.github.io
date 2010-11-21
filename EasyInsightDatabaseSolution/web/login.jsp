@@ -45,15 +45,15 @@
       </style>
   </head>
   <body>
-    <img src="images/logo.jpg" alt="Easy Insight Logo" /><h1>Database Solution</h1>
+    <img src="images/logo.jpg" alt="Easy Insight Logo" /><h1>Database Connection</h1>
     <h3>Please log in.</h3>
     <form action="login.jsp" method="post">
       Username: <input type="text" name="user" /><br />
       Password: <input type="password" name="password" /><br />
       <input type="submit" value="Log In"/>
     </form>
-    <h2>What is the Easy Insight Database Solution?</h2>
-    <p>The Easy Insight Database Solution is a Java web application that facilitates importing data from your database into <a href="https://www.easy-insight.com/app">Easy Insight</a>.</p>
-    <p>Start by logging in above to create connections and schedule uploads from your database in order to get better insight!</p>
+    <h2>What is the Easy Insight Database Connection?</h2>
+    <p>The Easy Insight Database Connection is a Java web application that facilitates importing data from your database into <a href="https://www.easy-insight.com/app">Easy Insight</a>.</p>
+    <p>Start by logging in above to create connections and schedule uploads from your database in order to get immediate visibility and reporting!</p>
   </body>
 </html>
