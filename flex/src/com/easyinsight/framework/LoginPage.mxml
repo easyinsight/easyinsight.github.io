@@ -199,7 +199,7 @@
         private var logo:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/mail.PNG")]
+        [Embed(source="../../../../assets/mail.png")]
         private var mailIcon:Class;
 
         [Bindable]
