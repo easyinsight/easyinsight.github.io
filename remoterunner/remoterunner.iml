@@ -37,6 +37,16 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library name="metro">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/metro" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/lib/metro" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>
 
