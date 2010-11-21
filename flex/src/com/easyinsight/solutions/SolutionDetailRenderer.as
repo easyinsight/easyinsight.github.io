@@ -10,6 +10,7 @@ import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.IPerspective;
 import com.easyinsight.quicksearch.EIDescriptor;
+import com.easyinsight.skin.BackgroundImage;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 import com.easyinsight.util.UserAudit;
@@ -24,7 +25,6 @@ import flash.net.navigateToURL;
 import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
-import mx.containers.VBox;
 import mx.controls.Alert;
 import mx.events.CloseEvent;
 import mx.events.FlexEvent;
@@ -37,16 +37,12 @@ import mx.utils.URLUtil;
 [Event(name="install", type="com.easyinsight.solutions.SolutionDetailEvent")]
 [Event(name="externalSite", type="com.easyinsight.solutions.SolutionDetailEvent")]
 
-public class SolutionDetailRenderer extends VBox implements IPerspective {
+public class SolutionDetailRenderer extends BackgroundImage implements IPerspective {
 
     private var _solution:Solution;
     private var solutionService:RemoteObject;
     private var installResult:ArrayCollection;
     private var _newAuth:Boolean;
-
-    [Bindable]
-    [Embed(source="../../../../assets/background2.JPG")]
-    protected var background2:Class;
 
     private var _logo:Bitmap;
 

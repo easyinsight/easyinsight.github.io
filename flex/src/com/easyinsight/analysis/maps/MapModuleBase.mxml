@@ -79,7 +79,7 @@
             if (dimension != null && event.shiftKey) {
                 var feature:MapFeature = map.getFeatureAt(event.localX, event.localY);
                 if (feature != null) {
-                    var window:PseudoContextWindow = new PseudoContextWindow(dimension, passThrough, this);
+                    var window:PseudoContextWindow = new PseudoContextWindow(dimension, passThrough, this, mapDefinition);
                     var obj:Object = new Object();
                     obj[dimension.qualifiedName()] = feature.data.label;
                     window.data = obj;
@@ -150,8 +150,10 @@
             return renderer;
         }
 
+        private var mapDefinition:MapDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
-            var mapDefinition:MapDefinition = analysisDefinition as MapDefinition;
+            mapDefinition = analysisDefinition as MapDefinition;
             mapDefinition.mapType = mapType;
             dimension = mapDefinition.geography;
             graphData = new ArrayCollection();

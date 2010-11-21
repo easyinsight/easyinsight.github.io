@@ -43,7 +43,7 @@ public class AccountMemberInvitation {
     private static String remindUserNameText =
             "Your user name with Easy Insight is below:\r\n\r\n" +
             "User Name:  {0}\r\n\r\n"+
-            "This email was sent from an automated account. Please do not reply to this address.";;
+            "This email was sent from an automated account. Please do not reply to this address.";
 
     private static String newConsultantProAccountText =
             "A new professional account for your organization has been created on Easy Insight.\r\nYou can access the application at\r\n\r\n" +
@@ -58,11 +58,19 @@ public class AccountMemberInvitation {
             "This consultant will be responsible for assisting you with data source, report, and goal creation,\r\n"+
             "as well as any further questions or support issues you may have.\r\n\r\nWelcome to Easy Insight!";
 
-    private static String freeAccountConfirmationText =
-            "You have created a new account with Easy Insight.\r\n"+
+    private static String welcomeEmailText =
+             "Hi {0},\r\n\r\n"+
+             "Welcome to Easy Insight and thanks for signing up!\r\n\r\n"+
             "Please click the link below to activate your account:\r\n\r\n"+
-            "{0}\r\n\r\n"+
-            "This email was sent from an automated account. Please do not reply to this address.";
+            "{1}\r\n\r\n"+
+            "Once you've activated your account, you can always log back in to your account at:\r\n\r\n"+
+            "https://www.easy-insight.com/app\r\n\r\n"+
+            "Thank you for choosing Easy Insight. Introductory screencasts that may help you out are available at http://www.youtube.com/user/easyinsight. In particular, you may find the following screencasts helpful as starting points:\r\n\r\n"+
+            "Easy Insight and Basecamp - http://www.youtube.com/watch?v=XISV8DLN2XA\r\n"+
+            "Easy Insight and Highrise - http://www.youtube.com/watch?v=XISV8DLN2XA\r\n"+
+            "Easy Insight and Flat Files - http://www.youtube.com/watch?v=XISV8DLN2XA\r\n\r\n"+
+            "Documentation is available at http://www.easy-insight.com/documentation/toc.html\r\n\r\n"+
+            "If you have any questions around use of the service, please don't hesitant to contact us at support@easy-insight.com.\r\n\r\nThanks and welcome again!\r\n\r\nThe Team at Easy Insight";
 
     private static String salesText =
             "The following user requested sales info:\r\n\r\n" +
@@ -133,12 +141,12 @@ public class AccountMemberInvitation {
         }
     }
 
-    public void sendActivationEmail(String to, String activation) {
-        String url = "https://www.easy-insight.com/app/#activationID=" + activation;
-        String body = MessageFormat.format(freeAccountConfirmationText, url);
-        String subject = "Easy Insight Account Activation";
+    public void sendActivationEmail(String to, String firstName, String activation) {
+        String url = "https://www.easy-insight.com/app/accountactivation?activationID=" + activation;
+        String body = welcomeEmailText.replace("{0}", firstName).replace("{1}", url);
+        String subject = "Welcome to Easy Insight!";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "Easy Insight");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -53,11 +53,6 @@
             _error = value;
         }
 
-        private function reportToEasyInsight():void {
-            ProgressAlert.alert(this, "Reporting the bug...", null, bugService.reportFlexError);
-            bugService.reportFlexError.send(errorMessage, stackTrace);
-        }
-
         private function reported():void {
             PopUpManager.removePopUp(this);
         }
@@ -66,20 +61,16 @@
             if (User.getInstance() != null && User.getInstance().getAccountType() == Account.ADMINISTRATOR) {
                 index = 2;
             } else {
-                index = 1;
+                index = 2;
             }
         }
     ]]>
     </mx:Script>
-    <mx:RemoteObject id="bugService" destination="bugReportService">
-        <mx:method name="reportFlexError" result="reported()"/>
-    </mx:RemoteObject>
     <mx:ViewStack resizeToContent="true" selectedIndex="{index}" addedToStage="PopUpUtil.centerPopUp(this)">
         <mx:VBox horizontalAlign="center">
             <mx:Label text="Oops, something went wrong!" fontSize="20"/>
             <mx:Button label="Show Error Details" fontSize="12" click="toDetail()"/>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Button label="Report to Easy Insight" fontSize="14" click="reportToEasyInsight()"/>
                 <mx:Button label="Close" fontSize="14" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>
@@ -87,7 +78,6 @@
             <mx:Text text="{errorMessage}" fontSize="14" selectable="true"/>
             <mx:Button label="Hide Error Details" fontSize="12" click="index = 0"/>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Button label="Report to Easy Insight" fontSize="14" click="reportToEasyInsight()"/>
                 <mx:Button label="Close" fontSize="14" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>
@@ -97,7 +87,6 @@
                     borderStyle="inset" borderThickness="1"/>
             <mx:Button label="Hide Error Details" fontSize="12" click="index = 0"/>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Button label="Report to Easy Insight" fontSize="14" click="reportToEasyInsight()"/>
                 <mx:Button label="Close" fontSize="14" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>

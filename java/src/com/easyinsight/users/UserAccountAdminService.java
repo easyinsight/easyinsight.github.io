@@ -656,6 +656,7 @@ public class UserAccountAdminService {
             account.setMarketplaceEnabled(accountSettings.isMarketplace());
             account.setPublicDataEnabled(accountSettings.isPublicData());
             account.setReportSharingEnabled(accountSettings.isReportSharing());
+            account.setCurrencySymbol(accountSettings.getCurrencySymbol());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -682,6 +683,7 @@ public class UserAccountAdminService {
             accountSettings.setPublicData(account.isPublicDataEnabled());
             accountSettings.setDateFormat(account.getDateFormat());
             accountSettings.setReportSharing(account.isReportSharingEnabled());
+            accountSettings.setCurrencySymbol(account.getCurrencySymbol());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

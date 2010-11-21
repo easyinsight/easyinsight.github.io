@@ -33,6 +33,7 @@
         import com.easyinsight.quicksearch.QuickSearchEvent;
         import com.easyinsight.quicksearch.QuickSearchWindow;
         import com.easyinsight.report.ReportPerspectiveInfo;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.tour.TutorialFramework;
@@ -97,6 +98,7 @@
             PerspectiveFactoryHolder.factory = new PerspectiveFactory();
             Constants.setup();
             UserAudit.initialize();
+            ApplicationSkin.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
@@ -226,12 +228,6 @@
                     if (o.resetPassword != null && o.resetPassword != "") {
                         new PasswordReset(o.resetPassword, this).reset();
                     }
-                    if (o.startType != null && o.startType != "") {
-                        startType = int(o.startType);
-                    }
-                    if (o.scenarioKey != null && o.scenarioKey != "") {
-                        scenarioKey = o.scenarioKey;
-                    }
                     configureInline = !(o.configureInline != null && o.configureInline != "");
                 }
             }
@@ -262,33 +258,6 @@
             if (_solutionID == value) return;
             _solutionID = value;
             dispatchEvent(new Event("solutionIDChanged"));
-        }
-
-        private var _startType:int;
-
-        [Bindable(event="startTypeChanged")]
-        public function get startType():int {
-            return _startType;
-        }
-
-        public function set startType(value:int):void {
-            if (_startType == value) return;
-            _startType = value;
-            dispatchEvent(new Event("startTypeChanged"));
-        }
-
-        private var _scenarioKey:String;
-
-
-        [Bindable(event="scenarioKeyChanged")]
-        public function get scenarioKey():String {
-            return _scenarioKey;
-        }
-
-        public function set scenarioKey(value:String):void {
-            if (_scenarioKey == value) return;
-            _scenarioKey = value;
-            dispatchEvent(new Event("scenarioKeyChanged"));
         }
 
         private var passwordResetValue:String;
@@ -470,6 +439,8 @@
                 } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
                     quietLogin(authResult, false);
                     toLogin(2);
+                } else if (!authResult.activated) {
+                    toLogin(3);
                 } else {
                     quietLogin(authResult, false);
                     toMain();
@@ -548,6 +519,9 @@
         private function quietLogin(authResponse:UserServiceResponse, navigate:Boolean):void {
             User.initializeUser(authResponse);
             User.getInstance().userName = authResponse.userName;
+            if (User.getInstance().applicationSkin != null) {
+                ApplicationSkin.instance().applyUserSettings(User.getInstance().applicationSkin);
+            }
             Constants.instance().userName = authResponse.userName;
             if (User.getInstance().guestUser) {
                 FloatingGuestWindow.newWindow(this);
@@ -569,7 +543,6 @@
         private function loginEvent(event:LoginEvent):void {
             loggedIn = event.type == LoginEvent.LOGIN;
             if (event.type == LoginEvent.LOGOUT) {
-                startType = event.startType;
                 toLogin(0);
             }
         }
@@ -590,10 +563,7 @@
             loginPage.addEventListener(LoginEvent.QUIET_LOGIN, pageLoginHandler);
             loginPage.addEventListener(ConnectionGoEvent.CONNECTION_GO, onConnect);
             BindingUtils.bindProperty(loginPage, "solutionID", this, "solutionID");
-            BindingUtils.bindProperty(loginPage, "requiredTier", this, "requiredTier");
             BindingUtils.bindProperty(loginPage, "configureInline", this, "configureInline");
-            BindingUtils.bindProperty(loginPage, "scenarioKey", this, "scenarioKey");
-            BindingUtils.bindProperty(loginPage, "startType", this, "startType");
             masterCanvas.addChildAt(loginPage, 0);
         }
 
@@ -617,6 +587,10 @@
             dispatchEvent(new Event("configureInlineChanged"));
         }
 
+        public function set dividerColor(value:uint):void {
+            highBar.setStyle("backgroundColor", value);
+        }
+
         private function toMain():void {
             masterCanvas.removeAllChildren();
             /*var canvas:Canvas = new Canvas();
@@ -636,8 +610,7 @@
             var box:Box = new Box();
             box.percentWidth = 100;
             box.height = 5;
-            box.y = 68;
-            box.setStyle("backgroundColor", "#D42525");
+            box.y = 68;            
             masterCanvas.addChild(box);
             var hbox:HBox = new HBox();
             hbox.y = 73;
@@ -651,6 +624,7 @@
             this.headerBar = headerBar;
             this.highBar = box;
             this.coreSpace = hbox;
+            BindingUtils.bindProperty(this, "dividerColor", ApplicationSkin.instance(), "headerBarDividerColor");
         }
 
         private var coreVBox:Canvas;

@@ -1,8 +1,6 @@
 <?xml version="1.0" ?>
 <solutions:SolutionDetailRenderer xmlns:mx="http://www.adobe.com/2006/mxml"
-                                  xmlns:solutions="com.easyinsight.solutions.*"
-         width="100%" height="100%" paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0"
-         verticalGap="0" backgroundColor="#818285" horizontalAlign="center">
+                                  xmlns:solutions="com.easyinsight.solutions.*">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.OAuthResponse;
 
@@ -38,7 +36,7 @@
                 <mx:HRule width="100%" strokeColor="#3370ce"/>
                 <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" width="820" height="70" text="Want to see where you rank on your number of connections? How about LinkedIn reports by industry? One common data source that seemed at least halfway interesting to us was LinkedIn, so if you want a quick start with our reporting and analysis, here's your chance!" fontSize="14"/>
                 <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10">
-                    <mx:Image source="../assets/LinkedInReport.jpg"/>
+                    <mx:Image source="../assets/linkedin/LinkedInReport.jpg"/>
                 </mx:HBox>
                 <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" width="820" height="40" text="Measure your connections and network. Analyze your network by company--how many of your former coworkers are still stuck at that horrible place you worked before? Share your results with friends!" fontSize="14"/>
                 <mx:Box id="controlsBox" width="100%" horizontalAlign="center">

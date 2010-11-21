@@ -1,6 +1,5 @@
 package com.easyinsight.analysis
 {
-import com.easyinsight.analysis.conditions.ConditionRenderer;
 
 
 import com.easyinsight.pseudocontext.PseudoContextWindow;
@@ -9,11 +8,11 @@ import com.easyinsight.pseudocontext.StandardContextWindow;
 import flash.events.Event;
 import flash.events.MouseEvent;
 
-import mx.controls.Alert;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UITextField;
 import mx.events.FlexEvent;
 import mx.formatters.Formatter;
+import mx.managers.CursorManager;
 import mx.managers.PopUpManager;
 
 
@@ -21,16 +20,44 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 {
     private var _data:Object;
     private var _analysisItem:AnalysisItem;
+    private var _selectionEnabled:Boolean;
+    private var _report:AnalysisDefinition;
+    private var _rolloverIcon:Class;
 
     public function AnalysisCellRenderer() {
         super();
         addEventListener(MouseEvent.CLICK, onClick);
+        addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+        addEventListener(MouseEvent.ROLL_OUT, onRollOut);
     }
 
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
+    }
+
+    public function set rolloverIcon(value:Class):void {
+        _rolloverIcon = value;
+    }
+
+    private function onRollOver(event:MouseEvent):void {
+        if (_rolloverIcon && !_selectionEnabled) {
+            CursorManager.setCursor(_rolloverIcon);
+        }
+    }
+
+    private function onRollOut(event:MouseEvent):void {
+        if (_rolloverIcon && !_selectionEnabled) {
+            CursorManager.removeAllCursors();
+        }
+    }
+
+    public function set selectionEnabled(value:Boolean):void {
+        _selectionEnabled = value;
+    }
 
     private function onClick(event:MouseEvent):void {
-        if (event.shiftKey) {
-            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this);
+        if (!_selectionEnabled) {        
+            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report);
             window.data = this.data;
             PopUpManager.addPopUp(window, this);
             window.x = event.stageX + 5;

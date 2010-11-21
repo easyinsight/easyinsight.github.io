@@ -4,6 +4,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.email.SendGridEmail;
+import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
@@ -206,7 +207,8 @@ public class EIAccountManagementService {
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded(),
                             !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser());
+                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
+                            account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
                     // FlexContext.getFlexSession().getRemoteCredentials();
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");

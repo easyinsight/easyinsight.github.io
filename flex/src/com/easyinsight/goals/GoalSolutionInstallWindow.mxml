@@ -2,7 +2,6 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="getSolutions()">
     <mx:Script><![CDATA[
 import mx.managers.PopUpManager;
-import com.easyinsight.solutions.SolutionEvent;
 import mx.collections.ArrayCollection;
 
         public var goalTreeNode:GoalTreeNode;
@@ -37,9 +36,7 @@ import mx.collections.ArrayCollection;
 		<mx:method name="getSolutions" result="gotSolutions()"/>
 	</mx:RemoteObject>
     <mx:VBox>
-        <mx:ApplicationControlBar>
-            <mx:Label text="Suggested Solutions"/>
-        </mx:ApplicationControlBar>
+        <mx:Label text="Suggested Solutions"/>
         <mx:DataGrid dataProvider="{tagMatchedSolutions}" id="tagSolutionsGrid">
             <mx:columns>
                 <mx:DataGridColumn headerText="Name" dataField="name"/>
@@ -47,9 +44,7 @@ import mx.collections.ArrayCollection;
                 <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.goals.InstallSolutionToGoalControls"/>
             </mx:columns>
         </mx:DataGrid>
-        <mx:ApplicationControlBar>
-            <mx:Label text="All Available Solutions"/>
-        </mx:ApplicationControlBar>
+        <mx:Label text="All Available Solutions"/>
         <mx:DataGrid dataProvider="{allSolutions}" id="allSolutionsGrid">
             <mx:columns>
                 <mx:DataGridColumn headerText="Name" dataField="name"/>

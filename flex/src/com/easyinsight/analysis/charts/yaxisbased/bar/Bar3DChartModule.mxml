@@ -181,22 +181,22 @@ import com.easyinsight.filtering.FilterRawData;
          }
 
         private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, barChartDef);
                 window.data = event.hitData.item;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;
-            }
         }
 
         private function passThrough(event:Event):void {
             dispatchEvent(event);
         }
 
+        private var barChartDef:Bar3DChartDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
-            var barChartDef:Bar3DChartDefinition = analysisDefinition as Bar3DChartDefinition;
+            barChartDef = analysisDefinition as Bar3DChartDefinition;
 
 
             if (dataSet.length > 0) {

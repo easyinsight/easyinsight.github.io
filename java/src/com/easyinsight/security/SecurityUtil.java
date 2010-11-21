@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
@@ -103,7 +104,8 @@ public class SecurityUtil {
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                         account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
                         user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                        user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser());
+                        user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
+                        account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
             } else {
                 /*results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
                 if (results.size() > 0) {

@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.ColorReportFormItem;
+
+        import com.easyinsight.analysis.ComboBoxReportFormItem;
+        import com.easyinsight.analysis.ImageReportFormItem;
+
+        import com.easyinsight.analysis.NumericReportFormItem;
+
+        import com.easyinsight.analysis.ReportFormItem;
+
+        import com.easyinsight.framework.User;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+        private var items:ArrayCollection = new ArrayCollection();
+
+        private var skin:ApplicationSkinTO;
+
+        private function onCreation():void {
+            preferencesService.getSettings.send();
+        }
+
+        private function gotSettings():void {
+            skin = preferencesService.getSettings.lastResult as ApplicationSkinTO;
+            if (skin == null) {
+                skin = new ApplicationSkinTO();
+            }
+
+            items.addItem(new ColorReportFormItem("Core Application Background Color", "coreAppBackgroundColor", skin.coreAppBackgroundColor, skin));
+            items.addItem(new ImageReportFormItem("Core Application Background Image", "coreAppBackgroundImage", skin.coreAppBackgroundImage, skin));
+            items.addItem(new ComboBoxReportFormItem("Core Application Background Styling", "coreAppBackgroundSize", skin.coreAppBackgroundSize, skin, ["100%", "Auto"]));
+            items.addItem(new ColorReportFormItem("Header Bar Background Color", "headerBarBackgroundColor", skin.headerBarBackgroundColor, skin));
+            items.addItem(new ColorReportFormItem("Header Bar Divider Color", "headerBarDividerColor", skin.headerBarDividerColor, skin));
+            items.addItem(new ColorReportFormItem("Center Canvas Background Color", "centerCanvasBackgroundColor", skin.centerCanvasBackgroundColor, skin));
+            items.addItem(new NumericReportFormItem("Center Canvas Background Alpha", "centerCanvasBackgroundAlpha", skin.centerCanvasBackgroundAlpha, skin, 0, 1));
+            var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
+            lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
+            for each (var item:ReportFormItem in items) {
+                reportForm.addChild(item);
+            }
+        }
+
+        private function onDone(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private function savedSettings():void {
+            User.getInstance().applicationSkin = skin;
+            ApplicationSkin.instance().applyUserSettings(User.getInstance().applicationSkin);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function save():void {
+            for each (var item:ReportFormItem in items) {
+                item.save();
+            }
+            preferencesService.saveSkinSettings.send(skin);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="preferencesService" id="preferencesService">
+        <mx:method name="saveSkinSettings" result="savedSettings()"/>
+        <mx:method name="getSettings" result="gotSettings()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Form id="reportForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

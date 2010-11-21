@@ -45,6 +45,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private boolean includeDealNotes;
     private boolean includeCaseNotes;
     private String token;
+    private List<HighriseAdditionalToken> additionalTokens;
+
+    public List<HighriseAdditionalToken> getAdditionalTokens() {
+        return additionalTokens;
+    }
+
+    public void setAdditionalTokens(List<HighriseAdditionalToken> additionalTokens) {
+        this.additionalTokens = additionalTokens;
+    }
 
     public String getToken() {
         return token;
@@ -270,6 +279,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
         HighRiseCompositeSource dataSource = (HighRiseCompositeSource) super.clone(conn);
         dataSource.setUrl("");
+        dataSource.setAdditionalTokens(new ArrayList<HighriseAdditionalToken>());
         return dataSource;
     }
 
@@ -298,6 +308,15 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             token.setUserID(SecurityUtil.getUserID());
             new TokenStorage().saveToken(token, getDataFeedID(), (EIConnection) conn);
         }
+        if (additionalTokens != null) {
+            PreparedStatement saveTokenStmt = conn.prepareStatement("INSERT INTO HIGHRISE_ADDITIONAL_TOKEN (TOKEN, DATA_SOURCE_ID, TOKEN_VALID) VALUES (?, ?, ?)");
+            for (HighriseAdditionalToken token : additionalTokens) {
+                saveTokenStmt.setString(1, token.getToken());
+                saveTokenStmt.setLong(2, getDataFeedID());
+                saveTokenStmt.setBoolean(3, true);
+                saveTokenStmt.execute();
+            }
+        }
     }
 
     public void customLoad(Connection conn) throws SQLException {
@@ -316,6 +335,17 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             this.setIncludeCaseNotes(rs.getBoolean(7));
         }
         loadStmt.close();
+        PreparedStatement additionalTokenStmt = conn.prepareStatement("SELECT TOKEN FROM highrise_additional_token where DATA_SOURCE_ID = ?");
+        additionalTokenStmt.setLong(1, getDataFeedID());
+        List<HighriseAdditionalToken> tokens = new ArrayList<HighriseAdditionalToken>();
+        ResultSet tokenRS = additionalTokenStmt.executeQuery();
+        while (tokenRS.next()) {
+            String token = tokenRS.getString(1);
+            HighriseAdditionalToken highriseToken = new HighriseAdditionalToken();
+            highriseToken.setToken(token);
+            tokens.add(highriseToken);
+        }
+        this.additionalTokens = tokens;
     }
     
     public List<KPI> createKPIs() {

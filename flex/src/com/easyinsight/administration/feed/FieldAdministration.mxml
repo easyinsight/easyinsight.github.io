@@ -60,10 +60,6 @@
         private var selectedWrapper:AnalysisItemWrapper;
         private var openEditor:IAnalysisItemEditor;
 
-        [Bindable]
-        [Embed(source="../../../../../assets/background2.JPG")]
-        private var background2:Class;
-
         [Bindable(event="allFieldsChanged")]
         public function get allFields():ArrayCollection {
             return _allFields;

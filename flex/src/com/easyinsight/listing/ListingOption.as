@@ -3,6 +3,9 @@ package com.easyinsight.listing
 import com.easyinsight.framework.ModulePerspective;
 import com.easyinsight.framework.PerspectiveInfo;
 
+import com.easyinsight.skin.ApplicationSkin;
+
+import mx.binding.utils.BindingUtils;
 import mx.containers.VBox;
 import flash.events.MouseEvent;
 	import mx.collections.ArrayCollection;
@@ -25,8 +28,12 @@ import flash.events.MouseEvent;
             addEventListener(MouseEvent.ROLL_OUT, onMouseOut);
             useHandCursor = true;
             buttonMode = true;
+            BindingUtils.bindProperty(this, "headerBarBackgroundColor", ApplicationSkin.instance(), "headerBarBackgroundColor");
 		}
 
+    public function set headerBarBackgroundColor(color:uint):void {
+        this.setStyle("backgroundColor", color);
+    }
 
     private function listingChange(event:MouseEvent):void {
             dispatchEvent(new ListingChangeEvent(perspective));
@@ -37,7 +44,7 @@ import flash.events.MouseEvent;
         }
 
         private function onMouseOut(event:MouseEvent):void {
-            this.setStyle("backgroundColor", 0xF0F0F0);
+            this.setStyle("backgroundColor", ApplicationSkin.instance().headerBarBackgroundColor);
         }
 
         public function set displayName(val:String):void {

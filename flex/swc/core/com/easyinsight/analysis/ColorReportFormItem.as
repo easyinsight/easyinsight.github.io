@@ -5,7 +5,7 @@ public class ColorReportFormItem extends ReportFormItem {
 
     private var colorPicker:ColorPicker;
 
-    public function ColorReportFormItem(label:String, property:String, value:Object, report:AnalysisDefinition) {
+    public function ColorReportFormItem(label:String, property:String, value:Object, report:Object) {
         super(label, property, value, report);
     }
 

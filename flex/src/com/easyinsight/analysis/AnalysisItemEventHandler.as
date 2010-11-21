@@ -62,6 +62,8 @@ public class AnalysisItemEventHandler extends UIComponent {
             editor = CalculationMeasureWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
             editor = DerivedGroupingWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+            editor = DerivedDateWindow;
         }
         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
         analysisItemEditor.editorClass = editor;

@@ -5,6 +5,8 @@ import com.easyinsight.guest.Scenario;
 import com.easyinsight.preferences.UIConfiguration;
 import com.easyinsight.preferences.UISettings;
 
+import com.easyinsight.skin.ApplicationSkinTO;
+
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.net.SharedObject;
@@ -36,6 +38,8 @@ public class User extends EventDispatcher
     public var personaID:int;
     public var dateFormat:int;
     public var defaultReportSharing:Boolean;
+    public var currencySymbol:String;
+    public var applicationSkin:ApplicationSkinTO;
     private var _guestUser:Boolean;
     public var scenario:Scenario;
 
@@ -109,6 +113,8 @@ public class User extends EventDispatcher
         _user.dateFormat = response.dateFormat;
         _user.defaultReportSharing = response.defaultReportSharing;
         _user.scenario = response.scenario;
+        _user.currencySymbol = response.currencySymbol;
+        _user.applicationSkin = response.applicationSkin;        
         _user.guestUser = response.guestUser;
         if (_user.firstLogin) {
             User.getEventNotifier().dispatchEvent(new Event("firstLogin"));

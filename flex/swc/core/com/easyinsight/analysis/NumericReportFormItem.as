@@ -7,7 +7,7 @@ public class NumericReportFormItem extends ReportFormItem {
     private var maxValue:int;
     private var textInput:TextInput;
 
-    public function NumericReportFormItem(label:String, property:String, value:Object, report:AnalysisDefinition,
+    public function NumericReportFormItem(label:String, property:String, value:Object, report:Object,
             minValue:int, maxValue:int) {
         super(label, property, value, report);
         this.minValue = minValue;
@@ -22,7 +22,7 @@ public class NumericReportFormItem extends ReportFormItem {
     }
 
     override protected function getValue():Object {
-        return int(textInput.text);
+        return Number(textInput.text);
     }
 }
 }

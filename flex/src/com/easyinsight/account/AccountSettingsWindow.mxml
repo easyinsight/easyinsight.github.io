@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
                     creationComplete="userService.getAccountSettings.send(); groupService.getAccountGroups.send()">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
@@ -32,6 +32,7 @@
             sharingEnabled = accountSettings.reportSharing;
             groupID = accountSettings.groupID;
             dateFormat = accountSettings.dateFormat;
+            currencySymbol = accountSettings.currencySymbol;
         }
 
         private function save():void {
@@ -41,6 +42,7 @@
             accountSettings.reportSharing = sharingCheckbox.selected;
             accountSettings.groupID = groupBox.selectedItem.groupID;
             accountSettings.dateFormat = dateBox.selectedItem.data;
+            accountSettings.currencySymbol = currencySymbolInput.text;
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -57,6 +59,9 @@
         private function cancel():void {
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var currencySymbol:String;
 
         [Bindable]
         private var dateFormat:int;
@@ -96,10 +101,13 @@
                     </util:dataProvider>
                 </util:SmartComboBox>
             </mx:FormItem>
+            <mx:FormItem label="Currency Symbol">
+                <mx:TextInput id="currencySymbolInput" maxChars="1" text="{currencySymbol}"/>
+            </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>
             <mx:Button label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
-</util:EITitleWindow>
+</util:EISlimWindow>

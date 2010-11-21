@@ -80,23 +80,23 @@
         }
 
         private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, areaChartDef);
                 window.data = event.hitData.item;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;
-            }
         }
 
         private function passThrough(event:Event):void {
             dispatchEvent(event);
         }
 
+        private var areaChartDef:AreaChartDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
-            var areaChartDef:AreaChartDefinition = analysisDefinition as AreaChartDefinition;
+            areaChartDef = analysisDefinition as AreaChartDefinition;
 
             this.chartData = new ArrayCollection(dataSet.toArray());
 

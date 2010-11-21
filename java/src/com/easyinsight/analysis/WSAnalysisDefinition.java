@@ -10,6 +10,7 @@ import com.easyinsight.pipeline.ResultsBridge;
 import java.util.*;
 import java.io.Serializable;
 
+import com.easyinsight.preferences.ImageDescriptor;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -517,6 +518,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
             if (reportProperty.getPropertyName().equals(property)) {
                 ReportNumericProperty reportNumericProperty = (ReportNumericProperty) reportProperty;
                 return reportNumericProperty.getValue();
+            }
+        }
+        return defaultValue;
+    }
+
+    protected ImageDescriptor findImage(List<ReportProperty> properties, String property, ImageDescriptor defaultValue) {
+        for (ReportProperty reportProperty : properties) {
+            if (reportProperty.getPropertyName().equals(property)) {
+                ReportImageProperty reportImageProperty = (ReportImageProperty) reportProperty;
+                return reportImageProperty.createImageDescriptor();
             }
         }
         return defaultValue;

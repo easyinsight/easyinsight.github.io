@@ -15,9 +15,11 @@
 
         private var dimension1:AnalysisItem;
 
+        private var crosstabDefinition:CrosstabDefinition;
+
         public function renderReport(data:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (data.length > 0) {
-                var crosstabDefinition:CrosstabDefinition = analysisDefinition as CrosstabDefinition;
+                crosstabDefinition = analysisDefinition as CrosstabDefinition;
                 dataSet.setStyle("fontFamily", crosstabDefinition.fontName);
                 dataSet.setStyle("fontSize", crosstabDefinition.fontSize);
                 dimension1 = crosstabDefinition.rows.getItemAt(0) as AnalysisItem;
@@ -34,7 +36,7 @@
         }
 
         private function onClick(event:ListEvent):void {
-            var window:PseudoContextWindow = new PseudoContextWindow(dimension1, passThrough, this);
+            var window:PseudoContextWindow = new PseudoContextWindow(dimension1, passThrough, this, crosstabDefinition);
             window.data = event.itemRenderer;
             PopUpManager.addPopUp(window, this);
             var point:Point = new Point(event.itemRenderer.x, event.itemRenderer.y);
@@ -53,5 +55,10 @@
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
+    <mx:Style>
+        OLAPDataGrid {
+            fontFamily: "Tahoma";
+        }
+    </mx:Style>
     <mx:OLAPDataGrid id="dataSet" height="100%" width="100%" itemClick="onClick(event)" fontFamily="Tahoma"/>
 </mx:Module>

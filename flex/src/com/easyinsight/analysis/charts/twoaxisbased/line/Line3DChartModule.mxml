@@ -80,23 +80,23 @@
         }
 
         private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, lineChartDef);
                 window.data = event.hitData.item;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;
-            }
         }
 
         private function passThrough(event:Event):void {
             dispatchEvent(event);
         }
 
+        private var lineChartDef:Line3DChartDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
-            var lineChartDef:Line3DChartDefinition = analysisDefinition as Line3DChartDefinition;
+            lineChartDef = analysisDefinition as Line3DChartDefinition;
 
             if (dataSet.length > 0) {
 

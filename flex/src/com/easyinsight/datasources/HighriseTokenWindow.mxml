@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        public var token:HighriseAdditionalToken;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (token != null) {
+                tokenValue = token.token;
+            }
+        }
+
+        [Bindable]
+        private var tokenValue:String;
+
+        private function save():void {
+            if (token == null) {
+                token = new HighriseAdditionalToken();
+            }
+            token.token = tokenInput.text;
+            dispatchEvent(new HighriseTokenEvent(HighriseTokenEvent.ADD_TOKEN, token));
+            PopUpManager.removePopUp(this)
+        }
+        ]]></mx:Script>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:HBox>
+            <mx:Label text="What's the token value?"/>
+            <mx:TextInput id="tokenInput" width="300" text="{tokenValue}"/>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

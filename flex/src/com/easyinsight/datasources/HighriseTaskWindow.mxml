@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()" >
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var tokens:ArrayCollection;
+
+        private function onCreation():void {
+            addEventListener(HighriseTokenEvent.DELETE_TOKEN, onDeleteToken);
+        }
+
+        private function onDeleteToken(event:HighriseTokenEvent):void {
+            tokens.removeItemAt(tokens.getItemIndex(event.token));
+        }
+
+        private function addToken():void {
+            var window:HighriseTokenWindow = new HighriseTokenWindow();
+            window.addEventListener(HighriseTokenEvent.ADD_TOKEN, onNewToken, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onNewToken(event:HighriseTokenEvent):void {
+            tokens.addItem(event.token);
+        }
+        ]]></mx:Script>
+    <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" width="700" height="60" selectable="false" focusEnabled="false"
+             text="Highrise doesn't provide a way for administrators to see tasks across the entire system--by default, you're only to see tasks somehow related to you. To work around this restriction, you can optionally add API tokens from other users in the system. These tokens will be used solely for retrieval of task data."
+        fontSize="12"/>
+    <mx:Button label="Add API Token..." click="addToken()"/>
+    <mx:DataGrid dataProvider="{tokens}" rowHeight="28">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="API Token" dataField="token" width="400"/>
+            <util:EIDataGridColumn headerText="" dataField="token" itemRenderer="com.easyinsight.datasources.HighriseTokenControls" width="100"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+</util:EISlimWindow>

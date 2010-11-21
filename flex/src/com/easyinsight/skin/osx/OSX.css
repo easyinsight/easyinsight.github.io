@@ -50,8 +50,25 @@ MenuBar {
 }
 
 
+TitleWindow {
+	backgroundAlpha: 1; 
+	backgroundColor: #DCE2F8;
+	borderThicknessLeft: 0; 
+	borderThicknessBottom: 0; 
+	borderThicknessRight: 0;
+	borderThicknessTop: 0;
+	paddingLeft: 0;
+	paddingTop: 0;
+	paddingRight: 0;
+	paddingBottom: 0;
+}
 
-Panel { 
+Alert {
+    backgroundColor: #CDDAF5;
+    color: #000000;
+}
+
+Panel {
    cornerRadius: 8;
    headerHeight: 22;
    shadowDistance: 3;
@@ -69,29 +86,11 @@ Panel {
    paddingRight: 5;
    paddingLeft: 5;
    }
-   
+
 .panelTitle {
 	color: #000000;
 	textAlign: center;
 	fontWeight: normal;
-}
-
-TitleWindow {
-	backgroundAlpha: 1; 
-	backgroundColor: #DCE2F8;
-	borderThicknessLeft: 0; 
-	borderThicknessBottom: 0; 
-	borderThicknessRight: 0;
-	borderThicknessTop: 0;
-	paddingLeft: 0;
-	paddingTop: 0;
-	paddingRight: 0;
-	paddingBottom: 0;
-}
-
-Alert {
-    backgroundColor: #CDDAF5;
-    color: #000000;
 }
 
 .TitleWindowContents {
@@ -152,6 +151,21 @@ ToggleButtonBar {
    fontWeight: normal;
 }
 
+.grayButton {
+    cornerRadius: 5;
+    highlightAlphas: 0.5, 0.1;
+    fillColors: #333333, #333333, #333333, #333333;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #333333;
+    dropShadow: true;
+    shadowDistance: 3;
+    fontSize: 11;
+    fontWeight: normal;
+}
+
 .redButton { 
    cornerRadius: 12;
    highlightAlphas: 0.79, 0.2;
@@ -163,24 +177,6 @@ ToggleButtonBar {
    fontSize: 11;
    fontWeight: normal;
 }
-
-Accordion { 
-   headerHeight: 17;
-   borderStyle: solid;
-   backgroundAlpha: 1;
-   focusAlpha: 0;
-   highlightAlphas: 0.79, 0.2;
-   fillAlphas: 1, 1, 1, 1;
-   fillColors: #e0e0e0, #ffffff, #e0e0e0, #ffffff;
-   selectedFillColors: #195eb9, #adf8ff;
-   borderColor: #8e8e8e;
-   color: #000000;
-   textRollOverColor: #000000;
-   textSelectedColor: #000000;
-   fontSize: 10;
-   fontWeight: normal;
-}
-
 
 NumericStepper { 
    cornerRadius: 7;
@@ -202,18 +198,6 @@ CheckBox {
    textRollOverColor: #000000;
    color: #000000;
    textSelectedColor: #000000;
-}
-
-LegendItem {
-	fontSize: 12;
-	fontFamily: "Lucida Grande";
-	fontWeight: normal;
-}
-
-PieSeries {
-	fontSize: 10;
-	fontFamily: "Lucida Grande";
-	fontWeight: normal;
 }
 
 RadioButton {
@@ -259,10 +243,6 @@ HSlider {
    themeColor: #3370ce;
    fillAlphas: 1, 1, 1, 1;
    fillColors: #195eb9, #adf8ff, #ffffff, #eeeeee;
-}
-
-VScrollBar {
-
 }
 
 
@@ -374,38 +354,28 @@ DateChooser {
     fontSize: 12;    
 }
 
-.axisTitles {
-    fontSize: 14;
-    fontFamily: "Tahoma";
-}
-
-OLAPDataGrid {
-    fontFamily: "Tahoma";
-}
-
-CartesianChart {
-    axisTitleStyleName:axisTitles;
-    fontFamily: "Tahoma";
-    fontSize: 14;
-}
-
-CartesianChart3D {
-    axisTitleStyleName:axisTitles;
-    fontFamily: "Tahoma";
-    fontSize: 14;
-}
-
-CorePageButton {
-    rolloverColor: #cccccc;
-    backgroundColor: #ffffff;
+EISlimWindow {
+    cornerRadius: 10;
+    borderColor: #DDDDDD;
+    dropShadowEnabled: true;
     borderStyle: solid;
-    borderThickness: 1;
+    backgroundColor: #FFFFFF;
+    horizontalAlign: center;
+    paddingBottom: 5;
+    paddingLeft: 5;
+    paddingRight: 5;
+    paddingTop: 5;
 }
 
-GoalDataRenderer {
-    highlightedSelectedColor: #8695FF;
-    highlightedUnselectedColor: #FEFBBA;
-    unhiglightedSelectedColor: #637DFF;
-    unhighlightedUnselectedColor: #EAF1F6;
-    subTreePresentColor: #99ccff; 
+.errorTip {
+    fontSize: 12;
+}
+
+.connectionDetailCanvas {
+    backgroundColor: #FFFFFF;
+    paddingBottom: 20;
+    paddingLeft: 20;
+    paddingTop: 20;
+    paddingRight: 20;
+    horizontalAlign: center;
 }

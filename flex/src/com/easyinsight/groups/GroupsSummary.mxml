@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-         xmlns:discussion="com.easyinsight.discussion.*" width="100%" height="100%"
-         implements="com.easyinsight.listing.IPerspective"
-         xmlns:groups="com.easyinsight.groups.*"
-         creationComplete="initListeners()" xmlns:listing="com.easyinsight.listing.*"
-         paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" verticalGap="0"
-         backgroundColor="#818285" horizontalAlign="center">
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                      xmlns:discussion="com.easyinsight.discussion.*"
+                      implements="com.easyinsight.listing.IPerspective"
+                      xmlns:groups="com.easyinsight.groups.*"
+                      creationComplete="initListeners()" xmlns:listing="com.easyinsight.listing.*"
+                      xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
 		<![CDATA[
 
         import com.easyinsight.account.Account;
         import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.utils.URLUtil;
@@ -29,6 +29,12 @@
         private var showMyGroups:Boolean = false;
 
         private function initListeners():void {
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            solutionGrid.setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
+            solutionGrid.setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
         }
 
         private function gotCreate():void {
@@ -98,10 +104,6 @@
         }
 
         [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
-
-        [Bindable]
         private var stackIndex:int;
 
         [Bindable]
@@ -112,31 +114,33 @@
         <mx:method name="getMemberGroups" result="gotMemberGroups()"/>
         <mx:method name="canCreateGroup" result="gotCreate()"/>
         <!--<mx:method name="getPublicGroups" result="gotPublicGroups()"/>-->
-    </mx:RemoteObject>    
-    
-    <mx:VBox width="1000" height="100%" id="coreContent" backgroundColor="#FFFFFF" paddingTop="10" paddingLeft="10"
-             paddingRight="10" paddingBottom="10" horizontalAlign="center">
-        <mx:ViewStack resizeToContent="true" selectedIndex="{groupAddIndex}">
-            <mx:Box/>
-            <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-                <mx:Label text="You are only able to create groups with a Basic or higher account." fontSize="16" color="#000000"/>
-            </mx:Box>
-            <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-                <mx:Label text="You are only allowed to have one group with a Basic account." fontSize="16" color="#000000"/>
-            </mx:Box>
-            <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-                <mx:Button icon="@Embed('../../../../assets/users3_add.png')" label="Create a New Group..."
-                   click="createNewGroup()" labelPlacement="bottom"/>
-            </mx:Box>
-        </mx:ViewStack>
-        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" id="groupStack">
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                <mx:ProgressBar indeterminate="{stackIndex == 0}" label="Loading available groups..."/>
-            </mx:Box>
-            <mx:Canvas width="100%" height="100%">
-                <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.groups.GroupView" dataProvider="{myGroups}" id="solutionGrid"
-                    columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%"/>
-            </mx:Canvas>
-        </mx:ViewStack>
+    </mx:RemoteObject>
+    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:ViewStack resizeToContent="true" selectedIndex="{groupAddIndex}">
+        <mx:Box/>
+        <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
+            <mx:Label text="You are only able to create groups with a Basic or higher account." fontSize="16"
+                      color="#000000"/>
+        </mx:Box>
+        <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
+            <mx:Label text="You are only allowed to have one group with a Basic account." fontSize="16"
+                      color="#000000"/>
+        </mx:Box>
+        <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
+            <mx:Button icon="@Embed('../../../../assets/users3_add.png')" label="Create a New Group..."
+                       click="createNewGroup()" labelPlacement="bottom"/>
+        </mx:Box>
+    </mx:ViewStack>
+    <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" id="groupStack"
+                  creationPolicy="all">
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ProgressBar indeterminate="{stackIndex == 0}" label="Loading available groups..."/>
+        </mx:Box>
+        <mx:Canvas width="100%" height="100%">
+            <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.groups.GroupView"
+                         dataProvider="{myGroups}" id="solutionGrid"
+                         columnWidth="240" rowHeight="160"/>
+        </mx:Canvas>
+    </mx:ViewStack>
     </mx:VBox>
-</mx:VBox>
+</skin:BackgroundImage>

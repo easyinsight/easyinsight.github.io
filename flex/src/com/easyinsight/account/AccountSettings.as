@@ -9,6 +9,7 @@ public class AccountSettings {
     public var reportSharing:Boolean;
     public var groupID:int;
     public var dateFormat:int;
+    public var currencySymbol:String;
     
     public function AccountSettings() {
     }

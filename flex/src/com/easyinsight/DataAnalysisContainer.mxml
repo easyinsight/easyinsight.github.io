@@ -7,8 +7,7 @@
                      xmlns:util="com.easyinsight.util.*"
                      xmlns:filtering="com.easyinsight.filtering.*"
                      xmlns:feed="com.easyinsight.administration.feed.*" doubleClickEnabled="true"
-                     backgroundImage="{background2}" backgroundSize="100%"
-                     paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" backgroundColor="#DCE2F8"
+                     paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
         implements="com.easyinsight.listing.IPerspective">
     <mx:states>
         <mx:State name="NotLoggedIn">
@@ -75,6 +74,7 @@
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
@@ -116,9 +116,6 @@
 
         import com.easyinsight.analysis.AnalysisDefinition;
 
-        [Bindable]
-        [Embed(source="../../../assets/background2.JPG")]
-        private var background2:Class;
 
         [Bindable]
         public var dataService:DataService;
@@ -251,6 +248,8 @@
                 dataView.removeEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
                 dataControlVBox.removeChild(dataView);
                 viewWatcher.unwatch();
+                selectableWatcher.unwatch();
+                selectionWatcher.unwatch();
             }
             if (analysisDefinition == null) {
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
@@ -267,12 +266,56 @@
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             dataView.addEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
+
             viewWatcher = BindingUtils.bindProperty(dataViewFactory, "adHocMode", adHocButton, "adHoc");
+            selectableWatcher = BindingUtils.bindProperty(this, "reportSelectable", dataViewFactory, "reportSelectable");
+            selectionWatcher = BindingUtils.bindProperty(dataViewFactory, "reportSelectionEnabled", this, "reportSelectionEnabled");
             dataControlVBox.addChild(dataViewFactory);
             dataViewFactory.retrieveData();
         }
 
+        protected override function commitProperties():void {
+            super.commitProperties();
+            setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
+            setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
+        }
+
+        private var _reportSelectable:Boolean = false;
+
+        [Bindable(event="reportSelectableChanged")]
+        public function get reportSelectable():Boolean {
+            return _reportSelectable;
+        }
+
+        public function set reportSelectable(value:Boolean):void {
+            if (_reportSelectable == value) return;
+            _reportSelectable = value;
+            dispatchEvent(new Event("reportSelectableChanged"));
+            if (!value) {
+                reportSelectionEnabled = false;
+                reportSelectableTooltip = "This report type does not support selection mode.";
+                includeFilterDataTooltip = "This report type does not support selection mode.";
+                excludeFilterDataTooltip = "This report type does not support selection mode.";
+            } else {
+                reportSelectableTooltip = "Click to toggle report selection mode";
+                includeFilterDataTooltip = "Restrict report to the selected items";
+                excludeFilterDataTooltip = "Exclude the selected items from the report";
+            }
+        }
+
+        [Bindable]
+        private var reportSelectableTooltip:String;
+
+        [Bindable]
+        private var includeFilterDataTooltip:String;
+
+        [Bindable]
+        private var excludeFilterDataTooltip:String;
+
         private var viewWatcher:ChangeWatcher;
+        private var selectableWatcher:ChangeWatcher;
+        private var selectionWatcher:ChangeWatcher;
+
 
         public function newAnalysis(shareDataSourceSettings:Boolean):void {
             var controller:IReportController = new ListController();
@@ -584,7 +627,7 @@
                     if (uiConfig.getConfiguration(UIConfiguration.SHOW_EXPORT).selected) {
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_DLS).selected) exportTab.removeDLS();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_PNG).selected) exportTab.removePNG();
-                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();                        
+                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMAIL).selected) exportTab.removeEmail();
                     } else {
                         tabNavigator.removeChild(exportTab);
@@ -754,7 +797,7 @@
         public function cleanup():void {
             removeEventListener(CommandEvent.COMMAND, onCommand);
             /*if (stage != null)
-                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);*/
+             stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);*/
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
@@ -950,6 +993,20 @@
             }
         }
 
+        private var _reportSelectionEnabled:Boolean;
+
+
+        [Bindable(event="reportSelectionEnabledChanged")]
+        public function get reportSelectionEnabled():Boolean {
+            return _reportSelectionEnabled;
+        }
+
+        public function set reportSelectionEnabled(value:Boolean):void {
+            if (_reportSelectionEnabled == value) return;
+            _reportSelectionEnabled = value;
+            dispatchEvent(new Event("reportSelectionEnabledChanged"));
+        }
+
         private function blah():void {
             var analysisStep:AnalysisStep;
             var analysisLat:AnalysisLatitude;
@@ -1010,11 +1067,6 @@
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
                        toolTip="Adminster" visible="{admin}"/>
-            <!--<mx:Spacer width="100"/>
-            <mx:Box horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF" borderStyle="solid"
-                    borderThickness="1" cornerRadius="5" paddingLeft="8" paddingRight="8">
-                <mx:Label text="{reportName}" fontSize="16"/>
-            </mx:Box>-->
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"
@@ -1031,10 +1083,13 @@
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
                                           feedID="{dataSourceID}"
                                           analysisItems="{wrappers}" minHeight="40">
+                <mx:Button id="selectionModeButton" icon="@Embed(source='../../../assets/funnel.png')"
+                           toolTip="{reportSelectableTooltip}" click="reportSelectionEnabled = !reportSelectionEnabled"
+                        enabled="{reportSelectable}"/>
                 <mx:Button id="filterButton" icon="@Embed(source='../../../assets/funnel_new.png')"
-                           toolTip="Filter Data" click="createFilter()"/>
+                           toolTip="{includeFilterDataTooltip}" click="createFilter()" enabled="{reportSelectionEnabled}"/>
                 <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"
-                           toolTip="Exclude Data" click="exclude()"/>
+                           toolTip="{excludeFilterDataTooltip}" click="exclude()" enabled="{reportSelectionEnabled}"/>
             </filtering:TransformContainer>
             <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab"/>
             <analysis:ReportSharingTab analysisDefinition="{analysisDefinition}" originSolution="{originSolution}" id="reportSharingTab"

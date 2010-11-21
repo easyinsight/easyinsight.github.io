@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:listing="com.easyinsight.listing.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
-                      height="100%"
+<skin:BackgroundImage xmlns:listing="com.easyinsight.listing.*" xmlns:mx="http://www.adobe.com/2006/mxml"
                       xmlns:genredata="com.easyinsight.genredata.*"
                       implements="com.easyinsight.listing.IPerspective" creationComplete="setupListeners()"
-        backgroundColor="#818285">
+                      xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
 		<![CDATA[
+
 
         import com.easyinsight.solutions.Solution;
         import com.easyinsight.util.UserAudit;
@@ -45,9 +45,7 @@
         }
 
 
-
-        public static function stringReplaceAll(source:String, find:String, replacement:String):String
-        {
+        public static function stringReplaceAll(source:String, find:String, replacement:String):String {
             return source.split(find).join(replacement);
         }
 
@@ -67,14 +65,9 @@
          }*/
 
 
-        [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
-
-
         public function gotFocus():void {
             BrowserManager.getInstance().setTitle("Easy Insight - Exchange");
-            exchangeController = solutionDataController;            
+            exchangeController = solutionDataController;
             if (displayMode == 1) {
                 exchangeController.displayMode = "grid";
             } else if (displayMode == 2) {
@@ -85,7 +78,7 @@
             if (subTopicID > 0) {
                 exchangeController.subTopicID = subTopicID;
             }
-            solutionDataController.initBehavior();            
+            solutionDataController.initBehavior();
             updateURL();
             listsBox.removeAllChildren();
             listsBox.addChild(exchangeController.selectedPage);
@@ -178,7 +171,7 @@
         private var _solutions:ArrayCollection;
 
         private function changeSolution():void {
-            solution = solutionBox.selectedItem;    
+            solution = solutionBox.selectedItem;
         }
 
         private function gotSolutions():void {
@@ -218,29 +211,32 @@
         <mx:method name="getSolutions" result="gotSolutions()"/>
     </mx:RemoteObject>
     <!--<genredata:PublicDataController id="publicDataController" changeView="onChangeView(event)"/>-->
-    <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)" solution="{solution}" updateURL="updateURL()"/>
-    <mx:HBox width="100%" height="100%" horizontalAlign="center">
-            <mx:VBox id="centerBox" width="1000" height="100%" paddingBottom="10"
-                 paddingLeft="0" paddingRight="0" paddingTop="0" backgroundColor="#FFFFFF" verticalGap="0" horizontalAlign="center">
+    <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)"
+                                          solution="{solution}" updateURL="updateURL()"/>
 
-            <mx:HBox width="1000" verticalAlign="middle" paddingTop="20" paddingBottom="20" paddingLeft="20" paddingRight="20">
-                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" selectedItem="{solution}"
-                        rowCount="{solutionRows}"/>
-                <mx:Spacer width="100%"/>
-                <mx:TextArea color="0x323232" borderStyle="none" editable="false" selectable="false" backgroundAlpha="0" width="600"
-                        text="Click on reports below to try them out with your data. If you just need a starting point, take one of the reports and modify it to meet your needs." fontSize="16"/>
-                <mx:Spacer width="100%"/>
-                <mx:ToggleButtonBar itemClick="updateDisplayMode2()" id="displayTypeBar">
-                    <mx:dataProvider>
-                        <mx:Array>
-                            <mx:String>Summary</mx:String>
-                            <mx:String>Grid</mx:String>
-                            <!--<mx:String>Detail</mx:String>-->
-                        </mx:Array>
-                    </mx:dataProvider>
-                </mx:ToggleButtonBar>
-            </mx:HBox>
-            <mx:HBox width="1000" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20" paddingRight="20"/>
-        </mx:VBox>
-    </mx:HBox>
-</mx:Canvas>
+    <mx:VBox>
+        <mx:HBox width="980" verticalAlign="middle" paddingTop="20" paddingBottom="20" paddingLeft="20"
+                 paddingRight="20">
+            <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name"
+                         selectedItem="{solution}"
+                         rowCount="{solutionRows}"/>
+            <mx:Spacer width="100%"/>
+            <mx:TextArea color="0x323232" borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                         width="600"
+                         text="Click on reports below to try them out with your data. If you just need a starting point, take one of the reports and modify it to meet your needs."
+                         fontSize="16"/>
+            <mx:Spacer width="100%"/>
+            <mx:ToggleButtonBar itemClick="updateDisplayMode2()" id="displayTypeBar">
+                <mx:dataProvider>
+                    <mx:Array>
+                        <mx:String>Summary</mx:String>
+                        <mx:String>Grid</mx:String>
+                        <!--<mx:String>Detail</mx:String>-->
+                    </mx:Array>
+                </mx:dataProvider>
+            </mx:ToggleButtonBar>
+        </mx:HBox>
+        <mx:HBox width="980" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20"
+                 paddingRight="20"/>
+    </mx:VBox>
+</skin:BackgroundImage>

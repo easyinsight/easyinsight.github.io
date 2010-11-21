@@ -15,6 +15,34 @@ public class WSTreeMapDefinition extends WSAnalysisDefinition {
     private long treeMapDefinitionID;
     private int colorScheme;
 
+    private String colorStrategy = "Linear";
+    private int lowColor = 3355528;
+    private int highColor = 11184895;
+
+    public String getColorStrategy() {
+        return colorStrategy;
+    }
+
+    public void setColorStrategy(String colorStrategy) {
+        this.colorStrategy = colorStrategy;
+    }
+
+    public int getLowColor() {
+        return lowColor;
+    }
+
+    public void setLowColor(int lowColor) {
+        this.lowColor = lowColor;
+    }
+
+    public int getHighColor() {
+        return highColor;
+    }
+
+    public void setHighColor(int highColor) {
+        this.highColor = highColor;
+    }
+
     public int getColorScheme() {
         return colorScheme;
     }
@@ -78,11 +106,19 @@ public class WSTreeMapDefinition extends WSAnalysisDefinition {
     public Set<AnalysisItem> getAllAnalysisItems() {
         Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
         AnalysisHierarchyItem item = (AnalysisHierarchyItem) hierarchy;
-        for (HierarchyLevel level : item.getHierarchyLevels()) {
-            columnList.add(level.getAnalysisItem());
+        int startIndex = item.getHierarchyLevels().indexOf(item.getHierarchyLevel());
+        for (int i = startIndex; i < item.getHierarchyLevels().size() && i < (startIndex + 2); i++) {
+            columnList.add(item.getHierarchyLevels().get(i).getAnalysisItem());
         }
         columnList.add(measure1);
         columnList.add(measure2);
         return columnList;
+    }
+
+    public static void main(String[] args) {
+        int i= Integer.parseInt("333388",16);
+        System.out.println(i);
+        int j= Integer.parseInt("AAAAFF",16);
+        System.out.println(j);
     }
 }

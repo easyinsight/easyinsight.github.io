@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupListeners()">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupListeners()">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.CredentialsResponse;
         import com.easyinsight.administration.feed.FeedDefinitionData;
@@ -193,8 +193,9 @@
         <mx:Box id="coreContent"/>
         <mx:ProgressBar id="progressBar" indeterminate="false" mode="manual" visible="false" label="{asyncLabel}"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Create" click="validate()" enabled="{ready}"/>
-            <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)"/>
+            <mx:Button label="Create" click="validate()" enabled="{ready}" styleName="grayButton" fontSize="14"/>
+            <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)" styleName="grayButton"
+                    fontSize="14"/>
         </mx:HBox>
 	</mx:VBox>
-</util:EITitleWindow>
+</util:EISlimWindow>

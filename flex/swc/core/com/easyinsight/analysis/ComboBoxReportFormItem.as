@@ -7,7 +7,7 @@ public class ComboBoxReportFormItem extends ReportFormItem {
     private var choices:ArrayCollection;
     private var comboBox:ComboBox;
 
-    public function ComboBoxReportFormItem(label:String, property:String, value:Object, report:AnalysisDefinition,
+    public function ComboBoxReportFormItem(label:String, property:String, value:Object, report:Object,
             choices:Array) {
         super(label, property, value, report);
         this.choices = new ArrayCollection(choices);

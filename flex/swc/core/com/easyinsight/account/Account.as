@@ -34,6 +34,7 @@ package com.easyinsight.account
         public var apiEnabled:Boolean = true;
         public var activated:Boolean;
         public var optInEmail:Boolean;
+        public var currencySymbol:String = "$";
 		
 		public function Account()
 		{

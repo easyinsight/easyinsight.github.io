@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <account:AccountFormItem xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
-        label="Account Storage Used:" direction="horizontal">
+        label="Storage Used:" direction="horizontal">
     <mx:Script><![CDATA[
         import mx.formatters.NumberFormatter;
 
@@ -14,6 +14,7 @@
             super.commitProperties();
             var accountStats:AccountStats = accountInfo.accountStats;
             var numberFormatter:NumberFormatter = new NumberFormatter();
+            numberFormatter.precision = 2;
             if (accountStats.maxSpace <= 1000000) {
                 spaceUsed = numberFormatter.format(accountStats.usedSpace / 1000) + " KB";
                 availableSpace = numberFormatter.format(accountStats.maxSpace / 1000) + " KB";

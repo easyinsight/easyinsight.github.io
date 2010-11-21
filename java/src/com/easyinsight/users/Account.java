@@ -123,6 +123,9 @@ public class Account {
     @Column(name="date_format")
     private int dateFormat;
 
+    @Column(name="currency_symbol")
+    private String currencySymbol = "$";
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="account_id")
     private List<BandwidthUsage> historicBandwidthUsage = new ArrayList<BandwidthUsage>();
@@ -137,6 +140,14 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public String getCurrencySymbol() {
+        return currencySymbol;
+    }
+
+    public void setCurrencySymbol(String currencySymbol) {
+        this.currencySymbol = currencySymbol;
+    }
 
     public boolean isManualInvoicing() {
         return manualInvoicing;

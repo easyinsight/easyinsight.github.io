@@ -52,7 +52,11 @@
 
         public function set sourceItem(value:AnalysisItem):void {
             _sourceItem = value;
-            urlSampleText = "URL links will connect the report to external URLs. You can use fields to dynamically construct URLs by surrounding the field name with brackets. For example, http://www.google.com?q=["+_sourceItem.key.createString()+"]";
+            if (_sourceItem == null) {
+
+            } else {
+                urlSampleText = "URL links will connect the report to external URLs. You can use fields to dynamically construct URLs by surrounding the field name with brackets. For example, http://www.google.com?q=["+_sourceItem.key.createString()+"]";
+            }
         }
 
         public function set link(value:Link):void {

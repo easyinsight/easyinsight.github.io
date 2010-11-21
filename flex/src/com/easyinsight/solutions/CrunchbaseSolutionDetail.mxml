@@ -1,8 +1,6 @@
 <?xml version="1.0" ?>
 <solutions:SolutionDetailRenderer xmlns:mx="http://www.adobe.com/2006/mxml"
-                                  xmlns:solutions="com.easyinsight.solutions.*"
-         width="100%" height="100%" paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0"
-         verticalGap="0" backgroundColor="#818285" horizontalAlign="center">
+                                  xmlns:solutions="com.easyinsight.solutions.*">
     <mx:Script><![CDATA[
 
         override protected function toAccountBelowRequiredState():void {

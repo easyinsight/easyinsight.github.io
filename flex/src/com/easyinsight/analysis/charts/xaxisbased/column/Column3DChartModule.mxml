@@ -3,6 +3,18 @@
            xmlns:ilog="ilog.charts3d.*" xmlns:ilog2="ilog.charts3d.series.*"
            implements="com.easyinsight.analysis.IReportRenderer"
            width="100%" height="100%" creationComplete="onCreation()">
+    <mx:Style>
+        .axisTitles {
+            fontSize: 14;
+            fontFamily: "Tahoma";
+        }
+
+        CartesianChart3D {
+            axisTitleStyleName:axisTitles;
+            fontFamily: "Tahoma";
+            fontSize: 14;
+        }
+    </mx:Style>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -241,14 +253,12 @@
         }
 
         private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(xAxisItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(xAxisItem, passThrough, this, columnChartDef);
                 window.data = event.hitData.item;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;
-            }
         }
 
         private function passThrough(event:Event):void {
@@ -258,8 +268,10 @@
         [Bindable]
         private var stackIndex:int = 0;
 
+        private var columnChartDef:Column3DChartDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
-            var columnChartDef:Column3DChartDefinition = analysisDefinition as Column3DChartDefinition;
+            columnChartDef = analysisDefinition as Column3DChartDefinition;
 
             if (dataSet.length > 0) {
                 stackIndex = 0;

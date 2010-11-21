@@ -37,6 +37,7 @@
 
                 var renderer:FormCellRenderer = new FormCellRenderer();
                 renderer.analysisItem = item;
+                renderer.report = formReport;
                 renderer.data = row;
                 formItem.addChild(renderer);
 

@@ -73,26 +73,24 @@
                 for each (var aMeasure:AnalysisMeasure in def.measures) {
                     if (aMeasure.display == lineSeries.displayName) {
                         string = lineSeries.displayName + "\n" +
-                            xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + aMeasure.getFormatter().format(lineSeriesItem.yValue);
+                                xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + aMeasure.getFormatter().format(lineSeriesItem.yValue);
                         break;
                     }
                 }
             } else {
                 string = lineSeries.displayName + "\n" +
-                    xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+                        xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
             }
             return string;
         }
 
         private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
-                window.data = event.hitData.item;
-                PopUpManager.addPopUp(window, this);
-                window.x = event.stageX + 5;
-                window.y = event.stageY + 5;
-            }
+            var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, def);
+            window.data = event.hitData.item;
+            PopUpManager.addPopUp(window, this);
+            window.x = event.stageX + 5;
+            window.y = event.stageY + 5;
         }
 
         private function passThrough(event:Event):void {
@@ -118,7 +116,7 @@
                 lineChart.percentWidth = 100;
                 lineChart.dataProvider = chartData;
                 lineChart.showDataTips = true;
-                //lineChart.selectionMode = "multiple";
+                lineChart.selectionMode = "multiple";
                 lineChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
                 lineChart.dataTipFunction = dataTipFunction;
                 var verticalAxis:LinearAxis = new LinearAxis();
@@ -210,6 +208,7 @@
                     var key:String = uniques.getItemAt(i) as String;
                     var uniqueLineSeries:LineSeries = new LineSeries();
                     uniqueLineSeries.setStyle("form", lineChartDef.form);
+                    uniqueLineSeries.selectable = true;
                     uniqueLineSeries.setStyle("fill", colors[i % colors.length]);
                     uniqueLineSeries.interpolateValues = lineChartDef.interpolateValues == "true";
                     var stroke:IStroke = strokes[i % strokes.length];
@@ -257,6 +256,14 @@
 
         [Bindable]
         private var stackIndex:int = 0;
+
+        public function set selectionEnabled(mode:Boolean):void {
+            if (mode) {
+                lineChart.selectionMode = "multiple";
+            } else {
+                lineChart.selectionMode = "none";
+            }
+        }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>

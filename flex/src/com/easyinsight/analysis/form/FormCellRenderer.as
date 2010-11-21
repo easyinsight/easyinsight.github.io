@@ -21,10 +21,16 @@ public class FormCellRenderer extends Box
 {
     private var _data:Object;
     private var _analysisItem:AnalysisItem;
+    private var _report:AnalysisDefinition;
 
     public function FormCellRenderer() {
         super();
         addEventListener(MouseEvent.CLICK, onClick);
+    }
+
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
     }
 
     override protected function createChildren():void {
@@ -63,13 +69,11 @@ public class FormCellRenderer extends Box
     }
 
     private function onClick(event:MouseEvent):void {
-        if (event.shiftKey) {
-            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this);
+            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report);
             window.data = this.data;
             PopUpManager.addPopUp(window, this);
             window.x = event.stageX + 5;
             window.y = event.stageY + 5;
-        }
     }
 
     private function passThrough(event:Event):void {

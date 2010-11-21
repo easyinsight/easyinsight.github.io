@@ -6,12 +6,14 @@ import com.easyinsight.framework.DataServiceLoadingEvent;
 
 import com.easyinsight.report.ReportEventProcessor;
 
+import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
 import flash.events.Event;
 
 import mx.binding.utils.BindingUtils;
+import mx.binding.utils.ChangeWatcher;
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.Canvas;
@@ -46,11 +48,37 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private var _loadingDisplay:LoadingModuleDisplay;
 
+    private var _reportSelectionEnabled:Boolean = false;
+
+    private var _reportSelectable:Boolean = false;
+
     private var pendingRequest:Boolean = false;
 
     public function DataViewFactory() {
         this.percentHeight = 100;
         this.percentWidth = 100;
+    }
+
+    [Bindable(event="reportSelectionEnabledChanged")]
+    public function get reportSelectionEnabled():Boolean {
+        return _reportSelectionEnabled;
+    }
+
+    public function set reportSelectionEnabled(value:Boolean):void {
+        if (_reportSelectionEnabled == value) return;
+        _reportSelectionEnabled = value;
+        dispatchEvent(new Event("reportSelectionEnabledChanged"));
+    }
+
+    [Bindable(event="reportSelectableChanged")]
+    public function get reportSelectable():Boolean {
+        return _reportSelectable;
+    }
+
+    public function set reportSelectable(value:Boolean):void {
+        if (_reportSelectable == value) return;
+        _reportSelectable = value;
+        dispatchEvent(new Event("reportSelectableChanged"));
     }
 
     public function highlightDropAreas():void {
@@ -317,6 +345,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown, false, 0, true);
             _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
             _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
+            _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
+            if (_reportRenderer is ISelectableReportRenderer) {
+                var selectableReportRenderer:ISelectableReportRenderer = _reportRenderer as ISelectableReportRenderer;
+                reportSelectable = true;
+                reportWatcher = BindingUtils.bindProperty(_reportRenderer, "selectionEnabled", this, "reportSelectionEnabled");
+            } else {
+                reportSelectable = false;
+            }
             _dataService.preserveValues = _reportRenderer.preserveValues();
             if (_loadingDisplay != null) {
                 reportCanvas.removeChild(_loadingDisplay);
@@ -329,6 +365,12 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 retrieveData();
             }
         }
+    }
+
+    private var reportWatcher:ChangeWatcher;
+
+    private function toReport(event:ReportNavigationEvent):void {
+
     }
 
     private function onReportWindow(event:ReportWindowEvent):void {
@@ -420,7 +462,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function createFilterRawData():FilterRawData {
-        return _reportRenderer.createFilterRawData();
+        return ISelectableReportRenderer(_reportRenderer).createFilterRawData();
     }
 
     public function invalidateItems(invalidAnalysisItemIDs:ArrayCollection):void {

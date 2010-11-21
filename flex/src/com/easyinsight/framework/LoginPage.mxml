@@ -30,14 +30,6 @@
         [Bindable]
         private var panelIndex:int;
 
-        [Bindable]
-        [Embed(source="../../../../assets/banner4.jpg")]
-        public var backImage:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/banner5.jpg")]
-        public var topImage:Class;
-
         private var _solutionID:String;
 
         [Bindable(event="solutionIDChanged")]
@@ -51,45 +43,15 @@
             dispatchEvent(new Event("solutionIDChanged"));
         }
 
-        private var _startType:int;
-
-        [Bindable(event="startTypeChanged")]
-        public function get startType():int {
-            return _startType;
-        }
-
-        public function set startType(value:int):void {
-            if (_startType == value) return;
-            _startType = value;
-            dispatchEvent(new Event("startTypeChanged"));
-        }
-
-        private var _scenarioKey:String;
-
-        [Bindable(event="scenarioKeyChanged")]
-        public function get scenarioKey():String {
-            return _scenarioKey;
-        }
-
-        public function set scenarioKey(value:String):void {
-            if (_scenarioKey == value) return;
-            _scenarioKey = value;
-            dispatchEvent(new Event("scenarioKeyChanged"));
-        }
-
         private function setup():void {
             if (_initState == 1) {
-                panelIndex = 5;
+                panelIndex = 3;
             } else if (_initState == 2) {
                 panelIndex = 6;
+            } else if (_initState == 3) {
+                panelIndex = 4;
             } else {
-                if (_startType == 1) {
-                    panelIndex = 1;
-                } else if (_startType == 2) {
-                    panelIndex = 8;
-                } else {
-                    loginComponent.setupFocus();
-                }
+                loginComponent.setupFocus();
             }
         }
 
@@ -120,10 +82,8 @@
                     configWindow.onlyDataSource = true;
                     configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
                     configWindow.addEventListener("later", onLater, false, 0, true);
-                    /*configWindow.setStyle("hideEffect", leftEffect);
-                     configWindow.setStyle("showEffect", leftEffect);*/
-                    centerBox.removeChild(viewStack);
-                    centerBox.addChild(configWindow);
+                    removeChild(viewStack);
+                    addChild(configWindow);
                 }
             }
         }
@@ -193,10 +153,12 @@
 
         private function loginHandler(event:LoginEvent):void {
             if (event.authResponse.accountState == Account.DELINQUENT) {
-                panelIndex = 5;
+                panelIndex = 3;
             } else if (event.authResponse.accountState == Account.REACTIVATION_POSSIBLE) {
                 panelIndex = 6;
                 dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
+            } else if (!event.authResponse.activated) {
+                panelIndex = 4;
             } else {
                 dispatchEvent(event);
             }
@@ -214,7 +176,7 @@
         }
 
         private function reactivated():void {
-            panelIndex = 7;
+            panelIndex++;
         }
 
         private function onward():void {
@@ -224,12 +186,24 @@
         [Bindable]
         private var slideEffect:Effect = rightEffect;
 
+        private function resendActivationEmail():void {
+            userService.resendActivationEmail.send();
+        }
+
+        private function resent():void {
+            panelIndex++;
+        }
+
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/chart_area_x48.png")]
+        [Embed(source="../../../../assets/mail.PNG")]
+        private var mailIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/chart_pie2_48x48.png")]
         public var connectionsIcon:Class;
 
         [Bindable]
@@ -246,18 +220,13 @@
     <mx:RemoteObject destination="login" id="userService">
         <mx:method name="applySetupData" result="applied()"/>
         <mx:method name="reactivate" result="reactivated()"/>
+        <mx:method name="resendActivationEmail" result="resent()"/>
     </mx:RemoteObject>
 
-    <mx:Canvas width="1000" borderStyle="solid" borderThickness="1" borderColor="#DDDDDD"
-               backgroundColor="#FFFFFF" id="canvas">
-        <mx:Box width="100%" backgroundImage="{topImage}" backgroundSize="100%" height="18"/>
-        <mx:Image source="{logo}" y="18" x="414"/>
-        <mx:Canvas width="100%" backgroundColor="#848080" y="77" height="44">
-            <mx:Label text="Getting Started" color="#FFFFFF" x="409" y="5" fontSize="24"/>
-        </mx:Canvas>
-        <mx:Box width="100%" height="440" paddingLeft="0" paddingBottom="0" paddingRight="0" paddingTop="0"
+
+       <!-- <mx:Box width="100%" height="440" paddingLeft="0" paddingBottom="0" paddingRight="0" paddingTop="0"
                 id="centerBox"
-                backgroundColor="0xFFFFFF" y="122">
+                backgroundColor="0xFFFFFF" y="122">-->
             <mx:ViewStack selectedIndex="{panelIndex}"
                           id="viewStack" resizeToContent="true" width="100%" height="440"
                           paddingTop="10">
@@ -266,39 +235,7 @@
                     <!-- login page -->
                     <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent"
                                               y="114"/>
-                    <mx:VBox width="50%" horizontalAlign="center">
-                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                                 backgroundColor="#FFFFFF" height="185"
-                                 width="350" cornerRadius="8" buttonMode="true" id="connectionsBox"
-                                 mouseOver="connectionsBox.setStyle('backgroundColor', 0xDDDDDD)"
-                                 mouseOut="connectionsBox.setStyle('backgroundColor', 0xFFFFFF)"
-                                 click="slideEffect = rightEffect; panelIndex = 1"
-                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                            <mx:Image source="{connectionsIcon}"/>
-                            <mx:Text text="No Account Yet?" fontSize="24" selectable="false"/>
-                            <mx:TextArea
-                                    text="Click here to sign up for a new account and start analyzing your data now!"
-                                    fontSize="18" backgroundAlpha="0" editable="false" selectable="false"
-                                    height="80"
-                                    width="310" textAlign="center"/>
-                        </mx:VBox>
-                    </mx:VBox>
                 </mx:HBox>
-                <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
-                    <!-- account wizard -->
-                    <account:AccountCreationWizard cancel="slideEffect = leftEffect; panelIndex = 0"
-                                                   pro="accountType = Account.PRO; slideEffect = rightEffect; panelIndex = 2"
-                                                   plus="accountType = Account.PLUS; slideEffect = rightEffect; panelIndex = 2"
-                                                   basic="accountType = Account.BASIC; slideEffect = rightEffect; panelIndex = 2"
-                                                   free="accountType = Account.PERSONAL; slideEffect = rightEffect; panelIndex = 2"
-                                                   requiredTier="{requiredTier}"/>
-                </mx:VBox>
-                <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
-                    <!-- profile creation page -->
-                    <account:ProfessionalAccountLoginCreation cancel="slideEffect = leftEffect; panelIndex = 1"
-                                                              loginEvent2="slideEffect = rightEffect; accountCreated(event)"
-                                                              accountType="{accountType}"/>
-                </mx:VBox>
                 <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
                     <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
                                                  kpiTutorialNext="slideEffect = rightEffect; remaining()"
@@ -315,7 +252,8 @@
 
                 <!-- welcome back panel -->
                 <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="{slideEffect}" showEffect="{slideEffect}">
+                         hideEffect="{slideEffect}" showEffect="{slideEffect}" backgroundColor="0xFFFFFF" borderStyle="solid"
+                        borderThickness="1" cornerRadius="10">
                     <mx:Image source="{moneyIcon}"/>
                     <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
                                  fontSize="18"
@@ -323,9 +261,29 @@
                                  width="350" height="80"/>
                     <mx:Button label="Enter Billing" click="toBilling()" fontSize="18"/>
                 </mx:VBox>
+                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
+                         hideEffect="{slideEffect}" showEffect="{slideEffect}"  backgroundColor="0xFFFFFF" borderStyle="solid"
+                        borderThickness="1" cornerRadius="10">
+                    <mx:Image source="{mailIcon}"/>
+                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                                 fontSize="18"
+                                 text="You haven't activated your account yet. Need a new activation email?"
+                                 width="350" height="80"/>
+                    <mx:Button label="Resend Activation Email" click="resendActivationEmail()" fontSize="18"/>
+                </mx:VBox>
+                <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
+                         hideEffect="{slideEffect}" showEffect="{slideEffect}" backgroundColor="0xFFFFFF" borderStyle="solid"
+                        borderThickness="1" cornerRadius="10">
+                    <mx:Image source="{mailIcon}"/>
+                    <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
+                                 fontSize="18"
+                                 text="You should've received a new email with information about activating your account."
+                                 width="350" height="80"/>
+                </mx:VBox>
                 <!-- delinquent panel -->
                 <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="{slideEffect}" showEffect="{slideEffect}" verticalGap="25">
+                         hideEffect="{slideEffect}" showEffect="{slideEffect}" verticalGap="25" backgroundColor="0xFFFFFF" borderStyle="solid"
+                        borderThickness="1" cornerRadius="10">
                     <mx:Image source="{connectionsIcon}"/>
                     <mx:Label text="Ready to give Easy Insight another try?" fontSize="18"/>
                     <mx:TextArea borderStyle="none" editable="false" selectable="false" backgroundAlpha="0"
@@ -335,15 +293,12 @@
                     <mx:Button label="Reactivate" click="reactivate()" fontSize="18"/>
                 </mx:VBox>
                 <mx:VBox horizontalAlign="center" width="100%" height="100%" verticalAlign="middle"
-                         hideEffect="{slideEffect}" showEffect="{slideEffect}" verticalGap="25">
+                         hideEffect="{slideEffect}" showEffect="{slideEffect}" verticalGap="25" backgroundColor="0xFFFFFF" borderStyle="solid"
+                        borderThickness="1" cornerRadius="10">
                     <mx:Image source="{connectionsIcon}"/>
                     <mx:Label text="Your account is now active again with a new 30 day trial!" fontSize="20"/>
                     <mx:Button label="Onward to the Application!" click="onward()" fontSize="18"/>
                 </mx:VBox>
-                <guest:CompanyWindow hideEffect="{slideEffect}" showEffect="{slideEffect}"
-                                     loginEvent2="loginHandler(event)" cancel="panelIndex = 0"/>
             </mx:ViewStack>
-        </mx:Box>
-        <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18" y="562"/>
-    </mx:Canvas>
+        <!--</mx:Box>-->
 </mx:Box>

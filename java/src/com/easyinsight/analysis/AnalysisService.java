@@ -521,22 +521,11 @@ public class AnalysisService {
             return new UserCapabilities(Roles.NONE, Roles.NONE, false, false);
         }
         UserCapabilities userCapabilities = getUserCapabilitiesForFeed(feedID);
-        long userID = SecurityUtil.getUserID();
-        Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE " +
-                    "USER_ID = ? AND ANALYSIS_ID = ?");
-            existingLinkQuery.setLong(1, userID);
-            existingLinkQuery.setLong(2, insightID);
-            ResultSet rs = existingLinkQuery.executeQuery();
-            if (rs.next()) {
-                userCapabilities.setAnalysisRole(rs.getInt(1));
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
+            SecurityUtil.authorizeInsight(insightID);
+            userCapabilities.setAnalysisRole(Roles.OWNER);
+        } catch (SecurityException se) {
+            userCapabilities.setAnalysisRole(Roles.NONE);
         }
         return userCapabilities;
     }

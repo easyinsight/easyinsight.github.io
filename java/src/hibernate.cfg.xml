@@ -88,6 +88,9 @@
         <mapping class="com.easyinsight.analysis.ReportStringProperty"/>
         <mapping class="com.easyinsight.analysis.ReportNumericProperty"/>              
         <mapping class="com.easyinsight.analysis.ReportBooleanProperty"/>
+        <mapping class="com.easyinsight.analysis.ReportImageProperty"/>
+
+        <mapping class="com.easyinsight.preferences.ApplicationSkinSettings"/>
 
         <mapping class="com.easyinsight.scheduler.TaskGenerator"/>
         <mapping class="com.easyinsight.scheduler.DataSourceTaskGenerator"/>

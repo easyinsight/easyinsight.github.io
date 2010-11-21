@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.formatter
 {
-	import mx.formatters.CurrencyFormatter;
+import com.easyinsight.framework.User;
+
+import mx.formatters.CurrencyFormatter;
 
     import mx.formatters.Formatter;
 	
@@ -34,6 +36,7 @@ package com.easyinsight.analysis.formatter
 				case CURRENCY:
 					var currencyFormatter:CurrencyFormatter = new CurrencyFormatter();
 					currencyFormatter.precision = 2;
+                    currencyFormatter.currencySymbol = User.getInstance().currencySymbol; 
 					formatter = currencyFormatter;
 					break;
 				case PERCENTAGE:

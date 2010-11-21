@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.UISettings;
 
 import java.util.Date;
@@ -37,6 +38,8 @@ public class UserServiceResponse {
     private String sessionCookie;
     private boolean cookieLogin;
     private Scenario scenario;
+    private String currencySymbol;
+    private ApplicationSkin applicationSkin;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -49,7 +52,7 @@ public class UserServiceResponse {
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
                                boolean firstLogin, Date lastLoginDate, String accountName, boolean renewalOptionPossible,
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
-                               boolean guestUser) {
+                               boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -73,6 +76,16 @@ public class UserServiceResponse {
         this.defaultReportSharing = defaultReportSharing;
         this.cookieLogin = cookieLogin;
         this.guestUser = guestUser;
+        this.currencySymbol = currencySymbol;
+        this.applicationSkin = applicationSkin;
+    }
+
+    public ApplicationSkin getApplicationSkin() {
+        return applicationSkin;
+    }
+
+    public void setApplicationSkin(ApplicationSkin applicationSkin) {
+        this.applicationSkin = applicationSkin;
     }
 
     public Scenario getScenario() {
@@ -97,6 +110,14 @@ public class UserServiceResponse {
 
     public void setGuestUser(boolean guestUser) {
         this.guestUser = guestUser;
+    }
+
+    public String getCurrencySymbol() {
+        return currencySymbol;
+    }
+
+    public void setCurrencySymbol(String currencySymbol) {
+        this.currencySymbol = currencySymbol;
     }
 
     public boolean isDefaultReportSharing() {

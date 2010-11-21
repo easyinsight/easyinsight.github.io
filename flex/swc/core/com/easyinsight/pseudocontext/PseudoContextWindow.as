@@ -1,16 +1,15 @@
 package com.easyinsight.pseudocontext {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DrillThrough;
 import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
-import com.easyinsight.analysis.HierarchyDrilldownEvent;
 import com.easyinsight.analysis.HierarchyLevel;
 import com.easyinsight.analysis.HierarchyRollupEvent;
 import com.easyinsight.analysis.Link;
 import com.easyinsight.analysis.ReportWindowEvent;
 import com.easyinsight.analysis.URLLink;
-import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
 
@@ -40,22 +39,31 @@ public class PseudoContextWindow extends VBox {
     private var passthroughFunction:Function;
     private var passthroughObject:EventDispatcher;
 
-    public function PseudoContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:EventDispatcher) {
+    private var analysisDefinition:AnalysisDefinition;
+
+    public function PseudoContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:EventDispatcher, analysisDefinition:AnalysisDefinition) {
         super();
         this.analysisItem = analysisItem;
         this.passthroughFunction = passthroughFunction;
         this.passthroughObject = passthroughObject;
+        this.analysisDefinition = analysisDefinition;
         items = [];
+        if (analysisDefinition.showDrilldown(analysisItem)) {
+            var drilldownContextItem:PseudoContextItem = new PseudoContextItem("Drilldown", drill);
+            items.push(drilldownContextItem);
+        }
+        if (analysisDefinition.showRollup(analysisItem)) {
+            var rollupItem:PseudoContextItem = new PseudoContextItem("Rollup", onRollup);
+            items.push(rollupItem);
+        }
         if (analysisItem is AnalysisHierarchyItem) {
             var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
             var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
             if (index < (hierarchy.hierarchyLevels.length - 1)) {
-                var drilldownContextItem:PseudoContextItem = new PseudoContextItem("Drilldown", drill);
-                items.push(drilldownContextItem);
+
             }
             if (index > 0) {
-                var rollupItem:PseudoContextItem = new PseudoContextItem("Rollup", onRollup);
-                items.push(rollupItem);
+
             }
         }
         var copyItem:PseudoContextItem = new PseudoContextItem("Copy Value", copyValue);
@@ -85,6 +93,7 @@ public class PseudoContextWindow extends VBox {
         setStyle("backgroundColor", 0xFFFFFF);
         setStyle("backgroundAlpha", 1);
     }
+
 
 
 
@@ -153,25 +162,19 @@ public class PseudoContextWindow extends VBox {
         var hierarchyItem:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
         var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
         if (index > 0) {
+            var previousParent:AnalysisItem = hierarchyItem.hierarchyLevel.analysisItem;
             hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index - 1) as HierarchyLevel;
             destroy();
-            passthroughFunction.call(passthroughObject, new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem, hierarchyItem, index - 1));
+            passthroughFunction.call(passthroughObject, new HierarchyRollupEvent(previousParent, hierarchyItem, index - 1));
         }
     }
 
     private function drill(event:MouseEvent):void {
-        var hierarchyItem:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
-        var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
-        if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
-            var dataField:String = analysisItem.qualifiedName();
-            var dataString:String = data[dataField];
-            var filterRawData:FilterRawData = new FilterRawData();
-            filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
-            hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
-            destroy();
-            passthroughFunction.call(passthroughObject, new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData,
-                    hierarchyItem, index + 1));
+        var drillEvent:Event = analysisDefinition.drill(analysisItem, data);
+        if (drillEvent != null) {
+            passthroughFunction.call(passthroughObject, drillEvent);
         }
+        destroy();
     }
 
     private function urlClick(event:MouseEvent):void {
@@ -190,8 +193,8 @@ public class PseudoContextWindow extends VBox {
 
     private function onDrill(event:DrillThroughEvent):void {
         var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
-        filterDefinition.field = analysisItem;
-        filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
+        filterDefinition.field = analysisDefinition.getCoreAnalysisItem(analysisItem);
+        filterDefinition.filteredValues = new ArrayCollection([analysisDefinition.getValue(analysisItem, data)]);
         filterDefinition.enabled = true;
         filterDefinition.inclusive = true;
         var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);

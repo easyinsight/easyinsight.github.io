@@ -40,6 +40,8 @@
         private var yAxisItem:AnalysisItem;
         private var measureItem:AnalysisItem;
 
+        private var areaChartDef:Area3DChartDefinition;
+
         private var legend:Legend;
 
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
@@ -80,14 +82,12 @@
         }
 
         private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, areaChartDef);
                 window.data = event.hitData.item;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;
-            }
         }
 
         private function passThrough(event:Event):void {
@@ -96,7 +96,7 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
-            var areaChartDef:Area3DChartDefinition = analysisDefinition as Area3DChartDefinition;
+            this.areaChartDef = analysisDefinition as Area3DChartDefinition;
 
             this.chartData = new ArrayCollection(dataSet.toArray());
 

@@ -1,15 +1,17 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.treemap.*"
+           xmlns:maps="com.easyinsight.analysis.maps.*"
            implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
     <mx:states>
         <mx:State name="hasData">
             <mx:AddChild relativeTo="{box}">
-                <ilog:TreeMap id="treeMap" width="100%" height="100%" areaField="area" labelField="label"
-                              colorField="color" algorithm="squarified"
-                              dataProvider="{resultData}" labelThreshold="2" colorScheme="{colorScheme}"
+                    <ilog:TreeMap id="treeMap" width="100%" height="100%" areaField="area" labelField="label"
+                              colorFunction="colorFunction" colorScheme="none"
+                              dataProvider="{resultData}" labelThreshold="2"
                               borderThickness="1" itemRollOver="onover(event)" itemRollOut="onout(event)"
                               mouseChildren="true" mouseEnabled="true" click="onClick(event)" allowSelection="false"
-                              allowMultipleSelection="false"/>
+                              allowMultipleSelection="false" fontSize="13" animationDuration="500"/>
+                    
             </mx:AddChild>
         </mx:State>
     </mx:states>
@@ -20,13 +22,17 @@
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.HierarchyLevel;
-        import com.easyinsight.filtering.FilterRawData;
 
+        import com.easyinsight.analysis.conditions.ConditionRenderer;
+        import com.easyinsight.analysis.conditions.MeasureCondition;
+        import com.easyinsight.analysis.conditions.MeasureConditionRange;
+        import com.easyinsight.analysis.conditions.StatefulConditionRenderer;
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import ilog.treemap.TreeMapEvent;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.controls.ToolTip;
         import mx.formatters.Formatter;
         import mx.managers.PopUpManager;
@@ -34,18 +40,21 @@
 
         private var regionDimension:AnalysisItem;
 
+        private var hierarchy:AnalysisHierarchyItem;
+
         private var areaFormatter:Formatter;
 
         private function onClick(event:MouseEvent):void {
-            if (event.shiftKey) {
-                var item:Object = treeMap.getItemAt(event.localX, event.localY);
-                if (item != null) {
-                    var window:PseudoContextWindow = new PseudoContextWindow(regionDimension, passThrough, this);
-                    window.data = item;
-                    PopUpManager.addPopUp(window, this);
-                    window.x = event.stageX + 5;
-                    window.y = event.stageY + 5;
-                }
+            var item:Object = treeMap.getItemAt(event.localX, event.localY);
+            if (item != null) {
+                var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel) + 1;
+                var baseLevel:HierarchyLevel = hierarchy.hierarchyLevels.getItemAt(index) as HierarchyLevel;
+                var base:AnalysisItem = baseLevel.analysisItem;
+                var window:PseudoContextWindow = new PseudoContextWindow(hierarchy, passThrough, this, treeDefinition);
+                window.data = item;
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
             }
         }
 
@@ -62,30 +71,39 @@
         public var tooltip:ToolTip;
 
         public function onover(event:TreeMapEvent):void {
-            if (event.item) {
-                var val:int;
-                if (event.item.sum > 0) {
-                    val = event.item.sum;
-                } else {
-                    val = event.item.area;
-                }
-                tooltip =
-                ToolTipManager.createToolTip(event.item.label + " - " + areaFormatter.format(val),
-                        MouseEvent(event.triggerEvent).stageX,
-                        MouseEvent(event.triggerEvent).stageY)
-                        as ToolTip;
-            }
+            /*if (event.item) {
+             var val:int;
+             if (event.item.sum > 0) {
+             val = event.item.sum;
+             } else {
+             val = event.item.area;
+             }
+             tooltip =
+             ToolTipManager.createToolTip(event.item.label + " - " + areaFormatter.format(val),
+             MouseEvent(event.triggerEvent).stageX,
+             MouseEvent(event.triggerEvent).stageY)
+             as ToolTip;
+             }*/
         }
 
-        public function onout(event:TreeMapEvent):void {
-            if (tooltip) {
-                ToolTipManager.destroyToolTip(tooltip);
-                tooltip = null;
-            }
+        public function onout(event:
+                TreeMapEvent):void {
+            /*if (tooltip) {
+             ToolTipManager.destroyToolTip(tooltip);
+             tooltip = null;
+             }*/
         }
 
+        [Bindable]
+        private var minValue:Number;
 
-        private function handleLevel(level:HierarchyLevel, levels:ArrayCollection, row:Object, measure1:AnalysisMeasure, measure2:AnalysisMeasure, masterResult:Object):Object {
+        [Bindable]
+        private var maxValue:Number;
+
+        [Bindable]
+        private var formatter:Formatter;
+
+        private function handleLevel(level:HierarchyLevel, levels:ArrayCollection, row:Object, measure1:AnalysisMeasure, measure2:AnalysisMeasure, masterResult:Object, recurse:Boolean):Object {
             var value:Object = row[level.analysisItem.qualifiedName()];
             var key:String = String(value);
             var result:Object = masterResult[key];
@@ -93,15 +111,16 @@
             if (result == null) {
                 result = new Object();
                 masterResult[key] = result;
+                result[level.analysisItem.qualifiedName()] = row[level.analysisItem.qualifiedName()];
                 result.label = String(value);
                 result.children = new ArrayCollection();
                 newResult = true;
             }
-            var index:int = levels.getItemIndex(level);
-            if (index < (levels.length - 1)) {
+            if (recurse) {
+                var index:int = levels.getItemIndex(level);
                 var nextLevel:HierarchyLevel = levels.getItemAt(index + 1) as HierarchyLevel;
                 regionDimension = nextLevel.analysisItem;
-                var returnResult:Object = handleLevel(nextLevel, levels, row, measure1, measure2, result);
+                var returnResult:Object = handleLevel(nextLevel, levels, row, measure1, measure2, result, false);
                 if (returnResult != null) {
                     result.children.addItem(returnResult);
                 }
@@ -118,27 +137,70 @@
             }
         }
 
+        private function createRenderer(rows:ArrayCollection, mapDefinition:TreeMapDefinition):ConditionRenderer {
+
+            var measureRange:MeasureConditionRange = new MeasureConditionRange();
+            measureRange.condition = new MeasureCondition();
+            measureRange.condition.highColor = mapDefinition.highColor;
+            measureRange.condition.highValue = 100;
+            measureRange.condition.lowColor = mapDefinition.lowColor;
+            measureRange.condition.lowValue = 0;
+            if (mapDefinition.colorStrategy == "Linear") {
+                measureRange.valueRangeType = MeasureConditionRange.PERCENTAGE;
+            } else if (mapDefinition.colorStrategy == "Logarithmic") {
+                measureRange.valueRangeType = MeasureConditionRange.LOGARITHM;
+            }
+            var renderer:StatefulConditionRenderer = new StatefulConditionRenderer(measureRange);
+            this.minValue = Number.MAX_VALUE;
+            this.maxValue = Number.MIN_VALUE;
+            for (var i:int = 0; i < rows.length; i++) {
+                var row:Object = rows.getItemAt(i);
+                var measureValue:Number;
+
+                measureValue = Number(row[mapDefinition.measure2.qualifiedName()]);
+
+                var testMinValue:Number = Math.min(this.minValue, measureValue);
+                if (!isNaN(testMinValue) && isFinite(testMinValue)) {
+                    this.minValue = testMinValue;
+                }
+                var testMaxValue:Number = Math.max(this.maxValue, measureValue);
+                if (!isNaN(testMaxValue) && isFinite(testMaxValue)) {
+                    this.maxValue = testMaxValue;
+                }
+
+                renderer.addValue(measureValue);
+            }
+            return renderer;
+        }
+
+        private function colorFunction(item:Object):uint {
+            if (item.color == null) {
+                return 0xCCCCCC;
+            } else {
+                return conditionRenderer.getColor(item.color);
+            }
+        }
+
+        private var treeDefinition:TreeMapDefinition;
+
+        [Bindable]
+        private var conditionRenderer:ConditionRenderer;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var treeDefinition:TreeMapDefinition = analysisDefinition as TreeMapDefinition;
+            this.treeDefinition = treeDefinition;
+            this.hierarchy = treeDefinition.hierarchy as AnalysisHierarchyItem;
             if (dataSet.length > 0) {
+                conditionRenderer = createRenderer(dataSet, treeDefinition);
+                this.formatter = treeDefinition.measure2.getFormatter();
                 areaFormatter = treeDefinition.measure1.getFormatter();
-                switch (treeDefinition.colorScheme) {
-                    case TreeMapDefinition.DIV_RED_GREEN:
-                        colorScheme = "div-red-green";
-                        break;
-                    case TreeMapDefinition.DEPTH:
-                        colorScheme = "depth";
-                        break;
-                    case TreeMapDefinition.QUALITATIVE:
-                        colorScheme = "qualitative";
-                        break;
-                }
+                colorScheme = "none";
                 var hierarchy:AnalysisHierarchyItem = treeDefinition.hierarchy as AnalysisHierarchyItem;
                 var results:ArrayCollection = new ArrayCollection();
                 var masterResult:Object = new Object();
                 for each (var row:Object in dataSet) {
-                    handleLevel(hierarchy.hierarchyLevels.getItemAt(0) as HierarchyLevel, hierarchy.hierarchyLevels, row,
-                            treeDefinition.measure1 as AnalysisMeasure, treeDefinition.measure2 as AnalysisMeasure, masterResult);
+                    handleLevel(hierarchy.hierarchyLevel, hierarchy.hierarchyLevels, row,
+                            treeDefinition.measure1 as AnalysisMeasure, treeDefinition.measure2 as AnalysisMeasure, masterResult, true);
                 }
                 for each (var obj:Object in masterResult) {
                     var sum:int = 0;
@@ -149,15 +211,17 @@
                     results.addItem(obj);
                 }
                 resultData = results;
+                if (treeMap != null) {
+                    treeMap.colorFunction = colorFunction;
+                }
+                if (minValue != Number.MAX_VALUE && maxValue != Number.MIN_VALUE) {
+                    legend.recreate();
+                }
                 currentState = "hasData";
             } else {
                 currentState = "";
                 resultData = dataSet;
             }
-        }
-
-        public function createFilterRawData():FilterRawData {
-            return null;
         }
 
         public function updateExportMetadata():void {
@@ -169,5 +233,10 @@
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
-    <mx:Box width="100%" id="box" height="100%"/>
+    <mx:HBox width="100%" height="100%">
+        <mx:Canvas id="box" width="100%" height="100%"/>
+        <maps:ColorRangeLegend points="5" conditionRenderer="{conditionRenderer}" maxValue="{maxValue}"
+                                       minValue="{minValue}"
+                                       formatter="{formatter}" id="legend"/>
+    </mx:HBox>
 </mx:Module>

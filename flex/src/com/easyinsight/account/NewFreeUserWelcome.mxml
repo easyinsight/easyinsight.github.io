@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
-        xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
-        paddingTop="0" top="0" implements="com.easyinsight.listing.IPerspective">
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
+                      xmlns:util="com.easyinsight.util.*"  implements="com.easyinsight.listing.IPerspective"
+                      xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.help.ScreencastWindow;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.BrowserManager;
@@ -45,67 +46,98 @@
         }
 		]]>
     </mx:Script>
-    <mx:HBox width="100%" height="100%" horizontalAlign="center" backgroundColor="#818285">
-        <mx:VBox height="100%" backgroundColor="#FFFFFF" width="1000" verticalGap="0">
-            <mx:VBox verticalAlign="middle" horizontalAlign="center"
-                                         width="100%" backgroundColor="#DDDDDD" paddingTop="10" paddingBottom="0">
-                <mx:Label text="Getting Started with Easy Insight" fontSize="18" fontFamily="Tahoma" fontWeight="bold" color="#000000"/>
-                <mx:HRule width="100%"/>
+    <mx:VBox>
+        <mx:VBox verticalAlign="middle" horizontalAlign="center"
+                 width="100%" backgroundColor="#DDDDDD" paddingTop="10" paddingBottom="0">
+            <mx:Label text="Getting Started with Easy Insight" fontSize="18" fontFamily="Tahoma" fontWeight="bold"
+                      color="#000000"/>
+            <mx:HRule width="100%"/>
+        </mx:VBox>
+        <mx:HBox width="100%" height="260">
+            <mx:VBox width="50%" horizontalAlign="center" backgroundColor="#EEEEEE" paddingLeft="15" paddingRight="15"
+                     paddingTop="30" height="100%">
+                <mx:Button label="Upload Your Own Data" click="dispatchEvent(new NavigationEvent('Connections'))"
+                           fontSize="18"
+                           styleName="redButton"/>
+                <mx:Image source="{solutionsIcon}"/>
+                <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false"
+                             selectable="false" width="100%"
+                             text="Have a CSV or Excel spreadsheet of data? How about a Google spreadsheet? Want instant reports on Salesforce, Google Analytics, or many other sources? Click here to get started in a couple of clicks!"/>
             </mx:VBox>
-            <mx:HBox width="100%" height="260">
-                <mx:VBox width="50%" horizontalAlign="center" backgroundColor="#EEEEEE" paddingLeft="15" paddingRight="15" paddingTop="30" height="100%">
-                    <mx:Button label="Upload Your Own Data" click="dispatchEvent(new NavigationEvent('Connections'))" fontSize="18"
-                            styleName="redButton"/>
-                    <mx:Image source="{solutionsIcon}"/>
-                    <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false" selectable="false" width="100%"
-                            text="Have a CSV or Excel spreadsheet of data? How about a Google spreadsheet? Want instant reports on Salesforce, Google Analytics, or many other sources? Click here to get started in a couple of clicks!"/>
-                </mx:VBox>
-                <mx:VBox width="50%" horizontalAlign="center" paddingLeft="15" paddingRight="10" paddingTop="30" height="100%">
-                    <mx:Button label="Find Reports" click="dispatchEvent(new NavigationEvent('Exchange', null, {viewMode: 1, displayMode: 0}))" fontSize="18"
-                            styleName="redButton"/>
-                    <mx:Image source="{myDataIcon}"/>
-                    <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false" selectable="false" width="100%"
-                            text="Installed a connection to Basecamp, but looking for more reports? Take advantage of the Easy Insight community and install reports against your own data source in a single click."/>
-                </mx:VBox>
-            </mx:HBox>
-            <mx:HBox width="100%" paddingLeft="30" paddingRight="30" paddingTop="20" backgroundColor="#DDDDDD" height="100%" borderStyle="solid" borderThickness="1">
+            <mx:VBox width="50%" horizontalAlign="center" paddingLeft="15" paddingRight="10" paddingTop="30"
+                     height="100%">
+                <mx:Button label="Find Reports"
+                           click="dispatchEvent(new NavigationEvent('Exchange', null, {viewMode: 1, displayMode: 0}))"
+                           fontSize="18"
+                           styleName="redButton"/>
+                <mx:Image source="{myDataIcon}"/>
+                <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false"
+                             selectable="false" width="100%"
+                             text="Installed a connection to Basecamp, but looking for more reports? Take advantage of the Easy Insight community and install reports against your own data source in a single click."/>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox width="100%" paddingLeft="30" paddingRight="30" paddingTop="20" backgroundColor="#DDDDDD" height="100%"
+                 borderStyle="solid" borderThickness="1">
 
-                <mx:VBox width="100%" horizontalAlign="center" borderStyle="solid" borderThickness="1" cornerRadius="15" height="210"
-                        backgroundColor="#FFFFFF">
-                    <mx:Label text="Our Easy Insight Documentation" fontSize="16" fontFamily="Tahoma" fontWeight="bold"/>
-                    <mx:HRule width="100%"/>
-                    <mx:HBox width="90%">
-                        <mx:VBox width="50%">
-                            <mx:LinkButton label="All" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/toc.html'))" textDecoration="underline" fontSize="14"/>
-                            <mx:LinkButton label="Concepts" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/coreconcepts.html'))" textDecoration="underline" fontSize="14"/>
-                            <mx:LinkButton label="Data Sources" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/datasources.html'))" textDecoration="underline" fontSize="14"/>
-                            <mx:LinkButton label="Report Creation" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/reportediting.html'))" textDecoration="underline" fontSize="14"/>
-                            <mx:LinkButton label="KPIs" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/kpi.html'))" textDecoration="underline" fontSize="14"/>
-                        </mx:VBox>
-                        <mx:VBox width="50%">
-                            <mx:LinkButton label="Collaboration" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/collaboration.html'))" textDecoration="underline" fontSize="14"/>
-                            <mx:LinkButton label="API" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/api.html'))" textDecoration="underline" fontSize="14"/>
-                            <mx:LinkButton label="Databases" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/database.html'))" textDecoration="underline" fontSize="14"/>
-                            <mx:LinkButton label="Highrise" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/highrise.html'))" textDecoration="underline" fontSize="14"/>
-                            <mx:LinkButton label="Basecamp" click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/basecamp.html'))" textDecoration="underline" fontSize="14"/>
-                        </mx:VBox>
-                    </mx:HBox>
-                </mx:VBox>
+            <mx:VBox width="100%" horizontalAlign="center" borderStyle="solid" borderThickness="1" cornerRadius="15"
+                     height="210"
+                     backgroundColor="#FFFFFF">
+                <mx:Label text="Our Easy Insight Documentation" fontSize="16" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:HRule width="100%"/>
+                <mx:HBox width="90%">
+                    <mx:VBox width="50%">
+                        <mx:LinkButton label="All"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/toc.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                        <mx:LinkButton label="Concepts"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/coreconcepts.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                        <mx:LinkButton label="Data Sources"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/datasources.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                        <mx:LinkButton label="Report Creation"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/reportediting.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                        <mx:LinkButton label="KPIs"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/kpi.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                    </mx:VBox>
+                    <mx:VBox width="50%">
+                        <mx:LinkButton label="Collaboration"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/collaboration.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                        <mx:LinkButton label="API"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/api.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                        <mx:LinkButton label="Databases"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/database.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                        <mx:LinkButton label="Highrise"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/highrise.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                        <mx:LinkButton label="Basecamp"
+                                       click="navigateToURL(new URLRequest('http://www.easy-insight.com/documentation/basecamp.html'))"
+                                       textDecoration="underline" fontSize="14"/>
+                    </mx:VBox>
+                </mx:HBox>
+            </mx:VBox>
 
-                <mx:Spacer width="80"/>
-                <mx:VBox width="50%" horizontalAlign="center" borderStyle="solid" borderThickness="1" cornerRadius="15" height="200"
-                        backgroundColor="#FFFFFF">
-                    <mx:Label text="Video Tours of Easy Insight" fontSize="16" fontFamily="Tahoma" fontWeight="bold"/>
-                    <mx:HRule width="100%"/>
-                    <!--<mx:LinkButton label="Why Easy Insight?"/>-->
-                    <mx:LinkButton label="View All Screencasts" click="navigateToURL(new URLRequest('http://www.youtube.com/user/easyinsight'))" textDecoration="underline" fontSize="14"/>
-                </mx:VBox>
-            </mx:HBox>
-            <!--<mx:VBox width="100%" horizontalAlign="center">
+            <mx:Spacer width="80"/>
+            <mx:VBox width="50%" horizontalAlign="center" borderStyle="solid" borderThickness="1" cornerRadius="15"
+                     height="200"
+                     backgroundColor="#FFFFFF">
+                <mx:Label text="Video Tours of Easy Insight" fontSize="16" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:HRule width="100%"/>
+                <!--<mx:LinkButton label="Why Easy Insight?"/>-->
+                <mx:LinkButton label="View All Screencasts"
+                               click="navigateToURL(new URLRequest('http://www.youtube.com/user/easyinsight'))"
+                               textDecoration="underline" fontSize="14"/>
+            </mx:VBox>
+        </mx:HBox>
+    </mx:VBox>
+        <!--<mx:VBox width="100%" horizontalAlign="center">
                 <mx:Label fontSize="18" color="#000000" text="Welcome to Easy Insight!"/>
                 <mx:Label fontSize="16" color="#000000"
                           text="You can start by clicking any of the top buttons to navigate to that particular section."/>
             </mx:VBox>-->
-        </mx:VBox>
-    </mx:HBox>
-</mx:Box>
+</skin:BackgroundImage>

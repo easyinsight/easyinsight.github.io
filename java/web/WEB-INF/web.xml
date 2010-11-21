@@ -47,6 +47,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>AccountActivation</servlet-name>
+        <display-name>AccountActivation</display-name>
+        <servlet-class>com.easyinsight.servlet.AccountActivationServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>Image</servlet-name>
         <display-name>Image</display-name>
         <servlet-class>com.easyinsight.export.ImageServlet</servlet-class>
@@ -115,6 +122,11 @@
     <servlet-mapping>
         <servlet-name>Excel</servlet-name>
         <url-pattern>/excel</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AccountActivation</servlet-name>
+        <url-pattern>/accountactivation</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

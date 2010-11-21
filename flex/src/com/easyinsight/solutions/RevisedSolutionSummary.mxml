@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
-         xmlns:util="com.easyinsight.util.*" xmlns:solutions="com.easyinsight.solutions.*" width="100%" height="100%"
-         implements="com.easyinsight.listing.IPerspective"
-         backgroundColor="#DCE2F8" doubleClickEnabled="true" creationComplete="initListeners()">
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
+                      xmlns:util="com.easyinsight.util.*" xmlns:solutions="com.easyinsight.solutions.*"
+                      implements="com.easyinsight.listing.IPerspective"
+                      doubleClickEnabled="true" creationComplete="initListeners()"
+                      xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.customupload.UploadResponse;
@@ -12,6 +13,8 @@
 
         import com.easyinsight.listing.IPerspective;
         import com.easyinsight.listing.ListingChangeEvent;
+
+        import com.easyinsight.skin.ApplicationSkin;
 
         import mx.events.ItemClickEvent;
         import mx.utils.URLUtil;
@@ -27,10 +30,6 @@
             availableSolutions.refresh();
         }
 
-        [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
-
         private var selectedCategory:int;
 
         public var defaultView:int;
@@ -42,6 +41,12 @@
         private var _learning:Boolean = false;
 
         private var _biz:Boolean = false;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            solutionGrid.setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
+            solutionGrid.setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
+        }
 
         [Bindable(event="bizChanged")]
         public function get biz():Boolean {
@@ -143,11 +148,11 @@
                     okay = false;
                     break;
                 /*case Solution.LEARNING:
-                    okay = learning;
-                    break;
-                case Solution.BIZ:
-                    okay = biz;
-                    break;*/
+                 okay = learning;
+                 break;
+                 case Solution.BIZ:
+                 okay = biz;
+                 break;*/
             }
             return okay;
         }
@@ -174,26 +179,23 @@
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="getSolutions" result="gotAllSolutions()"/>
     </mx:RemoteObject>
-    <mx:VBox width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
-        <mx:VBox width="1000" height="100%" id="coreContent" backgroundColor="#FFFFFF" paddingTop="10" paddingLeft="10"
-                 paddingRight="10" paddingBottom="10">
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:VBox width="100%" height="100%" horizontalAlign="center">
-                    <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                        <mx:Label fontSize="24" text="Ready to connect to your own data?"/>
-                    </mx:Box>
-                    <mx:Label text="Click on any of the options below to quickly connect and get started." fontSize="18"/>
-                </mx:VBox>
-            </mx:HBox>
-            <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}">
-                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                    <mx:ProgressBar indeterminate="{stackIndex == 0}" label="Loading available connections..."/>
-                </mx:Box>
-                <mx:Canvas width="100%" height="100%">
-                    <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-                        columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%"/>
-                </mx:Canvas>
-            </mx:ViewStack>
+    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:VBox width="100%" height="100%" horizontalAlign="center">
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                <mx:Label fontSize="24" text="Ready to connect to your own data?"/>
+            </mx:Box>
+            <mx:Label text="Click on any of the options below to quickly connect and get started." fontSize="18"/>
         </mx:VBox>
+    </mx:HBox>
+    <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all">
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ProgressBar indeterminate="{stackIndex == 0}" label="Loading available connections..."/>
+        </mx:Box>
+        <mx:Canvas width="100%" height="100%">
+            <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
+                columnWidth="240" rowHeight="160"/>
+        </mx:Canvas>
+    </mx:ViewStack>
     </mx:VBox>
-</mx:Canvas>
+</skin:BackgroundImage>

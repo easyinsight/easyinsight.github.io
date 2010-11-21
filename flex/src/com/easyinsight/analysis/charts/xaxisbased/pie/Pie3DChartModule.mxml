@@ -3,6 +3,19 @@
            xmlns:ilog="http://www.ilog.com/2007/ilog/flex"
            implements="com.easyinsight.analysis.IReportRenderer"
            width="100%" height="100%" creationComplete="onCreation()">
+    <mx:Style>
+        PieSeries {
+            fontSize: 10;
+            fontFamily: "Lucida Grande";
+            fontWeight: normal;
+        }
+
+        LegendItem {
+            fontSize: 12;
+            fontFamily: "Lucida Grande";
+            fontWeight: normal;
+        }
+    </mx:Style>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -28,14 +41,12 @@
         }
 
         private function onClick(event:ChartItemEvent):void {
-            if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this, pieChartDef);
                 window.data = event.hitData.item;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;
-            }
         }
 
         private function passThrough(event:Event):void {
@@ -60,12 +71,14 @@
 
         private var dimensionItem:AnalysisItem;
 
+        private var pieChartDef:Pie3DChartDefinition;
+
         private function onCustomChange(event:CustomChangeEvent):void {
             dispatchEvent(event);
         }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
-            var pieChartDef:Pie3DChartDefinition = analysisDefinition as Pie3DChartDefinition;
+            pieChartDef = analysisDefinition as Pie3DChartDefinition;
             if (pieChartDef.elevationAngle > 0) {
                 visuals.elevationAngle = pieChartDef.elevationAngle;
                 visuals.rotationAngle = pieChartDef.rotationAngle;

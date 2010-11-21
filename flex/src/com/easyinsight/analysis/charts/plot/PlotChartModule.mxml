@@ -53,8 +53,10 @@
 
         private var measure2Formatter:Formatter;
 
+        private var plotChartDef:PlotChartDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
-            var plotChartDef:PlotChartDefinition = analysisDefinition as PlotChartDefinition;
+            this.plotChartDef = analysisDefinition as PlotChartDefinition;
             var seriesMap:Object = new Object();
             if (dataSet.length > 0) {
                 if (additionalProperties != null) {
@@ -143,7 +145,7 @@
         private function onClick(event:ChartItemEvent):void {
             if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this, plotChartDef);
                 window.data = event.hitData.item;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;

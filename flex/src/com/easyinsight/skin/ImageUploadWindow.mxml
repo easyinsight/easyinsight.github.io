@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+	creationComplete="doCreationComplete()">
+	<mx:Script>
+		<![CDATA[
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+
+        private var _sourceID:int;
+
+        [Bindable]
+        private var file:FileReference = new FileReference();
+
+
+        public function set sourceID(value:int):void {
+            _sourceID = value;
+        }
+
+        private function doBrowse(event:Event):void {
+            file.browse();
+        }
+
+        public function doCreationComplete():void {
+            file.addEventListener(Event.SELECT, doSelect);
+            file.addEventListener(Event.COMPLETE, doComplete);
+        }
+
+        public function doSelect(event:Event):void {
+            fileName.text = file.name;
+            submitEnabled = true;
+        }
+
+        public function doSubmit():void {
+            try {
+                file.load();
+            } catch(e:Error) {
+                Alert.show(e.message);
+            }
+        }
+
+        private var fileData:ByteArray;
+
+        private function doComplete(event:Event):void {
+            try {
+                fileData = file.data;
+                preferencesService.addImage.send(fileName.text, fileData);
+            } catch(e:Error) {
+                Alert.show(e.message);
+            }
+        }
+
+        private function addedImage():void {
+            var imageID:int = preferencesService.addImage.lastResult as int;
+            var desc:ImageDescriptor = new ImageDescriptor();
+            desc.name = fileName.text;
+            desc.id = imageID;
+            dispatchEvent(new ImageUploadEvent(desc));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var submitEnabled:Boolean;
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+		]]>
+	</mx:Script>
+    <mx:RemoteObject destination="preferencesService" id="preferencesService">
+        <mx:method name="addImage" result="addedImage()"/>
+    </mx:RemoteObject>
+	<mx:VBox>
+		<mx:TextInput id="fileName" editable="false"/>
+        <mx:HBox>
+            <mx:Button label="Browse..." click="doBrowse( event )" />
+            <mx:Button label="Submit" click="doSubmit()" enabled="{submitEnabled}"/>
+            <mx:Button label="Close" click="cancel()"/>
+        </mx:HBox>
+	</mx:VBox>
+</util:EISlimWindow>

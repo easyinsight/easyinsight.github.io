@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.listing.IPerspective"
-	xmlns:listing="com.easyinsight.listing.*" xmlns:account="com.easyinsight.account.*"  backgroundColor="#818285" creationComplete="setupListeners()" paddingTop="0" top="0"
-        verticalGap="0" horizontalAlign="center">
-	<mx:Script>
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+                      implements="com.easyinsight.listing.IPerspective"
+                      xmlns:listing="com.easyinsight.listing.*" xmlns:account="com.easyinsight.account.*"
+                      creationComplete="setupListeners()" top="0"
+                      xmlns:skin="com.easyinsight.skin.*">
+    <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
 
+        import com.easyinsight.skin.ApplicationSkin;
+
         import mx.managers.BrowserManager;
         import mx.utils.URLUtil;
 
-        [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
 
         [Bindable]
         private var _destinationURL:String;
@@ -23,6 +24,11 @@
 
         private var _connectionName:String;
 
+        protected override function commitProperties():void {
+            super.commitProperties();
+            centerPage.setStyle("backgroundColor", ApplicationSkin.instance().centerCanvasBackgroundColor);
+            centerPage.setStyle("backgroundAlpha", ApplicationSkin.instance().centerCanvasBackgroundAlpha);
+        }
 
         [Bindable(event="destinationURLChanged")]
         public function get destinationURL():String {
@@ -87,26 +93,18 @@
 
         }
 
+
         [Bindable]
         private var stackIndex:int = 0;
 
         public function cleanup():void {
         }
 		]]>
-	</mx:Script>	
-    <mx:Canvas width="100%" height="100%" backgroundColor="#000000">
-        <mx:VBox width="100%" height="100%" verticalGap="0">
-            <mx:Canvas height="50%" width="100%" backgroundColor="#888888"/>
-            <mx:Canvas height="50%" width="100%" backgroundColor="#000000"/>
-        </mx:VBox>
-        <mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="30" paddingLeft="10" paddingRight="10"
-             paddingBottom="10" horizontalAlign="center">
-            <mx:ViewStack width="1000" paddingLeft="20" resizeToContent="true"
-                 paddingRight="20" paddingTop="5" paddingBottom="20" id="coreContent" backgroundColor="#FFFFFF" creationPolicy="all"
-                    selectedIndex="{stackIndex}">
-                <mx:Box/>
-                <account:AccountSummary id="accountSummary"/>
-             </mx:ViewStack>
-        </mx:VBox>
-    </mx:Canvas>
-</mx:VBox>
+    </mx:Script>
+    <mx:ViewStack width="1000" paddingLeft="20" resizeToContent="true"
+                  paddingRight="20" paddingTop="5" paddingBottom="20" id="centerPage" creationPolicy="all"
+                  selectedIndex="{stackIndex}">
+        <mx:Box/>
+        <account:AccountSummary id="accountSummary"/>
+    </mx:ViewStack>
+</skin:BackgroundImage>

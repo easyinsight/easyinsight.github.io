@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="*" xmlns:listing="com.easyinsight.listing.*"
-         width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="0" verticalAlign="middle" backgroundColor="0xF0F0F0"
+         width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="0" verticalAlign="middle"
         creationComplete="setup()" height="68">
     <mx:Metadata>
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
         [Event(name="launchQuickSearch", type="com.easyinsight.listing.LaunchQuickSearchEvent")]
-        [Event(name="reportBug", type="com.easyinsight.listing.ReportBugEvent")]
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
@@ -15,6 +14,9 @@
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.preferences.UIOption;
 
+        import com.easyinsight.skin.ApplicationSkin;
+
+        import mx.binding.utils.BindingUtils;
         import mx.states.RemoveChild;
         import mx.states.State;
 
@@ -24,10 +26,10 @@
             User.getEventNotifier().addEventListener("uiChange", uiChangeEvent);
             if (User.getInstance().uiConfiguration != null) {
                 createState(User.getInstance().uiConfiguration);
-            }            
+            }
         }
 
-        private function loginEvent(event:LoginEvent):void {            
+        private function loginEvent(event:LoginEvent):void {
             if (event.type == LoginEvent.LOGIN) {
                 if (User.getInstance().uiConfiguration != null) {
                     createState(User.getInstance().uiConfiguration);
@@ -41,6 +43,14 @@
             }
         }
 
+        public function set headerBarBackgroundColor(value:uint):void {
+            setStyle("backgroundColor", value);
+        }
+
+        protected override function createChildren():void {
+            super.createChildren();
+            BindingUtils.bindProperty(this, "headerBarBackgroundColor", ApplicationSkin.instance(), "headerBarBackgroundColor");
+        }
 
         [Bindable]
         [Embed(source="../../../../assets/find.png")]
@@ -128,7 +138,7 @@
             evaluate(myDataOption, UIConfiguration.SHOW_MY_DATA, config, ops);
             evaluate(connectionsOption, UIConfiguration.SHOW_CONNECTIONS, config, ops);
             evaluate(exchangeOption, UIConfiguration.SHOW_EXCHANGE, config, ops);
-            evaluate(groupsOption, UIConfiguration.SHOW_GROUPS, config, ops);            
+            evaluate(groupsOption, UIConfiguration.SHOW_GROUPS, config, ops);
             if (ops.length > 0) {
                 var state:State = new State();
                 state.overrides = ops;

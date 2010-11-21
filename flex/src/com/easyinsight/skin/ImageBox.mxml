@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var imageName:String;
+        [Bindable]
+        [Embed(source="../../../../assets/pencil.png")]
+        private var editIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/navigate_cross.png")]
+        private var deleteIcon:Class;
+
+        public var imageDescriptor:ImageDescriptor;
+
+        private function onEdit():void {
+            var window:ImageUploadWindow = new ImageUploadWindow();
+            window.addEventListener(ImageUploadEvent.IMAGE_UPLOAD, onImageUpload, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onImageUpload(event:ImageUploadEvent):void {
+            var desc:ImageDescriptor = event.imageDescriptor;
+            imageName = desc.name;
+            this.imageDescriptor = desc;
+        }
+
+        private function onDelete():void {
+            imageName = "( No Image )";
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (imageDescriptor == null) {
+                imageName = "( No Image )";
+            } else {
+                imageName = imageDescriptor.name;
+            }
+        }]]></mx:Script>
+    <mx:Label text="{imageName}"/>
+    <mx:Button icon="{editIcon}" click="onEdit()"/>
+    <mx:Button icon="{deleteIcon}" click="onDelete()"/>
+</mx:HBox>

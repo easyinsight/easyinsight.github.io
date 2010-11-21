@@ -1,34 +1,60 @@
 <?xml version="1.0" ?>
 <solutions:SolutionDetailRenderer xmlns:mx="http://www.adobe.com/2006/mxml"
-                                  xmlns:solutions="com.easyinsight.solutions.*"
-         width="100%" height="100%" paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0"
-         verticalGap="0" backgroundColor="#818285" horizontalAlign="center">
+                                  xmlns:solutions="com.easyinsight.solutions.*">
+    <solutions:states>
+        <mx:State name="AccountBelowRequired">
+            <mx:RemoveChild target="{installButton}"/>
+            <mx:AddChild relativeTo="{controlsBox}">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
+                    <mx:VBox verticalGap="0">
+                        <mx:Label text="This connection requires a higher account" fontSize="16"/>
+                        <mx:Label text="tier than what your current subscription." fontSize="16"/>
+                    </mx:VBox>
+                    <mx:Button label="Upgrade Account" styleName="grayButton" click="upgrade()"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </solutions:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.skin.ApplicationSkin;
 
         override protected function toAccountBelowRequiredState():void {
             currentState = "AccountBelowRequired";
         }
         ]]></mx:Script>
-    <mx:HBox width="1000" height="100%" backgroundColor="#FFFFFF" paddingLeft="20"
-             paddingRight="20" paddingTop="20" paddingBottom="20" horizontalAlign="center">
-            <mx:VBox width="900" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="20" paddingBottom="20" paddingLeft="20" paddingRight="20">
-                <mx:HBox verticalAlign="middle" width="100%">
-                    <mx:Image source="{logo}" click="toVendorPage()"/>
-                    <mx:Spacer width="100%"/>
-                    <mx:Label text="Why Use Easy Insight with Constant Contact?" fontSize="18"/>
-                    <mx:Spacer width="100%"/>
-                </mx:HBox>
-                <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" width="820" height="70" text="Want the ability to perform custom Constant Contact reporting? Whether it's simple reports on email activity or in depth business conversion rate analysis, Easy Insight can get you that visibility in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation." fontSize="14"/>
-                <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10">
-                    <mx:Image source="../assets/SendGrid.jpg"/>
-                </mx:HBox>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" width="820" height="50" text="Measure your conversion rates. Filter by campaign, join your campaigns to other data sources, and view as lists, trees, charts, or more. Share the reports with your coworkers or embed them into iGoogle or another dashboard." fontSize="14"/>
-                <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
-                    <mx:Button label="Get Started Now!" fontSize="18" click="installSolution()" styleName="blueButton"
-                               id="installButton"/>
-                </mx:Box>
-            </mx:VBox>
+    <mx:HBox width="1100" height="100%" horizontalGap="0">
+        <solutions:HeaderShadeArea width="50" height="100%" leftColor="{ApplicationSkin.instance().coreAppBackgroundColor}" rightColor="#FFFFFF"/>
+
+        <mx:VBox width="1000" height="100%" backgroundColor="#FFFFFF" horizontalAlign="center" verticalGap="10"
+                 paddingBottom="20" paddingLeft="20"
+                 paddingRight="20" paddingTop="20">
+            <mx:HBox verticalAlign="middle" width="100%">
+
+                <mx:Image source="{logo}" click="toVendorPage()"/>
+                <mx:Spacer width="100%"/>
+                <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="620"
+                             height="60"
+                             text="Want the ability to perform custom Constant Contact reporting? Whether it's simple reports on campaigns or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks!"
+                             fontSize="14"/>
+                <mx:Spacer width="100%"/>
+
+            </mx:HBox>
+            <mx:HRule width="100%" strokeColor="#333333"/>
+            <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
+                <mx:Button label="Connect to Freshbooks" fontSize="20" click="installSolution()" styleName="grayButton"
+                           id="installButton"/>
+            </mx:Box>
+            <mx:HRule width="100%" strokeColor="#333333"/>
+            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="50">
+                <mx:Image source="../assets/Freshbooks KPIs Small.jpg" height="150"/>
+                <mx:Image source="../assets/FreshbooksReportEditorSmall.jpg" height="150"/>
+            </mx:HBox>
+            <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
+                         height="120"
+                         text="Take advantage of Easy Insight to extend your Constant Contact reporting capabilities to the next level of visibility and analysis. Keep a pulse on the health of your marketing campaigns through KPIs of contact acquisitions and conversion rates. Easily apply custom filters to analyze data by campaign, geography, custom fields, or any of the other fields in Constant Contact. View data as lists, charte, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."
+                         fontSize="14"/>
+
+        </mx:VBox>
+        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="{ApplicationSkin.instance().coreAppBackgroundColor}"/>
     </mx:HBox>
 </solutions:SolutionDetailRenderer>

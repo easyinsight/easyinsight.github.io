@@ -5,7 +5,10 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
+import org.hibernate.Session;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +22,120 @@ import java.util.List;
  * Time: 11:50:50 AM
  */
 public class PreferencesService {
+
+    public long addImage(String imageName, byte[] bytes) {
+        long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_IMAGE (image_bytes, image_name, user_id) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+            insertStmt.setBinaryStream(1, bis, bytes.length);
+            insertStmt.setString(2, imageName);
+            insertStmt.setLong(3, userID);
+            insertStmt.execute();
+            long id = Database.instance().getAutoGenKey(insertStmt);
+            conn.commit();
+            return id;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public byte[] getImage(long imageID) {
+        byte[] bytes;
+        long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE WHERE USER_IMAGE_ID = ? AND USER_ID = ?");
+            queryStmt.setLong(1, imageID);
+            queryStmt.setLong(2, userID);
+            ResultSet rs = queryStmt.executeQuery();
+            rs.next();
+            bytes = rs.getBytes(1);
+            conn.commit();
+            return bytes;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void deleteImage(long imageID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public ImageDescriptor getImages() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return null;
+    }
+
+    public ApplicationSkin getSettings() {
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
+            if (results.size() > 0) {
+                ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
+                return settings.toSkin();
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException();
+        } finally {
+            session.close();
+        }
+        return null;
+    }
+
+    public void saveSkinSettings(ApplicationSkin skin) {
+        Session session = Database.instance().createSession();
+        try {
+            ApplicationSkinSettings settings = skin.toSettings();
+            settings.setUserID(SecurityUtil.getUserID());
+            session.getTransaction().begin();
+            session.saveOrUpdate(settings);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+        } finally {
+            session.close();
+        }
+    }
 
     public List<Persona> getPersonas() {
         SecurityUtil.authorizeAccountAdmin();

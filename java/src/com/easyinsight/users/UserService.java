@@ -2,6 +2,8 @@ package com.easyinsight.users;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.preferences.ApplicationSkin;
+import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.preferences.UISettingRetrieval;
 import com.easyinsight.salesautomation.SalesEmail;
@@ -47,6 +49,15 @@ public class UserService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    private void createAccountActivation(EIConnection conn, long accountID, String activationKey, String targetURL) throws SQLException {
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_ACTIVATION (ACCOUNT_ID, ACTIVATION_KEY, CREATION_DATE, TARGET_URL) VALUES (?, ?, ?, ?)");
+        insertStmt.setLong(1, accountID);
+        insertStmt.setString(2, activationKey);
+        insertStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+        insertStmt.setString(4, targetURL);
+        insertStmt.execute();
     }
 
     public void reactivate() {
@@ -452,10 +463,11 @@ public class UserService {
         return (results.size() > 0);
     }
 
-    private User retrieveUser() {
+    private UserInfo retrieveUser() {
         long userID = SecurityUtil.getUserID();
         try {
             User user = null;
+            ApplicationSkin applicationSkin = null;
             EIConnection conn = Database.instance().getConnection();
             Session session = Database.instance().createSession(conn);
             List results;
@@ -469,6 +481,7 @@ public class UserService {
                     }
                     user.setLastLoginDate(new Date());
                     session.update(user);
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session);
                 }
                 session.flush();
                 conn.commit();
@@ -480,7 +493,10 @@ public class UserService {
                 session.close();
                 Database.closeConnection(conn);
             }
-            return user;
+            UserInfo userInfo = new UserInfo();
+            userInfo.user = user;
+            userInfo.settings = applicationSkin;
+            return userInfo;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -505,7 +521,7 @@ public class UserService {
     }
 */
     public void updateUserLabels(String userName, String fullName, String email, String firstName) {
-        User user = retrieveUser();
+        User user = retrieveUser().user;
         if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
             throw new SecurityException();
         }
@@ -607,11 +623,16 @@ public class UserService {
                 cal.add(Calendar.DAY_OF_YEAR, 30);
                 new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
             }
+            String activationKey = RandomTextGenerator.generateText(20);
+            if (sourceURL == null) {
+                sourceURL = "https://www.easy-insight.com/app";
+            }
+            createAccountActivation(conn, account.getAccountID(), activationKey, sourceURL);
             //}
             session.flush();
             conn.commit();
             if (SecurityUtil.getSecurityProvider() instanceof DefaultSecurityProvider) {
-                //new AccountMemberInvitation().sendActivationEmail(user.getEmail(), activationKey);
+                new AccountMemberInvitation().sendActivationEmail(user.getEmail(), user.getFirstName(), activationKey);
                 new Thread(new SalesEmail(account, user)).start();
             }
             return account.getAccountID();
@@ -622,6 +643,26 @@ public class UserService {
         } finally {
             session.close();
             conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void resendActivationEmail() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement getEmailStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME FROM USER WHERE USER_ID = ?");
+            getEmailStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet rs = getEmailStmt.executeQuery();
+            rs.next();
+            String email = rs.getString(1);
+            String firstName = rs.getString(2);
+            String activationKey = RandomTextGenerator.generateText(20);
+            createAccountActivation(conn, SecurityUtil.getAccountID(), activationKey, "https://www.easy-insight.com/app");
+            new AccountMemberInvitation().sendActivationEmail(email, firstName, activationKey);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
             Database.closeConnection(conn);
         }
     }
@@ -660,18 +701,25 @@ public class UserService {
         }
     }
 
+    private static class UserInfo {
+        User user;
+        ApplicationSkin settings;
+    }
+
     public UserServiceResponse isSessionLoggedIn() {
         UserPrincipal existing = (UserPrincipal) FlexContext.getFlexSession().getUserPrincipal();
         if (existing == null) {
             return null;
         } else {
-            User user = retrieveUser();
+            UserInfo userInfo = retrieveUser();
+            User user = userInfo.user;
             Account account = user.getAccount();
             UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                     user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
+                    userInfo.settings);
             response.setScenario(existing.getScenario());
             response.setActivated(account.isActivated());
             return response;
@@ -703,7 +751,8 @@ public class UserService {
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
+                            ApplicationSkinSettings.retrieveSkin(userID, session));
                     userServiceResponse.setActivated(account.isActivated());
                 } else {
                     userServiceResponse = null;
@@ -748,7 +797,8 @@ public class UserService {
                             (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                            user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
+                            ApplicationSkinSettings.retrieveSkin(userID, session));
                     userServiceResponse.setActivated(account.isActivated());
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     userServiceResponse.setSessionCookie(sessionCookie);
@@ -846,7 +896,8 @@ public class UserService {
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                                user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
+                                account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
 
                         userServiceResponse.setActivated(account.isActivated());
 
@@ -937,7 +988,8 @@ public class UserService {
                     (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                     user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                     !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
+                    ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
             userServiceResponse.setActivated(account.isActivated());
             user.setLastLoginDate(new Date());
             session.update(user);
@@ -991,7 +1043,7 @@ public class UserService {
                         session.update(user);
                     }
                 } else {
-                    userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
+                    userServiceResponse = new UserServiceResponse(false, "We didn't recognize the username or password you entered.");
                 }
             }
             session.flush();
@@ -1024,14 +1076,15 @@ public class UserService {
                         (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                         user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                         !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                        user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
+                        ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
                 userServiceResponse.setActivated(account.isActivated());
                 user.setLastLoginDate(new Date());
                 session.update(user);
 
             // FlexContext.getFlexSession().getRemoteCredentials();
         } else {
-            userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
+            userServiceResponse = new UserServiceResponse(false, "We didn't recognize the username or password you entered.");
         }
         return userServiceResponse;
     }
@@ -1080,7 +1133,8 @@ public class UserService {
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
                                 user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                                 !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), user.isRenewalOptionAvailable(),
-                                user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser());
+                                user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
+                                ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
                         userServiceResponse.setActivated(account.isActivated());
                         userServiceResponse.setScenario(scenario);
                         user.setLastLoginDate(new Date());

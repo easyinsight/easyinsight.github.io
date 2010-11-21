@@ -12,8 +12,17 @@ public class AccountSettings {
     private boolean reportSharing;
     private long groupID;
     private int dateFormat;
+    private String currencySymbol;
 
     public AccountSettings() {
+    }
+
+    public String getCurrencySymbol() {
+        return currencySymbol;
+    }
+
+    public void setCurrencySymbol(String currencySymbol) {
+        this.currencySymbol = currencySymbol;
     }
 
     public int getDateFormat() {

@@ -492,6 +492,25 @@ public class TransformContainer extends HBox
                     filterMeasureRangeDefinition.field = key;
                     filterDefinition = filterMeasureRangeDefinition;
                     filter = new SliderMeasureFilter(_feedID, key);
+                    var min:Number = Number.MAX_VALUE;
+                    var max:Number = Number.MIN_VALUE;
+                    for each (var valO:Object in uniqueValues) {
+                        var num:Number = Number(valO);
+                        if (num < min) {
+                            min = num;
+                        }
+                        if (num > max) {
+                            max = num;
+                        }
+                    }
+                    if (includeFilter) {
+                        filterMeasureRangeDefinition.currentEndValueDefined = true;
+                        filterMeasureRangeDefinition.currentEndValue = max;
+                        filterMeasureRangeDefinition.currentStartValueDefined = true;
+                        filterMeasureRangeDefinition.currentStartValue = min;
+                    } else {
+                        
+                    }
                 }
                 filterMap[key.qualifiedName()] = filter;
                 filter.filterDefinition = filterDefinition;

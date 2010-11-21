@@ -4,10 +4,10 @@ import mx.containers.FormItem;
 public class ReportFormItem extends FormItem {
 
     public var property:String;
-    public var report:AnalysisDefinition;
+    public var report:Object;
     public var value:Object;
 
-    public function ReportFormItem(label:String, property:String, value:Object, report:AnalysisDefinition) {
+    public function ReportFormItem(label:String, property:String, value:Object, report:Object) {
         super();
         this.label = label;
         this.value = value;

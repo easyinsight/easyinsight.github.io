@@ -8,7 +8,13 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.HighRiseDataSource;
-        
+        import com.easyinsight.datasources.HighriseTaskWindow;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
         [Bindable]
         private var url:String;
 
@@ -20,6 +26,7 @@
             obj.includeCompanyNotes = companyNotesCheckbox.selected;
             obj.includeDealNotes = dealNotesCheckbox.selected;
             obj.includeCaseNotes = caseNotesCheckbox.selected;
+            obj.additionalTokens = additionalTokens;
             return obj;
         }
 
@@ -30,6 +37,7 @@
             includeCompanyNotes = ds.includeCompanyNotes;
             includeDealNotes = ds.includeDealNotes;
             includeCaseNotes= ds.includeCaseNotes;
+            additionalTokens = ds.additionalTokens;
             url = ds.url;
         }
 
@@ -41,6 +49,7 @@
             ds.includeCompanyNotes = companyNotesCheckbox.selected;
             ds.includeDealNotes = dealNotesCheckbox.selected;
             ds.includeCaseNotes = caseNotesCheckbox.selected;
+            ds.additionalTokens = additionalTokens;
             ds.token = userNameInput.text;
         }
 
@@ -59,8 +68,17 @@
         [Bindable]
         private var includeCaseNotes:Boolean;
 
+        private var additionalTokens:ArrayCollection = new ArrayCollection();
+
         public function get savesCredentials():Boolean {
             return false;
+        }
+
+        private function configureTasks():void {
+            var window:HighriseTaskWindow = new HighriseTaskWindow();
+            window.tokens = additionalTokens;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         public function validate():Boolean {
@@ -79,21 +97,29 @@
     <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" width="700" height="60" selectable="false" focusEnabled="false"
                  text="The next set of options enable you to control just what data Easy Insight pulls over from your Highrise account. Each of these options will significantly increase the time required to synchronize data, so we recommend that you only enable a given option if you need to report against that particular subject matter."
             fontSize="12"/>
-    <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-        <mx:FormItem label="Do you want to report on email activity?" direction="horizontal">
-            <mx:CheckBox id="emailsCheckbox" selected="{includeEmails}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Do you want to report on contact notes?" direction="horizontal">
-            <mx:CheckBox id="contactNotesCheckbox" selected="{includeContactNotes}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Do you want to report on company notes?" direction="horizontal">
-            <mx:CheckBox id="companyNotesCheckbox" selected="{includeCompanyNotes}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Do you want to report on deal notes?" direction="horizontal">
-            <mx:CheckBox id="dealNotesCheckbox" selected="{includeDealNotes}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Do you want to report on case notes?" direction="horizontal">
-            <mx:CheckBox id="caseNotesCheckbox" selected="{includeCaseNotes}"/>
-        </mx:FormItem>
-	</mx:Form>
+    <mx:HBox>
+        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="Do you want to report on email activity?" direction="horizontal">
+                <mx:CheckBox id="emailsCheckbox" selected="{includeEmails}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Do you want to report on contact notes?" direction="horizontal">
+                <mx:CheckBox id="contactNotesCheckbox" selected="{includeContactNotes}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Do you want to report on company notes?" direction="horizontal">
+                <mx:CheckBox id="companyNotesCheckbox" selected="{includeCompanyNotes}"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Form>
+            <mx:FormItem label="Do you want to report on deal notes?" direction="horizontal">
+                <mx:CheckBox id="dealNotesCheckbox" selected="{includeDealNotes}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Do you want to report on case notes?" direction="horizontal">
+                <mx:CheckBox id="caseNotesCheckbox" selected="{includeCaseNotes}"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:HBox>
+    <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" width="700" height="30" selectable="false" focusEnabled="false"
+                 text="And finally, do you want to report on tasks across multiple users in your Highrise system? If so, please click to Configure Task Access. Otherwise, just ignore this option."
+            fontSize="12"/>
+    <mx:Button label="Configure Task Access" click="configureTasks()"/>
 </mx:VBox>

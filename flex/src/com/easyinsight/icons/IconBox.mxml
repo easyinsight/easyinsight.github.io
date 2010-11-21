@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" borderStyle="solid" borderThickness="1"
+        click="assignIcon()" width="40" height="40" horizontalAlign="center" verticalAlign="middle"
+                                            toolTip="Click to assign or change icon...">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+        private var _iconPath:String;
+
+        [Bindable]
+        private var iconExists:Boolean;
+
+        [Bindable(event="iconPathChanged")]
+        public function get iconPath():String {
+            return _iconPath;
+        }
+
+        public function set iconPath(value:String):void {
+            if (_iconPath == value) return;
+            _iconPath = value;
+            dispatchEvent(new Event("iconPathChanged"));
+            if (_iconPath != null && _iconPath != "") {
+                iconExists = true;
+            }
+        }
+
+        private function iconSelected(event:IconSelectionEvent):void {
+            iconExists = true;
+            iconPath = "/app/assets/icons/32x32/" + event.icon.path;
+        }
+
+        private function iconRemoved(event:IconSelectionEvent):void {
+            iconExists = false;
+            iconPath = null;
+        }
+
+        private function assignIcon():void {
+            var iconWindow:IconSelectionWindow = IconSelectionWindow(PopUpManager.createPopUp(this, IconSelectionWindow, true));
+            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, iconRemoved);
+            PopUpUtil.centerPopUp(iconWindow);
+        }
+        ]]></mx:Script>
+    <mx:Image id="iconImage" source="{iconPath}" visible="{iconExists}"/>
+</mx:Box>

@@ -8,7 +8,7 @@
          creationComplete="onCreation()" backgroundColor="#FFFFFF"
          implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
          paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
-         direction="vertical" backgroundImage="{background2}" backgroundSize="100%">
+         direction="vertical">
     <mx:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{topDisplay}"/>
@@ -34,6 +34,7 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.EIErrorEvent;
         import com.easyinsight.util.PopUpUtil;
@@ -355,6 +356,8 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
+            setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
+            setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
             if (!_embedded) {
             }
             if (retrievedDataOnce) {
@@ -759,10 +762,6 @@
         [Bindable]
         [Embed(source="../../../../assets/arrow_right_blue.png")]
         private var nextReportArrow:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
 
         [Bindable]
         private var whenCreated:String = "5 months ago";

@@ -2,6 +2,7 @@ package com.easyinsight.framework
 {
 import com.easyinsight.guest.Scenario;
 import com.easyinsight.preferences.UISettings;
+import com.easyinsight.skin.ApplicationSkinTO;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.users.UserServiceResponse")]
@@ -35,6 +36,8 @@ public class UserServiceResponse
     public var nonCookieLogin:Boolean;
     public var scenario:Scenario;
     public var password:String;
+    public var currencySymbol:String;
+    public var applicationSkin:ApplicationSkinTO;
 
     public function UserServiceResponse()
         {

@@ -1,10 +1,8 @@
 package com.easyinsight.analysis
 {
-	import mx.controls.ComboBox;
 	
 	public class HierarchyDropArea extends DropArea
 	{
-		private var aggregationBox:ComboBox;
 		
 		public function HierarchyDropArea()
 		{

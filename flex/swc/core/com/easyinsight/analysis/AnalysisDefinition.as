@@ -1,6 +1,10 @@
 package com.easyinsight.analysis
 {
-	import mx.collections.ArrayCollection;
+import com.easyinsight.filtering.FilterRawData;
+
+import flash.events.Event;
+
+import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.WSAnalysisDefinition")]
@@ -110,6 +114,47 @@ package com.easyinsight.analysis
             items.addItem(new NumericReportFormItem("Font Size", "fontSize", fontSize, this, 8, 48));
             items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", fixedWidth, this, 0, 5000));
             return items;
+        }
+
+        public function showDrilldown(analysisItem:AnalysisItem):Boolean {
+            if (analysisItem is AnalysisHierarchyItem) {
+                var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
+                var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
+                return (index < (hierarchy.hierarchyLevels.length - 1));
+            }
+            return false;
+        }
+
+        public function showRollup(analysisItem:AnalysisItem):Boolean {
+            if (analysisItem is AnalysisHierarchyItem) {
+                var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
+                var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
+                return index > 0;
+            }
+            return false;
+        }
+
+        public function drill(analysisItem:AnalysisItem, data:Object):Event {
+            var hierarchyItem:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
+            var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+            if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
+                var dataField:String = analysisItem.qualifiedName();
+                var dataString:String = data[dataField];
+                var filterRawData:FilterRawData = new FilterRawData();
+                filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
+                hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
+                return new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData,
+                        hierarchyItem, index + 1);
+            }
+            return null;
+        }
+
+        public function getValue(analysisItem:AnalysisItem, data:Object):Object {
+            return data[analysisItem.qualifiedName()];
+        }
+
+        public function getCoreAnalysisItem(analysisItem:AnalysisItem):AnalysisItem {
+            return analysisItem;
         }
 	}
 }

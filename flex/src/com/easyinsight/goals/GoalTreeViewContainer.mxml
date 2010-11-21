@@ -16,6 +16,7 @@
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.ModelessWindowEvent;
 
         import com.easyinsight.util.PopUpUtil;
@@ -34,9 +35,6 @@
             dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(_goalTreeID)));
         }
 
-        [Bindable]
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var background2:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/document_out.png")]
@@ -116,8 +114,8 @@
 
         override protected function commitProperties():void {
             if (!_embedded) {
-                setStyle("backgroundImage", background2);
-                setStyle("backgroundSize", "100%");
+                setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
+                setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
             }
         }
 
@@ -233,6 +231,15 @@
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalDataTree" result="gotTree()"/>
     </mx:RemoteObject>
+    <mx:Style>
+        GoalDataRenderer {
+            highlightedSelectedColor: #8695FF;
+            highlightedUnselectedColor: #FEFBBA;
+            unhiglightedSelectedColor: #637DFF;
+            unhighlightedUnselectedColor: #EAF1F6;
+            subTreePresentColor: #99ccff;
+        }
+    </mx:Style>
     <mx:VBox width="100%" height="100%">
     <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
         <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" label="Back" labelPlacement="bottom"/>

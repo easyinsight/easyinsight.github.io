@@ -1,6 +1,6 @@
-<?xml version="1.0" ?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
-        creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyedSignon); focusManager.setFocus(userName)">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+        creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyedSignon); focusManager.setFocus(userName)"
+        width="100%" height="100%" backgroundColor="#EEEEEE" horizontalAlign="center" verticalAlign="middle">
     <mx:Metadata>
         [Event(name="loginEvent2", type="com.easyinsight.framework.LoginEvent")]
         [Event(name="loginClose", type="flash.events.Event")]
@@ -24,7 +24,7 @@
                         <mx:Label text="Already got reset email?" fontSize="14"/>
                         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
                             <mx:FormItem label="Manually Enter Reset Key:" direction="horizontal">
-                                <mx:TextInput id="resetKey"/>                                
+                                <mx:TextInput id="resetKey"/>
                             </mx:FormItem>
                         </mx:Form>
                         <mx:Button label="Reset Manually" click="resetManual()"/>
@@ -39,14 +39,9 @@
             </mx:AddChild>
         </mx:State>
         <mx:State name="PasswordReset">
-            <mx:AddChild relativeTo="{activationBox}">
+            <!--<mx:AddChild relativeTo="{activationBox}">
                 <mx:Label text="An email has been sent to your email address to allow you to reset your password."/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="AdditionalInfo">
-            <mx:AddChild relativeTo="{activationBox}">
-                <mx:Label text="{_additionalInfo}"/>
-            </mx:AddChild>
+            </mx:AddChild>-->
         </mx:State>
     </mx:states>
     <mx:Script>
@@ -93,12 +88,6 @@
 
         public function set additionalInfo(value:String):void {
             _additionalInfo = value;
-        }
-
-        private function delinquentAccount():void {
-            var delinquent:Boolean = authService.isAccountDelinquentOrClosed.lastResult as Boolean;
-            if (delinquent)
-                navigateToURL(new URLRequest("billing/login.jsp"), "_self");
         }
 
         public function setupFocus():void {
@@ -161,6 +150,7 @@
                                 case "Client.Authentication":
                                 default:
                                     failureMessage = event.fault.faultString;
+                                    failureIndex = 1;
                             }
                         }
                         ));
@@ -168,6 +158,7 @@
             } else {
                 stackIndex = 0;
                 failureMessage = authResult.failureMessage;
+                failureIndex = 1;
             }
         }
 
@@ -175,6 +166,7 @@
         private var passwordStr:String;
 
         public function signon(userNameStr:String, passwordStr:String):void {
+            failureIndex = 0;
             stackIndex = 1;
             this.userNameStr = userNameStr;
             this.passwordStr = passwordStr;
@@ -215,42 +207,58 @@
         private var failureMessage:String = "";
 
         [Bindable]
+        private var failureIndex:int = 0;
+
+        [Bindable]
         private var stackIndex:int;
                 ]]>
 	</mx:Script>
-    <mx:VBox id="coreBox" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
-        <mx:Box id="activationBox" width="100%" horizontalAlign="center" paddingTop="10"/>
+    <mx:VBox id="coreBox" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" cornerRadius="10"
+            borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
         <mx:VBox id="loginForm" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
-            <mx:ViewStack selectedIndex="{stackIndex}">
-                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-                    <mx:FormItem label="User Name or Email:" direction="horizontal">
-                        <mx:TextInput id="userName" tabIndex="1"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Password:" direction="horizontal">
-                        <mx:TextInput id="password" displayAsPassword="true" tabIndex="2"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="">
-                        <mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your Password?"
-                                       click="currentState='ResetPassword'"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Remember Me On This Computer">
-                        <mx:CheckBox id="rememberMeCheckbox" tabIndex="3"/>
-                    </mx:FormItem>
-                </mx:Form>
+            <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
+                <mx:VBox paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+                    <mx:Box width="100%" horizontalAlign="center" paddingBottom="10">
+                        <mx:Image source="@Embed(source='../../../../assets/logo2.PNG')"/>
+                    </mx:Box>
+                    <mx:ViewStack resizeToContent="true" selectedIndex="{failureIndex}" width="100%">
+                        <mx:Box/>
+                        <mx:HBox width="100%" horizontalAlign="center">
+                            <mx:Box backgroundColor="#CC0000">
+                                <mx:Text text="{failureMessage}" fontSize="14" color="#FFFFFF"/>
+                            </mx:Box>
+                        </mx:HBox>
+                    </mx:ViewStack>
+                    <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                        <mx:FormItem label="User Name or Email:" direction="horizontal" fontSize="14">
+                            <mx:TextInput id="userName" tabIndex="1" fontSize="14" width="350"/>
+                        </mx:FormItem>
+                        <mx:FormItem label="Password:" direction="horizontal" fontSize="14">
+                            <mx:TextInput id="password" displayAsPassword="true" tabIndex="2" fontSize="14" width="350"/>
+                        </mx:FormItem>
+                    </mx:Form>
+                    <mx:CheckBox id="rememberMeCheckbox" tabIndex="3" label="Remember Me On This Computer"/>
+                </mx:VBox>
                 <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
                     <mx:ProgressBar label="Connecting..." indeterminate="true"/>
                 </mx:Box>
             </mx:ViewStack>
-            <mx:Spacer height="10"/>
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Button label="Sign In" click="defaultSignon()" tabIndex="4"/>
+            <mx:VBox width="100%" horizontalAlign="center">
+                <mx:Button label="Sign In" click="defaultSignon()" tabIndex="4" fontSize="14"/>
+                <mx:HRule strokeColor="#CDCDCD" width="80%"/>
+            </mx:VBox>
+            <mx:HBox width="100%" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+                <mx:LinkButton fontSize="12" textDecoration="underline" label="Forgot your Password?"
+                                           click="failureIndex = 0; currentState='ResetPassword'"/>
+                <mx:Spacer width="100%"/>
+                <mx:LinkButton fontSize="12" textDecoration="underline" label="No account yet?"
+                                           click="navigateToURL(new URLRequest('newaccount'), '_self')"/>
             </mx:HBox>
-            <mx:Spacer height="10"/>
         </mx:VBox>
-        <mx:Spacer height="10"/>
+        <!--<mx:Spacer height="10"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Text text="{failureMessage}" fontSize="14"/>
-        </mx:HBox>
+        </mx:HBox>-->
     </mx:VBox>
     <mx:StringValidator id="userNameValidator" minLength="3" source="{userName}" property="text"/>
     <mx:StringValidator id="passwordValidator" minLength="3" source="{password}" property="text"/>
@@ -260,4 +268,4 @@
                    fault="failureMessage = event.fault.faultString"/>
         <mx:method name="remindPassword" result="reset()" fault="emailFailure = event.fault.faultString"/>
     </mx:RemoteObject>
-</mx:Box>
+</mx:VBox>

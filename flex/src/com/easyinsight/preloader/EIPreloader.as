@@ -49,7 +49,7 @@ import flash.display.DisplayObject;
     public class EIPreloader extends Sprite implements IPreloaderDisplay
     {
         // Embed the Logo
-        [Embed("../../../../assets/large_logo2.PNG")]
+        [Embed("../../../../assets/logo2.PNG")]
         [Bindable]
         protected var LogoClass:Class;
 

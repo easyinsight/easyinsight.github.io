@@ -160,7 +160,7 @@ import mx.events.FlexEvent;
         private function onClick(event:ChartItemEvent):void {
             if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, barChartDef);
                 window.data = event.hitData.item;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
@@ -279,9 +279,11 @@ import mx.events.FlexEvent;
             return filterRawData;
         }
 
+        private var barChartDef:BarChartDefinition;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object,
                 additionalProperties:Object):void {
-            var barChartDef:BarChartDefinition = analysisDefinition as BarChartDefinition;
+            barChartDef = analysisDefinition as BarChartDefinition;
 
             if (dataSet.length > 0) {
                 stackIndex = 0;

@@ -2,6 +2,8 @@ package com.easyinsight.datasources {
 import com.easyinsight.customupload.HighRiseDataSourceCreation;
 import com.easyinsight.listing.DataFeedDescriptor;
 
+import mx.collections.ArrayCollection;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.highrise.HighRiseCompositeSource")]
 public class HighRiseDataSource extends CompositeServerDataSource {
@@ -14,6 +16,7 @@ public class HighRiseDataSource extends CompositeServerDataSource {
     public var includeCaseNotes:Boolean;
     public var joinDealsToContacts:Boolean;
     public var token:String;
+    public var additionalTokens:ArrayCollection;
 
     public function HighRiseDataSource() {
         super();

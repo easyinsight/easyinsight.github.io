@@ -6,6 +6,7 @@ import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.analysis.ReportWindowEvent;
 import com.easyinsight.analysis.service.ReportRetrievalFault;
 import com.easyinsight.framework.DataServiceLoadingEvent;
+import com.easyinsight.skin.ApplicationSkin;
 import com.easyinsight.util.EIErrorEvent;
 import com.easyinsight.util.EITitleWindow;
 import com.easyinsight.util.PopUpUtil;
@@ -29,9 +30,6 @@ public class ReportEventProcessor extends EITitleWindow {
     private var _overlayIndex:int;
     private var _stackTrace:String;
 
-    [Embed(source="../../../../assets/background2.JPG")]
-    public var backImage:Class;
-
     public function ReportEventProcessor() {
         this.width = 600;
         this.height = 500;
@@ -39,8 +37,8 @@ public class ReportEventProcessor extends EITitleWindow {
         setStyle("paddingRight", 10);
         setStyle("paddingTop", 10);
         setStyle("paddingBottom", 10);
-        setStyle("backgroundImage", backImage);
-        setStyle("backgroundSize", "100%");
+        setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
+        setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
         this.showCloseButton = true;
         addEventListener(Event.CLOSE, onClose);
     }

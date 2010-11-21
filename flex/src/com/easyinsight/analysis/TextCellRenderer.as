@@ -20,6 +20,7 @@ public class TextCellRenderer extends Text
 	{
 		private var _data:Object;
 		private var _analysisItem:AnalysisText;
+    private var _report:AnalysisDefinition;
 
 		public function TextCellRenderer() {
 			super();
@@ -27,9 +28,13 @@ public class TextCellRenderer extends Text
 		}
 
 
-        private function onClick(event:MouseEvent):void {
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
+    }
+
+    private function onClick(event:MouseEvent):void {
             if (event.shiftKey) {
-                var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this);
+                var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report);
                 window.data = this.data;
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;

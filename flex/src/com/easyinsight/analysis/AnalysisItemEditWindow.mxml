@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
-	<mx:Script>
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+                    xmlns:analysis="com.easyinsight.analysis.*" xmlns:filters="com.easyinsight.filtering.*"
+        creationComplete="onCreation()" width="850"
+        height="500">
+    <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.PerspectiveInfo;
+
+        import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
@@ -18,13 +23,40 @@
 
         private var _dataSourceID:int;
 
+        private function onCreation():void {
+            addEventListener(LinkMetadataEvent.LINK_EDITED, onLinkUpdate);
+            addEventListener(LinkMetadataEvent.LINK_DELETED, onLinkDelete);
+            linkFactory = new ClassFactory(LinkControls);
+            if (_analysisItem != null) {
+                linkFactory.properties = { sourceItem: _analysisItem };
+                transformContainer.existingFilters = _analysisItem.filters;
+            }
+        }
+
+        [Bindable]
+        private var links:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
+        private var linkIndex:int = 0;
+
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
 
         public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
             _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
         }
 
         public function set analysisItem(analysisItem:AnalysisItem):void {
             _analysisItem = analysisItem;
+            if (_analysisItem != null) {
+                this.links = analysisItem.links;
+                linkIndex = (this.links != null && this.links.length > 0) ? 1 : 0;
+            }
         }
 
         private var _originalWrapper:AnalysisItemWrapper;
@@ -33,8 +65,15 @@
             _originalWrapper = analysisItemWrapper;
         }
 
-        public function set analysisItems(analysisItems:ArrayCollection):void {
-            _analysisItems = analysisItems;
+        [Bindable(event="analysisItemsChanged")]
+        public function get analysisItems():ArrayCollection {
+            return _analysisItems;
+        }
+
+        public function set analysisItems(value:ArrayCollection):void {
+            if (_analysisItems == value) return;
+            _analysisItems = value;
+            dispatchEvent(new Event("analysisItemsChanged"));
         }
 
         public function set editorClass(editorClass:Class):void {
@@ -64,6 +103,12 @@
         }
 
         private function onSaveComplete(event:AnalysisItemSaveEvent):void {
+            if (event.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                event.analysisItem.links = new ArrayCollection();
+            } else {
+                event.analysisItem.links = links;
+            }
+            event.analysisItem.filters = transformContainer.getFilterDefinitions();
             dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, _originalWrapper, true));
             editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
             PopUpManager.removePopUp(this);
@@ -74,13 +119,77 @@
             var valid:Boolean = editor.validate();
             if (valid) editor.save(_dataSourceID);
         }
+
+        private function addLink():void {
+            var window:LinkWindow = new LinkWindow();
+            window.sourceItem = _analysisItem;
+            window.addEventListener(LinkMetadataEvent.LINK_DEFINED, onLinkSave, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onLinkSave(event:LinkMetadataEvent):void {
+            links.addItem(event.link);
+            linkIndex = (this.links != null && this.links.length > 0) ? 1 : 0;
+        }
+
+        private function onLinkUpdate(event:LinkMetadataEvent):void {
+            links.removeItemAt(links.getItemIndex(event.previousLink));
+            links.addItem(event.link);
+        }
+
+        private function onLinkDelete(event:LinkMetadataEvent):void {
+            links.removeItemAt(links.getItemIndex(event.link));
+            linkIndex = (this.links != null && this.links.length > 0) ? 1 : 0;
+        }
+
+        [Bindable]
+        private var linkFactory:ClassFactory;
 		]]>
-	</mx:Script>
-	<mx:VBox styleName="TitleWindowContents" id="editorFormItem" width="100%" height="100%">			
-		<mx:HBox width="100%" horizontalAlign="center">
-			<mx:Button label="Save" click="save()" id="saveButton"/>
-			<mx:Button label="Cancel" click="cancel()"/>
-		</mx:HBox>	
-	</mx:VBox>
-	
+    </mx:Script>
+    <mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
+        <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120">
+            <mx:Canvas id="editorFormItem" width="100%" height="100%" label="Item"/>
+            <mx:VBox label="Links" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
+                 paddingTop="5" horizontalAlign="center">
+                <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
+                                       borderStyle="none" fontSize="14"
+                                       text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs), as well as links to external URLs."/>
+                <mx:ViewStack selectedIndex="{linkIndex}" width="100%" height="100%">
+                    <mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+                        <mx:Label text="You haven't defined any links yet." fontSize="14"/>
+                        <mx:Button label="Create a link" click="addLink()" fontSize="14"/>
+                    </mx:VBox>
+                    <mx:VBox>
+                        <mx:Button label="Add Link..." click="addLink()"/>
+                        <mx:DataGrid dataProvider="{links}" width="100%" rowHeight="28">
+                            <mx:columns>
+                                <util:EIDataGridColumn headerText="Link Name" dataField="label"/>
+                                <util:EIDataGridColumn headerText="Link Type" dataField="type"/>
+                                <util:EIDataGridColumn headerText="" sortable="false" dataField="label"
+                                                       itemRenderer="{linkFactory}"
+                                                       width="100"/>
+                            </mx:columns>
+                        </mx:DataGrid>
+                    </mx:VBox>
+                </mx:ViewStack>
+            </mx:VBox>
+            <mx:VBox label="Filters" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
+                     paddingTop="5" horizontalAlign="center">
+                <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
+                                       borderStyle="none" fontSize="14"
+                                       text="You can define filters at the field level by dragging fields from the left hand list into the drop area below. Any filters you define here will only be applied to this field."/>
+                <filters:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
+                                            paddingRight="10"
+                                            width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
+                                            feedID="{dataSourceID}"
+                                            analysisItems="{analysisItems}" borderStyle="solid" borderThickness="1"/>
+            </mx:VBox>
+        </mx:TabNavigator>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()" id="saveButton"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+
 </util:EITitleWindow>
