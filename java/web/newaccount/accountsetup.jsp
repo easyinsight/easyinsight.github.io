@@ -62,6 +62,8 @@
             user.setFirstName(firstName);
             user.setName(lastName);
             user.setEmail(email);
+            user.setAccountAdmin(true);
+            user.setOptInEmail(true);
             com.easyinsight.users.AccountTransferObject account = new com.easyinsight.users.AccountTransferObject();
             account.setName(company);
             account.setAccountType(Integer.parseInt(request.getParameter("tier")));
