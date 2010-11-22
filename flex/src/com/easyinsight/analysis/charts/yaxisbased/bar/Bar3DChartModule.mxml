@@ -182,8 +182,7 @@ import com.easyinsight.filtering.FilterRawData;
 
         private function onClick(event:ChartItemEvent):void {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, barChartDef);
-                window.data = event.hitData.item;
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, barChartDef, event.hitData.item);
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;

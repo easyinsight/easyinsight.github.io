@@ -79,10 +79,10 @@
             if (dimension != null && event.shiftKey) {
                 var feature:MapFeature = map.getFeatureAt(event.localX, event.localY);
                 if (feature != null) {
-                    var window:PseudoContextWindow = new PseudoContextWindow(dimension, passThrough, this, mapDefinition);
                     var obj:Object = new Object();
                     obj[dimension.qualifiedName()] = feature.data.label;
                     window.data = obj;
+                    var window:PseudoContextWindow = new PseudoContextWindow(dimension, passThrough, this, mapDefinition, obj);
                     PopUpManager.addPopUp(window, this);
                     window.x = event.stageX + 5;
                     window.y = event.stageY + 5;

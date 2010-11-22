@@ -104,8 +104,7 @@
         private function onClick(event:ChartItemEvent):void {
             if (event.shiftKey) {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this, bubbleChart);
-                window.data = event.hitData.item;
+                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this, bubbleChart, event.hitData.item);
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;

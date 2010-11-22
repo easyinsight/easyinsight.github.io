@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.tree {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 
 import flash.display.DisplayObject;
@@ -9,6 +10,7 @@ import mx.core.IUITextField;
 public class CustomTreeRenderer extends AdvancedDataGridGroupItemRenderer {
 
     private var _analysisItem:AnalysisItem;
+    private var _report:AnalysisDefinition;
 
     public function CustomTreeRenderer() {
         super();
@@ -23,9 +25,18 @@ public class CustomTreeRenderer extends AdvancedDataGridGroupItemRenderer {
         _analysisItem = val;
     }
 
+    public function get report():AnalysisDefinition {
+        return _report;
+    }
+
+    public function set report(value:AnalysisDefinition):void {
+        _report = value;
+    }
+
     protected override function commitProperties():void {
         super.commitProperties();
         CustomTreeTextRenderer(label).analysisItem = analysisItem;
+        CustomTreeTextRenderer(label).report = report;
         CustomTreeTextRenderer(label).data = data;
     }
 

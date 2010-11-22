@@ -34,8 +34,7 @@ public class TextCellRenderer extends Text
 
     private function onClick(event:MouseEvent):void {
             if (event.shiftKey) {
-                var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report);
-                window.data = this.data;
+                var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;

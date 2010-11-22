@@ -50,8 +50,7 @@
                 var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel) + 1;
                 var baseLevel:HierarchyLevel = hierarchy.hierarchyLevels.getItemAt(index) as HierarchyLevel;
                 var base:AnalysisItem = baseLevel.analysisItem;
-                var window:PseudoContextWindow = new PseudoContextWindow(hierarchy, passThrough, this, treeDefinition);
-                window.data = item;
+                var window:PseudoContextWindow = new PseudoContextWindow(hierarchy, passThrough, this, treeDefinition, item);
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;

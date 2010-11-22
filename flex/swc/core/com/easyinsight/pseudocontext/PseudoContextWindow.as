@@ -41,9 +41,11 @@ public class PseudoContextWindow extends VBox {
 
     private var analysisDefinition:AnalysisDefinition;
 
-    public function PseudoContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:EventDispatcher, analysisDefinition:AnalysisDefinition) {
+    public function PseudoContextWindow(analysisItem:AnalysisItem, passthroughFunction:Function, passthroughObject:EventDispatcher, analysisDefinition:AnalysisDefinition,
+            data:Object) {
         super();
         this.analysisItem = analysisItem;
+        this.data = data;
         this.passthroughFunction = passthroughFunction;
         this.passthroughObject = passthroughObject;
         this.analysisDefinition = analysisDefinition;
@@ -58,27 +60,21 @@ public class PseudoContextWindow extends VBox {
         }
         if (analysisItem is AnalysisHierarchyItem) {
             var hierarchy:AnalysisHierarchyItem = analysisItem as AnalysisHierarchyItem;
-            var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
-            if (index < (hierarchy.hierarchyLevels.length - 1)) {
-
-            }
-            if (index > 0) {
-
+            //var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
+            for each (var level:HierarchyLevel in hierarchy.hierarchyLevels) {
+                var childItem:AnalysisItem = level.analysisItem;
+                if (data[childItem.qualifiedName()]) {
+                    for each (var hierarchyLink:Link in childItem.links) {
+                        composeLink(hierarchyLink);
+                    }
+                }
             }
         }
         var copyItem:PseudoContextItem = new PseudoContextItem("Copy Value", copyValue);
         items.push(copyItem);
         if (analysisItem.links.length > 0) {
             for each (var link:Link in analysisItem.links) {
-                if (link is URLLink) {
-                    var url:URLLink = link as URLLink;
-                    var urlContextItem:PseudoContextItem = new PseudoContextItem(url.label, urlClick, url);
-                    items.push(urlContextItem);
-                } else if (link is DrillThrough) {
-                    var drillThrough:DrillThrough = link as DrillThrough;
-                    var drillContextItem:PseudoContextItem = new PseudoContextItem(drillThrough.label, drillthroughClick, drillThrough);
-                    items.push(drillContextItem);
-                }
+                composeLink(link);
             }
         }
 
@@ -94,7 +90,17 @@ public class PseudoContextWindow extends VBox {
         setStyle("backgroundAlpha", 1);
     }
 
-
+    private function composeLink(link:Link):void {
+        if (link is URLLink) {
+            var url:URLLink = link as URLLink;
+            var urlContextItem:PseudoContextItem = new PseudoContextItem(url.label, urlClick, url);
+            items.push(urlContextItem);
+        } else if (link is DrillThrough) {
+            var drillThrough:DrillThrough = link as DrillThrough;
+            var drillContextItem:PseudoContextItem = new PseudoContextItem(drillThrough.label, drillthroughClick, drillThrough);
+            items.push(drillContextItem);
+        }
+    }
 
 
     private function onCreationComplete(event:FlexEvent):void {

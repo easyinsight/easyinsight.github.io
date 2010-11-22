@@ -66,7 +66,7 @@ import mx.events.DragEvent;
             for each (var filter:IFilter in filterMap) {
                 if (filter.filterDefinition.field.qualifiedName() == item.qualifiedName()) {
                     filterTile.removeChild(filter as DisplayObject);
-                    filterMap[filter.filterDefinition.field.qualifiedName()] = null;
+                    delete filterMap[filter.filterDefinition.field.qualifiedName()];
                     var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
                     filterDefinitions.removeItemAt(index);
                     if (filterDefinitions.length == 0) {
@@ -84,7 +84,7 @@ import mx.events.DragEvent;
                 for each (var filter:IFilter in filterMap) {
                     if (filter.filterDefinition.field.analysisItemID == itemID) {
                         filterTile.removeChild(filter as DisplayObject);
-                        filterMap[filter.filterDefinition.field.qualifiedName()] = null;
+                        delete filterMap[filter.filterDefinition.field.qualifiedName()];
                         var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
                         filterDefinitions.removeItemAt(index);
                         if (filterDefinitions.length == 0) {
@@ -238,7 +238,7 @@ import mx.events.DragEvent;
 
         public function commandFilterDelete(filter:IEmbeddedFilter):void {
             filterTile.removeChild(filter as DisplayObject);
-			filterMap[filter.filterDefinition.field.qualifiedName()] = null;
+			delete filterMap[filter.filterDefinition.field.qualifiedName()];
 			var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
 			filterDefinitions.removeItemAt(index);
 			if (filterDefinitions.length == 0) {

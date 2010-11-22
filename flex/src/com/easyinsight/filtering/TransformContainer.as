@@ -10,6 +10,8 @@ import flash.display.DisplayObject;
 
 import flash.geom.Point;
 
+import flash.utils.Dictionary;
+
 import flexlib.containers.FlowBox;
 
 import mx.collections.ArrayCollection;
@@ -30,7 +32,7 @@ import mx.managers.ToolTipManager;
 
 public class TransformContainer extends HBox
 {
-    private var filterMap:Object = new Object();
+    private var filterMap:Dictionary = new Dictionary();
     private var filterDefinitions:ArrayCollection = new ArrayCollection();
     private var filterTile:FlowBox;
     private var _feedID:int;
@@ -126,7 +128,7 @@ public class TransformContainer extends HBox
         for each (var filter:IFilter in filterMap) {
             if (filter.filterDefinition.field.qualifiedName() == item.qualifiedName()) {
                 filterTile.removeChild(filter as DisplayObject);
-                filterMap[filter.filterDefinition.field.qualifiedName()] = null;
+                delete filterMap[filter.filterDefinition.field.qualifiedName()];
                 var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
                 filterDefinitions.removeItemAt(index);
                 if (filterDefinitions.length == 0) {
@@ -144,7 +146,7 @@ public class TransformContainer extends HBox
             for each (var filter:IFilter in filterMap) {
                 if (filter.filterDefinition.field.analysisItemID == itemID) {
                     filterTile.removeChild(filter as DisplayObject);
-                    filterMap[filter.filterDefinition.field.qualifiedName()] = null;
+                    delete filterMap[filter.filterDefinition.field.qualifiedName()];
                     var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
                     filterDefinitions.removeItemAt(index);
                     if (filterDefinitions.length == 0) {
@@ -329,7 +331,7 @@ public class TransformContainer extends HBox
             dimWindow.feedID = _feedID;
             dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
             PopUpManager.addPopUp(dimWindow, this, true);
-            dimWindow.x = Math.max(stageX - 220, 30);;
+            dimWindow.x = Math.max(stageX - 220, 30);
             dimWindow.y = stageY - 35;
         }
     }
@@ -427,7 +429,7 @@ public class TransformContainer extends HBox
 
     public function commandFilterDelete(filter:IFilter):void {
         filterTile.removeChild(filter as DisplayObject);
-        filterMap[filter.filterDefinition.field.qualifiedName()] = null;
+        delete filterMap[filter.filterDefinition.field.qualifiedName()];
         var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
         filterDefinitions.removeItemAt(index);
         if (filterDefinitions.length == 0) {

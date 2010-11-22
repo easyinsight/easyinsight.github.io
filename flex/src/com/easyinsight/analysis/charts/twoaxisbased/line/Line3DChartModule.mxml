@@ -81,8 +81,7 @@
 
         private function onClick(event:ChartItemEvent):void {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, lineChartDef);
-                window.data = event.hitData.item;
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, lineChartDef, event.hitData.item);
                 PopUpManager.addPopUp(window, this);
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;

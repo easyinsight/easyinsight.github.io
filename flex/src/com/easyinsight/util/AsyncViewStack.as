@@ -6,7 +6,7 @@ import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportView;
 
 import mx.containers.ViewStack;
-import mx.controls.Alert;
+
 import mx.core.Container;
 [Event(name="asyncLoadStart", type="com.easyinsight.util.AsyncLoadEvent")]
 [Event(name="asyncLoadSuccess", type="com.easyinsight.util.AsyncLoadEvent")]
@@ -90,7 +90,7 @@ public class AsyncViewStack extends ViewStack{
                 for (var propertyName:String in queuedPropertiesForReport) {                    
                     screen[propertyName] = queuedPropertiesForReport[propertyName];
                 }
-                _queuedProperties[idString] = null;
+                delete _queuedProperties[idString];
             }
             loadingScreen = screen;
             var container:Container = screen.getContainer();
