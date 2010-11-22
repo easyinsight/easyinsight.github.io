@@ -24,19 +24,6 @@
         [Bindable]
         private var panelIndex:int;
 
-        private var _solutionID:String;
-
-        [Bindable(event="solutionIDChanged")]
-        public function get solutionID():String {
-            return _solutionID;
-        }
-
-        public function set solutionID(value:String):void {
-            if (_solutionID == value) return;
-            _solutionID = value;
-            dispatchEvent(new Event("solutionIDChanged"));
-        }
-
         private function setup():void {
             if (_initState == 1) {
                 panelIndex = 3;
