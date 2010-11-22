@@ -36,8 +36,7 @@
         }
 
         private function onClick(event:ListEvent):void {
-            var window:PseudoContextWindow = new PseudoContextWindow(dimension1, passThrough, this, crosstabDefinition);
-            window.data = event.itemRenderer;
+            var window:PseudoContextWindow = new PseudoContextWindow(dimension1, passThrough, this, crosstabDefinition, event.itemRenderer);
             PopUpManager.addPopUp(window, this);
             var point:Point = new Point(event.itemRenderer.x, event.itemRenderer.y);
             point = localToGlobal(point);
