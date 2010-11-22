@@ -25,7 +25,6 @@
         import com.easyinsight.framework.PerspectiveFactoryHolder;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.Constants;
-        import com.easyinsight.guest.FloatingGuestWindow;
         import com.easyinsight.listing.HeaderBar;
         import com.easyinsight.listing.IModulePerspective;
         import com.easyinsight.listing.LaunchQuickSearchEvent;
@@ -523,9 +522,9 @@
                 ApplicationSkin.instance().applyUserSettings(User.getInstance().applicationSkin);
             }
             Constants.instance().userName = authResponse.userName;
-            if (User.getInstance().guestUser) {
+            /*if (User.getInstance().guestUser) {
                 FloatingGuestWindow.newWindow(this);
-            }
+            }*/
             loggedIn = true;
             User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
