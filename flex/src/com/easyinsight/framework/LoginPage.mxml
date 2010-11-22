@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" 
         xmlns:framework="com.easyinsight.framework.*" xmlns:account="com.easyinsight.account.*"
         xmlns:kpi="com.easyinsight.kpi.*" xmlns:customupload="com.easyinsight.customupload.*"
         xmlns:guest="com.easyinsight.guest.*"
@@ -14,19 +14,11 @@
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.account.AccountSetupData;
-        import com.easyinsight.customupload.ConnectionInstall;
-        import com.easyinsight.customupload.DataSourceConfiguredEvent;
         import com.easyinsight.preferences.Persona;
-        import com.easyinsight.quicksearch.EIDescriptor;
-        import com.easyinsight.solutions.DataSourceDescriptor;
-        import com.easyinsight.solutions.PostInstallSource;
-        import com.easyinsight.solutions.Solution;
-        import com.easyinsight.solutions.SolutionInstallInfo;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.collections.ArrayCollection;
-        import mx.effects.Effect;
+        import mx.collections.ArrayCollection;        
         import mx.messaging.config.ServerConfig;
 
         [Bindable]
@@ -52,62 +44,21 @@
                 panelIndex = 6;
             } else if (_initState == 3) {
                 panelIndex = 4;
+            } else if (_initState == 4) {
+                panelIndex = 1;
             } else {
                 loginComponent.setupFocus();
             }
         }
 
-        private var _configureInline:Boolean;
-
-        public function set configureInline(value:Boolean):void {
-            _configureInline = value;
-        }
-
         [Bindable]
         private var setupData:AccountSetupData = new AccountSetupData();
-
-        private function gotSolution():void {
-            solution = solutionService.retrieveSolution.lastResult as Solution;
-            solutionService.installSolution.send(int(_solutionID));
-        }
-
-        private var solution:Solution;
-
-        private function installed():void {
-            installResult = solutionService.installSolution.lastResult as ArrayCollection;
-            for each (var solutionInstallInfo:SolutionInstallInfo in installResult) {
-                if (solutionInstallInfo.descriptor.getType() == EIDescriptor.DATA_SOURCE && solutionInstallInfo.requiresConfiguration) {
-                    var configWindow:ConnectionInstall = new ConnectionInstall();
-                    configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
-                    configWindow.percentHeight = 100;
-                    configWindow.percentWidth = 100;
-                    configWindow.onlyDataSource = true;
-                    configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
-                    configWindow.addEventListener("later", onLater, false, 0, true);
-                    removeChild(viewStack);
-                    addChild(configWindow);
-                }
-            }
-        }
 
         private function onLater(event:Event):void {
             dispatchEvent(new Event("allDone"));
         }
 
         private var installResult:ArrayCollection;
-
-        private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
-
-            var dataSourceItems:ArrayCollection = new ArrayCollection();
-
-            for each (var solInstall:SolutionInstallInfo in installResult) {
-                if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE) {
-                    dataSourceItems.addItem(solInstall.descriptor);
-                }
-            }
-            var dataSource:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
-            dispatchEvent(new ConnectionGoEvent(new PostInstallSource(dataSource, solution)));
-        }
 
         private function accountCreated(event:LoginEvent):void {
             dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
@@ -124,12 +75,7 @@
 
         private function applied():void {
             User.getInstance().changeSettings(Persona(setupData.personas.getItemAt(setupData.myPersona)).uiSettings);
-            if (accountType >= _requiredTier && int(_solutionID) > 0 && _configureInline) {
-                ProgressAlert.alert(this, "Establishing connection...", null, solutionService.retrieveSolution, solutionService.installSolution);
-                solutionService.retrieveSolution.send(int(_solutionID));
-            } else {
-                dispatchEvent(new Event("allDone"));
-            }
+            dispatchEvent(new Event("allDone"));            
         }
 
         [Bindable]
@@ -161,6 +107,9 @@
                 dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
             } else if (event.authResponse.accountState == Account.INACTIVE) {
                 panelIndex = 4;
+            } else if (event.authResponse.firstLogin && event.authResponse.accountAdmin) {
+                dispatchEvent(new LoginEvent(LoginEvent.QUIET_LOGIN, event.authResponse));
+                panelIndex = 1;
             } else {
                 dispatchEvent(event);
             }
@@ -184,9 +133,6 @@
         private function onward():void {
             dispatchEvent(new Event("allDone"));
         }
-
-        [Bindable]
-        private var slideEffect:Effect = rightEffect;
 
         private function resendActivationEmail():void {
             ProgressAlert.alert(this, "Resending activation email...", null, userService.resendActivationEmail);
@@ -220,13 +166,6 @@
         [Embed(source="../../../../assets/credit_card_x48.png")]
         public var moneyIcon:Class;
         ]]></mx:Script>
-    <viewStackEffects:Slide id="leftEffect" direction="right"/>
-    <viewStackEffects:Slide id="rightEffect" direction="left"/>
-
-    <mx:RemoteObject destination="solutionService" id="solutionService">
-        <mx:method name="installSolution" result="installed()"/>
-        <mx:method name="retrieveSolution" result="gotSolution()"/>
-    </mx:RemoteObject>
     <mx:RemoteObject destination="login" id="userService">
         <mx:method name="applySetupData" result="applied()"/>
         <mx:method name="reactivate" result="reactivated()"/>
@@ -237,22 +176,30 @@
     <mx:ViewStack selectedIndex="{panelIndex}"
                   id="viewStack" resizeToContent="true"
                   paddingTop="10">
-        <mx:HBox width="100%" verticalAlign="middle" height="100%" hideEffect="{slideEffect}"
-                 showEffect="{slideEffect}">
+        <mx:HBox width="100%" verticalAlign="middle" height="100%">
             <!-- login page -->
             <framework:LoginComponent loginEvent2="loginHandler(event)" id="loginComponent"
                                       y="114"/>
         </mx:HBox>
-        <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
-            <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
-                                         kpiTutorialNext="slideEffect = rightEffect; remaining()"
+        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                     paddingTop="10" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" cornerRadius="10"
+                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
+                <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
+                                         kpiTutorialNext="remaining()"
                                          accountType="{accountType}"/>
-        </mx:VBox>
-        <mx:VBox hideEffect="{slideEffect}" showEffect="{slideEffect}">
-            <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
+            </mx:VBox>
+        </mx:Box>
+        <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:VBox horizontalAlign="center" verticalAlign="middle"
+                     paddingTop="10" paddingBottom="10"
+                     paddingLeft="10" paddingRight="10" cornerRadius="10"
+                     borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
+                <account:InitialPreferences id="preferencesPanel" setupData="{setupData}"
                                         kpiTutorialFinish="finishAccountSetup()" accountType="{accountType}"/>
-        </mx:VBox>
-
+            </mx:VBox>
+        </mx:Box>
         <!--
             additional emails
         -->
@@ -260,7 +207,7 @@
         <!-- welcome back panel -->
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
-                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingTop="10" paddingBottom="10"
                      paddingLeft="10" paddingRight="10" cornerRadius="10"
                      borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
                 <mx:Image source="{moneyIcon}"/>
@@ -276,7 +223,7 @@
         </mx:Box>
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
-                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingTop="10" paddingBottom="10"
                      paddingLeft="10" paddingRight="10" cornerRadius="10"
                      borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF"
                      borderThickness="1">
@@ -294,7 +241,7 @@
         </mx:Box>
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
-                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingTop="10" paddingBottom="10"
                      paddingLeft="10" paddingRight="10" cornerRadius="10"
                      borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
                 <mx:Image source="{mailIcon}"/>
@@ -308,7 +255,7 @@
         <!-- delinquent panel -->
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
-                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingTop="10" paddingBottom="10"
                      paddingLeft="10" paddingRight="10" cornerRadius="10"
                      borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
                 <mx:Image source="{connectionsIcon}"/>
@@ -322,7 +269,7 @@
         </mx:Box>
         <mx:Box paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
             <mx:VBox horizontalAlign="center" verticalAlign="middle"
-                     hideEffect="{slideEffect}" showEffect="{slideEffect}" paddingTop="10" paddingBottom="10"
+                     paddingTop="10" paddingBottom="10"
                      paddingLeft="10" paddingRight="10" cornerRadius="10"
                      borderColor="#DDDDDD" dropShadowEnabled="true" borderStyle="solid" backgroundColor="#FFFFFF">
                 <mx:Image source="{connectionsIcon}"/>

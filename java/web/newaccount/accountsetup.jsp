@@ -69,15 +69,7 @@
             account.setAccountType(Integer.parseInt(request.getParameter("tier")));
             String exists = new com.easyinsight.users.UserService().doesUserExist(user.getUserName(), user.getEmail(), account.getName());
             if (exists == null) {
-                String connectionIDParam = request.getParameter("connectionID");
                 String url = "https://www.easy-insight.com/app";
-                if (connectionIDParam != null && !"".equals(connectionIDParam.trim()) && !"null".equals(connectionIDParam)) {
-                    if (request.getParameter("inline") != null) {
-                        url = url + "/#solutionID=" + connectionIDParam + "&inline=1";
-                    } else {
-                        url = url + "/#solutionID=" + connectionIDParam;
-                    }
-                }
                 new com.easyinsight.users.UserService().createAccount(user, account, request.getParameter("password"), url);
                 accountCreated = true;
             } else {

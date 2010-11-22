@@ -136,9 +136,10 @@ public class UserService {
                 if (personaMap.get(AccountSetupData.BI_GURU) == null) {
                     personaMap.put(AccountSetupData.BI_GURU, new PreferencesService().savePersona(accountSetupData.getPersonas().get(2), conn));
                 }
-                PreparedStatement updateUserStmt = conn.prepareStatement("UPDATE USER SET PERSONA_ID = ? WHERE USER_ID = ?");
+                PreparedStatement updateUserStmt = conn.prepareStatement("UPDATE USER SET PERSONA_ID = ?, INITIAL_SETUP_DONE = ? WHERE USER_ID = ?");
                 updateUserStmt.setLong(1, personaMap.get(accountSetupData.getMyPersona()));
-                updateUserStmt.setLong(2, SecurityUtil.getUserID());
+                updateUserStmt.setBoolean(2, true);
+                updateUserStmt.setLong(3, SecurityUtil.getUserID());
                 updateUserStmt.executeUpdate();
                 for (UserPersonaObject user : accountSetupData.getUsers()) {
                     user.setPersonaID(personaMap.get(user.getPersona()));
@@ -602,7 +603,6 @@ public class UserService {
             account.setCreationDate(new Date());
             configureNewAccount(account);
             User user = createInitialUser(userTransferObject, password, account);
-            user.setInitialSetupDone(true);
             account.addUser(user);
             session.save(account);
             user.setAccount(account);

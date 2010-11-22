@@ -215,7 +215,8 @@
             var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
             if (currentFragment != browserManager.fragment) {
                 currentFragment = browserManager.fragment;
-                if (User.getInstance() != null && User.getInstance().accountState != Account.REACTIVATION_POSSIBLE) {
+                if (User.getInstance() != null && User.getInstance().accountState != Account.REACTIVATION_POSSIBLE &&
+                        !User.getInstance().firstLogin) {
                     parseFragmentObject(o, currentFragment);
                 } else {
                     if (o.solutionID != null && o.solutionID != "") {
@@ -440,6 +441,9 @@
                     toLogin(2);
                 } else if (authResult.accountState == Account.INACTIVE) {
                     toLogin(3);
+                } else if (authResult.firstLogin && authResult.accountAdmin) {
+                    quietLogin(authResult, false);
+                    toLogin(4);
                 } else {
                     quietLogin(authResult, false);
                     toMain();

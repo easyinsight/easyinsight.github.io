@@ -113,7 +113,7 @@ public class User extends EventDispatcher
         _user.currencySymbol = response.currencySymbol;
         _user.applicationSkin = response.applicationSkin;        
         _user.guestUser = response.guestUser;
-        if (_user.firstLogin) {
+        if (_user.firstLogin && !_user.accountAdmin) {
             User.getEventNotifier().dispatchEvent(new Event("firstLogin"));
         } else if (response.accountType == Account.DELINQUENT) {
             User.getEventNotifier().dispatchEvent(new Event("accountDelinquent"));
