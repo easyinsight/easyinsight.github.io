@@ -1,6 +1,5 @@
 package com.easyinsight.administration.feed
 {
-import com.easyinsight.framework.User;
 
 import flash.events.MouseEvent;
 	
@@ -29,8 +28,6 @@ import flash.events.MouseEvent;
 				button.toolTip = "Delete";
 				button.setStyle("icon", deleteIcon);
 				button.addEventListener(MouseEvent.CLICK, deleteUser);
-                if(!User.getInstance().activated)
-                    button.enabled = false;
 
 			}
 			addChild(button);
