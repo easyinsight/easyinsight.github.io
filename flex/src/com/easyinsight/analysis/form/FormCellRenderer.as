@@ -69,8 +69,7 @@ public class FormCellRenderer extends Box
     }
 
     private function onClick(event:MouseEvent):void {
-            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report);
-            window.data = this.data;
+            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, this.data);
             PopUpManager.addPopUp(window, this);
             window.x = event.stageX + 5;
             window.y = event.stageY + 5;
