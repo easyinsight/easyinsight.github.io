@@ -14,7 +14,7 @@
     } else {
         try {
             int tierNumber = Integer.parseInt(tier);
-            if (tierNumber < com.easyinsight.users.Account.PERSONAL || tierNumber > com.easyinsight.users.Account.PLUS) {
+            if (tierNumber < com.easyinsight.users.Account.PERSONAL || tierNumber > com.easyinsight.users.Account.PROFESSIONAL) {
                 response.sendRedirect("index.jsp");
                 return;
             }
@@ -136,7 +136,7 @@
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
         <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a
-                href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+                href="/app/newaccount/" class="signupforfreeButton"></a></div>
         <div class="headline"><a id="productPage" href="/product.html">FEATURES</a> <a id="dataPage" href="/data.html">DATA</a>
             <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="companyPage" href="/company.html">COMPANY</a>
         </div>
@@ -251,7 +251,7 @@
                 |
             </div>
             <div style="float:left;padding-left:40px;">
-                <a href="/pricing.html">Pricing</a>
+                <a href="/app/newaccount/">Pricing</a>
             </div>
             <div style="float:left;padding-left:40px;">
                 |
