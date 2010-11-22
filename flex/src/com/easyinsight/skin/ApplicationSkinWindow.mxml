@@ -59,10 +59,16 @@
         }
 
         private function save():void {
-            for each (var item:ReportFormItem in items) {
-                item.save();
+            var valid:Boolean = true;
+            for each (var validateItem:ReportFormItem in items) {
+                valid = valid && validateItem.validate();
             }
-            preferencesService.saveSkinSettings.send(skin);
+            if (valid) {
+                for each (var item:ReportFormItem in items) {
+                    item.save();
+                }
+                preferencesService.saveSkinSettings.send(skin);
+            }
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">

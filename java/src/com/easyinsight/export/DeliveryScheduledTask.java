@@ -7,6 +7,7 @@ import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.scorecard.*;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
+import com.itextpdf.text.DocumentException;
 
 import javax.mail.MessagingException;
 import javax.persistence.Column;
@@ -82,7 +83,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         //new SendGridEmail().sendAttachmentEmail(email, subjectLine, body, bytes, reportName, htmlEmail);
     }
 
-    private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException {
+    private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException, DocumentException {
 
         PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         getInfoStmt.setLong(1, activityID);
@@ -128,6 +129,20 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         }
                     } else if (deliveryFormat == ReportDelivery.PNG) {
                         new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
+                    } else if (deliveryFormat == ReportDelivery.PDF) {
+                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                        if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
+                            analysisDefinition.updateMetadata();
+                            DataResults dataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+                            if (dataResults instanceof ListDataResults) {
+                                ListDataResults listDataResults = (ListDataResults) dataResults;
+                                byte[] bytes = new ExportService().toListPDF(analysisDefinition, listDataResults, conn);
+                                String reportName = analysisDefinition.getName();
+                                sendEmails(conn, bytes, reportName + ".pdf", accountID, "application/pdf", activityID);
+                            } else {
+                                new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
+                            }
+                        }
                     }
                 } finally {
                     SecurityUtil.clearThreadLocal();

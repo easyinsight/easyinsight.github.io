@@ -11,7 +11,6 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
@@ -32,10 +31,8 @@ import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 
-import java.net.MalformedURLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -287,9 +284,9 @@ public class ExportService {
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
                 analysisDefinition.updateMetadata();
                 ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
-                toListPDF(analysisDefinition, listDataResults, conn);
+                toListPDFInDatabase(analysisDefinition, listDataResults, conn);
             } else {
-                toImagePDF(analysisDefinition, bytes, width, height, conn);
+                toImagePDFDatabase(analysisDefinition, bytes, width, height, conn);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -299,7 +296,11 @@ public class ExportService {
         }
     }
 
-    private void toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn) throws SQLException, DocumentException {
+    public void toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn) throws SQLException, DocumentException {
+        toDatabase(analysisDefinition.getName(), toListPDF(analysisDefinition, listDataResults, conn), conn);
+    }
+
+    public byte[] toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn) throws SQLException, DocumentException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
         dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
@@ -351,10 +352,14 @@ public class ExportService {
         }
         document.add(table);
         document.close();
-        toDatabase(analysisDefinition.getName(), baos.toByteArray(), conn);
+        return baos.toByteArray();
     }
 
-    private void toImagePDF(WSAnalysisDefinition analysisDefinition, byte[] bytes, int width, int height, EIConnection conn) throws DocumentException, IOException, SQLException {
+    public void toImagePDFDatabase(WSAnalysisDefinition analysisDefinition, byte[] bytes, int width, int height, EIConnection conn) throws IOException, DocumentException, SQLException {
+        toDatabase(analysisDefinition.getName(), toImagePDF(bytes, width, height), conn);
+    }
+
+    public byte[] toImagePDF(byte[] bytes, int width, int height) throws DocumentException, IOException, SQLException {
         Document document;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         document = new Document(PageSize.A4.rotate());
@@ -370,7 +375,7 @@ public class ExportService {
         image.scaleAbsolute(pageWidth, adjustedHeight);
         document.add(image);
         document.close();
-        toDatabase(analysisDefinition.getName(), baos.toByteArray(), conn);
+        return baos.toByteArray();
     }
 
     public static String createValue(int dateFormat, AnalysisItem headerItem, Value value) {

@@ -15,13 +15,14 @@ import java.util.Calendar;
  */
 public class WholeFoodsXMLParse implements IWholeFoodsParse {
 
-    private TransactionalLoad rowUtil;
+    private RowUtil rowUtil;
+
+    private boolean updatedWhere = false;
 
     public WholeFoodsXMLParse(String apiKey, String apiSecretKey, String dataSourceName) throws RemoteException {
-        rowUtil = new TransactionalLoad(RowMethod.REPLACE, apiKey, apiSecretKey,  dataSourceName, true, 2000,
-                "Region", "Store", "Store ID", "Item SKU ID", "Item Name", "Quantity", "Quantity UOM", "Week", "$ Sales", "Last Year $ Sales",
-                "Unit Sales", "LY - Unit Sales", "Average Retail Price");
-        rowUtil.startData();
+        rowUtil = new RowUtil(RowMethod.UPDATE, apiKey, apiSecretKey,  dataSourceName, true,
+                "Region", "Store", "Store ID", "Item SKU", "Item Name", "Quantity", "Quantity UOM", "Date", "$ Sales", "$ Sales - Last Year",
+                "Unit Sales", "Unit Sales - Last Year", "Average Retail Price");
     }
 
     public void addPage(String str) throws RemoteException {
@@ -49,7 +50,7 @@ public class WholeFoodsXMLParse implements IWholeFoodsParse {
                     Calendar cal = Calendar.getInstance();
                     cal.set(Calendar.YEAR, year);
                     cal.set(Calendar.WEEK_OF_YEAR, weekOfYear);
-                    cal.set(Calendar.DAY_OF_WEEK, 1);
+                    cal.set(Calendar.DAY_OF_WEEK, 3);
                     cal.set(Calendar.HOUR_OF_DAY, 0);
                     cal.set(Calendar.MINUTE, 0);
                     cal.set(Calendar.SECOND, 0);
@@ -58,6 +59,10 @@ public class WholeFoodsXMLParse implements IWholeFoodsParse {
                     Calendar startCal = Calendar.getInstance();
                     startCal.set(Calendar.YEAR, year);
                     startCal.set(Calendar.WEEK_OF_YEAR, weekOfYear);
+                    if (!updatedWhere) {
+                        rowUtil.where().and("Date", cal.get(Calendar.DAY_OF_YEAR), cal.get(Calendar.YEAR));
+                        updatedWhere = true;
+                    }
                     vals[j] = cal.getTime();
                 } else {
                     vals[j] = finalString;
@@ -100,9 +105,6 @@ public class WholeFoodsXMLParse implements IWholeFoodsParse {
     }
 
     public void done() throws RemoteException {
-        rowUtil.flush();
-        TransactionResults results = rowUtil.generateResults();
-        System.out.println("success = " + results.isSuccessful());
-        System.out.println("failure message = " + results.getFailureMessage());
+        rowUtil.flush();        
     }
 }

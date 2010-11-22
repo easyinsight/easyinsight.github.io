@@ -57,41 +57,68 @@ public class WholeFoodsRunner implements Runnable {
         String apiSecretKey = messageTokens[3];
         String dataSourceName = messageTokens[4];
         String refreshMode = messageTokens[5];
-        Selenium selenium = createSelenium(userID, password);
-        IWholeFoodsParse parseHandler;
-        if ("history".equals(refreshMode)) {
+        {
+            Selenium selenium = createSelenium(userID, password);
+            IWholeFoodsParse parseHandler;
             populateFormForHistory(selenium);
             parseHandler = new WholeFoodsXMLParse(apiKey, apiSecretKey, dataSourceName);
-        } else if ("current".equals(refreshMode)) {
+            boolean loadedReport = false;
+            while (!loadedReport) {
+                try {
+                    selenium.getText("//div[@id='rb_ReportStyleIncrementalFetch_2']/div/span[6]");
+                    loadedReport = true;
+                } catch (Exception e) {
+                    Thread.sleep(30000);
+                }
+            }
+            String pageString = selenium.getText("//div[@id='rb_ReportStyleIncrementalFetch_2']/div/span[6]");
+            String[] tokens = pageString.split(" ");
+            parseHandler.addPage(selenium.getHtmlSource());
+            int pages = Integer.parseInt(tokens[1]);
+            for (int k = 2; k <= pages; k++) {
+                if ((k - 1) % 5 == 0) {
+                    selenium.click("//img[@alt='Next 5 Pages']");
+                } else {
+                    selenium.click("link=" + k);
+                }
+                selenium.waitForPageToLoad("30000");
+                parseHandler.addPage(selenium.getHtmlSource());
+            }
+            parseHandler.done();
+            selenium.stop();
+        }
+        {
+            Selenium selenium = createSelenium(userID, password);
+            IWholeFoodsParse parseHandler;
+
             populateFormForLatest(selenium);
             parseHandler = new WholeFoodsLatestParse(apiKey, apiSecretKey, dataSourceName);
-        } else {
-            throw new RuntimeException("Unrecognized refresh mode " + refreshMode);
-        }
-        boolean loadedReport = false;
-        while (!loadedReport) {
-            try {
-                selenium.getText("//div[@id='rb_ReportStyleIncrementalFetch_2']/div/span[6]");
-                loadedReport = true;
-            } catch (Exception e) {
-                Thread.sleep(30000);
+            
+            boolean loadedReport = false;
+            while (!loadedReport) {
+                try {
+                    selenium.getText("//div[@id='rb_ReportStyleIncrementalFetch_2']/div/span[6]");
+                    loadedReport = true;
+                } catch (Exception e) {
+                    Thread.sleep(30000);
+                }
             }
-        }
-        String pageString = selenium.getText("//div[@id='rb_ReportStyleIncrementalFetch_2']/div/span[6]");
-        String[] tokens = pageString.split(" ");
-        parseHandler.addPage(selenium.getHtmlSource());
-        int pages = Integer.parseInt(tokens[1]);
-        for (int k = 2; k <= pages; k++) {
-            if ((k - 1) % 5 == 0) {
-                selenium.click("//img[@alt='Next 5 Pages']");
-            } else {
-                selenium.click("link=" + k);
-            }
-            selenium.waitForPageToLoad("30000");
+            String pageString = selenium.getText("//div[@id='rb_ReportStyleIncrementalFetch_2']/div/span[6]");
+            String[] tokens = pageString.split(" ");
             parseHandler.addPage(selenium.getHtmlSource());
+            int pages = Integer.parseInt(tokens[1]);
+            for (int k = 2; k <= pages; k++) {
+                if ((k - 1) % 5 == 0) {
+                    selenium.click("//img[@alt='Next 5 Pages']");
+                } else {
+                    selenium.click("link=" + k);
+                }
+                selenium.waitForPageToLoad("30000");
+                parseHandler.addPage(selenium.getHtmlSource());
+            }
+            parseHandler.done();
+            selenium.stop();
         }
-        parseHandler.done();
-        selenium.stop();
     }
 
     private static void populateFormForHistory(Selenium selenium) {
@@ -122,7 +149,7 @@ public class WholeFoodsRunner implements Runnable {
 		selenium.click("//div[@id='mstrPromptsBody']/div[5]/div[6]/table/tbody/tr/td[2]/span[1]/img");
         selenium.click("answerButton");
 		selenium.waitForPageToLoad("30000");
-		selenium.type("answer_8", "51");
+		selenium.type("answer_8", "1");
 		selenium.click("answerButton");
 		selenium.waitForPageToLoad("30000");
     }

@@ -15,6 +15,10 @@ public class ReportFormItem extends FormItem {
         this.property = property;
     }
 
+    public function validate():Boolean {
+        return true;
+    }
+
     protected function getValue():Object {
         return null;
     }
