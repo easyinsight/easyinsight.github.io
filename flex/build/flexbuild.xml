@@ -65,7 +65,7 @@
                     <url rsl-url="rpc_3.5.0.12683.swf"/>
                 </runtime-shared-library-path>
                 <runtime-shared-library-path path-element="../libs/rsl/EICore.swc">
-                    <url rsl-url="https://localhost:4443/app/1/EICore.swf"/>
+                    <url rsl-url="https://localhost:443/app/1/EICore.swf"/>
                 </runtime-shared-library-path>
             </mxmlc>
         </sequential>
@@ -78,7 +78,7 @@
     <target name="modules5" depends="report.worldmap, report.usmap, report.americasmap, report.asiamap, report.europemap, report.middleeastmap"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.kpitreeadmin, perspective.groupdetail"/>
     <target name="modules7" depends="perspective.kpiwindow, perspective.kpitreeview, perspective.datasourceadmin, perspective.analysisitemeditor"/>
-    <target name="modules8" depends="report.africamap"/>
+    <target name="modules8" depends="report.africamap, report.heatmap"/>
 
     <target name="perspective.spreadsheetwizard">
         <buildSWF mainMXML="com/easyinsight/customupload/wizard/SpreadsheetWizard.mxml" swfName="SpreadsheetWizard" buildFile="perspectives/spreadsheet-wizard-module.xml"/>
