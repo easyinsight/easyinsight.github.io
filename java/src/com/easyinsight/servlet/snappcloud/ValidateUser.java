@@ -24,6 +24,6 @@ public class ValidateUser extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String name = request.getParameter("username");
         System.out.println(name);
-        response.setStatus(403);
+        response.setStatus(422);
     }
 }
