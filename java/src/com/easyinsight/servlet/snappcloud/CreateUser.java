@@ -39,6 +39,7 @@ public class CreateUser extends HttpServlet {
             AccountTransferObject account = new AccountTransferObject();
             account.setAccountType(Account.PROFESSIONAL);
             service.createAccount(user, account, password);
+            System.out.println(password);
         } catch(Exception e) {
             success = false;
         }
