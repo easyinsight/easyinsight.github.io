@@ -64,7 +64,7 @@ public class DataSourceCopyUtils {
                 if (insight.isRootDefinition()) {
                     continue;
                 }
-                AnalysisDefinition clonedInsight = insight.clone(result.getKeyReplacementMap(), clonedFeedDefinition.getFields());
+                AnalysisDefinition clonedInsight = insight.clone(result.getKeyReplacementMap(), clonedFeedDefinition.getFields(), false);
                 // need to update keys on the analysis items at this point
                 clonedInsight.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
                 clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());

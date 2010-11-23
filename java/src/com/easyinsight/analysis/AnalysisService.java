@@ -90,7 +90,7 @@ public class AnalysisService {
             for (AnalysisItem item : feed.getFields()) {
                 keyReplacementMap.put(item.getKey(), item.getKey());
             }
-            AnalysisDefinition clone = analysisDefinition.clone(keyReplacementMap, feed.getFields());
+            AnalysisDefinition clone = analysisDefinition.clone(keyReplacementMap, feed.getFields(), false);
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();

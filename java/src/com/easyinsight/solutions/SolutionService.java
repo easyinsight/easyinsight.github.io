@@ -628,7 +628,7 @@ public class SolutionService {
 
     private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report,
                                                         Map<Key, Key> keyReplacementMap, Session session) throws CloneNotSupportedException {
-        AnalysisDefinition clonedReport = report.clone(keyReplacementMap, localDefinition.getFields());
+        AnalysisDefinition clonedReport = report.clone(keyReplacementMap, localDefinition.getFields(), true);
         clonedReport.setSolutionVisible(false);
         clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
         clonedReport.setDataFeedID(localDefinition.getDataFeedID());
@@ -638,23 +638,6 @@ public class SolutionService {
         clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
         clonedReport.setTemporaryReport(true);
         return clonedReport;
-    }
-
-    private InsightDescriptor installReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report,
-                                                        Map<Key, Key> keyReplacementMap, Session session) throws CloneNotSupportedException {
-        AnalysisDefinition clonedReport = report.clone(keyReplacementMap, localDefinition.getFields());
-        clonedReport.setSolutionVisible(false);
-        clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
-        clonedReport.setDataFeedID(localDefinition.getDataFeedID());
-
-        // what to do here...
-
-        clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
-        clonedReport.setTemporaryReport(true);
-        new AnalysisStorage().saveAnalysis(clonedReport, session);
-        // TODO: Add urlKey
-        return new InsightDescriptor(clonedReport.getAnalysisID(), clonedReport.getTitle(),
-                clonedReport.getDataFeedID(), clonedReport.getReportType(),null);
     }
 
     public List<SolutionReportExchangeItem> getSolutionReports() {

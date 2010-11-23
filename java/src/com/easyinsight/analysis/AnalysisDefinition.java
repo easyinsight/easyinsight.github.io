@@ -333,12 +333,24 @@ public class AnalysisDefinition implements Cloneable {
         this.publiclyVisible = publiclyVisible;
     }
 
-    public AnalysisDefinition clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
+    private void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
+        if (changingDataSource) {
+            // TODO: validate calculations and lookup tables--if necessary to create, should emit something with the report
+            analysisItem.setLookupTableID(null);
+        }
+    }
+
+    public AnalysisDefinition clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields, boolean changingDataSource) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(keyMap, allFields));
         analysisDefinition.setUrlKey(null);
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+
+        Map<String, Key> backupKeyMap = new HashMap<String, Key>();
+        for (Map.Entry<Key, Key> entry :  keyMap.entrySet()) {
+            backupKeyMap.put(entry.getKey().toDisplayName(), entry.getValue());
+        }
 
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
 
@@ -347,6 +359,7 @@ public class AnalysisDefinition implements Cloneable {
                 AnalysisItem clonedItem;
                 if (replacementMap.get(analysisItem.getAnalysisItemID()) == null) {
                     clonedItem = analysisItem.clone();
+                    cleanup(clonedItem, changingDataSource);
                     replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
                 } else {
                     clonedItem = replacementMap.get(analysisItem.getAnalysisItemID());
@@ -363,12 +376,14 @@ public class AnalysisDefinition implements Cloneable {
         for (AnalysisItem baseItem : reportItems) {
             if (replacementMap.get(baseItem.getAnalysisItemID()) == null) {
                 AnalysisItem clonedItem = baseItem.clone();
+                cleanup(clonedItem, changingDataSource);
                 replacementMap.put(baseItem.getAnalysisItemID(), clonedItem);
             }
             List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, false);
             for (AnalysisItem item : items) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();
+                    cleanup(clonedItem, changingDataSource);
                     replacementMap.put(item.getAnalysisItemID(), clonedItem);
                 }
             }
@@ -381,6 +396,7 @@ public class AnalysisDefinition implements Cloneable {
                 for (AnalysisItem item : filterItems) {
                     if (replacementMap.get(item.getAnalysisItemID()) == null) {
                         AnalysisItem clonedItem = item.clone();
+                        cleanup(clonedItem, changingDataSource);
                         replacementMap.put(item.getAnalysisItemID(), clonedItem);
                     }
                 }
@@ -394,10 +410,11 @@ public class AnalysisDefinition implements Cloneable {
                 AnalysisItem clonedItem = entry.getValue().clone();
                 replacementMap.put(entry.getValue().getAnalysisItemID(), clonedItem);
                 clonedStructure.put(entry.getKey(), clonedItem);
-                List<AnalysisItem> items = entry.getValue().getAnalysisItems(new ArrayList<AnalysisItem>(), new ArrayList<AnalysisItem>(), false, true, false);
+                List<AnalysisItem> items = entry.getValue().getAnalysisItems(allFields, reportItems, false, true, false);
                 for (AnalysisItem item : items) {
                     if (replacementMap.get(item.getAnalysisItemID()) == null) {
                         AnalysisItem clonedChildItem = item.clone();
+                        cleanup(clonedItem, changingDataSource);
                         replacementMap.put(item.getAnalysisItemID(), clonedChildItem);
                     }
                 }
@@ -407,12 +424,16 @@ public class AnalysisDefinition implements Cloneable {
         }
 
         for (AnalysisItem analysisItem : replacementMap.values()) {
-            if (keyMap != null) {
-                Key key = keyMap.get(analysisItem.getKey());
-                if (key != null) {
-                    analysisItem.setKey(key);
+            Key key = keyMap.get(analysisItem.getKey());
+            if (key != null) {
+                analysisItem.setKey(key);
+            } else {
+                key = backupKeyMap.get(analysisItem.getKey().toDisplayName());
+                if (key == null) {
+                    Key clonedKey = analysisItem.getKey().clone();
+                    analysisItem.setKey(clonedKey);
                 } else {
-                    analysisItem.setKey(analysisItem.getKey().clone());
+                    analysisItem.setKey(key);
                 }
             }
             analysisItem.updateIDs(replacementMap);

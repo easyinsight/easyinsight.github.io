@@ -27,10 +27,18 @@
                 firstNextButton = "Save";
             }
             connectionSave = _report.solutionVisible ? "yes" : "no";
+            if (_report.analysisID == 0) {
+                reportShare = "yes";
+            } else {
+                reportShare = _report.accountVisible ? "yes" : "no";
+            }
         }
 
         [Bindable]
         private var connectionSave:String;
+
+        [Bindable]
+        private var reportShare:String;
 
         [Bindable]
         private var accountVisible:Boolean;
@@ -189,9 +197,9 @@
                 <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
                     <mx:Label text="Do you want to share this report with other users in the account?" fontSize="14"
                             fontWeight="bold"/>
-                    <mx:RadioButtonGroup id="sharingGroup"/>
+                    <mx:RadioButtonGroup id="sharingGroup" selectedValue="{reportShare}"/>
                     <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:RadioButton label="Yes" value="yes" groupName="sharingGroup" selected="true" fontSize="14" tabIndex="0"/>
+                        <mx:RadioButton label="Yes" value="yes" groupName="sharingGroup" fontSize="14" tabIndex="0"/>
                         <mx:RadioButton label="No" value="no" groupName="sharingGroup" fontSize="14" tabIndex="1"/>
                     </mx:HBox>
                     <mx:Spacer height="20"/>
