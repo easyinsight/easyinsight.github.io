@@ -44,7 +44,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
 
     protected void execute(Date now, EIConnection conn) throws Exception {
         try {
-            IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
+            IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID, conn);
             UserStub dataSourceUser = null;
             List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
             for (FeedConsumer owner : owners){
