@@ -595,12 +595,17 @@ public class UserService {
     }
 
     public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password, String sourceURL) {
+        return createAccount(userTransferObject, accountTransferObject, password, sourceURL, Account.WEBSITE);
+    }
+
+    public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password, String sourceURL, int accountSource) {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
             Account account = accountTransferObject.toAccount();
             account.setCreationDate(new Date());
+            account.setAccountSource(accountSource);
             configureNewAccount(account);
             User user = createInitialUser(userTransferObject, password, account);
             account.addUser(user);

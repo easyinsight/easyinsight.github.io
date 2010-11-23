@@ -40,6 +40,9 @@ public class Account {
     public static final int CLOSING = 10;
     public static final int REACTIVATION_POSSIBLE = 11;
 
+    public static final int WEBSITE = 1;
+    public static final int SNAPPCLOUD = 2;
+
     public static final long PERSONAL_MAX = 5000000;
     public static final long BASIC_MAX = 35000000;
     public static final long PLUS_MAX = 90000000;
@@ -68,6 +71,9 @@ public class Account {
 
     @Column(name="account_type")
     private int accountType;
+
+    @Column(name="source")
+    private int accountSource;
 
     @Column(name="max_size")
     private long maxSize;
@@ -366,6 +372,14 @@ public class Account {
 
     public void setGroupID(Long groupID) {
         this.groupID = groupID;
+    }
+
+    public int getAccountSource() {
+        return accountSource;
+    }
+
+    public void setAccountSource(int accountSource) {
+        this.accountSource = accountSource;
     }
 
     public static long getMaxCount(int tier) {
