@@ -3,6 +3,8 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.ColorReportFormItem;
+import com.easyinsight.analysis.ComboBoxReportFormItem;
 import com.easyinsight.analysis.HierarchyDrilldownEvent;
 import com.easyinsight.analysis.HierarchyLevel;
 
@@ -35,7 +37,6 @@ public class TreeMapDefinition extends AnalysisDefinition{
     public var measure2:AnalysisItem;
     public var hierarchy:AnalysisItem;
     public var treeMapDefinitionID:int;
-    public var colorScheme:int = QUALITATIVE;
 
     public var highColor:uint = 0xAAAAFF;
     public var lowColor:uint = 0x333388;
@@ -47,6 +48,15 @@ public class TreeMapDefinition extends AnalysisDefinition{
 
     override public function getFields():ArrayCollection {
         return new ArrayCollection([ measure1, measure2, hierarchy ]);
+    }
+
+    override public function createFormItems():ArrayCollection {
+        var items:ArrayCollection = super.createFormItems();
+        items.addItem(new ComboBoxReportFormItem("Color Strategy", "colorStrategy", colorStrategy,
+                this, ["Linear", "Logarithmic"]));
+        items.addItem(new ColorReportFormItem("High Color", "highColor", highColor, this));
+        items.addItem(new ColorReportFormItem("Low Color", "lowColor", lowColor, this));
+        return items;
     }
 
     override public function populate(fields:ArrayCollection):void {

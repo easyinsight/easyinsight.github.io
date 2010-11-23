@@ -89,7 +89,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
     public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
-        if (listLimitsMetadata != null) {
+        if (listLimitsMetadata != null && listLimitsMetadata.isLimitEnabled()) {
             int count = dataSet.getRows().size();
             limitsResults = new LimitsResults(count >= listLimitsMetadata.getNumber(), count, listLimitsMetadata.getNumber());
             if (listLimitsMetadata.getAnalysisItem() != null) {

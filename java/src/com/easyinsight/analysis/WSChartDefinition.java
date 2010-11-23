@@ -64,7 +64,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
 
     public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
-        if (limitsMetadata != null) {
+        if (limitsMetadata != null && limitsMetadata.isLimitEnabled()) {
             int count = dataSet.getRows().size();
             limitsResults = new LimitsResults(count >= limitsMetadata.getNumber(), count, limitsMetadata.getNumber());
             Map<String, AnalysisItem> structure = new HashMap<String, AnalysisItem>();

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*"
-                title="List Configuration">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisItemUpdateEvent;
@@ -30,7 +29,7 @@
             super.commitProperties();
             var existingLimits:LimitsMetadata = definition.limitsMetadata;
             if (existingLimits != null) {
-                limitsEnabled = true;
+                limitsEnabled = existingLimits.limitEnabled;
 
                 var matchedEntry:LimitsEntry = null;
                 for each (var limitsEntry:LimitsEntry in limitOptions) {
@@ -60,16 +59,13 @@
 
         public function save():void {
 
-            var limitsMetadata:ListLimitsMetadata;
-            if (limitsEnabled) {
-                limitsMetadata = new ListLimitsMetadata();
-
-                var limitsEntry:LimitsEntry = limitsBox.selectedItem as LimitsEntry;
-                if (limitsEntry == topN || limitsEntry == bottomN) {
-                    limitsEntry.number = Number(customLimitInput.text);
-                }
-                limitsEntry.toLimitsMetadata(limitsMetadata);
+            var limitsMetadata:LimitsMetadata = new LimitsMetadata();
+            limitsMetadata.limitEnabled = limitsEnabled;
+            var limitsEntry:LimitsEntry = limitsBox.selectedItem as LimitsEntry;
+            if (limitsEntry == topN || limitsEntry == bottomN) {
+                limitsEntry.number = Number(customLimitInput.text);
             }
+            limitsEntry.toLimitsMetadata(limitsMetadata);
             definition.limitsMetadata = limitsMetadata;
             for each (var reportFormItem:ReportFormItem in reportItems) {
                 reportFormItem.save();
@@ -119,8 +115,8 @@
         </mx:FormItem>
     </mx:Form>
         <mx:HBox horizontalAlign="center" width="100%">
-            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Save" click="save()" styleName="grayButton"/>
             <mx:Button label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
-</util:EITitleWindow>
+</util:EISlimWindow>

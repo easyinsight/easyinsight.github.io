@@ -18,6 +18,9 @@ public class LimitsMetadata implements Serializable, Cloneable {
     @Column(name="number_items")
     private int number;
 
+    @Column(name="limit_enabled")
+    private boolean limitEnabled;
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="limits_metadata_id")
     private long limitsMetadataID;
@@ -28,6 +31,14 @@ public class LimitsMetadata implements Serializable, Cloneable {
 
     public void setLimitsMetadataID(long limitsMetadataID) {
         this.limitsMetadataID = limitsMetadataID;
+    }
+
+    public boolean isLimitEnabled() {
+        return limitEnabled;
+    }
+
+    public void setLimitEnabled(boolean limitEnabled) {
+        this.limitEnabled = limitEnabled;
     }
 
     public boolean isTop() {

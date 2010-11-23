@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*">
+    <mx:Script>
+		<![CDATA[
+
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _definition:AnalysisDefinition;
+
+        [Bindable]
+        private var limitsEnabled:Boolean;
+
+        [Bindable]
+        private var customLimitEnabled:Boolean;
+
+        public function set definition(definition:AnalysisDefinition):void {
+            this._definition = definition;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            reportItems = new ArrayCollection();
+            for each (var formItem:ReportFormItem in _definition.createFormItems()) {
+                form.addChild(formItem);
+                reportItems.addItem(formItem);
+            }
+        }
+
+        private var reportItems:ArrayCollection;
+
+        public function save():void {
+            for each (var reportFormItem:ReportFormItem in reportItems) {
+                reportFormItem.save();
+            }
+            dispatchEvent(new AnalysisItemUpdateEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        public function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+		]]>
+    </mx:Script>
+    <mx:VBox paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
+    <mx:Form id="form" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+    </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

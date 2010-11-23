@@ -5,6 +5,7 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
+import com.easyinsight.analysis.GenericDefinitionEditWindow;
 import com.easyinsight.analysis.HierarchyDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
@@ -12,29 +13,22 @@ import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 
-import flash.events.Event;
+import com.easyinsight.util.PopUpUtil;
 
-import mx.binding.utils.BindingUtils;
-import mx.collections.ArrayCollection;
-import mx.containers.HBox;
-import mx.controls.ComboBox;
+import flash.events.MouseEvent;
+
+import mx.controls.Button;
 import mx.controls.Label;
-import mx.events.FlexEvent;
+import mx.managers.PopUpManager;
 
 public class TreeMapControlBar extends ReportControlBar implements IReportControlBar {
 
     private var hierarchyGrouping:ListDropAreaGrouping;
     private var areaMeasureGrouping:ListDropAreaGrouping;
     private var colorMeasureGrouping:ListDropAreaGrouping;
-    private var colorSchemeBox:ComboBox;
-    private var _colorScheme:int = 0;
     private var mapDefinition:TreeMapDefinition;
 
     public function TreeMapControlBar() {
-        colorSchemeBox = new ComboBox();
-        colorSchemeBox.addEventListener(Event.CHANGE, onSchemeChange);
-        colorSchemeBox.dataProvider = new ArrayCollection([ "Depth", "Div-Red-Green", "Qualitative" ]);
-        BindingUtils.bindProperty(colorSchemeBox, "selectedIndex", this, "colorScheme");
         hierarchyGrouping = new ListDropAreaGrouping();
         hierarchyGrouping.maxElements = 1;
         hierarchyGrouping.dropAreaType = HierarchyDropArea;
@@ -50,25 +44,16 @@ public class TreeMapControlBar extends ReportControlBar implements IReportContro
         setStyle("verticalAlign", "middle");
     }
 
-
-    [Bindable]
-    public function get colorScheme():int {
-        return _colorScheme;
-    }
-
-    public function set colorScheme(value:int):void {
-        if (_colorScheme == value) return;
-        _colorScheme = value;
-        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-    }
-
-    private function onSchemeChange(event:Event):void {
-        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA, false));
-    }
+    [Embed(source="../../../../../assets/table_edit.png")]
+    public var tableEditIcon:Class;
 
     override protected function createChildren():void {
         super.createChildren();
-        addChild(colorSchemeBox);
+        var listEditButton:Button = new Button();
+        listEditButton.setStyle("icon", tableEditIcon);
+        listEditButton.toolTip = "Edit Tree Map Properties...";
+        listEditButton.addEventListener(MouseEvent.CLICK, editList);
+        addChild(listEditButton);
         var groupingLabel:Label = new Label();
         groupingLabel.text = "Hierarchy:";
         groupingLabel.setStyle("fontSize", 14);
@@ -96,20 +81,26 @@ public class TreeMapControlBar extends ReportControlBar implements IReportContro
         }
     }
 
+    private function editList(event:MouseEvent):void {
+        var listWindow:GenericDefinitionEditWindow = new GenericDefinitionEditWindow();
+        listWindow.definition = mapDefinition;
+        listWindow.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        PopUpManager.addPopUp(listWindow, this, true);
+        PopUpUtil.centerPopUp(listWindow);
+    }
+
     private function requestListData(event:AnalysisItemUpdateEvent):void {
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     public function set analysisDefinition(analysisDefinition:AnalysisDefinition):void {
         mapDefinition = analysisDefinition as TreeMapDefinition;
-        colorScheme = mapDefinition.colorScheme - 1;
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {
         mapDefinition.hierarchy = hierarchyGrouping.getListColumns()[0];
         mapDefinition.measure1 = areaMeasureGrouping.getListColumns()[0];
         mapDefinition.measure2 = colorMeasureGrouping.getListColumns()[0];
-        mapDefinition.colorScheme = colorSchemeBox.selectedIndex + 1;
         return mapDefinition;
     }
 

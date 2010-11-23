@@ -7,6 +7,7 @@ package com.easyinsight.analysis
 		public var top:Boolean;
 		public var number:int;
 		public var limitsMetadataID:int;
+        public var limitEnabled:Boolean;
 		
 		public function LimitsMetadata()
 		{

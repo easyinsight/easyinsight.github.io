@@ -1,0 +1,1 @@
+alter table limits_metadata add limit_enabled tinyint(4) not null default 1;
