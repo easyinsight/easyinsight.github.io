@@ -103,11 +103,20 @@
         <servlet-class>com.easyinsight.servlet.snappcloud.ValidateUser</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>SnappCloudCreateUser</servlet-name>
+        <servlet-class>com.easyinsight.servlet.snappcloud.CreateUser</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>SnappCloudValidateUser</servlet-name>
         <url-pattern>/validateUser</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>SnappCloudCreateUser</servlet-name>
+        <url-pattern>/createUser</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>MessageBrokerServlet</servlet-name>
