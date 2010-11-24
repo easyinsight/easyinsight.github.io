@@ -41,6 +41,9 @@
             items.addItem(new ColorReportFormItem("Header Bar Divider Color", "headerBarDividerColor", skin.headerBarDividerColor, skin));
             items.addItem(new ColorReportFormItem("Center Canvas Background Color", "centerCanvasBackgroundColor", skin.centerCanvasBackgroundColor, skin));
             items.addItem(new NumericReportFormItem("Center Canvas Background Alpha", "centerCanvasBackgroundAlpha", skin.centerCanvasBackgroundAlpha, skin, 0, 1));
+
+            items.addItem(new ImageReportFormItem("Report Editor Background Image", "reportBackground", skin.reportBackground, skin));
+            items.addItem(new ComboBoxReportFormItem("Report Editor Background Styling", "reportBackgroundSize", skin.reportBackgroundSize, skin, ["100%", "Auto"]));
             var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
             lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
             for each (var item:ReportFormItem in items) {

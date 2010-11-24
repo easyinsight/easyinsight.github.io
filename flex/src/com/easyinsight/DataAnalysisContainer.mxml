@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Module xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-                     xmlns:analysis="com.easyinsight.analysis.*"
-                     xmlns:datasources="com.easyinsight.datasources.*"
-                     creationComplete="initializeForWorksheet()" width="100%"
-                     height="100%"
-                     xmlns:util="com.easyinsight.util.*"
-                     xmlns:filtering="com.easyinsight.filtering.*"
-                     xmlns:feed="com.easyinsight.administration.feed.*" doubleClickEnabled="true"
-                     paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
-        implements="com.easyinsight.listing.IPerspective">
-    <mx:states>
+<skin:BackgroundImage xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+                      xmlns:analysis="com.easyinsight.analysis.*"
+                      xmlns:datasources="com.easyinsight.datasources.*"
+                      creationComplete="initializeForWorksheet()" width="100%"
+                      height="100%"
+                      xmlns:util="com.easyinsight.util.*"
+                      xmlns:filtering="com.easyinsight.filtering.*"
+                      xmlns:feed="com.easyinsight.administration.feed.*" doubleClickEnabled="true"
+                      implements="com.easyinsight.listing.IPerspective" xmlns:skin="com.easyinsight.skin.*" applyCenterScreenLogic="false">
+    <skin:states>
         <mx:State name="NotLoggedIn">
             <mx:RemoveChild target="{saveButton}"/>
             <mx:RemoveChild target="{saveAsButton}"/>
@@ -26,31 +25,19 @@
         <mx:State name="Free" basedOn="Individual">
 
         </mx:State>
-    </mx:states>
+    </skin:states>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.analysis.AddedItemUpdateEvent;
-        import com.easyinsight.analysis.AnalysisCalculation;
         import com.easyinsight.analysis.AnalysisChangedEvent;
-        import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
-        import com.easyinsight.analysis.AnalysisLatitude;
-        import com.easyinsight.analysis.AnalysisList;
-        import com.easyinsight.analysis.AnalysisLongitude;
-        import com.easyinsight.analysis.AnalysisStep;
-        import com.easyinsight.analysis.AnalysisText;
         import com.easyinsight.analysis.AnalysisUtil;
-        import com.easyinsight.analysis.AnalysisZipCode;
         import com.easyinsight.analysis.AvailableFieldRenderer;
         import com.easyinsight.analysis.ControllerLookup;
-        import com.easyinsight.analysis.CoordinateValue;
         import com.easyinsight.analysis.DataServiceEvent;
-        import com.easyinsight.analysis.DerivedAnalysisDimension;
-        import com.easyinsight.analysis.DrillThrough;
-        import com.easyinsight.analysis.DrillThroughEvent;
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.FieldDoubleClickEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
@@ -61,9 +48,6 @@
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
-        import com.easyinsight.analysis.SixSigmaMeasure;
-        import com.easyinsight.analysis.StringValue;
-        import com.easyinsight.analysis.URLLink;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -75,7 +59,6 @@
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
@@ -85,7 +68,6 @@
         import mx.binding.utils.ChangeWatcher;
         import mx.collections.Sort;
         import mx.events.DragEvent;
-        import mx.events.ListEvent;
 
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.AnalysisCloseEvent;
@@ -273,12 +255,6 @@
             selectionWatcher = BindingUtils.bindProperty(dataViewFactory, "reportSelectionEnabled", this, "reportSelectionEnabled");
             dataControlVBox.addChild(dataViewFactory);
             dataViewFactory.retrieveData();
-        }
-
-        protected override function commitProperties():void {
-            super.commitProperties();
-            setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
-            setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
         }
 
         private var _reportSelectable:Boolean = false;
@@ -664,7 +640,7 @@
         }
 
         private function initializeState():void {
-            if (analysisDefinition != null) {
+            if (analysisDefinition != null && analysisDefinition.analysisID > 0) {
                 ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForInsight);
                 analysisService.getUserCapabilitiesForInsight.send(dataSourceID, analysisDefinition.analysisID);
             } else {
@@ -1013,24 +989,6 @@
             dispatchEvent(new Event("reportSelectionEnabledChanged"));
         }
 
-        private function blah():void {
-            var analysisStep:AnalysisStep;
-            var analysisLat:AnalysisLatitude;
-            var analysisLong:AnalysisLongitude;
-            var analysisText:AnalysisText;
-            var analysisZip:AnalysisZipCode;
-            var sigma:SixSigmaMeasure;
-            var tags:AnalysisList;
-            var hierarchy:AnalysisHierarchyItem;
-            var calc:AnalysisCalculation;
-            var derived:DerivedAnalysisDimension;
-            var urlLink:URLLink;
-            var drillthrough:DrillThrough;
-            var coordinate:CoordinateValue;
-            var stringValue:StringValue;
-            var drill:DrillThroughEvent;
-        }
-
         [Bindable]
         private var fieldsIndex:int = 0;
 
@@ -1050,10 +1008,10 @@
         <mx:method name="getUserCapabilitiesForInsight" result="gotUserCapabilitiesForInsight()"/>
     </mx:RemoteObject>
     <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}"/>
-    <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275">
+    <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
         <mx:HBox verticalAlign="middle" id="controlBar">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
-               toolTip="Close"/>
+                       toolTip="Close"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                        toolTip="Save" enabled="{!_previewMode &amp;&amp; !guestMode}"/>
@@ -1061,14 +1019,15 @@
                        toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !guestMode}"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="refreshButton" toolTip="Refresh Data"
-               icon="@Embed(source='../../../assets/refresh.png')"
-               click="dataView.forceRetrieve()"/>
+                       icon="@Embed(source='../../../assets/refresh.png')"
+                       click="dataView.forceRetrieve()"/>
             <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
                        icon="@Embed(source='../../../assets/table.png')" click="newReport()"/>
             <mx:Button id="reportsButton" icon="@Embed(source='../../../assets/tables_x16.png')" click="toReports()"
-                       toolTip="View All Reports for Data Source" enabled="{!_previewMode &amp;&amp; canMultiViewAnalysis}"/>
+                       toolTip="View All Reports for Data Source"
+                       enabled="{!_previewMode &amp;&amp; canMultiViewAnalysis}"/>
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
@@ -1078,57 +1037,66 @@
                          paddingBottom="0"
                          paddingLeft="0" paddingRight="0" resizeToContent="true">
             <analysis:ReportMetadataTab id="reportMetadataTab" dataSourceInfo="{dataSourceInfo}"
-                    dataView="{dataView}"/>
-            <analysis:AboutReportTab id="aboutReportTab" report="{analysisDefinition}"/>
-            <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
-                    wrappers="{wrappers}" availableFields="{availableFields}"
-                    dataView="{dataView}" analysisItemEdit="sortFields()"
-                    dataSourceID="{dataSourceID}" reportAudit="{auditString}"/>
+                                        dataView="{dataView}" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+            <analysis:AboutReportTab id="aboutReportTab" report="{analysisDefinition}"  backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+            <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}"
+                                    dataService="{dataService}"
+                                    wrappers="{wrappers}" availableFields="{availableFields}"
+                                    dataView="{dataView}" analysisItemEdit="sortFields()"
+                                    dataSourceID="{dataSourceID}" reportAudit="{auditString}" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
-                                          paddingRight="10" label="Filters" icon="@Embed(source='../../../assets/funnel.png')"
-                                          width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
+                                          paddingRight="10" label="Filters"
+                                          icon="@Embed(source='../../../assets/funnel.png')"
+                                          width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".9"
                                           feedID="{dataSourceID}"
                                           analysisItems="{wrappers}" minHeight="40">
                 <mx:Button id="selectionModeButton" icon="@Embed(source='../../../assets/funnel.png')"
                            toolTip="{reportSelectableTooltip}" click="reportSelectionEnabled = !reportSelectionEnabled"
-                        enabled="{reportSelectable}"/>
+                           enabled="{reportSelectable}"/>
                 <mx:Button id="filterButton" icon="@Embed(source='../../../assets/funnel_new.png')"
-                           toolTip="{includeFilterDataTooltip}" click="createFilter()" enabled="{reportSelectionEnabled}"/>
+                           toolTip="{includeFilterDataTooltip}" click="createFilter()"
+                           enabled="{reportSelectionEnabled}"/>
                 <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"
                            toolTip="{excludeFilterDataTooltip}" click="exclude()" enabled="{reportSelectionEnabled}"/>
             </filtering:TransformContainer>
-            <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab"/>
-            <analysis:ReportSharingTab analysisDefinition="{analysisDefinition}" originSolution="{originSolution}" id="reportSharingTab"
-                    reportSaveable="{reportSaveable}" canSubscribeToFeed="{canSubscribeToFeed}" canAddFeedToGroup="{canAddFeedToGroup}"
-                    canSaveToMyData="{canSubscribeToInsight}" dataService="{dataService}"/>
-            
+            <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+            <analysis:ReportSharingTab analysisDefinition="{analysisDefinition}" originSolution="{originSolution}"
+                                       id="reportSharingTab"
+                                       reportSaveable="{reportSaveable}" canSubscribeToFeed="{canSubscribeToFeed}"
+                                       canAddFeedToGroup="{canAddFeedToGroup}"
+                                       canSaveToMyData="{canSubscribeToInsight}" dataService="{dataService}"
+                     backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+
         </mx:TabNavigator>
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">
             <mx:VBox height="100%" width="240" id="leftHandBox">
                 <mx:HBox>
                     <mx:Label text="Report Type:" fontWeight="bold"/>
-                    <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)" id="analysisState"
-                                                   mode="all"/>
+                    <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)"
+                                                       id="analysisState"
+                                                       mode="all"/>
                 </mx:HBox>
 
 
                 <mx:VBox height="100%" width="100%" verticalGap="0" borderThickness="1" borderColor="#DCE2F8"
                          borderStyle="solid" dropShadowEnabled="true">
                     <mx:Canvas width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
-                    <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center" verticalAlign="middle" height="28">
+                    <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center" verticalAlign="middle"
+                            height="28">
                         <mx:Label text="{fieldsLabel}" color="0xFFFFFF" fontWeight="bold"/>
                     </mx:Box>
                     <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
-                                 id="fieldGrid" backgroundColor="#FFFFFF"
-                                 alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
-                                 dragComplete="onDragComplete(event)" mouseDown="onDragStart()"
-                                 mouseUp="onDragEnd()" showHeaders="false" groupItemRenderer="{rendererFactory}">
+                                         id="fieldGrid" backgroundColor="#FFFFFF"
+                                         alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
+                                         dragComplete="onDragComplete(event)" mouseDown="onDragStart()"
+                                         mouseUp="onDragEnd()" showHeaders="false"
+                                         groupItemRenderer="{rendererFactory}">
                         <mx:dataProvider>
                             <mx:HierarchicalData source="{availableFields}"/>
                         </mx:dataProvider>
                         <mx:columns>
-                            <mx:AdvancedDataGridColumn headerText="" dataField="displayName"/>                            
+                            <mx:AdvancedDataGridColumn headerText="" dataField="displayName"/>
                         </mx:columns>
                     </mx:AdvancedDataGrid>
                 </mx:VBox>
@@ -1136,4 +1104,4 @@
             <mx:VBox width="100%" height="100%" id="dataControlVBox"/>
         </mx:HDividedBox>
     </mx:VBox>
-</mx:Module>
+</skin:BackgroundImage>

@@ -3,7 +3,6 @@ package com.easyinsight.analysis.service {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataServiceEvent;
-import com.easyinsight.analysis.EmptyValue;
 import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.Value;
@@ -98,10 +97,6 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         metadata.utcOffset = new Date().getTimezoneOffset();
         metadata.refreshAllSources = refreshAllSources;
         dataRemoteSource.list.send(definition, metadata);
-    }
-
-    private function blah():void {
-        var emptyValue:EmptyValue;
     }
 }
 }

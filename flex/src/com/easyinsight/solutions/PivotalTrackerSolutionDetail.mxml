@@ -9,7 +9,7 @@
         }
         ]]></mx:Script>
     <mx:HBox width="1100" height="100%" horizontalGap="0">
-        <solutions:HeaderShadeArea width="50" height="100%" leftColor="{ApplicationSkin.instance().coreAppBackgroundColor}" rightColor="#FFFFFF"/>
+        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#000000" rightColor="#FFFFFF"/>
 
         <mx:VBox width="1000" height="100%" backgroundColor="#FFFFFF" horizontalAlign="center" verticalGap="10"
                  paddingBottom="20" paddingLeft="20"
@@ -39,6 +39,6 @@
                          text="Take advantage of Easy Insight to extend your Pivotal Tracker capabilities to the next level of visibility and analysis. Keep a pulse on your iteration progress through KPIs of story count and iteration velocity. Easily apply custom filters to analyze data by project, story, iteration and developer. View data as lists, charte, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."
                          fontSize="14"/>
         </mx:VBox>
-        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="{ApplicationSkin.instance().coreAppBackgroundColor}"/>
+        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="#000000"/>
     </mx:HBox>
 </solutions:SolutionDetailRenderer>

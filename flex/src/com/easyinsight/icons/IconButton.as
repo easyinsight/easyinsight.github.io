@@ -15,6 +15,8 @@ public class IconButton extends VBox {
         addEventListener(MouseEvent.CLICK, clicked);
         this.horizontalScrollPolicy = "off";
         this.verticalScrollPolicy = "off";
+        imageField = new Image();
+        labelField = new Label();
     }
 
     private function clicked(event:MouseEvent):void {
@@ -23,8 +25,8 @@ public class IconButton extends VBox {
 
     override public function set data(val:Object):void {
         _iconFile = val as Icon;
-        if (imageField != null) imageField.load("/app/assets/icons/32x32/" + _iconFile.path);
-        if (labelField != null) labelField.text = _iconFile.name;
+        imageField.load("/app/assets/icons/32x32/" + _iconFile.path);
+        labelField.text = _iconFile.name;
     }
 
     override public function get data():Object {
@@ -36,11 +38,9 @@ public class IconButton extends VBox {
         var imageBox:HBox = new HBox();
         imageBox.percentWidth = 100;
         imageBox.setStyle("horizontalAlign", "center");
-        imageField = new Image();
         if (_iconFile != null) imageField.load(_iconFile.path);
         imageBox.addChild(imageField);
         addChild(imageBox);
-        labelField = new Label();
         labelField.maxWidth = 80;
         labelField.truncateToFit = true;
         if (_iconFile != null) labelField.text = _iconFile.name;

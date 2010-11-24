@@ -26,6 +26,7 @@
         }
 
         private function determineEditor():void {
+
             if (User.getSharedObject() != null) {
                 var editorType:String = User.getSharedObject().data["kpiEditor"];
                 if (editorType != null) {

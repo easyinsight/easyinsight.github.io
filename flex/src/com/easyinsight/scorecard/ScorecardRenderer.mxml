@@ -374,7 +374,7 @@
             </mx:HBox>
         </mx:VBox>
         <mx:Box width="100%" height="250" horizontalAlign="center" verticalAlign="middle">
-            <!--<mx:ProgressBar label="Refreshing the scorecard..." indeterminate="{baseIndex == 4}"/>-->
+            <mx:ProgressBar label="Refreshing the scorecard..." indeterminate="{baseIndex == 4}"/>
         </mx:Box>
     </mx:ViewStack>
 </mx:VBox>

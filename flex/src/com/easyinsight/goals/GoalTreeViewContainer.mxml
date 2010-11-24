@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
-                xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()"
-         implements="com.easyinsight.util.IAsyncScreen, com.easyinsight.listing.IPerspective">
+           xmlns:goals="com.easyinsight.goals.*" xmlns:skin="com.easyinsight.skin.*" width="100%" height="100%"
+           creationComplete="setup()"
+           implements="com.easyinsight.util.IAsyncScreen, com.easyinsight.listing.IPerspective">
     <mx:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBox}"/>
@@ -16,7 +17,6 @@
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.ModelessWindowEvent;
 
         import com.easyinsight.util.PopUpUtil;
@@ -109,13 +109,6 @@
             }
             if (!_showFullScreen) {
                 buttonBox.removeChild(fullScreenButton);
-            }
-        }
-
-        override protected function commitProperties():void {
-            if (!_embedded) {
-                setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
-                setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
             }
         }
 
@@ -240,31 +233,36 @@
             subTreePresentColor: #99ccff;
         }
     </mx:Style>
-    <mx:VBox width="100%" height="100%">
-    <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
-        <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" label="Back" labelPlacement="bottom"/>
-        <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data" label="Refresh" labelPlacement="bottom"/>
-        <mx:Button id="fullScreenButton" icon="{fullScreenIcon}" click="toFullScreen()" toolTip="View in Full Screen" label="Full Screen" labelPlacement="bottom"/>
-        <mx:Button id="editButton" icon="{editIcon}" click="editTree()" toolTip="Edit the Goal Tree" label="Edit Tree" labelPlacement="bottom" visible="{editAvailable}"/>
-        <mx:VRule height="60"/>
-        <mx:HBox id="parentsBox"/>
-        <!--<mx:TileList id="parentsBox" itemRenderer="com.easyinsight.goals.GoalTreeIconRenderer" dataProvider="{parentTrees}" height="80"
-                backgroundAlpha="0" borderStyle="none" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"
-                columnCount="{columnCount}"/>-->
-    </mx:HBox>
-    <mx:HRule width="100%" id="hrule"/>
-    <mx:VBox width="100%" height="100%" paddingRight="15" paddingTop="15" paddingLeft="15" paddingBottom="15">
-        <mx:Canvas height="100%" width="100%" backgroundAlpha="0">
-            <ilog:OrgChart id="myOrgChart" dataProvider="{_goalTreeNodes}"
-                           width="100%" height="100%" minZoomLevel="1" maxZoomLevel="1" allowSelection="false">
-                <ilog:itemRenderer>
-                    <mx:Component>
-                        <goals:GoalDataRenderer/>
-                    </mx:Component>
-                </ilog:itemRenderer>
-            </ilog:OrgChart>
-        </mx:Canvas>
-    </mx:VBox>
-    </mx:VBox>
-
+    <skin:BackgroundImage width="100%" height="100%" applyCenterScreenLogic="false">
+        <mx:VBox width="100%" height="100%">
+            <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
+                <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" label="Back"
+                           labelPlacement="bottom"/>
+                <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data"
+                           label="Refresh" labelPlacement="bottom"/>
+                <mx:Button id="fullScreenButton" icon="{fullScreenIcon}" click="toFullScreen()"
+                           toolTip="View in Full Screen" label="Full Screen" labelPlacement="bottom"/>
+                <mx:Button id="editButton" icon="{editIcon}" click="editTree()" toolTip="Edit the Goal Tree"
+                           label="Edit Tree" labelPlacement="bottom" visible="{editAvailable}"/>
+                <mx:VRule height="60"/>
+                <mx:HBox id="parentsBox"/>
+                <!--<mx:TileList id="parentsBox" itemRenderer="com.easyinsight.goals.GoalTreeIconRenderer" dataProvider="{parentTrees}" height="80"
+                    backgroundAlpha="0" borderStyle="none" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"
+                    columnCount="{columnCount}"/>-->
+            </mx:HBox>
+            <mx:HRule width="100%" id="hrule"/>
+            <mx:VBox width="100%" height="100%" paddingRight="15" paddingTop="15" paddingLeft="15" paddingBottom="15">
+                <mx:Canvas height="100%" width="100%" backgroundAlpha="0">
+                    <ilog:OrgChart id="myOrgChart" dataProvider="{_goalTreeNodes}"
+                                   width="100%" height="100%" minZoomLevel="1" maxZoomLevel="1" allowSelection="false">
+                        <ilog:itemRenderer>
+                            <mx:Component>
+                                <goals:GoalDataRenderer/>
+                            </mx:Component>
+                        </ilog:itemRenderer>
+                    </ilog:OrgChart>
+                </mx:Canvas>
+            </mx:VBox>
+        </mx:VBox>
+    </skin:BackgroundImage>
 </mx:Module>

@@ -143,7 +143,6 @@
             if (accept) DragManager.acceptDragDrop(event.target as TextArea);
         }
 
-        private var savedExplanation:FunctionExplanation;
         private var explanationFunction:String;
 
         private function dragDropHandler(event:DragEvent):void {

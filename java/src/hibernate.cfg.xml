@@ -28,7 +28,6 @@
         <property name="show_sql">false</property>
 
         <mapping class="com.easyinsight.users.User"/>
-        <mapping class="com.easyinsight.users.Permission"/>
         <mapping class="com.easyinsight.analysis.AnalysisDefinition"/>
         <mapping class="com.easyinsight.analysis.Tag"/>
         <mapping class="com.easyinsight.analysis.TagCloud"/>

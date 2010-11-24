@@ -15,6 +15,7 @@
         import com.easyinsight.analysis.conditions.StatefulConditionRenderer;
         import com.easyinsight.filtering.FilterRawData;
 
+
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import ilog.maps.MapBase;
@@ -29,7 +30,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
+
         import mx.controls.ToolTip;
         import mx.formatters.Formatter;
         import mx.graphics.SolidColor;

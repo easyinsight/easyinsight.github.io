@@ -362,7 +362,7 @@
                     ProgressAlert.alert(this, "Saving the KPI...", null, scorecardService.updateKPI);
                     var metadata2:InsightRequestMetadata = new InsightRequestMetadata();
                     metadata2.utcOffset = new Date().getTimezoneOffset();
-                    scorecardService.updateKPI(_kpi,  metadata2);
+                    scorecardService.updateKPI(_kpi, metadata2);
                 }
             } else {
                 ProgressAlert.alert(this, "Saving the KPI...", null, kpiService.saveKPI);

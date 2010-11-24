@@ -196,6 +196,7 @@
                         filterDefinition.filteredValues = new ArrayCollection([coordinateValue.zip]);
                         filterDefinition.enabled = true;
                         filterDefinition.inclusive = true;
+                        filterDefinition.singleValue = true;
                         var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
                         if (event.drillThrough.miniWindow) {
                             dispatchEvent(new ReportWindowEvent(event.report.id, 0, 0, filters, event.report.dataFeedID, event.report.reportType));

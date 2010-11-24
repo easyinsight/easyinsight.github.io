@@ -42,9 +42,12 @@
 
         private var _biz:Boolean = false;
 
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var defaultReportBackground:Class;
+
         protected override function commitProperties():void {
             super.commitProperties();
-            solutionGrid.setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
+            solutionGrid.setStyle("backgroundImage", defaultReportBackground);
             solutionGrid.setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
         }
 
@@ -155,12 +158,6 @@
                  break;*/
             }
             return okay;
-        }
-
-        private function blah():void {
-            var context:FlatFileUploadContext;
-            var info:FieldUploadInfo;
-            var response:UploadResponse;
         }
 
         private function updateFilters():void {

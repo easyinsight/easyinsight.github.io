@@ -7,9 +7,6 @@
         import com.easyinsight.icons.IconSelectionEvent;
         import com.easyinsight.icons.IconSelectionWindow;
         import com.easyinsight.kpi.KPI;
-        import com.easyinsight.listing.DataFeedDescriptor;
-        import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.solutions.Solution;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.DataGrid;
@@ -82,12 +79,12 @@
         public function set goalName(val:String):void {
             _goalName = val;
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-          }
+        }
 
         private function setup():void {
             this.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
-			this.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
-			this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
+            this.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+            this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
             this.addEventListener(MouseEvent.CLICK, onClick);
         }
 
@@ -111,23 +108,23 @@
             } else {
                 var dragNode:GoalTreeNode = event.dragSource.dataForFormat("GoalTreeNode") as GoalTreeNode;
             }
-           /* if (obj is Solution) {
-                var solution:Solution = obj as Solution;
-                var goalSolution:GoalSolution = new GoalSolution();
-                goalSolution.solutionID = solution.solutionID;
-                goalSolution.solutionName = solution.name;
-                goalSolution.solutionArchiveName = solution.solutionArchiveName;
-                goalTreeNode.associatedSolutions.addItem(goalSolution);
-            } else if (obj is DataFeedDescriptor) {
-                var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-                var goalFeed:GoalFeed = new GoalFeed();
-                goalFeed.feedID = descriptor.dataFeedID;
-                goalFeed.feedName = descriptor.name;
-                goalTreeNode.associatedFeeds.addItem(goalFeed);
-            } else if (obj is InsightDescriptor) {
-                var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
-                goalTreeNode.associatedInsights.addItem(analysisDefinition);
-            } else */
+            /* if (obj is Solution) {
+             var solution:Solution = obj as Solution;
+             var goalSolution:GoalSolution = new GoalSolution();
+             goalSolution.solutionID = solution.solutionID;
+             goalSolution.solutionName = solution.name;
+             goalSolution.solutionArchiveName = solution.solutionArchiveName;
+             goalTreeNode.associatedSolutions.addItem(goalSolution);
+             } else if (obj is DataFeedDescriptor) {
+             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
+             var goalFeed:GoalFeed = new GoalFeed();
+             goalFeed.feedID = descriptor.dataFeedID;
+             goalFeed.feedName = descriptor.name;
+             goalTreeNode.associatedFeeds.addItem(goalFeed);
+             } else if (obj is InsightDescriptor) {
+             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
+             goalTreeNode.associatedInsights.addItem(analysisDefinition);
+             } else */
             if (obj is GoalTreeDescriptor) {
                 var goalTreeDescriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
                 var window:GoalTreeDropWindow = new GoalTreeDropWindow();
@@ -146,7 +143,7 @@
             }
             showBinding = goalTreeNode.kpi != null;
             /*showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
-                               goalTreeNode.associatedSolutions.length > 0;*/
+             goalTreeNode.associatedSolutions.length > 0;*/
             dispatchEvent(new GoalTreeChangedEvent());
         }
 
@@ -162,7 +159,7 @@
         }
 
         private function dragOverHandler(event:DragEvent):void {
-            DragManager.showFeedback(DragManager.MOVE);	
+            DragManager.showFeedback(DragManager.MOVE);
         }
 
         private function moveNode(event:ContextMenuEvent):void {
@@ -189,7 +186,7 @@
                 subTreePresent = goalTreeNode.subTreeID > 0;
                 showBinding = goalTreeNode.kpi != null;
                 /*showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
-                                   goalTreeNode.associatedSolutions.length > 0;*/
+                 goalTreeNode.associatedSolutions.length > 0;*/
                 defineContextMenu(goalTreeNode);
             }
         }
@@ -219,13 +216,13 @@
             newParentItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newParent);
             items.push(newParentItem);
             /*var moveItem:ContextMenuItem = new ContextMenuItem("Move", true);
-            moveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, moveNode);
-            items.push(moveItem);*/
+             moveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, moveNode);
+             items.push(moveItem);*/
             /*if (goalTreeNode.parent != null) {
-                var newTreeItem:ContextMenuItem = new ContextMenuItem("Create New Goal Tree", true);
-                newTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newGoalTree);
-                items.push(newTreeItem);
-            }*/
+             var newTreeItem:ContextMenuItem = new ContextMenuItem("Create New Goal Tree", true);
+             newTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newGoalTree);
+             items.push(newTreeItem);
+             }*/
             if (goalTreeNode.subTreeID > 0) {
                 var removeItem:ContextMenuItem = new ContextMenuItem("Remove Sub Tree", true);
                 removeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteSubTree);

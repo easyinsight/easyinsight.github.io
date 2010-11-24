@@ -6,7 +6,8 @@ import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.analysis.ReportWindowEvent;
 import com.easyinsight.analysis.service.ReportRetrievalFault;
 import com.easyinsight.framework.DataServiceLoadingEvent;
-import com.easyinsight.skin.ApplicationSkin;
+import com.easyinsight.skin.BackgroundImage;
+import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.EIErrorEvent;
 import com.easyinsight.util.EITitleWindow;
 import com.easyinsight.util.PopUpUtil;
@@ -14,8 +15,13 @@ import com.easyinsight.util.PopUpUtil;
 import flash.display.DisplayObject;
 import flash.events.Event;
 
+import flash.events.MouseEvent;
+
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
+import mx.containers.HBox;
+import mx.containers.VBox;
+import mx.controls.Button;
 import mx.managers.PopUpManager;
 
 public class ReportEventProcessor extends EITitleWindow {
@@ -33,12 +39,6 @@ public class ReportEventProcessor extends EITitleWindow {
     public function ReportEventProcessor() {
         this.width = 600;
         this.height = 500;
-        setStyle("paddingLeft", 10);
-        setStyle("paddingRight", 10);
-        setStyle("paddingTop", 10);
-        setStyle("paddingBottom", 10);
-        setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
-        setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
         this.showCloseButton = true;
         addEventListener(Event.CLOSE, onClose);
     }
@@ -88,11 +88,31 @@ public class ReportEventProcessor extends EITitleWindow {
 
     protected override function createChildren():void {
         super.createChildren();
+        var backgroundImage:BackgroundImage = new BackgroundImage();
+        backgroundImage.applyCenterScreenLogic = false;
+        addChild(backgroundImage);
+        var box:VBox = new VBox();
+        box.percentHeight = 100;
+        box.percentWidth = 100;
+        box.setStyle("paddingLeft", 10);
+        box.setStyle("paddingRight", 10);
+        box.setStyle("paddingTop", 10);
+        box.setStyle("paddingBottom", 10);
+        var controls:HBox = new HBox();
+        controls.setStyle("horizontalAlign", "center");
+        controls.percentWidth = 100;
+        var toReportButton:Button = new Button();
+        toReportButton.styleName = "grayButton";
+        toReportButton.addEventListener(MouseEvent.CLICK, toReport);
+        toReportButton.label = "Navigate to Report";
+        controls.addChild(toReportButton);
+        box.addChild(controls);
+        backgroundImage.addChild(box);
         reportCanvas = new ReportCanvas();
         BindingUtils.bindProperty(reportCanvas, "loading", this, "loading");
         BindingUtils.bindProperty(reportCanvas, "overlayIndex", this, "overlayIndex");
         BindingUtils.bindProperty(reportCanvas, "stackTrace", this, "stackTrace");
-        addChild(reportCanvas);
+        box.addChild(reportCanvas);
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         var viewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
@@ -111,6 +131,14 @@ public class ReportEventProcessor extends EITitleWindow {
         viewFactory.retrieveData(false);
     }
 
+    private function toReport(event:MouseEvent):void {
+        var report:InsightDescriptor = new InsightDescriptor();
+        report.dataFeedID = dataSourceID;
+        report.id = reportID;
+        report.reportType = reportType;
+        dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, report, reportFilters));
+    }
+
     private function onRetrievalFault(event:ReportRetrievalFault):void {        
         overlayIndex = 2;
     }
@@ -125,7 +153,7 @@ public class ReportEventProcessor extends EITitleWindow {
         overlayIndex = 3;
     }
 
-    public static function fromEvent(event:ReportWindowEvent, parent:DisplayObject):void {
+    public static function fromEvent(event:ReportWindowEvent, parent:DisplayObject):ReportEventProcessor {
         var window:ReportEventProcessor = new ReportEventProcessor();
         window.reportID = event.reportID;
         window.reportFilters = event.filters;
@@ -138,6 +166,7 @@ public class ReportEventProcessor extends EITitleWindow {
             window.x = event.x;
             window.y = event.y;
         }
+        return window;
     }
 }
 }

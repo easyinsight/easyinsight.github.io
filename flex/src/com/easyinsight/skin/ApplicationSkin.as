@@ -2,8 +2,6 @@ package com.easyinsight.skin {
 import flash.events.Event;
 import flash.events.EventDispatcher;
 
-import mx.controls.Alert;
-
 public class ApplicationSkin extends EventDispatcher {
 
     private var _coreAppBackgroundImage:Object;
@@ -15,7 +13,8 @@ public class ApplicationSkin extends EventDispatcher {
     private var _centerCanvasBackgroundColor:uint = 0xFFFFFF;
     private var _centerCanvasBackgroundAlpha:Number = 1;
     [Embed(source="../../../../assets/background2.JPG")]
-    private var _reportBackground:Class;
+    private var defaultReportBackground:Class;
+    private var _reportBackground:Object = defaultReportBackground;
     private var _reportBackgroundSize:String = "100%";
 
     public function ApplicationSkin() {
@@ -46,14 +45,22 @@ public class ApplicationSkin extends EventDispatcher {
         centerCanvasBackgroundAlpha = appSkin.centerCanvasBackgroundAlpha;
         coreAppBackgroundColor = appSkin.coreAppBackgroundColor;
         coreAppBackgroundSize = appSkin.coreAppBackgroundSize;
+        if (appSkin.reportBackground != null) {
+            var reportLoader:ImageLoader = new ImageLoader();
+            reportLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
+                reportBackground = event.bitmap;
+            });
+            reportLoader.load(appSkin.reportBackground.id);
+            reportBackgroundSize = appSkin.reportBackgroundSize;
+        }
     }
 
     [Bindable(event="reportBackgroundChanged")]
-    public function get reportBackground():Class {
+    public function get reportBackground():Object {
         return _reportBackground;
     }
 
-    public function set reportBackground(value:Class):void {
+    public function set reportBackground(value:Object):void {
         if (_reportBackground == value) return;
         _reportBackground = value;
         dispatchEvent(new Event("reportBackgroundChanged"));

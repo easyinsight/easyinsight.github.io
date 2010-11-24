@@ -77,6 +77,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
+    private double backgroundAlpha = 1;
+
+    public double getBackgroundAlpha() {
+        return backgroundAlpha;
+    }
+
+    public void setBackgroundAlpha(double backgroundAlpha) {
+        this.backgroundAlpha = backgroundAlpha;
+    }
 
     public boolean isAccountVisible() {
         return accountVisible;
@@ -483,6 +492,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         fontName = findStringProperty(properties, "fontName", "Tahoma");
         fontSize = (int) findNumberProperty(properties, "fontSize", 12);
         fixedWidth = (int) findNumberProperty(properties, "fixedWidth", 0);
+        backgroundAlpha =  findNumberProperty(properties, "backgroundAlpha", 0);
     }
 
     public List<ReportProperty> createProperties() {
@@ -490,6 +500,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportStringProperty("fontName", fontName));
         properties.add(new ReportNumericProperty("fontSize", fontSize));
         properties.add(new ReportNumericProperty("fixedWidth", fixedWidth));
+        properties.add(new ReportNumericProperty("backgroundAlpha", backgroundAlpha));
         return properties;
     }
 

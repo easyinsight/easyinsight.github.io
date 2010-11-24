@@ -785,58 +785,6 @@ public class SolutionService {
         return feedDescriptors;
     }
 
-    public SolutionContents getSolutionContents(long solutionID) {
-        List<FeedDescriptor> feedDescriptors = new ArrayList<FeedDescriptor>();
-        List<InsightDescriptor> insightDescriptors = new ArrayList<InsightDescriptor>();
-        List<GoalTreeDescriptor> goalTreeDescriptors = new ArrayList<GoalTreeDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME FROM SOLUTION_TO_FEED, DATA_FEED " +
-                    "WHERE SOLUTION_ID = ? AND DATA_FEED.DATA_FEED_ID = SOLUTION_TO_FEED.FEED_ID");
-            queryStmt.setLong(1, solutionID);
-            PreparedStatement queryInsightsStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE DATA_FEED_ID = ? AND ROOT_DEFINITION = ?");
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long feedID = rs.getLong(1);
-                String name = rs.getString(2);
-                FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setId(feedID);
-                feedDescriptor.setName(name);
-                feedDescriptors.add(feedDescriptor);
-                queryInsightsStmt.setLong(1, feedID);
-                queryInsightsStmt.setBoolean(2, false);
-                ResultSet insightRS = queryInsightsStmt.executeQuery();
-                while (insightRS.next()) {
-                    long insightID = insightRS.getLong(1);
-                    String insightName = insightRS.getString(2);
-                    // TODO: Add urlKey
-                    insightDescriptors.add(new InsightDescriptor(insightID, insightName, insightRS.getLong(3), insightRS.getInt(4),null));
-                }
-            }
-            PreparedStatement getGoalsStmt = conn.prepareStatement("SELECT goal_tree.goal_tree_id, goal_tree.name, goal_tree.goal_tree_icon FROM solution, goal_tree " +
-                    "WHERE SOLUTION_ID = ? AND goal_tree.goal_tree_id = solution.goal_tree_id");
-            getGoalsStmt.setLong(1, solutionID);
-            ResultSet goalRS = getGoalsStmt.executeQuery();
-            while (goalRS.next()) {
-                long goalID = goalRS.getLong(1);
-                String goalName = goalRS.getString(2);
-                // TODO: add urlKey
-                GoalTreeDescriptor goalTreeDescriptor = new GoalTreeDescriptor(goalID, goalName, 0, goalRS.getString(3), null);
-                goalTreeDescriptors.add(goalTreeDescriptor);
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        SolutionContents solutionContents = new SolutionContents();
-        solutionContents.setFeedDescriptors(feedDescriptors);
-        solutionContents.setGoalTreeDescriptors(goalTreeDescriptors);
-        solutionContents.setInsightDescriptors(insightDescriptors);
-        return solutionContents;
-    }
-
     public List<FeedDescriptor> getDescriptorsForSolution(long solutionID) {
         List<FeedDescriptor> feedDescriptors = new ArrayList<FeedDescriptor>();
         Connection conn = Database.instance().getConnection();

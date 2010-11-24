@@ -63,9 +63,5 @@ public class KPI extends EventDispatcher {
         _configurationMode = value;
         dispatchEvent(new Event("configurationModeChanged"));
     }
-
-    private function blah():void {
-        var kpiUser:KPIUser;
-    }
 }
 }

@@ -23,10 +23,16 @@ public class BackgroundImage extends Canvas {
 
     private var centerScreen:Container;
 
+    private var _applyCenterScreenLogic:Boolean = true;
+
     public function BackgroundImage() {
         super();
         this.percentHeight = 100;
         this.percentWidth = 100;
+    }
+
+    public function set applyCenterScreenLogic(value:Boolean):void {
+        _applyCenterScreenLogic = value;
     }
 
     override protected function createChildren():void {
@@ -37,18 +43,25 @@ public class BackgroundImage extends Canvas {
             backgroundImage.percentWidth = 100;
             backgroundImage.maintainAspectRatio = false;
         }
-        centerScreen = getChildAt(0) as Container;
-        if (centerScreen.width == 0) centerScreen.width = 1000;
-        centerScreen.percentHeight = 100;
+        if (_applyCenterScreenLogic) {
+            centerScreen = getChildAt(0) as Container;
+            if (centerScreen.width == 0) centerScreen.width = 1000;
+            centerScreen.percentHeight = 100;
+        }
         addChildAt(backgroundImage, 0);
         createBindings();
     }
 
     private function createBindings():void {
-        BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "coreAppBackgroundImage");
-        BindingUtils.bindProperty(this, "skinBackgroundColor", ApplicationSkin.instance(), "coreAppBackgroundColor");
-        BindingUtils.bindProperty(this, "backgroundImageStyle", ApplicationSkin.instance(), "coreAppBackgroundSize");
-        if (centerScreen != null) {
+        if (_applyCenterScreenLogic) {
+            BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "coreAppBackgroundImage");
+            BindingUtils.bindProperty(this, "skinBackgroundColor", ApplicationSkin.instance(), "coreAppBackgroundColor");
+            BindingUtils.bindProperty(this, "backgroundImageStyle", ApplicationSkin.instance(), "coreAppBackgroundSize");
+        } else {
+            BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "reportBackground");
+            //BindingUtils.bindProperty(this, "backgroundImageStyle", ApplicationSkin.instance(), "reportBackgroundSize");
+        }
+        if (_applyCenterScreenLogic && centerScreen != null) {
             BindingUtils.bindProperty(this, "centerCanvasBackgroundColor", ApplicationSkin.instance(), "centerCanvasBackgroundColor");
             BindingUtils.bindProperty(this, "centerCanvasBackgroundAlpha", ApplicationSkin.instance(), "centerCanvasBackgroundAlpha");
         }
@@ -56,9 +69,11 @@ public class BackgroundImage extends Canvas {
 
     protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
         super.updateDisplayList(unscaledWidth, unscaledHeight);
-        if (getChildren().length == 2) {
-            var content:DisplayObject = getChildren()[1];
-            content.x = unscaledWidth / 2 - (content.width / 2);
+        if (_applyCenterScreenLogic) {
+            if (getChildren().length == 2) {
+                var content:DisplayObject = getChildren()[1];
+                content.x = unscaledWidth / 2 - (content.width / 2);
+            }
         }
     }
 
@@ -68,12 +83,16 @@ public class BackgroundImage extends Canvas {
 
     public function set centerCanvasBackgroundColor(value:uint):void {
         _centerCanvasBackgroundColor = value;
-        centerScreen.setStyle("backgroundColor", value);
+        if (centerScreen != null) {
+            centerScreen.setStyle("backgroundColor", value);
+        }
     }
 
     public function set centerCanvasBackgroundAlpha(value:Number):void {
         _centerCanvasBackgroundAlpha = value;
-        centerScreen.setStyle("backgroundAlpha", value);
+        if (centerScreen != null) {
+            centerScreen.setStyle("backgroundAlpha", value);
+        }
     }
 
     public function set backgroundImageSource(value:Object):void {
@@ -81,12 +100,15 @@ public class BackgroundImage extends Canvas {
         _backgroundImageSource = value;
         if (value == null) {
             backgroundImage.source = null;
+            backgroundImage.visible = false;
         } else {
-            var bitmap:Bitmap = value as Bitmap;
-            //var sourceData:BitmapData = bitmap.bitmapData;
-            /*var targetData:BitmapData = new BitmapData(sourceData.width, sourceData.height);
-            targetData.copyPixels(sourceData, new Rectangle(0, 0, sourceData.width, sourceData.height), new Point(0, 0));*/
-            backgroundImage.source = new Bitmap(bitmap.bitmapData);
+            if (value is Bitmap) {
+                var bitmap:Bitmap = value as Bitmap;
+                backgroundImage.source = new Bitmap(bitmap.bitmapData);
+            } else {
+                backgroundImage.source = value;
+            }
+            backgroundImage.visible = true;
         }
     }
 

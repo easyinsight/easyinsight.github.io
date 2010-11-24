@@ -31,6 +31,7 @@
 
         private function onDelete():void {
             imageName = "( No Image )";
+            imageDescriptor = null;
         }
 
         protected override function commitProperties():void {

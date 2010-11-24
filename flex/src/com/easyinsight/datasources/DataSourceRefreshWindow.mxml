@@ -3,9 +3,6 @@
         creationComplete="setupListeners()" headerHeight="4">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.CredentialsResponse;
-        import com.easyinsight.analysis.AnalysisItemFault;
-        import com.easyinsight.analysis.DataSourceConnectivityReportFault;
-        import com.easyinsight.analysis.ServerError;
         import com.easyinsight.customupload.ProblemDataEvent;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
@@ -62,12 +59,6 @@
 
         private function onCancel(event:Event):void {
             PopUpManager.removePopUp(this);
-        }
-
-        private function blah():void {
-            var fault:DataSourceConnectivityReportFault;
-            var serverError:ServerError;
-            var analysisItemFault:AnalysisItemFault;
         }
 
         private function onProblem(event:ProblemDataEvent):void {

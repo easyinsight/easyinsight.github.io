@@ -41,7 +41,7 @@ public class ApplicationSkin {
             properties.add(new ReportImageProperty("headerBarLogo", headerBarLogo));
         }
         if (reportBackground != null) {
-            properties.add(new ReportImageProperty("headerBarLogo", reportBackground));
+            properties.add(new ReportImageProperty("reportBackground", reportBackground));
         }
         properties.add(new ReportNumericProperty("coreAppBackgroundColor", coreAppBackgroundColor));
         properties.add(new ReportNumericProperty("headerBarBackgroundColor", headerBarBackgroundColor));
@@ -49,6 +49,7 @@ public class ApplicationSkin {
         properties.add(new ReportNumericProperty("centerCanvasBackgroundColor", centerCanvasBackgroundColor));
         properties.add(new ReportNumericProperty("centerCanvasBackgroundAlpha", centerCanvasBackgroundAlpha));
         properties.add(new ReportStringProperty("coreAppBackgroundSize", coreAppBackgroundSize));
+        properties.add(new ReportStringProperty("reportBackgroundSize", reportBackgroundSize));
         settings.setSkinID(id);
         settings.setProperties(properties);
         return settings;
@@ -62,6 +63,8 @@ public class ApplicationSkin {
         centerCanvasBackgroundAlpha = findNumberProperty(properties, "centerCanvasBackgroundAlpha", 1);
         headerBarDividerColor = (int) findNumberProperty(properties, "headerBarDividerColor", 0);
         coreAppBackgroundSize = findStringProperty(properties, "coreAppBackgroundSize", "100%");
+        reportBackground = findImage(properties, "reportBackground", null);
+        reportBackgroundSize = findStringProperty(properties, "reportBackgroundSize", "100%");
     }
 
     public ImageDescriptor getCoreAppBackgroundImage() {

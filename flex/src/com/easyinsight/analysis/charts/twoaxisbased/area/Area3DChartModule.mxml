@@ -51,7 +51,7 @@
             var lineSeries:AreaSeries3D = hitData.element as AreaSeries3D;
             var lineSeriesItem:AreaSeries3DItem = hitData.chartItem as AreaSeries3DItem;
             string = lineSeries.displayName + "\n" +
-                     xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+                    xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
             return string;
         }
 
@@ -83,10 +83,10 @@
 
         private function onClick(event:ChartItemEvent):void {
 
-                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, areaChartDef, event.hitData.item);
-                PopUpManager.addPopUp(window, this);
-                window.x = event.stageX + 5;
-                window.y = event.stageY + 5;
+            var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, areaChartDef, event.hitData.item);
+            PopUpManager.addPopUp(window, this);
+            window.x = event.stageX + 5;
+            window.y = event.stageY + 5;
         }
 
         private function passThrough(event:Event):void {

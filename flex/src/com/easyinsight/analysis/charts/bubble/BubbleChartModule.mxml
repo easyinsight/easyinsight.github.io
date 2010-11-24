@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.analysis.IReportRenderer">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.analysis.ISelectableReportRenderer">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -51,6 +51,7 @@
             var plotChartDef:BubbleChartDefinition = analysisDefinition as BubbleChartDefinition;
             if (dataSet.length > 0) {
                 this.bubbleChart = plotChartDef;
+                plotChart.setStyle("backgroundAlpha", plotChartDef.backgroundAlpha);
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();
                 measure1Name = plotChartDef.xaxisMeasure.display;
                 measure2 = plotChartDef.yaxisMeasure.qualifiedName();
@@ -73,7 +74,7 @@
             var filterRawData:FilterRawData = new FilterRawData();
             for (var i:int = 0; i < plotChart.selectedChartItems.length; i++) {
                 var obj:ChartItem = plotChart.selectedChartItems[i];
-                filterRawData.addPair(dimensionItem, obj.item[dimensionItem.key.createString()]);
+                filterRawData.addPair(dimensionItem, obj.item[dimensionItem.qualifiedName()]);
             }
             return filterRawData;
         }
@@ -109,6 +110,23 @@
                 window.x = event.stageX + 5;
                 window.y = event.stageY + 5;
             }
+        }
+
+        private var _selectionEnabled:Boolean;
+
+        [Bindable(event="selectionEnabledChanged")]
+        public function get selectionEnabled():Boolean {
+            return _selectionEnabled;
+        }
+
+        public function set selectionEnabled(value:Boolean):void {
+            if (_selectionEnabled == value) return;
+            _selectionEnabled = value;
+            dispatchEvent(new Event("selectionEnabledChanged"));
+            if (value)
+                plotChart.selectionMode = "multiple";
+            else
+                plotChart.selectionMode = "none";
         }
 
         private function passThrough(event:Event):void {

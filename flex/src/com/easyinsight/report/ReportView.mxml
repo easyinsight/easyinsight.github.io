@@ -1,19 +1,18 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
-         xmlns:filtering="com.easyinsight.filtering.*"
-         xmlns:datasources="com.easyinsight.datasources.*"
-         xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
-         xmlns:report="com.easyinsight.report.*"
-         width="100%" height="100%"
-         creationComplete="onCreation()" backgroundColor="#FFFFFF"
-         implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
-         paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
-         direction="vertical">
-    <mx:states>
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                      xmlns:filtering="com.easyinsight.filtering.*"
+                      xmlns:datasources="com.easyinsight.datasources.*"
+                      xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
+                      xmlns:report="com.easyinsight.report.*"
+                      width="100%" height="100%"
+                      creationComplete="onCreation()" 
+                      implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
+                      xmlns:skin="com.easyinsight.skin.*" applyCenterScreenLogic="false">
+    <skin:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{topDisplay}"/>
         </mx:State>
-    </mx:states>
+    </skin:states>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
@@ -356,10 +355,6 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            setStyle("backgroundImage", ApplicationSkin.instance().reportBackground);
-            setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
-            if (!_embedded) {
-            }
             if (retrievedDataOnce) {
                 viewFactory.retrieveData();
             }
@@ -796,7 +791,8 @@
         }
 
         ]]></mx:Script>
-
+    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
+                      direction="vertical">
     <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF">
         <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5">
             <mx:ViewStack resizeToContent="true">
@@ -838,8 +834,8 @@
                 <mx:Spacer width="100%"/>
                 <mx:ViewStack selectedIndex="{exchangeIndex}" resizeToContent="true">
                     <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"
-                                               id="dataSourceDisplay"
-                                               visible="false"/>
+                                                   id="dataSourceDisplay"
+                                                   visible="false"/>
                     <mx:VBox verticalGap="3" horizontalAlign="center">
                         <mx:HBox verticalAlign="middle">
                             <mx:VBox verticalGap="0">
@@ -847,13 +843,14 @@
                                 <mx:Label text="{ratingText}" color="#2525D4"/>
                                 <!--<mx:Label text="{whenCreated}" fontSize="10"/>-->
                             </mx:VBox>
-                            <mx:VBox backgroundColor="#2525D4" borderColor="#2525D4" verticalGap="0" borderStyle="solid" borderThickness="1" cornerRadius="5" horizontalAlign="center">
+                            <mx:VBox backgroundColor="#2525D4" borderColor="#2525D4" verticalGap="0" borderStyle="solid"
+                                     borderThickness="1" cornerRadius="5" horizontalAlign="center">
                                 <mx:Label text="{currentRating}" fontSize="16" color="#FFFFFF"/>
                                 <mx:Label text="Average Score" fontSize="10" color="#FFFFFF"/>
                             </mx:VBox>
                         </mx:HBox>
                         <analysis:ReportRating score="{myRatingNumber}" rateable="true" reportID="{originReportID}"
-                                reportRating="updateRating(event)"/>
+                                               reportRating="updateRating(event)"/>
                         <mx:Label text="Rate it yourself!" fontSize="8"/>
                     </mx:VBox>
                 </mx:ViewStack>
@@ -870,12 +867,12 @@
         <mx:ViewStack resizeToContent="true" selectedIndex="{exchangeIndex}" width="100%">
             <mx:Box/>
             <mx:HBox paddingTop="15" verticalAlign="middle" width="100%" horizontalAlign="center">
-                    <mx:TextArea
-                            text="Want to save this report to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
-                            editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0"
-                            fontSize="12"/>
-                    <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton"
-                               click="saveReport(event)"/>
+                <mx:TextArea
+                        text="Want to save this report to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
+                        editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0"
+                        fontSize="12"/>
+                <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton"
+                           click="saveReport(event)"/>
             </mx:HBox>
         </mx:ViewStack>
         <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
@@ -893,12 +890,14 @@
                                               backgroundColor="#FFFFFF"/>
             </mx:VBox>
         </mx:ViewStack>
-        <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}" loading="{loading}"
+        <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}"
+                             loading="{loading}"
                 />
+    </mx:VBox>
     </mx:VBox>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
         <mx:method name="keepReport" result="confirmedKeep()"/>
         <mx:method name="getReportMetrics" result="gotMetrics()"/>
     </mx:RemoteObject>
-</mx:VBox>
+</skin:BackgroundImage>

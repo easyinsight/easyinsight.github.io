@@ -13,10 +13,5 @@ public class FeedNode {
     public function get display():String {
         return null;
     }
-
-    private function blah():void {
-        var folderNode:FolderNode;
-        var feedFolder:FeedFolder;
-    }
 }
 }

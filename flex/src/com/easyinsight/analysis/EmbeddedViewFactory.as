@@ -171,7 +171,8 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
     }
 
     private function onReportWindow(event:ReportWindowEvent):void {
-        ReportEventProcessor.fromEvent(event, this);
+        var window:ReportEventProcessor = ReportEventProcessor.fromEvent(event, this);
+        window.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
     }
 
     private function toReport(event:ReportNavigationEvent):void {

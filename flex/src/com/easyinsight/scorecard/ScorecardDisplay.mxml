@@ -262,6 +262,11 @@
                         primaryStackIndex = 1;
                     }
                 } else {
+                    if (scorecards.length == 0) {
+                        primaryStackIndex = 1;
+                    } else {
+                        primaryStackIndex = 2;
+                    }
                     for (var j:int = 0; j < scorecardStack.getChildren().length; j++) {
                         var existingRenderer:ScorecardRenderer = scorecardStack.getChildAt(j) as ScorecardRenderer;
                         existingRenderer.scorecardDescriptor = scorecardList.scorecardDescriptors.getItemAt(j) as ScorecardDescriptor;

@@ -6,26 +6,10 @@
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.analysis.AnalysisChangedEvent;
-        import com.easyinsight.customupload.CsvFileUploadFormat;
-        import com.easyinsight.customupload.ExcelUploadFormat;
-        import com.easyinsight.customupload.FlatFileUploadFormat;
-        import com.easyinsight.customupload.RedirectDataSource;
-        import com.easyinsight.customupload.XSSFExcelUploadFormat;
-        import com.easyinsight.datasources.BaseCampDataSource;
-        import com.easyinsight.datasources.CloudWatchDataSource;
-        import com.easyinsight.datasources.ConstantContactDataSource;
-        import com.easyinsight.datasources.FreshbooksDataSource;
-        import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.datasources.LinkedInDataSource;
-        import com.easyinsight.datasources.MeetupDataSource;
-        import com.easyinsight.datasources.PivotalTrackerBaseSource;
-        import com.easyinsight.datasources.SendGridDataSource;
-        import com.easyinsight.datasources.WholeFoodsDataSource;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.groups.GroupDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
-        import com.easyinsight.salesforce.SalesforceFeedDefinition;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.events.CloseEvent;
@@ -252,27 +236,6 @@
 
         private function wipedData():void {
             Alert.show("All data cleared!");
-        }
-
-        private function blah():void {
-            var excelUploadFormat:ExcelUploadFormat;
-            var xssfExcelUploadFormat:XSSFExcelUploadFormat;
-            var flatFileUploadFormat:FlatFileUploadFormat;
-            var csvFileUploadFormat:CsvFileUploadFormat;
-            var basecamp:BaseCampDataSource;
-            var highrise:HighRiseDataSource;
-            var google:GoogleAnalyticsDataSource;
-            var salesforce:SalesforceFeedDefinition;
-            var cloudwatch:CloudWatchDataSource;
-            var googleDoc:GoogleFeedDefinition;
-            var pivotal:PivotalTrackerBaseSource;
-            var sendGrid:SendGridDataSource;
-            var meetup:MeetupDataSource;
-            var linked:LinkedInDataSource;
-            var freshbooks:FreshbooksDataSource;
-            var redirect:RedirectDataSource;
-            var wf:WholeFoodsDataSource;
-            var constantContact:ConstantContactDataSource;
         }
 
         [Bindable]

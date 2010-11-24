@@ -13,7 +13,6 @@
         import com.easyinsight.kpi.TutorialPanel;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.ProgressAlert;
-        import com.easyinsight.util.UserAudit;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -99,10 +98,6 @@
 
         private function onCancel(event:Event):void {
             dispatchEvent(new AnalysisCloseEvent(this));
-        }
-
-        private function blah():void {
-            var context:FlatFileUploadContext;
         }
 
         public function gotFocus():void {

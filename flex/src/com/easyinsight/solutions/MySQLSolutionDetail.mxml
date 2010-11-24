@@ -23,7 +23,7 @@
         }
         ]]></mx:Script>
     <mx:HBox width="1100" height="100%" horizontalGap="0">
-        <solutions:HeaderShadeArea width="50" height="100%" leftColor="{ApplicationSkin.instance().coreAppBackgroundColor}" rightColor="#FFFFFF"/>
+        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#000000" rightColor="#FFFFFF"/>
 
         <mx:VBox width="1000" height="100%" backgroundColor="#FFFFFF" horizontalAlign="center" verticalGap="10"
                  paddingBottom="20" paddingLeft="20"
@@ -53,6 +53,6 @@
                          text="Since your relational database is hopefully running within your enterprise rather than as something Software-as-a-Service accessible, you'll need to download a client application to pull that data out into Easy Insight. The client is a Java web application which can be run in any application server or servlet container. No setup is required--just drop it into the server and go!"
                          fontSize="14"/>
         </mx:VBox>
-        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="{ApplicationSkin.instance().coreAppBackgroundColor}"/>
+        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="#000000"/>
     </mx:HBox>
 </solutions:SolutionDetailRenderer>

@@ -4,8 +4,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
 
-        
-import com.easyinsight.analysis.AnalysisItem;
+
+        import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartSortButton;
         import com.easyinsight.analysis.ChartSortEvent;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -26,12 +26,12 @@ import com.easyinsight.analysis.AnalysisItem;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
         import mx.charts.events.ChartItemEvent;
-import mx.charts.series.BarSeries;
+        import mx.charts.series.BarSeries;
         import mx.charts.series.items.BarSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
-import mx.collections.SortField;
-import mx.events.FlexEvent;
+        import mx.collections.SortField;
+        import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
@@ -91,55 +91,55 @@ import mx.events.FlexEvent;
         }
 
         private function onChartSort(event:ChartSortEvent):void {
-           if (event.sortState == ChartSortButton.ASCENDING ||
-               event.sortState == ChartSortButton.DESCENDING) {
-               var sort:Sort = new Sort();
-               sort.fields = [ new SortField(event.analysisItem.qualifiedName(), false,
-                   event.sortState == ChartSortButton.DESCENDING) ];
-               graphData.sort = sort;
-               graphData.refresh();
-           }
-       }
+            if (event.sortState == ChartSortButton.ASCENDING ||
+                    event.sortState == ChartSortButton.DESCENDING) {
+                var sort:Sort = new Sort();
+                sort.fields = [ new SortField(event.analysisItem.qualifiedName(), false,
+                        event.sortState == ChartSortButton.DESCENDING) ];
+                graphData.sort = sort;
+                graphData.refresh();
+            }
+        }
 
         /*private function onDrill(chartItem:ChartItem):void {
-            if (yAxisItem is AnalysisHierarchyItem) {
-               var data:Object = chartItem.item;
-               var hierarchyItem:AnalysisHierarchyItem = yAxisItem as AnalysisHierarchyItem;
-               var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
-               if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
-                   var dataField:String = hierarchyItem.qualifiedName();
-                   var dataString:String = data[dataField];
-                   var filterRawData:FilterRawData = new FilterRawData();
-                   filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
-                   hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
-                   dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData,
-                           hierarchyItem, index + 1));
-               }
-           }
-        }
+         if (yAxisItem is AnalysisHierarchyItem) {
+         var data:Object = chartItem.item;
+         var hierarchyItem:AnalysisHierarchyItem = yAxisItem as AnalysisHierarchyItem;
+         var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+         if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
+         var dataField:String = hierarchyItem.qualifiedName();
+         var dataString:String = data[dataField];
+         var filterRawData:FilterRawData = new FilterRawData();
+         filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
+         hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
+         dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData,
+         hierarchyItem, index + 1));
+         }
+         }
+         }
 
-        private function onRollup(chartItem:ChartItem):void {
-            if (yAxisItem is AnalysisHierarchyItem) {
-                var hierarchyItem:AnalysisHierarchyItem = yAxisItem as AnalysisHierarchyItem;
-                var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
-                if (index > 0) {
-                    hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index - 1) as HierarchyLevel;
-                    dispatchEvent(new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem, hierarchyItem, index - 1));
-                }
-            }
-        }
+         private function onRollup(chartItem:ChartItem):void {
+         if (yAxisItem is AnalysisHierarchyItem) {
+         var hierarchyItem:AnalysisHierarchyItem = yAxisItem as AnalysisHierarchyItem;
+         var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+         if (index > 0) {
+         hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index - 1) as HierarchyLevel;
+         dispatchEvent(new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem, hierarchyItem, index - 1));
+         }
+         }
+         }
 
-       private function drilldown(event:ChartItemEvent):void {
-           onDrill(event.hitData.chartItem);
-       }
+         private function drilldown(event:ChartItemEvent):void {
+         onDrill(event.hitData.chartItem);
+         }
 
-        private function drilldownEvent(event:ChartDrilldownEvent):void {
-            if (event.type == ChartDrilldownEvent.ROLLUP) {
-                onRollup(event.chartItem);
-            } else {
-                onDrill(event.chartItem);
-            }
-        }*/
+         private function drilldownEvent(event:ChartDrilldownEvent):void {
+         if (event.type == ChartDrilldownEvent.ROLLUP) {
+         onRollup(event.chartItem);
+         } else {
+         onDrill(event.chartItem);
+         }
+         }*/
 
         private function setupListeners():void {
             addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
@@ -181,12 +181,12 @@ import mx.events.FlexEvent;
                 barChart.percentWidth = 100;
                 barChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
                 /*barChart.addEventListener(ChartItemEvent.ITEM_CLICK, drilldown);
-                barChart.addEventListener(ChartDrilldownEvent.DRILLDOWN, drilldownEvent);
-                barChart.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);*/
+                 barChart.addEventListener(ChartDrilldownEvent.DRILLDOWN, drilldownEvent);
+                 barChart.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);*/
                 barChart.showDataTips = true;
                 /*if (selectable) {
-                    barChart.selectionMode = "multiple";
-                }*/
+                 barChart.selectionMode = "multiple";
+                 }*/
                 barChart.dataProvider = graphData;
 
                 // define the X axis
@@ -244,13 +244,13 @@ import mx.events.FlexEvent;
         }
 
         private function myDataFunction(series:Series, item:Object, fieldName:String):Object {
-              if(fieldName == 'xValue')
-                  return(item[xAxisItem.qualifiedName()].toNumber());
-              else if(fieldName == "yValue")
-                  return(item[yAxisItem.qualifiedName()].toString());
-              else
-                  return null;
-         }
+            if (fieldName == 'xValue')
+                return(item[xAxisItem.qualifiedName()].toNumber());
+            else if (fieldName == "yValue")
+                return(item[yAxisItem.qualifiedName()].toString());
+            else
+                return null;
+        }
 
         private function renderChartLabel(element:ChartItem, series:Series):String {
             var barSeriesItem:BarSeriesItem = element as BarSeriesItem;
@@ -281,7 +281,7 @@ import mx.events.FlexEvent;
         private var barChartDef:BarChartDefinition;
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object,
-                additionalProperties:Object):void {
+                                     additionalProperties:Object):void {
             barChartDef = analysisDefinition as BarChartDefinition;
 
             if (dataSet.length > 0) {
@@ -348,8 +348,8 @@ import mx.events.FlexEvent;
                 }
 
                 barChart.dataProvider = dataSet;
-            barSeries.dataProvider = dataSet;
-            yAxis.dataProvider = dataSet;
+                barSeries.dataProvider = dataSet;
+                yAxis.dataProvider = dataSet;
             } else {
                 if (barChartDef.measure != null && barChartDef.yaxis != null) stackIndex = 2;
                 else stackIndex = 1;

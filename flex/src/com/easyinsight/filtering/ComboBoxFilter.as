@@ -2,8 +2,7 @@ package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisRangeResultMetadata;
-import com.easyinsight.analysis.AnalysisTagsResultMetadata;
+
 import com.easyinsight.analysis.Value;
 
 import flash.events.Event;
@@ -227,11 +226,6 @@ public class ComboBoxFilter extends HBox implements IFilter
 				dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
 			} 
 		}
-
-        private function blah():void {
-            var metadata:AnalysisTagsResultMetadata;
-            var metadata2:AnalysisRangeResultMetadata;
-        }
 		
 		private function gotMetadata(event:ResultEvent):void {
             
