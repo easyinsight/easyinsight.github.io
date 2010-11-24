@@ -6,9 +6,14 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CoordinateValue;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.DrillThrough;
+        import com.easyinsight.analysis.DrillThroughEvent;
+        import com.easyinsight.analysis.DrillThroughExecutor;
+        import com.easyinsight.analysis.Link;
         import com.easyinsight.analysis.ReportWindowEvent;
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.filtering.FilterValueDefinition;
+        import com.easyinsight.report.ReportNavigationEvent;
         import com.google.maps.InfoWindowOptions;
         import com.google.maps.LatLng;
         import com.google.maps.MapEvent;
@@ -180,28 +185,26 @@
             var ll:LatLng = marker.getLatLng();
             var lookup:String = ll.lat() + "-" + ll.lng();
             var point:Object = pointDictionary[lookup];
-            if (heatMapDefinition.pointReportID > 0) {
-                var filters:ArrayCollection = new ArrayCollection(heatMapDefinition.filterDefinitions.toArray());
-                if (heatMapDefinition.zipCode != null) {
-                    var coordinateValue:CoordinateValue = point[heatMapDefinition.zipCode.qualifiedName()];
-                    var zipFilter:FilterValueDefinition = new FilterValueDefinition();
-                    zipFilter.inclusive = true;
-                    zipFilter.field = heatMapDefinition.zipCode;
-                    zipFilter.filteredValues = new ArrayCollection([coordinateValue.zip]);
-                    filters.addItem(zipFilter);
-                } else {
-                    var latFilter:FilterValueDefinition = new FilterValueDefinition();
-                    latFilter.inclusive = true;
-                    latFilter.field = heatMapDefinition.latitudeItem;
-                    latFilter.filteredValues = new ArrayCollection([ll.lat()]);
-                    var lngFilter:FilterValueDefinition = new FilterValueDefinition();
-                    lngFilter.inclusive = true;
-                    lngFilter.field = heatMapDefinition.longitudeItem;
-                    lngFilter.filteredValues = new ArrayCollection([ll.lng()]);
-                    filters.addItem(latFilter);
-                    filters.addItem(lngFilter);
+            if (heatMapDefinition.zipCode != null && heatMapDefinition.zipCode.links != null && heatMapDefinition.zipCode.links.length > 0) {
+                var link:Link = heatMapDefinition.zipCode.links.getItemAt(0) as Link;
+                if (link is DrillThrough) {
+                    var executor:DrillThroughExecutor = new DrillThroughExecutor(link as DrillThrough);
+                    executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, function(event:DrillThroughEvent):void {
+                        var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
+                        var coordinateValue:CoordinateValue = point[heatMapDefinition.zipCode.qualifiedName()];
+                        filterDefinition.field = heatMapDefinition.getCoreAnalysisItem(heatMapDefinition.zipCode);
+                        filterDefinition.filteredValues = new ArrayCollection([coordinateValue.zip]);
+                        filterDefinition.enabled = true;
+                        filterDefinition.inclusive = true;
+                        var filters:ArrayCollection = new ArrayCollection([ filterDefinition ]);
+                        if (event.drillThrough.miniWindow) {
+                            dispatchEvent(new ReportWindowEvent(event.report.id, 0, 0, filters, event.report.dataFeedID, event.report.reportType));
+                        } else {
+                            dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, event.report, filters));
+                        }
+                    });
+                    executor.send();
                 }
-                dispatchEvent(new ReportWindowEvent(heatMapDefinition.pointReportID, 0, 0, filters, heatMapDefinition.dataFeedID, 1));
             } else {
                 var options:InfoWindowOptions = new InfoWindowOptions();
                 options.contentHTML = "<p>" + heatMapDefinition.measure.display + ": <b>" + point[heatMapDefinition.measure.qualifiedName()] + "</b></p>";

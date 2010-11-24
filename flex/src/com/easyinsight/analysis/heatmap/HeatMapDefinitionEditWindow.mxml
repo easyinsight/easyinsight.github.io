@@ -22,7 +22,6 @@
 
         public function set heatMapDefinition(treeDefinition:HeatMapDefinition):void {
             this.definition = treeDefinition;
-            pointReportID = definition.pointReportID;
         }
 
         protected override function commitProperties():void {
@@ -44,7 +43,6 @@
             for each (var reportFormItem:ReportFormItem in reportItems) {
                 reportFormItem.save();
             }
-            definition.pointReportID = pointComboBox.selectedItem.id;
             dispatchEvent(new AnalysisItemUpdateEvent());
             PopUpManager.removePopUp(this);
         }
@@ -72,10 +70,6 @@
     </mx:RemoteObject>
     <mx:VBox paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
     <mx:Form id="form" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
-        <mx:FormItem label="Show This Report when User Clicks on Points:">
-            <util:SmartComboBox id="pointComboBox" dataProvider="{reports}" labelField="name" selectedValue="{pointReportID}"
-                                selectedProperty="id"/>
-        </mx:FormItem>
     </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>

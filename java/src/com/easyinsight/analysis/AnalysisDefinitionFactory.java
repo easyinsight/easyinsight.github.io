@@ -94,9 +94,6 @@ public class AnalysisDefinitionFactory {
             heatMapDefinitionState.setMinLong(heatMap.getMinLong());
             heatMapDefinitionState.setMaxLat(heatMap.getMaxLat());
             heatMapDefinitionState.setMaxLong(heatMap.getMaxLong());
-            if (heatMap.getPointReportID() > 0) {
-                heatMapDefinitionState.setPointReport(new AnalysisStorage().getPersistableReport(heatMap.getPointReportID(), session));
-            }
             analysisDefinitionState = heatMapDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.GANTT)) {
             WSGanttChartDefinition gantt = (WSGanttChartDefinition) wsAnalysisDefinition;

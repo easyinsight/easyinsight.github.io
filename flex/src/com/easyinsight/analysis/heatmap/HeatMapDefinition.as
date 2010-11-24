@@ -28,7 +28,6 @@ public class HeatMapDefinition extends AnalysisDefinition {
     public var mapType:int;
     public var displayType:int = HEAT_MAP;
     public var heatMapID:int;
-    public var pointReportID:int;
 
     public function HeatMapDefinition() {
         super();

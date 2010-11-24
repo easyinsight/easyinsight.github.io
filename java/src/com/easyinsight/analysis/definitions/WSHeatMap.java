@@ -31,17 +31,7 @@ public class WSHeatMap extends WSAnalysisDefinition {
 
     private int precision;
 
-    private long pointReportID;
-
     private long heatMapID;
-
-    public long getPointReportID() {
-        return pointReportID;
-    }
-
-    public void setPointReportID(long pointReportID) {
-        this.pointReportID = pointReportID;
-    }
 
     public int getDisplayType() {
         return displayType;
