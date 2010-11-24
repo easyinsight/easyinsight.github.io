@@ -1,6 +1,6 @@
 package com.easyinsight.salesautomation;
 
-import com.easyinsight.email.AuthSMTPConnection;
+import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.User;
@@ -48,7 +48,7 @@ public class SalesEmail implements Runnable {
         String body = MessageFormat.format(newAccountNotification, accountType, user.getUserName(), user.getFirstName(), user.getName(), user.getEmail());
         String subject = "New " + accountType + " Account Created";
         try {
-            new AuthSMTPConnection().sendSSLMessage("sales@easy-insight.com", subject, body, "donotreply@easy-insight.com");
+            new SendGridEmail().sendEmail("sales@easy-insight.com", subject, body, "donotreply@easy-insight.com", false, "Easy Insight");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -1,7 +1,7 @@
 package com.easyinsight.logging;
 
+import com.easyinsight.email.SendGridEmail;
 import org.apache.log4j.Logger;
-import com.easyinsight.email.AuthSMTPConnection;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.security.SecurityUtil;
 
@@ -38,7 +38,7 @@ public class LogClass {
                     username = SecurityUtil.getUserName();
                 } catch(Exception e) {
                 }
-                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, message , "donotreply@easy-insight.com");
+                new SendGridEmail().sendEmail("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, message , "donotreply@easy-insight.com", false, "Easy Insight");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
@@ -60,7 +60,7 @@ public class LogClass {
                 } catch(Exception se) {
                 }
                 String msg = new String(baos.toByteArray());
-                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, msg , "donotreply@easy-insight.com");
+                new SendGridEmail().sendEmail("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, msg , "donotreply@easy-insight.com", false, "Easy Insight");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
@@ -82,7 +82,7 @@ public class LogClass {
             }
             String msg = new String(baos.toByteArray());
             try {
-                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + e.getClass().getName(), msg, "donotreply@easy-insight.com");
+                new SendGridEmail().sendEmail("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + e.getClass().getName(), msg, "donotreply@easy-insight.com", false, "Easy Insight");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?

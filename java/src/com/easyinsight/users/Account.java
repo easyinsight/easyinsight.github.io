@@ -457,7 +457,7 @@ public class Account {
             for (User user : getUsers()) {
                 if (user.isAccountAdmin()) {
                     try {
-                        new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com");
+                        new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
                     } catch (Exception e) {
                         LogClass.error(e);
                     }

@@ -90,7 +90,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(newProAccountText, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+            new SendGridEmail().sendEmail(to, subject, body, "donotreply@easy-insight.com", false, "Easy Insight");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -101,7 +101,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(resetPasswordText, password);
         String subject = "Easy Insight Password Reset";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+            new SendGridEmail().sendEmail(to, subject, body, "donotreply@easy-insight.com", false, "Easy Insight");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -112,7 +112,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(remindUserNameText, userName);
         String subject = "Easy Insight User Name Reminder";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+            new SendGridEmail().sendEmail(to, subject, body, "donotreply@easy-insight.com", false, "Easy Insight");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -123,7 +123,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(newProAccountText, userName, password, consultant, consultantEMail);
         String subject = "Easy Insight Account Creation";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+            new SendGridEmail().sendEmail(to, subject, body, "donotreply@easy-insight.com", false, "Easy Insight");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -134,7 +134,8 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(groupInviteText, adminFirstName != null ? adminFirstName : "", accountOwner, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, adminFirstName + " " + accountOwner);
+            new SendGridEmail().sendEmail(to, subject, body, "support@easy-insight.com", false, "Easy Insight on behalf of " +
+                    (adminFirstName == null ? accountOwner : adminFirstName + " " + accountOwner));
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -146,7 +147,7 @@ public class AccountMemberInvitation {
         String body = welcomeEmailText.replace("{0}", firstName).replace("{1}", url);
         String subject = "Welcome to Easy Insight!";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "Easy Insight");
+            new SendGridEmail().sendEmail(to, subject, body, "sales@easy-insight.com", false, "Easy Insight");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -156,6 +157,6 @@ public class AccountMemberInvitation {
     public void salesNotification(String userName, String email, String company, String additionalInfo) throws MessagingException, UnsupportedEncodingException {
         String body = MessageFormat.format(salesText, userName, email, company, additionalInfo);
         String subject = "Sales Info Request";
-        new AuthSMTPConnection().sendSSLMessage("sales@easy-insight.com", subject, body, "donotreply@easy-insight.com");
+        new SendGridEmail().sendEmail("sales@easy-insight.com", subject, body, "donotreply@easy-insight.com", false, "Easy Insight");
     }
 }

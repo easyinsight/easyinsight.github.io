@@ -161,10 +161,4 @@
         </properties>
     </destination>
 
-    <destination id="bugReportService">
-        <properties>
-            <source>com.easyinsight.bugreports.BugReportService</source>
-        </properties>
-    </destination>
-
 </service>

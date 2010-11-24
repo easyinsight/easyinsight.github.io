@@ -13,11 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Properties;
 
 /**
@@ -214,7 +209,7 @@ public class SendGridEmail {
         transport.close();
     }
 
-    public void sendEmail(String emailAddress, String subject, String body, String from) throws MessagingException, UnsupportedEncodingException {
+    public void sendEmail(String emailAddress, String subject, String body, String fromAddress, boolean htmlEmail, String fromName) throws MessagingException, UnsupportedEncodingException {
         Properties props = new Properties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.host", SMTP_HOST_NAME);
@@ -233,17 +228,19 @@ public class SendGridEmail {
 
         message.setSubject(subject);
 
-        BodyPart part1 = new MimeBodyPart();
-        part1.setText(body);
-
-        /*BodyPart part2 = new MimeBodyPart();
-        part2.setContent(htmlBody, "text/html");*/
-
-        multipart.addBodyPart(part1);
+        if (htmlEmail) {
+            BodyPart part2 = new MimeBodyPart();
+            part2.setContent(body, "text/html;charset=UTF-8");
+            multipart.addBodyPart(part2);
+        } else {
+            BodyPart part1 = new MimeBodyPart();
+            part1.setContent(body,"text/plain;charset=utf-8");
+            multipart.addBodyPart(part1);
+        }
 
         message.setContent(multipart);
 
-        message.setFrom(new InternetAddress(from, "Easy Insight"));
+        message.setFrom(new InternetAddress(fromAddress, fromName));
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
 
         transport.connect();
