@@ -25,6 +25,7 @@
         import com.easyinsight.framework.PerspectiveFactoryHolder;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.Constants;
+        import com.easyinsight.framework.TORegistry;
         import com.easyinsight.listing.HeaderBar;
         import com.easyinsight.listing.IModulePerspective;
         import com.easyinsight.listing.LaunchQuickSearchEvent;
@@ -91,6 +92,7 @@
 
         public var browserManager:IBrowserManager;
 
+        private var registry:TORegistry;
 
         private function startWorkspace():void {
             Security.allowInsecureDomain("maps.googleapis.com");
