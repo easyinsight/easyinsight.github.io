@@ -7,26 +7,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Created by IntelliJ IDEA.
  * User: abaldwin
- * Date: Nov 22, 2010
- * Time: 11:06:49 AM
+ * Date: Nov 24, 2010
+ * Time: 9:51:12 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ValidateUser extends HttpServlet {
-
+public class CancelUser extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        throw new ServletException();
+        String username = request.getParameter("username");
+        UserService service = new UserService();
+        service.cancelPaidAccount();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String name = request.getParameter("username");
-        System.out.println(name);
-        UserService service = new UserService();
-        response.setStatus((service.doesAccountExist(name) && service.doesAccountExist(name)) ? 422 : 200);
+        throw new ServletException();
     }
 }

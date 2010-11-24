@@ -37,6 +37,7 @@ public class CreateUser extends HttpServlet {
             user.setAccountAdmin(true);
             user.setOptInEmail(true);
             AccountTransferObject account = new AccountTransferObject();
+            account.setName(userName);
             account.setAccountType(Account.PROFESSIONAL);
             service.createAccount(user, account, password, null, Account.SNAPPCLOUD);
             System.out.println(password);

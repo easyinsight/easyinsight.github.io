@@ -301,18 +301,8 @@ public class UserService {
         long accountID = SecurityUtil.getAccountID();
         Session session = Database.instance().createSession();
         try {
-            session.getTransaction().begin();
-            Account a = (Account) session.createQuery("from Account where accountID  = ?").setLong(0, accountID).list().get(0);
-            a.setAccountState(Account.CLOSING);
-            a.setBillingInformationGiven(false);
-            BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
-            billingSystem.setUsername("testapi");
-            billingSystem.setPassword("password1");
-            billingSystem.cancelPlan(a.getAccountID());
-            session.save(a);
-            session.getTransaction().commit();
-        }
-        catch(Exception e) {
+            cancelPaidAccount(accountID, session);
+        } catch(Exception e) {
             session.getTransaction().rollback();
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -320,6 +310,34 @@ public class UserService {
         finally {
             session.close();
         }
+    }
+
+    public void cancelPaidAccount(String username) {
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            User user = (User) session.createQuery("from User where userName = ?").setString(0, username).list().get(0);
+            cancelPaidAccount(user.getAccount().getAccountID(), session);
+        } catch(Exception e) {
+            session.getTransaction().rollback();
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void cancelPaidAccount(long accountID, Session session) {
+        session.getTransaction().begin();
+        Account a = (Account) session.createQuery("from Account where accountID  = ?").setLong(0, accountID).list().get(0);
+        a.setAccountState(Account.CLOSING);
+        a.setBillingInformationGiven(false);
+        BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
+        billingSystem.setUsername("testapi");
+        billingSystem.setPassword("password1");
+        billingSystem.cancelPlan(a.getAccountID());
+        session.save(a);
+        session.getTransaction().commit();
     }
 
     public void cancelFreeAccount() {
