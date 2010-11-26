@@ -19,6 +19,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
 
+        import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.charts.Chart3DVisuals;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
@@ -232,7 +233,7 @@
         }
 
         private function customFill(element:ChartItem, index:Number):IFill {
-            return bgFills[index % 15];
+            return FillProvider.getColor(columnChartDef.colorScheme, bgFills, index);
         }
 
         private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
@@ -273,6 +274,7 @@
             columnChartDef = analysisDefinition as Column3DChartDefinition;
 
             if (dataSet.length > 0) {
+                canvas.setStyle("backgroundAlpha", columnChartDef.backgroundAlpha);
                 stackIndex = 0;
                 xField = columnChartDef.xaxis.qualifiedName();
                 createChart();

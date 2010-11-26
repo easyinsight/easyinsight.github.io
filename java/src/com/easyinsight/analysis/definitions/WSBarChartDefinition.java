@@ -7,7 +7,7 @@ import com.easyinsight.analysis.ChartDefinitionState;
  * Date: Mar 20, 2009
  * Time: 7:23:14 PM
  */
-public class WSBarChartDefinition extends WSYAxisDefinition {
+public class WSBarChartDefinition extends WSYAxisDefinition {    
 
     public int getChartType() {
         return ChartDefinitionState.BAR_2D;

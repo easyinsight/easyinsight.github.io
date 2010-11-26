@@ -9,6 +9,7 @@
         import com.easyinsight.analysis.ChartSortButton;
         import com.easyinsight.analysis.ChartSortEvent;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.SortableAxisTitle;
 
@@ -258,7 +259,7 @@
         }
 
         private function customFill(element:ChartItem, index:Number):IFill {
-            return bgFills[index % 15];
+            return FillProvider.getColor(barChartDef.colorScheme, bgFills, index);
         }
 
         private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
@@ -285,6 +286,7 @@
             barChartDef = analysisDefinition as BarChartDefinition;
 
             if (dataSet.length > 0) {
+                canvas.setStyle("backgroundAlpha", barChartDef.backgroundAlpha);
                 stackIndex = 0;
                 if (barChartDef.yaxis.sort > 0) {
                     var sort:Sort = new Sort();
@@ -378,7 +380,7 @@
         }]]></mx:Script>
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
     <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
-    <mx:Canvas width="100%" height="100%" id="canvas">
+    <mx:Canvas width="100%" height="100%" id="canvas" backgroundAlpha="1" backgroundColor="#FFFFFF">
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
                       mouseEnabled="false">
             <mx:Canvas width="100%" height="100%"/>

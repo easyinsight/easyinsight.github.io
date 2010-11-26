@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.ISelectableReportRenderer"
            width="100%" height="100%">
     <mx:Script><![CDATA[
 
@@ -16,6 +16,7 @@
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import mx.charts.CategoryAxis;
+        import mx.charts.ChartItem;
         import mx.charts.DateTimeAxis;
         import mx.charts.HitData;
         import mx.charts.Legend;
@@ -53,8 +54,6 @@
                 lineChart = new LineChart();
                 lineChart.percentHeight = 100;
                 lineChart.percentWidth = 100;
-                //lineChart.dataProvider = chartData;
-                lineChart.selectionMode = "multiple";
             }
             hbox.addChild(lineChart);
             if (legend == null) {
@@ -102,6 +101,8 @@
 
             if (dataSet.length > 0) {
 
+                coreBox.setStyle("backgroundAlpha", lineChartDef.backgroundAlpha);
+
                 stackIndex = 0;
                 this.def = lineChartDef;
 
@@ -115,7 +116,7 @@
                 lineChart.percentWidth = 100;
                 lineChart.dataProvider = chartData;
                 lineChart.showDataTips = true;
-                lineChart.selectionMode = "multiple";
+                lineChart.selectionMode = _selectionMode;
                 lineChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
                 lineChart.dataTipFunction = dataTipFunction;
                 var verticalAxis:LinearAxis = new LinearAxis();
@@ -243,7 +244,12 @@
 
 
         public function createFilterRawData():FilterRawData {
-            return null;
+            var filterRawData:FilterRawData = new FilterRawData();
+            for (var i:int = 0; i < lineChart.selectedChartItems.length; i++) {
+                var obj:ChartItem = lineChart.selectedChartItems[i];
+                filterRawData.addPair(measureItem, obj.item[measureItem.qualifiedName()]);
+            }
+            return filterRawData;
         }
 
         public function updateExportMetadata():void {
@@ -256,17 +262,22 @@
         [Bindable]
         private var stackIndex:int = 0;
 
+        private var _selectionMode:String = "none";
+
         public function set selectionEnabled(mode:Boolean):void {
             if (mode) {
-                lineChart.selectionMode = "multiple";
+                _selectionMode = "multiple";
             } else {
-                lineChart.selectionMode = "none";
+                _selectionMode = "none";
+            }
+            if (lineChart != null) {
+                lineChart.selectionMode = _selectionMode;
             }
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
-    <mx:Canvas width="100%" height="100%">
+    <mx:Canvas width="100%" height="100%" backgroundColor="#FFFFFF" id="coreBox">
         <mx:HBox width="100%" height="100%" id="hbox"/>
 
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"

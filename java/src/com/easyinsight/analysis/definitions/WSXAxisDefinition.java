@@ -1,12 +1,11 @@
 package com.easyinsight.analysis.definitions;
 
+import com.easyinsight.analysis.ReportProperty;
+import com.easyinsight.analysis.ReportStringProperty;
 import com.easyinsight.analysis.WSChartDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 
-import java.util.Set;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -20,6 +19,16 @@ public abstract class WSXAxisDefinition extends WSChartDefinition {
 
     private double yAxisMin;
     private double yAxisMax;
+
+    private String colorScheme;
+
+    public String getColorScheme() {
+        return colorScheme;
+    }
+
+    public void setColorScheme(String colorScheme) {
+        this.colorScheme = colorScheme;
+    }
 
     public double getYAxisMax() {
         return yAxisMax;
@@ -68,5 +77,18 @@ public abstract class WSXAxisDefinition extends WSChartDefinition {
         columnList.add(measure);
         columnList.add(xaxis);
         return columnList;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        colorScheme = findStringProperty(properties, "colorScheme", "Bright Gradients");
+    }
+
+    @Override
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportStringProperty("colorScheme", colorScheme));
+        return properties;
     }
 }

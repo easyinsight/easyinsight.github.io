@@ -1,5 +1,6 @@
 package com.easyinsight.analysis {
 import mx.graphics.GradientEntry;
+import mx.graphics.IFill;
 import mx.graphics.LinearGradient;
 import mx.graphics.SolidColor;
 
@@ -15,6 +16,27 @@ public class FillProvider {
     public static const fillOptions:Array = [ brightGradients, warmColors, spectral, highContrast];
 
     public function FillProvider() {
+    }
+
+    public static function getColor(scheme:String, defaults:Array, index:int):IFill {
+        var array:Array;
+        if (scheme == FillProvider.spectral) {
+            array = FillProvider.createSpectralColors();
+        } else if (scheme == FillProvider.highContrast) {
+            array = FillProvider.createSAPColors();
+        } else if (scheme == FillProvider.warmColors) {
+            array = FillProvider.createWarmColors();
+        } else {
+            if (defaults != null) {
+                array = defaults;
+            } else {
+                array = FillProvider.createSampleGradient();
+            }
+        }
+        if (array.length == 1) {
+            return array[0];
+        }
+        return array[index % array.length];
     }
 
     public static function createSpectralColors():Array {

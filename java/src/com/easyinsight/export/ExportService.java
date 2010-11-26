@@ -690,6 +690,9 @@ public class ExportService {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
         });
+        String style = "style=\"font-size:" + report.getFontSize() + "px;font-family=" + report.getFontName() + ";serif\"";
+        sb.append("<table " + style + ">");
+        sb.append("<tr>");
         for (AnalysisItem analysisItem : items) {
             for (AnalysisItem headerItem : listDataResults.getHeaders()) {
                 if (headerItem == analysisItem) {
@@ -699,8 +702,6 @@ public class ExportService {
                 }
             }
         }
-        sb.append("<table>");
-        sb.append("<tr>");
         sb.append("</tr>");
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr>");

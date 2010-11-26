@@ -1,8 +1,10 @@
 package com.easyinsight.analysis.charts.xaxisbased {
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.ComboBoxReportFormItem;
+import com.easyinsight.analysis.FillProvider;
+
 import mx.collections.ArrayCollection;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSXAxisChartDefinition")]
@@ -13,6 +15,8 @@ public class XAxisDefinition extends ChartDefinition{
 
     public var yAxisMin:Number;
     public var yAxisMax:Number;
+
+    public var colorScheme:String = FillProvider.defaultFill;
 
     public function XAxisDefinition() {
         super();
@@ -31,6 +35,13 @@ public class XAxisDefinition extends ChartDefinition{
 
     override public function getFields():ArrayCollection {
         return new ArrayCollection([ xaxis, measure]);
+    }
+
+    override public function createFormItems():ArrayCollection {
+        var items:ArrayCollection = super.createFormItems();
+        items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", colorScheme,
+                    this, FillProvider.fillOptions));
+        return items;
     }
 }
 }

@@ -56,7 +56,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     public function DataViewFactory() {
         this.percentHeight = 100;
-        this.percentWidth = 100;
+        this.percentWidth = 100;        
     }
 
     [Bindable(event="reportSelectionEnabledChanged")]
@@ -189,7 +189,20 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar, false, 0, true);
         _controlBar.analysisDefinition = _analysisDefinition;
         //BindingUtils.bindProperty(_controlBar, "width", this, "controlBarWidth");
-        addChild(_controlBar as DisplayObject);
+        var box2:Box = new Box();
+        box2.setStyle("paddingLeft", 5);
+        box2.setStyle("paddingRight", 5);
+        box2.setStyle("paddingBottom", 5);
+        box2.setStyle("paddingTop", 5);
+        box2.setStyle("backgroundAlpha", .8);
+        box2.setStyle("backgroundColor", 0xFFFFFF);
+        box2.setStyle("cornerRadius", 5);
+        box2.setStyle("borderStyle", "solid");
+        box2.setStyle("borderThickness", 0);
+        box2.setStyle("borderColor", "0xFFFFFF");
+        box2.percentWidth = 100;
+        addChild(box2);
+        box2.addChild(_controlBar as DisplayObject);
 
         canvas = new Canvas();
         canvas.percentHeight = 100;

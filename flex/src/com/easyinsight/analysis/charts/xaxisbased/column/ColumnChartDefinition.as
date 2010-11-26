@@ -2,9 +2,14 @@ package com.easyinsight.analysis.charts.xaxisbased.column {
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
+
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSColumnChartDefinition")]
 public class ColumnChartDefinition extends XAxisDefinition{
+
+
+
     public function ColumnChartDefinition() {
         super();
     }
@@ -20,5 +25,7 @@ public class ColumnChartDefinition extends XAxisDefinition{
     override public function getChartFamily():int {
         return ChartTypes.COLUMN_FAMILY;
     }
+
+
 }
 }

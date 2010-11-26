@@ -15,6 +15,7 @@ public abstract class EIDescriptor {
     public static final int PACKAGE = 8;
     public static final int SCORECARD = 9;
     public static final int LOOKUP_TABLE = 10;
+    public static final int DASHBOARD = 11;
 
     private String name;
     private String urlKey;

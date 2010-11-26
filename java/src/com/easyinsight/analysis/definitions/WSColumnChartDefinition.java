@@ -9,6 +9,8 @@ import com.easyinsight.analysis.ChartDefinitionState;
  */
 public class WSColumnChartDefinition extends WSXAxisDefinition {
 
+
+
     public int getChartType() {
         return ChartDefinitionState.COLUMN_2D;
     }

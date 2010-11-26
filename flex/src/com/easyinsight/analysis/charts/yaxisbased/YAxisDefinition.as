@@ -2,12 +2,16 @@ package com.easyinsight.analysis.charts.yaxisbased {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.ComboBoxReportFormItem;
+import com.easyinsight.analysis.FillProvider;
+
 import mx.collections.ArrayCollection;
 
 public class YAxisDefinition extends ChartDefinition{
 
     public var measure:AnalysisItem;
     public var yaxis:AnalysisItem;
+    public var colorScheme:String = FillProvider.defaultFill;;
 
     public function YAxisDefinition() {
         super();
@@ -26,6 +30,13 @@ public class YAxisDefinition extends ChartDefinition{
 
     override public function getFields():ArrayCollection {
         return new ArrayCollection([ yaxis, measure]);
+    }
+
+    override public function createFormItems():ArrayCollection {
+        var items:ArrayCollection = super.createFormItems();
+        items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", colorScheme,
+                    this, FillProvider.fillOptions));
+        return items;
     }
 }
 }

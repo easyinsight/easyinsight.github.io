@@ -5,6 +5,7 @@
         import com.easyinsight.account.Account;
         import com.easyinsight.framework.User;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         private var _errorMessage:String;
