@@ -43,6 +43,8 @@ import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.SendGridDataSource;
 import com.easyinsight.datasources.WholeFoodsDataSource;
 import com.easyinsight.goals.KPITreeWrapper;
+import com.easyinsight.google.Spreadsheet;
+import com.easyinsight.google.Worksheet;
 import com.easyinsight.icons.Icon;
 import com.easyinsight.kpi.KPIUser;
 import com.easyinsight.salesforce.SalesforceFeedDefinition;
@@ -99,6 +101,8 @@ public class TORegistry {
         var kpiUser:KPIUser;
         var info:FieldUploadInfo;
         var response:UploadResponse;
+        var spreadsheet:Spreadsheet;
+        var worksheet:Worksheet;
     }
 }
 }
