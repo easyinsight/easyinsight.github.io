@@ -53,7 +53,7 @@
     finally {
         s.close();
     }
-    if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
+    if((account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
             && !user.isAccountAdmin())
       response.sendRedirect("access.jsp");
 
@@ -161,7 +161,19 @@
                 <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Billing</h1></div>
                 <p>Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.</p>
         <% if(request.getParameter("error") != null) { %>
-            <p><span class="error">There was an error with your billing information. Please input the correct information below.</span></p>
+            <p><span class="error"><%
+                String errorCode = request.getParameter("responseCode");
+                if ("200".equals(errorCode)) out.println("The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.");
+                else if ("202".equals(errorCode)) out.println("The transaction was declined due to insufficient funds.");
+                else if ("203".equals(errorCode)) out.println("The transaction was declined due to being over the credit limit.");
+                else if ("204".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
+                else if ("220".equals(errorCode)) out.println("There was an error with your billing information. Please double check the payment information below. If this error continues, contact support@easy-insight.com.");
+                else if ("221".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
+                else if ("222".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
+                else if ("223".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
+                else if ("224".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
+                else out.println("There was an error with your billing information. Please input the correct information below.");
+            %></span></p>
         <% } %>
   <form method="post" action="https://secure.braintreepaymentgateway.com/api/transact.php" onsubmit="setCCexp()">
       <input id="ccexp" type="hidden" value="" name="ccexp"/>
