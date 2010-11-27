@@ -9,7 +9,7 @@
 <html>
 <head>
 <!-- InstanceBeginEditable name="doctitle" -->
-            <title>Easy Insight - Billing Complete</title>
+            <title>Easy Insight - Dashboard Login</title>
 <!-- InstanceEndEditable -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="/css/base.css" rel="stylesheet" type="text/css" />
@@ -46,6 +46,9 @@
         <div id="content">
         <!-- InstanceBeginEditable name="content" -->
             <div style="width:100%;background-color:#FFFFFF">
+                <% if (request.getParameter("error") != null) {
+                    out.println("There was an error in your login attempt.");
+                } %>
               <form method="post" action="index.jsp" style="width:100%">
                   <input type="hidden" value="<%= request.getParameter("reportID")%>" name="reportID"/>
                   <table><tbody><tr>
