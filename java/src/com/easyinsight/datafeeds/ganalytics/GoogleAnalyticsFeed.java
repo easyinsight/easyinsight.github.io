@@ -238,7 +238,6 @@ public class GoogleAnalyticsFeed extends Feed {
                 "&metrics=ga:pageviews,ga:bounces,ga:timeOnPage,ga:visitors,ga:visits,ga:timeOnSite" +
                 "&start-date=2009-06-09&end-date=2009-06-11";*/
                 String next = urlBuilder.toString();
-                System.out.println(next);
                 
                 while (next != null) {
                     URL reportUrl = new URL(next);

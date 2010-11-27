@@ -84,6 +84,7 @@ public abstract class ScheduleType {
         insertScheduleStmt.execute();
         long scheduleID = Database.instance().getAutoGenKey(insertScheduleStmt);
         this.scheduleID = scheduleID;
+        insertScheduleStmt.close();
         childSave(conn);
         return scheduleID;
     }

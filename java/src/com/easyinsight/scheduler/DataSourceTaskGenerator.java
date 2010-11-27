@@ -41,6 +41,7 @@ public class DataSourceTaskGenerator extends TaskGenerator {
         if (time != null) {
             PreparedStatement findDataStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM SCHEDULED_DATA_SOURCE_REFRESH WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
             findDataStmt.setLong(1, activityID);
+            List<ScheduledTask> results;
             ResultSet rs = findDataStmt.executeQuery();
             if (rs.next()) {
                 DataSourceScheduledTask dataSourceScheduledTask = new DataSourceScheduledTask();
@@ -49,10 +50,12 @@ public class DataSourceTaskGenerator extends TaskGenerator {
                 dataSourceScheduledTask.setExecutionDate(time);
                 dataSourceScheduledTask.setTaskGeneratorID(getTaskGeneratorID());
                 setLastTaskDate(time);
-                return Arrays.asList((ScheduledTask) dataSourceScheduledTask);
+                results = Arrays.asList((ScheduledTask) dataSourceScheduledTask);
             } else {
-                return Collections.emptyList();
+                results = Collections.emptyList();
             }
+            findDataStmt.close();
+            return results;
         } else {
             return Collections.emptyList();
         }

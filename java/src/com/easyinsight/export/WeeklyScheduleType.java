@@ -59,6 +59,7 @@ public class WeeklyScheduleType extends ScheduleType {
         if (rs.next()) {
             this.dayOfWeek = rs.getInt(1);
         }
+        queryStmt.close();
     }
 
     @Override

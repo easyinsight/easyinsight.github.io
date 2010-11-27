@@ -57,6 +57,7 @@ public class MonthlyScheduleType extends ScheduleType {
         if (rs.next()) {
             this.dayOfMonth = rs.getInt(1);
         }
+        queryStmt.close();
     }
 
     @Override
