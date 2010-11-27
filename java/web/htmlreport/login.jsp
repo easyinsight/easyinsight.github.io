@@ -47,6 +47,7 @@
         <!-- InstanceBeginEditable name="content" -->
             <div style="width:100%;background-color:#FFFFFF">
               <form method="post" action="index.jsp" style="width:100%">
+                  <input type="hidden" value="<%= request.getParameter("reportID")%>" name="reportID"/>
                   <table><tbody><tr>
                       <td>User Name:</td>
                       <td> <input type="text" name="username" /></td></tr>

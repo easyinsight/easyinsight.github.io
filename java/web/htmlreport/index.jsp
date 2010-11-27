@@ -18,10 +18,8 @@
 </head>
 <body>
     <%
-        if (request.getParameter("reportID") != null) {
-            request.getSession().setAttribute("reportID", request.getParameter("reportID"));    
-        }
         Long userID = (Long) request.getSession().getAttribute("userID");
+        String reportURLKey = request.getParameter("reportID");
         if(request.getParameter("username") != null && request.getParameter("password") != null) {
             Session hibernateSession = Database.instance().createSession();
             try {
@@ -29,7 +27,7 @@
 
                 java.util.List results = hibernateSession.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
                 if(results.size() != 1) {
-                    response.sendRedirect("login.jsp?error=true");
+                    response.sendRedirect("login.jsp?error=true&reportID=" + reportURLKey);
                     return;
                 }
                 User user =(User) results.get(0);
@@ -42,7 +40,7 @@
                 hibernateSession.close();
             }
         } else if (userID == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login.jsp?reportID=" + reportURLKey);
             return;
         } else {
             Session hibernateSession = Database.instance().createSession();
@@ -66,10 +64,7 @@
             Database.closeConnection(conn);
         }
 
-        String reportURLKey = request.getParameter("reportID");
-        if (reportURLKey == null) {
-            reportURLKey = (String) request.getSession().getAttribute("reportID");
-        }
+
         com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportURLKey);
         if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
             WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
