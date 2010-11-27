@@ -19,6 +19,7 @@
         import mx.managers.DragManager;
         import mx.controls.List;
         import mx.events.DragEvent;
+        import mx.validators.Validator;
 
         [Bindable]
         private var failureMessage:String;
@@ -110,6 +111,12 @@
         }
 
         public function validate():Boolean {
+            var results:Array = Validator.validateAll([nameValidator]);
+            if (results.length > 0) {
+                nameInput.setFocus();
+                nameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
             return true;
         }
 
