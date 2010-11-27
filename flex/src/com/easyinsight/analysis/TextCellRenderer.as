@@ -21,24 +21,26 @@ public class TextCellRenderer extends Text
 		private var _data:Object;
 		private var _analysisItem:AnalysisText;
     private var _report:AnalysisDefinition;
+    private var _selectionEnabled:Boolean;
 
 		public function TextCellRenderer() {
 			super();
             addEventListener(MouseEvent.CLICK, onClick);
 		}
 
+    public function set selectionEnabled(value:Boolean):void {
+        _selectionEnabled = value;
+    }
 
     public function set report(value:AnalysisDefinition):void {
         _report = value;
     }
 
     private function onClick(event:MouseEvent):void {
-            if (event.shiftKey) {
-                var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
-                PopUpManager.addPopUp(window, this);
-                window.x = event.stageX + 5;
-                window.y = event.stageY + 5;
-            }
+            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
+            PopUpManager.addPopUp(window, this);
+            window.x = event.stageX + 5;
+            window.y = event.stageY + 5;
         }
 
         private function passThrough(event:Event):void {
