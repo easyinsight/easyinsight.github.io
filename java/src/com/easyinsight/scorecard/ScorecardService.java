@@ -401,12 +401,14 @@ public class ScorecardService {
             }
             for (Long dataSourceID : dataSourceIDs) {
                 FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-                IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                    try {
-                        dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null);
-                    } finally {
-                        DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                if (feedDefinition instanceof IServerDataSourceDefinition) {
+                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                    if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                        try {
+                            dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null);
+                        } finally {
+                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                        }
                     }
                 }
             }
