@@ -3,6 +3,7 @@ import com.easyinsight.administration.feed.GoogleAnalyticsDataSource;
 import com.easyinsight.administration.feed.GoogleFeedDefinition;
 import com.easyinsight.administration.feed.PersistableStringValue;
 import com.easyinsight.administration.feed.PersistableValue;
+import com.easyinsight.administration.sharing.UserStub;
 import com.easyinsight.analysis.AnalysisCalculation;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItemFault;
@@ -161,6 +162,7 @@ public class TORegistry {
         var metadata:AnalysisTagsResultMetadata;
         var metadata2:AnalysisRangeResultMetadata;
         var kpiUser:KPIUser;
+        var userStub:UserStub;
         var info:FieldUploadInfo;
         var response:UploadResponse;
         var spreadsheet:Spreadsheet;
