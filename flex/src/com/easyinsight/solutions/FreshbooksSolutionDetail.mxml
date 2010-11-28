@@ -55,8 +55,7 @@
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="120"
                          text="Take advantage of Easy Insight to extend your Freshbooks reporting capabilities to the next level of visibility and analysis. Keep a pulse on the health of your business's financial health through KPIs of your invoices and expenses. Easily apply custom filters to analyze data by vendor, category, dates, or any of the other fields in Freshbooks. View data as lists, charte, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."
-                         fontSize="14"/>
-            <solutions:HeaderShadeArea width="300" height="50" leftColor="#FFFFFF" rightColor="#DDDDDD"/>
+                         fontSize="14"/>            
         </mx:VBox>
         <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="#000000"/>
     </mx:HBox>
