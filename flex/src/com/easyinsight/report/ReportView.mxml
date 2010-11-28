@@ -33,7 +33,6 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
-        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.EIErrorEvent;
         import com.easyinsight.util.PopUpUtil;

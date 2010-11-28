@@ -44,19 +44,39 @@ import com.easyinsight.datasources.MeetupDataSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.SendGridDataSource;
 import com.easyinsight.datasources.WholeFoodsDataSource;
+import com.easyinsight.filtering.FilterDateRangeDefinition;
+import com.easyinsight.filtering.FilterPatternDefinition;
+import com.easyinsight.filtering.FilterRangeDefinition;
+import com.easyinsight.filtering.FilterValueDefinition;
+import com.easyinsight.filtering.FirstValueFilterDefinition;
+import com.easyinsight.filtering.LastValueFilterDefinition;
+import com.easyinsight.filtering.NullValueFilterDefinition;
+import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
 import com.easyinsight.goals.KPITreeWrapper;
 import com.easyinsight.google.GoogleSpreadsheetUploadContext;
 import com.easyinsight.google.Spreadsheet;
 import com.easyinsight.google.Worksheet;
 import com.easyinsight.icons.Icon;
+import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUser;
 import com.easyinsight.salesforce.SalesforceFeedDefinition;
+
+import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.solutions.SolutionInstallInfo;
+
+import mx.managers.DragManager;
+import mx.managers.PopUpManager;
 
 public class TORegistry {
     public function TORegistry() {
     }
 
     public static function registerTypes():void {
+
+        var dm:DragManager;
+        var pm:PopUpManager;
+        
+
         var analysisStep:AnalysisStep;
         var analysisLat:AnalysisLatitude;
         var analysisLong:AnalysisLongitude;
@@ -64,6 +84,7 @@ public class TORegistry {
         var analysisZip:AnalysisZipCode;
         var sigma:SixSigmaMeasure;
         var tags:AnalysisList;
+        var solutionInstallInfo:SolutionInstallInfo;
         var hierarchy:AnalysisHierarchyItem;
         var calc:AnalysisCalculation;
         var derived:DerivedAnalysisDimension;
@@ -74,7 +95,17 @@ public class TORegistry {
         var emptyValue:EmptyValue;
         var numValue:NumericValue;
         var drill:DrillThroughEvent;
+        var filter1:FilterValueDefinition;
+        var filter2:FilterDateRangeDefinition;
+        var filter3:FilterRangeDefinition;
+        var filter4:FilterPatternDefinition;
+        var filter5:RollingDateRangeFilterDefinition;
+        var filter6:FirstValueFilterDefinition;
+        var filter7:LastValueFilterDefinition;
+        var filter8:NullValueFilterDefinition;
         var icon:Icon;
+        var scorecard:Scorecard;
+        var kpi:KPI;
         var folderNode:FolderNode;
         var feedFolder:FeedFolder;
         var kpiWrapper:KPITreeWrapper;

@@ -30,4 +30,10 @@ public class ReportNumericProperty extends ReportProperty {
     public void setValue(double value) {
         this.value = value;
     }
+
+    public void cleanup() {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            value = 0;
+        }
+    }
 }

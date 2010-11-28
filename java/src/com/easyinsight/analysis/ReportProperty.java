@@ -46,4 +46,8 @@ public class ReportProperty implements Cloneable {
     public void setPropertyName(String propertyName) {
         this.propertyName = propertyName;
     }
+
+    public void cleanup() {
+
+    }
 }

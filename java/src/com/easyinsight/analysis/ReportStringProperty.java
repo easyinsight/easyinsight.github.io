@@ -30,4 +30,11 @@ public class ReportStringProperty extends ReportProperty {
     public void setValue(String value) {
         this.value = value;
     }
+
+    @Override
+    public void cleanup() {
+        if (value == null) {
+            value = "";
+        }
+    }
 }
