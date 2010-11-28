@@ -140,7 +140,13 @@ import mx.rpc.events.ResultEvent;
 			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
 			var dateMetadata:AnalysisDateDimensionResultMetadata = metadata as AnalysisDateDimensionResultMetadata;
 			this.lowDate = dateMetadata.earliestDate;
+            if (lowDate == null) {
+                lowDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
+            }
 			this.highDate = dateMetadata.latestDate;
+            if (highDate == null) {
+                highDate = new Date();
+            }
 			this.delta = highDate.valueOf() - lowDate.valueOf();
 			hslider = new HSlider();
 			hslider.thumbCount = 2;
@@ -226,16 +232,16 @@ import mx.rpc.events.ResultEvent;
                 _filterDefinition.sliding = true;
 			} else {
                 if (_filterDefinition.sliding && _filterDefinition.startDate != null && _filterDefinition.endDate != null) {
-                    var nowDelta:int = dateMetadata.latestDate.getTime() - _filterDefinition.endDate.getTime();
+                    var nowDelta:int = highDate.getTime() - _filterDefinition.endDate.getTime();
                     _filterDefinition.startDate = new Date(_filterDefinition.startDate.getTime() + nowDelta);
                     _filterDefinition.endDate = new Date(_filterDefinition.endDate.getTime() + nowDelta);
                 }
 				if (_filterDefinition.startDate == null) {
-					_filterDefinition.startDate = dateMetadata.earliestDate;
+					_filterDefinition.startDate = lowDate;
 				}
 				lowField.selectedDate = _filterDefinition.startDate;
 				if (_filterDefinition.endDate == null) {
-					_filterDefinition.endDate = dateMetadata.latestDate;
+					_filterDefinition.endDate = highDate;
 				}
                 if (_filterDefinition.startDateDimension != null) {
                     leftIndex = 1;
