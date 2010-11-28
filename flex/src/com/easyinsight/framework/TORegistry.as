@@ -30,6 +30,7 @@ import com.easyinsight.analysis.ServerError;
 import com.easyinsight.analysis.SixSigmaMeasure;
 import com.easyinsight.analysis.StringValue;
 import com.easyinsight.analysis.URLLink;
+import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.CsvFileUploadFormat;
 import com.easyinsight.customupload.ExcelUploadFormat;
 import com.easyinsight.customupload.FlatFileUploadFormat;
@@ -49,6 +50,8 @@ import com.easyinsight.datasources.MeetupDataSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.SendGridDataSource;
 import com.easyinsight.datasources.WholeFoodsDataSource;
+import com.easyinsight.feedassembly.CompositeFeedConnection;
+import com.easyinsight.feedassembly.CompositeFeedNode;
 import com.easyinsight.filtering.FilterDateRangeDefinition;
 import com.easyinsight.filtering.FilterPatternDefinition;
 import com.easyinsight.filtering.FilterRangeDefinition;
@@ -63,11 +66,19 @@ import com.easyinsight.google.Spreadsheet;
 import com.easyinsight.google.Worksheet;
 import com.easyinsight.icons.Icon;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.kpi.KPIUser;
+import com.easyinsight.kpi.KPIValue;
 import com.easyinsight.salesforce.SalesforceFeedDefinition;
 
 import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.scorecard.ScorecardDescriptor;
+import com.easyinsight.scorecard.ScorecardList;
+import com.easyinsight.scorecard.ScorecardWrapper;
+import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.SolutionInstallInfo;
+
+import com.easyinsight.solutions.SolutionKPIData;
 
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
@@ -116,6 +127,8 @@ public class TORegistry {
         var persString:PersistableStringValue;
         var persValue:PersistableValue;
         var kpi:KPI;
+        var kpiValue:KPIValue;
+        var kpiOutcome:KPIOutcome;
         var folderNode:FolderNode;
         var feedFolder:FeedFolder;
         var kpiWrapper:KPITreeWrapper;
@@ -139,6 +152,8 @@ public class TORegistry {
         var freshbooks:FreshbooksDataSource;
         var redirect:RedirectDataSource;
         var constantContact:ConstantContactDataSource;
+        var connection:CompositeFeedConnection;
+        var node:CompositeFeedNode;
         var wf:WholeFoodsDataSource;
         var fault:DataSourceConnectivityReportFault;
         var serverError:ServerError;
@@ -150,6 +165,12 @@ public class TORegistry {
         var response:UploadResponse;
         var spreadsheet:Spreadsheet;
         var worksheet:Worksheet;
+        var configDS:ConfigureDataSource;
+        var scorecardDescriptor:ScorecardDescriptor;
+        var scorecardList:ScorecardList;
+        var scorecardWrapper:ScorecardWrapper;
+        var dsd:DataSourceDescriptor;
+        var sKPIData:SolutionKPIData;
     }
 }
 }
