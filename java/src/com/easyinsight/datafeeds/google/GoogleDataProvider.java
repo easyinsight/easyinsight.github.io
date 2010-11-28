@@ -100,6 +100,7 @@ public class GoogleDataProvider {
                         worksheet.setSpreadsheet(entry.getTitle().getPlainText());
                         worksheet.setTitle(title);
                         String url = worksheetEntry.getListFeedUrl().toString();
+                        System.out.println("*** " + title + " - " + url);
                         worksheet.setUrl(url);
                         worksheet.setFeedDescriptor(worksheetToFeedMap.get(url));
                         worksheetList.add(worksheet);
