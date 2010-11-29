@@ -66,10 +66,6 @@
 
             boolean yearly = request.getParameter("orderid").startsWith("yearly");
 
-            List l = s.createQuery("from BuyOurStuffTodo where userID = ?").setLong(0, userID).list();
-            if(l.size() > 0) {
-                s.delete(l.get(0));
-            }
 
             // Can only let account admins use the billing
             if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
