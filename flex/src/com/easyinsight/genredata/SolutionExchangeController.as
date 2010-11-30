@@ -69,19 +69,7 @@ public class SolutionExchangeController extends ExchangeController{
     }
 
     override protected function createExchangedGridPage():ExchangePage {
-        var page:SolutionExchangeGridPage = new SolutionExchangeGridPage();
-
-
-        return page;
-    }
-
-    override protected function createExchangeSummaryPage():ExchangePage {
-        var summary:SolutionExchangeSummaryPage = new SolutionExchangeSummaryPage();
-        summary.id = "connectionSummary";
-        summary.itemRenderer = summaryItemRenderer();
-
-
-        return summary;
+        return new SolutionExchangeGridPage();
     }
 
     override protected function summaryItemRenderer():IFactory {

@@ -6,11 +6,6 @@
                       xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.customupload.UploadResponse;
-        import com.easyinsight.customupload.wizard.FieldUploadInfo;
-        import com.easyinsight.customupload.wizard.FlatFileUploadContext;
-        import com.easyinsight.framework.LoginEvent;
-
         import com.easyinsight.listing.IPerspective;
         import com.easyinsight.listing.ListingChangeEvent;
 
@@ -18,8 +13,6 @@
 
         import mx.events.ItemClickEvent;
         import mx.utils.URLUtil;
-
-        import com.easyinsight.framework.User;
 
         import mx.managers.BrowserManager;
 
@@ -103,20 +96,7 @@
         private var availableSolutions:ArrayCollection;
 
         private function initListeners():void {
-            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             addEventListener(SolutionSelectionEvent.SOLUTION_SELECTION, onSelection);
-        }
-
-        private function onSelection(event:SolutionSelectionEvent):void {
-            var detail:IPerspective = SolutionDetailFactory.createDetailPage(event.solution, false);
-            dispatchEvent(new ListingChangeEvent(detail));
-        }
-
-        private function onLogin(event:LoginEvent):void {
-            gotFocus();
-        }
-
-        public function gotFocus():void {
             var fragmentObject:Object = new Object();
             fragmentObject.page = "connections";
             BrowserManager.getInstance().setTitle("Easy Insight - Connections");
@@ -127,6 +107,14 @@
             }
             stackIndex = 0;
             solutionService.getSolutions.send();
+        }
+
+        private function onSelection(event:SolutionSelectionEvent):void {
+            var detail:IPerspective = SolutionDetailFactory.createDetailPage(event.solution, false);
+            dispatchEvent(new ListingChangeEvent(detail));
+        }
+
+        public function gotFocus():void {
         }
 
         private function gotAllSolutions():void {

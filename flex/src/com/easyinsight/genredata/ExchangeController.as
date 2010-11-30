@@ -7,7 +7,6 @@ import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
 import mx.collections.SortField;
-import mx.controls.Alert;
 import mx.core.IFactory;
 
 [Event(name="changeView", type="com.easyinsight.genredata.ExchangeControllerEvent")]
@@ -15,10 +14,7 @@ import mx.core.IFactory;
 public class ExchangeController extends EventDispatcher {
 
     private var _exchangeGridPage:ExchangePage;
-    private var _exchangeSummaryPage:ExchangePage;
-    private var _exchangeDetailPage:ExchangePage;
     private var _dataProvider:ArrayCollection = new ArrayCollection();
-    private var _displayMode:String = "summary";
     private var _selectedTag:String;
     private var _keyword:String;
     private var _selectedPage:ExchangePage;
@@ -58,34 +54,10 @@ public class ExchangeController extends EventDispatcher {
 
     public function get selectedPage():ExchangePage {
         if (_selectedPage == null) {
-            _selectedPage = exchangeSummaryPage;
+            _selectedPage = exchangeGridPage;
         }
         return _selectedPage;
     }
-
-    [Bindable(event="displayModeChanged")]
-    [Inspectable(category="General", enumeration="grid,summary,detail", defaultValue="summary")]
-    public function get displayMode():String {
-        return _displayMode;
-    }
-
-    public function set displayMode(value:String):void {
-
-        if (_displayMode == value) return;
-        _displayMode = value;
-        if (_displayMode == "grid") {
-            _selectedPage = exchangeGridPage;
-            dispatchEvent(new ExchangeControllerEvent(exchangeGridPage));
-        } else if (_displayMode == "summary") {
-            _selectedPage = exchangeSummaryPage;
-            dispatchEvent(new ExchangeControllerEvent(exchangeSummaryPage));
-        } else if (_displayMode == "detail") {
-            _selectedPage = exchangeDetailPage;
-            dispatchEvent(new ExchangeControllerEvent(exchangeDetailPage));
-        }
-        dispatchEvent(new Event("displayModeChanged"));
-    }
-
 
     [Bindable(event="selectedTagChanged")]
     public function get selectedTag():String {
@@ -173,26 +145,6 @@ public class ExchangeController extends EventDispatcher {
 
     protected function createExchangedGridPage():ExchangePage {
         return null;
-    }
-
-    public function get exchangeSummaryPage():ExchangePage {
-        if (_exchangeSummaryPage == null) {
-            _exchangeSummaryPage = createExchangeSummaryPage();            
-            configureExchangePage(_exchangeSummaryPage);
-        }
-        return _exchangeSummaryPage;
-    }
-
-    protected function createExchangeSummaryPage():ExchangePage {
-        return null;
-    }
-
-    public function get exchangeDetailPage():ExchangePage {
-        if (_exchangeDetailPage == null) {
-            _exchangeDetailPage = new ExchangeDetailPage();
-            configureExchangePage(_exchangeDetailPage);
-        }
-        return _exchangeDetailPage;
     }
 
     public function refreshData():void {

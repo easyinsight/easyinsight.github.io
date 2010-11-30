@@ -1,19 +1,31 @@
 package com.easyinsight.genredata {
-import com.easyinsight.analysis.ReportRating;
 
-public class ExchangeRatingRenderer extends ReportRating{
+import mx.containers.HBox;
+import mx.controls.Label;
+import mx.formatters.NumberFormatter;
+
+public class ExchangeRatingRenderer extends HBox {
 
     private var reportExchangeItem:ReportExchangeItem;
+    private var ratingLabel:Label;
 
     public function ExchangeRatingRenderer() {
         super();
-        rateable = true;
+        setStyle("horizontalAlign", "center");
+        percentWidth = 100;
+        ratingLabel = new Label();
+    }
+
+    protected override function createChildren():void {
+        super.createChildren();
+        addChild(ratingLabel);
     }
 
     override public function set data(val:Object):void {
         reportExchangeItem = val as ReportExchangeItem;
-        reportID = reportExchangeItem.id;
-        score = reportExchangeItem.ratingAverage;
+        var nf:NumberFormatter = new NumberFormatter();
+        nf.precision = 2;
+        ratingLabel.text = nf.format(reportExchangeItem.ratingAverage);
     }
 
     override public function get data():Object {

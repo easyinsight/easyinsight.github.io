@@ -17,19 +17,20 @@
             </mx:HBox>
             <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" height="100%"/>
         </mx:VBox>
-        <mx:DataGrid dataProvider="{dataProvider2}" width="100%" height="100%">
-        <mx:columns>
-            <mx:DataGridColumn headerText="Name" dataField="name"/>
-            <mx:DataGridColumn headerText="Data Source" dataField="dataSourceName" width="180"/>
-            <mx:DataGridColumn headerText="Author" dataField="author" width="120"/>
-            <mx:DataGridColumn headerText="Rating" dataField="name"
-                               itemRenderer="com.easyinsight.genredata.ExchangeRatingRenderer" width="120"/>
-            <mx:DataGridColumn headerText="Date Added" dataField="author" width="90"
-                    itemRenderer="com.easyinsight.genredata.ReportDateRenderer"/>
-            <mx:DataGridColumn headerText="" dataField="name" sortable="false"
-                               itemRenderer="com.easyinsight.genredata.ExchangeActionRenderer" width="50"/>
-        </mx:columns>
-    </mx:DataGrid>
+        <mx:DataGrid dataProvider="{dataProvider2}" width="100%" height="100%" variableRowHeight="true">
+            <mx:columns>
+                <mx:DataGridColumn headerText="Name" dataField="name" fontSize="14"/>
+                <mx:DataGridColumn headerText="Description" dataField="description" itemRenderer="com.easyinsight.genredata.ExchangeDescriptionRenderer"/>
+                <mx:DataGridColumn headerText="Data Source" dataField="dataSourceName" width="180"/>
+                <mx:DataGridColumn headerText="Author" dataField="author" width="120"/>
+                <mx:DataGridColumn headerText="Rating" dataField="name"
+                                   itemRenderer="com.easyinsight.genredata.ExchangeRatingRenderer" width="120"/>
+                <mx:DataGridColumn headerText="Date Added" dataField="author" width="90"
+                        itemRenderer="com.easyinsight.genredata.ReportDateRenderer"/>
+                <mx:DataGridColumn headerText="" dataField="name" sortable="false"
+                                   itemRenderer="com.easyinsight.genredata.ExchangeActionRenderer" width="50"/>
+            </mx:columns>
+        </mx:DataGrid>
     </mx:HBox>
 
 </genredata:ExchangePage>

@@ -18,7 +18,6 @@
         private function setupListeners():void {
             solutionService.getSolutions.send();
             BindingUtils.bindProperty(solutionDataController, "solution", this, "solution");
-            BindingUtils.bindProperty(displayTypeBar, "selectedIndex", this, "displayMode");
             UserAudit.instance().audit(UserAudit.VISITED_EXCHANGE);
         }
 
@@ -26,7 +25,6 @@
             viewMode = index;
             listsBox.removeAllChildren();
             exchangeController = solutionDataController;
-            updateDisplayMode2();
             updateURL();
             listsBox.addChild(exchangeController.selectedPage);
             exchangeController.refreshData();
@@ -36,7 +34,6 @@
             var fragmentObject:Object = new Object();
             fragmentObject.page = "exchange";
             fragmentObject.view = viewMode;
-            fragmentObject.display = displayMode;
             fragmentObject.subTopicID = subTopicID;
             //exchangeController.decorateObject(fragmentObject);
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
@@ -49,40 +46,26 @@
             return source.split(find).join(replacement);
         }
 
-        private function updateDisplayMode2():void {
-            displayMode = displayTypeBar.selectedIndex;
-            if (displayTypeBar.selectedIndex == 1) {
-                exchangeController.displayMode = "grid";
-            } else if (displayTypeBar.selectedIndex == 0) {
-                exchangeController.displayMode = "summary";
-            } else if (displayTypeBar.selectedIndex == 2) {
-                exchangeController.displayMode = "detail";
-            }
-            updateURL();
-        }
-
         /*private function updateState():void {
          }*/
 
+        private function refreshExchange():void {
+            listsBox.removeAllChildren();
+            listsBox.addChild(exchangeController.selectedPage);
+            exchangeController.refreshData();
+        }
 
         public function gotFocus():void {
             BrowserManager.getInstance().setTitle("Easy Insight - Exchange");
             exchangeController = solutionDataController;
-            if (displayMode == 1) {
-                exchangeController.displayMode = "grid";
-            } else if (displayMode == 2) {
-                exchangeController.displayMode = "detail";
-            } else {
-                exchangeController.displayMode = "summary";
-            }
             if (subTopicID > 0) {
                 exchangeController.subTopicID = subTopicID;
             }
             solutionDataController.initBehavior();
             updateURL();
-            listsBox.removeAllChildren();
-            listsBox.addChild(exchangeController.selectedPage);
-            exchangeController.refreshData();
+            if (listsBox.getChildren().length == 0) {
+                refreshExchange();
+            }
         }
 
         private function onChangeView(event:ExchangeControllerEvent):void {
@@ -91,8 +74,6 @@
         }
 
         private var _viewMode:int = 0;
-
-        private var _displayMode:int = 0;
 
         private var _subTopicID:int = 0;
 
@@ -116,17 +97,6 @@
             if (_viewMode == value) return;
             _viewMode = value;
             dispatchEvent(new Event("viewModeChanged"));
-        }
-
-        [Bindable(event="displayModeChanged")]
-        public function get displayMode():int {
-            return _displayMode;
-        }
-
-        public function set displayMode(value:int):void {
-            if (_displayMode == value) return;
-            _displayMode = value;
-            dispatchEvent(new Event("displayModeChanged"));
         }
 
         private var exchangeController:ExchangeController;
@@ -226,17 +196,11 @@
                          text="Click on reports below to try them out with your data. If you just need a starting point, take one of the reports and modify it to meet your needs."
                          fontSize="16"/>
             <mx:Spacer width="100%"/>
-            <mx:ToggleButtonBar itemClick="updateDisplayMode2()" id="displayTypeBar">
-                <mx:dataProvider>
-                    <mx:Array>
-                        <mx:String>Summary</mx:String>
-                        <mx:String>Grid</mx:String>
-                        <!--<mx:String>Detail</mx:String>-->
-                    </mx:Array>
-                </mx:dataProvider>
-            </mx:ToggleButtonBar>
+            <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" toolTip="Refresh Listing" click="refreshExchange()"/>
         </mx:HBox>
         <mx:HBox width="980" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20"
-                 paddingRight="20"/>
+                 paddingRight="20">
+            
+        </mx:HBox>
     </mx:VBox>
 </skin:BackgroundImage>
