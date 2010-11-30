@@ -138,7 +138,7 @@ public class CCContactSource extends ConstantContactBaseSource {
 
             boolean hasMoreData;
 
-            Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts", ccSource.getTokenKey(), ccSource.getTokenSecret());
+            Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
 
             do {
 
@@ -151,7 +151,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                     Node node = nodes.get(i);
                     String contactIDLink = queryField(node, "id/text()");
                     String id = contactIDLink.split("/")[7];
-                    Document details = query(contactIDLink, ccSource.getTokenKey(), ccSource.getTokenSecret());
+                    Document details = query(contactIDLink, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                     row.addValue(CONTACT_EMAIL, queryField(details, "/entry/content/Contact/EmailAddress/text()"));
                     row.addValue(CONTACT_EMAIL_TYPE, queryField(details, "/entry/content/Contact/EmailType/text()"));
                     row.addValue(CONTACT_ID, id);
@@ -198,7 +198,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                     if (attribute != null && "next".equals(attribute.getValue())) {
                         String linkURL = link.getAttribute("href").getValue();
                         hasMoreData = true;
-                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret());
+                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                         break;
                     }
                 }

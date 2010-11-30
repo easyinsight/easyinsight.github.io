@@ -8,12 +8,8 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
 import nu.xom.*;
-import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
-import oauth.signpost.exception.OAuthMessageSignerException;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.*;
 
@@ -63,7 +59,7 @@ public class CCContactListSource extends ConstantContactBaseSource {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
-            Document doc = query("http://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists", ccSource.getTokenKey(), ccSource.getTokenSecret());
+            Document doc = query("http://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
             boolean hasMoreData;
             do {
                 hasMoreData = false;
@@ -90,7 +86,7 @@ public class CCContactListSource extends ConstantContactBaseSource {
                     if (attribute != null && "next".equals(attribute.getValue())) {
                         String linkURL = link.getAttribute("href").getValue();
                         hasMoreData = true;
-                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret());
+                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                         break;
                     }
                 }

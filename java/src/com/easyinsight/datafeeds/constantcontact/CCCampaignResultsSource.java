@@ -97,7 +97,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
-            Document doc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns", ccSource.getTokenKey(), ccSource.getTokenSecret());
+            Document doc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
             boolean hasMoreCampaigns;
             do {
                 hasMoreCampaigns = false;
@@ -118,13 +118,13 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
 
                     try {
                         String eventsURL = "http://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/campaigns/" + id + "/events/";
-                        Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret());
+                        Document eventsDoc = query(eventsURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                         Nodes eventNodes = eventsDoc.query("/service/workspace/collection");
                         for (int j = 0; j < eventNodes.size(); j++) {
                             Element eventElement = (Element) eventNodes.get(j);
                             Attribute attribute = eventElement.getAttribute("href");
 
-                            Document eventDetailDoc = query("https://api.constantcontact.com" + attribute.getValue(), ccSource.getTokenKey(), ccSource.getTokenSecret());
+                            Document eventDetailDoc = query("https://api.constantcontact.com" + attribute.getValue(), ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                             boolean hasMoreEvents;
                             do {
                                 hasMoreEvents = false;
@@ -213,7 +213,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                                     if (relAttribute != null && "next".equals(relAttribute.getValue())) {
                                         String linkURL = link.getAttribute("href").getValue();
                                         hasMoreEvents = true;
-                                        eventDetailDoc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret());
+                                        eventDetailDoc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                                         break;
                                     }
                                 }
@@ -232,7 +232,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                     if (attribute != null && "next".equals(attribute.getValue())) {
                         String linkURL = link.getAttribute("href").getValue();
                         hasMoreCampaigns = true;
-                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret());
+                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                         break;
                     }
                 }

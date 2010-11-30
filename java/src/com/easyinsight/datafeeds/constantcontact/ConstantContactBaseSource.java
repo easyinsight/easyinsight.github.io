@@ -1,5 +1,8 @@
 package com.easyinsight.datafeeds.constantcontact;
 
+import com.easyinsight.analysis.DataSourceConnectivityReportFault;
+import com.easyinsight.analysis.ReportException;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
@@ -18,6 +21,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -57,24 +61,32 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
             return null;
     }
 
-    protected Document query(String queryString, String tokenKey, String tokenSecretKey) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException {
-        Builder builder = new Builder();
-        OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
-        consumer.setMessageSigner(new HmacSha1MessageSigner());
-        consumer.setTokenWithSecret(tokenKey, tokenSecretKey);
-        HttpGet httpRequest = new HttpGet(queryString);
-        httpRequest.setHeader("Accept", "application/xml");
-        httpRequest.setHeader("Content-Type", "application/xml");
-        consumer.sign(httpRequest);
+    protected Document query(String queryString, String tokenKey, String tokenSecretKey, FeedDefinition parentSource) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException {
+        try {
+            Builder builder = new Builder();
+            OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
+            consumer.setMessageSigner(new HmacSha1MessageSigner());
+            consumer.setTokenWithSecret(tokenKey, tokenSecretKey);
+            HttpGet httpRequest = new HttpGet(queryString);
+            httpRequest.setHeader("Accept", "application/xml");
+            httpRequest.setHeader("Content-Type", "application/xml");
+            consumer.sign(httpRequest);
 
-        org.apache.http.client.HttpClient client = new DefaultHttpClient();
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            org.apache.http.client.HttpClient client = new DefaultHttpClient();
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
-        String string = client.execute(httpRequest, responseHandler);
-        string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
-        string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
-        string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
-        //System.out.println(string);
-        return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+            String string = client.execute(httpRequest, responseHandler);
+            string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
+            string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
+            string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
+            //System.out.println(string);
+            return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+        } catch (HttpResponseException e) {
+            if ("Unauthorized".equals(e.getMessage())) {
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Constant Contact data.", parentSource));
+            } else {
+                throw e;
+            }
+        }
     }
 }
