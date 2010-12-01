@@ -45,10 +45,12 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
     }
 
     private function onClick(event:MouseEvent):void {
-        var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
-        PopUpManager.addPopUp(window, this);
-        window.x = event.stageX + 5;
-        window.y = event.stageY + 5;
+        if (event.shiftKey) {
+            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
+            PopUpManager.addPopUp(window, this);
+            window.x = event.stageX + 5;
+            window.y = event.stageY + 5;
+        }
     }
 
     public function get data():Object {

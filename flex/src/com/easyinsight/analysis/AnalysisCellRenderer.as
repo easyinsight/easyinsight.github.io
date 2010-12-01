@@ -56,7 +56,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
     }
 
     private function onClick(event:MouseEvent):void {
-        if (!_selectionEnabled) {        
+        if (!_selectionEnabled && event.shiftKey) {
             var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this, _report, data);
             PopUpManager.addPopUp(window, this);
             window.x = event.stageX + 5;
