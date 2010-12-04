@@ -169,6 +169,7 @@
                             dateAxis.dataUnits = "years";
                             break;
                         case AnalysisItemTypes.MONTH_LEVEL:
+                        case AnalysisItemTypes.QUARTER_OF_YEAR:
                             dateAxis.dataUnits = "months";
                             break;
                         case AnalysisItemTypes.DAY_LEVEL:

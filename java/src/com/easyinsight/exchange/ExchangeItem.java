@@ -11,7 +11,6 @@ import java.util.List;
 public class ExchangeItem {
     private String name;
     private long id;
-    private String attribution;
     private double ratingAverage;
     private double ratingCount;
     private Date dateAdded;
@@ -22,11 +21,10 @@ public class ExchangeItem {
     public ExchangeItem() {
     }
 
-    public ExchangeItem(String name, long id, String attribution, double ratingAverage, double ratingCount, Date dateAdded,
+    public ExchangeItem(String name, long id, double ratingAverage, double ratingCount, Date dateAdded,
                         String description, String author) {
         this.name = name;
         this.id = id;
-        this.attribution = attribution;
         this.ratingAverage = ratingAverage;
         this.ratingCount = ratingCount;
         this.dateAdded = dateAdded;
@@ -64,14 +62,6 @@ public class ExchangeItem {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getAttribution() {
-        return attribution;
-    }
-
-    public void setAttribution(String attribution) {
-        this.attribution = attribution;
     }
 
     public double getRatingAverage() {

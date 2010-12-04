@@ -652,7 +652,7 @@
 
         private function onRollup(event:HierarchyRollupEvent):void {
             if (event.analysisItem == null) {
-                Alert.show("rollup to item was null");
+                
             } else {
                 transformContainer.clearFilter(event.analysisItem);
             }

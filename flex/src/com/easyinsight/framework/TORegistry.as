@@ -25,6 +25,7 @@ import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.EmptyValue;
 import com.easyinsight.analysis.FeedFolder;
 import com.easyinsight.analysis.FolderNode;
+import com.easyinsight.analysis.GenericReportFault;
 import com.easyinsight.analysis.HierarchyLevel;
 import com.easyinsight.analysis.NumericValue;
 import com.easyinsight.analysis.ServerError;
@@ -127,6 +128,7 @@ public class TORegistry {
         var scorecard:Scorecard;
         var persString:PersistableStringValue;
         var persValue:PersistableValue;
+        var genericReportFault:GenericReportFault;
         var kpi:KPI;
         var kpiValue:KPIValue;
         var kpiOutcome:KPIOutcome;

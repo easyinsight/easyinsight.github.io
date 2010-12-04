@@ -11,7 +11,7 @@
                 <mx:DataGridColumn headerText="Name" dataField="name" fontSize="14" width="200"/>
                 <mx:DataGridColumn headerText="Description" dataField="description" itemRenderer="com.easyinsight.genredata.ExchangeDescriptionRenderer"
                         width="300" fontSize="14" sortable="false"/>
-                <mx:DataGridColumn headerText="Data Source" dataField="dataSourceName" width="120" fontSize="14"/>
+                <mx:DataGridColumn headerText="Connection" dataField="solutionName" width="120" fontSize="14"/>
                 <mx:DataGridColumn headerText="Rating" dataField="name"
                                    itemRenderer="com.easyinsight.genredata.ExchangeRatingRenderer" width="60" fontSize="14"/>
                 <mx:DataGridColumn headerText="" dataField="name" sortable="false"

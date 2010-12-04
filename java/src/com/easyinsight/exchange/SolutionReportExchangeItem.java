@@ -1,5 +1,7 @@
 package com.easyinsight.exchange;
 
+import com.easyinsight.core.EIDescriptor;
+
 import java.util.Date;
 
 /**
@@ -14,9 +16,9 @@ public class SolutionReportExchangeItem extends ReportExchangeItem {
     public SolutionReportExchangeItem() {
     }
 
-    public SolutionReportExchangeItem(String name, long id, String attribution, double ratingAverage, double ratingCount,
-                                      Date dateAdded, String description, String author, ExchangeData exchangeData, long solutionID, String solutionName) {
-        super(name, id, attribution, ratingAverage, ratingCount, dateAdded, description, author, exchangeData);
+    public SolutionReportExchangeItem(String name, long id, double ratingAverage, double ratingCount,
+                                      Date dateAdded, String description, String author, EIDescriptor descriptor, long solutionID, String solutionName) {
+        super(name, id, ratingAverage, ratingCount, dateAdded, description, author, descriptor);
         this.solutionID = solutionID;
         this.solutionName = solutionName;
     }

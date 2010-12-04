@@ -39,6 +39,8 @@ public class AnalysisDateDimension extends AnalysisDimension {
     public static final int DAY_OF_YEAR_FLAT = 8;
     public static final int DAY_OF_WEEK_FLAT = 9;
     public static final int WEEK_OF_YEAR_FLAT = 10;
+    public static final int QUARTER_OF_YEAR_LEVEL = 11;
+    public static final int QUARTER_OF_YEAR_FLAT = 12;
 
     public AnalysisDateDimension(Key key, boolean group, int dateLevel) {
         super(key, group);
@@ -138,7 +140,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         if (tempDate != null) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(tempDate);
-            if (dateLevel <= WEEK_LEVEL) {
+            if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
                         calendar.set(Calendar.MONTH, 0);
@@ -148,6 +150,13 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         calendar.set(Calendar.SECOND, 0);
                         calendar.set(Calendar.MILLISECOND, 0);
                         break;
+                    case QUARTER_OF_YEAR_LEVEL:
+                        calendar.set(Calendar.MONTH, (calendar.get(Calendar.MONTH)) / 3 * 3);
+                        calendar.set(Calendar.DAY_OF_MONTH, 1);
+                        calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
                     case MONTH_LEVEL:
                         calendar.set(Calendar.DAY_OF_MONTH, 1);
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -185,6 +194,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 resultValue = new DateValue(finalDate);
             } else {
                 switch (dateLevel) {
+                    case QUARTER_OF_YEAR_FLAT:
+                        int quarter = (calendar.get(Calendar.MONTH) + 1) / 4;
+                        resultValue = new StringValue("Q" + quarter);
+                        break;
                     case MONTH_FLAT:
                         int month = calendar.get(Calendar.MONTH);
                         switch (month) {

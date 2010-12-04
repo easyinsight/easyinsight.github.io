@@ -14,6 +14,8 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var formReport:FormReport = analysisDefinition as FormReport;
+            setStyle("fontSize", formReport.fontSize);
+            setStyle("fontName", formReport.fontName);
             removeAllChildren();
             if (dataSet.length == 0) {
 
@@ -31,6 +33,7 @@
             var form:Form = new Form();
             for each (var item:AnalysisItem in formReport.columns) {
                 var formItem:FormItem = new FormItem();
+                formItem.setStyle("fontWeight", "normal");
 
 
                 formItem.label = item.display + ":";

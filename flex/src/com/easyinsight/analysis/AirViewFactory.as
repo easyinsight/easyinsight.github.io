@@ -20,7 +20,7 @@ import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.treemap.TreeMapModule;
 import com.easyinsight.framework.DataServiceLoadingEvent;
-import com.easyinsight.framework.HierarchyOverride;
+import com.easyinsight.framework.AnalysisItemOverride;
 import com.easyinsight.report.AbstractViewFactory;
 
 import flash.display.DisplayObject;
@@ -94,7 +94,7 @@ public class AirViewFactory extends AbstractViewFactory {
             pendingRequest = true;
         } else {
             var overrides:ArrayCollection = new ArrayCollection();
-            for each (var hierarchyOverride:HierarchyOverride in overrideObj) {
+            for each (var hierarchyOverride:AnalysisItemOverride in overrideObj) {
                 overrides.addItem(hierarchyOverride);
             }
             _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, allSources, drillthroughFilters, _noCache, overrides);
@@ -103,7 +103,7 @@ public class AirViewFactory extends AbstractViewFactory {
 
     private var overrideObj:Object = new Object();
 
-    override public function addOverride(hierarchyOverride:HierarchyOverride):void {
+    override public function addOverride(hierarchyOverride:AnalysisItemOverride):void {
         overrideObj[hierarchyOverride.analysisItemID] = hierarchyOverride;
     }
 

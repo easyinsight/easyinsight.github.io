@@ -28,6 +28,8 @@ public class PerspectiveInfo {
     public static const CONNECTION_DETAIL:int = 25;
     public static const KPI_WINDOW:int = 26;
     public static const ANALYSIS_ITEM_EDITOR:int = 27;
+    public static const DASHBOARD_EDITOR:int = 28;
+    public static const DASHBOARD_VIEW:int = 29;
 
     public var perspectiveType:int;
     public var properties:Object = null;

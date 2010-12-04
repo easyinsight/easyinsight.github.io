@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
+                      xmlns:filtering="com.easyinsight.filtering.*" xmlns:util="com.easyinsight.util.*"
+                      xmlns:datasources="com.easyinsight.datasources.*"
+                      applyCenterScreenLogic="false" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        import com.easyinsight.commands.CommandEvent;
+
+        import com.easyinsight.commands.CommandProcessor;
+
+        import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.filtering.TransformsUpdatedEvent;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.core.UIComponent;
+        import mx.managers.BrowserManager;
+        import mx.utils.URLUtil;
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out.png")]
+        private var closeIcon:Class;
+
+        private var _dashboardID:int;
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        [Bindable]
+        private var filterDefinitions:ArrayCollection;
+
+        [Bindable]
+        [Embed(source="../../../../assets/banner4.jpg")]
+        public var backImage:Class;
+
+        private function onCreation():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+        }
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+        private var rootView:IDashboardViewComponent;
+
+        [Bindable]
+        [Embed(source="../../../../assets/plasma_tv.png")]
+        private var fullScreenIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/edit.png")]
+        private var reportEditorIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/funnel.png")]
+        private var filterIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/bookmark_blue.png")]
+        private var bookmarkIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/refresh.png")]
+        private var refreshIcon:Class;
+
+        public function set dashboardID(value:int):void {
+            _dashboardID = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            dashboardService.getDashboard.send(_dashboardID);
+        }
+
+        private var _connectionID:int;
+
+        private var _dashboardRating:Number;
+
+        private var _dashboardURLKey:String;
+
+        public function set connectionID(value:int):void {
+            _connectionID = value;
+        }
+
+        public function set dashboardRating(value:Number):void {
+            _dashboardRating = value;
+        }
+
+        public function set dashboardURLKey(value:String):void {
+            _dashboardURLKey = value;
+        }
+
+        private function gotDashboard():void {
+            dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            dashboardName = dashboard.name;
+            dataSourceID = dashboard.dataSourceID;
+            filterDefinitions = dashboard.filters;
+            var feedFragmentObject:Object = new Object();
+            if (_dashboardURLKey == null) {
+                feedFragmentObject.dashboardID = String(dashboard.urlKey);
+            } else {
+                feedFragmentObject.reportTemplateID = String(_dashboardURLKey);
+            }
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            if (dashboard.filters.length > 0) {
+                filterIndex = 1;
+            }
+            transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            rootView = dashboard.rootElement.createViewComponent() as IDashboardViewComponent;
+            dashboardCanvas.addChild(rootView as UIComponent);
+            if (_connectionID > 0) {
+                exchangeIndex = 1;
+            }
+        }
+
+        private function transformsUpdated(event:Event):void {
+            rootView.refresh(transformContainer.getFilterDefinitions());
+        }
+
+        [Bindable]
+        private var description:String;
+
+        [Bindable]
+        private var dashboardName:String;
+
+        [Bindable]
+        private var exchangeIndex:int;
+
+        [Bindable]
+        private var ratingText:String;
+
+        private var dashboard:Dashboard;
+
+        private function close():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
+        private function toFullScreen():void {
+
+        }
+
+        private function keptDashboard():void {
+            Alert.show("This report will now be available to you under the My Data page.");
+            exchangeIndex = 0;
+        }
+
+        private function saveReport(event:Event):void {
+            dashboardService.keepDashboard.send(dashboard.id);
+        }
+
+        [Bindable]
+        private var filterIndex:int = 0;
+
+        private function refreshData():void {
+            rootView.retrieveData();
+        }
+
+        private function toggleFilters():void {
+            filterIndex = filterIndex == 0 ? 1 : 0;
+        }
+
+        [Bindable]
+        private var dataSource:DataSourceInfo;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="dashboardService" id="dashboardService">
+        <mx:method name="getDashboard" result="gotDashboard()"/>
+        <mx:method name="keepDashboard" result="keptDashboard()"/>
+    </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0"
+             horizontalAlign="center"
+             direction="vertical">
+        <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay"
+                 backgroundColor="#FFFFFF">
+            <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5"
+                     paddingTop="5">
+                <mx:HBox width="1000" id="highBox">
+                    <mx:VBox>
+                        <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
+                            <mx:Button click="close()" icon="{closeIcon}" labelPlacement="bottom"
+                                       id="backButton"
+                                       toolTip="Close the report view"/>
+                            <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
+                                       id="fullScreenButton" toolTip="View full screen"/>
+                            <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
+                                       id="refreshButton" toolTip="Refresh this dashboard"/>                            
+                            <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="bottom"
+                                       id="filterButton"/>
+                            <mx:Spacer width="100%"/>
+                            <mx:Label text="{dashboardName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350"
+                                      fontSize="14"/>
+                            <mx:Spacer width="100%"/>
+                        </mx:HBox>
+                        <util:AutoSizeTextArea text="{description}" visible="true" fontSize="12" width="720"
+                                               editable="false" backgroundAlpha="0"/>
+                    </mx:VBox>
+                    <mx:Spacer width="100%"/>
+                    <mx:ViewStack selectedIndex="{exchangeIndex}" resizeToContent="true">
+                        <mx:Box/>
+                        <mx:VBox verticalGap="3" horizontalAlign="center">
+                            <mx:HBox verticalAlign="middle">
+                                <mx:VBox verticalGap="0">
+                                    <mx:Label text="Created by:" color="#555555" fontSize="10" fontStyle="italic"/>
+                                    <mx:Label text="{ratingText}" color="#2525D4"/>
+                                    <!--<mx:Label text="{whenCreated}" fontSize="10"/>-->
+                                </mx:VBox>
+                                <mx:VBox backgroundColor="#2525D4" borderColor="#2525D4" verticalGap="0"
+                                         borderStyle="solid"
+                                         borderThickness="1" cornerRadius="5" horizontalAlign="center">
+                                    <mx:Label text="3.7" fontSize="16" color="#FFFFFF"/>
+                                    <mx:Label text="Average Score" fontSize="10" color="#FFFFFF"/>
+                                </mx:VBox>
+                            </mx:HBox>
+                            <!--<analysis:ReportRating score="{myRatingNumber}" rateable="true" reportID="{originReportID}"
+                                                   reportRating="updateRating(event)"/>-->
+                            <mx:Label text="Rate it yourself!" fontSize="8"/>
+                        </mx:VBox>
+                    </mx:ViewStack>
+                </mx:HBox>
+            </mx:HBox>
+
+            <mx:ViewStack resizeToContent="true" selectedIndex="{exchangeIndex}" width="100%">
+                <mx:Box/>
+                <mx:HBox paddingTop="15" verticalAlign="middle" width="100%" horizontalAlign="center">
+                    <mx:TextArea
+                            text="Want to save this dashboard to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
+                            editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0"
+                            fontSize="12"/>
+                    <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton"
+                               click="saveReport(event)"/>
+                </mx:HBox>
+            </mx:ViewStack>
+            <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
+        </mx:VBox>
+        <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0">
+            <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
+                <mx:Box/>
+                <mx:VBox width="100%" horizontalAlign="center">
+                    <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
+                                                  borderThickness="1"
+                                                  existingFilters="{filterDefinitions}"
+                                                  width="100%" paddingLeft="10"
+                                                  paddingTop="10" paddingBottom="10"
+                                                  paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
+                                                  backgroundColor="#FFFFFF" backgroundAlpha=".8"/>
+                </mx:VBox>
+            </mx:ViewStack>
+            <mx:Canvas width="100%" height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF" backgroundAlpha=".8"/>
+        </mx:VBox>
+    </mx:VBox>
+</skin:BackgroundImage>

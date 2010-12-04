@@ -1,6 +1,8 @@
 package com.easyinsight.solutions;
 
 import com.easyinsight.core.DataSourceDescriptor;
+import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.exchange.SolutionReportExchangeItem;
 
 import java.util.List;
 
@@ -11,24 +13,22 @@ import java.util.List;
  */
 public class ReportTemplateInfo {
     private List<DataSourceDescriptor> dataSources;
-    private long reportID;
-    private long solutionID;
+    private SolutionReportExchangeItem exchangeData;
 
     public ReportTemplateInfo() {
     }
 
-    public ReportTemplateInfo(List<DataSourceDescriptor> dataSources, long reportID, long solutionID) {
+    public ReportTemplateInfo(List<DataSourceDescriptor> dataSources, SolutionReportExchangeItem exchangeData) {
         this.dataSources = dataSources;
-        this.reportID = reportID;
-        this.solutionID = solutionID;
+        this.exchangeData = exchangeData;
     }
 
-    public long getSolutionID() {
-        return solutionID;
+    public SolutionReportExchangeItem getExchangeData() {
+        return exchangeData;
     }
 
-    public void setSolutionID(long solutionID) {
-        this.solutionID = solutionID;
+    public void setExchangeData(SolutionReportExchangeItem exchangeData) {
+        this.exchangeData = exchangeData;
     }
 
     public List<DataSourceDescriptor> getDataSources() {
@@ -37,13 +37,5 @@ public class ReportTemplateInfo {
 
     public void setDataSources(List<DataSourceDescriptor> dataSources) {
         this.dataSources = dataSources;
-    }
-
-    public long getReportID() {
-        return reportID;
-    }
-
-    public void setReportID(long reportID) {
-        this.reportID = reportID;
     }
 }

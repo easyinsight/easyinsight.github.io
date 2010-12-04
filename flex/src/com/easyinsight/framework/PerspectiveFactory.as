@@ -4,6 +4,8 @@ import com.easyinsight.account.AccountBasePage;
 import com.easyinsight.account.AccountSetupWizard;
 import com.easyinsight.account.NewFreeUserWelcome;
 import com.easyinsight.customupload.api.APIPage;
+import com.easyinsight.dashboard.DashboardEditor;
+import com.easyinsight.dashboard.DashboardView;
 import com.easyinsight.etl.LookupTableEditor;
 import com.easyinsight.feedassembly.NewCompositeFeedWorkspace;
 import com.easyinsight.genredata.GenreDataProvider;
@@ -98,6 +100,12 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.ANALYSIS_ITEM_EDITOR:
                 perspective = new ModuleUIComponent("AnalysisItemEditor", "Loading the field editor...");
+                break;
+            case PerspectiveInfo.DASHBOARD_EDITOR:
+                perspective = new DirectUIComponent(new DashboardEditor());
+                break;
+            case PerspectiveInfo.DASHBOARD_VIEW:
+                perspective = new DirectUIComponent(new DashboardView());
                 break;
         }
         return perspective;

@@ -2,8 +2,10 @@ package com.easyinsight.listing
 {
 	import com.easyinsight.analysis.AnalysisDefinition;
 	import com.easyinsight.customupload.UploadPolicy;
-	
-	import mx.collections.ArrayCollection;
+
+import com.easyinsight.solutions.DataSourceDescriptor;
+
+import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.FeedDescriptor")]
@@ -58,6 +60,14 @@ package com.easyinsight.listing
 		public function DataFeedDescriptor()
 		{
 		}
+
+        public function toDataSourceDescriptor():DataSourceDescriptor {
+            var dsd:DataSourceDescriptor = new DataSourceDescriptor();
+            dsd.id = id;
+            dsd.name = name;
+            dsd.dataSourceType = feedType;
+            return dsd;
+        }
 
 
         }

@@ -1,11 +1,13 @@
 package com.easyinsight.solutions;
 
+import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.exchange.ExchangePackageData;
-import com.easyinsight.exchange.ExchangeReportData;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -363,27 +365,15 @@ public class SolutionService {
         }
     }
 
-    public List<DataSourceDescriptor> determineDataSourceForPackage(long packageID) {
-        List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
-        List<ExtraDataSourceInfo> extraInfos = new ArrayList<ExtraDataSourceInfo>();
+    public List<DataSourceDescriptor> determineDataSourceForEntity(EIDescriptor descriptor) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement packageQuery = conn.prepareStatement("SELECT REPORT_PACKAGE.data_source_id FROM REPORT_PACKAGE WHERE REPORT_PACKAGE_ID = ?");
-            packageQuery.setLong(1, packageID);
-            ResultSet packageRS = packageQuery.executeQuery();
-            while (packageRS.next()) {
-                long dataSourceID = packageRS.getLong(1);
-                PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID FROM " +
-                    "SOLUTION_INSTALL WHERE SOLUTION_INSTALL.installed_data_source_id = ?");
-                dsQueryStmt.setLong(1, dataSourceID);
-                ResultSet dsRS = dsQueryStmt.executeQuery();
-                if (dsRS.next()) {
-                    long originalDataSourceID = dsRS.getLong(1);
-                    determineDataSources(descriptors, extraInfos, conn, originalDataSourceID);
-                }
-            }
-            if (descriptors.size() > 1) {
-                describe(descriptors, extraInfos, conn);
+            if (descriptor.getType() == EIDescriptor.REPORT) {
+                return determineDataSourceForReport(descriptor.getId(), conn).descriptors;
+            } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                return determineDataSourceForDashboard(descriptor.getId(), conn).descriptors;
+            } else {
+                throw new UnsupportedOperationException("Unsupported exchange type " + descriptor.getType());
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -391,69 +381,130 @@ public class SolutionService {
         } finally {
             Database.closeConnection(conn);
         }
-        return descriptors;
     }
 
-    public ReportTemplateInfo determineDataSourceForURLKey(String urlKey) {
+    private Blah determineDataSourceForDashboard(long dashboardID, EIConnection conn) throws SQLException {
         List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
         List<ExtraDataSourceInfo> extraInfos = new ArrayList<ExtraDataSourceInfo>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, DATA_FEED_ID FROM ANALYSIS WHERE ANALYSIS.solution_visible = ? AND " +
-                    "ANALYSIS.url_key = ?");
-            reportQueryStmt.setBoolean(1, true);
-            reportQueryStmt.setString(2, urlKey);
-            ResultSet rs = reportQueryStmt.executeQuery();
-            if (rs.next()) {
-                long reportID = rs.getLong(1);
-                long dataSourceID = rs.getLong(2);
-                PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID, SOLUTION_INSTALL.SOLUTION_ID FROM " +
-                    "SOLUTION_INSTALL WHERE SOLUTION_INSTALL.installed_data_source_id = ?");
-                dsQueryStmt.setLong(1, dataSourceID);
-                long solutionID = 0;
-                ResultSet dsRS = dsQueryStmt.executeQuery();
-                if (dsRS.next()) {
-                    long originalDataSourceID = dsRS.getLong(1);
-                    solutionID = dsRS.getLong(2);
-                    determineDataSources(descriptors, extraInfos, conn, originalDataSourceID);
-                }
-                if (descriptors.size() > 1) {
-                    describe(descriptors, extraInfos, conn);
-                }
-                return new ReportTemplateInfo(descriptors, reportID, solutionID);
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return null;
-    }
-
-    public List<DataSourceDescriptor> determineDataSource(long dataSourceID) {
-        List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
-        List<ExtraDataSourceInfo> extraInfos = new ArrayList<ExtraDataSourceInfo>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID FROM " +
-                    "SOLUTION_INSTALL WHERE SOLUTION_INSTALL.installed_data_source_id = ?");
+        PreparedStatement dashboardQuery = conn.prepareStatement("SELECT DASHBOARD.data_source_id, DASHBOARD.dashboard_name," +
+                "DASHBOARD.CREATION_DATE, DASHBOARD.DESCRIPTION, DASHBOARD.AUTHOR_NAME FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+        dashboardQuery.setLong(1, dashboardID);
+        ResultSet dashboardRS = dashboardQuery.executeQuery();
+        if (dashboardRS.next()) {
+            long dataSourceID = dashboardRS.getLong(1);
+            PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID, SOLUTION_INSTALL.solution_id, SOLUTION.name FROM " +
+                "SOLUTION_INSTALL, SOLUTION WHERE SOLUTION_INSTALL.installed_data_source_id = ? and solution_install.solution_id = solution.solution_id");
             dsQueryStmt.setLong(1, dataSourceID);
             ResultSet dsRS = dsQueryStmt.executeQuery();
             if (dsRS.next()) {
                 long originalDataSourceID = dsRS.getLong(1);
+                long connectionID = dsRS.getLong(2);
+                String connectionName = dsRS.getString(3);
+
                 determineDataSources(descriptors, extraInfos, conn, originalDataSourceID);
+                if (descriptors.size() > 1) {
+                    describe(descriptors, extraInfos, conn);
+                }
+                return new Blah(descriptors, connectionID, connectionName);
             }
-            if (descriptors.size() > 1) {
-                describe(descriptors, extraInfos, conn);
+
+        }
+        return null;
+    }
+
+    private static class Blah {
+        private List<DataSourceDescriptor> descriptors;
+        private long connectionID;
+        private String connectionName;
+
+        private Blah(List<DataSourceDescriptor> descriptors, long connectionID, String connectionName) {
+            this.descriptors = descriptors;
+            this.connectionID = connectionID;
+            this.connectionName = connectionName;
+        }
+    }
+
+    public ReportTemplateInfo determineDataSourceForURLKey(String urlKey) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            ReportTemplateInfo reportTemplateInfo = new ReportTemplateInfo();
+            SolutionReportExchangeItem srei;
+            PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, DATA_FEED_ID, TITLE, CREATE_DATE, AUTHOR_NAME, DESCRIPTION " +
+                    "FROM ANALYSIS WHERE ANALYSIS.solution_visible = ? AND ANALYSIS.url_key = ?");
+            reportQueryStmt.setBoolean(1, true);
+            reportQueryStmt.setString(2, urlKey);
+            Blah blah;
+            ResultSet rs = reportQueryStmt.executeQuery();
+            if (rs.next()) {
+                long reportID = rs.getLong(1);
+                long dataSourceID = rs.getLong(2);
+                String reportName = rs.getString(3);
+                Date dateCreated = new Date(rs.getTimestamp(4).getTime());
+                String authorName = rs.getString(5);
+                String description = rs.getString(6);
+                EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, null);
+                blah = determineDataSourceForReport(reportID, conn);
+                srei = new SolutionReportExchangeItem(reportName, reportID, 0, 0, dateCreated, description, authorName, descriptor, blah.connectionID, blah.connectionName);
+            } else {
+                PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD_ID, URL_KEY, DASHBOARD_NAME, CREATION_DATE," +
+                        "AUTHOR_NAME, DESCRIPTION FROM DASHBOARD WHERE DASHBOARD.exchange_visible = ? and " +
+                        "DASHBOARD.url_key = ?");
+                dashboardQueryStmt.setBoolean(1, true);
+                dashboardQueryStmt.setString(2, urlKey);
+                ResultSet dashboardRS = dashboardQueryStmt.executeQuery();
+                if (dashboardRS.next()) {
+                    long dashboardID = dashboardRS.getLong(1);
+                    String dashboardURLKey = dashboardRS.getString(2);
+                    String dashboardName = dashboardRS.getString(3);
+                    Date dateCreated = new Date(dashboardRS.getTimestamp(4).getTime());
+                    String authorName = dashboardRS.getString(5);
+                    String description = dashboardRS.getString(6);
+                    EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey);
+                    blah = determineDataSourceForDashboard(dashboardID, conn);
+                    srei = new SolutionReportExchangeItem(dashboardName, dashboardID, 0, 0, dateCreated, description, authorName, descriptor, blah.connectionID, blah.connectionName);
+                } else {
+                    return null;
+                }
             }
+            reportTemplateInfo.setExchangeData(srei);
+            reportTemplateInfo.setDataSources(blah.descriptors);
+            return reportTemplateInfo;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
-        } finally {            
+        } finally {
             Database.closeConnection(conn);
         }
-        return descriptors;
+    }
+
+    private Blah determineDataSourceForReport(long reportID, EIConnection conn) throws SQLException {
+        List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
+        List<ExtraDataSourceInfo> extraInfos = new ArrayList<ExtraDataSourceInfo>();
+        PreparedStatement reportQuery = conn.prepareStatement("SELECT ANALYSIS.data_feed_id, ANALYSIS.url_key " +
+                "FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+        reportQuery.setLong(1, reportID);
+        ResultSet reportRS = reportQuery.executeQuery();
+        if (reportRS.next()) {
+            long dataSourceID = reportRS.getLong(1);
+            PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID, SOLUTION_INSTALL.solution_id," +
+                    "SOLUTION.NAME FROM " +
+                    "SOLUTION_INSTALL, SOLUTION WHERE SOLUTION_INSTALL.installed_data_source_id = ? and SOLUTION_INSTALL.solution_id = solution.solution_id");
+            dsQueryStmt.setLong(1, dataSourceID);
+            ResultSet dsRS = dsQueryStmt.executeQuery();
+            long connectionID;
+            String connectionName;
+            if (dsRS.next()) {
+                long originalDataSourceID = dsRS.getLong(1);
+                connectionID = dsRS.getLong(2);
+                connectionName = dsRS.getString(3);
+                determineDataSources(descriptors, extraInfos, conn, originalDataSourceID);
+                if (descriptors.size() > 1) {
+                    describe(descriptors, extraInfos, conn);
+                }
+                return new Blah(descriptors, connectionID, connectionName);
+            }
+        }
+        return null;
     }
 
     private void determineDataSources(List<DataSourceDescriptor> descriptors, List<ExtraDataSourceInfo> extraInfos, EIConnection conn, long originalDataSourceID) throws SQLException {
@@ -551,7 +602,80 @@ public class SolutionService {
         }
     }
 
-    
+    public EIDescriptor installEntity(EIDescriptor descriptor, long dataSourceID) {
+        if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+            return installDashboard(descriptor.getId(), dataSourceID);
+        } else if (descriptor.getType() == EIDescriptor.REPORT) {
+            return installReport(descriptor.getId(), dataSourceID);
+        } else {
+            throw new RuntimeException("Unknown descriptor type " + descriptor.getType());
+        }
+    }
+
+    public DashboardDescriptor installDashboard(long dashboardID, long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            Session session = Database.instance().createSession(conn);
+            DashboardStorage dashboardStorage = new DashboardStorage();
+            FeedStorage feedStorage = new FeedStorage();
+            Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
+            FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(dashboard.getDataSourceID(), conn);
+            Set<Long> reportIDs = dashboard.containedReports();
+            List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
+
+            for (Long containedReportID : reportIDs) {
+                reports.add(new AnalysisStorage().getPersistableReport(containedReportID, session));
+            }
+
+            Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
+
+            FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+            Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
+            
+            List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
+            for (AnalysisDefinition child : reports) {
+
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, keyReplacementMap);
+                reportReplacementMap.put(child.getAnalysisID(), copyReport);
+                reportList.add(copyReport);
+            }
+
+            for (AnalysisDefinition copiedReport : reportList) {
+                new AnalysisStorage().saveAnalysis(copiedReport, session);
+            }
+
+            for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
+                copiedReport.updateReportIDs(reportReplacementMap);
+            }
+
+            for (AnalysisDefinition copiedReport : reportList) {
+                new AnalysisStorage().saveAnalysis(copiedReport, session);
+            }
+
+            Dashboard copiedDashboard = dashboard.cloneDashboard(reportReplacementMap, true, sourceDataSource.getFields(), keyReplacementMap);
+
+            copiedDashboard.setDataSourceID(dataSourceID);
+
+            dashboardStorage.saveDashboard(copiedDashboard, conn);
+
+            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey());
+
+            session.flush();
+
+            conn.commit();
+            session.close();
+
+            return dashboardDescriptor;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
 
     public InsightDescriptor installReport(long reportID, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
@@ -576,7 +700,7 @@ public class SolutionService {
             for (AnalysisDefinition child : reports) {
                 FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
                 Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
-                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, keyReplacementMap, session);
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, keyReplacementMap);
                 reportReplacementMap.put(child.getAnalysisID(), copyReport);
                 reportList.add(copyReport);
             }
@@ -627,7 +751,7 @@ public class SolutionService {
     }
 
     private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report,
-                                                        Map<Key, Key> keyReplacementMap, Session session) throws CloneNotSupportedException {
+                                                        Map<Key, Key> keyReplacementMap) throws CloneNotSupportedException {
         AnalysisDefinition clonedReport = report.clone(keyReplacementMap, localDefinition.getFields(), true);
         clonedReport.setSolutionVisible(false);
         clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
@@ -644,20 +768,13 @@ public class SolutionService {
         List<SolutionReportExchangeItem> reports = new ArrayList<SolutionReportExchangeItem>();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG FROM ANALYSIS_TO_TAG, ANALYSIS_TAGS WHERE " +
-                    "ANALYSIS_TO_TAG.analysis_tags_id = ANALYSIS_TAGS.analysis_tags_id AND analysis_to_tag.analysis_id = ?");
             PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE, " +
                     "avg(USER_REPORT_RATING.rating), analysis.create_date, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
                     "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID, ANALYSIS.url_key FROM DATA_FEED, SOLUTION_INSTALL, SOLUTION, ANALYSIS " +
                     " LEFT JOIN USER_REPORT_RATING ON USER_REPORT_RATING.report_id = ANALYSIS.ANALYSIS_ID WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                     "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND ANALYSIS.SOLUTION_VISIBLE = ? " +
                     "AND solution_install.solution_id = solution.solution_id GROUP BY ANALYSIS.ANALYSIS_ID");
-            PreparedStatement packageQueryStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.REPORT_PACKAGE_ID, REPORT_PACKAGE.PACKAGE_NAME, " +
-                    "SOLUTION.NAME, SOLUTION.SOLUTION_ID FROM DATA_FEED, SOLUTION_INSTALL, SOLUTION, REPORT_PACKAGE " +
-                    " LEFT JOIN USER_PACKAGE_RATING ON USER_PACKAGE_RATING.report_package_id = REPORT_PACKAGE.REPORT_PACKAGE_ID WHERE REPORT_PACKAGE.data_source_id = DATA_FEED.DATA_FEED_ID AND " +
-                    "REPORT_PACKAGE.data_source_id = SOLUTION_INSTALL.installed_data_source_id AND REPORT_PACKAGE.CONNECTION_VISIBLE = ? " +
-                    "AND solution_install.solution_id = solution.solution_id AND report_package.temporary_package = ?");
-            PreparedStatement getImageStmt = conn.prepareStatement("SELECT REPORT_IMAGE FROM REPORT_IMAGE WHERE REPORT_ID = ?");
+
             analysisQueryStmt.setBoolean(1, true);
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {
@@ -677,48 +794,39 @@ public class SolutionService {
                 }
 
                 String description = analysisRS.getString(7);
-                String dataSourceName = analysisRS.getString(8);
                 String authorName = analysisRS.getString(9);
-                boolean accessible = analysisRS.getBoolean(10);
-                String solutionName = analysisRS.getString(11);
-                long solutionID = analysisRS.getLong(12);
+                String connectionName = analysisRS.getString(11);
+                long connectionID = analysisRS.getLong(12);
                 String urlKey = analysisRS.getString(13);
-                getTagsStmt.setLong(1, analysisID);
-                ExchangeReportData exchangeReportData = new ExchangeReportData();
-                exchangeReportData.setDataSourceAccessible(accessible);
-                exchangeReportData.setDataSourceID(dataSourceID);
-                exchangeReportData.setDataSourceName(dataSourceName);
-                exchangeReportData.setReportType(reportType);
-                exchangeReportData.setReportUrlKey(urlKey);
-                SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID, "",
-                        ratingAverage, 0, created, description, authorName, exchangeReportData, solutionID, solutionName);
+                InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey);
+                SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID,
+                        ratingAverage, 0, created, description, authorName, insightDescriptor, connectionID, connectionName);
                 reports.add(item);
-                ResultSet tagRS = getTagsStmt.executeQuery();
-                List<String> tags = new ArrayList<String>();
-                while (tagRS.next()) {
-                    tags.add(tagRS.getString(1));
-                }
-                getImageStmt.setLong(1, analysisID);
-                ResultSet imageRS = getImageStmt.executeQuery();
-                if (imageRS.next()) {
-                    byte[] bytes = imageRS.getBytes(1);
-                    item.setImage(bytes);
-                }
-                item.setTags(tags);
             }
-            packageQueryStmt.setBoolean(1, true);
-            packageQueryStmt.setBoolean(2, false);
-            ResultSet packageRS = packageQueryStmt.executeQuery();
-            while (packageRS.next()) {
-                long packageID = packageRS.getLong(1);
-                String packageName = packageRS.getString(2);
-                String solutionName = packageRS.getString(3);
-                long solutionID = packageRS.getLong(4);
-                ExchangePackageData exchangePackageData = new ExchangePackageData();
-                exchangePackageData.setPackageID(packageID);
-                exchangePackageData.setPackageName(packageName);
-                SolutionReportExchangeItem item = new SolutionReportExchangeItem(packageName, packageID, "",
-                        0, 0, new Date(), "", "", exchangePackageData, solutionID, solutionName);
+
+            PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.DASHBOARD_NAME, " +
+                    "SOLUTION.NAME, SOLUTION.SOLUTION_ID, dashboard.creation_date, dashboard.description," +
+                    "dashboard.author_name, dashboard.url_key FROM DATA_FEED, SOLUTION_INSTALL, SOLUTION, dashboard " +
+                    " WHERE dashboard.data_source_id = DATA_FEED.DATA_FEED_ID AND " +
+                    "dashboard.data_source_id = SOLUTION_INSTALL.installed_data_source_id AND dashboard.exchange_visible = ? " +
+                    "AND solution_install.solution_id = solution.solution_id AND dashboard.temporary_dashboard = ?");
+            dashboardQueryStmt.setBoolean(1, true);
+            dashboardQueryStmt.setBoolean(2, false);
+
+            ResultSet dashboardRS = dashboardQueryStmt.executeQuery();
+            while (dashboardRS.next()) {
+                long dashboardID = dashboardRS.getLong(1);
+                String dashboardName = dashboardRS.getString(2);
+                String connectionName = dashboardRS.getString(3);
+                long connectionID = dashboardRS.getLong(4);
+                double ratingAverage = 0;
+                Date createdDate = new Date(dashboardRS.getTimestamp(5).getTime());
+                String description = dashboardRS.getString(6);
+                String authorName = dashboardRS.getString(7);
+                String urlKey = dashboardRS.getString(8);
+                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey);
+                SolutionReportExchangeItem item = new SolutionReportExchangeItem(dashboardName, dashboardID, ratingAverage,
+                        0, createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName);
                 reports.add(item);
             }
             Collections.sort(reports, new Comparator<SolutionReportExchangeItem>() {

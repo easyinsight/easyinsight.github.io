@@ -1,6 +1,7 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.goals.GoalStorage;
@@ -68,6 +69,7 @@ public class UserUploadService implements IUserUploadService {
             List<Object> objects = new ArrayList<Object>();
             List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
             objects.addAll(new GoalStorage().getTreesForUser(userID));
+            objects.addAll(new DashboardService().getDashboardsForUser(userID));
             Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
             for (FeedDescriptor descriptor : descriptors) {
                 descriptorMap.put(descriptor.getId(), descriptor);

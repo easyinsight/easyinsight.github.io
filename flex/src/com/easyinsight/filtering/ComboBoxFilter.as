@@ -254,17 +254,19 @@ public class ComboBoxFilter extends HBox implements IFilter
                 _filterDefinition.singleValue = true;
             }
 			var selectedValue:String;
-			if (_filterDefinition.filteredValues.length == 0) {
+			if (_filterDefinition.filteredValues.length == 0 && strings.length > 0) {
 				_filterDefinition.filteredValues.addItem(strings.getItemAt(0));
 			}
-            var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
-            if (filterObj is Value) {
-                selectedValue = String(filterObj.getValue());
-            } else {
-                selectedValue = filterObj as String;
-            }
-			//selectedValue = _filterDefinition.filteredValues.getItemAt(0) as String;
-			comboBox.selectedItem = selectedValue;
+            if (_filterDefinition.filteredValues.length > 0) {
+                var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
+                if (filterObj is Value) {
+                    selectedValue = String(filterObj.getValue());
+                } else {
+                    selectedValue = filterObj as String;
+                }
+                comboBox.selectedItem = selectedValue;
+            }            			
+
 			comboBox.enabled = _filterDefinition.enabled;
             if (deleteButton != null) {
 			    deleteButton.enabled = true;

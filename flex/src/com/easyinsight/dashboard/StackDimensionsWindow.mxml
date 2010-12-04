@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private var _dashboardStack:DashboardStack;
+
+        [Bindable]
+        private var selectedEffect:int = DashboardStack.SLIDE;
+
+        [Bindable]
+        private var transitionTime:String = "500";
+
+        public function set dashboardStack(value:DashboardStack):void {
+            _dashboardStack = value;
+            if (value.count > 0) {
+                transitionTime = String(value.effectDuration);
+                selectedEffect = value.effectType;
+                reportCount = value.count;
+            }
+        }
+
+        [Bindable]
+        private var reportCount:int = 2;
+
+        private function save():void {
+            _dashboardStack.count = reportStepper.value;
+            _dashboardStack.effectType = animationComboBox.selectedItem.data;
+            _dashboardStack.effectDuration = int(transitionInput.text);
+            dispatchEvent(new GridDimensionEvent(0, 0));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:VBox horizontalAlign="center">
+        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="How many reports will this stack contain?">
+                <mx:NumericStepper id="reportStepper" minimum="1" maximum="5" value="{reportCount}"/>
+            </mx:FormItem>
+            <mx:FormItem label="What animation should be used in transitions between reports?">
+                <util:SmartComboBox id="animationComboBox" selectedProperty="data" selectedValue="{selectedEffect}">
+                    <util:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:Object data="{DashboardStack.FADE}" label="Fade"/>
+                                <mx:Object data="{DashboardStack.FLIP}" label="Flip"/>
+                                <mx:Object data="{DashboardStack.NONE}" label="None"/>
+                                <mx:Object data="{DashboardStack.PIXELATE}" label="Pixelate"/>
+                                <mx:Object data="{DashboardStack.SLIDE}" label="Slide"/>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </util:dataProvider>
+                </util:SmartComboBox>
+            </mx:FormItem>
+            <mx:FormItem label="How long should the transition take in milliseconds?">
+                <mx:TextInput id="transitionInput" text="{transitionTime}"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Button label="Save" styleName="grayButton" click="save()"/>
+    </mx:VBox>
+
+</util:EISlimWindow>

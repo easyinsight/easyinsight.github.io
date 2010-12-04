@@ -190,6 +190,7 @@
             this.treeDefinition = treeDefinition;
             this.hierarchy = treeDefinition.hierarchy as AnalysisHierarchyItem;
             if (dataSet.length > 0) {
+                canvas.setStyle("backgroundAlpha", treeDefinition.backgroundAlpha);
                 conditionRenderer = createRenderer(dataSet, treeDefinition);
                 this.formatter = treeDefinition.measure2.getFormatter();
                 areaFormatter = treeDefinition.measure1.getFormatter();
@@ -232,7 +233,7 @@
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
-    <mx:HBox width="100%" height="100%">
+    <mx:HBox width="100%" height="100%" id="canvas" backgroundColor="#FFFFFF" backgroundAlpha="1">
         <mx:Canvas id="box" width="100%" height="100%"/>
         <maps:ColorRangeLegend points="5" conditionRenderer="{conditionRenderer}" maxValue="{maxValue}"
                                        minValue="{minValue}"

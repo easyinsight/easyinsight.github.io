@@ -2,6 +2,7 @@ package com.easyinsight.listing
 {
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.customupload.UploadConfigEvent;
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.datasources.DataSourceRefreshWindow;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableSource;
@@ -290,6 +291,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(obj).id)));
         } else if (obj is GoalTreeDescriptor) {
             dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(GoalTreeDescriptor(obj).id)));
+        } else if (obj is DashboardDescriptor ){
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(obj).id})));
         }
     }
 
@@ -321,6 +324,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
         } else if (obj is GoalTreeDescriptor) {
             dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(GoalTreeDescriptor(obj).id)));
+        }  else if (obj is DashboardDescriptor ){
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {dashboardID: DashboardDescriptor(obj).id}))); 
         }
     }
 
@@ -356,6 +361,9 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             refreshVisible = false;
             adminVisible = false;
         } else if (value is GoalTreeDescriptor) {
+            refreshVisible = false;
+            adminVisible = true;
+        } else if (value is DashboardDescriptor) {
             refreshVisible = false;
             adminVisible = true;
         }

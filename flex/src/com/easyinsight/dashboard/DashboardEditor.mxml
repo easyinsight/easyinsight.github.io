@@ -1,0 +1,248 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.*"
+         xmlns:filtering="com.easyinsight.filtering.*"
+         implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
+         paddingLeft="5"
+         paddingRight="5">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        private var dashboardChanged:Boolean;
+
+        private function populateData():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+            var controls:ArrayCollection = new ArrayCollection();
+            controls.addItem(new DashboardControl("Grid", DashboardGrid));
+            controls.addItem(new DashboardControl("Stack", DashboardStack));
+            this.availableControls = controls;
+            if (_dashboardID == 0) {
+                ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds);
+                feedService.searchForSubscribedFeeds.send();
+            } else {
+                ProgressAlert.alert(this, "Retrieving data...", null, dashboardService.getDashboard);
+                dashboardService.getDashboard.send(_dashboardID);
+            }
+        }
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+        private var _dashboardID:int;
+
+        public function set dashboardID(value:int):void {
+            _dashboardID = value;
+        }
+
+        private var _dashboard:Dashboard;
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+        }
+
+        [Bindable]
+        private var availableControls:ArrayCollection;
+
+        [Bindable]
+        private var availableReports:ArrayCollection = new ArrayCollection();
+
+        private function gotReports():void {
+            var reportList:ArrayCollection = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
+            for each (var report:InsightDescriptor in reportList) {
+                availableReports.addItem(report);
+            }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            availableReports.sort = sort;
+            availableReports.refresh();
+        }
+
+        private function gotDataSources():void {
+            var window:DashboardSetupWindow = new DashboardSetupWindow();
+            window.dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            window.addEventListener(DashboardSetupEvent.DASHBOARD_SETUP, onDimensions, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function gotDashboard():void {
+            _dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            dataSourceID = _dashboard.dataSourceID;
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.dashboardAdminID = String(_dashboard.urlKey);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            var box:DashboardBox = new DashboardBox();
+            box.element = _dashboard.rootElement;
+            box.allowDelete = false;
+            dashboardCanvas.addChild(box);
+            analysisService.getInsightDescriptorsForDataSource.send(_dashboard.dataSourceID);
+            dashboardFilters = _dashboard.filters;
+            dataService.getFeedMetadata.send(_dashboard.dataSourceID);
+        }
+
+        private function onDimensions(event:DashboardSetupEvent):void {
+            var grid:DashboardGrid = new DashboardGrid();
+            grid.rows = event.rows;
+            grid.columns = event.columns;
+            var box:DashboardBox = new DashboardBox();
+            box.element = grid;
+            box.allowDelete = false;
+            dashboardCanvas.addChild(box);
+            _dashboard = new Dashboard();
+            dataSourceID = event.dataSource.id;
+            analysisService.getInsightDescriptorsForDataSource.send(dataSourceID);
+            dataService.getFeedMetadata.send(dataSourceID);
+            _dashboard.rootElement = grid;
+        }
+
+        private function closeEditor():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
+        private function save():void {
+            var box:DashboardBox = dashboardCanvas.getChildAt(0) as DashboardBox;
+            if (box.validate()) {
+                box.save();
+                _dashboard.dataSourceID = dataSourceID;
+                _dashboard.filters = transformContainer.getFilterDefinitions();
+                var window:DashboardSaveWindow = new DashboardSaveWindow();
+                window.addEventListener(DashboardSaveEvent.DASHBOARD_SAVE, onSave, false, 0, true);
+                window.originConnection = connectionID;
+                window.dashboard = _dashboard;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
+
+        private function onSave(event:DashboardSaveEvent):void {
+            this._dashboard = event.dashboard;
+        }
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        [Bindable]
+        private var availableDimensions:ArrayCollection;
+
+        [Bindable]
+        private var index:int;
+
+        [Bindable]
+        private var allFields:ArrayCollection;
+
+        private var feedMetadata:FeedMetadata;
+
+        private var dashboardFilters:ArrayCollection = new ArrayCollection();
+
+        private var connectionID:int;
+
+        private function gotFeedMetadata():void {
+            var feedMetadata:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+            connectionID = feedMetadata.originSolution;
+            allFields = new ArrayCollection();
+            var dimensions:ArrayCollection = new ArrayCollection();
+            for each (var analysisItem:AnalysisItem in feedMetadata.fields) {
+                dimensions.addItem(analysisItem);
+                var aNode:AnalysisItemNode = new AnalysisItemNode();
+                aNode.analysisItem = analysisItem;
+                allFields.addItem(new AnalysisItemWrapper(aNode));
+            }
+            this.availableDimensions = dimensions;
+            if (transformContainer.getFilterDefinitions().length == 0) {
+                for each (var filter:FilterDefinition in dashboardFilters) {
+                    transformContainer.addFilterDefinition(filter);
+                }
+            }
+        }
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
+        }]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="dashboardService" id="dashboardService">
+        <mx:method name="getDashboard" result="gotDashboard()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="data" id="dataService">
+        <mx:method name="getFeedMetadata" result="gotFeedMetadata()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
+    </mx:RemoteObject>
+    <mx:HBox width="100%" paddingLeft="15" paddingTop="5">
+        <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="closeEditor()"
+                   toolTip="Close"/>
+        <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+                   toolTip="Save"/>
+    </mx:HBox>
+    <mx:HBox width="100%" height="100%">
+        <mx:VBox height="100%" horizontalAlign="center" width="200">
+            <mx:Label text="Controls" fontSize="14"/>
+            <mx:List id="controlsList" dataProvider="{availableControls}" labelField="name" dragEnabled="true"
+                     width="100%" rowCount="2"/>
+            <mx:Label text="Reports" fontSize="14"/>
+            <mx:List id="reportsList" dataProvider="{availableReports}" labelField="name" dragEnabled="true"
+                     width="100%"/>
+        </mx:VBox>
+        <mx:VBox width="100%" height="100%" horizontalAlign="center">
+            <mx:HBox>
+                <mx:ToggleButtonBar id="toggleBar" itemClick="index = toggleBar.selectedIndex">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>Dashboard Canvas</mx:String>
+                                <mx:String>Filters</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ToggleButtonBar>
+            </mx:HBox>
+            <mx:ViewStack width="100%" height="100%" selectedIndex="{index}" creationPolicy="all">
+                <mx:Canvas width="100%" height="100%" id="dashboardCanvas"/>
+                <mx:HDividedBox height="50%" width="100%" backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5"
+                                paddingRight="5" paddingTop="10">
+                    <mx:List dataProvider="{availableDimensions}" labelField="display"
+                             dragEnabled="true"
+                             dragMoveEnabled="false" width="30%"
+                             height="100%"/>
+                    <mx:Canvas width="70%" height="100%">
+                        <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                                      borderStyle="solid"
+                                                      borderThickness="1" backgroundColor="#ffffff"
+                                                      backgroundAlpha=".1" feedID="{dataSourceID}"
+                                                      analysisItems="{allFields}"
+                                                      showLabel="true"
+                                                      paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                                      paddingTop="5"/>
+                    </mx:Canvas>
+                </mx:HDividedBox>
+            </mx:ViewStack>
+        </mx:VBox>
+    </mx:HBox>
+</mx:VBox>

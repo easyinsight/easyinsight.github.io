@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private function save():void {
+            dispatchEvent(new GridDimensionEvent(rowStepper.value, columnStepper.value));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:VBox horizontalAlign="center">
+        <mx:Label text="The first step to a dashboard is to define an initial grid:" fontSize="16"/>
+        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="Number of Rows:">
+                <mx:NumericStepper id="rowStepper" minimum="1" maximum="5" value="2"/>
+            </mx:FormItem>
+            <mx:FormItem label="Number of Columns:">
+                <mx:NumericStepper id="columnStepper" minimum="1" maximum="5" value="2"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Button label="Save" styleName="grayButton" click="save()"/>
+    </mx:VBox>
+
+</util:EISlimWindow>

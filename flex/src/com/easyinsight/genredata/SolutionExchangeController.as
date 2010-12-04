@@ -72,10 +72,6 @@ public class SolutionExchangeController extends ExchangeController{
         return new SolutionExchangeGridPage();
     }
 
-    override protected function summaryItemRenderer():IFactory {
-        return new ClassFactory(SolutionExchangeSummaryRenderer2);
-    }
-
     override protected function retrieveData():void {
         exchangeService.getSolutionReports.send();
     }

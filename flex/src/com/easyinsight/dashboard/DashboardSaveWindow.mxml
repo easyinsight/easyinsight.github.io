@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.framework.User;
+
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+        import mx.validators.Validator;
+
+        private var _dashboard:Dashboard;
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            dashboardName = _dashboard.name;
+            accountVisible = _dashboard.accountVisible;
+            dashboardDescription = _dashboard.description;
+            showConnectionSave = _originConnection > 0;
+            if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                firstNextButton = "Next";
+            } else {
+                firstNextButton = "Save";
+            }
+            connectionSave = _dashboard.exchangeVisible ? "yes" : "no";
+            if (_dashboard.id == 0) {
+                dashboardShare = "yes";
+            } else {
+                dashboardShare = _dashboard.accountVisible ? "yes" : "no";
+            }
+        }
+
+        private var _originConnection:int;
+
+        public function set originConnection(value:int):void {
+            _originConnection = value;
+        }
+
+        [Bindable]
+        private var accountVisible:Boolean;
+
+        [Bindable]
+        private var stackIndex:int;
+
+        [Bindable]
+        private var dashboardName:String;
+
+        [Bindable]
+        private var dashboardTags:String;
+
+        [Bindable]
+        private var dashboardDescription:String;
+
+        [Bindable]
+        private var dashboardShare:String;
+
+        [Bindable]
+        private var connectionSave:String;
+
+        [Bindable]
+        private var showConnectionSave:Boolean;
+
+        [Bindable]
+        private var errorText:String;
+
+        [Bindable]
+        private var firstNextButton:String;
+
+        private function nextFromName():void {
+            var results:Array = Validator.validateAll([dashboardNameValidator]);
+            if (results.length > 0) {
+                reportNameInput.setFocus();
+                reportNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            } else {
+                dashboardName = reportNameInput.text;
+                dashboardDescription = reportDescriptionInput.text;
+
+                if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                    stackIndex++;
+                } else {
+                    save();
+                }
+            }
+        }
+
+        private function save():void {
+            _dashboard.name = dashboardName;
+            _dashboard.description = dashboardDescription;
+            _dashboard.accountVisible = sharingGroup.selectedValue == "yes";
+            _dashboard.exchangeVisible = exchangeGroup.selectedValue == "yes";
+            stackIndex = 2;
+            dashboardService.saveDashboard.send(_dashboard);
+        }
+
+        private function savedDashboard():void {
+            _dashboard = dashboardService.saveDashboard.lastResult as Dashboard;
+            dispatchEvent(new DashboardSaveEvent(_dashboard));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onFault(event:FaultEvent):void {
+            errorText = event.fault.faultString;
+            stackIndex = 3;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="dashboardService" id="dashboardService">
+        <mx:method name="saveDashboard" result="savedDashboard()" fault="onFault(event)"/>
+    </mx:RemoteObject>
+    <mx:Canvas width="600" height="400">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="#000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="#CCCCCC"/>
+        </mx:VBox>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ViewStack selectedIndex="{stackIndex}" width="550" height="350" backgroundColor="#FFFFFF">
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <!-- what do you want to call this report? -->
+                    <mx:Label text="What do you want to name this dashboard?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextInput text="{dashboardName}" id="reportNameInput" width="530" fontSize="14"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="What tags should be applied to this report?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextInput text="{dashboardTags}" id="reportTagsInput" width="530" fontSize="14"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="How do you want to describe this report?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextArea width="530" height="75" id="reportDescriptionInput"
+                                         text="{dashboardDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="{firstNextButton}" click="nextFromName()" fontSize="14"/>
+                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="Do you want to share this dashboard with other users in the account?" fontSize="14"
+                            fontWeight="bold"/>
+                    <mx:RadioButtonGroup id="sharingGroup" selectedValue="{dashboardShare}"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:RadioButton label="Yes" value="yes" groupName="sharingGroup" fontSize="14" tabIndex="0"/>
+                        <mx:RadioButton label="No" value="no" groupName="sharingGroup" fontSize="14" tabIndex="1"/>
+                    </mx:HBox>
+                    <mx:Spacer height="20"/>
+                    <mx:TextArea text="Do you want to share the template of this dashboard on the Exchange for other Easy Insight users?" fontSize="14"
+                            width="530" borderStyle="none" editable="false" selectable="false" fontWeight="bold" backgroundAlpha="0" visible="{showConnectionSave}"/>
+                    <mx:RadioButtonGroup id="exchangeGroup" selectedValue="{connectionSave}"/>
+                    <mx:HBox width="100%" horizontalAlign="center" visible="{showConnectionSave}">
+                        <mx:RadioButton label="Yes" value="yes" groupName="exchangeGroup" fontSize="14" tabIndex="2"/>
+                        <mx:RadioButton label="No" value="no" groupName="exchangeGroup" fontSize="14" tabIndex="3"/>
+                    </mx:HBox>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="Back" click="stackIndex--" fontSize="14" tabIndex="4"/>
+                        <mx:Button label="Save" click="save()" fontSize="14" tabIndex="5"/>
+                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14" tabIndex="6"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar label="Saving the report..." indeterminate="true"/>
+                </mx:Box>
+                <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="We're sorry, but something went wrong in saving the report." fontSize="14"/>
+                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200" editable="false"/>
+                    <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                </mx:VBox>
+            </mx:ViewStack>
+        </mx:Box>
+    </mx:Canvas>
+    <mx:StringValidator id="dashboardNameValidator" source="{reportNameInput}" property="text" minLength="3" maxLength="100"/>
+</util:EITitleWindow>

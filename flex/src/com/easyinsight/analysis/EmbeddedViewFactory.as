@@ -202,7 +202,9 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
     }
 
     private function reportFailureHandler(event:ModuleEvent):void {
-        Alert.show(event.errorText);
+        if (event.errorText != "SWF is not a loadable module") {
+            Alert.show(event.errorText);
+        }
     }
     }
 }

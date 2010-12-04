@@ -101,13 +101,11 @@ public class CompositeFeed extends Feed {
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
         try {
             return getDataSet(analysisItems, filters, insightRequestMetadata);
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;
     }
 
     private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws ReportException {
@@ -187,6 +185,9 @@ public class CompositeFeed extends Feed {
         while (neededNodeIter.hasNext()) {
             QueryStateNode nextNode = neededNodeIter.next();
             List<Edge> neededEdges = DijkstraShortestPath.findPathBetween(graph, firstNode, nextNode);
+            if (neededEdges == null || neededEdges.get(0) == null) {
+                throw new ReportException(new GenericReportFault("We weren't able to find a way to join data across the specified fields. Please adjust the report to try again."));
+            }
             for (Edge edge : neededEdges) {
                 QueryStateNode precedingNode = graph.getEdgeSource(edge);
                 QueryStateNode followingNode = graph.getEdgeTarget(edge);

@@ -359,6 +359,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
             _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
             _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
+            _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, itemChange, false, 0, true);
             if (_reportRenderer is ISelectableReportRenderer) {
                 var selectableReportRenderer:ISelectableReportRenderer = _reportRenderer as ISelectableReportRenderer;
                 reportSelectable = true;
@@ -378,6 +379,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
                 retrieveData();
             }
         }
+    }
+
+    private function itemChange(event:AnalysisItemChangeEvent):void {
+        forceRetrieve();
     }
 
     private var reportWatcher:ChangeWatcher;

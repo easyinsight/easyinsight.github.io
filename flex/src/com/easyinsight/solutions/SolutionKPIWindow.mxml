@@ -7,7 +7,6 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
-        import com.easyinsight.framework.ITutorialRegistrar;
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -18,12 +17,9 @@
         import com.easyinsight.schedule.DataSourceRefreshActivity;
         import com.easyinsight.scorecard.Scorecard;
         import com.easyinsight.scorecard.ScorecardList;
-        import com.easyinsight.tour.ActionTutorialElement;
-        import com.easyinsight.tour.ReportEditorTutorial;
         import com.easyinsight.util.Callout;
 
         import mx.collections.ArrayCollection;
-        import mx.core.Application;
 
         private var _dataSourceDescriptor:DataSourceDescriptor;
 
@@ -129,27 +125,6 @@
         private function kpiLinkStart():void {
             //linksEnabled = true;
             callout = scorecardRenderer.firstRenderer(_kpis.getItemAt(0) as KPI);
-
-        }
-
-        private function onReport(event:AnalyzeEvent):void {
-
-            if (callout != null) {
-                callout.hide();
-                scorecardRenderer.clearRenderer();
-                callout = null;
-            }
-
-            var tutorial:ReportEditorTutorial = new ReportEditorTutorial(_solution);
-
-            var reportElement:ActionTutorialElement = new ActionTutorialElement(event);
-            tutorial.getNotes().addItemAt(reportElement, 0);
-
-            ITutorialRegistrar(Application.application).registerTutorialForApp(tutorial);
-            tutorial.startTutorial();
-
-            /*var reportAnalyzeSource:ReportEditorAnalyzeSource = event.analyzeSource as ReportEditorAnalyzeSource;
-             reportAnalyzeSource.tutorialMode = 1;*/
 
         }
 
@@ -347,8 +322,7 @@
             <mx:VBox width="1000" height="100%" verticalGap="0">
                 <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle">
                     <scorecard:ScorecardRenderer scorecard="{scorecard}" contextMenuAvailable="{linksEnabled}"
-                                                 id="scorecardRenderer"
-                                                 analyze="onReport(event)"/>
+                                                 id="scorecardRenderer"/>
                 </mx:Box>
                 <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle">
                     <mx:ViewStack width="100%" selectedIndex="{stackIndex}">

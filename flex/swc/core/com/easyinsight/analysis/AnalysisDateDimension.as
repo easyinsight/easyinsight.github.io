@@ -1,6 +1,7 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.analysis.formatter.DimensionValueFormatter;
+import com.easyinsight.analysis.formatter.QuarterFormatter;
 import com.easyinsight.framework.User;
 
 import mx.formatters.DateFormatter;
@@ -111,8 +112,11 @@ import mx.formatters.NumberFormatter;
                         break;
                 }
                 formatter = dateFormatter;
-            } else if (dateLevel == AnalysisItemTypes.DAY_OF_WEEK_FLAT || dateLevel == AnalysisItemTypes.MONTH_FLAT) {
+            } else if (dateLevel == AnalysisItemTypes.DAY_OF_WEEK_FLAT || dateLevel == AnalysisItemTypes.MONTH_FLAT ||
+                    dateLevel == AnalysisItemTypes.QUARTER_OF_YEAR_FLAT) {
                 formatter = new DimensionValueFormatter();
+            } else if (dateLevel == AnalysisItemTypes.QUARTER_OF_YEAR) {
+                formatter = new QuarterFormatter();
             } else {
                 var numberFormatter:NumberFormatter = new NumberFormatter();
 			    numberFormatter.precision = 0;

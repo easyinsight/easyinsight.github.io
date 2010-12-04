@@ -729,6 +729,89 @@ public class SecurityUtil {
         }
     }
 
+    public static void authorizeDashboard(long dashboardID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.ACCOUNT_VISIBLE FROM DASHBOARD where " +
+                    "dashboard.dashboard_id = ?");
+            queryStmt.setLong(1, dashboardID);
+
+            boolean accountVisible;
+
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                accountVisible = rs.getBoolean(1);
+            } else {
+                throw new SecurityException();
+            }
+
+            PreparedStatement userStmt = conn.prepareStatement("SELECT USER_TO_DASHBOARD.USER_ID, USER.ACCOUNT_ID FROM " +
+                    "user_to_dashboard, user where user_to_dashboard.user_id = user.user_id and user_to_dashboard.dashboard_id = ?");
+            userStmt.setLong(1, dashboardID);
+            ResultSet userRS = userStmt.executeQuery();
+            boolean matched = false;
+            while (userRS.next()) {
+                long userID = userRS.getLong(1);
+                long accountID = userRS.getLong(2);
+                if (userID == SecurityUtil.getUserID() || (accountVisible && accountID == SecurityUtil.getAccountID())) {
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new SecurityException();
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static long authorizeDashboard(String urlKey) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD.ACCOUNT_VISIBLE FROM DASHBOARD where " +
+                    "dashboard.url_key = ?");
+            queryStmt.setString(1, urlKey);
+
+            boolean accountVisible;
+            long dashboardID;
+
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                dashboardID = rs.getLong(1);
+                accountVisible = rs.getBoolean(2);
+            } else {
+                throw new SecurityException();
+            }
+
+            PreparedStatement userStmt = conn.prepareStatement("SELECT USER_TO_DASHBOARD.USER_ID, USER.ACCOUNT_ID FROM " +
+                    "user_to_dashboard, user where user_to_dashboard.user_id = user.user_id and user_to_dashboard.dashboard_id = ?");
+            userStmt.setLong(1, dashboardID);
+            ResultSet userRS = userStmt.executeQuery();
+            boolean matched = false;
+            while (userRS.next()) {
+                long userID = userRS.getLong(1);
+                long accountID = userRS.getLong(2);
+                if (userID == SecurityUtil.getUserID() || (accountVisible && accountID == SecurityUtil.getAccountID())) {
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                throw new SecurityException();
+            }
+            return dashboardID;
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new SecurityException();
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public static long authorizeGoalTree(String urlKey, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {

@@ -31,7 +31,9 @@ package com.easyinsight.analysis
         public static const DAY_OF_YEAR_FLAT:int = 8;
         public static const DAY_OF_WEEK_FLAT:int = 9;
         public static const WEEK_OF_YEAR_FLAT:int = 10;
-		
+        public static const QUARTER_OF_YEAR:int = 11;
+        public static const QUARTER_OF_YEAR_FLAT:int = 12;
+
 		public function AnalysisItemTypes()
 			{
 			super();

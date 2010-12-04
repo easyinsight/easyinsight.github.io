@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private var _errorMessage:String;
+
+        [Bindable(event="errorMessageChanged")]
+        public function get errorMessage():String {
+            return _errorMessage;
+        }
+
+        public function set errorMessage(value:String):void {
+            if (_errorMessage == value) return;
+            _errorMessage = value;
+            dispatchEvent(new Event("errorMessageChanged"));
+        }
+
+
+        private function reported():void {
+            PopUpManager.removePopUp(this);
+        }
+    ]]>
+    </mx:Script>
+    <mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <util:AutoSizeTextArea text="{errorMessage}" fontSize="20" editable="false" focusEnabled="false" width="400"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Close" fontSize="14" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

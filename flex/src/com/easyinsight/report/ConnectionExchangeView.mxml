@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+<easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                            xmlns:util="com.easyinsight.util.*"
+                            width="100%" height="100%" implements="com.easyinsight.framework.IFullScreenPage"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.genredata.DataSourceChoiceWindow;
+        import com.easyinsight.genredata.DataSourceSelectionEvent;
+        import com.easyinsight.genredata.NoSolutionInstalledWindow;
+        import com.easyinsight.genredata.SolutionReportExchangeItem;
+        import com.easyinsight.listing.ListingChangeEvent;
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.util.AsyncLoadEvent;
+        import com.easyinsight.util.IAsyncScreenFactory;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _factory:IAsyncScreenFactory = new ReportScreenFactory();
+
+        private var _report:EIDescriptor;
+
+        private var _connectionID:int;
+
+        public function set connectionID(value:int):void {
+            _connectionID = value;
+        }
+
+        private function onLoading(event:AsyncLoadEvent):void {
+
+        }
+
+        private function onCreation():void {
+            solutionService.determineDataSource.send();
+        }
+
+        private function gotMatchingDataSources():void {
+            var dataSources:ArrayCollection = solutionService.determineDataSource.lastResult as ArrayCollection;
+            if (dataSources.length == 0) {
+                var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+                window.solution = _connectionID;
+                window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else if (dataSources.length == 1) {
+                dataSourceID = dataSources.getItemAt(0).id;
+                ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
+
+            } else {
+                var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
+                dsWindow.sources = dataSources;
+                dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourceChoice, false, 0, true);
+                PopUpManager.addPopUp(dsWindow, this, true);
+                PopUpUtil.centerPopUp(dsWindow);
+            }
+        }
+
+        private var dataSourceID:int;
+
+        [Bindable(event="reportChanged")]
+        public function get report():EIDescriptor {
+            return _report;
+        }
+
+        public function set report(value:EIDescriptor):void {
+            if (_report == value) return;
+            _report = value;
+            dispatchEvent(new Event("reportChanged"));
+        }
+
+        [Bindable(event="factoryChanged")]
+        public function get factory():IAsyncScreenFactory {
+            return _factory;
+        }
+
+        public function set factory(value:IAsyncScreenFactory):void {
+            if (_factory == value) return;
+            _factory = value;
+            dispatchEvent(new Event("factoryChanged"));
+        }
+
+        private function toEIDescriptor():void {
+            solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
+        }
+
+        private function gotReports():void {
+            var reports:ArrayCollection = solutionService.getSolutionReports.lastResult as ArrayCollection;
+            var first:SolutionReportExchangeItem = reports.getItemAt(0) as SolutionReportExchangeItem;
+
+            for each (var item:SolutionReportExchangeItem in reports) {
+
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+        <mx:method name="getSolutionReports" result="gotReports()"/>
+        <mx:method name="installReport" result="installedReport()"/>
+        <mx:method name="determineDataSource" result="gotMatchingDataSources()"/>
+    </mx:RemoteObject>
+    <util:AsyncViewStack width="100%" height="100%" targetDescriptor="{report}" screenRenderer="{factory}"
+                         asyncLoadStart="onLoading(event)" asyncLoadSuccess="onLoading(event)" id="viewStack"/>
+</easyinsight:FullScreenPage>

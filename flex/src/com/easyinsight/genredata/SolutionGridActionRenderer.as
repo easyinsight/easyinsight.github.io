@@ -1,6 +1,8 @@
 package com.easyinsight.genredata {
-import com.easyinsight.framework.User;
+import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.ListingChangeEvent;
+import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
@@ -36,26 +38,25 @@ public class SolutionGridActionRenderer extends HBox{
         runButton.addEventListener(MouseEvent.CLICK, viewReport);
         solutionService = new RemoteObject();
         solutionService.destination = "solutionService";
-        solutionService.determineDataSource.addEventListener(ResultEvent.RESULT, gotMatchingDataSources);
-        solutionService.installReport.addEventListener(ResultEvent.RESULT, installedReport);
+        solutionService.determineDataSourceForEntity.addEventListener(ResultEvent.RESULT, gotMatchingDataSources);
+        solutionService.installEntity.addEventListener(ResultEvent.RESULT, installedReport);
     }
 
     private function viewReport(event:MouseEvent):void {
-        if (User.getInstance() != null) {
-            if (exchangeItem.exchangeData is ExchangeReportData) {
-                var exchangeReportData:ExchangeReportData = exchangeItem.exchangeData as ExchangeReportData;
-                solutionService.determineDataSource.send(exchangeReportData.dataSourceID);
-            }
-        } else {
-            
-        }
+        ProgressAlert.alert(this, "Determining data source...", null, solutionService.determineDataSourceForEntity);
+        solutionService.determineDataSourceForEntity.send(exchangeItem.descriptor);
     }
 
     private function installedReport(event:ResultEvent):void {
         UserAudit.instance().audit(UserAudit.USED_REPORT_IN_EXCHANGE);
-        var insightDescriptor:InsightDescriptor = solutionService.installReport.lastResult as InsightDescriptor;
-        // has to emit special property here to let us decide whether or not we want to keep this report
-        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, exchangeItem.id, exchangeItem.ratingAverage, ExchangeReportData(exchangeItem.exchangeData).reportUrlKey)));
+        var descriptor:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
+        if (descriptor is InsightDescriptor) {
+            var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, exchangeItem.id, exchangeItem.ratingAverage, exchangeItem.descriptor.urlKey)));
+        } else if (descriptor is DashboardDescriptor ){
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, connectionID: exchangeItem.id,
+                dashboardRating: exchangeItem.ratingAverage, dashboardURLKey: exchangeItem.descriptor.urlKey})));
+        }
     }
 
     private function onListingEvent(event:ListingChangeEvent):void {
@@ -63,7 +64,7 @@ public class SolutionGridActionRenderer extends HBox{
     }
 
     private function gotMatchingDataSources(event:ResultEvent):void {
-        var dataSources:ArrayCollection = solutionService.determineDataSource.lastResult as ArrayCollection;
+        var dataSources:ArrayCollection = solutionService.determineDataSourceForEntity.lastResult as ArrayCollection;
         if (dataSources.length == 0) {
             var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
             window.solution = exchangeItem.solutionID;
@@ -71,8 +72,8 @@ public class SolutionGridActionRenderer extends HBox{
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         } else if (dataSources.length == 1) {
-            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
-            solutionService.installReport.send(exchangeItem.id, dataSources.getItemAt(0).id);
+            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
+            solutionService.installEntity.send(exchangeItem.descriptor, dataSources.getItemAt(0).id);
         } else {
             var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
             dsWindow.sources = dataSources;
@@ -84,8 +85,8 @@ public class SolutionGridActionRenderer extends HBox{
 
     private function dataSourceChoice(event:DataSourceSelectionEvent):void {
         UserAudit.instance().audit(UserAudit.USED_REPORT_IN_EXCHANGE);
-        ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
-        solutionService.installReport.send(exchangeItem.id, event.dataSource.id);
+        ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
+        solutionService.installEntity.send(exchangeItem.descriptor, event.dataSource.id);
     }
 
     override protected function createChildren():void {

@@ -4,9 +4,11 @@ import com.easyinsight.analysis.DelayedDeepLink;
 import com.easyinsight.analysis.DelayedFeedAdminLink;
 import com.easyinsight.analysis.DelayedFeedLink;
 import com.easyinsight.analysis.DelayedReportLink;
+import com.easyinsight.dashboard.DelayedDashboardViewLink;
 import com.easyinsight.etl.DelayedLookupTableLink;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.genredata.DelayedReportTemplate;
+import com.easyinsight.goals.DelayedDashboardAdminLink;
 import com.easyinsight.goals.DelayedGoalAdminLink;
 import com.easyinsight.goals.DelayedGoalLink;
 import com.easyinsight.groups.DelayedGroupLink;
@@ -69,6 +71,16 @@ public class FragmentParser {
                 var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(key);
                 delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedGoalAdminLink.execute();
+            }),
+            new FragmentTester("dashboardAdminID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var delayedDashboardAdminLink:DelayedDashboardAdminLink = new DelayedDashboardAdminLink(key);
+                delayedDashboardAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                delayedDashboardAdminLink.execute();
+            }),
+            new FragmentTester("dashboardID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var delayedDashboardAdminLink:DelayedDashboardViewLink = new DelayedDashboardViewLink(key);
+                delayedDashboardAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                delayedDashboardAdminLink.execute();
             }),
             new FragmentTester("lookupTableID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var delayedLookupTableLink:DelayedLookupTableLink = new DelayedLookupTableLink(key);

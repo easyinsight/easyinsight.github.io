@@ -22,6 +22,12 @@
         </properties>
     </destination>
 
+    <destination id="dashboardService">
+        <properties>
+            <source>com.easyinsight.dashboard.DashboardService</source>
+        </properties>
+    </destination>
+
     <destination id="preferencesService">
         <properties>
             <source>com.easyinsight.preferences.PreferencesService</source>
@@ -31,12 +37,6 @@
     <destination id="kpiService">
         <properties>
             <source>com.easyinsight.kpi.KPIService</source>
-        </properties>
-    </destination>
-
-    <destination id="exchangeService">
-        <properties>
-            <source>com.easyinsight.exchange.ExchangeService</source>
         </properties>
     </destination>
 

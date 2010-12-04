@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()" width="400" height="200">
+    <util:states>
+        <mx:State name="defineGrid">
+            <mx:AddChild>
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
+                    <mx:Label text="What sort of layout should the dashboard use?" fontSize="16"/>
+                    <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                        <mx:FormItem label="Number of Rows:">
+                            <mx:NumericStepper id="rowStepper" minimum="1" maximum="5" value="2"/>
+                        </mx:FormItem>
+                        <mx:FormItem label="Number of Columns:">
+                            <mx:NumericStepper id="columnStepper" minimum="1" maximum="5" value="2"/>
+                        </mx:FormItem>
+                    </mx:Form>
+                    <mx:Button label="Save" styleName="grayButton" click="save()"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="chooseDataSource">
+            <mx:AddChild>
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
+                    <mx:Label text="First, choose a data source for the dashboard:" fontSize="16"/>
+                    <mx:ComboBox dataProvider="{dataSources}" id="dataSourceBox" labelField="name"/>
+                    <mx:Button label="Next" styleName="grayButton" click="choseDataSource()"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </util:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var dataSources:ArrayCollection;
+
+        [Bindable]
+        private var index:int;
+
+        private var dataSource:DataSourceDescriptor;
+
+        private function choseDataSource():void {
+            dataSource = DataFeedDescriptor(dataSourceBox.selectedItem).toDataSourceDescriptor();
+            currentState = "defineGrid";
+        }
+
+        private function onCreation():void {
+            if (dataSources.length == 0) {
+
+            } else if (dataSources.length == 1) {
+                dataSource = DataFeedDescriptor(dataSources.getItemAt(0)).toDataSourceDescriptor();
+                currentState = "defineGrid";
+            } else {
+                currentState = "chooseDataSource";
+            }
+        }
+
+        private function save():void {
+            dispatchEvent(new DashboardSetupEvent(dataSource, rowStepper.value, columnStepper.value));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+
+
+</util:EISlimWindow>

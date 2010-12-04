@@ -16,6 +16,7 @@ public class EIDescriptor {
     public static const PACKAGE:int = 8;
     public static const SCORECARD:int = 9;
     public static const LOOKUP_TABLE:int = 10;
+    public static const DASHBOARD:int = 11;
 
     public var id:int;
     public var name:String;

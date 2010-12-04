@@ -8,6 +8,13 @@ package com.easyinsight.analysis;
 public class GenericReportFault extends ReportFault {
     private String message;
 
+    public GenericReportFault() {
+    }
+
+    public GenericReportFault(String message) {
+        this.message = message;
+    }
+
     public String getMessage() {
         return message;
     }

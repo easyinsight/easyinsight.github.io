@@ -14,6 +14,7 @@ public class ColorRangeLegend extends VBox {
 
     public function ColorRangeLegend() {
         super();
+        setStyle("paddingTop", 10);
     }
 
     public function recreate():void {

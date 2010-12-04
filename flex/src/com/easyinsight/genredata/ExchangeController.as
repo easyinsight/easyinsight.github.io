@@ -7,7 +7,6 @@ import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
 import mx.collections.SortField;
-import mx.core.IFactory;
 
 [Event(name="changeView", type="com.easyinsight.genredata.ExchangeControllerEvent")]
 [Event(name="updateURL", type="flash.events.Event")]
@@ -150,10 +149,6 @@ public class ExchangeController extends EventDispatcher {
     public function refreshData():void {
         loading = true;
         retrieveData();
-    }
-
-    protected function summaryItemRenderer():IFactory {
-        return null;
     }
 
     protected function retrieveData():void {
