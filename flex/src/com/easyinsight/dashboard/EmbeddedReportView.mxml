@@ -31,7 +31,7 @@
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
-        import com.easyinsight.framework.AnalysisItemOverride;
+        import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.util.UserAudit;
 
@@ -68,7 +68,7 @@
         }
 
         private function onRollup(event:HierarchyRollupEvent):void {
-            var overrideObj:AnalysisItemOverride = new AnalysisItemOverride();
+            var overrideObj:HierarchyOverride = new HierarchyOverride();
             overrideObj.analysisItemID = event.hierarchy.analysisItemID;
             overrideObj.position = event.position;
             dataViewFactory.addOverride(overrideObj);
@@ -77,7 +77,7 @@
 
         private function childFilterCreation(event:HierarchyDrilldownEvent):void {
             dataViewFactory.noCache = true;
-            var overrideObj:AnalysisItemOverride = new AnalysisItemOverride();
+            var overrideObj:HierarchyOverride = new HierarchyOverride();
             overrideObj.analysisItemID = event.hierarchyItem.analysisItemID;
             overrideObj.position = event.position;
             dataViewFactory.addOverride(overrideObj);
