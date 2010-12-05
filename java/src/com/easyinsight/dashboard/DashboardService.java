@@ -93,7 +93,8 @@ public class DashboardService {
         }
     }
 
-    public List<DashboardDescriptor> getDashboardsForUser(long userID) {
+    public List<DashboardDescriptor> getDashboardsForUser() {
+        long userID = SecurityUtil.getUserID();
         List<DashboardDescriptor> dashboards = new ArrayList<DashboardDescriptor>();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -102,6 +103,30 @@ public class DashboardService {
                     "dashboard.temporary_dashboard = ?");
             queryStmt.setLong(1, userID);
             queryStmt.setBoolean(2, false);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3)));
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return dashboards;
+    }
+
+    public List<DashboardDescriptor> getDashboardsForAccount() {
+        long accountID = SecurityUtil.getAccountID();
+        List<DashboardDescriptor> dashboards = new ArrayList<DashboardDescriptor>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key from " +
+                    "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
+                    "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id");
+            queryStmt.setLong(1, accountID);
+            queryStmt.setBoolean(2, false);
+            queryStmt.setBoolean(3, true);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3)));

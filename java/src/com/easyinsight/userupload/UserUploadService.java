@@ -69,7 +69,7 @@ public class UserUploadService implements IUserUploadService {
             List<Object> objects = new ArrayList<Object>();
             List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
             objects.addAll(new GoalStorage().getTreesForUser(userID));
-            objects.addAll(new DashboardService().getDashboardsForUser(userID));
+            objects.addAll(new DashboardService().getDashboardsForUser());
             Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
             for (FeedDescriptor descriptor : descriptors) {
                 descriptorMap.put(descriptor.getId(), descriptor);
@@ -91,6 +91,7 @@ public class UserUploadService implements IUserUploadService {
             if (includeGroups) {
                 groupReports.addAll(analysisStorage.getReportsForGroups(userID));
                 groupReports.addAll(analysisStorage.getReportsForAccount(SecurityUtil.getAccountID()));
+                objects.addAll(new DashboardService().getDashboardsForAccount());
             }
 
             for (InsightDescriptor analysisDefinition : analysisStorage.getInsightDescriptors(userID)) {
