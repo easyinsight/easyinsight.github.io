@@ -95,12 +95,16 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         viewChildren = new ArrayCollection();
         for (var i:int = 0; i < dashboardStack.gridItems.length; i++) {
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
-            var report:DashboardReport = stackItem.dashboardElement as DashboardReport;
+            var report:DashboardElement = stackItem.dashboardElement;
             var topButton:Button = new Button();
             topButton.styleName = "grayButton";
             topButton.data = i;
             topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
-            topButton.label = report.report.name;
+            if (report is DashboardReport) {
+                topButton.label = DashboardReport(report).report.name;
+            } else {
+                topButton.label = String(i);
+            }
             headerbar.addChild(topButton);
             var comp:UIComponent = report.createViewComponent();
             viewChildren.addItem(comp);

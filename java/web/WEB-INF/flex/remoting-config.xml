@@ -9,16 +9,16 @@
     <default-channels>
         <channel ref="my-secure-amf" />
     </default-channels>
-
-    <destination id="exchangeService">
-        <properties>
-            <source>com.easyinsight.exchange.ExchangeService</source>
-        </properties>
-    </destination>
     
     <destination id="scorecardService">
         <properties>
             <source>com.easyinsight.scorecard.ScorecardService</source>
+        </properties>
+    </destination>
+
+    <destination id="dashboardService">
+        <properties>
+            <source>com.easyinsight.dashboard.DashboardService</source>
         </properties>
     </destination>
 

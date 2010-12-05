@@ -19,6 +19,7 @@ public abstract class DashboardElement implements Cloneable {
     public static final int GRID = 1;
     public static final int REPORT = 2;
     public static final int STACK = 3;
+    public static final int IMAGE = 4;
 
     private long elementID;
 

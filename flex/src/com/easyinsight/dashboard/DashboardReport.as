@@ -1,6 +1,8 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.analysis.CheckBoxReportFormItem;
 import com.easyinsight.solutions.InsightDescriptor;
 
+import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
 
 [Bindable]
@@ -8,6 +10,8 @@ import mx.core.UIComponent;
 public class DashboardReport extends DashboardElement {
 
     public var report:InsightDescriptor;
+    public var labelPlacement:int;
+    public var showLabel:Boolean;
 
     public function DashboardReport() {
         super();
@@ -23,6 +27,12 @@ public class DashboardReport extends DashboardElement {
         var comp:DashboardReportViewComponent = new DashboardReportViewComponent();
         comp.dashboardReport = this;
         return comp;
+    }
+
+    override public function editableProperties():ArrayCollection {
+        var properties:ArrayCollection = new ArrayCollection();
+        properties.addItem(new CheckBoxReportFormItem("Show Label", "showLabel", showLabel, this));
+        return properties;
     }
 }
 }

@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.ReportFormItem;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+
+
+        private var _dashboardElement:DashboardElement;
+
+        private var items:ArrayCollection;
+
+        protected override function createChildren():void {
+            super.createChildren();
+            items = _dashboardElement.editableProperties();
+            var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
+            lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
+            for each (var item:ReportFormItem in items) {
+                form.addChild(item);
+            }
+        }
+
+        private function onDone(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        private function save():void {
+            var valid:Boolean = true;
+            for each (var validateItem:ReportFormItem in items) {
+                valid = valid && validateItem.validate();
+            }
+            if (valid) {
+                for each (var item:ReportFormItem in items) {
+                    item.save();
+                }
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        public function set dashboardElement(value:DashboardElement):void {
+            _dashboardElement = value;
+        }]]></mx:Script>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Form id="form">
+
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

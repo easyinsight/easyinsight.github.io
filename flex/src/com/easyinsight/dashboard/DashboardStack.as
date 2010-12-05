@@ -17,6 +17,7 @@ public class DashboardStack extends DashboardElement {
     public var count:int;
     public var effectType:int;
     public var effectDuration:int = 1000;
+    public var stackControl:int;
 
     public function DashboardStack() {
         super();

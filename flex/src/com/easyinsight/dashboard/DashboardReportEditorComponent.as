@@ -2,6 +2,7 @@ package com.easyinsight.dashboard {
 import mx.containers.VBox;
 import mx.controls.Image;
 import mx.controls.Label;
+import mx.managers.PopUpManager;
 
 public class DashboardReportEditorComponent extends VBox implements IDashboardEditorComponent {
 
@@ -36,6 +37,9 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
     }
 
     public function edit():void {
+        var window:DashboardEditWindow = new DashboardEditWindow();
+        window.dashboardElement = report;
+        PopUpManager.addPopUp(window, this, true);
     }
 }
 }

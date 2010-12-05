@@ -105,6 +105,9 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
     }
 
     public function edit():void {
+        var window:DashboardEditWindow = new DashboardEditWindow();
+        window.dashboardElement = dashboardGrid;
+        PopUpManager.addPopUp(window, this, true);
     }
 }
 }

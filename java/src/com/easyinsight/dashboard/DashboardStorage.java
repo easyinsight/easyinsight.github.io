@@ -26,7 +26,6 @@ public class DashboardStorage {
         try {
             conn.setAutoCommit(false);
             saveDashboard(dashboard, conn);
-            
             conn.commit();
         } catch (Exception e) {
             conn.rollback();
@@ -198,6 +197,8 @@ public class DashboardStorage {
             element = DashboardReport.loadReport(elementID, conn);
         } else if (elementType == DashboardElement.STACK) {
             element = DashboardStack.loadGrid(elementID, conn);
+        } else if (elementType == DashboardElement.IMAGE) {
+            element = DashboardImage.loadImage(elementID, conn);
         } else {
             throw new RuntimeException();
         }

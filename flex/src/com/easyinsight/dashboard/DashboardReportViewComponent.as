@@ -5,6 +5,8 @@ import com.easyinsight.report.AbstractViewFactory;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Canvas;
+import mx.containers.VBox;
+import mx.controls.Label;
 
 public class DashboardReportViewComponent extends Canvas implements IDashboardViewComponent  {
 
@@ -24,7 +26,19 @@ public class DashboardReportViewComponent extends Canvas implements IDashboardVi
         viewFactory = controller.createEmbeddedView();
         viewFactory.reportID = dashboardReport.report.id;
         viewFactory.dataSourceID = dashboardReport.report.dataFeedID;
-        addChild(viewFactory);
+        if (dashboardReport.showLabel) {
+            var vbox:VBox = new VBox();
+            vbox.percentHeight = 100;
+            vbox.percentWidth = 100;
+            vbox.setStyle("horizontalAlign", "center");
+            addChild(vbox);
+            var label:Label = new Label();
+            label.text = dashboardReport.report.name;
+            vbox.addChild(label);
+            vbox.addChild(viewFactory);
+        } else {
+            addChild(viewFactory);
+        }
         viewFactory.retrieveData();
     }
 

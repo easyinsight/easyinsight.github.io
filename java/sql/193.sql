@@ -21,6 +21,8 @@ drop table if exists dashboard_report;
 create table dashboard_report (
   dashboard_report_id bigint(20) auto_increment not null,
   report_id bigint(20) not null,
+  label_placement integer not null default 0,
+  show_label tinyint(4) not null default 0,
   dashboard_element_id bigint(20) not null,
   primary key(dashboard_report_id),
   constraint dashboard_report_ibfk1 foreign key (report_id) references analysis (analysis_id) on delete cascade,
@@ -138,4 +140,14 @@ create table report_install (
   primary key (report_install_id),
   constraint report_install_ibfk1 foreign key (user_id) references user (user_id) on delete cascade,
   constraint report_install_ibfk2 foreign key (report_id) references analysis (analysis_id) on delete cascade
+);
+
+drop table if exists dashboard_element_to_report_property;
+create table dashboard_element_to_report_property (
+  dashboard_element_to_report_property_id bigint(20) auto_increment not null,
+  dashboard_element_id bigint(20) not null,
+  report_property_id bigint(20) not null,
+  primary key (dashboard_element_to_report_property_id),
+  constraint dashboard_element_to_report_property_ibfk1 foreign key (dashboard_element_id) references dashboard_element (dashboard_element_id) on delete cascade,
+  constraint dashboard_element_to_report_property_ibfk2 foreign key (report_property_id) references report_property (report_property_id) on delete cascade
 );

@@ -21,6 +21,7 @@ public class DashboardStackEditorComponent extends HBox implements IDashboardEdi
         var items:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dashboardStack.count; i++) {
             var box:DashboardBox = getChildAt(i) as DashboardBox;
+            box.save();
             var dashboardGridItem:DashboardStackItem = new DashboardStackItem();
             dashboardGridItem.position = i;
             dashboardGridItem.dashboardElement = box.element;

@@ -18,6 +18,24 @@ import java.util.Set;
  */
 public class DashboardReport extends DashboardElement {
     private InsightDescriptor report;
+    private boolean showLabel;
+    private int labelPlacement;
+
+    public boolean isShowLabel() {
+        return showLabel;
+    }
+
+    public void setShowLabel(boolean showLabel) {
+        this.showLabel = showLabel;
+    }
+
+    public int getLabelPlacement() {
+        return labelPlacement;
+    }
+
+    public void setLabelPlacement(int labelPlacement) {
+        this.labelPlacement = labelPlacement;
+    }
 
     public InsightDescriptor getReport() {
         return report;
@@ -35,10 +53,12 @@ public class DashboardReport extends DashboardElement {
     @Override
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_REPORT (DASHBOARD_ELEMENT_ID, REPORT_ID) " +
-                "VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_REPORT (DASHBOARD_ELEMENT_ID, REPORT_ID, LABEL_PLACEMENT, SHOW_LABEL) " +
+                "VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setLong(2, report.getId());
+        insertStmt.setInt(3, labelPlacement);
+        insertStmt.setBoolean(4, showLabel);
         insertStmt.execute();
         return id;
     }
@@ -59,13 +79,16 @@ public class DashboardReport extends DashboardElement {
 
     public static DashboardElement loadReport(long elementID, EIConnection conn) throws SQLException {
         DashboardReport dashboardReport = null;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, analysis.data_feed_id, analysis.report_type, analysis.analysis_id, analysis.url_key from " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.title, analysis.data_feed_id, analysis.report_type, analysis.analysis_id, analysis.url_key, " +
+                "dashboard_report.label_placement, dashboard_report.show_label from " +
                 "analysis, dashboard_report where dashboard_report.dashboard_element_id = ? and dashboard_report.report_id = analysis.analysis_id");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             dashboardReport = new DashboardReport();
             dashboardReport.setReport(new InsightDescriptor(rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getInt(3), rs.getString(5)));
+            dashboardReport.setLabelPlacement(rs.getInt(6));
+            dashboardReport.setShowLabel(rs.getBoolean(7));
         }
         return dashboardReport;
     }

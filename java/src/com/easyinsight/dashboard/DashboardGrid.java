@@ -17,6 +17,9 @@ import java.util.*;
 public class DashboardGrid extends DashboardElement {
     private int rows;
     private int columns;
+    private int width;
+    private int backgroundColor;
+    private double backgroundAlpha;
 
     private List<DashboardGridItem> gridItems;
 
@@ -60,14 +63,42 @@ public class DashboardGrid extends DashboardElement {
         return DashboardElement.GRID;
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public double getBackgroundAlpha() {
+        return backgroundAlpha;
+    }
+
+    public void setBackgroundAlpha(double backgroundAlpha) {
+        this.backgroundAlpha = backgroundAlpha;
+    }
+
     @Override
     public long save(EIConnection conn) throws SQLException {
         long id = super.save(conn);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_GRID (DASHBOARD_ELEMENT_ID, NUMBER_ROWS, NUMBER_COLUMNS) VALUES (?, ?, ?)",
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_GRID (DASHBOARD_ELEMENT_ID, NUMBER_ROWS, NUMBER_COLUMNS, WIDTH, BACKGROUND_COLOR," +
+                "background_alpha) VALUES (?, ?, ?, ?, ?, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
         insertStmt.setLong(1, getElementID());
         insertStmt.setInt(2, rows);
         insertStmt.setInt(3, columns);
+        insertStmt.setInt(4, width);
+        insertStmt.setInt(5, backgroundColor);
+        insertStmt.setDouble(6, backgroundAlpha);
         insertStmt.execute();
         long gridID = Database.instance().getAutoGenKey(insertStmt);
         for (DashboardGridItem gridItem : gridItems) {
@@ -78,7 +109,8 @@ public class DashboardGrid extends DashboardElement {
 
     public static DashboardElement loadGrid(long elementID, EIConnection conn) throws SQLException {
         DashboardGrid dashboardGrid = null;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT NUMBER_ROWS, NUMBER_COLUMNS, DASHBOARD_GRID_ID FROM DASHBOARD_GRID WHERE DASHBOARD_ELEMENT_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT NUMBER_ROWS, NUMBER_COLUMNS, DASHBOARD_GRID_ID, WIDTH, BACKGROUND_COLOR, BACKGROUND_ALPHA " +
+                "FROM DASHBOARD_GRID WHERE DASHBOARD_ELEMENT_ID = ?");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -86,6 +118,9 @@ public class DashboardGrid extends DashboardElement {
             dashboardGrid.setRows(rs.getInt(1));
             dashboardGrid.setColumns(rs.getInt(2));
             long gridID = rs.getLong(3);
+            dashboardGrid.setWidth(rs.getInt(4));
+            dashboardGrid.setBackgroundColor(rs.getInt(5));
+            dashboardGrid.setBackgroundAlpha(rs.getDouble(6));
             PreparedStatement gridItemStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, DASHBOARD_ELEMENT.element_type, " +
                     "ROW_POSITION, COLUMN_POSITION FROM DASHBOARD_GRID_ITEM, DASHBOARD_ELEMENT WHERE DASHBOARD_GRID_ID = ? AND DASHBOARD_GRID_ITEM.dashboard_element_id = dashboard_element.dashboard_element_id");
             gridItemStmt.setLong(1, gridID);

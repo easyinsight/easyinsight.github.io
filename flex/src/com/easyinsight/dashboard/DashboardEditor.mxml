@@ -34,6 +34,7 @@
             var controls:ArrayCollection = new ArrayCollection();
             controls.addItem(new DashboardControl("Grid", DashboardGrid));
             controls.addItem(new DashboardControl("Stack", DashboardStack));
+            controls.addItem(new DashboardControl("Image", DashboardImage));
             this.availableControls = controls;
             if (_dashboardID == 0) {
                 ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds);

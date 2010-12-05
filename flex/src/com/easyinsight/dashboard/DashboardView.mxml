@@ -3,6 +3,11 @@
                       xmlns:filtering="com.easyinsight.filtering.*" xmlns:util="com.easyinsight.util.*"
                       xmlns:datasources="com.easyinsight.datasources.*"
                       applyCenterScreenLogic="false" creationComplete="onCreation()">
+    <skin:states>
+        <mx:State name="fullScreen">
+            <mx:RemoveChild target="{topDisplay}"/>
+        </mx:State>
+    </skin:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -93,6 +98,16 @@
 
         private function gotDashboard():void {
             dashboard = dashboardService.getDashboard.lastResult as Dashboard;
+            var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
+            if (grid.width == 0) {
+                dashboardWidth = 1000;
+            } else {
+                dashboardWidth = grid.width;
+            }
+            dashboardCanvas.setStyle("backgroundAlpha", grid.backgroundAlpha);
+            if (grid.backgroundColor != 0) {
+                dashboardCanvas.setStyle("backgroundColor", grid.backgroundColor);
+            }
             dashboardName = dashboard.name;
             dataSourceID = dashboard.dataSourceID;
             filterDefinitions = dashboard.filters;
@@ -138,7 +153,15 @@
         }
 
         private function toFullScreen():void {
+            currentState = "fullScreen";
+            stage.addEventListener(KeyboardEvent.KEY_DOWN, onKey);
+        }
 
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ESCAPE) {
+                stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKey);
+                currentState = "";
+            }
         }
 
         private function keptDashboard():void {
@@ -162,13 +185,16 @@
         }
 
         [Bindable]
+        private var dashboardWidth:int;
+
+        [Bindable]
         private var dataSource:DataSourceInfo;
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboard" result="gotDashboard()"/>
         <mx:method name="keepDashboard" result="keptDashboard()"/>
     </mx:RemoteObject>
-    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0"
+    <mx:VBox width="100%" height="100%" paddingLeft="10" paddingRight="10" verticalGap="0"
              horizontalAlign="center"
              direction="vertical">
         <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay"
@@ -233,8 +259,8 @@
             </mx:ViewStack>
             <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
         </mx:VBox>
-        <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0">
-            <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
+        <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0" horizontalAlign="center" verticalGap="0">
+            <mx:ViewStack width="{dashboardWidth}" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
                 <mx:Box/>
                 <mx:VBox width="100%" horizontalAlign="center">
                     <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
@@ -246,7 +272,7 @@
                                                   backgroundColor="#FFFFFF" backgroundAlpha=".8"/>
                 </mx:VBox>
             </mx:ViewStack>
-            <mx:Canvas width="100%" height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF" backgroundAlpha=".8"/>
+            <mx:Canvas width="{dashboardWidth}" height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF" backgroundAlpha=".8"/>
         </mx:VBox>
     </mx:VBox>
 </skin:BackgroundImage>

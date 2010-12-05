@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
 
 [Bindable]
@@ -14,6 +15,10 @@ public class DashboardElement {
 
     public function createViewComponent():UIComponent {
         return null;
+    }
+
+    public function editableProperties():ArrayCollection {
+        return new ArrayCollection();
     }
 }
 }
