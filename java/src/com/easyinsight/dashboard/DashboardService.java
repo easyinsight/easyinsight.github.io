@@ -1,5 +1,6 @@
 package com.easyinsight.dashboard;
 
+import com.easyinsight.analysis.ReportMetrics;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedConsumer;
@@ -70,8 +71,40 @@ public class DashboardService {
         }
     }
 
-    public void rateDashboard(long dashboardID, int rating) {
-        
+    public ReportMetrics rateDashboard(long dashboardID, int rating) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT dashboard_user_rating_id from dashboard_user_rating where " +
+                    "user_id = ? and dashboard_id = ?");
+            queryStmt.setLong(1, SecurityUtil.getUserID());
+            queryStmt.setLong(2, dashboardID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long id = rs.getLong(1);
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE dashboard_user_rating set rating = ? where dashboard_user_rating_id = ?");
+                updateStmt.setInt(1, rating);
+                updateStmt.setLong(2, id);
+                updateStmt.executeUpdate();
+            } else {
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO dashboard_user_rating (rating, user_id, dashboard_id) values (?, ?, ?)");
+                insertStmt.setInt(1, rating);
+                insertStmt.setLong(2, SecurityUtil.getUserID());
+                insertStmt.setLong(3, dashboardID);
+                insertStmt.execute();
+            }
+            PreparedStatement ratingStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM DASHBOARD_USER_RATING WHERE DASHBOARD_ID = ?");
+            ratingStmt.setLong(1, dashboardID);
+            ResultSet dashboardRS = ratingStmt.executeQuery();
+            dashboardRS.next();
+            double ratingAverage = dashboardRS.getDouble(1);
+            int ratingCount = dashboardRS.getInt(2);
+            return new ReportMetrics(ratingCount, ratingAverage, rating);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public Dashboard getDashboard(long dashboardID) {

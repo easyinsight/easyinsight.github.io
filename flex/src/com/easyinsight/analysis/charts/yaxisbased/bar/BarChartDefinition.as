@@ -1,12 +1,19 @@
 package com.easyinsight.analysis.charts.yaxisbased.bar {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.CheckBoxReportFormItem;
+import com.easyinsight.analysis.ColorReportFormItem;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.yaxisbased.YAxisDefinition;
+
+import mx.collections.ArrayCollection;
 
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSBarChartDefinition")]
 public class BarChartDefinition extends YAxisDefinition{
+
+    public var chartColor:uint;
+    public var useChartColor:Boolean;
 
     public function BarChartDefinition() {
         super();
@@ -25,6 +32,11 @@ public class BarChartDefinition extends YAxisDefinition{
         return ChartTypes.BAR_FAMILY;
     }
 
-
+    override public function createFormItems():ArrayCollection {
+        var items:ArrayCollection = super.createFormItems();
+        items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", useChartColor, this));
+        items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", chartColor, this));
+        return items;
+    }
 }
 }

@@ -47,6 +47,7 @@
         import mx.formatters.Formatter;
         import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
+        import mx.graphics.SolidColor;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -230,7 +231,11 @@
         }
 
         private function customFill(element:ChartItem, index:Number):IFill {
-            return FillProvider.getColor(columnChartDef.colorScheme, bgFills, index);
+            if (columnChartDef.useChartColor) {
+                return new SolidColor(columnChartDef.chartColor);
+            } else {
+                return FillProvider.getColor(columnChartDef.colorScheme, bgFills, index);
+            }
         }
 
         private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {

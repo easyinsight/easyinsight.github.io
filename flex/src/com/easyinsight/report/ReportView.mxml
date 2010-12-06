@@ -29,7 +29,6 @@
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
-        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
@@ -76,10 +75,6 @@
 
         public function set reportNavHandler(value:Function):void {
             _reportNavHandler = value;
-        }
-
-        private function toBrowser():void {
-            navigateToURL(new URLRequest("https://www.easy-insight.com/app/#reportID=" + _reportID), "_blank");
         }
 
         private function exportExcel():void {
@@ -204,9 +199,7 @@
         [Bindable]
         [Embed(source="../../../../assets/refresh.png")]
         private var refreshIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/window_earth.png")]
-        private var browserIcon:Class;
+        
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
@@ -602,10 +595,6 @@
             analysisService.keepReport.send(_reportID);
         }
 
-        private function signup(event:MouseEvent):void {
-            User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS));
-        }
-
         private function toExchange(event:MouseEvent):void {
             var props:Object = new Object();
             dispatchEvent(new AnalysisCloseEvent(this, null, "Exchange", props));
@@ -645,17 +634,11 @@
                 if (!_showFullScreen) {
                     leftButtonBar.removeChild(fullScreenButton);
                 }
-                if (!_showBookmark || _showAddBar) {
-                    leftButtonBar.removeChild(bookmarkButton);
-                }
                 if (!_showExport) {
                     leftButtonBar.removeChild(exportButton);
                 }
                 if (!_showReportEditor || _showAddBar || User.getInstance().guestUser) {
                     leftButtonBar.removeChild(editReportButton);
-                }
-                if (!_showBrowser) {
-                    leftButtonBar.removeChild(browserButton);
                 }
                 if (!_showRefresh) {
                     leftButtonBar.removeChild(refreshButton);
@@ -810,8 +793,6 @@
                                    id="fullScreenButton" toolTip="View full screen"/>
                         <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
                                    id="refreshButton" toolTip="Refresh this report"/>
-                        <mx:Button click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
-                                   id="bookmarkButton" toolTip="Save this report to My Data..."/>
                         <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
                                    labelPlacement="bottom"
                                    id="exportButton" toolTip="Export the report..."/>
@@ -820,8 +801,6 @@
                         <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
                                    labelPlacement="bottom" id="editReportButton"
                                    toolTip="Open this report in the report editor..."/>
-                        <mx:Button click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
-                                   id="browserButton"/>
                         <mx:Spacer width="100%"/>
                         <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350"
                                   fontSize="14"/>
@@ -890,8 +869,7 @@
             </mx:VBox>
         </mx:ViewStack>
         <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}"
-                             loading="{loading}"
-                />
+                             loading="{loading}"/>
     </mx:VBox>
     </mx:VBox>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">

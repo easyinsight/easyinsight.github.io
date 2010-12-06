@@ -1,6 +1,5 @@
 package com.easyinsight.framework
 {
-import com.easyinsight.account.Account;
 import com.easyinsight.guest.Scenario;
 import com.easyinsight.preferences.UIConfiguration;
 import com.easyinsight.preferences.UISettings;
@@ -113,13 +112,6 @@ public class User extends EventDispatcher
         _user.currencySymbol = response.currencySymbol;
         _user.applicationSkin = response.applicationSkin;        
         _user.guestUser = response.guestUser;
-        if (_user.firstLogin && !_user.accountAdmin) {
-            User.getEventNotifier().dispatchEvent(new Event("firstLogin"));
-        } else if (response.accountType == Account.DELINQUENT) {
-            User.getEventNotifier().dispatchEvent(new Event("accountDelinquent"));
-        } else if (response.accountType == Account.REACTIVATION_POSSIBLE) {
-            User.getEventNotifier().dispatchEvent(new Event("reactivationPossible"));
-        }
         if (response.uiSettings != null) {
             _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);
         }

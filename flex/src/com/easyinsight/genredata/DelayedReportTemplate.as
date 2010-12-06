@@ -75,7 +75,7 @@ public class DelayedReportTemplate extends EventDispatcher {
                     info.exchangeData.descriptor.urlKey)));
         } else if (descriptor is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, connectionID: info.exchangeData.id,
-                dashboardRating: info.exchangeData.ratingAverage, dashboardURLKey: info.exchangeData.descriptor.urlKey})));
+                dashboardRating: info.exchangeData.ratingAverage, dashboardURLKey: info.exchangeData.descriptor.urlKey, originDashboardID: info.exchangeData.descriptor.id})));
         }
     }
 }

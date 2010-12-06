@@ -443,8 +443,15 @@ public class SolutionService {
                 String authorName = rs.getString(5);
                 String description = rs.getString(6);
                 EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, null);
+                PreparedStatement ratingStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM USER_REPORT_RATING WHERE REPORT_ID = ?");
+                ratingStmt.setLong(1, reportID);
+                ResultSet ratingRS = ratingStmt.executeQuery();
+                ratingRS.next();
+                double ratingAverage = ratingRS.getDouble(1);
+                int ratingCount = ratingRS.getInt(2);
                 blah = determineDataSourceForReport(reportID, conn);
-                srei = new SolutionReportExchangeItem(reportName, reportID, 0, 0, dateCreated, description, authorName, descriptor, blah.connectionID, blah.connectionName);
+                srei = new SolutionReportExchangeItem(reportName, reportID, ratingAverage, ratingCount, dateCreated, description,
+                        authorName, descriptor, blah.connectionID, blah.connectionName);
             } else {
                 PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD_ID, URL_KEY, DASHBOARD_NAME, CREATION_DATE," +
                         "AUTHOR_NAME, DESCRIPTION FROM DASHBOARD WHERE DASHBOARD.exchange_visible = ? and " +
@@ -461,7 +468,14 @@ public class SolutionService {
                     String description = dashboardRS.getString(6);
                     EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey);
                     blah = determineDataSourceForDashboard(dashboardID, conn);
-                    srei = new SolutionReportExchangeItem(dashboardName, dashboardID, 0, 0, dateCreated, description, authorName, descriptor, blah.connectionID, blah.connectionName);
+                    PreparedStatement ratingStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM DASHBOARD_USER_RATING WHERE DASHBOARD_ID = ?");
+                    ratingStmt.setLong(1, dashboardID);
+                    ResultSet ratingRS = ratingStmt.executeQuery();
+                    ratingRS.next();
+                    double ratingAverage = ratingRS.getDouble(1);
+                    int ratingCount = ratingRS.getInt(2);
+                    srei = new SolutionReportExchangeItem(dashboardName, dashboardID, ratingAverage, ratingCount, dateCreated, description,
+                            authorName, descriptor, blah.connectionID, blah.connectionName);
                 } else {
                     return null;
                 }

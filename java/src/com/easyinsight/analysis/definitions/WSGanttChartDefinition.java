@@ -19,7 +19,16 @@ public class WSGanttChartDefinition extends WSAnalysisDefinition {
     private AnalysisItem startTime;
     private AnalysisItem endTime;
     private AnalysisItem grouping;
+    private AnalysisItem taskGrouping;
     private long ganttDefinitionID;
+
+    public AnalysisItem getTaskGrouping() {
+        return taskGrouping;
+    }
+
+    public void setTaskGrouping(AnalysisItem taskGrouping) {
+        this.taskGrouping = taskGrouping;
+    }
 
     public long getGanttDefinitionID() {
         return ganttDefinitionID;
@@ -64,21 +73,24 @@ public class WSGanttChartDefinition extends WSAnalysisDefinition {
         items.add(startTime);
         items.add(endTime);
         items.add(grouping);
+        items.add(taskGrouping);
         return items;
     }
 
     @Override
-        public void createReportStructure(Map<String, AnalysisItem> structure) {
-            addItems("startTime", Arrays.asList(startTime), structure);
-            addItems("endTime", Arrays.asList(endTime), structure);
-            addItems("grouping", Arrays.asList(grouping), structure);
-        }
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
+        addItems("startTime", Arrays.asList(startTime), structure);
+        addItems("endTime", Arrays.asList(endTime), structure);
+        addItems("grouping", Arrays.asList(grouping), structure);
+        addItems("taskGrouping", Arrays.asList(taskGrouping), structure);
+    }
 
-        @Override
-        public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
-            startTime = firstItem("startTime", structure);
-            endTime = firstItem("endTime", structure);
-            grouping = firstItem("grouping", structure);
-        }
+    @Override
+    public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
+        startTime = firstItem("startTime", structure);
+        endTime = firstItem("endTime", structure);
+        grouping = firstItem("grouping", structure);
+        taskGrouping = firstItem("taskGrouping", structure);
+    }
 
 }

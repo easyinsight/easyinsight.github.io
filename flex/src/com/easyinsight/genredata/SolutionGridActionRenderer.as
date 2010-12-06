@@ -55,7 +55,7 @@ public class SolutionGridActionRenderer extends HBox{
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, exchangeItem.id, exchangeItem.ratingAverage, exchangeItem.descriptor.urlKey)));
         } else if (descriptor is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, connectionID: exchangeItem.id,
-                dashboardRating: exchangeItem.ratingAverage, dashboardURLKey: exchangeItem.descriptor.urlKey})));
+                dashboardRating: exchangeItem.ratingAverage, dashboardURLKey: exchangeItem.descriptor.urlKey, originDashboardID: exchangeItem.descriptor.id})));
         }
     }
 

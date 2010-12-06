@@ -17,7 +17,6 @@
         import com.easyinsight.framework.ConnectionGoEvent;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FragmentParser;
-        import com.easyinsight.framework.InitialLoginWindow;
         import com.easyinsight.framework.LoginPage;
         import com.easyinsight.framework.ModulePerspective;
         import com.easyinsight.framework.PasswordReset;
@@ -104,7 +103,6 @@
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
-            User.getEventNotifier().addEventListener("firstLogin", onFirstLogin);
             EIMessageListener.initialize();
             messageListener = EIMessageListener.instance();
             //GAHelper.initialize(tracker);
@@ -114,12 +112,6 @@
         private function gotBuildPath():void {
             Constants.instance().buildPath = userService.getBuildPath.lastResult as String;
             userService.isSessionLoggedIn.send();
-        }
-
-        private function onFirstLogin(event:Event):void {
-            var window:InitialLoginWindow = new InitialLoginWindow();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function applicationListeners():void {
@@ -403,15 +395,18 @@
             var browserSetup:Boolean = false;
             if (authResult != null) {
                 if (authResult.accountState == Account.DELINQUENT) {
-                    toLogin(1);
+                    toLogin(LoginPage.DELINQUENT);
                 } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
                     quietLogin(authResult, false);
-                    toLogin(2);
+                    toLogin(LoginPage.REACTIVATE);
                 } else if (authResult.accountState == Account.INACTIVE) {
-                    toLogin(3);
+                    toLogin(LoginPage.NEEDS_ACTIVATION);
                 } else if (authResult.firstLogin && authResult.accountAdmin) {
                     quietLogin(authResult, false);
-                    toLogin(4);
+                    toLogin(LoginPage.INITIAL_ADMIN_SETUP);
+                } else if (authResult.firstLogin && !authResult.accountAdmin) {
+                    quietLogin(authResult, false);
+                    toLogin(LoginPage.INITIAL_USER_SETUP);
                 } else {
                     quietLogin(authResult, false);
                     toMain();
@@ -451,10 +446,10 @@
                                 case "success":
                                     dispatchEvent(new LoginEvent(LoginEvent.LOGIN, authResult));
                                     if (authResult.accountState == Account.DELINQUENT) {
-                                        toLogin(1);
+                                        toLogin(LoginPage.DELINQUENT);
                                     } else if (authResult.accountState == Account.REACTIVATION_POSSIBLE) {
                                         quietLogin(authResult, false);
-                                        toLogin(2);
+                                        toLogin(LoginPage.REACTIVATE);
                                     } else {
                                         quietLogin(authResult, false);
                                         toMain();
