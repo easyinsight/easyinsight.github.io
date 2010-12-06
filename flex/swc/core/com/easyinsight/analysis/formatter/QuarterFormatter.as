@@ -11,7 +11,7 @@ public class QuarterFormatter extends Formatter {
             var date:Date = value as Date;
             var year:Number = date.getFullYear();
             var month:Number = date.getMonth();
-            var quarter:int = month / 3;
+            var quarter:int = month / 3 + 1;
             return "Q" + quarter + " " + year;
         } else {
             return "";
