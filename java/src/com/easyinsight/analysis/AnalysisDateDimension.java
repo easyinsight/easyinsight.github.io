@@ -195,7 +195,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             } else {
                 switch (dateLevel) {
                     case QUARTER_OF_YEAR_FLAT:
-                        int quarter = (calendar.get(Calendar.MONTH) + 1) / 4;
+                        int quarter = (calendar.get(Calendar.MONTH)) / 3 + 1;
                         resultValue = new StringValue("Q" + quarter);
                         break;
                     case MONTH_FLAT:

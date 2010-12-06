@@ -50,13 +50,13 @@ public class PreferencesService {
 
     public byte[] getImage(long imageID) {
         byte[] bytes;
-        long userID = SecurityUtil.getUserID();
+        long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE WHERE USER_IMAGE_ID = ? AND USER_ID = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE, USER WHERE USER_IMAGE_ID = ? AND USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID");
             queryStmt.setLong(1, imageID);
-            queryStmt.setLong(2, userID);
+            queryStmt.setLong(2, accountID);
             ResultSet rs = queryStmt.executeQuery();
             rs.next();
             bytes = rs.getBytes(1);

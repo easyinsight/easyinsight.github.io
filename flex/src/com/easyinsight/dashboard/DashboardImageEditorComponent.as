@@ -30,7 +30,7 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
     }
 
     public function validate():Boolean {
-        return true;
+        return image.imageDescriptor != null;
     }
 
     public function edit():void {

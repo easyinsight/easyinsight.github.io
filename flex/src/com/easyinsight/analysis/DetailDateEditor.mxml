@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
-                                   xmlns:analysis="com.easyinsight.analysis.*">
+                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         [Bindable]
         private var dateLevel:int;
@@ -13,7 +13,7 @@
             super.analysisItem = val;
             if (val is AnalysisDateDimension) {
                 var date:AnalysisDateDimension = val as AnalysisDateDimension;
-                dateLevel = date.dateLevel - 1;
+                dateLevel = date.dateLevel;
             }
         }
 
@@ -24,7 +24,7 @@
         }
         ]]></mx:Script>
     <mx:FormItem label="Date Level:" direction="horizontal">
-        <mx:ComboBox id="dateBox" rowCount="12" selectedIndex="{dateLevel}">
+        <util:SmartComboBox id="dateBox" rowCount="12" selectedValue="{dateLevel}" selectedProperty="data">
             <mx:ArrayCollection>
                 <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
                 <mx:Object label="Quarter - Year" data="{AnalysisItemTypes.QUARTER_OF_YEAR}"/>
@@ -41,7 +41,7 @@
                 <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
                 <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
             </mx:ArrayCollection>
-        </mx:ComboBox>
+        </util:SmartComboBox>
     </mx:FormItem>
 
 </analysis:AnalysisItemDetailEditor>
