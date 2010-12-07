@@ -1,3 +1,7 @@
+<%@ page import="com.easyinsight.users.Account" %>
+<%@ page import="com.easyinsight.users.User" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="org.hibernate.Session" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -16,6 +20,21 @@
 
 	<div data-role="content">
         <%
+            if(request.getSession().getAttribute("accountID") != null) {
+                org.hibernate.Session s = com.easyinsight.database.Database.instance().createSession();
+                try {
+                    long accountID = (Long) request.getSession().getAttribute("accountID");
+                    long userID = (Long) request.getSession().getAttribute("userID");
+                    User user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+                    Account account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+                    session.setAttribute("accountType", account.getAccountType());
+                    session.setAttribute("userName", user.getUserName());
+                    response.sendRedirect("menu.jsp");
+                    return;
+                } finally {
+                    s.close();
+                }
+            }
             /*if (request.getSession().getAttribute("accountID") != null) {
                 long accountID = (Long) request.getSession().getAttribute("accountID");
                 long userID = (Long) request.getSession().getAttribute("userID");
