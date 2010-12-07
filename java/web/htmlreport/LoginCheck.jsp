@@ -19,7 +19,7 @@
             session.setAttribute("userID", user.getUserID());
             session.setAttribute("accountType", account.getAccountType());
             session.setAttribute("userName", userName);
-            response.sendRedirect("dataSources.jsp");
+            response.sendRedirect("menu.jsp");
             return;
         }
     } finally {
