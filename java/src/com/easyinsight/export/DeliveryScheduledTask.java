@@ -85,13 +85,14 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
     private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException, DocumentException {
 
-        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID, TIMEZONE_OFFSET FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         if (deliveryInfoRS.next()) {
             int deliveryFormat = deliveryInfoRS.getInt(1);
 
             long reportID = deliveryInfoRS.getLong(2);
+            int timezoneOffset = deliveryInfoRS.getInt(7);
             long ownerID;
             PreparedStatement findOwnerStmt = conn.prepareStatement("SELECT USER_ID FROM user_to_analysis where analysis_id = ?");
 
@@ -120,7 +121,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     if (deliveryFormat == ReportDelivery.EXCEL) {
                         WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
                         analysisDefinition.updateMetadata();
-                        DataResults dataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+                        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                        insightRequestMetadata.setUtcOffset(timezoneOffset);
+                        DataResults dataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
                         if (dataResults instanceof ListDataResults) {
                             ListDataResults listDataResults = (ListDataResults) dataResults;
                             byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn);
@@ -133,7 +136,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
                         if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
                             analysisDefinition.updateMetadata();
-                            DataResults dataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+                            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                            insightRequestMetadata.setUtcOffset(timezoneOffset);
+                            DataResults dataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
                             if (dataResults instanceof ListDataResults) {
                                 ListDataResults listDataResults = (ListDataResults) dataResults;
                                 byte[] bytes = new ExportService().toListPDF(analysisDefinition, listDataResults, conn);
