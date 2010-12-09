@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
-                xmlns:solutions="com.easyinsight.solutions.*" layout="absolute"
+                xmlns:solutions="com.easyinsight.solutions.*" xmlns:guest="com.easyinsight.guest.*" layout="absolute"
                 creationComplete="setup()"
                 xmlns:system="com.easyinsight.administration.system.*">
     <mx:states>
@@ -14,7 +14,7 @@
                         <mx:Button label="Create Data Source" click="externalSources()"/>
                         <mx:Button label="Update Zip Geocodes" click="updateZipCodes()"/>
                         <mx:Button label="Nuke Old Data" click="nukeOldData()"/>
-                        <mx:Button label="Test Selenium" click="testSelenium()"/>
+                        <mx:Button label="Report Admin XML" click="reportAdminXML()"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Solutions">
                         <solutions:SolutionAdministration width="100%" height="100%"/>
@@ -23,6 +23,7 @@
                         <account:AccountAdministration width="100%" height="100%"/>
                     </mx:VBox>
                     <account:Newsletter label="Newsletter"/>
+                    <guest:ScenarioAdministration width="100%" height="100%" label="Scenarios"/>
                 </mx:TabNavigator>
             </mx:AddChild>
         </mx:State>
@@ -30,6 +31,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
+        import com.easyinsight.administration.ReportAdminXMLWindow;
         import com.easyinsight.administration.UpdateZipsWindow;
         import com.easyinsight.customupload.UploadExternalSource;
         import com.easyinsight.framework.User;
@@ -46,6 +48,12 @@
 
         private function updateZipCodes():void {
             var window:UpdateZipsWindow = new UpdateZipsWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function reportAdminXML():void {
+            var window:ReportAdminXMLWindow = new ReportAdminXMLWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -105,7 +113,6 @@
         private function dumpThreads():void {
             adminService.threadDump.send();
         }
-
 
 
         private function sessionCheck():void {

@@ -47,6 +47,14 @@ public class FilterPatternDefinition extends FilterDefinition {
         return super.validForQuery() && pattern != null && !regex;
     }
 
+    @Override
+    public String toXML() {
+        String xml = "<patternFilter>";
+        xml += getField().toXML();
+        xml += "</patternFilter>";
+        return xml;
+    }
+
     public String getPattern() {
         return pattern;
     }

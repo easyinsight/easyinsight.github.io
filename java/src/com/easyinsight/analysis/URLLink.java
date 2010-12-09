@@ -50,4 +50,9 @@ public class URLLink extends Link {
     public String generateLink(IRow row, Map<String, String> dataSourceProperties) {
         return URLPattern.getURL(url, row, dataSourceProperties);
     }
+
+    @Override
+    public String toXML() {
+        return "<urlLink url=\""+url + "\"/>";
+    }
 }

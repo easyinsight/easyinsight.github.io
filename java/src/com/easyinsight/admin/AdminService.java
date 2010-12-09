@@ -1,5 +1,7 @@
 package com.easyinsight.admin;
 
+import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.analysis.ZipGeocodeCache;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -31,12 +33,113 @@ public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
 
+    public String describeReport(String urlKey) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE URL_KEY = ?");
+            queryStmt.setString(1, urlKey);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long analysisID = rs.getLong(1);
+                AnalysisDefinition report = new AnalysisStorage().getPersistableReport(analysisID, session);
+                return report.toXML();
+            } else {
+                throw new RuntimeException("Couldn't find report " + urlKey);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
+        }
+    }
+
     public void updateZips(byte[] bytes) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         try {
             new ZipGeocodeCache().saveFile(bytes);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void clearOrphanData() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement basecampStmt = conn.prepareStatement("select basecamp.basecamp_id, data_feed.data_feed_id from basecamp left join data_feed on basecamp.data_feed_id = data_feed.data_feed_id where data_feed.data_feed_id is null");
+            PreparedStatement basecampCleanupStmt = conn.prepareStatement("DELETE FROM BASECAMP WHERE BASECAMP.BASECAMP_ID = ?");
+            ResultSet basecampRS = basecampStmt.executeQuery();
+            while (basecampRS.next()) {
+                basecampCleanupStmt.setLong(1, basecampRS.getLong(1));
+                basecampCleanupStmt.executeUpdate();
+            }
+
+            PreparedStatement daQuery1Stmt = conn.prepareStatement("select data_activity_task_generator_id from data_activity_task_generator left join task_generator on data_activity_task_generator.task_generator_id = task_generator.task_generator_id and task_generator.task_generator_id is null");
+            PreparedStatement daQuery2Stmt = conn.prepareStatement(" select data_activity_task_generator_id from data_activity_task_generator left join scheduled_account_activity on data_activity_task_generator.scheduled_activity_id = scheduled_account_activity.scheduled_account_activity_id and scheduled_account_activity.scheduled_account_activity_id is null");
+            PreparedStatement daQueryCleanupStmt = conn.prepareStatement("DELETE FROM data_activity_task_generator WHERE data_activity_task_generator.data_activity_task_generator_id = ?");
+            ResultSet da1RS = daQuery1Stmt.executeQuery();
+            while (da1RS.next()) {
+                daQueryCleanupStmt.setLong(1, da1RS.getLong(1));
+                daQueryCleanupStmt.executeUpdate();
+            }
+            ResultSet da2RS = daQuery2Stmt.executeQuery();
+            while (da2RS.next()) {
+                daQueryCleanupStmt.setLong(1, da2RS.getLong(1));
+                daQueryCleanupStmt.executeUpdate();
+            }
+
+            PreparedStatement dsQuery1Stmt = conn.prepareStatement("select data_source_query_id from data_source_query left join scheduled_task on data_source_query.scheduled_task_id = scheduled_task.scheduled_task_id and scheduled_task.scheduled_task_id is null");
+            PreparedStatement dsQuery2Stmt = conn.prepareStatement(" select data_source_query_id from data_source_query left join data_feed on data_source_query.data_source_id = data_feed.data_feed_id and data_feed.data_feed_id is null");
+            PreparedStatement dsQueryCleanupStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_QUERY WHERE DATA_SOURCE_QUERY.data_source_query_id = ?");
+            ResultSet ds1RS = dsQuery1Stmt.executeQuery();
+            while (ds1RS.next()) {
+                dsQueryCleanupStmt.setLong(1, ds1RS.getLong(1));
+                dsQueryCleanupStmt.executeUpdate();
+            }
+            ResultSet ds2RS = dsQuery2Stmt.executeQuery();
+            while (ds2RS.next()) {
+                dsQueryCleanupStmt.setLong(1, ds2RS.getLong(1));
+                dsQueryCleanupStmt.executeUpdate();
+            }
+            PreparedStatement dtQuery1Stmt = conn.prepareStatement("select data_source_task_generator.data_source_task_generator_id from data_source_task_generator left join task_generator on data_source_task_generator.data_source_task_generator_id = task_generator.task_generator_id where task_generator.task_generator_id is null");
+            PreparedStatement dtQuery2Stmt = conn.prepareStatement("select data_source_task_generator.data_source_task_generator_id from data_source_task_generator left join data_feed on data_source_task_generator.data_source_id = data_feed.data_feed_id where data_feed.data_feed_id is null");
+            PreparedStatement dtQueryCleanupStmt = conn.prepareStatement("DELETE FROM data_source_task_generator WHERE data_source_task_generator.data_source_task_generator_id = ?");
+            ResultSet dt1RS = dtQuery1Stmt.executeQuery();
+            while (dt1RS.next()) {
+                dtQueryCleanupStmt.setLong(1, dt1RS.getLong(1));
+                dtQueryCleanupStmt.executeUpdate();
+            }
+            ResultSet dt2RS = dtQuery2Stmt.executeQuery();
+            while (dt2RS.next()) {
+                dtQueryCleanupStmt.setLong(1, dt2RS.getLong(1));
+                dtQueryCleanupStmt.executeUpdate();
+            }
+            PreparedStatement taskStmt = conn.prepareStatement("select scheduled_task.scheduled_task_id from scheduled_task left join task_generator on scheduled_task.task_generator_id = task_generator.task_generator_id where task_generator.task_generator_id is null");
+            PreparedStatement taskCleanupStmt = conn.prepareStatement("delete from scheduled_task where scheduled_task_id = ?");
+            ResultSet taskRS = taskStmt.executeQuery();
+            while (taskRS.next()) {
+                taskCleanupStmt.setLong(1, taskRS.getLong(1));
+                taskCleanupStmt.executeUpdate();
+            }
+            PreparedStatement uiStmt = conn.prepareStatement("SELECT ui_visibility_setting.ui_visibility_setting_id from ui_visibility_setting left join persona on ui_visibility_setting.persona_id = persona.persona_id where persona.persona_id is null");
+            PreparedStatement uiCleanupStmt = conn.prepareStatement("DELETE FROM ui_visibility_setting where ui_visibility_setting.ui_visibility_setting_id = ?");
+            ResultSet uiRS = uiStmt.executeQuery();
+            while (uiRS.next()) {
+                uiCleanupStmt.setLong(1, uiRS.getLong(1));
+                uiCleanupStmt.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
@@ -176,7 +279,7 @@ public class AdminService {
         cleanStmt.execute();
     }
 
-    public void clearOrphanData() {
+    public void clearOrphanData2() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {

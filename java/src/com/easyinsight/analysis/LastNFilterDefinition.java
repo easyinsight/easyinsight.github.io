@@ -34,4 +34,12 @@ public class LastNFilterDefinition extends FilterDefinition {
         // TODO: implement
         return start;
     }
+
+    @Override
+    public String toXML() {
+        String xml = "<lastNFilter>";
+        xml += getField().toXML();
+        xml += "</lastNFilter>";
+        return xml;
+    }
 }

@@ -40,4 +40,8 @@ public class DrillThrough extends Link {
         AnalysisDefinition report = replacementMap.get(reportID);
         setReportID(report.getAnalysisID());
     }
+
+    public String toXML() {
+        return "<drillThrough/>";
+    }
 }

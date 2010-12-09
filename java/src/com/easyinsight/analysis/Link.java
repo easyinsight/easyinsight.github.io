@@ -77,4 +77,8 @@ public class Link implements Cloneable, Serializable {
     public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap) {
         
     }
+
+    public String toXML() {
+        return null;
+    }
 }

@@ -559,4 +559,25 @@ public class AnalysisDefinition implements Cloneable {
         }
         return drillIDs;
     }
+
+    public String toXML() {
+        String xml = "<report type=\"" + getReportType() + "\">";
+        xml += "<fields>";
+        for (AnalysisItem field : reportStructure.values()) {
+            xml += field.toXML();
+        }
+        xml += "</fields>";
+        xml += "<filters>";
+        for (FilterDefinition filterDefinition : getFilterDefinitions()) {
+            xml += filterDefinition.toXML();
+        }
+        xml += "</filters>";
+        xml += "<addedFields>";
+        for (AnalysisItem additionalField : getAddedItems()) {
+            xml += additionalField.toXML();
+        }
+        xml += "</addedFields>";
+        xml += "</report>";
+        return xml;
+    }
 }

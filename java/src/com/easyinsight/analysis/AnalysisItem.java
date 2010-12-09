@@ -465,4 +465,16 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public List<IComponent> createComponents() {
         return new ArrayList<IComponent>();
     }
+
+    public String toXML() {
+        String xml = "<analysisItem key=\""+key.toDisplayName()+"\" display=\""+toDisplay()+"\" id=\""+analysisItemID+"\">";
+        for (FilterDefinition filterDefinition : getFilters()) {
+            xml += filterDefinition.toXML();
+        }
+        for (Link link : getLinks()) {
+            xml += link.toXML();
+        }
+        xml += "</analysisItem>";
+        return xml;
+    }
 }

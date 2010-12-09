@@ -110,4 +110,12 @@ public class RollingFilterDefinition extends FilterDefinition {
         }
         return start;
     }
+
+    @Override
+    public String toXML() {
+        String xml = "<rollingFilter>";
+        xml += getField().toXML();
+        xml += "</rollingFilter>";
+        return xml;
+    }
 }

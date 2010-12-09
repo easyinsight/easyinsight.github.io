@@ -196,4 +196,12 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             return super.createComponents(beforeAggregation, filterProcessor, sourceItem);
         }
     }
+
+    @Override
+    public String toXML() {
+        String xml = "<dateRangeFilter>";
+        xml += getField().toXML();
+        xml += "</dateRangeFilter>";
+        return xml;
+    }
 }

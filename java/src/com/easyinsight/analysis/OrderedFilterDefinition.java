@@ -39,6 +39,14 @@ public class OrderedFilterDefinition extends FilterDefinition {
     }
 
     @Override
+    public String toXML() {
+        String xml = "<orderedFilter>";
+        xml += getField().toXML();
+        xml += "</orderedFilter>";
+        return xml;
+    }
+
+    @Override
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }

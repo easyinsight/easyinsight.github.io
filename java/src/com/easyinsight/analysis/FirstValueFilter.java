@@ -48,4 +48,12 @@ public class FirstValueFilter extends FilterDefinition {
             return new ArrayList<IComponent>();
         }
     }
+
+    @Override
+    public String toXML() {
+        String xml = "<firstValueFilter>";
+        xml += getField().toXML();
+        xml += "</firstValueFilter>";
+        return xml;
+    }
 }

@@ -52,4 +52,12 @@ public class LastValueFilter extends FilterDefinition {
             return new ArrayList<IComponent>();
         }
     }
+
+    @Override
+    public String toXML() {
+        String xml = "<lastValueFilter>";
+        xml += getField().toXML();
+        xml += "</lastValueFilter>";
+        return xml;
+    }
 }

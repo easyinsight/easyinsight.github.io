@@ -184,4 +184,9 @@ public class AnalysisCalculation extends AnalysisMeasure {
     public boolean isCalculated() {
         return !applyBeforeAggregation;
     }
+
+    @Override
+    public String toXML() {
+        return "<calculation formula=\"" + calculationString + "\">" + super.toXML() + "</calculation>";
+    }
 }

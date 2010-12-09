@@ -128,4 +128,9 @@ public class AnalysisMeasure extends AnalysisItem {
         result = 31 * result + aggregation;
         return result;
     }
+
+    @Override
+    public String toXML() {
+        return "<analysisMeasure>" + super.toXML() + "</analysisMeasure>";
+    }
 }

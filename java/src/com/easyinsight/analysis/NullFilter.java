@@ -36,6 +36,14 @@ public class NullFilter extends FilterDefinition {
     }
 
     @Override
+    public String toXML() {
+        String xml = "<nullFilter>";
+        xml += getField().toXML();
+        xml += "</nullFilter>";
+        return xml;
+    }
+
+    @Override
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         return start;
     }

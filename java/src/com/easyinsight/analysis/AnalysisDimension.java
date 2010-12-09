@@ -170,4 +170,14 @@ public class AnalysisDimension extends AnalysisItem {
     public String toString() {
         return toDisplay() + " - " + getAnalysisItemID();
     }
+
+    @Override
+    public String toXML() {
+        String xml = "<analysisDimension>" + super.toXML();
+        if (keyDimension != null) {
+            xml += "<keyDimension>" + keyDimension.toXML() + "</keyDimension>";
+        }
+        xml += "</analysisDimension>";
+        return xml;
+    }
 }

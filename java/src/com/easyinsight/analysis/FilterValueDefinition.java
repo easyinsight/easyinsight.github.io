@@ -249,4 +249,12 @@ public class FilterValueDefinition extends FilterDefinition {
         }
         return new MaterializedValueFilterDefinition(getField(), valueSet, inclusive);
     }
+
+    @Override
+    public String toXML() {
+        String xml = "<valueFilter>";
+        xml += getField().toXML();
+        xml += "</valueFilter>";
+        return xml;
+    }
 }

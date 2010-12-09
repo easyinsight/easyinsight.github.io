@@ -147,4 +147,6 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         }
         return components;
     }
+
+    public abstract String toXML();
 }

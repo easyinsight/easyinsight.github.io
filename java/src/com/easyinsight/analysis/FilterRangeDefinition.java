@@ -45,6 +45,14 @@ public class FilterRangeDefinition extends FilterDefinition {
         if (Double.isNaN(currentEndValue)) currentEndValue = 0;
     }
 
+    @Override
+    public String toXML() {
+        String xml = "<rangeFilter>";
+        xml += getField().toXML();
+        xml += "</rangeFilter>";
+        return xml;
+    }
+
     public boolean isCurrentStartValueDefined() {
         return currentStartValueDefined;
     }

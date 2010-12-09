@@ -166,4 +166,14 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         result = 31 * result + hierarchyLevel.hashCode();
         return result;
     }
+
+    @Override
+    public String toXML() {
+        String xml = "<hierarchy>" + super.toXML();
+        for (HierarchyLevel level : hierarchyLevels) {
+            xml += "<level>" + level.getAnalysisItem().toXML() + "</level>";
+        }
+        xml += "</hierarchy>";
+        return xml;
+    }
 }
