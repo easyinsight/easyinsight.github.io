@@ -5,6 +5,8 @@
         height="500">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.PerspectiveInfo;
 
         import com.easyinsight.util.PopUpUtil;
@@ -26,11 +28,20 @@
         private function onCreation():void {
             addEventListener(LinkMetadataEvent.LINK_EDITED, onLinkUpdate);
             addEventListener(LinkMetadataEvent.LINK_DELETED, onLinkDelete);
+
             linkFactory = new ClassFactory(LinkControls);
             if (_analysisItem != null) {
                 linkFactory.properties = { sourceItem: _analysisItem };
                 transformContainer.existingFilters = _analysisItem.filters;
             }
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+        }
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
         }
 
         [Bindable]
