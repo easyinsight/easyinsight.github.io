@@ -94,6 +94,7 @@ public class DashboardBox extends VBox {
             dropBox.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
             dropBox.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
+            dispatchEvent(new DashboardChangedEvent());
         }
     }
 
@@ -135,6 +136,7 @@ public class DashboardBox extends VBox {
         dropBox.setStyle("backgroundColor", 0xEEEEEE);
         dropBox.removeEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
         dropBox.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+        dispatchEvent(new DashboardChangedEvent());
     }
 }
 }
