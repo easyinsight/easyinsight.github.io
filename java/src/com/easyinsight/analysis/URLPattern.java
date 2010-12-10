@@ -2,7 +2,6 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
 
-import javax.annotation.RegEx;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -17,7 +16,6 @@ public class URLPattern {
 
     private static final String patternStr = "\\[[A-Za-z0-9][A-Za-z0-9\\t :<>,.;/?\"\\\'{}=+-]*\\]";
 
-    @RegEx
     private static final Pattern keyPattern = Pattern.compile(patternStr);
 
     public static List<String> getKeys(String pattern) {
