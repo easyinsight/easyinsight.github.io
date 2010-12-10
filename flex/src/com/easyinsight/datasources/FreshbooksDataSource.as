@@ -8,6 +8,8 @@ public class FreshbooksDataSource extends CompositeServerDataSource {
 
     public var url:String;
     public var pin:String;
+    public var tokenKey:String;
+    public var tokenSecretKey:String;
 
     public function FreshbooksDataSource() {
         super();

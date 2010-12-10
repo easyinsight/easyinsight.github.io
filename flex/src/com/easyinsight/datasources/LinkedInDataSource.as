@@ -9,6 +9,8 @@ import com.easyinsight.listing.DataFeedDescriptor;
 public class LinkedInDataSource extends ServerDataSourceDefinition {
 
     public var pin:String;
+    public var tokenKey:String;
+    public var tokenSecret:String;
 
     public function LinkedInDataSource() {
         super();

@@ -8,6 +8,8 @@ public class ConstantContactDataSource extends CompositeServerDataSource {
 
     public var pin:String;
     public var ccUserName:String;
+    public var tokenKey:String;
+    public var tokenSecret:String;
 
     public function ConstantContactDataSource() {
         super();
