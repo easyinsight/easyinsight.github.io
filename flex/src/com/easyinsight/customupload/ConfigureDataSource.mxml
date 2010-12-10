@@ -127,18 +127,20 @@
         private var lastMessage:Date;
 
         private function onMessage(event:DataSourceMessageEvent):void {
-            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
-            if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
-                lastMessage = scorecardEvent.timestamp;
-                if (scorecardEvent.dataSourceID == dataSourceDefinition.dataFeedID) {
-                    if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
-                        asyncLabel = scorecardEvent.dataSourceName;
-                        if (scorecardEvent.max > 0 && progressBar != null) {
-                            progressBar.maximum = scorecardEvent.max;
-                            progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
+            if (event != null && event.dataSourceAsyncEvent != null && dataSourceDefinition != null) {
+                var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
+                if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
+                    lastMessage = scorecardEvent.timestamp;
+                    if (scorecardEvent.dataSourceID == dataSourceDefinition.dataFeedID) {
+                        if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
+                            asyncLabel = scorecardEvent.dataSourceName;
+                            if (scorecardEvent.max > 0 && progressBar != null) {
+                                progressBar.maximum = scorecardEvent.max;
+                                progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
+                            }
+                        } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
+                            asyncLabel = scorecardEvent.dataSourceName;
                         }
-                    } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
-                        asyncLabel = scorecardEvent.dataSourceName;
                     }
                 }
             }
