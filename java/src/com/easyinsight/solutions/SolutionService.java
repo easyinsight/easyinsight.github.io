@@ -782,12 +782,15 @@ public class SolutionService {
         List<SolutionReportExchangeItem> reports = new ArrayList<SolutionReportExchangeItem>();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE, " +
-                    "avg(USER_REPORT_RATING.rating), analysis.create_date, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
+            PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE, " +
+                    "analysis.create_date, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
                     "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID, ANALYSIS.url_key FROM DATA_FEED, SOLUTION_INSTALL, SOLUTION, ANALYSIS " +
-                    " LEFT JOIN USER_REPORT_RATING ON USER_REPORT_RATING.report_id = ANALYSIS.ANALYSIS_ID WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
+                    " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                     "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND ANALYSIS.SOLUTION_VISIBLE = ? " +
                     "AND solution_install.solution_id = solution.solution_id GROUP BY ANALYSIS.ANALYSIS_ID");
+
+            PreparedStatement getReportRatingStmt = conn.prepareStatement("SELECT avg(user_report_rating.rating), count(user_report_rating.rating) from " +
+                    "user_report_rating where report_id = ?");
 
             analysisQueryStmt.setBoolean(1, true);
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
@@ -799,22 +802,26 @@ public class SolutionService {
                 String title = analysisRS.getString(2);
                 long dataSourceID = analysisRS.getLong(3);
                 int reportType = analysisRS.getInt(4);
-                double ratingAverage = analysisRS.getDouble(5);
 
                 Date created = null;
-                java.sql.Date date = analysisRS.getDate(6);
+                java.sql.Date date = analysisRS.getDate(5);
                 if (date != null) {
                     created = new Date(date.getTime());
                 }
 
-                String description = analysisRS.getString(7);
-                String authorName = analysisRS.getString(9);
-                String connectionName = analysisRS.getString(11);
-                long connectionID = analysisRS.getLong(12);
-                String urlKey = analysisRS.getString(13);
+                String description = analysisRS.getString(6);
+                String authorName = analysisRS.getString(8);
+                String connectionName = analysisRS.getString(10);
+                long connectionID = analysisRS.getLong(11);
+                String urlKey = analysisRS.getString(12);
+                getReportRatingStmt.setLong(1, analysisID);
+                ResultSet ratingRS = getReportRatingStmt.executeQuery();
+                ratingRS.next();
+                double ratingAverage = ratingRS.getLong(1);
+                int ratingCount = ratingRS.getInt(2);
                 InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey);
                 SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID,
-                        ratingAverage, 0, created, description, authorName, insightDescriptor, connectionID, connectionName);
+                        ratingAverage, ratingCount, created, description, authorName, insightDescriptor, connectionID, connectionName);
                 reports.add(item);
             }
 
@@ -824,6 +831,8 @@ public class SolutionService {
                     " WHERE dashboard.data_source_id = DATA_FEED.DATA_FEED_ID AND " +
                     "dashboard.data_source_id = SOLUTION_INSTALL.installed_data_source_id AND dashboard.exchange_visible = ? " +
                     "AND solution_install.solution_id = solution.solution_id AND dashboard.temporary_dashboard = ?");
+            PreparedStatement getRatingDashboardStmt = conn.prepareStatement("SELECT avg(DASHBOARD_USER_RATING.rating), count(dashboard_user_rating.rating) from " +
+                    "dashboard_user_rating where dashboard_id = ?");
             dashboardQueryStmt.setBoolean(1, true);
             dashboardQueryStmt.setBoolean(2, false);
 
@@ -833,14 +842,20 @@ public class SolutionService {
                 String dashboardName = dashboardRS.getString(2);
                 String connectionName = dashboardRS.getString(3);
                 long connectionID = dashboardRS.getLong(4);
-                double ratingAverage = 0;
                 Date createdDate = new Date(dashboardRS.getTimestamp(5).getTime());
                 String description = dashboardRS.getString(6);
                 String authorName = dashboardRS.getString(7);
                 String urlKey = dashboardRS.getString(8);
+
+                getRatingDashboardStmt.setLong(1, dashboardID);
+                ResultSet ratingRS = getRatingDashboardStmt.executeQuery();
+                ratingRS.next();
+
+                double ratingAverage = ratingRS.getDouble(1);
+                int ratingCount = ratingRS.getInt(2);
                 DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey);
                 SolutionReportExchangeItem item = new SolutionReportExchangeItem(dashboardName, dashboardID, ratingAverage,
-                        0, createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName);
+                        ratingCount, createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName);
                 reports.add(item);
             }
             Collections.sort(reports, new Comparator<SolutionReportExchangeItem>() {
