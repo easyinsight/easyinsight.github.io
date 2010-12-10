@@ -17,8 +17,8 @@ import java.util.*;
  * Time: 3:26:51 PM
  */
 public class FreshbooksTimeFeed extends FreshbooksFeed {
-    protected FreshbooksTimeFeed(String url, String tokenKey, String tokenSecretKey) {
-        super(url, tokenKey, tokenSecretKey);
+    protected FreshbooksTimeFeed(String url, String tokenKey, String tokenSecretKey, FreshbooksCompositeSource parentSource) {
+        super(url, tokenKey, tokenSecretKey, parentSource);
     }
 
 
@@ -79,6 +79,8 @@ public class FreshbooksTimeFeed extends FreshbooksFeed {
                 requestPage++;
             } while (currentPage < pages);
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

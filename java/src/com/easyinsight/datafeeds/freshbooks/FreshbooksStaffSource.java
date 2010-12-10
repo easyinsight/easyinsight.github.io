@@ -77,6 +77,6 @@ public class FreshbooksStaffSource extends FreshbooksBaseSource {
     public Feed createFeedObject(FeedDefinition parent) {
         FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parent;
         return new FreshbooksStaffFeed(freshbooksCompositeSource.getUrl(), freshbooksCompositeSource.getTokenKey(),
-                freshbooksCompositeSource.getTokenSecretKey());
+                freshbooksCompositeSource.getTokenSecretKey(), freshbooksCompositeSource);
     }
 }

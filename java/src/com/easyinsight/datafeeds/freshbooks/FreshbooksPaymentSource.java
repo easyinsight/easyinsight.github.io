@@ -64,6 +64,6 @@ public class FreshbooksPaymentSource extends FreshbooksBaseSource {
     public Feed createFeedObject(FeedDefinition parent) {
         FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parent;
         return new FreshbooksPaymentFeed(freshbooksCompositeSource.getUrl(), freshbooksCompositeSource.getTokenKey(),
-                freshbooksCompositeSource.getTokenSecretKey());
+                freshbooksCompositeSource.getTokenSecretKey(), freshbooksCompositeSource);
     }
 }

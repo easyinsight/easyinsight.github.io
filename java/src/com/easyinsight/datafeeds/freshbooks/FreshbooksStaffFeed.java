@@ -15,8 +15,8 @@ import java.util.*;
  * Time: 3:26:33 PM
  */
 public class FreshbooksStaffFeed extends FreshbooksFeed {
-    protected FreshbooksStaffFeed(String url, String tokenKey, String tokenSecretKey) {
-        super(url, tokenKey, tokenSecretKey);
+    protected FreshbooksStaffFeed(String url, String tokenKey, String tokenSecretKey, FreshbooksCompositeSource parentSource) {
+        super(url, tokenKey, tokenSecretKey, parentSource);
     }
 
 
@@ -66,6 +66,8 @@ public class FreshbooksStaffFeed extends FreshbooksFeed {
                 }
 
             return dataSet;
+        } catch (ReportException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

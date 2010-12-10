@@ -69,6 +69,6 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
     public Feed createFeedObject(FeedDefinition parent) {
         FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parent;
         return new FreshbooksTimeFeed(freshbooksCompositeSource.getUrl(), freshbooksCompositeSource.getTokenKey(),
-                freshbooksCompositeSource.getTokenSecretKey());
+                freshbooksCompositeSource.getTokenSecretKey(), freshbooksCompositeSource);
     }
 }

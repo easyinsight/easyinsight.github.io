@@ -63,6 +63,6 @@ public class FreshbooksProjectSource extends FreshbooksBaseSource {
     public Feed createFeedObject(FeedDefinition parent) {
         FreshbooksCompositeSource freshbooksCompositeSource = (FreshbooksCompositeSource) parent;
         return new FreshbooksProjectFeed(freshbooksCompositeSource.getUrl(), freshbooksCompositeSource.getTokenKey(),
-                freshbooksCompositeSource.getTokenSecretKey());
+                freshbooksCompositeSource.getTokenSecretKey(), freshbooksCompositeSource);
     }
 }
