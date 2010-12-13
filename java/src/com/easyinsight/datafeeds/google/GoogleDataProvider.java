@@ -89,6 +89,7 @@ public class GoogleDataProvider {
             existsStmt.close();            
             URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(token);
+            System.out.println("retrieving spreadsheets...");
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
                 try {
@@ -113,11 +114,7 @@ public class GoogleDataProvider {
                     LogClass.debug("Skipping over spreadsheet");
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ServiceException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
