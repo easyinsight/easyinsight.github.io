@@ -30,6 +30,7 @@ public class PerspectiveInfo {
     public static const ANALYSIS_ITEM_EDITOR:int = 27;
     public static const DASHBOARD_EDITOR:int = 28;
     public static const DASHBOARD_VIEW:int = 29;
+    public static const SCHEDULING:int = 30;
 
     public var perspectiveType:int;
     public var properties:Object = null;

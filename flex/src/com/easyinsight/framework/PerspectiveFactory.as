@@ -15,6 +15,7 @@ import com.easyinsight.listing.SimpleIntro;
 import com.easyinsight.report.MultiReportView;
 import com.easyinsight.report.MultiScreenView;
 import com.easyinsight.report.ReportView;
+import com.easyinsight.schedule.ScheduleManagement;
 import com.easyinsight.scorecard.LoggedInHome;
 import com.easyinsight.solutions.PostInstallPage;
 import com.easyinsight.solutions.RevisedSolutionSummary;
@@ -106,6 +107,9 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.DASHBOARD_VIEW:
                 perspective = new DirectUIComponent(new DashboardView());
+                break;
+            case PerspectiveInfo.SCHEDULING:
+                perspective = new DirectUIComponent(new ScheduleManagement());
                 break;
         }
         return perspective;
