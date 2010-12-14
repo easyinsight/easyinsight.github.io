@@ -89,9 +89,9 @@ public class GoogleDataProvider {
             existsStmt.close();            
             URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(token);
-            System.out.println("retrieving spreadsheets...");
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
+                System.out.println("checking " + entry.getTitle().getPlainText());
                 try {
                     List<WorksheetEntry> worksheetEntries = entry.getWorksheets();
                     List<Worksheet> worksheetList = new ArrayList<Worksheet>();
@@ -111,12 +111,12 @@ public class GoogleDataProvider {
                     spreadsheet.setChildren(worksheetList);
                     worksheets.add(spreadsheet);
                 } catch (Exception e) {
+                    LogClass.error(e);
                     LogClass.debug("Skipping over spreadsheet");
                 }
             }
         } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
+            throw new RuntimeException(e);        
         } finally {
             Database.closeConnection(conn);
         }
