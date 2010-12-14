@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.etl.LookupTableDescriptor;
@@ -276,8 +277,15 @@ public class FeedService {
             getGoalTreeStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet goalTreeRS = getGoalTreeStmt.executeQuery();
             while (goalTreeRS.next()) {
-                // TODO: Add urlKey
                 descriptorList.add(new GoalTreeDescriptor(goalTreeRS.getLong(1), goalTreeRS.getString(2), goalTreeRS.getInt(3), goalTreeRS.getString(4), null));
+            }
+            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, dashboard.DASHBOARD_ID, DASHBOARD.URL_KEY FROM DASHBOARD, user_to_dashboard where " +
+                    "dashboard.dashboard_id = user_to_dashboard.dashboard_id and dashboard.temporary_dashboard = ? and user_to_dashboard.user_id = ?");
+            dashboardStmt.setBoolean(1, false);
+            dashboardStmt.setLong(2, SecurityUtil.getUserID());
+            ResultSet dashboardRS = dashboardStmt.executeQuery();
+            while (dashboardRS.next()) {
+                descriptorList.add(new DashboardDescriptor(dashboardRS.getString(1), dashboardRS.getLong(2), dashboardRS.getString(3)));
             }
             Map<String, Integer> countMap = new HashMap<String, Integer>();
             Set<String> dupeNames = new HashSet<String>();

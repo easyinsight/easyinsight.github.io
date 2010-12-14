@@ -106,7 +106,7 @@ public class FeedStorage {
         savePolicy(conn, feedID, feedDefinition.getUploadPolicy());
         feedDefinition.setDataFeedID(feedID);
         saveFields(feedID, conn, feedDefinition.getFields());
-        saveFolders(feedID, conn, feedDefinition.getFolders());
+        saveFolders(feedID, conn, feedDefinition.getFolders(), feedDefinition.getFields());
         saveTags(feedID, conn, feedDefinition.getTags());
         feedDefinition.exchangeTokens((EIConnection) conn);
         feedDefinition.customStorage(conn);
@@ -132,17 +132,52 @@ public class FeedStorage {
         }
     }
 
-    private void saveFolders(long feedID, Connection conn, List<FeedFolder> folders) throws SQLException {
+    private void saveFolders(long feedID, Connection conn, List<FeedFolder> folders, List<AnalysisItem> fields) throws SQLException {
+        Set<Long> ids = new HashSet<Long>();
+        for (AnalysisItem field : fields) {
+            ids.add(field.getAnalysisItemID());
+        }
+        validateFolders(folders, ids);
         PreparedStatement wipeStmt = conn.prepareStatement("DELETE FROM FOLDER WHERE DATA_SOURCE_ID = ?");
         wipeStmt.setLong(1, feedID);
         wipeStmt.executeUpdate();
         wipeStmt.close();
         for (FeedFolder folder : folders) {
-            saveFolder(folder, feedID, conn);
+            saveFolder(folder, feedID, conn, ids);
         }
     }
 
-    private long saveFolder(FeedFolder folder, long feedID, Connection conn) throws SQLException {
+    private void validateFolders(List<FeedFolder> folders, Set<Long> ids) {
+        Iterator<FeedFolder> iter = folders.iterator();
+        while (iter.hasNext()) {
+            FeedFolder folder = iter.next();
+            boolean valid = validateFolder(folder, ids);
+            if (!valid) {
+                iter.remove();
+            }
+        }
+    }
+
+    private boolean validateFolder(FeedFolder folder, Set<Long> ids) {
+        boolean atLeastOneItem = false;
+        Iterator<FeedFolder> iter = folder.getChildFolders().iterator();
+        while (iter.hasNext()) {
+            FeedFolder childFolder = iter.next();
+            boolean childValid = validateFolder(childFolder, ids);
+            atLeastOneItem = atLeastOneItem || childValid;
+            if (!childValid) {
+                iter.remove();
+            }
+        }
+        for (AnalysisItem analysisItem : folder.getChildItems()) {
+            if (ids.contains(analysisItem.getAnalysisItemID())) {
+                atLeastOneItem = true;
+            }
+        }
+        return atLeastOneItem;
+    }
+
+    private long saveFolder(FeedFolder folder, long feedID, Connection conn, Set<Long> ids) throws SQLException {
         PreparedStatement insertFolderStmt = conn.prepareStatement("INSERT INTO FOLDER (FOLDER_NAME, DATA_SOURCE_ID) VALUES (?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         insertFolderStmt.setString(1, folder.getName());
@@ -150,14 +185,14 @@ public class FeedStorage {
         insertFolderStmt.execute();
         folder.setFolderID(Database.instance().getAutoGenKey(insertFolderStmt));
         insertFolderStmt.close();
-        saveFields(conn, folder);
+        saveFields(conn, folder, ids);
         PreparedStatement insertChildFolderStmt = conn.prepareStatement("INSERT INTO folder_to_folder (parent_folder_id, child_folder_id) values (?, ?)");
         PreparedStatement clearFoldersStmt = conn.prepareStatement("DELETE FROM folder_to_folder WHERE parent_folder_id = ?");
         clearFoldersStmt.setLong(1, folder.getFolderID());
         clearFoldersStmt.executeUpdate();
         clearFoldersStmt.close();
         for (FeedFolder childFolder : folder.getChildFolders()) {
-            saveFolder(childFolder, feedID, conn);
+            saveFolder(childFolder, feedID, conn, ids);
             insertChildFolderStmt.setLong(1, folder.getFolderID());
             insertChildFolderStmt.setLong(2, childFolder.getFolderID());
             insertChildFolderStmt.execute();
@@ -166,20 +201,23 @@ public class FeedStorage {
         return folder.getFolderID();
     }
 
-    private void saveFields(Connection conn, FeedFolder folder) throws SQLException {
+    private void saveFields(Connection conn, FeedFolder folder, Set<Long> fields) throws SQLException {
         PreparedStatement clearJoinsStmt = conn.prepareStatement("DELETE FROM folder_to_analysis_item WHERE folder_id = ?");
         clearJoinsStmt.setLong(1, folder.getFolderID());
         clearJoinsStmt.executeUpdate();
         clearJoinsStmt.close();
         PreparedStatement insertFieldStmt = conn.prepareStatement("INSERT INTO folder_to_analysis_item (folder_id, analysis_item_id) values (?, ?)");
         for (AnalysisItem analysisItem : folder.getChildItems()) {
-            insertFieldStmt.setLong(1, folder.getFolderID());
-            insertFieldStmt.setLong(2, analysisItem.getAnalysisItemID());
-            try {
-                insertFieldStmt.execute();
-            } catch (SQLException e) {
-                LogClass.error("Analysis item " + analysisItem.toDisplay() + " was not yet saved in folder " + folder.getName());
-                throw e;
+            boolean okay = fields.contains(analysisItem.getAnalysisItemID());
+            if (okay) {
+                insertFieldStmt.setLong(1, folder.getFolderID());
+                insertFieldStmt.setLong(2, analysisItem.getAnalysisItemID());
+                try {
+                    insertFieldStmt.execute();
+                } catch (SQLException e) {
+                    LogClass.error("Analysis item " + analysisItem.toDisplay() + " was not yet saved in folder " + folder.getName());
+                    throw e;
+                }
             }
         }
         insertFieldStmt.close();
@@ -545,9 +583,12 @@ public class FeedStorage {
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws Exception {
         try {
-            if (feedCache != null)
+            if (feedCache != null) {
                 feedCache.remove(feedDefinition.getDataFeedID());
-            LogClass.debug("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
+                FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
+                LogClass.debug("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
+            }
+
         } catch (CacheException e) {
             LogClass.error(e);
         }
@@ -587,7 +628,7 @@ public class FeedStorage {
         updateDataFeedStmt.close();
         savePolicy(conn, feedDefinition.getDataFeedID(), feedDefinition.getUploadPolicy());
         saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
-        saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders());
+        saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders(), feedDefinition.getFields());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
         feedDefinition.exchangeTokens((EIConnection) conn);
         feedDefinition.customStorage(conn);

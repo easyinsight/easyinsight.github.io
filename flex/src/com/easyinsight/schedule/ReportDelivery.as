@@ -18,7 +18,19 @@ public class ReportDelivery extends ScheduledDelivery {
 
 
     override public function get activityDisplay():String {
-        return "Email " + reportName;
+        var type:String;
+        switch (reportFormat) {
+            case 1:
+                type = " as Excel";
+                break;
+            case 2:
+                type = " as PNG";
+                break;
+            case 3:
+                type = " as PDF";
+                break;
+        }
+        return "Email " + reportName + type;
     }
 }
 }

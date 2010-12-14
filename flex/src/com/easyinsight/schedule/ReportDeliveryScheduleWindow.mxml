@@ -213,6 +213,9 @@
 		<mx:method name="getUserStubs" result="gotUserStubs()"/>
 	</mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+
+    </mx:VBox>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:HBox>
             <mx:VBox>
                 <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" id="form">

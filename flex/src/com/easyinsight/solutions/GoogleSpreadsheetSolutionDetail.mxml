@@ -3,47 +3,18 @@
                                   xmlns:solutions="com.easyinsight.solutions.*">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
-        import com.easyinsight.framework.AuthorizationRequirement;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.google.AuthSubNavWindow;
+        import com.easyinsight.google.GoogleAuthWindow;
+        import com.easyinsight.google.GoogleSpreadsheetEvent;
+        import com.easyinsight.google.GoogleSpreadsheetResponse;
         import com.easyinsight.google.GoogleWindow;
-        import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
-        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.PopUpUtil;
+
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.managers.PopUpManager;
 
-        [Bindable]
-        private var startButtonText:String = "Get Started Now!";
-
-        private var authRequirement:AuthorizationRequirement;
-
-        override protected function customInitialState():void {
-            if (newAuth) {
-                startButtonText = "Install the Connection";
-            } else {
-                solutionService2.determineAuthorizationRequirements.send(DataFeedDescriptor.GOOGLE, solution.solutionID);
-            }
-        }
-
-        private function authorize():void {
-            var window:AuthSubNavWindow = new AuthSubNavWindow();
-            window.googleURL = authRequirement.url;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function install():void {
-            if (authRequirement != null) {
-                authorize();
-            } else {
-                var uploadExternal:GoogleWindow = GoogleWindow(PopUpManager.createPopUp(this, GoogleWindow, true));
-                uploadExternal.addEventListener(AnalyzeEvent.ANALYZE, passThrough);
-                uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-                PopUpUtil.centerPopUp(uploadExternal);
-            }
-        }
 
         private function passThrough(event:Event):void {
             //Alert.show("got event at solution level");
@@ -51,15 +22,42 @@
         }
 
         private function gotRequirements():void {
-            authRequirement = solutionService2.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
+            var response:GoogleSpreadsheetResponse = googleService.getAvailableGoogleSpreadsheets.lastResult as GoogleSpreadsheetResponse;
+            if (response.validOAuth) {
+                var uploadExternal:GoogleWindow = new GoogleWindow();
+                uploadExternal.googleSpreadsheets = response.spreadsheets;
+                uploadExternal.addEventListener(AnalyzeEvent.ANALYZE, passThrough);
+                uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+                PopUpManager.addPopUp(uploadExternal, this, true);
+                PopUpUtil.centerPopUp(uploadExternal);
+            } else {
+                var window:GoogleAuthWindow = new GoogleAuthWindow();
+                window.addEventListener(GoogleSpreadsheetEvent.GOOGLE_SPREADSHEET, onSpreadsheet, false, 0, true);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
+
+        private function initialSetup():void {
+            ProgressAlert.alert(this, "Retrieving spreadsheets...", null, googleService.getAvailableGoogleSpreadsheets);
+            googleService.getAvailableGoogleSpreadsheets.send();
+        }
+
+        private function onSpreadsheet(event:GoogleSpreadsheetEvent):void {
+            var uploadExternal:GoogleWindow = new GoogleWindow();
+            uploadExternal.googleSpreadsheets = event.spreadsheets;
+            uploadExternal.addEventListener(AnalyzeEvent.ANALYZE, passThrough, false, 0, true);
+            uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete, false, 0, true);
+            PopUpManager.addPopUp(uploadExternal, this, true);
+            PopUpUtil.centerPopUp(uploadExternal);
         }
 
         private function uploadConfigComplete(event:UploadConfigEvent):void {
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID)));
         }
 ]]></mx:Script>
-    <mx:RemoteObject destination="solutionService" id="solutionService2">
-        <mx:method name="determineAuthorizationRequirements" result="gotRequirements()"/>
+    <mx:RemoteObject destination="google" id="googleService">
+        <mx:method name="getAvailableGoogleSpreadsheets" result="gotRequirements()"/>
     </mx:RemoteObject>
     <mx:HBox width="1100" height="100%" horizontalGap="0">
         <solutions:HeaderShadeArea width="50" height="100%" leftColor="#000000" rightColor="#FFFFFF"/>
@@ -75,7 +73,7 @@
             </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
-                <mx:Button label="Connect to Google Spreadsheets" fontSize="20" click="install()" styleName="grayButton"
+                <mx:Button label="Connect to Google Spreadsheets" fontSize="20" click="initialSetup()" styleName="grayButton"
                            id="installButton"/>
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>

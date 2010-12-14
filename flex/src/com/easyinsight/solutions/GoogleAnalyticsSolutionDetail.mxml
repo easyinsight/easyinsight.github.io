@@ -34,29 +34,6 @@
             currentState = "AccountBelowRequired";
         }
 
-        override protected function customInitialState():void {
-            if (newAuth) {
-                startButtonText = "Install the Connection";
-            } else {
-                solutionService2.determineAuthorizationRequirements.send(DataFeedDescriptor.GOOGLE_ANALYTICS, solution.solutionID);
-            }
-        }
-
-        private function authorize():void {
-            var window:AuthSubNavWindow = new AuthSubNavWindow();
-            window.googleURL = authRequirement.url;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function install():void {
-            if (authRequirement != null) {
-                authorize();
-            } else {
-                installSolution();                
-            }
-        }
-
         private function gotRequirements():void {
             authRequirement = solutionService2.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
         }
@@ -83,7 +60,7 @@
             </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
-                <mx:Button label="Connect to Google Analytics" fontSize="20" click="install()" styleName="grayButton"
+                <mx:Button label="Connect to Google Analytics" fontSize="20" click="installSolution()" styleName="grayButton"
                            id="installButton"/>
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>

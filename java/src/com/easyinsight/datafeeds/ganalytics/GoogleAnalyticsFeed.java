@@ -9,8 +9,11 @@ import com.easyinsight.users.TokenStorage;
 import com.easyinsight.users.Utility;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.config.ConfigLoader;
 import com.google.gdata.client.analytics.AnalyticsService;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
+import com.google.gdata.client.authn.oauth.OAuthSigner;
 import com.google.gdata.data.analytics.DataFeed;
 import com.google.gdata.data.analytics.DataEntry;
 import com.google.gdata.data.analytics.AccountEntry;
@@ -35,8 +38,9 @@ public class GoogleAnalyticsFeed extends Feed {
     private static DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
     private static DateFormat outboundDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-
-    public GoogleAnalyticsFeed() {
+    public GoogleAnalyticsFeed(String oauthToken, String oauthTokenSecret) {
+        this.oauthToken = oauthToken;
+        this.oauthTokenSecret = oauthTokenSecret;
     }
 
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
@@ -102,6 +106,9 @@ public class GoogleAnalyticsFeed extends Feed {
 
     private String token;
 
+    private String oauthToken;
+    private String oauthTokenSecret;
+
     private String getToken() throws ReportException {
         if (token == null) {
             Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_ANALYTICS_TOKEN, getFeedID(), true);
@@ -113,18 +120,22 @@ public class GoogleAnalyticsFeed extends Feed {
         return token;
     }
 
-    private AnalyticsService getAnalyticsService() throws AuthenticationException, ReportException {
+    private AnalyticsService getAnalyticsService() throws AuthenticationException, ReportException, OAuthException {
         if (as == null) {
             as = new AnalyticsService("easyinsight_eianalytics_v1.0");
-            try {
+            if (oauthToken == null) {
                 String token = getToken();
                 as.setAuthSubToken(token, Utility.getPrivateKey());
-            } catch (ReportException e) {
-                if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
-                    as.setUserCredentials(ConfigLoader.instance().getGoogleUserName(), ConfigLoader.instance().getGooglePassword());    
-                } else {
-                    throw e;
-                }
+            } else {
+                GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+                as.useSsl();
+                oauthParameters.setOAuthConsumerKey("www.easy-insight.com");
+                oauthParameters.setOAuthConsumerSecret("OG0zlkZFPIe7JdHfLB8qXXYv");
+                oauthParameters.setOAuthToken(oauthToken);
+                oauthParameters.setOAuthTokenSecret(oauthTokenSecret);
+                oauthParameters.setScope("https://www.google.com/analytics/feeds/");
+                OAuthSigner signer = new OAuthHmacSha1Signer();
+                as.setOAuthCredentials(oauthParameters, signer);
             }
         }
         return as;

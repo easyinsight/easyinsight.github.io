@@ -50,6 +50,19 @@
         protected override function createChildren():void {
             super.createChildren();
             BindingUtils.bindProperty(this, "headerBarBackgroundColor", ApplicationSkin.instance(), "headerBarBackgroundColor");
+            BindingUtils.bindProperty(this, "headerBarLogo", ApplicationSkin.instance(), "headerBarLogo");
+        }
+
+        private var _headerBarLogo:Object;
+
+        public function set headerBarLogo(value:Object):void {
+            _headerBarLogo = value;
+            if (value is Bitmap) {
+                var bitmap:Bitmap = ApplicationSkin.instance().headerBarLogo as Bitmap;
+                logoImage.source = new Bitmap(bitmap.bitmapData);
+            } else {
+                logoImage.source = logo;
+            }
         }
 
         [Bindable]
@@ -67,6 +80,10 @@
         [Bindable]
         [Embed(source="../../../../assets/headericons/shopping_bag.png")]
         private var catalogIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/calendar.png")]
+        private var scheduleIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/headericons/users2.png")]
@@ -159,7 +176,7 @@
         }
 		]]>
     </mx:Script>
-    <mx:Image source="{logo}"/>
+    <mx:Image source="{logo}" id="logoImage" maxWidth="180" maxHeight="50"/>
     <mx:Spacer width="10"/>
     <listing:ListingOption perspectiveClass="{PerspectiveInfo.HOME_PAGE}" displayName="Home" listingChange="onListingChange(event)" width="85">
         <mx:Image source="{homeIcon}" id="homeImage"/>
@@ -183,6 +200,11 @@
             id="exchangeOption" width="85">
         <mx:Image source="{catalogIcon}" id="catalogImage"/>
         <mx:Label text="Exchange" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspectiveClass="{PerspectiveInfo.SCHEDULING}" displayName="Scheduling" listingChange="onListingChange(event)"
+            id="scheduleOption" width="85">
+        <mx:Image source="{scheduleIcon}" id="scheduleImage"/>
+        <mx:Label text="Scheduling" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspectiveClass="{PerspectiveInfo.GROUPS}" displayName="Groups" listingChange="onListingChange(event)"
             id="groupsOption" width="85">

@@ -15,11 +15,11 @@ import org.jgrapht.graph.SimpleGraph;
 * Time: 5:22:14 PM
 */
 public abstract class CompositeFeedNodeShallowVisitor {
-    public void visit(CompositeFeedDefinition compositeFeed) throws SQLException {
+    public void visit(CompositeFeedDefinition compositeFeed) throws SQLException, CloneNotSupportedException {
         for (CompositeFeedNode compositeFeedNode : compositeFeed.getCompositeFeedNodes()) {
             accept(compositeFeedNode);
         }
     }
 
-    protected abstract void accept(CompositeFeedNode compositeFeedNode) throws SQLException;
+    protected abstract void accept(CompositeFeedNode compositeFeedNode) throws SQLException, CloneNotSupportedException;
 }

@@ -5,6 +5,8 @@ package com.easyinsight.administration.feed
 	public class GoogleFeedDefinition extends ServerDataSourceDefinition
 	{
 		public var worksheetURL:String;
+        public var tokenKey:String;
+        public var tokenSecret:String;
 		
 		public function GoogleFeedDefinition()
 		{

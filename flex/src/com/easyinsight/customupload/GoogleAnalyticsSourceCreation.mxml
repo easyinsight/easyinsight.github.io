@@ -8,9 +8,9 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.administration.feed.GoogleAnalyticsDataSource;
         import com.easyinsight.framework.Credentials;
+        import com.easyinsight.util.ProgressAlert;
 
-        [Bindable]
-        private var jiraURL:String;
+        import mx.controls.Alert;
 
         public function set dataSourceDefinition(definition:FeedDefinitionData):void {
             var jiraDef:GoogleAnalyticsDataSource = definition as GoogleAnalyticsDataSource;
@@ -20,33 +20,44 @@
             return new GoogleAnalyticsDataSource();
         }
 
-        public function get credentials():Credentials {
-            var credentials:Credentials = new Credentials();
-            credentials.userName = userNameInput.text;
-            credentials.password = passwordInput.text;
-            return credentials;
-        }
-
-        public function set credentials(c:Credentials):void {
-        }
-
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var source:GoogleAnalyticsDataSource = feedDefinition as GoogleAnalyticsDataSource;
+            source.pin = pinInput.text;
         }
 
-        public function get savesCredentials():Boolean {
-            return false;
+        private function install():void {
+            ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
+            tokenService.getOAuthURL.send(13, 0);
         }
+
+        private function gotURL():void {
+            var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
+            if (response.successful) {
+                stackIndex = 1;
+                var requestToken:String = response.requestToken;
+                navigateToURL(new URLRequest(requestToken));
+            } else {
+                Alert.show("We encountered a problem in connecting to Google Analytics. Please try again later or contact support@easy-insight.com if the issue continues.");                
+            }
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
 
         public function validate():Boolean {
             return true;
         }]]></mx:Script>
-    <mx:Form>
-		<mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
-		</mx:FormItem>
-		<mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
-		</mx:FormItem>
-	</mx:Form>
+    <mx:RemoteObject destination="tokenService" id="tokenService">
+        <mx:method name="getOAuthURL" result="gotURL()"/>
+    </mx:RemoteObject>
+    <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your Google account. Upon granting access, you will receive a verifier token. Copy that value, return to this tab or window, and paste that value below." borderStyle="none"
+            backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
+    <mx:Button label="Authorize Easy Insight Access" click="install()"/>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+        <mx:Box/>
+        <mx:Box>
+            <mx:Label text="Verifier from Google:"/>
+            <mx:TextInput id="pinInput" fontWeight="normal" fontFamily="Lucida Grande" width="500"/>
+        </mx:Box>
+    </mx:ViewStack>
 </mx:VBox>

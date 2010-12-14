@@ -1,24 +1,22 @@
 package com.easyinsight.datafeeds.google;
 
-import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.users.Token;
-import com.easyinsight.users.TokenStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.database.Database;
-import com.google.gdata.util.AuthenticationException;
-import com.google.gdata.util.ServiceException;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
+import flex.messaging.FlexContext;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.OAuthProvider;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.net.URL;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.ResultSet;
 
 /**
@@ -40,35 +38,55 @@ public class GoogleDataProvider {
         return instance;
     }
 
-    private String getToken() {
-        Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
-        if (tokenObject == null) {
-            if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
-                return null;
-            } else {
-                throw new RuntimeException("Token access revoked?");
-            }
+    public GoogleSpreadsheetResponse registerToken(String verifier) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
+            OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
+
+            provider.retrieveAccessToken(consumer, verifier.trim());
+            String tokenKey = consumer.getToken();
+            String tokenSecret = consumer.getTokenSecret();
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO GOOGLE_DOCS_TOKEN (TOKEN_KEY, TOKEN_SECRET, USER_ID) VALUES (?, ?, ?)");
+            insertStmt.setString(1, tokenKey);
+            insertStmt.setString(2, tokenSecret);
+            insertStmt.setLong(3, SecurityUtil.getUserID());
+            insertStmt.execute();
+            return getAvailableGoogleSpreadsheets(conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
-        return tokenObject.getTokenValue();
     }
 
-    public List<Spreadsheet> getAvailableGoogleSpreadsheets() {
-        String token = getToken();
-        List<Spreadsheet> worksheets = cachedSpreadsheetResults.get(token);
-        if (worksheets == null) {
-            try {
-                worksheets = getSpreadsheets(token);
-                cachedSpreadsheetResults.put(token, worksheets);
-                return worksheets;
-            } catch (Exception e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            }
+    public GoogleSpreadsheetResponse getAvailableGoogleSpreadsheets() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return getAvailableGoogleSpreadsheets(conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
-        return worksheets;
     }
 
-    private List<Spreadsheet> getSpreadsheets(String token) throws AuthenticationException {
+    private GoogleSpreadsheetResponse getAvailableGoogleSpreadsheets(EIConnection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOOGLE_DOCS_TOKEN.token_key, GOOGLE_DOCS_TOKEN.token_secret FROM " +
+                "GOOGLE_DOCS_TOKEN WHERE GOOGLE_DOCS_TOKEN.user_id = ?");
+        queryStmt.setLong(1, SecurityUtil.getUserID());
+        ResultSet rs = queryStmt.executeQuery();
+        if (rs.next()) {
+            List<Spreadsheet> spreadsheets = getSpreadsheets(rs.getString(1), rs.getString(2));
+            return new GoogleSpreadsheetResponse(spreadsheets, true);
+        } else {
+            return new GoogleSpreadsheetResponse(false);
+        }
+    }
+
+    private List<Spreadsheet> getSpreadsheets(String tokenKey, String tokenSecret) {
         List<Spreadsheet> worksheets = new ArrayList<Spreadsheet>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -87,8 +105,8 @@ public class GoogleDataProvider {
                 worksheetToFeedMap.put(worksheetURL, feedDescriptor);
             }
             existsStmt.close();            
-            URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(token);
+            URL feedUrl = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full");
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
                 System.out.println("checking " + entry.getTitle().getPlainText());

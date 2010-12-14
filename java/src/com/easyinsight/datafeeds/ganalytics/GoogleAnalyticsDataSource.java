@@ -4,16 +4,22 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.analysis.*;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import flex.messaging.FlexContext;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.OAuthProvider;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -185,8 +191,12 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return compiledMap.get(dimension);
     }
 
-    public boolean requiresConfiguration() {
-        return false;
+    @Override
+    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
+        GoogleAnalyticsDataSource googleAnalyticsDataSource = (GoogleAnalyticsDataSource) super.clone(conn);
+        googleAnalyticsDataSource.setTokenKey(null);
+        googleAnalyticsDataSource.setTokenSecret(null);
+        return googleAnalyticsDataSource;
     }
 
     public int getRequiredAccountTier() {
@@ -195,6 +205,11 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
 
     public int getDataSourceType() {
         return DataSourceInfo.LIVE;
+    }
+
+    @Override
+    public String validateCredentials() {
+        return null;
     }
 
     @Override
@@ -208,11 +223,27 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
-        return new GoogleAnalyticsFeed();
+        return new GoogleAnalyticsFeed(tokenKey, tokenSecret);
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
         return new DataSet();
+    }
+
+    @Override
+    public void exchangeTokens(EIConnection conn) throws Exception {
+        try {
+            if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecret == null) {
+                OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
+                OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
+                provider.retrieveAccessToken(consumer, pin.trim());
+                tokenKey = consumer.getToken();
+                tokenSecret = consumer.getTokenSecret();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     @NotNull
@@ -356,10 +387,53 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return analysisItems;
     }
 
+    private String pin;
+    private String tokenKey;
+    private String tokenSecret;
+
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
+    public String getTokenKey() {
+        return tokenKey;
+    }
+
+    public void setTokenKey(String tokenKey) {
+        this.tokenKey = tokenKey;
+    }
+
+    public String getTokenSecret() {
+        return tokenSecret;
+    }
+
+    public void setTokenSecret(String tokenSecret) {
+        this.tokenSecret = tokenSecret;
+    }
+
     public void customStorage(Connection conn) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM GOOGLE_ANALYTICS WHERE DATA_SOURCE_ID = ?");
+        clearStmt.setLong(1, getDataFeedID());
+        clearStmt.executeUpdate();
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO GOOGLE_ANALYTICS (DATA_SOURCE_ID, TOKEN_KEY, TOKEN_SECRET) VALUES (?, ?, ?)");
+        insertStmt.setLong(1, getDataFeedID());
+        insertStmt.setString(2, tokenKey);
+        insertStmt.setString(3, tokenSecret);
+        insertStmt.execute();
     }
 
     public void customLoad(Connection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT TOKEN_KEY, TOKEN_SECRET FROM GOOGLE_ANALYTICS WHERE DATA_SOURCE_ID = ?");
+        queryStmt.setLong(1, getDataFeedID());
+        ResultSet rs = queryStmt.executeQuery();
+        if (rs.next()) {
+            tokenKey = rs.getString(1);
+            tokenSecret = rs.getString(2);
+        }
     }
 
     @Override

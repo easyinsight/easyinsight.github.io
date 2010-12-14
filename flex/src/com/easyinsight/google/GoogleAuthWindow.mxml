@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.customupload.OAuthResponse;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+
+        private function gotURL():void {
+            var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
+            stackIndex = 1;
+            var requestToken:String = response.requestToken;
+            navigateToURL(new URLRequest(requestToken));
+        }
+
+        private function authorize():void {
+            ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
+            tokenService.getOAuthURL.send(1, 0);
+        }
+
+        private function registeredToken():void {
+            var response:GoogleSpreadsheetResponse = googleService.registerToken.lastResult as GoogleSpreadsheetResponse;
+            dispatchEvent(new GoogleSpreadsheetEvent(response.spreadsheets));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function registerToken():void {
+            ProgressAlert.alert(this,"Registering token and retrieving spreadsheets...", null, googleService.registerToken);
+            googleService.registerToken.send(pinInput.text);
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="tokenService" id="tokenService">
+        <mx:method name="getOAuthURL" result="gotURL()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="google" id="googleService">
+        <mx:method name="registerToken" result="registeredToken()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your Google account. Upon granting access, you will receive a verifier value. Copy that value, return to this tab or window, and paste that value below." borderStyle="none"
+                backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
+        <mx:Button label="Authorize Easy Insight Access" click="authorize()"/>
+        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+            <mx:Box/>
+            <mx:VBox>
+                <mx:Label text="Verifier from Google:"/>
+                <mx:TextInput id="pinInput" fontWeight="normal" fontFamily="Lucida Grande" width="500"/>
+            </mx:VBox>
+        </mx:ViewStack>
+        <mx:HBox>
+            <mx:Button label="Apply" click="registerToken()" enabled="{stackIndex == 1}"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+
+    </mx:VBox>
+</util:EISlimWindow>

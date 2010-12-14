@@ -4,15 +4,13 @@ import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
-import com.easyinsight.users.TokenStorage;
-import com.easyinsight.users.Token;
-import com.easyinsight.users.Utility;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.config.ConfigLoader;
+import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
+import com.google.gdata.client.authn.oauth.OAuthException;
+import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
+import com.google.gdata.client.authn.oauth.OAuthSigner;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
-import com.google.gdata.util.AuthenticationException;
 
 import java.util.Set;
 import java.util.Collection;
@@ -27,38 +25,28 @@ import java.net.URL;
 public class GoogleSpreadsheetFeed extends Feed {
 
     private String worksheetURL;
-    private String token;
+    private String tokenKey;
+    private String tokenSecret;
 
     private SpreadsheetService as;
 
-    public GoogleSpreadsheetFeed(String worksheetURL) {
+    public GoogleSpreadsheetFeed(String worksheetURL, String tokenKey, String tokenSecret) {
         this.worksheetURL = worksheetURL;
+        this.tokenKey = tokenKey;
+        this.tokenSecret = tokenSecret;
     }
 
-    private String getToken() throws ReportException {
-        if (token == null) {
-            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_DOCS_TOKEN, getFeedID(), true);
-            if (tokenObject == null) {
-                throw new ReportException(new DataSourceConnectivityReportFault("You need to reset your connection to Google Analytics.", getDataSource()));
-            }
-            token = tokenObject.getTokenValue();
-        }
-        return token;
-    }
-
-    private SpreadsheetService getService() throws AuthenticationException, ReportException {
+    private SpreadsheetService getService() throws OAuthException {
         if (as == null) {
             as = new SpreadsheetService("easyinsight_eidocs_v1.0");
-            try {
-                String token = getToken();
-                as.setAuthSubToken(token, Utility.getPrivateKey());
-            } catch (ReportException e) {
-                if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
-                    as.setUserCredentials(ConfigLoader.instance().getGoogleUserName(), ConfigLoader.instance().getGooglePassword());
-                } else {
-                    throw e;
-                }
-            }
+            GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+            oauthParameters.setOAuthConsumerKey("www.easy-insight.com");
+            oauthParameters.setOAuthConsumerSecret("OG0zlkZFPIe7JdHfLB8qXXYv");
+            oauthParameters.setOAuthToken(tokenKey);
+            oauthParameters.setOAuthTokenSecret(tokenSecret);
+            oauthParameters.setScope("https://docs.google.com/feeds/");
+            OAuthSigner signer = new OAuthHmacSha1Signer();
+            as.setOAuthCredentials(oauthParameters, signer);
         }
         return as;
     }
@@ -119,9 +107,5 @@ public class GoogleSpreadsheetFeed extends Feed {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        throw new UnsupportedOperationException();
     }
 }

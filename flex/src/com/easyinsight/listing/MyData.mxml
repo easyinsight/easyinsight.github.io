@@ -22,8 +22,7 @@
         import com.easyinsight.goals.GoalTreeDescriptor;
         import com.easyinsight.outboundnotifications.RefreshEventInfo;
         import com.easyinsight.preferences.UIConfiguration;
-        import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.schedule.ScheduleManagement;
+        import com.easyinsight.report.ReportAnalyzeSource;        
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -535,12 +534,6 @@
             dispatchEvent(event);
         }
 
-        private function toScheduling():void {
-            var window:ScheduleManagement = new ScheduleManagement();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
         private function createGoalTree():void {
             dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(0)));
         }
@@ -597,12 +590,10 @@
                        id="compositeFeedButton" icon="{joinIcon}" visible="{showComposite}" x="10" y="10"/>
             <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton"
                        icon="{tablesAddIcon}" visible="{showLookupTable}" x="58" y="10"/>
-            <mx:Button toolTip="Scheduling..." click="toScheduling()" id="schedulingButton" icon="{calendarIcon}"
-                       visible="{showLookupTable}" x="106" y="10"/>
             <mx:Button toolTip="Add KPI Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
-                       visible="{addGoalTreeAvailable}" x="154" y="10"/>
+                       visible="{addGoalTreeAvailable}" x="106" y="10"/>
             <mx:Button toolTip="Add Dashboard..." click="createDashboard()" icon="{dashboardIcon}"
-                       visible="{addDashboardAvailable}" x="202" y="10"/>
+                       visible="{addDashboardAvailable}" x="154" y="10"/>
             <mx:ProgressBar indeterminate="true" visible="{showLoading}" x="458" y="10"/>
             <mx:Label text="Need to add data?" fontSize="16" x="482" y="34" visible="{showConnections}"/>
             <mx:Button toolTip="Go to connections..." click="toConnections()" icon="{connectionsIcon}"

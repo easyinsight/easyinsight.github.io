@@ -82,7 +82,6 @@ public class ActivityControls extends UIComponent implements IListItemRenderer {
         var dataSources:ArrayCollection = exportService.getRefreshableDataSources.lastResult as ArrayCollection;
         var window:DataSourceScheduleWindow = new DataSourceScheduleWindow();
         window.activity = activity;
-        window.dataSources = dataSources;
         window.addEventListener(ScheduleActivityEvent.EDIT_ACTIVITY, passThrough, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);

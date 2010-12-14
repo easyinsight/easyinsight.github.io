@@ -4,6 +4,9 @@ import com.easyinsight.customupload.GoogleAnalyticsSourceCreation;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource")]
 public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition{
+
+    public var pin:String;
+
     public function GoogleAnalyticsDataSource() {
         super();
         this.feedName = "Google Analytics";

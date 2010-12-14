@@ -15,6 +15,8 @@ import com.google.gdata.data.spreadsheet.ListFeed;
 
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -44,20 +46,16 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
 
     private Map<Key, Set<String>> sampleMap;
 
-    private String getToken(Connection conn) {
-        Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN, conn);
-        if (tokenObject == null) {
-            if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
-                return null;
-            }
-            throw new RuntimeException("Token access revoked?");
-        }
-        return tokenObject.getTokenValue();
-    }
-
     @Override
     public List<AnalysisItem> guessFields(EIConnection conn) throws Exception {
-        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(getToken(conn));
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOOGLE_DOCS_TOKEN.token_key, GOOGLE_DOCS_TOKEN.token_secret FROM " +
+                "GOOGLE_DOCS_TOKEN WHERE GOOGLE_DOCS_TOKEN.user_id = ?");
+        queryStmt.setLong(1, SecurityUtil.getUserID());
+        ResultSet rs = queryStmt.executeQuery();
+        rs.next();
+        String tokenKey = rs.getString(1);
+        String tokenSecret = rs.getString(2);
+        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
         URL listFeedUrl = new URL(worksheetURL);
         ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
         DataTypeGuesser guesser = new DataTypeGuesser();
@@ -79,9 +77,18 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
 
     @Override
     public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn) throws Exception {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOOGLE_DOCS_TOKEN.token_key, GOOGLE_DOCS_TOKEN.token_secret FROM " +
+                "GOOGLE_DOCS_TOKEN WHERE GOOGLE_DOCS_TOKEN.user_id = ?");
+        queryStmt.setLong(1, SecurityUtil.getUserID());
+        ResultSet rs = queryStmt.executeQuery();
+        rs.next();
+        String tokenKey = rs.getString(1);
+        String tokenSecret = rs.getString(2);
         GoogleFeedDefinition googleFeedDefinition = new GoogleFeedDefinition();
         googleFeedDefinition.setFeedName(name);
         googleFeedDefinition.setWorksheetURL(worksheetURL);
+        googleFeedDefinition.setTokenKey(tokenKey);
+        googleFeedDefinition.setTokenSecret(tokenSecret);
         return googleFeedDefinition.create(conn, analysisItems);
     }
 

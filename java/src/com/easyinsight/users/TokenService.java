@@ -15,9 +15,11 @@ import oauth.signpost.OAuthProvider;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthProvider;
 import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.signature.HmacSha1MessageSigner;
 import oauth.signpost.signature.PlainTextMessageSigner;
 
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -73,6 +75,20 @@ public class TokenService {
                 provider = new DefaultOAuthProvider(
                         "https://oauth.constantcontact.com/ws/oauth/request_token", "https://oauth.constantcontact.com/ws/oauth/access_token",
                         "https://oauth.constantcontact.com/ws/oauth/confirm_access");
+            } else if (type == FeedType.GOOGLE.getType()) {
+                consumer = new DefaultOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
+                consumer.setMessageSigner(new HmacSha1MessageSigner());
+                String scope = "https://spreadsheets.google.com/feeds/";
+                provider = new DefaultOAuthProvider(
+                        "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
+                        "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
+            } else if (type == FeedType.GOOGLE_ANALYTICS.getType()) {
+                consumer = new DefaultOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
+                consumer.setMessageSigner(new HmacSha1MessageSigner());
+                String scope = "https://www.google.com/analytics/feeds/";
+                provider = new DefaultOAuthProvider(
+                        "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
+                        "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else {
                 throw new RuntimeException();
             }

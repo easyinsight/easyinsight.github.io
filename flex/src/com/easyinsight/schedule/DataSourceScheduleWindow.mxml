@@ -1,24 +1,25 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    xmlns:schedule="com.easyinsight.schedule.*"
-                    creationComplete="setup()" title="Data Source Refresh Scheduling">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:schedule="com.easyinsight.schedule.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.util.UserAudit;
 
-        import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
+        private var _dataSource:DataFeedDescriptor;
+
+        public function set dataSource(value:DataFeedDescriptor):void {
+            _dataSource = value;
+        }
+
         [Bindable]
-        public var dataSources:ArrayCollection;
+        private var refreshText:String;
 
         private var _activity:DataSourceRefreshActivity;
 
         [Bindable]
         private var dataSourceID:int;
-
-        private function setup():void {
-
-        }
 
         [Bindable(event="activityChanged")]
         public function get activity():ScheduledActivity {
@@ -35,7 +36,9 @@
             super.commitProperties();
             if (_activity != null) {
                 dataSourceID = _activity.dataSourceID;
-
+                refreshText = "Scheduled refresh of " + _activity.dataSourceName;
+            } else {
+                refreshText = "Scheduled refresh of " + _dataSource.name;
             }
         }
 
@@ -48,8 +51,10 @@
             }
 
             if (scheduleConfiguration.save()) {
-                DataSourceRefreshActivity(activity).dataSourceID = dataSourceComboBox.selectedItem.id;
-                DataSourceRefreshActivity(activity).dataSourceName = dataSourceComboBox.selectedItem.name;
+                if (_dataSource != null) {
+                    DataSourceRefreshActivity(activity).dataSourceID = _dataSource.id;
+                    DataSourceRefreshActivity(activity).dataSourceName = _dataSource.name;
+                }
                 var utcOffset:int = new Date().getTimezoneOffset();
                 exportService.addOrUpdateSchedule.send(_activity, utcOffset);
             }
@@ -71,18 +76,12 @@
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="addOrUpdateSchedule" result="saved()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="Data Source:" fontSize="12">
-                <util:SmartComboBox dataProvider="{dataSources}" selectedValue="{dataSourceID}"
-                                    selectedProperty="id"
-                                    id="dataSourceComboBox" labelField="name" fontSize="12"/>
-            </mx:FormItem>
-        </mx:Form>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" horizontalAlign="center">
+        <mx:Label text="{refreshText}" fontSize="16"/>
         <schedule:ScheduleConfiguration id="scheduleConfiguration" activity="{activity}"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>
             <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
-</util:EITitleWindow>
+</util:EISlimWindow>
