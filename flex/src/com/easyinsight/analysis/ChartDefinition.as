@@ -52,6 +52,7 @@ import mx.collections.ArrayCollection;
                         break;
                 }
                 limitsMetadata.number = limitNumber;
+                limitsMetadata.limitEnabled = true;
                 limitsMetadata.top = true;
                 this.limitsMetadata = limitsMetadata;
             }
