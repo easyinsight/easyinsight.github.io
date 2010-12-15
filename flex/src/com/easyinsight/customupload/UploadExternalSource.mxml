@@ -3,32 +3,7 @@
                 creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*"
                 title="Connect to External Data Source" width="800" height="600">
     <util:states>
-        <mx:State name="Free">
-            <mx:AddChild relativeTo="{coreContent}">
-                <mx:VBox height="100%" horizontalAlign="center" width="200">
-                    <mx:Label text="Available Data Sources" fontFamily="Tahoma" fontSize="14" fontWeight="bold"/>
-                    <mx:List height="100%" width="100%" itemClick="onItemClick(event)">
-                        <mx:dataProvider>
-                            <mx:ArrayCollection>
-                                <mx:Array>
-                                    <mx:String>Google Spreadsheet</mx:String>
-                                </mx:Array>
-                            </mx:ArrayCollection>
-                        </mx:dataProvider>
-                    </mx:List>
-                </mx:VBox>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{coreContent}">
-                <mx:VBox width="100%" height="100%">
-                    <mx:ViewStack id="freeStack" width="100%" height="100%">
-                        <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"
-                                straightToConnect="{_straightToConnect}"/>
-                    </mx:ViewStack>
-                </mx:VBox>
-            </mx:AddChild>
-            <mx:SetProperty target="{this}" name="viewStack" value="{freeStack}"/>
-        </mx:State>
+
         <mx:State name="Administration">
             <mx:AddChild relativeTo="{coreContent}">
                 <mx:VBox height="100%" horizontalAlign="center" width="200">
@@ -37,7 +12,6 @@
                         <mx:dataProvider>
                             <mx:ArrayCollection>
                                 <mx:Array>
-                                    <mx:String>Google Spreadsheet</mx:String>
                                     <mx:String>Google Analytics</mx:String>
                                     <mx:String>BaseCamp</mx:String>                                    
                                     <mx:String>Salesforce</mx:String>
@@ -63,9 +37,6 @@
             <mx:AddChild relativeTo="{coreContent}">
                 <mx:VBox width="100%" height="100%">
                     <mx:ViewStack id="adminStack" width="100%" height="100%">
-                        <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"
-                                                           straightToConnect="{_straightToConnect}"/>
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.GoogleAnalyticsSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
