@@ -106,7 +106,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     @Override
     public void exchangeTokens(EIConnection conn) throws Exception {
         try {
-            if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecretKey == null) {
+            if (pin != null && !"".equals(pin)) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
                 OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
                 provider.retrieveAccessToken(consumer, pin);
