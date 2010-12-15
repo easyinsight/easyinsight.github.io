@@ -134,7 +134,7 @@
         }
 
         private function created():void {
-            uploadService.refreshData.send(dataSourceDefinition.dataFeedID, true);
+            uploadService.refreshData.send(dataSourceDefinition.dataFeedID);
         }
 
         private function refreshed():void {

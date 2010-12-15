@@ -11,5 +11,4 @@ class GridData {
     Value[][] grid;
     String[] headerColumns;
     int rowCount;
-    int orientation;
 }

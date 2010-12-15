@@ -148,7 +148,7 @@
 
         private function created():void {
             var string:String = feedService.updateFeedDefinition.lastResult as String;
-            if (string == null) uploadService.refreshData.send(dataSourceDefinition.dataFeedID, true);
+            if (string == null) uploadService.refreshData.send(dataSourceDefinition.dataFeedID);
             else {
                 Alert.show(string);
                 ready = true;

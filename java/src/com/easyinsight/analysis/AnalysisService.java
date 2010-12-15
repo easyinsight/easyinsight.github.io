@@ -14,6 +14,9 @@ import com.easyinsight.cache.Cache;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.Feed;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,6 +37,28 @@ import org.apache.jcs.access.exception.CacheException;
 public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
+
+    public List<String> testFormat(String format, String value1, String value2, String value3) {
+        try {
+            DateFormat dateFormat = new SimpleDateFormat(format);
+            if (value1 != null) value1 = transform(dateFormat, value1);
+            if (value2 != null) value2 = transform(dateFormat, value2);
+            if (value3 != null) value3 = transform(dateFormat, value3);
+            return Arrays.asList(value1, value2, value3);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String transform(DateFormat dateFormat, String value) {
+        try {
+            Date date = dateFormat.parse(value);
+            return new SimpleDateFormat().format(date);
+        } catch (ParseException e) {
+            return "";
+        }
+    }
 
     public AnalysisItem cloneItem(AnalysisItem analysisItem) {
         try {

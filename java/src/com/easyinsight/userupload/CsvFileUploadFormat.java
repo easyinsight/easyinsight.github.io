@@ -1,8 +1,13 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.core.*;
 import com.easyinsight.dataset.ColumnSegment;
 import com.csvreader.CsvReader;
+import com.ibm.icu.text.CharsetDetector;
+import com.ibm.icu.text.CharsetMatch;
 
 import java.util.*;
 import java.sql.Connection;
@@ -19,9 +24,9 @@ import java.nio.charset.Charset;
  */
 public class CsvFileUploadFormat extends UploadFormat {
 
-    private String createName(String key) {
-        if (key == null) {
-            return "";
+    private String createName(String key, int index) {
+        if (key == null || "".equals(key.trim())) {
+            return String.valueOf("Column " + index);
         }
         if (key.length() > 50) {
             key = key.substring(0, 50);
@@ -29,36 +34,34 @@ public class CsvFileUploadFormat extends UploadFormat {
         return key.trim();
     }
 
-    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap) {
+    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems) {
 
         GridData gridData = new GridData();
+        CharsetDetector charsetDetector = new CharsetDetector();
+        charsetDetector.setText(data);
+        CharsetMatch charsetMatch = charsetDetector.detect();
+        String charsetName = charsetMatch.getName();
+        System.out.println("encoding = " + charsetName);
         ByteArrayInputStream stream = new ByteArrayInputStream(data);
-        CsvReader r= new CsvReader(stream, Charset.defaultCharset());
+        CsvReader r= new CsvReader(stream, Charset.forName(charsetName));
         List<Value[]> grid = new ArrayList<Value[]>();
-        String[] headerColumns = null;
-        Set<String> headerValuesObtained = null;
+        String[] headerColumns;
         try {
-            boolean gotValue = false;
             if(r.readHeaders()) {
                 headerColumns = r.getHeaders();
                 gridData.headerColumns = headerColumns;
-                headerValuesObtained = new HashSet<String>(Arrays.asList(headerColumns));
+            } else {
+                throw new RuntimeException("Couldn't locate headers.");
             }
             while(r.readRecord()) {
                 String[] values = new String[r.getColumnCount()];
+                Value[] convertedValues = new Value[r.getColumnCount()];
                 ColumnSegment columnSegment = new ColumnSegment();
                 for(int j = 0;j < r.getColumnCount();j++) {
-                    values[j] = r.get(j);
-                }
-                Value[] convertedValues = new Value[values.length];
-                for (int i = 0; i < values.length; i++) {
-                    Value convertedValue;
-                    if (values[i] == null || "".equals(values[i])) {
-                        convertedValue = new EmptyValue();
-                    } else {
-                        convertedValue = new StringValue(values[i].trim());
-                    }
-                    convertedValues[i] = convertedValue;
+                    String string = r.get(j);
+                    Value value = transformValue(string, analysisItems == null ? null : analysisItems.get(headerColumns[j]));
+
+                    convertedValues[j] = value;
                 }
 
                 columnSegment.setValues(convertedValues);
@@ -71,18 +74,16 @@ public class CsvFileUploadFormat extends UploadFormat {
                             if (value != null) {
                                 Key key;
                                 if (keyMap == null) {
-                                    key = new NamedKey(createName(headerColumns[headerKeyCounter]));
+                                    key = new NamedKey(createName(headerColumns[headerKeyCounter], headerKeyCounter));
                                 } else {
-                                    key = keyMap.get(createName(headerColumns[headerKeyCounter]));
+                                    key = keyMap.get(createName(headerColumns[headerKeyCounter], headerKeyCounter));
                                 }
                                 dataTypeGuesser.addValue(key, value);
-                                headerValuesObtained.remove(headerColumns[headerKeyCounter]);
                             }
                         }
                     }
                 }
             }
-            gridData.orientation = VERTICAL_HEADERS;
             gridData.rowCount = grid.size();
             Value[][] v = new Value[grid.size()][];
             for(int i = 0; i < grid.size();i++) {
@@ -98,6 +99,43 @@ public class CsvFileUploadFormat extends UploadFormat {
 
         }
         return gridData;
+    }
+
+    private Value transformValue(String string, AnalysisItem analysisItem) {
+        if (analysisItem == null) {
+            Value value;
+            if (string == null) {
+                value = new EmptyValue();
+            } else {
+                string = string.trim();
+                if ("".equals(string)) {
+                    value = new EmptyValue();
+                } else {
+                    if (NumericValue.testValue(string)) {
+                        value = new NumericValue(NumericValue.produceDoubleValue(string));
+                    } else {
+                        value = new StringValue(string);
+                    }
+                }
+            }
+            return value;
+        } else {
+            Value value;
+            if (string == null) {
+                value = new EmptyValue();
+            } else {
+                string = string.trim();
+                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    value = new NumericValue(NumericValue.produceDoubleValue(string));
+                } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                    value = date.renameMeLater(new StringValue(string));
+                } else {
+                    value = new StringValue(string);
+                }
+            }
+            return value;
+        }
     }
 
     public void persist(Connection conn, long feedID) throws SQLException {

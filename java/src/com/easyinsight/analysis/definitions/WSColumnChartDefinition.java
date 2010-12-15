@@ -1,9 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.ChartDefinitionState;
-import com.easyinsight.analysis.ReportBooleanProperty;
-import com.easyinsight.analysis.ReportNumericProperty;
-import com.easyinsight.analysis.ReportProperty;
+import com.easyinsight.analysis.*;
 
 import java.util.List;
 
@@ -16,6 +13,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
 
     private int chartColor;
     private boolean useChartColor;
+    private String columnSort;
 
     public int getChartType() {
         return ChartDefinitionState.COLUMN_2D;
@@ -23,6 +21,14 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
 
     public int getChartFamily() {
         return ChartDefinitionState.COLUMN_FAMILY;
+    }
+
+    public String getColumnSort() {
+        return columnSort;
+    }
+
+    public void setColumnSort(String columnSort) {
+        this.columnSort = columnSort;
     }
 
     public int getChartColor() {
@@ -46,13 +52,15 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         super.populateProperties(properties);
         chartColor = (int) findNumberProperty(properties, "chartColor", 0);
         useChartColor = findBooleanProperty(properties, "useChartColor", false);
+        columnSort = findStringProperty(properties, "columnSort", "Unsorted");
     }
 
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("chartColor", chartColor));
-        properties.add(new ReportBooleanProperty("useChartColor", false));
+        properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
+        properties.add(new ReportStringProperty("columnSort", columnSort));
         return properties;
     }
 }

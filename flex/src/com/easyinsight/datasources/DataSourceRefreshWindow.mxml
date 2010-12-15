@@ -24,7 +24,7 @@
 
         private function setupListeners():void {
             EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
-            uploadService.refreshData.send(_dataSourceID, true);
+            uploadService.refreshData.send(_dataSourceID);
         }
 
 
@@ -62,7 +62,7 @@
         }
 
         private function onProblem(event:ProblemDataEvent):void {
-            uploadService.refreshData.send(_dataSourceID, true);
+            uploadService.refreshData.send(_dataSourceID);
         }
 
         private function onFault(event:FaultEvent):void {

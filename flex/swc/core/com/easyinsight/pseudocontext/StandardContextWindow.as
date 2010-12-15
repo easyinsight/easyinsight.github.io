@@ -1,6 +1,9 @@
 package com.easyinsight.pseudocontext {
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
+import com.easyinsight.analysis.AnalysisItemChangeEvent;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.DrillThrough;
 import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
@@ -68,6 +71,29 @@ public class StandardContextWindow {
                 }
             }
         }
+        if (analysisItem is AnalysisDateDimension) {
+            var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
+            if (date.dateLevel == AnalysisItemTypes.YEAR_LEVEL) {
+                items.push(defineDateLink(AnalysisItemTypes.QUARTER_OF_YEAR, "Quarter of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.MONTH_LEVEL, "Month of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.WEEK_LEVEL, "Week of Year"));
+            } else if (date.dateLevel == AnalysisItemTypes.QUARTER_OF_YEAR) {
+                items.push(defineDateLink(AnalysisItemTypes.YEAR_LEVEL, "Year"));
+                items.push(defineDateLink(AnalysisItemTypes.MONTH_LEVEL, "Month of Year"));
+            } else if (date.dateLevel == AnalysisItemTypes.MONTH_LEVEL) {
+                items.push(defineDateLink(AnalysisItemTypes.YEAR_LEVEL, "Year"));
+                items.push(defineDateLink(AnalysisItemTypes.QUARTER_OF_YEAR, "Quarter of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.WEEK_LEVEL, "Week of Year"));
+            } else if (date.dateLevel == AnalysisItemTypes.WEEK_LEVEL) {
+                items.push(defineDateLink(AnalysisItemTypes.YEAR_LEVEL, "Year"));
+                items.push(defineDateLink(AnalysisItemTypes.QUARTER_OF_YEAR, "Quarter of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.MONTH_LEVEL, "Month of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.DAY_LEVEL, "Day of Year"));
+            } else if (date.dateLevel == AnalysisItemTypes.DAY_LEVEL) {
+                items.push(defineDateLink(AnalysisItemTypes.MONTH_LEVEL, "Month of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.WEEK_LEVEL, "Week of Year"));
+            }
+        }
         var copyItem:ContextMenuItem = new ContextMenuItem("Copy Value");
         copyItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copyValue);
         items.push(copyItem);
@@ -80,6 +106,16 @@ public class StandardContextWindow {
         menu.hideBuiltInItems();
         menu.customItems = items;
         passthroughObject.contextMenu = menu;
+    }
+
+    private function defineDateLink(targetLevel:int, label:String):ContextMenuItem {
+        var item:ContextMenuItem = new ContextMenuItem(label);
+        item.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+            var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
+            date.dateLevel = targetLevel;
+            passthroughFunction.call(passthroughObject, new AnalysisItemChangeEvent(date));
+        });
+        return item;
     }
 
     private function composeLink(link:Link):void {

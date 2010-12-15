@@ -16,7 +16,7 @@ public class InsightRequestMetadata implements Serializable {
     private int version;
     private boolean refreshAllSources;
     private boolean noCache;
-    private List<HierarchyOverride> hierarchyOverrides = new ArrayList<HierarchyOverride>();
+    private List<AnalysisItemOverride> hierarchyOverrides = new ArrayList<AnalysisItemOverride>();
     private boolean aggregateQuery = true;
 
     public boolean isAggregateQuery() {
@@ -27,11 +27,11 @@ public class InsightRequestMetadata implements Serializable {
         this.aggregateQuery = aggregateQuery;
     }
 
-    public List<HierarchyOverride> getHierarchyOverrides() {
+    public List<AnalysisItemOverride> getHierarchyOverrides() {
         return hierarchyOverrides;
     }
 
-    public void setHierarchyOverrides(List<HierarchyOverride> hierarchyOverrides) {
+    public void setHierarchyOverrides(List<AnalysisItemOverride> hierarchyOverrides) {
         this.hierarchyOverrides = hierarchyOverrides;
     }
 

@@ -1,10 +1,10 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.*;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.logging.LogClass;
-import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,9 +36,9 @@ public class XSSFExcelUploadFormat extends UploadFormat {
 
     private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    private String createName(String key) {
-        if (key == null) {
-            return "";
+    private String createName(String key, int index) {
+        if (key == null || "".equals(key.trim())) {
+            return String.valueOf("Column " + index);
         }
         if (key.length() > 50) {
             key = key.substring(0, 50);
@@ -46,7 +46,7 @@ public class XSSFExcelUploadFormat extends UploadFormat {
         return key.trim();
     }
 
-    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap) {
+    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems) {
         try {
             GridData gridData = new GridData();
 
@@ -59,43 +59,26 @@ public class XSSFExcelUploadFormat extends UploadFormat {
             // okay, first thing...
             // are the column headers horizontal or vertical?
 
-            int orientation = findHeaderDirection(sheet);
 
             //Value[][] grid;
 
 
-            String[] headerColumns = getHeaderColumns(sheet, orientation);
+            String[] headerColumns = getHeaderColumns(sheet);
 
 
-            boolean gotValue = false;
-            Set<String> headerValuesObtained = new HashSet<String>(Arrays.asList(headerColumns));
 
-            int rowModifier = orientation == VERTICAL_HEADERS ? 1 : 0;
-            int columnModifier = orientation == HORIZONTAL_HEADERS ? 1 : 0;
 
-            //grid = new Value[sheet.getLastRowNum() + columnModifier][];
 
             List<Value[]> gridList = new ArrayList<Value[]>();
 
             Iterator<Row> rit = sheet.rowIterator();
-            if (orientation == VERTICAL_HEADERS) {
-                rit.next();
-            }
-            int rowCounter = 0;
+            rit.next();
             for (; rit.hasNext(); ) {
                 Row row = rit.next();
-                if (row.getLastCellNum() < columnModifier) {
-                    continue;
-                }
-                Value[] values = new Value[row.getLastCellNum() - columnModifier];
+                Value[] values = new Value[row.getLastCellNum()];
                 boolean foundAtLeastOneValue = false;
                 Iterator<Cell> cit = row.cellIterator();
-                if (orientation == HORIZONTAL_HEADERS) {
-                    Cell cell = cit.next();
-                    if (cell.toString() != null && !"".equals(cell.toString())) {
-                        foundAtLeastOneValue = true;
-                    }
-                }
+
                 for (; cit.hasNext(); ) {
 
                     Cell cell = cit.next();
@@ -103,65 +86,35 @@ public class XSSFExcelUploadFormat extends UploadFormat {
                         foundAtLeastOneValue = true;
                     }
                     Value cellValue = getCellValue(cell);
-                    values[cell.getColumnIndex() - columnModifier] = cellValue;
+                    values[cell.getColumnIndex()] = cellValue;
                 }
                 if (!foundAtLeastOneValue) {
                     continue;
                 }
                 gridList.add(values);
-                //grid[row.getRowNum() - rowModifier] = values;
 
-                if (orientation == VERTICAL_HEADERS) {
-                    if (dataTypeGuesser != null) {
-                        for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
-                            if (headerKeyCounter < values.length) {
-                                Value value = values[headerKeyCounter];
-                                if (value != null) {
-                                    String headerColumn = headerColumns[headerKeyCounter];
-                                    if (headerColumn == null) {
-                                        headerColumn = String.valueOf(headerKeyCounter);
-                                    }
-                                    Key key;
-                                    if (keyMap == null) {
-                                        key = new NamedKey(createName(headerColumn));
-                                    } else {
-                                        key = keyMap.get(createName(headerColumn));
-                                    }
-                                    dataTypeGuesser.addValue(key, value);
-                                    headerValuesObtained.remove(headerColumn);
-                                    if (headerValuesObtained.isEmpty()) {
-                                        gotValue = true;
-                                    }
+                if (dataTypeGuesser != null) {
+                    for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
+                        if (headerKeyCounter < values.length) {
+                            Value value = values[headerKeyCounter];
+                            if (value != null) {
+                                String headerColumn = headerColumns[headerKeyCounter];
+                                if (headerColumn == null) {
+                                    headerColumn = String.valueOf(headerKeyCounter);
                                 }
-                            }
-                        }
-                    }
-                } else {
-                     if (dataTypeGuesser != null) {
-                        Value value = values[0];
-                        if (value != null) {
-                            String headerColumn = headerColumns[rowCounter];
-                            if (headerColumn == null) {
-                                headerColumn = String.valueOf(rowCounter);
-                            }
-                            Key key;
-                            if (keyMap == null) {
-                                key = new NamedKey(createName(headerColumn));
-                            } else {
-                                key = keyMap.get(createName(headerColumn));
-                            }
-                            dataTypeGuesser.addValue(key, value);
-                            headerValuesObtained.remove(headerColumn);
-                            if (headerValuesObtained.isEmpty()) {
-                                gotValue = true;
+                                Key key;
+                                if (keyMap == null) {
+                                    key = new NamedKey(createName(headerColumn, headerKeyCounter));
+                                } else {
+                                    key = keyMap.get(createName(headerColumn, headerKeyCounter));
+                                }
+                                dataTypeGuesser.addValue(key, value);
                             }
                         }
                     }
                 }
-                rowCounter++;
             }
 
-            gridData.orientation = orientation;
             gridData.rowCount = gridList.size();
             Value[][] grid = new Value[gridList.size()][];
             gridList.toArray(grid);
@@ -172,20 +125,6 @@ public class XSSFExcelUploadFormat extends UploadFormat {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    private int findHeaderDirection(XSSFSheet sheet) {
-        boolean topRowIsDates = false;
-        Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
-        XSSFRow row = sheet.getRow(0);
-        for (Iterator<Cell> cit = row.cellIterator(); cit.hasNext(); ) {
-            Cell cell = cit.next();
-            Matcher matcher = pattern.matcher(cell.toString());
-            if (matcher.find()) {
-                topRowIsDates = true;
-            }
-        }
-        return topRowIsDates ? HORIZONTAL_HEADERS : VERTICAL_HEADERS;
     }
 
     public void persist(Connection conn, long feedID) throws SQLException {
@@ -239,42 +178,22 @@ public class XSSFExcelUploadFormat extends UploadFormat {
         return obj;
     }
 
-    private String[] getHeaderColumns(XSSFSheet sheet, int alignment) {
-        if (alignment == VERTICAL_HEADERS) {
-            XSSFRow row = sheet.getRow(0);
-            List<String> rowList = new ArrayList<String>();
-            for (Iterator<Cell> cit = row.cellIterator(); cit.hasNext(); ) {
-                Cell cell = cit.next();
-                String header = cell.toString().trim();
-                if ("".equals(header)) {
-                    continue;
-                }
-                if (header.length() > 100) {
-                    header = header.substring(0, 100).trim();
-                }
-                rowList.add(header);
+    private String[] getHeaderColumns(XSSFSheet sheet) {
+        XSSFRow row = sheet.getRow(0);
+        List<String> rowList = new ArrayList<String>();
+        for (Iterator<Cell> cit = row.cellIterator(); cit.hasNext(); ) {
+            Cell cell = cit.next();
+            String header = cell.toString().trim();
+            if ("".equals(header)) {
+                continue;
             }
-            String[] rows = new String[rowList.size()];
-            rowList.toArray(rows);
-            return rows;
-        } else {
-            List<String> rowList = new ArrayList<String>();
-            Iterator<Row> rit = (Iterator<Row>)sheet.rowIterator();
-            for (; rit.hasNext(); ) {
-                Row row = rit.next();
-                Cell cell = row.getCell(0);
-                String header = cell.toString().trim();
-                if ("".equals(header)) {
-                    continue;
-                }
-                if (header.length() > 100) {
-                    header = header.substring(0, 100).trim();
-                }
-                rowList.add(header);
+            if (header.length() > 100) {
+                header = header.substring(0, 100).trim();
             }
-            String[] rows = new String[rowList.size()];
-            rowList.toArray(rows);
-            return rows;
+            rowList.add(header);
         }
+        String[] rows = new String[rowList.size()];
+        rowList.toArray(rows);
+        return rows;
     }
 }

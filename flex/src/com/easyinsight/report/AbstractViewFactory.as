@@ -1,5 +1,6 @@
 package com.easyinsight.report {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItemOverride;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.HierarchyOverride;
@@ -21,7 +22,7 @@ public class AbstractViewFactory extends VBox implements IRetrievable {
         this.percentWidth = 100;
     }
 
-    public function addOverride(hierarchyOverride:HierarchyOverride):void {
+    public function addOverride(hierarchyOverride:AnalysisItemOverride):void {
         
     }
 

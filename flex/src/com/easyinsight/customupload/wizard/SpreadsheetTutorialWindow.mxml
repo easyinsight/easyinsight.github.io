@@ -61,6 +61,7 @@
             if (item.hasType(AnalysisItemTypes.DATE)) {
                 type = "date";
                 selectedDateLevel = AnalysisDateDimension(item).dateLevel;
+                dateFormatEntry = AnalysisDateDimension(item).customDateFormat;
             } else if (item.hasType(AnalysisItemTypes.LATITUDE)) {
                 type = "latitude coordinate";
             } else if (item.hasType(AnalysisItemTypes.LONGITUDE)) {
@@ -88,7 +89,6 @@
                 stackIndex = 1;
             } else if (type == (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)) {
                 stackIndex = 2;
-                showDateFormat = originalType != (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION);
             } else if (type == (AnalysisItemTypes.LIST | AnalysisItemTypes.DIMENSION)) {
                 stackIndex = 3;
             } else if (type == (AnalysisItemTypes.ZIP_CODE | AnalysisItemTypes.DIMENSION)) {
@@ -117,7 +117,7 @@
                 AnalysisMeasure(item).formattingConfiguration.formattingType = formatBox.selectedItem.data;
             } else if (type == (AnalysisItemTypes.DATE | AnalysisItemTypes.DIMENSION)) {
                 item = new AnalysisDateDimension();
-                if (_info.guessedItem.hasType(AnalysisItemTypes.DATE) && dateFormat != null) {
+                if (dateFormat != null) {
                     AnalysisDateDimension(item).customDateFormat = dateFormat.text;
                 }
                 AnalysisDateDimension(item).dateLevel = dateLevelBox.selectedItem.data;
@@ -151,13 +151,10 @@
         private var startType:String;
 
         [Bindable]
-        private var showDateFormat:Boolean;
-
-        [Bindable]
         private var selectedAggregation:int;
 
         [Bindable]
-        private var selectedDateLevel:int;
+        private var selectedDateLevel:int = AnalysisItemTypes.DAY_LEVEL;
 
         [Bindable]
         private var selectedFormatting:int;
@@ -165,10 +162,30 @@
         [Bindable]
         private var stackIndex:int;
 
+        private function testFormat():void {
+            analysisService.testFormat.send(dateFormat.text, sampleValue1, sampleValue2, sampleValue3);
+        }
+
+        private function testedFormat():void {
+            var results:ArrayCollection = analysisService.testFormat.lastResult as ArrayCollection;
+            if (results.length > 0) {
+                sampleValue1 = results.getItemAt(0) as String;
+            }
+            if (results.length > 1) {
+                sampleValue2 = results.getItemAt(1) as String;
+            }
+            if (results.length > 2) {
+                sampleValue3 = results.getItemAt(2) as String;
+            }
+        }
+
         public function set info(value:FieldUploadInfo):void {
             _info = value;
             _analysisItem = value.guessedItem;
         }]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="testFormat" result="testedFormat()"/>
+    </mx:RemoteObject>
     <mx:Label text="{labeledText}" fontSize="18" maxWidth="750"/>
     <mx:HBox verticalAlign="middle">
         <mx:Label text="What do you want to call this field?" fontSize="16"/>
@@ -270,18 +287,25 @@
                     </util:SmartComboBox>
                 </mx:FormItem>
             </mx:Form>
-            <mx:HBox visible="{showDateFormat}">
-                <mx:TextArea editable="false" borderStyle="none" borderThickness="0" fontSize="10" width="300"
-                                 text="The date format is specified by a pattern string. Within the pattern, letters are interpreted as the components of the date string. The following pattern letters are supported:"/>
+            <mx:HBox>
+                <mx:TextArea editable="false" borderStyle="none" borderThickness="0" fontSize="10" width="300" height="80"
+                                 text="The date format is specified by a pattern string. Within the pattern, letters are interpreted as the components of the date string. For example, yyyy-MM-dd for 2010-10-15. The following pattern letters are supported:"/>
 
                     <mx:DataGrid fontSize="10" rowCount="5" headerHeight="0">
                         <mx:ArrayCollection>
                             <mx:Array>
                                 <mx:Object letter="y" meaning="Year" example="2008; 08"/>
                                 <mx:Object letter="M" meaning="Month in Year" example="July; Jul; 07"/>
+                                <mx:Object letter="w" meaning="Week in Year" example="27"/>
+                                <mx:Object letter="W" meaning="Week in Month" example="2"/>
+                                <mx:Object letter="D" meaning="Day in Year" example="189"/>
                                 <mx:Object letter="d" meaning="Day in month" example="10"/>
-                                <mx:Object letter="H" meaning="Hour in day" example="5"/>
+                                <mx:Object letter="F" meaning="Day of week in month" example="2"/>
+                                <mx:Object letter="E" meaning="Day in week" example="Tuesday;Tue"/>
+                                <mx:Object letter="a" meaning="AM/PM marker" example="PM"/>
+                                <mx:Object letter="H" meaning="Hour in day" example="0"/>
                                 <mx:Object letter="m" meaning="Minute" example="30"/>
+                                <mx:Object letter="'Week'" meaning="Escape the quoted value" example="2011 Week 3"/>
                             </mx:Array>
                         </mx:ArrayCollection>
                         <mx:columns>
@@ -292,9 +316,10 @@
                     </mx:DataGrid>
                 
             </mx:HBox>
-            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"  visible="{showDateFormat}">
-                <mx:FormItem label="Date Format:" fontSize="16" fontFamily="Lucida Grande" fontWeight="normal">
-                    <mx:TextInput id="dateFormat" text="{dateFormatEntry}" fontSize="16" fontFamily="Lucida Grande"/>        
+            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="Date Format:" fontSize="16" fontFamily="Lucida Grande" fontWeight="normal" direction="horizontal">
+                    <mx:TextInput id="dateFormat" text="{dateFormatEntry}" fontSize="16" fontFamily="Lucida Grande"/>
+                    <mx:Button label="Test This Format" click="testFormat()"/>
                 </mx:FormItem>
             </mx:Form>
 

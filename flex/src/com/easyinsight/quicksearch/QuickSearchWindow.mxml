@@ -29,6 +29,10 @@
         private var goalTreeIcon:Class;
 
         [Bindable]
+        [Embed(source="../../../../assets/presentation_chart.png")]
+        private var dashboardIcon:Class;
+
+        [Bindable]
         private var factory:ClassFactory;                     
 
 
@@ -58,6 +62,8 @@
                         descriptor.icon = dataSourceIcon;
                     } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
                         descriptor.icon = goalTreeIcon;
+                    } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                        descriptor.icon = dashboardIcon;
                     } else {
                         descriptor.icon = reportIcon;
                     }
@@ -107,6 +113,8 @@
                     descriptor.icon = dataSourceIcon;
                 } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
                     descriptor.icon = goalTreeIcon;
+                } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    descriptor.icon = dashboardIcon;
                 } else {
                     descriptor.icon = reportIcon;
                 }

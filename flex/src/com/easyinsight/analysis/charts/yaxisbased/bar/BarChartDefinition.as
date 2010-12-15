@@ -1,7 +1,9 @@
 package com.easyinsight.analysis.charts.yaxisbased.bar {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.ChartDefinition;
 import com.easyinsight.analysis.CheckBoxReportFormItem;
 import com.easyinsight.analysis.ColorReportFormItem;
+import com.easyinsight.analysis.ComboBoxReportFormItem;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.yaxisbased.YAxisDefinition;
 
@@ -14,6 +16,7 @@ public class BarChartDefinition extends YAxisDefinition{
 
     public var chartColor:uint;
     public var useChartColor:Boolean;
+    public var columnSort:String = ChartDefinition.SORT_UNSORTED;
 
     public function BarChartDefinition() {
         super();
@@ -36,6 +39,9 @@ public class BarChartDefinition extends YAxisDefinition{
         var items:ArrayCollection = super.createFormItems();
         items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", useChartColor, this));
         items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", chartColor, this));
+        items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", columnSort, this,
+                [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
+                ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
         return items;
     }
 }

@@ -65,12 +65,19 @@ public class NumericValue extends Value implements Serializable {
                 // see if we can find a # in there somewhere...
                 char[] transferArray = new char[valueObj.length()];
                 int i = 0;
+                boolean hitNumber = false;
+                boolean seemsValid = true;
                 for (char character : valueObj.toCharArray()) {
                     if (Character.isDigit(character) || character == '.') {
                         transferArray[i++] = character;
+                        hitNumber = true;
+                    } else {
+                        if (hitNumber && character != ',') {
+                            seemsValid = false;
+                        }
                     }
                 }
-                if (transferArray.length > 0) {
+                if (seemsValid && transferArray.length > 0) {
                     try {
                         value = Double.parseDouble(new String(transferArray));
                     } catch (NumberFormatException e1) {
@@ -78,6 +85,45 @@ public class NumericValue extends Value implements Serializable {
                     }
                 } else {
                     value = 0.;
+                }
+            }
+        }
+        return value;
+    }
+
+    public static boolean testValue(String valueObj) {
+        boolean value;
+        if (valueObj == null || "".equals(valueObj)) {
+            value = false;
+        } else {
+            try {
+                Double.parseDouble(valueObj);
+                value = true;
+            } catch (NumberFormatException e) {
+                // see if we can find a # in there somewhere...
+                char[] transferArray = new char[valueObj.length()];
+                int i = 0;
+                boolean hitNumber = false;
+                boolean seemsValid = true;
+                for (char character : valueObj.toCharArray()) {
+                    if (Character.isDigit(character) || character == '.') {
+                        transferArray[i++] = character;
+                        hitNumber = true;
+                    } else {
+                        if (hitNumber) {
+                            seemsValid = false;
+                        }
+                    }
+                }
+                if (seemsValid && transferArray.length > 0) {
+                    try {
+                        Double.parseDouble(new String(transferArray));
+                        value = true;
+                    } catch (NumberFormatException e1) {
+                        value = false;
+                    }
+                } else {
+                    value = false;
                 }
             }
         }

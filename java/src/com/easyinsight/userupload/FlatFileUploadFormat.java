@@ -1,5 +1,6 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.ColumnSegment;
 import com.easyinsight.core.*;
 
@@ -42,7 +43,7 @@ public class FlatFileUploadFormat extends UploadFormat {
         this.escapeSequence = escapeSequence;
     }    
 
-    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap) {
+    protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems) {
         GridData gridData = new GridData();
 
         String csvResults = new String(data);
@@ -103,7 +104,6 @@ public class FlatFileUploadFormat extends UploadFormat {
             }
         }
 
-        gridData.orientation = VERTICAL_HEADERS;
         gridData.rowCount = csvLines.length - 1;
         gridData.grid = grid;
         gridData.headerColumns = headerColumns;

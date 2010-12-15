@@ -112,35 +112,7 @@ public class DataService {
         try {
             SecurityUtil.authorizeInsight(reportID);
             Feed feed = feedRegistry.getFeed(dataSourceID);
-            EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID, drillThroughFilters);
-            Map<EmbeddedCacheKey, EmbeddedResults> resultsCache = null;
-            if (!insightRequestMetadata.isNoCache()) {
-                //noinspection unchecked
-                resultsCache = ReportCache.instance().getReports(dataSourceID);
-                if (resultsCache != null) {
-                    EmbeddedResults results = resultsCache.get(key);
-                    if (results != null) {
-                        results = results.clone();
-                        boolean dataSourceAccessible;
-                        try {
-                            SecurityUtil.authorizeFeedAccess(results.getDefinition().getDataFeedID());
-                            dataSourceAccessible = true;
-                        } catch (Exception e) {
-                            dataSourceAccessible = false;
-                        }
-                        EIConnection conn = Database.instance().getConnection();
-                        try {
-                            results.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
-                        } finally {
-                            Database.closeConnection(conn);
-                        }
-                        results.setDataSourceAccessible(dataSourceAccessible);
-                        return results;
-                    }
-                } else {
-                    resultsCache = new HashMap<EmbeddedCacheKey, EmbeddedResults>();
-                }
-            }
+
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
             if (analysisDefinition == null) {
                 return null;
@@ -167,13 +139,8 @@ public class DataService {
             } else {*/
 
             if (insightRequestMetadata.getHierarchyOverrides() != null) {
-                for (HierarchyOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
-                    for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
-                        if (analysisItem.getAnalysisItemID() == hierarchyOverride.getAnalysisItemID()) {
-                            AnalysisHierarchyItem hierarchy = (AnalysisHierarchyItem) analysisItem;
-                            hierarchy.setHierarchyLevel(hierarchy.getHierarchyLevels().get(hierarchyOverride.getPosition()));
-                        }
-                    }
+                for (AnalysisItemOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
+                    hierarchyOverride.apply(analysisDefinition.getAllAnalysisItems());
                 }
             }
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
@@ -221,10 +188,6 @@ public class DataService {
             }
             results.setDataSourceInfo(dataSourceInfo);
             results.setAttribution(feed.getAttribution());
-            if (resultsCache != null) {
-                resultsCache.put(key, results);
-                ReportCache.instance().storeResults(dataSourceID, resultsCache);
-            }
             //}
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;

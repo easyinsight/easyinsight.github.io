@@ -5,7 +5,6 @@ import com.easyinsight.analysis.service.ReportRetrievalFault;
 import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
-import com.easyinsight.framework.HierarchyOverride;
 import com.easyinsight.report.AbstractViewFactory;
 import com.easyinsight.report.ReportEventProcessor;
 import com.easyinsight.report.ReportNavigationEvent;
@@ -99,7 +98,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
             pendingRequest = true;
         } else {
             var overrides:ArrayCollection = new ArrayCollection();
-            for each (var hierarchyOverride:HierarchyOverride in overrideObj) {
+            for each (var hierarchyOverride:AnalysisItemOverride in overrideObj) {
                 overrides.addItem(hierarchyOverride);
             }
             _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, allSources, drillthroughFilters, _noCache, overrides);
@@ -108,7 +107,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
 
     private var overrideObj:Object = new Object();
 
-    override public function addOverride(hierarchyOverride:HierarchyOverride):void {
+    override public function addOverride(hierarchyOverride:AnalysisItemOverride):void {
         overrideObj[hierarchyOverride.analysisItemID] = hierarchyOverride;
     }
 
@@ -126,7 +125,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
 
     private function onProblem(event:ProblemDataEvent):void {
         var overrides:ArrayCollection = new ArrayCollection();
-        for each (var hierarchyOverride:HierarchyOverride in overrideObj) {
+        for each (var hierarchyOverride:AnalysisItemOverride in overrideObj) {
             overrides.addItem(hierarchyOverride);
         }
         _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, false, drillthroughFilters, _noCache, overrides);
@@ -162,12 +161,20 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup, false, 0, true);
         _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
         _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
+        _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, onItemChange, false, 0, true);
         _dataService.preserveValues = _reportRenderer.preserveValues();
         addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
             retrieveData(false);
         }
+    }
+
+    private function onItemChange(event:AnalysisItemChangeEvent):void {
+        var o:DateLevelOverride = new DateLevelOverride();
+        o.analysisItemID = event.item.analysisItemID;
+        o.dateLevel = AnalysisDateDimension(event.item).dateLevel;
+        dispatchEvent(new AnalysisItemOverrideEvent(o));
     }
 
     private function onReportWindow(event:ReportWindowEvent):void {

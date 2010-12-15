@@ -17,6 +17,8 @@
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItemOverride;
+        import com.easyinsight.analysis.AnalysisItemOverrideEvent;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
@@ -126,6 +128,7 @@
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            addEventListener(AnalysisItemOverrideEvent.ANALYSIS_ITEM_OVERRIDE, fieldChange);
             viewFactory.loadRenderer();
         }
 
@@ -136,6 +139,11 @@
             overrideObj.position = event.position;
             viewFactory.addOverride(overrideObj);
             transformContainer.clearFilter(event.analysisItem);
+        }
+
+        private function fieldChange(event:AnalysisItemOverrideEvent):void {
+            viewFactory.addOverride(event.analysisItemOverride);
+            viewFactory.retrieveData(false);
         }
 
         private function childFilterCreation(event:HierarchyDrilldownEvent):void {

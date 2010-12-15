@@ -1,7 +1,10 @@
 package com.easyinsight.pseudocontext {
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
+import com.easyinsight.analysis.AnalysisItemChangeEvent;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.DrillThrough;
 import com.easyinsight.analysis.DrillThroughEvent;
 import com.easyinsight.analysis.DrillThroughExecutor;
@@ -13,6 +16,7 @@ import com.easyinsight.analysis.URLLink;
 import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
 
+import flash.events.ContextMenuEvent;
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.events.KeyboardEvent;
@@ -20,6 +24,7 @@ import flash.events.MouseEvent;
 import flash.net.URLRequest;
 import flash.net.navigateToURL;
 import flash.system.System;
+import flash.ui.ContextMenuItem;
 import flash.ui.Keyboard;
 
 import mx.collections.ArrayCollection;
@@ -70,6 +75,29 @@ public class PseudoContextWindow extends VBox {
                 }
             }
         }
+        if (analysisItem is AnalysisDateDimension) {
+            var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
+            if (date.dateLevel == AnalysisItemTypes.YEAR_LEVEL) {
+                items.push(defineDateLink(AnalysisItemTypes.QUARTER_OF_YEAR, "Quarter of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.MONTH_LEVEL, "Month of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.WEEK_LEVEL, "Week of Year"));
+            } else if (date.dateLevel == AnalysisItemTypes.QUARTER_OF_YEAR) {
+                items.push(defineDateLink(AnalysisItemTypes.YEAR_LEVEL, "Year"));
+                items.push(defineDateLink(AnalysisItemTypes.MONTH_LEVEL, "Month of Year"));
+            } else if (date.dateLevel == AnalysisItemTypes.MONTH_LEVEL) {
+                items.push(defineDateLink(AnalysisItemTypes.YEAR_LEVEL, "Year"));
+                items.push(defineDateLink(AnalysisItemTypes.QUARTER_OF_YEAR, "Quarter of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.WEEK_LEVEL, "Week of Year"));
+            } else if (date.dateLevel == AnalysisItemTypes.WEEK_LEVEL) {
+                items.push(defineDateLink(AnalysisItemTypes.YEAR_LEVEL, "Year"));
+                items.push(defineDateLink(AnalysisItemTypes.QUARTER_OF_YEAR, "Quarter of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.MONTH_LEVEL, "Month of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.DAY_LEVEL, "Day of Year"));
+            } else if (date.dateLevel == AnalysisItemTypes.DAY_LEVEL) {
+                items.push(defineDateLink(AnalysisItemTypes.MONTH_LEVEL, "Month of Year"));
+                items.push(defineDateLink(AnalysisItemTypes.WEEK_LEVEL, "Week of Year"));
+            }
+        }
         var copyItem:PseudoContextItem = new PseudoContextItem("Copy Value", copyValue);
         items.push(copyItem);
         if (analysisItem.links.length > 0) {
@@ -88,6 +116,16 @@ public class PseudoContextWindow extends VBox {
         setStyle("paddingBottom", 10);
         setStyle("backgroundColor", 0xFFFFFF);
         setStyle("backgroundAlpha", 1);
+    }
+
+    private function defineDateLink(targetLevel:int, label:String):ContextMenuItem {
+        var item:ContextMenuItem = new ContextMenuItem(label);
+        item.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+            var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
+            date.dateLevel = targetLevel;
+            passthroughFunction.call(passthroughObject, new AnalysisItemChangeEvent(date));
+        });
+        return item;
     }
 
     private function composeLink(link:Link):void {

@@ -481,10 +481,6 @@ public class UserUploadService implements IUserUploadService {
     }
 
     public CredentialsResponse refreshData(long feedID) {
-        return refreshData(feedID, false);
-    }
-
-    public CredentialsResponse refreshData(long feedID, boolean synchronous) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             CredentialsResponse credentialsResponse;

@@ -57,59 +57,52 @@ public abstract class UploadFormat implements Serializable {
 
     private PersistableDataSetForm createInternalDataSet(byte[] data, IDataTypeGuesser dataTypeGuesser, List<AnalysisItem> analysisItems) {
         Map<String, Key> keyMap = createKeyMap(analysisItems);
+        Map<String, AnalysisItem> analysisItemMap = null;
+        if (analysisItems != null) {
+            analysisItemMap = new HashMap<String, AnalysisItem>();
+            for (AnalysisItem analysisItem : analysisItems) {
+                analysisItemMap.put(analysisItem.getKey().toDisplayName(), analysisItem);
+            }
+        }
         // special case = key by column
         // or, we always partition by column...
 
         try {
 
-            GridData gridData = createGridData(data, dataTypeGuesser, keyMap);
+            GridData gridData = createGridData(data, dataTypeGuesser, keyMap, analysisItemMap);
 
             Map<Key, ColumnSegment> columnSegmentMap = new LinkedHashMap<Key, ColumnSegment>();
-            if (gridData.orientation == VERTICAL_HEADERS) {
-                for (int j = 0; j < gridData.headerColumns.length; j++) {
-                    Value[] verticalGridSlice = new Value[gridData.rowCount];
-                    for (int i = 0; i < gridData.rowCount; i++) {
-                        Value value;
-                        if (j >= gridData.grid[i].length) {
-                            value = new EmptyValue();
-                        } else {
-                            value = gridData.grid[i][j];
-                        }
-                        verticalGridSlice[i] = value;
-                    }
-                    Key key;
-                    if (keyMap == null) {
-                        key = new NamedKey(createName(gridData.headerColumns[j]));
+            for (int j = 0; j < gridData.headerColumns.length; j++) {
+                Value[] verticalGridSlice = new Value[gridData.rowCount];
+                for (int i = 0; i < gridData.rowCount; i++) {
+                    Value value;
+                    if (j >= gridData.grid[i].length) {
+                        value = new EmptyValue();
                     } else {
-                        key = keyMap.get(createName(gridData.headerColumns[j]));
+                        value = gridData.grid[i][j];
                     }
-                    if (key != null) {
-                        columnSegmentMap.put(key, new ColumnSegment(verticalGridSlice));
-                    }
+                    verticalGridSlice[i] = value;
                 }
-            } else {
-                for (int j = 0; j < gridData.headerColumns.length; j++) {
-                    Value[] verticalGridSlice = gridData.grid[j];
-                    Key key;
-                    if (keyMap == null) {
-                        key = new NamedKey(createName(gridData.headerColumns[j]));
-                    } else {
-                        key = keyMap.get(createName(gridData.headerColumns[j]));
-                    }
-                    if (key != null) {
-                        columnSegmentMap.put(key, new ColumnSegment(verticalGridSlice));
-                    }
+                Key key;
+                if (keyMap == null) {
+                    key = new NamedKey(createName(gridData.headerColumns[j], j));
+                } else {
+                    key = keyMap.get(createName(gridData.headerColumns[j], j));
+                }
+                if (key != null) {
+                    columnSegmentMap.put(key, new ColumnSegment(verticalGridSlice));
                 }
             }
+
             return new PersistableDataSetForm(columnSegmentMap);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String createName(String key) {
-        if (key == null) {
-            return "";
+    private String createName(String key, int index) {
+        if (key == null || "".equals(key.trim())) {
+            return String.valueOf("Column " + index);
         }
         if (key.length() > 50) {
             key = key.substring(0, 50);
@@ -117,7 +110,7 @@ public abstract class UploadFormat implements Serializable {
         return key.trim();
     }
 
-    protected abstract GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap);
+    protected abstract GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems);
 
     public abstract void persist(Connection conn, long feedID) throws SQLException;
 }

@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
                 xmlns:util="com.easyinsight.util.*"
-                creationComplete="startWorkspace()" xmlns:local="*" applicationComplete="applicationListeners()"
-                xmlns:listing="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*"
-                xmlns:notification="com.easyinsight.outboundnotifications.*"
-                xmlns:ga4flash="com.google.analytics.components.*"
+                creationComplete="startWorkspace()" applicationComplete="applicationListeners()"
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0"
                 right="0" paddingRight="0"
                 bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIPreloader"
-        implements="com.easyinsight.framework.ITutorialRegistrar" frameRate="60">
+        frameRate="60">
     <mx:Script>
 		<![CDATA[        
         import com.easyinsight.account.Account;
@@ -35,7 +32,6 @@
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.tour.TutorialFramework;
         import com.easyinsight.util.CookieUtil;
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
@@ -175,11 +171,12 @@
                 if (event.eiDescriptor.getType() == EIDescriptor.DATA_SOURCE) {
                     var eiDescriptor:DataSourceDescriptor = event.eiDescriptor as DataSourceDescriptor;
                     internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.REPORT_EDITOR, {dataSourceID: eiDescriptor.id})));
-                    //internalAnalyze(new AnalyzeEvent(new DescriptorAnalyzeSource(eiDescriptor.id, eiDescriptor.name)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
                     internalAnalyze(new AnalyzeEvent(new ReportPerspectiveInfo(event.eiDescriptor as InsightDescriptor)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
                     internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.KPI_TREE_VIEW, {goalTreeID: event.eiDescriptor.id})));
+                } else if (event.eiDescriptor.getType() == EIDescriptor.DASHBOARD) {
+                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
                 }
             }
         }
@@ -194,15 +191,6 @@
             } else {
                 changePerspective(new ListingChangeEvent(new ModulePerspective(event.targetPerspective), event.properties));
             }
-        }
-
-        public static function registerTutorial(tutorial:TutorialFramework):void {
-            var workspace:PrimaryWorkspace = PrimaryWorkspace(Application.application);
-            workspace.registerTutorialForApp(tutorial);
-        }
-
-        public function registerTutorialForApp(tutorial:TutorialFramework):void {
-            addListeners(tutorial);
         }
 
         private function parseURL(event:Event):void {
@@ -245,13 +233,13 @@
                             navigation(new NavigationEvent("Scorecards"));
                             break;
                         case "exchange":
-                            //var view:int = int(o.view);
-                            //var display:int = int(o.display);
-                            //var subTopic:int = int(o.subTopicID);
                             navigation(new NavigationEvent("Exchange"));
                             break;
                         case "groups":
                             navigation(new NavigationEvent("Groups"));
+                            break;
+                        case "scheduling":
+                            navigation(new NavigationEvent("Scheduling"));
                             break;
                         case "help":
                             navigation(new NavigationEvent("Help"));
@@ -264,12 +252,7 @@
                             navigation(new NavigationEvent("Home"));
                             break;
                         case "connections":
-                            if (o.type != null && o.type == "business")
-                                navigation(new NavigationEvent("Connections", null, { biz: true, client:false, saas: false, learning: false }));
-                            else if (o.type != null && o.type == "application")
-                                navigation(new NavigationEvent("Connections", null, { saas: true, client:true, biz: false, learning: false }));
-                            else
-                                navigation(new NavigationEvent("Connections"));
+                            navigation(new NavigationEvent("Connections"));
                             break;
                         case "account":
                             navigation(new NavigationEvent("Accounts"));

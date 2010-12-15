@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
            implements="com.easyinsight.analysis.IReportRenderer"
-           width="100%" height="100%" creationComplete="setupListeners()">
+           width="100%" height="100%">
     <mx:Style>
         .axisTitles {
             fontSize: 14;
@@ -19,19 +19,19 @@
 
 
         import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.analysis.ChartSortButton;
-        import com.easyinsight.analysis.ChartSortEvent;
+        import com.easyinsight.analysis.ChartDefinition;
+
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.SortFunctionFactory;
-        import com.easyinsight.analysis.SortableAxisTitle;
+
 
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
 
         import mx.binding.utils.BindingUtils;
-        import mx.charts.AxisRenderer;
+
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
         import mx.charts.ColumnChart;
@@ -104,25 +104,11 @@
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
         }
 
-        private function setupListeners():void {
-            addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
-        }
-
         override protected function createChildren():void {
             super.createChildren();
             var bgFill:BitmapFill = new BitmapFill();
             bgFill.source = standardFill;
             bgFills = [ bgFill ];
-        }
-
-        private function onChartSort(event:ChartSortEvent):void {
-            if (event.sortState == ChartSortButton.ASCENDING ||
-                    event.sortState == ChartSortButton.DESCENDING) {
-                var sort:Sort = new Sort();
-                sort.compareFunction = SortFunctionFactory.createSortFunction(event.analysisItem, event.analysisItem.sort == ChartSortButton.DESCENDING);
-                graphData.sort = sort;
-                graphData.refresh();
-            }
         }
 
         private function onClick(event:ChartItemEvent):void {
@@ -162,17 +148,6 @@
                 xAxis.dataProvider = graphData;
                 xAxis.title = xAxisTitle;
                 columnChart.horizontalAxis = xAxis;
-                if (sortable) {
-                    var axisRenderer:AxisRenderer = new AxisRenderer();
-                    axisRenderer.axis = xAxis;
-                    var xClassFactory:ClassFactory = new ClassFactory(SortableAxisTitle);
-                    xClassFactory.properties = { analysisItem: xAxisItem, axisDirection: true};
-                    xAxisTitleRendererFactory = xClassFactory;
-                    axisRenderer.titleRenderer = xAxisTitleRendererFactory;
-                    //axisRenderer.setStyle("color", "#FFFFFF");
-                    axisRenderer.placement = "bottom";
-                    columnChart.horizontalAxisRenderers = [ axisRenderer ];
-                }
 
                 // define the Y axis
 
@@ -180,16 +155,6 @@
                 yAxis.title = yAxisTitle;
                 yAxis.labelFunction = renderAxis;
                 columnChart.verticalAxis = yAxis;
-                if (sortable) {
-                    var yAxisRenderer:AxisRenderer = new AxisRenderer();
-                    yAxisRenderer.axis = yAxis;
-                    //yAxisRenderer.setStyle("color", "#FFFFFF");
-                    yAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
-                    yAxisTitleRendererFactory.properties = { analysisItem: yAxisItem, axisDirection: false};
-                    yAxisRenderer.titleRenderer = yAxisTitleRendererFactory;
-                    yAxisRenderer.placement = "left";
-                    columnChart.verticalAxisRenderers = [ yAxisRenderer ];
-                }
 
                 // create the data series
 
@@ -263,16 +228,18 @@
             if (dataSet.length > 0) {
                 canvas.setStyle("backgroundAlpha", columnChartDef.backgroundAlpha);
                 stackIndex = 0;
-                if (columnChartDef.xaxis.sort > 0) {
+                if (columnChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
                     var sort:Sort = new Sort();
-                    //sort.fields = [ new SortField(columnChartDef.xaxis.qualifiedName(), false, )];
-                    sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, columnChartDef.xaxis.sort == ChartSortButton.DESCENDING);
+                    if (columnChartDef.columnSort == ChartDefinition.SORT_X_ASCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, false);
+                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, true);
+                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, false);
+                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, true);
+                    }
                     dataSet.sort = sort;
-                    dataSet.refresh();
-                } else if (columnChartDef.measure.sort > 0) {
-                    var measureSort:Sort = new Sort();
-                    measureSort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, columnChartDef.measure.sort == ChartSortButton.DESCENDING);
-                    dataSet.sort = measureSort;
                     dataSet.refresh();
                 }
 
@@ -288,19 +255,11 @@
                 var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
                 if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
                     xAxisItem = newXAxisItem;
-                    if (sortable) {
-                        //xAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
-                        xAxisTitleRendererFactory.properties = { analysisItem: xAxisItem, axisDirection: true};
-                    }
                 }
 
                 var newYAxisItem:AnalysisItem = columnChartDef.measure;
                 if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
                     yAxisItem = newYAxisItem;
-                    if (sortable) {
-                        //yAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
-                        yAxisTitleRendererFactory.properties = { analysisItem: yAxisItem, axisDirection: false};
-                    }
                 }
 
                 var newXField:String = newXAxisItem.qualifiedName();
