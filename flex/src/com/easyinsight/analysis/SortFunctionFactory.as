@@ -1,4 +1,5 @@
 package com.easyinsight.analysis {
+
 import mx.utils.ObjectUtil;
 
 public class SortFunctionFactory {
@@ -7,7 +8,6 @@ public class SortFunctionFactory {
     
     public static function createSortFunction(myHeader:AnalysisItem, sortDescending:Boolean):Function {
             return function(obj1:Object, obj2:Object, fields:Array = null):int {
-
                 var value1:Value;
                 var value2:Value;
                 var valueObj1:Object = obj1[myHeader.qualifiedName()];
@@ -20,7 +20,7 @@ public class SortFunctionFactory {
                 } else if (valueObj1 is String) {
                     value1 = new StringValue();
                     StringValue(value1).value = valueObj1 as String;
-                } else if (valueObj2 is Date) {
+                } else if (valueObj1 is Date) {
                     value1 = new DateValue();
                     DateValue(value1).date = valueObj1 as Date;
                 }
@@ -71,7 +71,7 @@ public class SortFunctionFactory {
                         return 1;
                     }
                 }
-                if (value2.type == Value.EMPTY || value2.toSortValue().type() == Value.EMPTY) {
+                if (value2.type() == Value.EMPTY || value2.toSortValue().type() == Value.EMPTY) {
                     if (sortDescending) {
                         return 1;
                     } else {
