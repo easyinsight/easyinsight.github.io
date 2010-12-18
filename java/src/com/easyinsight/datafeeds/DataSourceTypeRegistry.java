@@ -13,6 +13,8 @@ import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.marketo.MarketoDataSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
+import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
+import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
@@ -91,6 +93,9 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.CONSTANT_CONTACT_CONTACT_TO_CONTACT_LIST, CCContactToContactListSource.class);
         registerType(FeedType.CONSTANT_CONTACT_CAMPAIGN, CCCampaignSource.class);
         registerType(FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS, CCCampaignResultsSource.class);
+        registerType(FeedType.BASECAMP_TODO_COMMENTS, BaseCampTodoCommentsSource.class);
+        registerType(FeedType.QUICKBASE_COMPOSITE, QuickbaseCompositeSource.class);
+        registerType(FeedType.QUICKBASE_CHILD, QuickbaseDatabaseSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
