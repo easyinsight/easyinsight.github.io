@@ -5,8 +5,8 @@ public class ColorReportFormItem extends ReportFormItem {
 
     private var colorPicker:ColorPicker;
 
-    public function ColorReportFormItem(label:String, property:String, value:Object, report:Object) {
-        super(label, property, value, report);
+    public function ColorReportFormItem(label:String, property:String, value:Object, report:Object, enabledProperty:String = null) {
+        super(label, property, value, report, enabledProperty);
     }
 
     protected override function createChildren():void {

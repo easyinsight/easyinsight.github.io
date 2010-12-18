@@ -8,8 +8,8 @@ public class ComboBoxReportFormItem extends ReportFormItem {
     private var comboBox:ComboBox;
 
     public function ComboBoxReportFormItem(label:String, property:String, value:Object, report:Object,
-            choices:Array) {
-        super(label, property, value, report);
+            choices:Array, enabledProperty:String = null) {
+        super(label, property, value, report, enabledProperty);
         this.choices = new ArrayCollection(choices);
     }
 

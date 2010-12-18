@@ -7,8 +7,8 @@ public class CheckBoxReportFormItem extends ReportFormItem {
 
     private var checkBox:CheckBox;
 
-    public function CheckBoxReportFormItem(label:String, property:String, value:Object, report:Object) {
-        super(label, property, value, report);
+    public function CheckBoxReportFormItem(label:String, property:String, value:Object, report:Object, enabledProperty:String = null) {
+        super(label, property, value, report, enabledProperty);
     }
 
     protected override function createChildren():void {
