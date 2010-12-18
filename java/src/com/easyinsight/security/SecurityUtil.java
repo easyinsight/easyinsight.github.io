@@ -105,7 +105,7 @@ public class SecurityUtil {
                         account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
                         user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
-                        account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
+                        account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
             } else {
                 /*results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
                 if (results.size() > 0) {

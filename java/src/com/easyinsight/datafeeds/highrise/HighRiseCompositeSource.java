@@ -44,6 +44,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private boolean includeCompanyNotes;
     private boolean includeDealNotes;
     private boolean includeCaseNotes;
+    private boolean joinTasksToContacts;
     private String token;
     private List<HighriseAdditionalToken> additionalTokens;
 
@@ -53,6 +54,14 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     public void setAdditionalTokens(List<HighriseAdditionalToken> additionalTokens) {
         this.additionalTokens = additionalTokens;
+    }
+
+    public boolean isJoinTasksToContacts() {
+        return joinTasksToContacts;
+    }
+
+    public void setJoinTasksToContacts(boolean joinTasksToContacts) {
+        this.joinTasksToContacts = joinTasksToContacts;
     }
 
     public String getToken() {
@@ -225,6 +234,11 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             connections.add(new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_DEAL, HighRiseCompanySource.COMPANY_ID,
                 HighRiseDealSource.COMPANY_ID));
         }
+        if (joinTasksToContacts) {
+
+        } else {
+
+        }
         connections.addAll(Arrays.asList(
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_CONTACTS, HighRiseCompanySource.COMPANY_ID,
                     HighRiseContactSource.COMPANY_ID),
@@ -290,7 +304,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL, INCLUDE_EMAILS, join_deals_to_contacts, include_contact_notes," +
-                "include_company_notes, include_deal_notes, include_case_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                "include_company_notes, include_deal_notes, include_case_notes, join_tasks_to_contacts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
         basecampStmt.setBoolean(3, includeEmails);
@@ -299,6 +313,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         basecampStmt.setBoolean(6, includeCompanyNotes);
         basecampStmt.setBoolean(7, includeDealNotes);
         basecampStmt.setBoolean(8, includeCaseNotes);
+        basecampStmt.setBoolean(9, joinTasksToContacts);
         basecampStmt.execute();
         basecampStmt.close();
         if (this.token != null && !"".equals(this.token.trim())) {

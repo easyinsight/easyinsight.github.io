@@ -66,9 +66,8 @@ public abstract class FreshbooksFeed extends Feed {
             byte[] content = ("<request method=\""+queryString+"\">"+requestXML+"</request>").getBytes();
             entity.setContent(new ByteArrayInputStream(content));
             entity.setContentLength(content.length);
-            System.out.println(entity.getContentLength());
             httpRequest.setEntity(entity);
-            HttpRequest signedRequest = consumer.sign(httpRequest);
+            consumer.sign(httpRequest);
             
             HttpClient client = new DefaultHttpClient();
             ResponseHandler<String> responseHandler = new BasicResponseHandler();

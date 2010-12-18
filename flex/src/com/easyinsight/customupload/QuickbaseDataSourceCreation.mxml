@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.google.QuickbaseCompositeSource;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var archivedIncluded:Boolean;
+        [Bindable]
+        private var inactiveIncluded:Boolean;
+        [Bindable]
+        private var milestoneCommentsIncluded:Boolean;
+        [Bindable]
+        private var todoCommentsIncluded:Boolean;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:QuickbaseCompositeSource = new QuickbaseCompositeSource();
+            obj.qbUserName = userNameInput.text;
+            obj.qbPassword = passwordInput.text;
+            return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:QuickbaseCompositeSource = feedDefinition as QuickbaseCompositeSource;
+        }
+
+        public function get savesCredentials():Boolean {
+            return false;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:QuickbaseCompositeSource = feedDefinition as QuickbaseCompositeSource;
+            ds.qbUserName = userNameInput.text;
+            ds.qbPassword = passwordInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Quickbase User Name:">
+            <mx:TextInput id="userNameInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="Quickbase Password:">
+            <mx:TextInput id="passwordInput" displayAsPassword="true"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:HBox>

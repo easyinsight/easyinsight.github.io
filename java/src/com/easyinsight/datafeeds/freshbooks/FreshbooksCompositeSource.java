@@ -109,9 +109,10 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
             if (pin != null && !"".equals(pin)) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
                 OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
-                provider.retrieveAccessToken(consumer, pin);
+                provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecretKey = consumer.getTokenSecret();
+                pin = null;
             }
         } catch (OAuthCommunicationException oe) {
             throw new UserMessageException(oe, "The specified verifier token was rejected. Please try to authorize access again.");

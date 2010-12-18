@@ -129,7 +129,6 @@ public class SendGridFeed extends Feed {
                 if (doc.toString().indexOf("error") != -1) {
                     //throw new ReportException(new CredentialRequirement(getFeedID(), getName(), CredentialsDefinition.STANDARD_USERNAME_PW));
                 }
-                System.out.println(getMethod.getResponseBodyAsString());
                 Nodes categories = doc.query("/categories/category");
                 List<NameValuePair> pairs = Arrays.asList(new NameValuePair("api_user", getUserName()),
                     new NameValuePair("api_key", getPassword()), new NameValuePair("start_date", startDateString), new NameValuePair("end_date", endDateString));

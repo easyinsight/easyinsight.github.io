@@ -16,8 +16,11 @@
 
         public var imageDescriptor:ImageDescriptor;
 
+        public var publicImage:Boolean;
+
         private function onEdit():void {
             var window:ImageUploadWindow = new ImageUploadWindow();
+            window.publicImage = publicImage;
             window.addEventListener(ImageUploadEvent.IMAGE_UPLOAD, onImageUpload, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);

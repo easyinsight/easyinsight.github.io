@@ -500,7 +500,7 @@ public class UserService {
                     }
                     user.setLastLoginDate(new Date());
                     session.update(user);
-                    applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session);
+                    applicationSkin = ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID());
                 }
                 session.flush();
                 conn.commit();
@@ -762,7 +762,7 @@ public class UserService {
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                            ApplicationSkinSettings.retrieveSkin(userID, session));
+                            ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()));
                 } else {
                     userServiceResponse = null;
                 }
@@ -807,7 +807,7 @@ public class UserService {
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                            ApplicationSkinSettings.retrieveSkin(userID, session));
+                            ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()));
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     userServiceResponse.setSessionCookie(sessionCookie);
                     user.setLastLoginDate(new Date());
@@ -905,7 +905,7 @@ public class UserService {
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
-                                account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
+                                account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
 
 
                 } else {
@@ -996,7 +996,7 @@ public class UserService {
                     user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                     !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                    ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
+                    ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
             user.setLastLoginDate(new Date());
             session.update(user);
             conn.commit();
@@ -1083,7 +1083,7 @@ public class UserService {
                         user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                         !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                        ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
+                        ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
                 user.setLastLoginDate(new Date());
                 session.update(user);
 
@@ -1139,7 +1139,7 @@ public class UserService {
                                 user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                                 !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                                ApplicationSkinSettings.retrieveSkin(user.getUserID(), session));
+                                ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
                         userServiceResponse.setScenario(scenario);
                         user.setLastLoginDate(new Date());
                         session.update(user);

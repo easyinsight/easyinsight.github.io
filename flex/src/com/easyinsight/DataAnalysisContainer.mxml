@@ -710,6 +710,7 @@
                 dataView.updateExportMetadata();
                 var window:ImprovedSaveWindow = new ImprovedSaveWindow();
                 window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saved);
+                window.coreView = dataView.getCoreView();
                 window.report = analysisDefinition;
                 window.originConnection = originSolution;
                 PopUpManager.addPopUp(window, this, true);

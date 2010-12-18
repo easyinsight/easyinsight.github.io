@@ -15,6 +15,7 @@ public class HighRiseDataSource extends CompositeServerDataSource {
     public var includeDealNotes:Boolean;
     public var includeCaseNotes:Boolean;
     public var joinDealsToContacts:Boolean;
+    public var joinTasksToContacts:Boolean;
     public var token:String;
     public var additionalTokens:ArrayCollection;
 

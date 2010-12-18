@@ -6,13 +6,17 @@ public class ImageReportFormItem extends ReportFormItem {
 
     private var imageBox:ImageBox;
 
-    public function ImageReportFormItem(label:String, property:String, value:Object, report:Object) {
-        super(label, property, value, report);
+    private var publicImage:Boolean;
+
+    public function ImageReportFormItem(label:String, property:String, value:Object, report:Object, enabledProperty:String = null, publicImage:Boolean = false) {
+        super(label, property, value, report, enabledProperty);
+        this.publicImage = publicImage;
     }
 
     protected override function createChildren():void {
         super.createChildren();
         imageBox = new ImageBox();
+        imageBox.publicImage = this.publicImage;
         if (this.value != null) imageBox.imageDescriptor = ImageDescriptor(this.value);
         addChild(imageBox);
     }

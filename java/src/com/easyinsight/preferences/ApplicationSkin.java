@@ -12,15 +12,25 @@ import java.util.List;
  */
 public class ApplicationSkin {
     private ImageDescriptor coreAppBackgroundImage;
+    private boolean coreAppBackgroundImageEnabled;
     private int coreAppBackgroundColor;
+    private boolean coreAppBackgroundColorEnabled;
     private String coreAppBackgroundSize;
+    private boolean coreAppBackgroundSizeEnabled;
     private int headerBarBackgroundColor;
+    private boolean headerBarBackgroundColorEnabled;
     private ImageDescriptor headerBarLogo;
+    private boolean headerBarLogoEnabled;
     private int headerBarDividerColor;
+    private boolean headerBarDividerColorEnabled;
     private int centerCanvasBackgroundColor;
+    private boolean centerCanvasBackgroundColorEnabled;
     private double centerCanvasBackgroundAlpha;
+    private boolean centerCanvasBackgroundAlphaEnabled;
     private ImageDescriptor reportBackground;
+    private boolean reportBackgroundEnabled;
     private String reportBackgroundSize;
+    private boolean reportBackgroundSizeEnabled;
     private long id;
 
     public long getId() {
@@ -35,21 +45,21 @@ public class ApplicationSkin {
         ApplicationSkinSettings settings = new ApplicationSkinSettings();
         List<ReportProperty> properties = new ArrayList<ReportProperty>();
         if (coreAppBackgroundImage != null) {
-            properties.add(new ReportImageProperty("coreAppBackgroundImage", coreAppBackgroundImage));
+            properties.add(new ReportImageProperty("coreAppBackgroundImage", coreAppBackgroundImage, coreAppBackgroundImageEnabled));
         }
         if (headerBarLogo != null) {
-            properties.add(new ReportImageProperty("headerBarLogo", headerBarLogo));
+            properties.add(new ReportImageProperty("headerBarLogo", headerBarLogo, headerBarLogoEnabled));
         }
         if (reportBackground != null) {
-            properties.add(new ReportImageProperty("reportBackground", reportBackground));
+            properties.add(new ReportImageProperty("reportBackground", reportBackground, reportBackgroundEnabled));
         }
-        properties.add(new ReportNumericProperty("coreAppBackgroundColor", coreAppBackgroundColor));
-        properties.add(new ReportNumericProperty("headerBarBackgroundColor", headerBarBackgroundColor));
-        properties.add(new ReportNumericProperty("headerBarDividerColor", headerBarDividerColor));
-        properties.add(new ReportNumericProperty("centerCanvasBackgroundColor", centerCanvasBackgroundColor));
-        properties.add(new ReportNumericProperty("centerCanvasBackgroundAlpha", centerCanvasBackgroundAlpha));
-        properties.add(new ReportStringProperty("coreAppBackgroundSize", coreAppBackgroundSize));
-        properties.add(new ReportStringProperty("reportBackgroundSize", reportBackgroundSize));
+        properties.add(new ReportNumericProperty("coreAppBackgroundColor", coreAppBackgroundColor, coreAppBackgroundColorEnabled));
+        properties.add(new ReportNumericProperty("headerBarBackgroundColor", headerBarBackgroundColor, headerBarBackgroundColorEnabled));
+        properties.add(new ReportNumericProperty("headerBarDividerColor", headerBarDividerColor, headerBarDividerColorEnabled));
+        properties.add(new ReportNumericProperty("centerCanvasBackgroundColor", centerCanvasBackgroundColor, centerCanvasBackgroundColorEnabled));
+        properties.add(new ReportNumericProperty("centerCanvasBackgroundAlpha", centerCanvasBackgroundAlpha, centerCanvasBackgroundAlphaEnabled));
+        properties.add(new ReportStringProperty("coreAppBackgroundSize", coreAppBackgroundSize, coreAppBackgroundSizeEnabled));
+        properties.add(new ReportStringProperty("reportBackgroundSize", reportBackgroundSize, reportBackgroundSizeEnabled));
         settings.setSkinID(id);
         settings.setProperties(properties);
         return settings;
@@ -57,14 +67,23 @@ public class ApplicationSkin {
 
     public void populateProperties(List<ReportProperty> properties) {
         coreAppBackgroundImage = findImage(properties, "coreAppBackgroundImage", null);
+        coreAppBackgroundImageEnabled = propertyEnabled(properties, "coreAppBackgroundImage");
         coreAppBackgroundColor = (int) findNumberProperty(properties, "coreAppBackgroundColor", 0);
+        coreAppBackgroundColorEnabled = propertyEnabled(properties, "coreAppBackgroundColor");
         headerBarBackgroundColor = (int) findNumberProperty(properties, "headerBarBackgroundColor", 0);
+        headerBarBackgroundColorEnabled = propertyEnabled(properties, "headerBarBackgroundColor");
         centerCanvasBackgroundColor = (int) findNumberProperty(properties, "centerCanvasBackgroundColor", 0);
+        centerCanvasBackgroundColorEnabled = propertyEnabled(properties, "centerCanvasBackgroundColor");
         centerCanvasBackgroundAlpha = findNumberProperty(properties, "centerCanvasBackgroundAlpha", 1);
+        centerCanvasBackgroundAlphaEnabled = propertyEnabled(properties, "centerCanvasBackgroundAlpha");
         headerBarDividerColor = (int) findNumberProperty(properties, "headerBarDividerColor", 0);
+        headerBarDividerColorEnabled = propertyEnabled(properties, "headerBarDividerColor");
         coreAppBackgroundSize = findStringProperty(properties, "coreAppBackgroundSize", "100%");
+        coreAppBackgroundSizeEnabled = propertyEnabled(properties, "coreAppBackgroundSize");
         reportBackground = findImage(properties, "reportBackground", null);
+        reportBackgroundEnabled = propertyEnabled(properties, "reportBackground");
         reportBackgroundSize = findStringProperty(properties, "reportBackgroundSize", "100%");
+        reportBackgroundSizeEnabled = propertyEnabled(properties, "reportBackgroundSize");
     }
 
     public ImageDescriptor getCoreAppBackgroundImage() {
@@ -145,6 +164,95 @@ public class ApplicationSkin {
 
     public void setReportBackgroundSize(String reportBackgroundSize) {
         this.reportBackgroundSize = reportBackgroundSize;
+    }
+
+    public boolean isCoreAppBackgroundImageEnabled() {
+        return coreAppBackgroundImageEnabled;
+    }
+
+    public void setCoreAppBackgroundImageEnabled(boolean coreAppBackgroundImageEnabled) {
+        this.coreAppBackgroundImageEnabled = coreAppBackgroundImageEnabled;
+    }
+
+    public boolean isCoreAppBackgroundColorEnabled() {
+        return coreAppBackgroundColorEnabled;
+    }
+
+    public void setCoreAppBackgroundColorEnabled(boolean coreAppBackgroundColorEnabled) {
+        this.coreAppBackgroundColorEnabled = coreAppBackgroundColorEnabled;
+    }
+
+    public boolean isCoreAppBackgroundSizeEnabled() {
+        return coreAppBackgroundSizeEnabled;
+    }
+
+    public void setCoreAppBackgroundSizeEnabled(boolean coreAppBackgroundSizeEnabled) {
+        this.coreAppBackgroundSizeEnabled = coreAppBackgroundSizeEnabled;
+    }
+
+    public boolean isHeaderBarBackgroundColorEnabled() {
+        return headerBarBackgroundColorEnabled;
+    }
+
+    public void setHeaderBarBackgroundColorEnabled(boolean headerBarBackgroundColorEnabled) {
+        this.headerBarBackgroundColorEnabled = headerBarBackgroundColorEnabled;
+    }
+
+    public boolean isHeaderBarLogoEnabled() {
+        return headerBarLogoEnabled;
+    }
+
+    public void setHeaderBarLogoEnabled(boolean headerBarLogoEnabled) {
+        this.headerBarLogoEnabled = headerBarLogoEnabled;
+    }
+
+    public boolean isHeaderBarDividerColorEnabled() {
+        return headerBarDividerColorEnabled;
+    }
+
+    public void setHeaderBarDividerColorEnabled(boolean headerBarDividerColorEnabled) {
+        this.headerBarDividerColorEnabled = headerBarDividerColorEnabled;
+    }
+
+    public boolean isCenterCanvasBackgroundColorEnabled() {
+        return centerCanvasBackgroundColorEnabled;
+    }
+
+    public void setCenterCanvasBackgroundColorEnabled(boolean centerCanvasBackgroundColorEnabled) {
+        this.centerCanvasBackgroundColorEnabled = centerCanvasBackgroundColorEnabled;
+    }
+
+    public boolean isCenterCanvasBackgroundAlphaEnabled() {
+        return centerCanvasBackgroundAlphaEnabled;
+    }
+
+    public void setCenterCanvasBackgroundAlphaEnabled(boolean centerCanvasBackgroundAlphaEnabled) {
+        this.centerCanvasBackgroundAlphaEnabled = centerCanvasBackgroundAlphaEnabled;
+    }
+
+    public boolean isReportBackgroundEnabled() {
+        return reportBackgroundEnabled;
+    }
+
+    public void setReportBackgroundEnabled(boolean reportBackgroundEnabled) {
+        this.reportBackgroundEnabled = reportBackgroundEnabled;
+    }
+
+    public boolean isReportBackgroundSizeEnabled() {
+        return reportBackgroundSizeEnabled;
+    }
+
+    public void setReportBackgroundSizeEnabled(boolean reportBackgroundSizeEnabled) {
+        this.reportBackgroundSizeEnabled = reportBackgroundSizeEnabled;
+    }
+
+    protected boolean propertyEnabled(List<ReportProperty> properties, String property) {
+        for (ReportProperty reportProperty : properties) {
+            if (reportProperty.getPropertyName().equals(property)) {
+                return reportProperty.isEnabled();
+            }
+        }
+        return false;
     }
 
     protected String findStringProperty(List<ReportProperty> properties, String property, String defaultValue) {

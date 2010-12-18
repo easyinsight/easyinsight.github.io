@@ -104,7 +104,6 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         client.executeMethod(restMethod);
         doc = new Builder().build(restMethod.getResponseBodyAsStream());
         String token = doc.query("/token/guid/text()").get(0).getValue();
-        System.out.println(token);
         return token;
     }
 

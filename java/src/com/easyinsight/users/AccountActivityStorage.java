@@ -66,7 +66,6 @@ public class AccountActivityStorage {
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             cal.add(Calendar.DAY_OF_YEAR, -1);
-            System.out.println(cal.getTime());
             queryStmt.setDate(1, new java.sql.Date(cal.getTimeInMillis()));
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {

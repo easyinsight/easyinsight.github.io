@@ -74,6 +74,10 @@ public class FeedType {
     public static final FeedType CONSTANT_CONTACT_CONTACTS = new FeedType(66);
     public static final FeedType CONSTANT_CONTACT_CONTACT_LISTS = new FeedType(67);
     public static final FeedType CONSTANT_CONTACT_CONTACT_TO_CONTACT_LIST = new FeedType(68);
+    public static final FeedType BASECAMP_PROJECTS = new FeedType(69);
+    public static final FeedType BASECAMP_TODO_COMMENTS = new FeedType(70);
+    public static final FeedType QUICKBASE_CHILD = new FeedType(71);
+    public static final FeedType QUICKBASE_COMPOSITE = new FeedType(72);
 
     private int type;
 

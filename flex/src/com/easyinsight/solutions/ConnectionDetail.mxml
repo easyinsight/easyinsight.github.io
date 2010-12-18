@@ -39,6 +39,7 @@
             var j:FreshbooksSolutionDetail;
             var k:CrunchbaseSolutionDetail;
             var l:ConstantContactSolutionDetail;
+            var m:QuickbaseSolutionDetail;
         }
 
         public function gotFocus():void {

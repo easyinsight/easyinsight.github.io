@@ -6,7 +6,9 @@ import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -29,15 +31,37 @@ public class ApplicationSkinSettings {
         this.skinID = skinID;
     }
 
-    @Column(name="user_id")
-    private long userID;
+    @Column(name="global_skin")
+    private boolean globalSkin;
 
-    public long getUserID() {
+    public boolean isGlobalSkin() {
+        return globalSkin;
+    }
+
+    public void setGlobalSkin(boolean globalSkin) {
+        this.globalSkin = globalSkin;
+    }
+
+    @Column(name="user_id")
+    private Long userID;
+
+    public Long getUserID() {
         return userID;
     }
 
-    public void setUserID(long userID) {
+    public void setUserID(Long userID) {
         this.userID = userID;
+    }
+
+    @Column(name="account_id")
+    private Long accountID;
+
+    public Long getAccountID() {
+        return accountID;
+    }
+
+    public void setAccountID(Long accountID) {
+        this.accountID = accountID;
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -61,12 +85,47 @@ public class ApplicationSkinSettings {
         return skin;
     }
 
-    public static ApplicationSkin retrieveSkin(long userID, Session session) {
-        List results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, userID).list();
+    public static ApplicationSkin retrieveSkin(long userID, Session session, long accountID) {
+        ApplicationSkinSettings globalSkin;
+        List results = session.createQuery("from ApplicationSkinSettings where globalSkin = ?").setBoolean(0, true).list();
         if (results.size() > 0) {
-            ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
-            return settings.toSkin();
+            globalSkin = (ApplicationSkinSettings) results.get(0);
+        } else {
+            globalSkin = new ApplicationSkinSettings();
         }
-        return null;
+        ApplicationSkinSettings accountSkin;
+        results = session.createQuery("from ApplicationSkinSettings where accountID = ?").setLong(0, accountID).list();
+        if (results.size() > 0) {
+            accountSkin = (ApplicationSkinSettings) results.get(0);
+        } else {
+            accountSkin = new ApplicationSkinSettings();
+        }
+        ApplicationSkinSettings userSkin;
+        results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, userID).list();
+        if (results.size() > 0) {
+            userSkin = (ApplicationSkinSettings) results.get(0);
+        } else {
+            userSkin = new ApplicationSkinSettings();
+        }
+        return globalSkin.override(accountSkin).override(userSkin).toSkin();
+    }
+
+    private ApplicationSkinSettings override(ApplicationSkinSettings settings) {
+        Map<String, ReportProperty> propertyMap = new HashMap<String, ReportProperty>();
+        for (ReportProperty reportProperty : settings.getProperties()) {
+            if (reportProperty.isEnabled()) {
+                propertyMap.put(reportProperty.getPropertyName(), reportProperty);
+            }
+        }
+
+        for (ReportProperty reportProperty : getProperties()) {
+            if (!propertyMap.containsKey(reportProperty.getPropertyName()) && reportProperty.isEnabled()) {
+                propertyMap.put(reportProperty.getPropertyName(), reportProperty);
+            }
+        }
+
+        ApplicationSkinSettings result = new ApplicationSkinSettings();
+        result.setProperties(new ArrayList<ReportProperty>(propertyMap.values()));
+        return result;
     }
 }

@@ -41,7 +41,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     private String url;
     private boolean includeArchived;
     private boolean includeInactive;
-    private boolean includeComments;
+    private boolean includeMilestoneComments;
+    private boolean includeTodoComments;
     private String token;
 
     private transient BaseCampCache basecampCache;
@@ -78,12 +79,20 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         this.includeArchived = includeArchived;
     }
 
-    public boolean isIncludeComments() {
-        return includeComments;
+    public boolean isIncludeMilestoneComments() {
+        return includeMilestoneComments;
     }
 
-    public void setIncludeComments(boolean includeComments) {
-        this.includeComments = includeComments;
+    public void setIncludeMilestoneComments(boolean includeMilestoneComments) {
+        this.includeMilestoneComments = includeMilestoneComments;
+    }
+
+    public boolean isIncludeTodoComments() {
+        return includeTodoComments;
+    }
+
+    public void setIncludeTodoComments(boolean includeTodoComments) {
+        this.includeTodoComments = includeTodoComments;
     }
 
     public int getDataSourceType() {
@@ -109,6 +118,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.BASECAMP_COMPANY);
         feedTypes.add(FeedType.BASECAMP_COMPANY_PROJECT_JOIN);
         feedTypes.add(FeedType.BASECAMP_COMMENTS);
+        feedTypes.add(FeedType.BASECAMP_TODO_COMMENTS);
         return feedTypes;
     }
     
@@ -186,7 +196,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                 Arrays.asList(Arrays.asList(BaseCampTimeSource.TODOID), new ArrayList<String>()), true, false),
                 new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID, BaseCampCompanyProjectJoinSource.PROJECT_ID),
                 new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID),
-                new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMMENTS, BaseCampTodoSource.MILESTONE_ID, BaseCampCommentsSource.MILESTONE_ID));
+                new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMMENTS, BaseCampTodoSource.MILESTONE_ID, BaseCampCommentsSource.MILESTONE_ID),
+                new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_TODO_COMMENTS, BaseCampTodoSource.ITEMID, BaseCampTodoCommentsSource.TODO_ID));
     }
     
     public void customStorage(Connection conn) throws SQLException {
@@ -196,12 +207,13 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO BASECAMP (DATA_FEED_ID, URL, INCLUDE_ARCHIVED," +
-                "include_inactive, INCLUDE_COMMENTS) VALUES (?, ?, ?, ?, ?)");
+                "include_inactive, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS) VALUES (?, ?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
         basecampStmt.setBoolean(3, isIncludeArchived());
         basecampStmt.setBoolean(4, isIncludeInactive());
-        basecampStmt.setBoolean(5, isIncludeComments());
+        basecampStmt.setBoolean(5, isIncludeMilestoneComments());
+        basecampStmt.setBoolean(6, isIncludeTodoComments());
         basecampStmt.execute();
         basecampStmt.close();
         if (this.token != null && !"".equals(this.token.trim())) {
@@ -215,7 +227,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_ARCHIVED, INCLUDE_INACTIVE, INCLUDE_COMMENTS FROM " +
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_ARCHIVED, INCLUDE_INACTIVE, INCLUDE_COMMENTS, INCLUDE_TODO_COMMENTS FROM " +
                 "BASECAMP WHERE DATA_FEED_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
@@ -223,7 +235,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
             this.setUrl(rs.getString(1));
             this.setIncludeArchived(rs.getBoolean(2));
             this.setIncludeInactive(rs.getBoolean(3));
-            this.setIncludeComments(rs.getBoolean(4));
+            this.setIncludeMilestoneComments(rs.getBoolean(4));
+            this.setIncludeTodoComments(rs.getBoolean(5));
         }
         loadStmt.close();
     }
@@ -252,12 +265,12 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 4;
+        return 5;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new BaseCamp1To2(this), new BaseCamp2To3(this), new BaseCamp3To4(this));
+        return Arrays.asList(new BaseCamp1To2(this), new BaseCamp2To3(this), new BaseCamp3To4(this), new BaseCamp4To5(this));
     }
 
     @Override

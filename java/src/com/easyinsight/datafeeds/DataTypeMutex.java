@@ -44,15 +44,12 @@ public class DataTypeMutex {
         if (lockRequiredTypes.contains(feedType)) {
             Semaphore semaphore = mutexMap.get(feedType);
             if (semaphore.tryAcquire()) {
-                System.out.println("got the lock for " + feedType.getType());
             } else {
                 DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                 info.setDataSourceID(dataSourceID);
                 info.setDataSourceName("The target system is having trouble with volume. It may take a minute or two for us to start synchronizing.");
                 info.setType(DataSourceRefreshEvent.BLOCKED);
-                System.out.println("user id = " + SecurityUtil.getUserID() + ", data ID " + dataSourceID);
                 info.setUserId(SecurityUtil.getUserID());
-                System.out.println("sending system blocked event");
                 MessageUtils.sendMessage("generalNotifications", info);
                 try {
                     semaphore.acquire();

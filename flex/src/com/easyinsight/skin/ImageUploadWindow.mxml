@@ -41,10 +41,12 @@
 
         private var fileData:ByteArray;
 
+        public var publicImage:Boolean;
+
         private function doComplete(event:Event):void {
             try {
                 fileData = file.data;
-                preferencesService.addImage.send(fileName.text, fileData);
+                preferencesService.addImage.send(fileName.text, fileData, publicImage);
             } catch(e:Error) {
                 Alert.show(e.message);
             }

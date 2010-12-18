@@ -88,7 +88,6 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
                 Node caseNode = caseNodes.get(i);
                 String id = queryField(caseNode, "id/text()");
                 String name = queryField(caseNode, "last-name/text()");
-                System.out.println(name);
                 int notesOffset = 0;
                 int notesCount;
                 do {

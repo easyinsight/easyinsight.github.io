@@ -17,6 +17,12 @@
         protected override function commitProperties():void {
             super.commitProperties();
             reportName = _report.name;
+            if (_report.reportType == AnalysisDefinition.LIST || _report.reportType == AnalysisDefinition.CROSSTAB ||
+                    _report.reportType == AnalysisDefinition.TREE) {
+                exportIndex = 0;
+            } else {
+                exportIndex = 1;
+            }
             reportTags = TagCloud.toString(_report.tagCloud);
             reportDescription = _report.description;
             accountVisible = _report.accountVisible;
@@ -38,10 +44,19 @@
         private var connectionSave:String;
 
         [Bindable]
+        private var exportIndex:int;
+
+        [Bindable]
         private var reportShare:String;
 
         [Bindable]
         private var accountVisible:Boolean;
+
+        private var _coreView:DisplayObject;
+
+        public function set coreView(value:DisplayObject):void {
+            _coreView = value;
+        }
 
         private function onCreation():void {
             reportNameInput.setFocus();
@@ -112,6 +127,10 @@
             new ExcelCreator().exportExcel(_report, this);
         }
 
+        private function pdf():void {
+            new PDFCreator().exportReportToPDF(_report, this, _coreView);
+        }
+
         private function email():void {
             exportService.getReportDelivery.send(_report.analysisID, new Date().getTimezoneOffset());
         }
@@ -147,6 +166,10 @@
         [Bindable]
         [Embed(source="../../../../assets/table.png")]
         private var excelIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_chart.png")]
+        private var pdfIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/plasma_tv.png")]
@@ -231,37 +254,74 @@
                             width="530" borderStyle="none" editable="false" selectable="false" fontWeight="bold" backgroundAlpha="0" fontSize="14" height="75"/>
                     <mx:Spacer height="100%"/>
                     <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                        <mx:ViewStack height="140" width="150" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"
+                                selectedIndex="{exportIndex}">
+                            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                                  backgroundColor="#FFFFFF" height="140"
                                  width="150" cornerRadius="8" buttonMode="true" id="excelBox"
                                  mouseOver="excelBox.setStyle('backgroundColor', 0xDDDDDD)"
                                  mouseOut="excelBox.setStyle('backgroundColor', 0xFFFFFF)"
                                  click="excel()"
                                  mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                            <mx:Image source="{excelIcon}"/>
-                            <mx:Text text="Export to Excel" fontSize="14" selectable="false"/>
-                            <mx:TextArea
-                                    text="Export the report as an Excel spreadsheet"
-                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                    height="80"
-                                    width="130" textAlign="center"/>
-                        </mx:VBox>
+                                <mx:Image source="{excelIcon}"/>
+                                <mx:Text text="Export to Excel" fontSize="14" selectable="false"/>
+                                <mx:TextArea
+                                        text="Export the report as an Excel spreadsheet"
+                                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                        height="80"
+                                        width="130" textAlign="center"/>
+                            </mx:VBox>
+                            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="pdfBox"
+                                 mouseOver="pdfBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="pdfBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="pdf()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                                <mx:Image source="{pdfIcon}"/>
+                                <mx:Text text="Export to PDF" fontSize="14" selectable="false"/>
+                                <mx:TextArea
+                                        text="Export the report as an PDF file"
+                                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                        height="80"
+                                        width="130" textAlign="center"/>
+                            </mx:VBox>
+                        </mx:ViewStack>
+
                         <mx:Spacer width="100%"/>
-                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                        <mx:ViewStack height="140" width="150" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                                  backgroundColor="#FFFFFF" height="140"
                                  width="150" cornerRadius="8" buttonMode="true" id="embedBox"
                                  mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
                                  mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
                                  click="embed()"
                                  mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                            <mx:Image source="{embedIcon}"/>
-                            <mx:Text text="Embed this Report" fontSize="14" selectable="false"/>
-                            <mx:TextArea
-                                    text="Generate HTML to embed the report into a web page"
-                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                    height="80"
-                                    width="130" textAlign="center"/>
-                        </mx:VBox>
+                                <mx:Image source="{embedIcon}"/>
+                                <mx:Text text="Embed this Report" fontSize="14" selectable="false"/>
+                                <mx:TextArea
+                                        text="Generate HTML to embed the report into a web page"
+                                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                        height="80"
+                                        width="130" textAlign="center"/>
+                            </mx:VBox>
+                            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="basecampBox"
+                                 mouseOver="basecampBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="basecampBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="embed()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                                <mx:Image source="{embedIcon}"/>
+                                <mx:Text text="Embed in Basecamp" fontSize="14" selectable="false"/>
+                                <mx:TextArea
+                                        text="Generate HTML to embed the report into a Basecamp message"
+                                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                        height="80"
+                                        width="130" textAlign="center"/>
+                            </mx:VBox>
+                        </mx:ViewStack>
+
                         <mx:Spacer width="100%"/>
                         <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
                                  backgroundColor="#FFFFFF" height="140"

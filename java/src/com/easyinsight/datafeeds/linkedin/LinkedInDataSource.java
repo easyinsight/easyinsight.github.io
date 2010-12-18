@@ -110,9 +110,10 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
             if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecret == null) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
                 OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
-                provider.retrieveAccessToken(consumer, pin);
+                provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecret = consumer.getTokenSecret();
+                pin = null;
             }
         } catch (Exception e) {
             LogClass.error(e);

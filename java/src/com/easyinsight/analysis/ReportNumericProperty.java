@@ -20,6 +20,12 @@ public class ReportNumericProperty extends ReportProperty {
         this.value = value;
     }
 
+    public ReportNumericProperty(String propertyName, double value, boolean enabled) {
+        super(propertyName);
+        this.value = value;
+        setEnabled(enabled);
+    }
+
     public ReportNumericProperty() {
     }
 

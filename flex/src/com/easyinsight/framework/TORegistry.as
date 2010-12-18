@@ -64,6 +64,8 @@ import com.easyinsight.filtering.NullValueFilterDefinition;
 import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
 import com.easyinsight.goals.KPITreeWrapper;
 import com.easyinsight.google.GoogleSpreadsheetUploadContext;
+import com.easyinsight.google.QuickbaseCompositeSource;
+import com.easyinsight.google.QuickbaseResponse;
 import com.easyinsight.google.Spreadsheet;
 import com.easyinsight.google.Worksheet;
 import com.easyinsight.icons.Icon;
@@ -155,6 +157,7 @@ public class TORegistry {
         var freshbooks:FreshbooksDataSource;
         var redirect:RedirectDataSource;
         var constantContact:ConstantContactDataSource;
+        var qbSource:QuickbaseCompositeSource;
         var connection:CompositeFeedConnection;
         var node:CompositeFeedNode;
         var wf:WholeFoodsDataSource;
@@ -175,6 +178,7 @@ public class TORegistry {
         var scorecardWrapper:ScorecardWrapper;
         var dsd:DataSourceDescriptor;
         var sKPIData:SolutionKPIData;
+        var qb:QuickbaseResponse;
     }
 }
 }

@@ -26,6 +26,13 @@ public class ReportImageProperty extends ReportProperty {
         this.imageID = imageDescriptor.getId();
     }
 
+    public ReportImageProperty(String propertyName, ImageDescriptor imageDescriptor, boolean enabled) {
+        super(propertyName);
+        this.imageName = imageDescriptor.getName();
+        this.imageID = imageDescriptor.getId();
+        setEnabled(enabled);
+    }
+
     public ReportImageProperty() {
     }
 

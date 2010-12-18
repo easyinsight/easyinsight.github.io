@@ -90,7 +90,6 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
                     Node companyNode = companyNodes.get(i);
                     String id = queryField(companyNode, "id/text()");
                     String name = queryField(companyNode, "last-name/text()");
-                    System.out.println(name);
                     Document emails = runRestRequest("/people/" + id + "/emails.xml", client, builder, url, false, false, parentDefinition);
                     Nodes emailNodes = emails.query("/emails/email");
                     for (int j = 0; j < emailNodes.size(); j++) {

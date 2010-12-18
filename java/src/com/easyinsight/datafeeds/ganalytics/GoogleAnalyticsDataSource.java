@@ -233,12 +233,13 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     @Override
     public void exchangeTokens(EIConnection conn) throws Exception {
         try {
-            if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecret == null) {
+            if (pin != null && !"".equals(pin)) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
                 OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
                 provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecret = consumer.getTokenSecret();
+                pin = null;
             }
         } catch (Exception e) {
             LogClass.error(e);

@@ -95,7 +95,15 @@ public class GoogleSpreadsheetFeed extends Feed {
                             if (string == null) {
                                 value = new EmptyValue();
                             } else {
-                                value = new StringValue(string);
+                                string = string.trim();
+                                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                    value = new NumericValue(NumericValue.produceDoubleValue(string));
+                                } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                    AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                                    value = date.renameMeLater(new StringValue(string));
+                                } else {
+                                    value = new StringValue(string);
+                                }
                             }
                             row.addValue(analysisItem.createAggregateKey(), value);
                         }

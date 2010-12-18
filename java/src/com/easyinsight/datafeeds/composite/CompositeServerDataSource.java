@@ -246,7 +246,6 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             insertStmt.setLong(2, getDataFeedID());
             insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             insertStmt.setString(4, InetAddress.getLocalHost().getHostAddress());
-            System.out.println("start = " + new Date());
             insertStmt.execute();
             long auditID = Database.instance().getAutoGenKey(insertStmt);
             boolean changed = false;

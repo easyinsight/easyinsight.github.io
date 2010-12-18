@@ -11,8 +11,6 @@
 
         import com.easyinsight.analysis.ReportFormItem;
 
-        import com.easyinsight.framework.User;
-
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -22,32 +20,14 @@
 
         private var items:ArrayCollection = new ArrayCollection();
 
-        public static const USER_SKIN:int = 1;
-        public static const ACCOUNT_SKIN:int = 2;
-
-        private var _skinMode:int;
-
-        public function set skinMode(value:int):void {
-            _skinMode = value;
-        }
-
         private var skin:ApplicationSkinTO;
 
         private function onCreation():void {
-            if (_skinMode == USER_SKIN) {
-                preferencesService.getUserSkin.send();
-            } else if (_skinMode == ACCOUNT_SKIN) {
-                preferencesService.getAccountSkin.send();
-            }
+            preferencesService.getGlobalSkin.send();
         }
 
-        private function gotUserSkin():void {
-            skin = preferencesService.getUserSkin.lastResult as ApplicationSkinTO;
-            gotSettings();
-        }
-
-        private function gotAccountSkin():void {
-            skin = preferencesService.getAccountSkin.lastResult as ApplicationSkinTO;
+        private function gotSkin():void {
+            skin = preferencesService.getGlobalSkin.lastResult as ApplicationSkinTO;
             gotSettings();
         }
 
@@ -58,14 +38,14 @@
             }
 
             items.addItem(new ColorReportFormItem("Core Application Background Color", "coreAppBackgroundColor", skin.coreAppBackgroundColor, skin, "coreAppBackgroundColorEnabled"));
-            items.addItem(new ImageReportFormItem("Core Application Background Image", "coreAppBackgroundImage", skin.coreAppBackgroundImage, skin, "coreAppBackgroundImageEnabled"));
+            items.addItem(new ImageReportFormItem("Core Application Background Image", "coreAppBackgroundImage", skin.coreAppBackgroundImage, skin, "coreAppBackgroundImageEnabled", true));
             items.addItem(new ComboBoxReportFormItem("Core Application Background Styling", "coreAppBackgroundSize", skin.coreAppBackgroundSize, skin, ["100%", "Auto"], "coreAppBackgroundSizeEnabled"));
             items.addItem(new ColorReportFormItem("Header Bar Background Color", "headerBarBackgroundColor", skin.headerBarBackgroundColor, skin, "headerBarBackgroundColorEnabled"));
             items.addItem(new ColorReportFormItem("Header Bar Divider Color", "headerBarDividerColor", skin.headerBarDividerColor, skin, "headerBarDividerColorEnabled"));
             items.addItem(new ColorReportFormItem("Center Canvas Background Color", "centerCanvasBackgroundColor", skin.centerCanvasBackgroundColor, skin, "centerCanvasBackgroundColorEnabled"));
             items.addItem(new NumericReportFormItem("Center Canvas Background Alpha", "centerCanvasBackgroundAlpha", skin.centerCanvasBackgroundAlpha, skin, 0, 1, "centerCanvasBackgroundAlphaEnabled"));
 
-            items.addItem(new ImageReportFormItem("Report Editor Background Image", "reportBackground", skin.reportBackground, skin, "reportBackgroundEnabled"));
+            items.addItem(new ImageReportFormItem("Report Editor Background Image", "reportBackground", skin.reportBackground, skin, "reportBackgroundEnabled", true));
             items.addItem(new ComboBoxReportFormItem("Report Editor Background Styling", "reportBackgroundSize", skin.reportBackgroundSize, skin, ["100%", "Auto"], "reportBackgroundSizeEnabled"));
             var lastItem:ReportFormItem = items.getItemAt(items.length - 1) as ReportFormItem;
             lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
@@ -79,14 +59,6 @@
         }
 
         private function savedSettings():void {
-            var resultSkin:ApplicationSkinTO;
-            if (_skinMode == USER_SKIN) {
-                resultSkin = preferencesService.saveUserSkin.lastResult as ApplicationSkinTO;
-            } else if (_skinMode == ACCOUNT_SKIN) {
-                resultSkin = preferencesService.saveAccountSkin.lastResult as ApplicationSkinTO;
-            }
-            User.getInstance().applicationSkin = resultSkin;
-            ApplicationSkin.instance().applyUserSettings(User.getInstance().applicationSkin);
             PopUpManager.removePopUp(this);
         }
 
@@ -99,19 +71,13 @@
                 for each (var item:ReportFormItem in items) {
                     item.save();
                 }
-                if (_skinMode == USER_SKIN) {
-                    preferencesService.saveUserSkin.send(skin);
-                } else if (_skinMode == ACCOUNT_SKIN) {
-                    preferencesService.saveAccountSkin.send(skin);
-                }
+                preferencesService.saveGlobalSkin.send(skin);
             }
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
-        <mx:method name="getUserSkin" result="gotUserSkin()"/>
-        <mx:method name="getAccountSkin" result="gotAccountSkin()"/>
-        <mx:method name="saveUserSkin" result="savedSettings()"/>
-        <mx:method name="saveAccountSkin" result="savedSettings()"/>
+        <mx:method name="getGlobalSkin" result="gotSkin()"/>
+        <mx:method name="saveGlobalSkin" result="savedSettings()"/>
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form id="reportForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">

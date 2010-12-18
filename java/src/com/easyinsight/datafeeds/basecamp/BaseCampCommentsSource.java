@@ -66,7 +66,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
         DataSet ds = new DataSet();
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
-        if (source.isIncludeComments()) {
+        if (source.isIncludeMilestoneComments()) {
 
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();

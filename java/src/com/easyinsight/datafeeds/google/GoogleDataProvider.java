@@ -1,22 +1,41 @@
 package com.easyinsight.datafeeds.google;
 
+import com.easyinsight.analysis.*;
+import com.easyinsight.core.DataSourceDescriptor;
+import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
+import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
+import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.database.Database;
+import com.easyinsight.users.Account;
+import com.easyinsight.userupload.UploadPolicy;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
 import flex.messaging.FlexContext;
+import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.*;
 import java.net.URL;
 import java.sql.PreparedStatement;
-import java.sql.Connection;
 import java.sql.ResultSet;
 
 /**
@@ -88,7 +107,7 @@ public class GoogleDataProvider {
 
     private List<Spreadsheet> getSpreadsheets(String tokenKey, String tokenSecret) {
         List<Spreadsheet> worksheets = new ArrayList<Spreadsheet>();
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement existsStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, WORKSHEETURL FROM GOOGLE_FEED, DATA_FEED, UPLOAD_POLICY_USERS " +
                     "WHERE GOOGLE_FEED.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND UPLOAD_POLICY_USERS.FEED_ID = " +
@@ -109,7 +128,6 @@ public class GoogleDataProvider {
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
-                System.out.println("checking " + entry.getTitle().getPlainText());
                 try {
                     List<WorksheetEntry> worksheetEntries = entry.getWorksheets();
                     List<Worksheet> worksheetList = new ArrayList<Worksheet>();
@@ -119,7 +137,6 @@ public class GoogleDataProvider {
                         worksheet.setSpreadsheet(entry.getTitle().getPlainText());
                         worksheet.setTitle(title);
                         String url = worksheetEntry.getListFeedUrl().toString();
-                        System.out.println("*** " + title + " - " + url);
                         worksheet.setUrl(url);
                         worksheet.setFeedDescriptor(worksheetToFeedMap.get(url));
                         worksheetList.add(worksheet);
@@ -139,5 +156,221 @@ public class GoogleDataProvider {
             Database.closeConnection(conn);
         }
         return worksheets;
+    }
+
+    private static final String AUTHENTICATE_XML = "<username>{0}</username><password>{1}</password><hours>24</hours>";
+    private static final String GET_APPLICATIONS_XML = "<ticket>{0}</ticket>";
+    private static final String GET_SCHEMA_XML = "<ticket>{0}</ticket><apptoken>{1}</apptoken>";
+
+    public QuickbaseResponse authenticate(String userName, String password) {
+        SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
+        try {
+            String requestBody = MessageFormat.format(AUTHENTICATE_XML, userName, password);
+            Document doc = executeRequest("www.quickbase.com", null, "API_Authenticate", requestBody);
+            String errorCode = doc.query("/qdbapi/errcode/text()").get(0).getValue();
+            if ("0".equals(errorCode)) {
+                String ticket = doc.query("/qdbapi/ticket/text()").get(0).getValue();
+                QuickbaseResponse quickbaseResponse = new QuickbaseResponse();
+                quickbaseResponse.setSessionTicket(ticket);
+                return quickbaseResponse;
+            } else {
+                String errorText = doc.query("/qdbapi/errtext/text()").get(0).getValue();
+                QuickbaseResponse quickbaseResponse = new QuickbaseResponse();
+                quickbaseResponse.setErrorMessage(errorText);
+                return quickbaseResponse;
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public EIDescriptor createDataSource(String sessionTicket) {
+        SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            String applicationToken = "txxe32vjyuwicxbjpnpdwjatqb";
+            String requestBody = MessageFormat.format(GET_APPLICATIONS_XML, sessionTicket);
+            Document doc = executeRequest("www.quickbase.com", null, "API_GrantedDBs", requestBody);
+            Nodes databases = doc.query("/qdbapi/databases/dbinfo");
+            List<Connection> connections = new ArrayList<Connection>();
+            QuickbaseCompositeSource quickbaseCompositeSource = new QuickbaseCompositeSource();
+            quickbaseCompositeSource.setHost("www.quickbase.com");
+            quickbaseCompositeSource.setSessionTicket(sessionTicket);
+            quickbaseCompositeSource.setApplicationToken(applicationToken);
+            quickbaseCompositeSource.setFeedName("Quickbase");
+
+            UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+            quickbaseCompositeSource.setUploadPolicy(uploadPolicy);
+            new FeedCreation().createFeed(quickbaseCompositeSource, conn, new DataSet(), uploadPolicy);
+
+            List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
+
+            Map<String, QuickbaseDatabaseSource> map = new HashMap<String, QuickbaseDatabaseSource>();
+            for (int i = 0; i < databases.size(); i++) {
+                Node database = databases.get(i);
+                QuickbaseDatabaseSource quickbaseDatabaseSource = createDataSource(sessionTicket, applicationToken, database, connections);
+                quickbaseDatabaseSource.setVisible(false);
+                map.put(quickbaseDatabaseSource.getDatabaseID(), quickbaseDatabaseSource);
+                quickbaseDatabaseSource.setParentSourceID(quickbaseCompositeSource.getDataFeedID());
+                UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+                quickbaseDatabaseSource.setUploadPolicy(childPolicy);
+                new FeedCreation().createFeed(quickbaseDatabaseSource, conn, new DataSet(), childPolicy);
+                CompositeFeedNode node = new CompositeFeedNode(quickbaseDatabaseSource.getDataFeedID(), 0, 0);
+                nodes.add(node);
+            }
+
+            quickbaseCompositeSource.setCompositeFeedNodes(nodes);
+
+            List<CompositeFeedConnection> compositeFeedConnectionList = new ArrayList<CompositeFeedConnection>();
+            for (Connection connection : connections) {
+                QuickbaseDatabaseSource source = map.get(connection.sourceDatabaseID);
+                QuickbaseDatabaseSource target = map.get(connection.targetDatabaseID);
+                Key sourceKey = null;
+                for (AnalysisItem field : source.getFields()) {
+                    Key key = field.getKey();
+                    if (key.toKeyString().split("\\.")[1].equals(connection.sourceDatabaseFieldID)) {
+                        sourceKey = key;
+                    }
+                }
+                Key targetKey = null;
+                for (AnalysisItem field : target.getFields()) {
+                    Key key = field.getKey();
+                    if (key.toKeyString().split("\\.")[1].equals(connection.targetDatabaseFieldID)) {
+                        targetKey = key;
+                    }
+                }
+                if (sourceKey == null) {
+                    throw new RuntimeException("Couldn't find " + connection.sourceDatabaseFieldID + " on " + source.getFeedName());
+                }
+                if (targetKey == null) {
+                    throw new RuntimeException("Couldn't find " + connection.targetDatabaseFieldID + " on " + target.getFeedName());
+                }
+                compositeFeedConnectionList.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceKey, targetKey));
+            }
+            quickbaseCompositeSource.setConnections(compositeFeedConnectionList);
+            quickbaseCompositeSource.populateFields(conn);
+
+            new FeedStorage().updateDataFeedConfiguration(quickbaseCompositeSource, conn);
+
+            return new DataSourceDescriptor(quickbaseCompositeSource.getFeedName(), quickbaseCompositeSource.getDataFeedID(),
+                    quickbaseCompositeSource.getFeedType().getType());
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    private QuickbaseDatabaseSource createDataSource(String sessionTicket, String applicationToken, Node database, List<Connection> connections) throws IOException, ParsingException {
+        QuickbaseDatabaseSource quickbaseDatabaseSource = new QuickbaseDatabaseSource();
+
+
+        String databaseID = database.query("dbid/text()").get(0).getValue();
+        quickbaseDatabaseSource.setDatabaseID(databaseID);
+
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+
+        String tableName = getSchema(sessionTicket, applicationToken, databaseID, items, connections);
+        quickbaseDatabaseSource.setFeedName(tableName);
+
+        quickbaseDatabaseSource.setFields(items);
+
+        return quickbaseDatabaseSource;
+    }
+
+    private String getSchema(String sessionTicket, String applicationToken, String databaseID, List<AnalysisItem> items, List<Connection> connections) throws IOException, ParsingException {
+        String schemaRequest = MessageFormat.format(GET_SCHEMA_XML, sessionTicket, applicationToken);
+        Document schemaDoc = executeRequest("www.quickbase.com", databaseID, "API_GetSchema", schemaRequest);
+        String tableName = schemaDoc.query("/qdbapi/table/name/text()").get(0).getValue();
+        Nodes fields = schemaDoc.query("/qdbapi/table/fields/field");
+        // determine URLs
+
+
+        for (int j = 0; j < fields.size(); j++) {
+            Element field = (Element) fields.get(j);
+            String fieldID = field.getAttribute("id").getValue();
+            String keyField = databaseID + "." + fieldID;
+            NamedKey namedKey = new NamedKey(keyField);
+            String fieldType = field.getAttribute("field_type").getValue();
+            Attribute attributeMode = field.getAttribute("mode");
+            if (attributeMode != null && "lookup".equals(attributeMode.getValue())) {
+                continue;
+            }
+            String label = field.query("label/text()").get(0).getValue();
+            if ("text".equals(fieldType) || "checkbox".equals(fieldType) || "phone".equals(fieldType) ||
+                    "userid".equals(fieldType)) {
+                items.add(new AnalysisDimension(namedKey, label));
+            } else if ("recordid".equals(fieldType)) {
+                AnalysisDimension dim = new AnalysisDimension(namedKey, label);
+                dim.setHidden(true);
+                items.add(dim);
+            } else if ("url".equals(fieldType)) {
+                AnalysisDimension dim = new AnalysisDimension(namedKey, label);
+                items.add(dim);
+            } else if ("dblink".equals(fieldType)) {
+                String targetDatabaseID = field.query("target_dbid/text()").get(0).getValue();
+                String targetFieldID = field.query("target_fid/text()").get(0).getValue();
+                String sourceFieldID = field.query("source_fid/text()").get(0).getValue();
+                connections.add(new Connection(databaseID, sourceFieldID, targetDatabaseID, targetFieldID));
+            } else if ("date".equals(fieldType) || "timestamp".equals(fieldType)) {
+                items.add(new AnalysisDateDimension(namedKey, label, AnalysisDateDimension.DAY_LEVEL));
+            } else if ("currency".equals(fieldType)) {
+                items.add(new AnalysisMeasure(namedKey, label, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
+            } else if ("duration".equals(fieldType)) {
+                items.add(new AnalysisMeasure(namedKey, label, AggregationTypes.SUM, true, FormattingConfiguration.MILLISECONDS));
+            } else if ("float".equals(fieldType)) {
+                items.add(new AnalysisMeasure(namedKey, label, AggregationTypes.SUM));
+            }
+        }
+
+        return tableName;
+    }
+
+    private static class Connection {
+        String sourceDatabaseID;
+        String sourceDatabaseFieldID;
+        String targetDatabaseID;
+        String targetDatabaseFieldID;
+
+        private Connection(String sourceDatabaseID, String sourceDatabaseFieldID, String targetDatabaseID, String targetDatabaseFieldID) {
+            this.sourceDatabaseID = sourceDatabaseID;
+            this.sourceDatabaseFieldID = sourceDatabaseFieldID;
+            this.targetDatabaseID = targetDatabaseID;
+            this.targetDatabaseFieldID = targetDatabaseFieldID;
+        }
+
+        @Override
+        public String toString() {
+            return "Connection{" +
+                    "sourceDatabaseID='" + sourceDatabaseID + '\'' +
+                    ", sourceDatabaseFieldID='" + sourceDatabaseFieldID + '\'' +
+                    ", targetDatabaseID='" + targetDatabaseID + '\'' +
+                    ", targetDatabaseFieldID='" + targetDatabaseFieldID + '\'' +
+                    '}';
+        }
+    }
+
+    private Document executeRequest(String host, String path, String action, String requestBody) throws IOException, ParsingException {
+        if (path == null) {
+            path = "main";
+        }
+        String fullPath = "https://" + host + "/db/" + path;
+        HttpPost httpRequest = new HttpPost(fullPath);
+        httpRequest.setHeader("Accept", "application/xml");
+        httpRequest.setHeader("Content-Type", "application/xml");
+        httpRequest.setHeader("QUICKBASE-ACTION", action);
+        BasicHttpEntity entity = new BasicHttpEntity();
+        String contentString = "<qdbapi>"+requestBody+"</qdbapi>";
+        byte[] contentBytes = contentString.getBytes();
+        entity.setContent(new ByteArrayInputStream(contentBytes));
+        entity.setContentLength(contentBytes.length);
+        httpRequest.setEntity(entity);
+        HttpClient client = new DefaultHttpClient();
+        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+        String string = client.execute(httpRequest, responseHandler);
+        return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
     }
 }

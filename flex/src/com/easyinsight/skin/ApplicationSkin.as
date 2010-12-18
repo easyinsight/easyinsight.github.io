@@ -8,7 +8,7 @@ public class ApplicationSkin extends EventDispatcher {
     private var _coreAppBackgroundColor:uint = 0x818285;
     private var _coreAppBackgroundSize:String = "auto";
     private var _headerBarBackgroundColor:uint = 0xF0F0F0;
-    private var _headerBarLogo:Class;
+    private var _headerBarLogo:Object;
     private var _headerBarDividerColor:uint = 0xD42525;
     private var _centerCanvasBackgroundColor:uint = 0xFFFFFF;
     private var _centerCanvasBackgroundAlpha:Number = 1;
@@ -52,6 +52,13 @@ public class ApplicationSkin extends EventDispatcher {
             });
             reportLoader.load(appSkin.reportBackground.id);
             reportBackgroundSize = appSkin.reportBackgroundSize;
+        }
+        if (appSkin.headerBarLogo != null) {
+            var headerBarLoader:ImageLoader = new ImageLoader();
+            headerBarLoader.addEventListener(ImageLoadEvent.IMAGE_LOADED, function(event:ImageLoadEvent):void {
+                headerBarLogo = event.bitmap;
+            });
+            headerBarLoader.load(appSkin.headerBarLogo.id);
         }
     }
 
@@ -122,11 +129,11 @@ public class ApplicationSkin extends EventDispatcher {
     }
 
     [Bindable(event="headerBarLogoChanged")]
-    public function get headerBarLogo():Class {
+    public function get headerBarLogo():Object {
         return _headerBarLogo;
     }
 
-    public function set headerBarLogo(value:Class):void {
+    public function set headerBarLogo(value:Object):void {
         if (_headerBarLogo == value) return;
         _headerBarLogo = value;
         dispatchEvent(new Event("headerBarLogoChanged"));
