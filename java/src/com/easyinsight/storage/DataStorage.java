@@ -359,7 +359,6 @@ public class DataStorage {
                             continue;
                         }
                         Key key = analysisItem.createAggregateKey(false);
-                        System.out.println(key.toKeyString() + " - " + analysisItem.getKey().toBaseKey().getKeyID());
                         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
@@ -417,12 +416,6 @@ public class DataStorage {
             dropTableStmt.execute();
         }
         return this.version;
-    }
-
-    public static void main(String[] args) {
-        NumericValue existingValue = new NumericValue(583978.5840958490);
-        String string = ((Long) ((NumericValue) existingValue).getValue().longValue()).toString();
-        System.out.println(string);
     }
 
     /**
@@ -509,7 +502,6 @@ public class DataStorage {
         PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
-        System.out.println(queryBuilder.toString());
         ResultSet dataRS = queryStmt.executeQuery();
         processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery);
         dataSet.setLastTime(metadata.getLastData());
@@ -771,7 +763,6 @@ public class DataStorage {
         }
         tableBuilder.append(getTableName());
         String updateSQL = "DELETE " + getTableName() + " FROM " + tableBuilder.toString() + " WHERE " + whereBuilder.toString();
-        System.out.println(updateSQL);
         PreparedStatement updateStmt = storageConn.prepareStatement(updateSQL);
         int i = 1;
         for (IWhere where : wheres) {
@@ -1146,7 +1137,6 @@ public class DataStorage {
             int type = keyMetadata.type;
             filterDefinition.populatePreparedStatement(queryStmt, position, type, insightRequestMetadata);
         }
-        System.out.println(sqlBuilder.toString());
         ResultSet dataRS = queryStmt.executeQuery();
         while (dataRS.next()) {
             int i = 1;

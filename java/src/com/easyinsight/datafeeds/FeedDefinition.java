@@ -545,9 +545,6 @@ public class FeedDefinition implements Cloneable, Serializable {
                 key = field.getKey();
             }
         }
-        if (key == null) {
-            System.out.println("*** could not find " + sourceKey);
-        }
         return key;
     }
 

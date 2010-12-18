@@ -25,12 +25,10 @@ public class DataSourceMutex {
     public boolean lock(long dataSourceID) {
         Object obj = mutexMap.get(dataSourceID);
         if (obj == null) {
-            System.out.println(Thread.currentThread().getId() + " got the lock for " + dataSourceID);
             obj = new Object();
             mutexMap.put(dataSourceID, obj);
             return true;
         } else {
-            System.out.println(Thread.currentThread().getId() + " someone else had the lock for " + dataSourceID);
             synchronized(obj) {
                 try {
                     obj.wait(600000);

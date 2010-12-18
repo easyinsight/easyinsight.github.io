@@ -17,9 +17,11 @@
     </mx:Style>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.ChartDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
 
         import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.charts.Chart3DVisuals;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
@@ -33,6 +35,7 @@
 
         import mx.binding.utils.BindingUtils;
         import mx.charts.events.ChartItemEvent;
+        import mx.collections.Sort;
         import mx.events.FlexEvent;
 
         import com.easyinsight.filtering.FilterRawData;
@@ -47,6 +50,7 @@
         import mx.charts.ChartItem;
         import mx.charts.CategoryAxis;
         import mx.collections.ArrayCollection;
+        import mx.graphics.SolidColor;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -166,15 +170,6 @@
                 //xAxis.title = xAxisTitle;
                 BindingUtils.bindProperty(xAxis, "title", this, "xAxisTitle");
                 columnChart.horizontalAxis = xAxis;
-                if (sortable) {
-                    /*var axisRenderer:AxisRenderer = new AxisRenderer();
-                     axisRenderer.axis = xAxis;
-                     xAxisTitleRendererFactory = new SortableAxisTitleFactory(xAxisItem, true);
-                     axisRenderer.titleRenderer = xAxisTitleRendererFactory;
-                     //axisRenderer.setStyle("color", "#FFFFFF");
-                     axisRenderer.placement = "bottom";*/
-                    //columnChart.horizontalAxisRenderers = [ axisRenderer ];
-                }
 
                 // define the Y axis
 
@@ -183,15 +178,6 @@
                 BindingUtils.bindProperty(yAxis, "title", this, "yAxisTitle");
                 yAxis.labelFunction = renderAxis;
                 columnChart.verticalAxis = yAxis;
-                if (sortable) {
-                    /*var yAxisRenderer:AxisRenderer = new AxisRenderer();
-                     yAxisRenderer.axis = yAxis;
-                     //yAxisRenderer.setStyle("color", "#FFFFFF");
-                     yAxisTitleRendererFactory = new SortableAxisTitleFactory(yAxisItem, false);
-                     yAxisRenderer.titleRenderer = yAxisTitleRendererFactory;
-                     yAxisRenderer.placement = "left";*/
-                    //columnChart.verticalAxisRenderers = [ yAxisRenderer ];
-                }
 
                 // create the data series
 
@@ -233,7 +219,11 @@
         }
 
         private function customFill(element:ChartItem, index:Number):IFill {
-            return FillProvider.getColor(columnChartDef.colorScheme, bgFills, index);
+            if (columnChartDef.useChartColor) {
+                return new SolidColor(columnChartDef.chartColor);
+            } else {
+                return FillProvider.getColor(columnChartDef.colorScheme, bgFills, index);
+            }
         }
 
         private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
@@ -275,6 +265,20 @@
 
             if (dataSet.length > 0) {
                 canvas.setStyle("backgroundAlpha", columnChartDef.backgroundAlpha);
+                 if (columnChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
+                    var sort:Sort = new Sort();
+                    if (columnChartDef.columnSort == ChartDefinition.SORT_X_ASCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, false);
+                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, true);
+                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, false);
+                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, true);
+                    }
+                    dataSet.sort = sort;
+                    dataSet.refresh();
+                }
                 stackIndex = 0;
                 xField = columnChartDef.xaxis.qualifiedName();
                 createChart();

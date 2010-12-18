@@ -23,17 +23,4 @@ public class RandomTextGenerator {
         }
         return new String(activationBuf);
     }
-
-    public static void main(String[] args) {
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-        System.out.println(generateText(12));
-    }
 }

@@ -307,26 +307,4 @@ public class AnalysisDateDimension extends AnalysisDimension {
         result = 31 * result + dateLevel;
         return result;
     }
-
-    public static void main(String[] args) throws ParseException {
-        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse("2010-04-09 03:30");
-        Calendar calendar = Calendar.getInstance();
-        TimeZone timeZone = TimeZone.getTimeZone("GMT-10");
-        calendar.setTime(date);
-        calendar.setTimeZone(timeZone);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        System.out.println(calendar.getTime());
-        Calendar newCal = Calendar.getInstance();
-        newCal.setTime(calendar.getTime());
-        newCal.setTimeZone(TimeZone.getDefault());
-        System.out.println(newCal.getTime());
-    }
-
-    /*@Override
-    public AggregateKey createAggregateKey() {
-        return new AggregateDateKey(getKey(), getType(), getDateLevel());
-    }*/
 }

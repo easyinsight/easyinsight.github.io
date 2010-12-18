@@ -18,8 +18,8 @@ import mx.collections.ArrayCollection;
 		public var mapDefinitionID:int;
         public var measure:AnalysisItem;
         public var geography:AnalysisItem;
-        public var highColor:uint;
-        public var lowColor:uint;
+        public var highColor:uint = 0xAAAAFF;
+        public var lowColor:uint = 0x333388;
         public var colorStrategy:String;
         public var backgroundColor:uint;
 		

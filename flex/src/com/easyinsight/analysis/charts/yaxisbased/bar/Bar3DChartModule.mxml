@@ -16,8 +16,10 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.ChartDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.SortFunctionFactory;
         import com.easyinsight.analysis.charts.Chart3DVisuals;
         import com.easyinsight.filtering.FilterRawData;
 
@@ -32,6 +34,7 @@
 
         import mx.binding.utils.BindingUtils;
         import mx.charts.events.ChartItemEvent;
+        import mx.collections.Sort;
         import mx.events.FlexEvent;
         import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
@@ -214,6 +217,20 @@
             if (dataSet.length > 0) {
                 canvas.setStyle("backgroundAlpha", barChartDef.backgroundAlpha);
                 stackIndex = 0;
+                 if (barChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
+                    var sort:Sort = new Sort();
+                    if (barChartDef.columnSort == ChartDefinition.SORT_X_ASCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measure, false);
+                    } else if (barChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measure, true);
+                    } else if (barChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, false);
+                    } else if (barChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, true);
+                    }
+                    dataSet.sort = sort;
+                    dataSet.refresh();
+                }
                 yField = barChartDef.yaxis.qualifiedName();
                 createChart();
 

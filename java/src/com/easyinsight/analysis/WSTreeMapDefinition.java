@@ -114,11 +114,4 @@ public class WSTreeMapDefinition extends WSAnalysisDefinition {
         columnList.add(measure2);
         return columnList;
     }
-
-    public static void main(String[] args) {
-        int i= Integer.parseInt("333388",16);
-        System.out.println(i);
-        int j= Integer.parseInt("AAAAFF",16);
-        System.out.println(j);
-    }
 }

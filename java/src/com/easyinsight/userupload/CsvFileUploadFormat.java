@@ -41,7 +41,6 @@ public class CsvFileUploadFormat extends UploadFormat {
         charsetDetector.setText(data);
         CharsetMatch charsetMatch = charsetDetector.detect();
         String charsetName = charsetMatch.getName();
-        System.out.println("encoding = " + charsetName);
         ByteArrayInputStream stream = new ByteArrayInputStream(data);
         CsvReader r= new CsvReader(stream, Charset.forName(charsetName));
         List<Value[]> grid = new ArrayList<Value[]>();

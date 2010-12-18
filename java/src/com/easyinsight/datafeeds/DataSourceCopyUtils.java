@@ -125,7 +125,6 @@ public class DataSourceCopyUtils {
             }
         } else {
             DataStorage clonedTable = DataStorage.writeConnection(clonedFeedDefinition, conn);
-            System.out.println("*** CLONING " + clonedFeedDefinition.getFeedName());
             try {
                 clonedTable.createTable();
                 clonedTable.commit();
