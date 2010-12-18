@@ -31,12 +31,5 @@ public class YAxisDefinition extends ChartDefinition{
     override public function getFields():ArrayCollection {
         return new ArrayCollection([ yaxis, measure]);
     }
-
-    override public function createFormItems():ArrayCollection {
-        var items:ArrayCollection = super.createFormItems();
-        items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", colorScheme,
-                    this, FillProvider.fillOptions));
-        return items;
-    }
 }
 }

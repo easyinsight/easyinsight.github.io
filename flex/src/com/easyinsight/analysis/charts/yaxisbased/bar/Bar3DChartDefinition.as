@@ -3,6 +3,7 @@ import com.easyinsight.analysis.ChartDefinition;
 import com.easyinsight.analysis.CheckBoxReportFormItem;
 import com.easyinsight.analysis.ColorReportFormItem;
 import com.easyinsight.analysis.ComboBoxReportFormItem;
+import com.easyinsight.analysis.FillProvider;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.yaxisbased.YAxisDefinition;
 import com.easyinsight.analysis.AnalysisDefinition;
@@ -36,6 +37,8 @@ public class Bar3DChartDefinition extends YAxisDefinition{
 
     override public function createFormItems():ArrayCollection {
         var items:ArrayCollection = super.createFormItems();
+        items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", colorScheme,
+                    this, [FillProvider.ocean, FillProvider.linearGradients, FillProvider.highContrast]));
         items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", useChartColor, this));
         items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", chartColor, this));
         items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", columnSort, this,

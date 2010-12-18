@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer"
         width="100%" height="100%" creationComplete="setupListeners()">
     <mx:Style>
         PieSeries {
@@ -67,14 +67,12 @@
                 pieChart.setStyle("fontSize", pieChartDef.fontSize);
                 pieSeries.setStyle("fontFamily", pieChartDef.fontName);
                 pieSeries.setStyle("fontSize", pieChartDef.fontSize);
-                if (pieChartDef.colorScheme == FillProvider.spectral) {
-                    pieSeries.setStyle("fills", FillProvider.createSpectralColors());
+                if (pieChartDef.colorScheme == FillProvider.radialGradients) {
+                    pieSeries.setStyle("fills", FillProvider.createRadialGradients());
                 } else if (pieChartDef.colorScheme == FillProvider.highContrast) {
                     pieSeries.setStyle("fills", FillProvider.createSAPColors());
-                } else if (pieChartDef.colorScheme == FillProvider.warmColors) {
-                    pieSeries.setStyle("fills", FillProvider.createWarmColors());
                 } else {
-                    pieSeries.setStyle("fills", FillProvider.createSampleGradient());
+                    pieSeries.setStyle("fills", FillProvider.createRadialGradients());
                 }
                 //StyleManager.getStyleDeclaration("UITextField");
                 this.measureFormatter = pieChartDef.measure.getFormatter();
@@ -150,11 +148,11 @@
 
         [Bindable]
         private var stackIndex:int = 0;
-		]]>
+        ]]>
 	</mx:Script>
     <mx:Canvas width="100%" height="100%" id="canvas" backgroundAlpha="1" backgroundColor="#FFFFFF">
         <mx:HBox width="100%" height="100%">
-            <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
+            <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="none" height="100%" width="100%"
                         paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="onClick(event)"
                     showDataTips="true" fontFamily="Tahoma" fontSize="14">
                 <mx:series>

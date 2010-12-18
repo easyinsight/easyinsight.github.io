@@ -36,12 +36,5 @@ public class XAxisDefinition extends ChartDefinition{
     override public function getFields():ArrayCollection {
         return new ArrayCollection([ xaxis, measure]);
     }
-
-    override public function createFormItems():ArrayCollection {
-        var items:ArrayCollection = super.createFormItems();
-        items.addItem(new ComboBoxReportFormItem("Color Scheme", "colorScheme", colorScheme,
-                    this, FillProvider.fillOptions));
-        return items;
-    }
 }
 }
