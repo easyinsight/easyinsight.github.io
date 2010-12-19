@@ -585,7 +585,9 @@ public class FeedStorage {
         try {
             if (feedCache != null) {
                 feedCache.remove(feedDefinition.getDataFeedID());
-                FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
+                if (FeedRegistry.instance() != null) {
+                    FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
+                }
                 LogClass.debug("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
             }
 
