@@ -381,7 +381,16 @@ public class FeedDefinition implements Cloneable, Serializable {
             try {
                 FeedFolder clonedFolder = feedFolder.clone();
                 clonedFolder.updateIDs(replacementMap);
-                if (clonedFolder.getChildFolders().size() > 0 || clonedFolder.getChildItems().size() > 0) {
+                boolean hasVisibleChildren = clonedFolder.getChildFolders().size() > 0;
+                if (!hasVisibleChildren) {
+                    for (AnalysisItem analysisItem : clonedFolder.getChildItems()) {
+                        if (!analysisItem.isHidden()) {
+                            hasVisibleChildren = true;
+                            break;
+                        }
+                    }
+                }
+                if (hasVisibleChildren) {
                     feedNodes.add(clonedFolder.toFeedNode());
                 }
             } catch (CloneNotSupportedException e) {

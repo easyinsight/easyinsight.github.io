@@ -23,7 +23,7 @@ create table quickbase_data_source (
 
 alter table report_property add enabled tinyint(4) not null default 1;
 
-alter table application_skin account_id bigint(20) default null;
+alter table application_skin add account_id bigint(20) default null;
 alter table application_skin add constraint application_skin_ibfk2 foreign key (account_id) references account (account_id) on delete cascade;
 
 alter table application_skin add global_skin tinyint(4) not null default 0;

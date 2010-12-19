@@ -303,12 +303,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             List<FeedNode> feedNodes = new ArrayList<FeedNode>();
             for (FeedFolder feedFolder : folders) {
                 try {
-                    FeedFolder clonedFolder = feedFolder.clone();
-                    clonedFolder.updateIDs(replacementMap);
-                    feedNodes.add(clonedFolder.toFeedNode());
-                    for (AnalysisItem item : clonedFolder.getChildItems()) {
-                        set.remove(item);
-                    }
+                    feedNodes.add(cloneFolder(feedFolder, set, replacementMap, true));
                 } catch (CloneNotSupportedException e) {
                     LogClass.error(e);
                 }
@@ -318,6 +313,29 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
             nodeMap.put(compositeFeedNode.getDataFeedID(), feedNodes);
         }
+    }
+
+    private FeedNode cloneFolder(FeedFolder feedFolder, Set<AnalysisItem> set, Map<Long, AnalysisItem> replacementMap, boolean first) throws CloneNotSupportedException {
+        FeedFolder clonedFolder = feedFolder.clone();
+        if (first) {
+            clonedFolder.updateIDs(replacementMap);
+        }
+        FeedNode feedNode = clonedFolder.toFeedNode();
+        for (AnalysisItem item : clonedFolder.getChildItems()) {
+            set.remove(item);
+        }
+        Iterator<FeedNode> nodeIter = feedNode.getChildren().iterator();
+        while (nodeIter.hasNext()) {
+            FeedNode child = nodeIter.next();
+            if (child instanceof FolderNode) {
+                nodeIter.remove();
+            }
+        }
+        for (FeedFolder childFolder : clonedFolder.getChildFolders()) {
+            FeedNode childNode = cloneFolder(childFolder, set, replacementMap, false);
+            feedNode.getChildren().add(childNode);
+        }
+        return feedNode;
     }
 
     private List<AnalysisItem> retrieveFields(long feedID, Connection conn) throws SQLException {

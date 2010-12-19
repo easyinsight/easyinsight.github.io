@@ -31,6 +31,7 @@ public class DataSourceInternalService {
             CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedStorage.getFeedDefinitionData(parentDataSourceID, conn);
             compositeFeedDefinition.populateFields(conn);
             feedStorage.updateDataFeedConfiguration(compositeFeedDefinition, conn);
+            updateComposites(compositeFeedDefinition, conn);
         }
         stmt.close();
     }
