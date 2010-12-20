@@ -10,6 +10,8 @@ import com.easyinsight.api.v2.BasicAuthEIV2API;
 import com.easyinsight.api.v2.BasicAuthTransactionalLoadAPI;
 import com.easyinsight.api.v2.EIV2API;
 import com.easyinsight.api.v2.TransactionalLoadAPI;
+import com.easyinsight.api.v3.BasicAuthEIV3API;
+import com.easyinsight.api.v3.EIV3API;
 import com.easyinsight.api.wsdeathstar.WSDeathStarUncheckedPublishService;
 import com.easyinsight.api.wsdeathstar.WSDeathStarValidatingPublishService;
 import com.easyinsight.database.Database;
@@ -45,6 +47,7 @@ public class APIManager implements IAPIManager {
             createUncheckedSOAPAPI();
             createdValidatedSOAPAPI();
             createV2API();
+            createV3API();
             go();
         } catch (Exception e) {
             LogClass.error(e);
@@ -63,6 +66,14 @@ public class APIManager implements IAPIManager {
         transactionalLoadEndpoint.setPublishedEndpointUrl("https://www.easy-insight.com/app/services/EITransactionalLoad");
         transactionalLoadEndpoint.publish("/EITransactionalLoad");
         configureBasicAuth(transactionalLoadEndpoint);
+    }
+
+    private void createV3API() {
+        EIV3API basicAuthPublishService = new BasicAuthEIV3API();
+        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.create(basicAuthPublishService);
+        basicAuthEndpoint.setPublishedEndpointUrl("https://www.easy-insight.com/app/services/EIDataV3");
+        basicAuthEndpoint.publish("/EIDataV3");
+        configureBasicAuth(basicAuthEndpoint);
     }
 
     private void createdValidatedSOAPAPI() {        
