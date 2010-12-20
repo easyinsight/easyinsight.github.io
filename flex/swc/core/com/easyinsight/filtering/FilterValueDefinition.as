@@ -9,7 +9,8 @@ package com.easyinsight.filtering
 		public var filteredValues:ArrayCollection = new ArrayCollection();
 		public var inclusive:Boolean;
         public var singleValue:Boolean;
-		
+        public var autoComplete:Boolean;
+
 		public function FilterValueDefinition()
 		{
 			super();
