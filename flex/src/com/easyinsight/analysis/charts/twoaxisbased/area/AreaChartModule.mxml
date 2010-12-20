@@ -31,6 +31,7 @@
         import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.AreaChart;
+        import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.events.ChartItemEvent;
         import mx.charts.renderers.CircleItemRenderer;
@@ -121,6 +122,12 @@
             areaChart.dataProvider = chartData;
             areaChart.type = areaChartDef.stackingType;
             areaChart.selectionMode = "multiple";
+            var verticalAxis:LinearAxis = new LinearAxis();
+            verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
+            if (areaChartDef.yaxis != null) {
+                verticalAxis.title = areaChartDef.yaxis.display;
+            }
+            areaChart.verticalAxis = verticalAxis;
 
             if (dataSet.length > 0) {
 
@@ -186,6 +193,7 @@
                     if (additionalProperties["xAxisMaximum"] != null) {
                         dateAxis.maximum = additionalProperties["xAxisMaximum"];
                     }
+                    dateAxis.title = xAxisDimension.display;
                     xAxis = dateAxis;
                 } else {
                     var categoryAxis:CategoryAxis = new CategoryAxis();

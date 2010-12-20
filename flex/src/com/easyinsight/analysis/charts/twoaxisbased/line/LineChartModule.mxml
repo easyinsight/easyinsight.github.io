@@ -133,6 +133,9 @@
                 lineChart.dataTipFunction = dataTipFunction;
                 var verticalAxis:LinearAxis = new LinearAxis();
                 verticalAxis.baseAtZero = lineChartDef.baseAtZero == "true";
+                if (lineChartDef.yaxis != null) {
+                    verticalAxis.title = lineChartDef.yaxis.display;
+                }
                 lineChart.verticalAxis = verticalAxis;
 
                 var strokes:Array = [];
@@ -201,6 +204,7 @@
                     if (additionalProperties != null && additionalProperties["xAxisMaximum"] != null) {
                         dateAxis.maximum = additionalProperties["xAxisMaximum"];
                     }
+                    dateAxis.title = dateDimension.display;
                     xAxis = dateAxis;
                 } else {
                     var categoryAxis:CategoryAxis = new CategoryAxis();
