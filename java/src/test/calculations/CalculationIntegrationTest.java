@@ -49,7 +49,7 @@ public class CalculationIntegrationTest extends TestCase {
 
         // Once the object is populated, you can test by doing the following...
 
-        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID(), null);
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();
@@ -243,7 +243,7 @@ public class CalculationIntegrationTest extends TestCase {
 
         // Once the object is populated, you can test by doing the following...
 
-        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID(), null);
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();
@@ -279,7 +279,7 @@ public class CalculationIntegrationTest extends TestCase {
 
         // Once the object is populated, you can test by doing the following...
 
-        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID(), null);
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();
@@ -314,7 +314,7 @@ public class CalculationIntegrationTest extends TestCase {
 
         // Once the object is populated, you can test by doing the following...
 
-        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID(), null);
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();
@@ -349,7 +349,7 @@ public class CalculationIntegrationTest extends TestCase {
 
         // Once the object is populated, you can test by doing the following...
 
-        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID(), null);
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();

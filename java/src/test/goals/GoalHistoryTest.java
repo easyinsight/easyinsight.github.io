@@ -42,8 +42,8 @@ public class GoalHistoryTest extends TestCase {
                 new AnalysisMeasure("Value", AggregationTypes.SUM));
         long id = TestUtil.createTestDataSource(dataSet, items);
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>(Arrays.asList(TestUtil.getItem(id, "Date"), TestUtil.getItem(id, "Value")));
-        Feed feed = FeedRegistry.instance().getFeed(id);
-        dataSet = feed.getAggregateDataSet(itemSet, new ArrayList<FilterDefinition>(), new InsightRequestMetadata() , feed.getFields(), false);
+        Feed feed = FeedRegistry.instance().getFeed(id, null);
+        dataSet = feed.getAggregateDataSet(itemSet, new ArrayList<FilterDefinition>(), new InsightRequestMetadata() , feed.getFields(), false, null);
         cal.setTime(startDate);
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         rollingFilterDefinition.setField(TestUtil.getItem(id, "Date"));
