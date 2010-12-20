@@ -194,9 +194,10 @@ public class FeedService {
     }
     
     public ReportFault getCredentials(List<Integer> dataSourceIDs) {
+        EIConnection conn = Database.instance().getConnection();
         try {
             for (Integer dataSourceID : dataSourceIDs) {
-                Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+                Feed feed = FeedRegistry.instance().getFeed(dataSourceID, conn);
                 ReportFault reportFault = feed.getDataSource().validateDataConnectivity();
                 if (reportFault != null) {
                     return reportFault;
@@ -206,6 +207,8 @@ public class FeedService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 

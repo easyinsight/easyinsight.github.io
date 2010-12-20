@@ -1,9 +1,9 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.core.Key;
 import com.easyinsight.pipeline.DerivedDataSourcePipeline;
 
 import java.util.*;
@@ -31,21 +31,21 @@ public class AnalysisBasedFeed extends Feed {
 
     public List<AnalysisItem> getFields() {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
-        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
+        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), null);
         return feed.getFields();
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
-        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
-        return feed.getMetadata(analysisItem, null);
+        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
+        return feed.getMetadata(analysisItem, null, conn);
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
 
-        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
+        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
 
         if (analysisDefinition.retrieveFilterDefinitions() != null) {
             if (filters == null) {
@@ -53,7 +53,7 @@ public class AnalysisBasedFeed extends Feed {
             }
             filters.addAll(analysisDefinition.retrieveFilterDefinitions());
         }
-        DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode);
+        DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
 
         return new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
     }

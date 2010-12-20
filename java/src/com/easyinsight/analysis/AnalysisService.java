@@ -111,7 +111,7 @@ public class AnalysisService {
 
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition, session);
-            Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
+            Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
             for (AnalysisItem item : feed.getFields()) {
                 keyReplacementMap.put(item.getKey(), item.getKey());
             }
@@ -194,8 +194,9 @@ public class AnalysisService {
 
     public String validateCalculation(String calculationString, long dataSourceID, List<AnalysisItem> reportItems) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
+        EIConnection conn = Database.instance().getConnection();
         try {
-            Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+            Feed feed = FeedRegistry.instance().getFeed(dataSourceID, conn);
             List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(feed.getFields());
             allItems.addAll(reportItems);
             CalculationTreeNode tree;
@@ -240,6 +241,8 @@ public class AnalysisService {
             }
         } catch (Exception e) {
             return e.getMessage();
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 

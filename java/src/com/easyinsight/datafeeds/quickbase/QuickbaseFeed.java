@@ -1,6 +1,10 @@
 package com.easyinsight.datafeeds.quickbase;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DateValue;
+import com.easyinsight.core.Value;
+import com.easyinsight.core.StringValue;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
@@ -30,23 +34,75 @@ public class QuickbaseFeed extends Feed {
     private String applicationToken;
     private String sessionTicket;
     private String host;
-    private FeedDefinition parent;
 
     public QuickbaseFeed(String databaseID, String applicationToken, String sessionTicket, String host, FeedDefinition parent) {
         this.databaseID = databaseID;
         this.applicationToken = applicationToken;
         this.sessionTicket = sessionTicket;
         this.host = host;
-        this.parent = parent;
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
-        return null;
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
+        try {
+            String fullPath = "https://" + host + "/db/" + databaseID;
+            HttpPost httpRequest = new HttpPost(fullPath);
+            httpRequest.setHeader("Accept", "application/xml");
+            httpRequest.setHeader("Content-Type", "application/xml");
+            httpRequest.setHeader("QUICKBASE-ACTION", "API_DoQuery");
+            String targetFieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
+            String requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, targetFieldID);
+            byte[] contentBytes = requestBody.getBytes();
+            BasicHttpEntity entity = new BasicHttpEntity();
+            entity.setContent(new ByteArrayInputStream(contentBytes));
+            entity.setContentLength(contentBytes.length);
+            httpRequest.setEntity(entity);
+            HttpClient client = new DefaultHttpClient();
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+            String string = client.execute(httpRequest, responseHandler);
+            Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+            Nodes errors = doc.query("/qdbapi/errcode/text()");
+            if (errors.size() > 0) {
+                Node error = errors.get(0);
+                if (!"0".equals(error.getValue())) {
+                    String errorDetail = doc.query("/qdbapi/errdetail/text()").get(0).getValue();
+                    throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, getParentSource(conn)));
+                }
+            }
+            Nodes records = doc.query("/qdbapi/table/records/record");
+            AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
+            for (int i = 0; i < records.size(); i++) {
+                Element record = (Element) records.get(i);
+                Elements childElements = record.getChildElements();
+                for (int j = 0; j < childElements.size(); j++) {
+                    Element childElement = childElements.get(j);
+                    if (childElement.getLocalName().equals("f")) {
+                        String fieldID = childElement.getAttribute("id").getValue();
+                        if (fieldID.equals(targetFieldID)) {
+                            String value = childElement.getValue();
+                            Value val;
+                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
+                                val = new DateValue(new Date(Long.parseLong(value)));
+                            } else {
+                                val = new StringValue(value);
+                            }
+                            metadata.addValue(analysisItem, val, insightRequestMetadata);
+                        }
+                    }
+                }
+            }
+            return metadata;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             String fullPath = "https://" + host + "/db/" + databaseID;
             HttpPost httpRequest = new HttpPost(fullPath);
@@ -78,7 +134,7 @@ public class QuickbaseFeed extends Feed {
                 Node error = errors.get(0);
                 if (!"0".equals(error.getValue())) {
                     String errorDetail = doc.query("/qdbapi/errdetail/text()").get(0).getValue();
-                    throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, parent));
+                    throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, getParentSource(conn)));
                 }
             }
             Nodes records = doc.query("/qdbapi/table/records/record");

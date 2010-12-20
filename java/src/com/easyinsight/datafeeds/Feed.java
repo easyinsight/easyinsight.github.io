@@ -32,6 +32,10 @@ public abstract class Feed implements Serializable {
     private String urlKey;
     private Map<String, String> properties;
 
+    protected FeedDefinition getParentSource(EIConnection conn) throws SQLException {
+        return new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID());
+    }
+
     public FeedDefinition getDataSource() {
         return dataSource;
     }
@@ -106,7 +110,7 @@ public abstract class Feed implements Serializable {
         this.fieldHierarchy = fieldHierarchy;
     }
 
-    public List<FilterDefinition> getIntrinsicFilters() {
+    public List<FilterDefinition> getIntrinsicFilters(EIConnection conn) {
         return new ArrayList<FilterDefinition>();
     }
 
@@ -156,9 +160,9 @@ public abstract class Feed implements Serializable {
         return ids;
     }
 
-    public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException;
+    public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException;
 
-    public abstract DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException;
+    public abstract DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException;
 
     public List<KPI> createKPIs() {
         return new ArrayList<KPI>();

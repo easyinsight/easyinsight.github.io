@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.salesforce;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -29,7 +30,7 @@ public class SalesforceFeed extends Feed {
     @Transient
     protected Soap service;
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         /*AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         try {
             if (sessionHeader == null)
@@ -91,7 +92,7 @@ public class SalesforceFeed extends Feed {
         return -1;
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         /*DataSet dataSet = new DataSet();
         try {
             if (sessionHeader == null)

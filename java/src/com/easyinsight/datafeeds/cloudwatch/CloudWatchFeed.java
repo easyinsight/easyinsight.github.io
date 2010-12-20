@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.cloudwatch;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -25,7 +26,7 @@ public class CloudWatchFeed extends Feed {
         return cloudWatchDataSource.getCwPassword();
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         if (analysisItem.getKey().toKeyString().equals(CloudWatchDataSource.DATE)) {
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_YEAR, -13);
@@ -49,7 +50,7 @@ public class CloudWatchFeed extends Feed {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public List<FilterDefinition> getIntrinsicFilters() {
+    public List<FilterDefinition> getIntrinsicFilters(EIConnection conn) {
         FilterDateRangeDefinition rollingFilterDefinition = new FilterDateRangeDefinition();
         AnalysisItem dateField = null;
         for (AnalysisItem analysisItem : getFields()) {
@@ -67,7 +68,7 @@ public class CloudWatchFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         // do we need a dimension?
         try {
             Collection<AnalysisDimension> dimensions = new ArrayList<AnalysisDimension>();

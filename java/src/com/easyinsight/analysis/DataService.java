@@ -29,26 +29,30 @@ public class DataService {
 
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset) {
+        SecurityUtil.authorizeFeedAccess(feedID);
+        EIConnection conn = Database.instance().getConnection();
         try {
-            SecurityUtil.authorizeFeedAccess(feedID);
             if (analysisItem == null) {
                 LogClass.error("Received null analysis item from feed " + feedID);
                 return null;
             }
-            Feed feed = feedRegistry.getFeed(feedID);
+            Feed feed = feedRegistry.getFeed(feedID, conn);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(utfOffset);
-            return feed.getMetadata(analysisItem, insightRequestMetadata);
+            return feed.getMetadata(analysisItem, insightRequestMetadata, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
     public FeedMetadata getFeedMetadata(long feedID) {
+        SecurityUtil.authorizeFeedAccess(feedID);
+        EIConnection conn = Database.instance().getConnection();
         try {
-            SecurityUtil.authorizeFeedAccess(feedID);
-            Feed feed = feedRegistry.getFeed(feedID);
+            Feed feed = feedRegistry.getFeed(feedID, conn);
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
@@ -65,23 +69,20 @@ public class DataService {
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
             feedMetadata.setFieldHierarchy(feed.getFieldHierarchy());
-            feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters());
+            feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters(conn));
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
             feedMetadata.setOriginSolution(feed.getOriginSolution());
             feedMetadata.setUrlKey(feed.getUrlKey());
             feedMetadata.setDataSourceInfo(feed.getDataSourceInfo());
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                feedMetadata.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
-            } finally {
-                Database.closeConnection(conn);
-            }
+            feedMetadata.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             return feedMetadata;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -109,9 +110,11 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
+        SecurityUtil.authorizeInsight(reportID);
+        EIConnection conn = Database.instance().getConnection();
         try {
-            SecurityUtil.authorizeInsight(reportID);
-            Feed feed = feedRegistry.getFeed(dataSourceID);
+            conn.setAutoCommit(false);
+            Feed feed = feedRegistry.getFeed(dataSourceID, conn);
 
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
             if (analysisDefinition == null) {
@@ -164,7 +167,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
-            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             DataResults listDataResults = pipeline.toList(dataSet);
@@ -180,12 +183,7 @@ public class DataService {
                 dataSet.setLastTime(new Date());
             }
             DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
-            } finally {
-                Database.closeConnection(conn);
-            }
+            dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             results.setDataSourceInfo(dataSourceInfo);
             results.setAttribution(feed.getAttribution());
             //}
@@ -198,13 +196,16 @@ public class DataService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
     public DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        EIConnection conn = Database.instance().getConnection();
         try {
-            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-            Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
+            Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID(), conn);
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
                 allFields.addAll(analysisDefinition.getAddedItems());
@@ -226,7 +227,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
-            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             return pipeline.toDataSet(dataSet);
@@ -235,14 +236,17 @@ public class DataService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        EIConnection conn = Database.instance().getConnection();
         try {
-            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             long startTime = System.currentTimeMillis();
-            Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
+            Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID(), conn);
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
@@ -269,7 +273,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
-            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
             List<String> auditMessages = dataSet.getAudits();
             auditMessages.add("At raw data source level, had " + dataSet.getRows().size() + " rows of data");
             //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
@@ -280,12 +284,7 @@ public class DataService {
             if (dataSet.getLastTime() == null) {
                 dataSet.setLastTime(new Date());
             }
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
-            } finally {
-                Database.closeConnection(conn);
-            }
+            dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             //dataSourceInfo.setLastDataTime(dataSet.getLastTime());
             results.setDataSourceInfo(dataSourceInfo);
             results.setAuditMessages(auditMessages);
@@ -301,6 +300,8 @@ public class DataService {
             ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));            
             return embeddedDataResults;
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 }

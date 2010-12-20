@@ -70,6 +70,8 @@
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, ComboBoxFilterWindow));
             } else if (typeGroup.selectedValue == "multi") {
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, MultiValueFilterWindow));
+            } else if (typeGroup.selectedValue == "autoComplete") {
+                dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, AutoCompleteFilterWindow));
             }
         }
 		]]>
@@ -79,6 +81,7 @@
         <mx:RadioButton group="{typeGroup}" label="Combo Box" value="single"/>
         <mx:RadioButton group="{typeGroup}" label="Multi Value" value="multi"/>
         <mx:RadioButton group="{typeGroup}" label="Pattern Match" selected="true" value="pattern"/>
+        <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
     </mx:HBox>
     <mx:Form>
         <mx:FormItem label="Filter Pattern: ">

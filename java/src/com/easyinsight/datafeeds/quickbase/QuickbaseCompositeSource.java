@@ -6,6 +6,7 @@ import com.easyinsight.datafeeds.CompositeFeedConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.logging.LogClass;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
@@ -97,6 +98,23 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         applicationToken = rs.getString(1);
         sessionTicket = rs.getString(2);
         host = rs.getString(3);
+    }
+
+    @Override
+    public String validateCredentials() {
+        try {
+            String requestBody = MessageFormat.format(AUTHENTICATE_XML, qbUserName, qbPassword);
+            Document doc = executeRequest("www.quickbase.com", null, "API_Authenticate", requestBody);
+            String errorCode = doc.query("/qdbapi/errcode/text()").get(0).getValue();
+            if ("0".equals(errorCode)) {
+                return null;
+            } else {
+                return doc.query("/qdbapi/errdetail/text()").get(0).getValue();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            return e.getMessage();
+        }
     }
 
     public String getApplicationToken() {

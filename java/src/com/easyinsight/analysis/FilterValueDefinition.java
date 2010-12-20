@@ -29,6 +29,9 @@ public class FilterValueDefinition extends FilterDefinition {
     @Column(name="single_value")
     private boolean singleValue;
 
+    @Column(name="auto_complete")
+    private boolean autoComplete;
+
     public FilterValueDefinition() {        
     }
 
@@ -36,6 +39,14 @@ public class FilterValueDefinition extends FilterDefinition {
         super(field);
         this.inclusive = inclusive;
         this.filteredValues = filteredValues;
+    }
+
+    public boolean isAutoComplete() {
+        return autoComplete;
+    }
+
+    public void setAutoComplete(boolean autoComplete) {
+        this.autoComplete = autoComplete;
     }
 
     public Set<PersistableValue> getPersistedValues() {

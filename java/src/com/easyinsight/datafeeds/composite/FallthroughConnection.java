@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.composite;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CompositeFeedConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedRegistry;
@@ -134,7 +135,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
 
     @Override
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                            Set<AnalysisItem> targetFields, String sourceName, String targetName) {
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn) {
 
         // start by merging items by to-do to-do ID -> time tracking to-do ID
         // for those items which can't be merged by IDs, merge by project name
@@ -159,7 +160,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
                     }
                 }
                 DataSet sourceCopySet = new DataSet(sourceRows);
-                sourceRows = combinedData(sourceFields, getSourceFeedID(), sourceCopySet).getRows();
+                sourceRows = combinedData(sourceFields, getSourceFeedID(), sourceCopySet, conn).getRows();
                 for (IRow row : targetRows) {
                     IRow unjoined = connection.removeTargetValues(row, targetFields);
                     if (connection.isTargetOuterJoin()) {
@@ -167,14 +168,14 @@ public class FallthroughConnection extends CompositeFeedConnection {
                     }
                 }
                 DataSet targetCopySet = new DataSet(targetRows);
-                targetRows = combinedData(targetFields, getTargetFeedID(), targetCopySet).getRows();
+                targetRows = combinedData(targetFields, getTargetFeedID(), targetCopySet, conn).getRows();
             }
             MergeResults mergeResults = merge(sourceRows, targetRows, sourceFields, targetFields, conns);
             compositeRows.addAll(mergeResults.mergedRows);
             sourceRows = mergeResults.unmergedSourceRows;
             targetRows = mergeResults.unmergedTargetRows;
-            sourceRows = combinedData(sourceFields, getSourceFeedID(), new DataSet(sourceRows)).getRows();
-            targetRows = combinedData(targetFields, getTargetFeedID(), new DataSet(targetRows)).getRows();
+            sourceRows = combinedData(sourceFields, getSourceFeedID(), new DataSet(sourceRows), conn).getRows();
+            targetRows = combinedData(targetFields, getTargetFeedID(), new DataSet(targetRows), conn).getRows();
             mergeStrings.add(mergeResults.audit);
         }
         //compositeRows.addAll(sourceRows);
@@ -183,8 +184,8 @@ public class FallthroughConnection extends CompositeFeedConnection {
         return new MergeAudit(mergeStrings, new DataSet(compositeRows));
     }
 
-    private DataSet combinedData(Set<AnalysisItem> neededItems, long sourceID, DataSet dataSet) {
-        Feed feed = FeedRegistry.instance().getFeed(sourceID);
+    private DataSet combinedData(Set<AnalysisItem> neededItems, long sourceID, DataSet dataSet, EIConnection conn) {
+        Feed feed = FeedRegistry.instance().getFeed(sourceID, conn);
         Pipeline pipeline = new CompositeReportPipeline();
         WSListDefinition analysisDefinition = new WSListDefinition();
         analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));

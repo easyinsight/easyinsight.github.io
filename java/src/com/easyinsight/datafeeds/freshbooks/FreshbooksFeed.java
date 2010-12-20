@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
@@ -17,6 +18,7 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.ByteArrayInputStream;
+import java.sql.SQLException;
 
 /**
  * User: jamesboe
@@ -28,13 +30,11 @@ public abstract class FreshbooksFeed extends Feed {
     private String url;
     private String tokenKey;
     private String tokenSecretKey;
-    private FreshbooksCompositeSource parentSource;
 
-    protected FreshbooksFeed(String url, String tokenKey, String tokenSecretKey, FreshbooksCompositeSource parentSource) {
+    protected FreshbooksFeed(String url, String tokenKey, String tokenSecretKey) {
         this.url = url;
         this.tokenKey = tokenKey;
         this.tokenSecretKey = tokenSecretKey;
-        this.parentSource = parentSource;
     }
 
     protected String queryField(Node n, String xpath) {
@@ -51,7 +51,7 @@ public abstract class FreshbooksFeed extends Feed {
             return null;
     }
 
-    protected Document query(String queryString, String requestXML) {
+    protected Document query(String queryString, String requestXML, EIConnection conn) throws SQLException {
         //HttpClient client = getHttpClient();
         Builder builder = new Builder();
         try {
@@ -76,7 +76,7 @@ public abstract class FreshbooksFeed extends Feed {
             string = string.replace("xmlns=\"http://www.freshbooks.com/api/\"", "");            
             return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
         } catch (HttpResponseException hre) {
-            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Freshbooks data.", parentSource));
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Freshbooks data.", getParentSource(conn)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

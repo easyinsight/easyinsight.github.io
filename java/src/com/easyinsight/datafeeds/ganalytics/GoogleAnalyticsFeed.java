@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.ganalytics;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -43,7 +44,7 @@ public class GoogleAnalyticsFeed extends Feed {
         this.oauthTokenSecret = oauthTokenSecret;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         try {
             AnalysisItem queryItem;
@@ -141,7 +142,7 @@ public class GoogleAnalyticsFeed extends Feed {
         return as;
     }
 
-    public List<FilterDefinition> getIntrinsicFilters() {
+    public List<FilterDefinition> getIntrinsicFilters(EIConnection conn) {
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         AnalysisItem dateField = null;
         for (AnalysisItem analysisItem : getFields()) {
@@ -156,7 +157,7 @@ public class GoogleAnalyticsFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             Collection<AnalysisDimension> dimensions = new HashSet<AnalysisDimension>();
             Collection<AnalysisMeasure> measures = new HashSet<AnalysisMeasure>();

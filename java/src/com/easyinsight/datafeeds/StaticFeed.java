@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.EmptyValue;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
@@ -29,12 +30,12 @@ public class StaticFeed extends Feed implements Serializable {
         return FeedType.STATIC;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
             AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
             Map<Value, Value> lookupMap = new HashMap<Value, Value>();
             LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
-            AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) getMetadata(lookupTable.getSourceField(), insightRequestMetadata);
+            AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) getMetadata(lookupTable.getSourceField(), insightRequestMetadata, conn);
             for (LookupPair lookupPair : lookupTable.getLookupPairs()) {
                 lookupMap.put(lookupPair.getSourceValue(), lookupPair.getTargetValue());
             }
@@ -92,7 +93,7 @@ public class StaticFeed extends Feed implements Serializable {
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         if (analysisItems.size() == 0) {
             return new DataSet();
         }

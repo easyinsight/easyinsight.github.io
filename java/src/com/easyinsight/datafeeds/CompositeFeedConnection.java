@@ -6,6 +6,7 @@ import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.Row;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 
@@ -121,7 +122,7 @@ public class CompositeFeedConnection implements Serializable {
     }
 
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                            Set<AnalysisItem> targetFields, String sourceName, String targetName) {
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn) {
         Key myJoinDimension = null;
         for (AnalysisItem item : sourceFields) {
             if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(getSourceJoin().toKeyString())) {

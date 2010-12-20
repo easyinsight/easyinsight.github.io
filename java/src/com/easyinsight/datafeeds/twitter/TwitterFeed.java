@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.twitter;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -43,7 +44,7 @@ public class TwitterFeed extends Feed {
     private ArrayList<String> searches;
 
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         if(dataSet == null)
             return null;
         if(Arrays.asList(TwitterDataSource.PUBLISHED, TwitterDataSource.UPDATED).contains(analysisItem.getKey().toKeyString())) {
@@ -64,7 +65,7 @@ public class TwitterFeed extends Feed {
         return null;
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             DateFormat df = new XmlSchemaDateFormat();
             DataSet dataSet = new DataSet();

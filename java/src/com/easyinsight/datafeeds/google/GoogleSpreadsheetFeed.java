@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.google;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
@@ -51,7 +52,7 @@ public class GoogleSpreadsheetFeed extends Feed {
         return as;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         try {
             AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
             SpreadsheetService myService = getService();
@@ -78,7 +79,7 @@ public class GoogleSpreadsheetFeed extends Feed {
         }
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             SpreadsheetService myService = getService();
             URL listFeedUrl = new URL(worksheetURL);

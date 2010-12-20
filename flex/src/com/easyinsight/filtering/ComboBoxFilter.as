@@ -100,7 +100,7 @@ public class ComboBoxFilter extends HBox implements IFilter
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
             _analysisItem = event.filterDefinition.field;
-            if (event.filterDefinition != this.filterDefinition) {
+            if (event.filterDefinition != this.filterDefinition || !FilterValueDefinition(event.filterDefinition).singleValue || FilterValueDefinition(event.filterDefinition).autoComplete) {
                 dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));        
             } else {
                 viewStack.selectedIndex = 0;

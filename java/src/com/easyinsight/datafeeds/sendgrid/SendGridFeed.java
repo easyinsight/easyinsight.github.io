@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.StringValue;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
 import nu.xom.*;
@@ -25,7 +26,7 @@ public class SendGridFeed extends Feed {
     private static final String GET_STRING = "https://sendgrid.com/api/stats.get.xml";
     private static DateFormat outboundDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public List<FilterDefinition> getIntrinsicFilters() {
+    public List<FilterDefinition> getIntrinsicFilters(EIConnection conn) {
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         AnalysisItem dateField = null;
         for (AnalysisItem analysisItem : getFields()) {
@@ -51,7 +52,7 @@ public class SendGridFeed extends Feed {
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         try {
             AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
             if (SendGridDataSource.CATEGORY.equals(analysisItem.getKey().toKeyString())) {
@@ -81,7 +82,7 @@ public class SendGridFeed extends Feed {
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
 
             Date startDate = null;

@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.custom;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.custom.client.*;
 import com.easyinsight.datafeeds.custom.client.DateValue;
@@ -52,7 +53,7 @@ public class CustomDataFeed extends Feed {
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             List<DateValue> dateValues = getPort().getPossibleDateValues(analysisItem.getKey().toKeyString(), new ArrayList<Property>());
@@ -74,7 +75,7 @@ public class CustomDataFeed extends Feed {
     }
     
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         List<Field> keys = new ArrayList<Field>();
         for (AnalysisItem analysisItem : analysisItems) {
             Field field = new Field();

@@ -244,7 +244,11 @@ public class TransformContainer extends HBox
         if (filterDefinition.getType() == FilterDefinition.VALUE) {
             var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;
             if (filterValueDefinition.singleValue) {
-                filter = new ComboBoxFilter(_feedID, filterDefinition.field);
+                if (filterValueDefinition.autoComplete) {
+                    filter = new AutoCompleteFilter(_feedID, filterDefinition.field);
+                } else {
+                    filter = new ComboBoxFilter(_feedID, filterDefinition.field);
+                }
             } else {
                 filter = new MultiValueFilter(_feedID, filterDefinition.field);
             }

@@ -7,7 +7,7 @@
 
         public function makeUpdates():FilterDefinition {
             FilterValueDefinition(_filterDefinition).singleValue = true;
-            FilterValueDefinition(_filterDefinition).autoComplete = false;
+            FilterValueDefinition(_filterDefinition).autoComplete = true;
             return _filterDefinition;
         }
 
@@ -29,16 +29,16 @@
                 dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, MultiValueFilterWindow));
             } else if (typeGroup.selectedValue == "pattern") {
                 dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, PatternFilterWindow));
-            } else if (typeGroup.selectedValue == "autoComplete") {
-                dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, AutoCompleteFilterWindow));
+            } else if (typeGroup.selectedValue == "single") {
+                dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, ComboBoxFilterWindow));
             }
         }
         ]]></mx:Script>
     <mx:HBox>
         <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()"/>
-        <mx:RadioButton group="{typeGroup}" label="Single Value" selected="true" value="single"/>
+        <mx:RadioButton group="{typeGroup}" label="Single Value" value="single"/>
         <mx:RadioButton group="{typeGroup}" label="Multi Value" value="multi"/>
         <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
-        <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
+        <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete" selected="true"/>
     </mx:HBox>
 </mx:VBox>

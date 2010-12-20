@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
@@ -49,12 +50,12 @@ public class CompositeFeed extends Feed {
     }
 
     @Override
-    public List<FilterDefinition> getIntrinsicFilters() {
+    public List<FilterDefinition> getIntrinsicFilters(EIConnection conn) {
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         for (CompositeFeedNode child : compositeFeedNodes) {
-            Feed childDataSource = FeedRegistry.instance().getFeed(child.getDataFeedID());
+            Feed childDataSource = FeedRegistry.instance().getFeed(child.getDataFeedID(), conn);
             //filters.addAll(childDataSource.getIntrinsicFilters());
-            List<FilterDefinition> childFilters = childDataSource.getIntrinsicFilters();
+            List<FilterDefinition> childFilters = childDataSource.getIntrinsicFilters(conn);
             for (FilterDefinition filterDefinition : childFilters) {
                 for (AnalysisItem item : getFields()) {
                     Key key = item.getKey();
@@ -68,12 +69,12 @@ public class CompositeFeed extends Feed {
         return filters;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         if (analysisItem.getKey() instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
             for (CompositeFeedNode compositeFeedNode : getCompositeFeedNodes()) {
                 if (compositeFeedNode.getDataFeedID() == derivedKey.getFeedID()) {
-                    return FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID()).getMetadata(analysisItem, insightRequestMetadata);
+                    return FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID(), conn).getMetadata(analysisItem, insightRequestMetadata, conn);
                 }
             }
         } else {
@@ -81,7 +82,7 @@ public class CompositeFeed extends Feed {
                 AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
                 Map<Value, Value> lookupMap = new HashMap<Value, Value>();
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
-                AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) getMetadata(lookupTable.getSourceField(), insightRequestMetadata);
+                AnalysisDimensionResultMetadata sourceMetadata = (AnalysisDimensionResultMetadata) getMetadata(lookupTable.getSourceField(), insightRequestMetadata, conn);
                 for (LookupPair lookupPair : lookupTable.getLookupPairs()) {
                     lookupMap.put(lookupPair.getSourceValue(), lookupPair.getTargetValue());
                 }
@@ -98,9 +99,9 @@ public class CompositeFeed extends Feed {
         return null;
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            return getDataSet(analysisItems, filters, insightRequestMetadata);
+            return getDataSet(analysisItems, filters, insightRequestMetadata, conn);
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
@@ -108,7 +109,7 @@ public class CompositeFeed extends Feed {
         }
     }
 
-    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
 
         if (analysisItems.size() == 0) {
             return new DataSet();
@@ -123,7 +124,7 @@ public class CompositeFeed extends Feed {
 
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>(analysisItems);
         for (CompositeFeedNode node : compositeFeedNodes) {
-            QueryStateNode queryStateNode = new QueryStateNode(node.getDataFeedID());
+            QueryStateNode queryStateNode = new QueryStateNode(node.getDataFeedID(), conn);
             queryNodeMap.put(node.getDataFeedID(), queryStateNode);
             graph.addVertex(queryStateNode);
             for (AnalysisItem analysisItem : analysisItems) {
@@ -274,7 +275,7 @@ public class CompositeFeed extends Feed {
                     targetNode = swap;
                 }
                 MergeAudit mergeAudit = last.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems,
-                        sourceNode.dataSourceName, targetNode.dataSourceName);
+                        sourceNode.dataSourceName, targetNode.dataSourceName, conn);
                 dataSet = mergeAudit.getDataSet();
                 auditStrings.addAll(mergeAudit.getMergeStrings());
                 //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
@@ -325,10 +326,12 @@ public class CompositeFeed extends Feed {
         private Collection<AnalysisItem> allFeedItems;
         private DataSet myDataSet;
         private String dataSourceName;
+        private EIConnection conn;
 
-        private QueryStateNode(long feedID) {
+        private QueryStateNode(long feedID, EIConnection conn) {
             this.feedID = feedID;
-            Feed feed = FeedRegistry.instance().getFeed(feedID);
+            Feed feed = FeedRegistry.instance().getFeed(feedID, conn);
+            this.conn = conn;
             dataSourceName = feed.getName();
             allFeedItems = feed.getFields();
         }
@@ -360,10 +363,10 @@ public class CompositeFeed extends Feed {
 
         public void produceDataSet(InsightRequestMetadata insightRequestMetadata) throws ReportException {
 
-            Feed feed = FeedRegistry.instance().getFeed(feedID);
+            Feed feed = FeedRegistry.instance().getFeed(feedID, conn);
 
             // The set of items passed into getAggregateDataSet() needs to resolve down to certain keys
-            DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false);
+            DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
             Pipeline pipeline = new CompositeReportPipeline();
             WSListDefinition analysisDefinition = new WSListDefinition();

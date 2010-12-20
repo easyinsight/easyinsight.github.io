@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
 import java.sql.Connection;
@@ -50,7 +51,7 @@ public class FeedRegistry {
         }
     }
 
-    public Feed getFeed(long identifier) {
+    public Feed getFeed(long identifier, EIConnection conn) {
         Feed feed = null;
         if(cache != null)
             feed = (Feed) cache.get(identifier);

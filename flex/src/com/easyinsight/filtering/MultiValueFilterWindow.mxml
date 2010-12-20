@@ -172,6 +172,8 @@
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, ComboBoxFilterWindow));
             } else if (typeGroup.selectedValue == "pattern") {
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, PatternFilterWindow));
+            } else if (typeGroup.selectedValue == "autoComplete") {
+                dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, AutoCompleteFilterWindow));
             }
         }
 
@@ -215,6 +217,7 @@
         <mx:RadioButton group="{typeGroup}" label="Single Value" value="single"/>
         <mx:RadioButton group="{typeGroup}" label="Multi Value" selected="true" value="multi"/>
         <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
+        <mx:RadioButton group="{typeGroup}" label="Auto Complete" value="autoComplete"/>
     </mx:HBox>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
         <mx:Box>
@@ -224,10 +227,8 @@
             <mx:Label text="Drag Items Between Available and Filtered"/>
             <mx:CheckBox label="Filter Includes Values" id="includeCheckbox" selected="{includeFilter}"/>
             <mx:HBox verticalAlign="middle">
-                <mx:VBox>
-                    <mx:ApplicationControlBar width="200">
-                        <mx:Label text="Available Values"/>
-                    </mx:ApplicationControlBar>
+                <mx:VBox width="200">
+                    <mx:Label text="Available Values" fontSize="14"/>
                     <mx:TextInput id="availableSearch" change="sourceChange()"/>
                     <mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="200"
                             allowMultipleSelection="true"/>
@@ -236,10 +237,8 @@
                     <mx:Button label="Add All" click="addAll()"/>
                     <mx:Button label="Remove All" click="removeAll()"/>
                 </mx:VBox>
-                <mx:VBox>
-                    <mx:ApplicationControlBar width="200">
-                        <mx:Label text="Filtered Values"/>
-                    </mx:ApplicationControlBar>
+                <mx:VBox width="200">
+                    <mx:Label text="Filtered Values" fontSize="14"/>
                     <mx:TextInput id="includedSearch" change="includedChange()"/>
                     <mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"
                         width="200" allowMultipleSelection="true"/>

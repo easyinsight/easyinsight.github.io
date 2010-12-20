@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -18,16 +19,16 @@ import java.util.*;
  */
 public class FreshbooksTimeFeed extends FreshbooksFeed {
     protected FreshbooksTimeFeed(String url, String tokenKey, String tokenSecretKey, FreshbooksCompositeSource parentSource) {
-        super(url, tokenKey, tokenSecretKey, parentSource);
+        super(url, tokenKey, tokenSecretKey);
     }
 
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         Set<AnalysisItem> set = new HashSet<AnalysisItem>();
         set.add(analysisItem);
-        DataSet dataSet = getAggregateDataSet(set, new ArrayList<FilterDefinition>(), insightRequestMetadata, null, false);
+        DataSet dataSet = getAggregateDataSet(set, new ArrayList<FilterDefinition>(), insightRequestMetadata, null, false, conn);
         for (IRow row : dataSet.getRows()) {
             metadata.addValue(analysisItem, row.getValue(analysisItem.createAggregateKey()), insightRequestMetadata);
         }
@@ -35,7 +36,7 @@ public class FreshbooksTimeFeed extends FreshbooksFeed {
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws ReportException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             Map<String, Key> keys = new HashMap<String, Key>();
             for (AnalysisItem analysisItem : analysisItems) {
@@ -48,7 +49,7 @@ public class FreshbooksTimeFeed extends FreshbooksFeed {
             int pages;
             int currentPage;
             do {
-                Document invoicesDoc = query("time_entry.list", "<page>" + requestPage + "</page>");
+                Document invoicesDoc = query("time_entry.list", "<page>" + requestPage + "</page>", conn);
                 Node invoicesSummaryNode = invoicesDoc.query("/response/time_entries").get(0);
                 String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
                 String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
