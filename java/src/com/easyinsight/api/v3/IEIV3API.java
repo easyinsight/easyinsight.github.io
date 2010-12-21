@@ -12,7 +12,7 @@ import javax.jws.WebService;
  * Date: Jun 21, 2010
  * Time: 12:15:12 PM
  */
-@WebService(name="EIDataV2", portName = "EIDataV2Port", serviceName = "EIDataV2")
+@WebService(name="EIDataV3", portName = "EIDataV3Port", serviceName = "EIDataV3")
 public interface IEIV3API {
     public boolean validateCredentials();
 
