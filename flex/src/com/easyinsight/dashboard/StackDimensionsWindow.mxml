@@ -34,7 +34,7 @@
     <mx:VBox horizontalAlign="center">
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="How many reports will this stack contain?">
-                <mx:NumericStepper id="reportStepper" minimum="1" maximum="5" value="{reportCount}"/>
+                <mx:NumericStepper id="reportStepper" minimum="1" maximum="10" value="{reportCount}"/>
             </mx:FormItem>
             <mx:FormItem label="What animation should be used in transitions between reports?">
                 <util:SmartComboBox id="animationComboBox" selectedProperty="data" selectedValue="{selectedEffect}">
