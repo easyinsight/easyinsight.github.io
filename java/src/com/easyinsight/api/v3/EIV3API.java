@@ -11,9 +11,11 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.userupload.UploadPolicy;
+import com.easyinsight.util.RandomTextGenerator;
 
 import javax.jws.WebParam;
 import java.sql.Connection;
@@ -37,6 +39,79 @@ public abstract class EIV3API implements IEIV3API {
         return true;
     }
 
+    public String defineCompositeDataSource(@WebParam(name="dataSources") String[] dataSources, @WebParam(name="connections") DataSourceConnection[] connections,
+                                          @WebParam(name="dataSourceName") String dataSourceName) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            Map<Long, Boolean> dataSourceMap = findDataSourceIDsByName(dataSourceName, conn);
+            CompositeFeedDefinition compositeFeedDefinition;
+            if (dataSourceMap.size() == 0) {
+                compositeFeedDefinition = new CompositeFeedDefinition();
+                compositeFeedDefinition.setFeedName(dataSourceName);
+                compositeFeedDefinition.setUploadPolicy(new UploadPolicy(getUserID(), SecurityUtil.getAccountID()));
+                compositeFeedDefinition.setApiKey(RandomTextGenerator.generateText(12));
+            } else if (dataSourceMap.size() == 1) {
+                compositeFeedDefinition = (CompositeFeedDefinition) new FeedStorage().getFeedDefinitionData(dataSourceMap.keySet().iterator().next(), conn);
+            } else {
+                throw new ServiceRuntimeException("More than one data source was found by that name.");
+            }
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE " +
+                    "DATA_FEED.API_KEY = ?");
+            Map<String, CompositeFeedNode> compositeNodes = new HashMap<String, CompositeFeedNode>();
+            List<CompositeFeedConnection> compositeConnections = new ArrayList<CompositeFeedConnection>();
+            for (String dataSource : dataSources) {
+                queryStmt.setString(1, dataSource);
+                ResultSet dataSetRS = queryStmt.executeQuery();
+                if (dataSetRS.next()) {
+                    long dataSourceID = dataSetRS.getLong(1);
+                    compositeNodes.put(dataSource, new CompositeFeedNode(dataSourceID, 0, 0));
+                } else {
+                    throw new ServiceRuntimeException("We couldn't find a data source with the key of " + dataSource + ".");
+                }
+            }
+            for (DataSourceConnection connection : connections) {
+                CompositeFeedNode source = compositeNodes.get(connection.getSourceDataSource());
+                CompositeFeedNode target = compositeNodes.get(connection.getTargetDataSource());
+                FeedDefinition sourceFeed = new FeedStorage().getFeedDefinitionData(source.getDataFeedID(), conn);
+                FeedDefinition targetFeed = new FeedStorage().getFeedDefinitionData(target.getDataFeedID(), conn);
+                Key sourceKey = findKey(connection.getSourceDataSourceField(), sourceFeed);
+                Key targetKey = findKey(connection.getTargetDataSourceField(), targetFeed);
+                compositeConnections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(),
+                        sourceKey, targetKey));
+            }
+            compositeFeedDefinition.setCompositeFeedNodes(new ArrayList<CompositeFeedNode>(compositeNodes.values()));
+            compositeFeedDefinition.setConnections(compositeConnections);
+
+            compositeFeedDefinition.populateFields(conn);
+
+            long feedID = new FeedStorage().addFeedDefinitionData(compositeFeedDefinition, conn);
+            DataStorage.liveDataSource(feedID, conn);
+            conn.commit();
+            return compositeFeedDefinition.getApiKey();
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            conn.rollback();
+            throw sre;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    private Key findKey(String fieldName, FeedDefinition dataSource) {
+        for (AnalysisItem field : dataSource.getFields()) {
+            if (fieldName.equals(field.getKey().toKeyString())) {
+                return field.getKey();
+            }
+        }
+        return null;
+    }
+
     public String defineDataSource(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name="fields") FieldDefinition[] fields) {
         EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
@@ -48,7 +123,7 @@ public abstract class EIV3API implements IEIV3API {
             dataStorage.insertData(callData.dataSet);
             dataStorage.commit();
             conn.commit();
-            return null;
+            return callData.apiKey;
         } catch (ServiceRuntimeException sre) {
             LogClass.debug(sre.getMessage());
             if (dataStorage != null) {
@@ -259,10 +334,12 @@ public abstract class EIV3API implements IEIV3API {
     private static class CallData {
         DataStorage dataStorage;
         DataSet dataSet;
+        String apiKey;
 
-        private CallData(DataStorage dataStorage, DataSet dataSet) {
+        private CallData(DataStorage dataStorage, DataSet dataSet, String apiKey) {
             this.dataStorage = dataStorage;
             this.dataSet = dataSet;
+            this.apiKey = apiKey;
         }
     }
 
@@ -404,6 +481,7 @@ public abstract class EIV3API implements IEIV3API {
         DataSet dataSet;
         Map<Long, Boolean> dataSourceIDs = findDataSourceIDsByName(dataSourceName, conn);
         List<AnalysisItem> analysisItems = fields.toAnalysisItems();
+        String apiKey;
         if (updateIfNecessary) {
             if (dataSourceIDs.size() == 0) {
                 long userID = getUserID();
@@ -422,6 +500,7 @@ public abstract class EIV3API implements IEIV3API {
                 feedDefinition.setUploadPolicy(uploadPolicy);
                 feedDefinition.setFields(analysisItems);
                 FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), uploadPolicy);
+                apiKey = feedDefinition.getApiKey();
                 dataStorage = result.getTableDefinitionMetadata();
             } else if (dataSourceIDs.size() > 1) {
                 throw new ServiceRuntimeException("More than one data source was found by that name. Please specify an API key for the data source instead.");
@@ -455,6 +534,7 @@ public abstract class EIV3API implements IEIV3API {
                 } else {
                     dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
                 }
+                apiKey = feedDefinition.getApiKey();
             }
             if (rows == null) {
                 dataSet = new DataSet();
@@ -476,9 +556,10 @@ public abstract class EIV3API implements IEIV3API {
                     dataSet = dataTransformation.toDataSet(rows);
                 }
                 dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
+                apiKey = feedDefinition.getApiKey();
             }
         }
-        return new CallData(dataStorage, dataSet);
+        return new CallData(dataStorage, dataSet, apiKey);
     }
 
     private Map<Long, Boolean> findDataSourceIDsByName(String dataSourceName, Connection conn) throws SQLException {

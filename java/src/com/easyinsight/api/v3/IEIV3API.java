@@ -16,6 +16,9 @@ import javax.jws.WebService;
 public interface IEIV3API {
     public boolean validateCredentials();
 
+    public String defineCompositeDataSource(@WebParam(name="dataSources") String[] dataSources, @WebParam(name="connections") DataSourceConnection[] connections,
+                                          @WebParam(name="dataSourceName") String dataSourceName);
+
     public String defineDataSource(@WebParam(name = "dataSourceName") String dataSourceName, @WebParam(name="fields") FieldDefinition[] fields);
 
     public void replaceRows(@WebParam(name = "dataSourceName") String dataSourceName,
