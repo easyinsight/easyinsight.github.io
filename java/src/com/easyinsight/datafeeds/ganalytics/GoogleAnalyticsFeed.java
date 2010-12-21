@@ -164,7 +164,7 @@ public class GoogleAnalyticsFeed extends Feed {
             List<AnalysisItem> convertedItems = new ArrayList<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
                 for (AnalysisItem field : getFields()) {
-                    if (field.getKey().equals(analysisItem.getKey().toBaseKey())) {
+                    if (field.getKey().toBaseKey().equals(analysisItem.getKey().toBaseKey())) {
                         if (field.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                             convertedItems.add(field);
                         } else if (field.hasType(AnalysisItemTypes.MEASURE) && analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
@@ -308,10 +308,6 @@ public class GoogleAnalyticsFeed extends Feed {
         return value;
     }
 
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        throw new UnsupportedOperationException();
-    }
-
     public AnalysisMeasure getDefaultMeasure(Collection<AnalysisDimension> dimensions) {
         AnalysisMeasure analysisMeasure = null;
         AnalysisDimension dimension = null;
@@ -332,10 +328,13 @@ public class GoogleAnalyticsFeed extends Feed {
                 }
             }
         }
+        String measureName;
         if (dimension == null) {
-            throw new RuntimeException("Attempt made to automatically retrieve a default measure when no dimension present");
+            measureName = GoogleAnalyticsDataSource.VISITS;
+        } else {
+            measureName = GoogleAnalyticsDataSource.getMeasure(dimension.getKey().toKeyString());
         }
-        String measureName = GoogleAnalyticsDataSource.getMeasure(dimension.getKey().toKeyString());
+
         for (AnalysisItem analysisItem : getFields()) {
             if (measureName.equals(analysisItem.getKey().toKeyString())) {
                 analysisMeasure = (AnalysisMeasure) analysisItem;

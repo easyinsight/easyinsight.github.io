@@ -69,14 +69,27 @@ public class CompositeFeed extends Feed {
         return filters;
     }
 
+    private AnalysisItemResultMetadata findMetadataForComposite(DerivedKey derivedKey, AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
+        AnalysisItemResultMetadata metadata = null;
+        for (CompositeFeedNode compositeFeedNode : getCompositeFeedNodes()) {
+            if (compositeFeedNode.getDataFeedID() == derivedKey.getFeedID()) {
+                metadata = FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID(), conn).getMetadata(analysisItem, insightRequestMetadata, conn);
+            }
+        }
+        if (metadata == null) {
+            Key parentKey = derivedKey.getParentKey();
+            if (parentKey instanceof DerivedKey) {
+                DerivedKey parentDerivedKey = (DerivedKey) parentKey;
+                metadata = findMetadataForComposite(parentDerivedKey, analysisItem, insightRequestMetadata, conn);
+            }
+        }
+        return metadata;
+    }
+
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         if (analysisItem.getKey() instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
-            for (CompositeFeedNode compositeFeedNode : getCompositeFeedNodes()) {
-                if (compositeFeedNode.getDataFeedID() == derivedKey.getFeedID()) {
-                    return FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID(), conn).getMetadata(analysisItem, insightRequestMetadata, conn);
-                }
-            }
+            return findMetadataForComposite(derivedKey, analysisItem, insightRequestMetadata, conn);
         } else {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
