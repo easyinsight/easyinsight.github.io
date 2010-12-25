@@ -78,6 +78,8 @@ public class FeedType {
     public static final FeedType BASECAMP_TODO_COMMENTS = new FeedType(70);
     public static final FeedType QUICKBASE_CHILD = new FeedType(71);
     public static final FeedType QUICKBASE_COMPOSITE = new FeedType(72);
+    public static final FeedType FRESHBOOKS_ITEMS = new FeedType(73);
+    public static final FeedType FRESHBOOKS_LINE_ITEMS = new FeedType(74);
 
     private int type;
 

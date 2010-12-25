@@ -80,6 +80,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.FRESHBOOKS_CATEGORIES, FreshbooksCategorySource.class);
         registerType(FeedType.FRESHBOOKS_ESTIMATES, FreshbooksEstimateSource.class);
         registerType(FeedType.FRESHBOOKS_PROJECTS, FreshbooksProjectSource.class);
+        registerType(FeedType.FRESHBOOKS_LINE_ITEMS, FreshbooksInvoiceLineSource.class);
         registerType(FeedType.BASECAMP_COMMENTS, BaseCampCommentsSource.class);
         registerType(FeedType.REDIRECT, RedirectDataSource.class);
         registerType(FeedType.WHOLE_FOODS, WholeFoodsSource.class);

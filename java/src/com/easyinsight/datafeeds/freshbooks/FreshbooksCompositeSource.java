@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.UserMessageException;
@@ -154,7 +155,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         return new HashSet<FeedType>(Arrays.asList(FeedType.FRESHBOOKS_INVOICE, FeedType.FRESHBOOKS_CLIENTS,
                 FeedType.FRESHBOOKS_EXPENSES, FeedType.FRESHBOOKS_CATEGORIES, FeedType.FRESHBOOKS_STAFF,
                 FeedType.FRESHBOOKS_PAYMENTS, FeedType.FRESHBOOKS_TASKS, FeedType.FRESHBOOKS_TIME_ENTRIES,
-                FeedType.FRESHBOOKS_PROJECTS, FeedType.FRESHBOOKS_ESTIMATES));
+                FeedType.FRESHBOOKS_PROJECTS, FeedType.FRESHBOOKS_ESTIMATES, FeedType.FRESHBOOKS_LINE_ITEMS));
     }
 
     @Override
@@ -174,7 +175,8 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.FRESHBOOKS_PAYMENTS, FeedType.FRESHBOOKS_INVOICE, FreshbooksPaymentSource.INVOICE_ID, FreshbooksInvoiceSource.INVOICE_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_PROJECTS, FeedType.FRESHBOOKS_CLIENTS, FreshbooksProjectSource.CLIENT_ID, FreshbooksClientSource.CLIENT_ID),
                 new ChildConnection(FeedType.FRESHBOOKS_TIME_ENTRIES, FeedType.FRESHBOOKS_STAFF, FreshbooksTimeEntrySource.STAFF_ID, FreshbooksStaffSource.STAFF_ID),
-                new ChildConnection(FeedType.FRESHBOOKS_TASKS, FeedType.FRESHBOOKS_TIME_ENTRIES, FreshbooksTaskSource.TASK_ID, FreshbooksTimeEntrySource.TASK_ID));
+                new ChildConnection(FeedType.FRESHBOOKS_TASKS, FeedType.FRESHBOOKS_TIME_ENTRIES, FreshbooksTaskSource.TASK_ID, FreshbooksTimeEntrySource.TASK_ID),
+                new ChildConnection(FeedType.FRESHBOOKS_LINE_ITEMS, FeedType.FRESHBOOKS_INVOICE, FreshbooksInvoiceLineSource.INVOICE_ID, FreshbooksInvoiceSource.INVOICE_ID));
     }
 
     @Override
@@ -204,5 +206,15 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         dataSource.setTokenSecretKey(null);
         dataSource.setPin(null);
         return dataSource;
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new FreshbooksComposite1To2(this));
     }
 }
