@@ -6,5 +6,5 @@ package com.easyinsight.api.v3;
  * Time: 12:30 PM
  */
 public enum FieldType {
-    GROUPING, MEASURE, DATE, POSTAL_CODE, LONGITUDE, LATITUDE
+    GROUPING, MEASURE, DATE, POSTAL_CODE, LONGITUDE, LATITUDE, TAGS
 }
