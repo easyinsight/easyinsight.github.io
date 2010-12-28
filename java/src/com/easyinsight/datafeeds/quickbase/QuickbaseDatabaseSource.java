@@ -56,9 +56,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
-        QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) parent;
-        return new QuickbaseFeed(databaseID, quickbaseCompositeSource.getApplicationToken(), quickbaseCompositeSource.getSessionTicket(),
-                quickbaseCompositeSource.getHost(), quickbaseCompositeSource);
+        return new QuickbaseFeed(databaseID);
     }
 
     @Override

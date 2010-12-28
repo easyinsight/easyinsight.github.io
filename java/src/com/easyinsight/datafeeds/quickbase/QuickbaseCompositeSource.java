@@ -33,7 +33,7 @@ import java.util.*;
  */
 public class QuickbaseCompositeSource extends CompositeServerDataSource {
 
-    private static final String AUTHENTICATE_XML = "<username>{0}</username><password>{1}</password><hours>24</hours>";
+    private static final String AUTHENTICATE_XML = "<username>{0}</username><password>{1}</password><hours>144</hours>";
 
     private String applicationToken;
     private String sessionTicket;

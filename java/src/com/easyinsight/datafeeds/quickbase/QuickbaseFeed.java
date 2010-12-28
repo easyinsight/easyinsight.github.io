@@ -6,7 +6,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import nu.xom.*;
@@ -31,20 +31,18 @@ public class QuickbaseFeed extends Feed {
     private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt></qdbapi>";
 
     private String databaseID;
-    private String applicationToken;
-    private String sessionTicket;
-    private String host;
 
-    public QuickbaseFeed(String databaseID, String applicationToken, String sessionTicket, String host, FeedDefinition parent) {
+    public QuickbaseFeed(String databaseID) {
         this.databaseID = databaseID;
-        this.applicationToken = applicationToken;
-        this.sessionTicket = sessionTicket;
-        this.host = host;
     }
 
     @Override
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         try {
+            QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
+            String sessionTicket = quickbaseCompositeSource.getSessionTicket();
+            String applicationToken = quickbaseCompositeSource.getApplicationToken();
+            String host = quickbaseCompositeSource.getHost();
             String fullPath = "https://" + host + "/db/" + databaseID;
             HttpPost httpRequest = new HttpPost(fullPath);
             httpRequest.setHeader("Accept", "application/xml");
@@ -104,6 +102,10 @@ public class QuickbaseFeed extends Feed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
+            QuickbaseCompositeSource quickbaseCompositeSource = (QuickbaseCompositeSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
+            String sessionTicket = quickbaseCompositeSource.getSessionTicket();
+            String applicationToken = quickbaseCompositeSource.getApplicationToken();
+            String host = quickbaseCompositeSource.getHost();
             String fullPath = "https://" + host + "/db/" + databaseID;
             HttpPost httpRequest = new HttpPost(fullPath);
             httpRequest.setHeader("Accept", "application/xml");
