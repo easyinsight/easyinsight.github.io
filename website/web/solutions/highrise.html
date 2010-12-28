@@ -18,72 +18,48 @@
     <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
     <script type="text/javascript" src="/js/slimbox2.js"></script>
-    <script language="javascript" type="text/javascript">
-
-normal_image = new Image();
-normal_image.src = "/images/GetStartedNow2.png";
-
-mouseover_image = new Image();
-mouseover_image.src = "/images/GetStartedNow1.png";
-
-sample_image = new Image();
-sample_image.src = "/images/SampleReports2.png";
-
-sample_mouseover_image = new Image();
-sample_mouseover_image.src = "/images/SampleReports1.png";
-
-doc_image = new Image();
-doc_image.src = "/images/doc2.png";
-
-doc_mouseover_image = new Image();
-doc_mouseover_image.src = "/images/doc1.png";
-
-
-<!-- repeat the 4 lines above for any subsequent images. -->
-
-function swap(){
-if (document.images){
-for (var x=0;
-x<swap.arguments.length;
-x+=2) {
-document[swap.arguments[x]].src = eval(swap.arguments[x+1] + ".src");
-}
-}
-}
-</script>
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/slimbox2.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
+<div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
+<div style="position:absolute;height:245px;background-color:#444444;width:100%;margin-top:108px"></div>
     <div style="width:1000px;margin:0 auto;">
-    	<div id="topBar" style="width:100%;text-align:left;height:95px;position:relative;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;">
-        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
-    <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="/app/newaccount/" class="signupforfreeButton"></a></div>
-                <div class="headline"><a id="productPage" href="/product.html">FEATURES</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="companyPage" href="/company.html">COMPANY</a></div>
+    	<div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
 
+        <div class="signupHeadline">
+            <a href="https://www.easy-insight.com/app/">Customer Login</a>
+            <a href="/app/newaccount/">Pricing &amp; Signup</a>
+            <a href="/contactus.html">Contacts</a>
         </div>
-	    <!-- InstanceBeginEditable name="submenu" -->
-    	<!-- InstanceEndEditable -->        
-        <div id="content" style="margin-top:10px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;background-color:#FFFFFF">
-		    
-            
-            
-            <div style="width:100%;text-align:left;background-color:#FFFFFF;padding-bottom:12px">
-              <div style="width:100%;height:60px;background-color:#848080;text-align:center">
-               	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Highrise Reporting, Analysis, and Business Intelligence<!-- InstanceEndEditable --></h1>
-              </div>
-              <!-- InstanceBeginEditable name="innerContent" -->
-              <p style="padding-top:10px;padding-bottom:10px">Want the ability to perform custom Highrise reporting? Whether it's simple reports on your sales pipeline or in depth CRM analysis, Easy Insight can get you that visibility in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation.</p>
+    </div>
+    <div class="headline">
+        <a id="productPage" href="/product.html">Features</a>
+        <a id="dataPage" href="/data.html">Connections</a>
+        <a id="solutionsPage" href="/webanalytics.html">Solutions</a>
+        <a id="customersPage" href="/customers.html">Customers</a>
+        <a id="partnersPage" href="/partners.html">Partners</a>
+        <a id="companyPage" href="/company.html">Company</a>
+    </div>
+    <div id="coreContent">
+        <div class="coreContentBlock" style="padding-top:20px;">
+            <h2 class="coreContentHeader">Highrise Reporting and Analytics</h2>
 
-                <div style="width:100%" align="center">
-                    <a style="padding-right:20px" href="/app/newaccount/" onMouseOver="swap('getstarted','normal_image')"
-onMouseOut="swap('getstarted','mouseover_image')">
-<img name="getstarted" src="/images/GetStartedNow1.png" border="0" alt="Start Highrise Reporting Now!"></a>
-                    <a style="padding-left:20px" href="http://www.easy-insight.com/documentation/highrise.html" onMouseOver="swap('docs','doc_image')"
-onMouseOut="swap('docs','doc_mouseover_image')">
-<img name="docs" src="/images/doc1.png" border="0" alt="View Highrise Documentation"></a>
-                </div>
+            <p class="coreContentParagraph">Want the ability to perform custom Highrise reporting? Whether it's simple reports on your sales pipeline or in depth CRM analysis, Easy Insight can get you that visibility in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation.</p>
+            <div class="connectionLinks">
+                <a href="/app/newaccount/">Get Started Now!</a>
+                <a href="http://www.easy-insight.com/documentation/highrise.html">View Highrise Documentation</a>
+            </div>
+        </div>
+        <div style="margin-top:50px;margin-right:50px;float:right;background-color:#FFFFFF">
+            <img style="padding:30px" src="/images/logos/Highrise.png" alt="Highrise Logo"/>
+        </div>
+    </div>
+    <div id="contentHeaderStart"></div>
+    <div id="midContent">
                 
               <div style="padding-top:35px;padding-left:10px;padding-right:30px;float:left">
                 <a href="../images/CompanyDealTree.png" rel="lightbox-highrise" title="Trees let you define hierarchial representations of your Highrise data. In the above report, companies drill down into the deals associated with those companies, with dollar figures rolling up to the company level."><img src="../images/CompanyDealTreeSmall.png" alt="Highrise report showing companies and deals in hierarchy"/></a>
@@ -109,7 +85,7 @@ onMouseOut="swap('docs','doc_mouseover_image')">
                     </div>
                 </div>
                 <span style="display:none"><a href="../images/TagAnalysis.png" rel="lightbox-highrise" title="You can report and analyze by your Highrise tags, giving you a whole new range of reporting capabilities.">Image 5</a></span>
-              <h2 style="padding-top:140px">Extend Your Highrise Reporting With Custom Fields</h2>
+              <h2 style="padding-top:160px">Extend Your Highrise Reporting With Custom Fields</h2>
               <p>Want to add probability of close to your deals? Industry to your contacts? Easy Insight provides you with the functionality to easily extend your Highrise reporting with custom fields. Have Basecamp too? Combine your Basecamp and Highrise data to create a single dashboard of todos, hours, and deal activity by user across the two products.</p>
               <p style="padding-top:80px;padding-bottom:2px;margin:2px;" class="disclaimer">Highrise and 37signals are registered trademarks of 37signals, LLC.</p>
               <p style="padding-top:2px;margin:2px;" class="disclaimer">Easy Insight is in no way affiliated with 37signals nor Highrise.</p>
