@@ -8,7 +8,7 @@
     <style type="text/css">
         .pricingBox {
             width: 220px;
-            height: 400px;
+            height: 420px;
             padding: 0px;
             margin: 0px;
             border-style: solid;
