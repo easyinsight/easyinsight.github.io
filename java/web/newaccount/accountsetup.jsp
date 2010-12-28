@@ -113,11 +113,7 @@
     <!-- InstanceBeginEditable name="head" -->
     <!-- InstanceEndEditable -->
     <link type="text/css" rel="stylesheet" media="screen" href="../../css/base.css"/>
-    <script type="text/javascript" src="http://use.typekit.com/luf1tdi.js"></script>
-    <script type="text/javascript">try {
-        Typekit.load();
-    } catch(e) {
-    }</script>
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <script type="text/javascript" src="/js/jquery.min.js"></script>
     <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
