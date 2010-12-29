@@ -1,5 +1,6 @@
 package com.easyinsight.api.basicauth;
 
+import com.easyinsight.users.UserService;
 import org.apache.cxf.binding.soap.interceptor.SoapHeaderInterceptor;
 
 import java.io.IOException;
@@ -50,10 +51,19 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
 
         // Verify the password
         try {
-            UserServiceResponse response;
-            response = SecurityUtil.authenticateKeys(policy.getUserName(), policy.getPassword());
+            UserServiceResponse response = SecurityUtil.authenticateKeys(policy.getUserName(), policy.getPassword());
             message.put("accountID", response.getAccountID());
             message.put("userID", response.getUserID());
+        } catch (SecurityException se) {
+            try {
+                UserServiceResponse response = new UserService().authenticate(policy.getUserName(), policy.getPassword(), false);
+                message.put("accountID", response.getAccountID());
+                message.put("userID", response.getUserID());
+            } catch (Exception e) {
+                log.warn("Invalid username or password for user: " + policy.getUserName());
+                LogClass.error(e);
+                sendErrorResponse(message, HttpURLConnection.HTTP_FORBIDDEN);
+            }
         } catch (Exception e) {
             log.warn("Invalid username or password for user: " + policy.getUserName());
             LogClass.error(e);
