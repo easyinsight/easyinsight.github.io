@@ -98,7 +98,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
 
     protected void configurationProblem(EIConnection conn, String message) throws Exception {
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_PROBLEM (DATA_SOURCE_ID, PROBLEM_TEXT) VALUES (?, ?)");
-        insertStmt.setLong(1, getTaskGeneratorID());
+        insertStmt.setLong(1, getDataSourceID());
         insertStmt.setString(2, message);
         insertStmt.execute();
     }
