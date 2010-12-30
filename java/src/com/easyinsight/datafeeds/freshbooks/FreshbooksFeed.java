@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.logging.LogClass;
 import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
@@ -76,6 +77,7 @@ public abstract class FreshbooksFeed extends Feed {
             string = string.replace("xmlns=\"http://www.freshbooks.com/api/\"", "");            
             return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
         } catch (HttpResponseException hre) {
+            LogClass.error(hre);
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Freshbooks data.", getParentSource(conn)));
         } catch (Exception e) {
             throw new RuntimeException(e);
