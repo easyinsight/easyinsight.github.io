@@ -632,10 +632,17 @@ public class FeedStorage {
         saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
         saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders(), feedDefinition.getFields());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
+        clearProblems(feedDefinition.getDataFeedID(), conn);
         feedDefinition.exchangeTokens((EIConnection) conn);
         feedDefinition.customStorage(conn);
 
         updateDataFeedStmt.close();
+    }
+
+    private void clearProblems(long dataSourceID, Connection conn) throws Exception {
+        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_PROBLEM WHERE data_source_id = ?");
+        deleteStmt.setLong(1, dataSourceID);
+        deleteStmt.executeUpdate();
     }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition) throws Exception {

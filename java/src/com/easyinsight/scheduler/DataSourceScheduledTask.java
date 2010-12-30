@@ -44,6 +44,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
 
     protected void execute(Date now, EIConnection conn) throws Exception {
         try {
+            if (!validate(conn)) return;
             IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID, conn);
             UserStub dataSourceUser = null;
             List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
@@ -79,10 +80,26 @@ public class DataSourceScheduledTask extends ScheduledTask {
                 }
             }
         } catch (ReportException re) {
-            LogClass.error(re.getReportFault().toString(), re);
+            configurationProblem(conn, re.getReportFault().toString());
         } catch (Exception e) {
             LogClass.error("Data source " + dataSourceID + " had error " + e.getMessage() + " in trying to refresh data.");
             throw e;
         }
+    }
+
+    protected boolean validate(EIConnection conn) throws Exception {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT COUNT(DATA_SOURCE_PROBLEM_ID) FROM DATA_SOURCE_PROBLEM WHERE DATA_SOURCE_ID = ?");
+        queryStmt.setLong(1, dataSourceID);
+        ResultSet rs = queryStmt.executeQuery();
+        rs.next();
+        int count = rs.getInt(1);
+        return (count <= 1);
+    }
+
+    protected void configurationProblem(EIConnection conn, String message) throws Exception {
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_PROBLEM (DATA_SOURCE_ID, PROBLEM_TEXT) VALUES (?, ?)");
+        insertStmt.setLong(1, getTaskGeneratorID());
+        insertStmt.setString(2, message);
+        insertStmt.execute();
     }
 }

@@ -62,6 +62,22 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
         dataSourceID = rs.getLong(1);
         dataSourceName = rs.getString(2);
         queryStmt.close();
+        PreparedStatement queryProblemStmt = conn.prepareStatement("SELECT problem_text FROM DATA_SOURCE_PROBLEM WHERE DATA_SOURCE_ID = ?");
+        queryProblemStmt.setLong(1, getDataSourceID());
+        ResultSet problemRS = queryProblemStmt.executeQuery();
+        int count = 0;
+        String message = null;
+        while (problemRS.next()) {
+            count++;
+            message = problemRS.getString(1);
+        }
+        if (count > 1) {
+            setProblemLevel(2);
+            setProblemMessage(message);
+        } else if (count == 1) {
+            setProblemLevel(1);
+            setProblemMessage(message);
+        }
     }
 
     @Override

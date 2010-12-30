@@ -20,6 +20,7 @@ import com.google.gdata.data.analytics.DataEntry;
 import com.google.gdata.data.analytics.AccountEntry;
 import com.google.gdata.data.analytics.AccountFeed;
 import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.util.InvalidEntryException;
 
 import java.util.*;
 import java.net.URL;
@@ -277,6 +278,8 @@ public class GoogleAnalyticsFeed extends Feed {
             }
             //String ids = "ga:16750246";
             return dataSet;
+        } catch (InvalidEntryException iee) {
+            throw new ReportException(new GenericReportFault(iee.getMessage()));
         } catch (ReportException tme) {
             throw tme;
         } catch (Exception e) {

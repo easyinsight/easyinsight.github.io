@@ -5,6 +5,8 @@ public class ScheduledActivity {
 
     public var scheduleType:ScheduleType;
     public var scheduledActivityID:int;
+    public var problemLevel:int;
+    public var problemMessage:String;
 
     public function ScheduledActivity() {
     }

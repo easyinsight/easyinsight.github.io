@@ -4,6 +4,7 @@ import com.easyinsight.core.Value;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * User: jamesboe
@@ -22,7 +23,11 @@ public class MaterializedFilterPatternDefinition extends MaterializedFilterDefin
         }
         if (!"".equals(pattern)) {
             if (regex) {
-                this.pattern = Pattern.compile(caseSensitive ? pattern : pattern.toLowerCase());
+                try {
+                    this.pattern = Pattern.compile(caseSensitive ? pattern : pattern.toLowerCase());
+                } catch (PatternSyntaxException pse) {
+                    throw new ReportException(new GenericReportFault(pse.getMessage()));
+                }
             } else {
                 this.pattern = Pattern.compile(caseSensitive ? createWildcardPattern(pattern) : createWildcardPattern(pattern.toLowerCase()));
             }

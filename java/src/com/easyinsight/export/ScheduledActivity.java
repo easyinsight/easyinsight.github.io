@@ -22,6 +22,25 @@ public abstract class ScheduledActivity {
     public static final int REPORT_DELIVERY = 2;
     public static final int SCORECARD_DELIVERY = 3;
 
+    private String problemMessage;
+    private int problemLevel;
+
+    public String getProblemMessage() {
+        return problemMessage;
+    }
+
+    public void setProblemMessage(String problemMessage) {
+        this.problemMessage = problemMessage;
+    }
+
+    public int getProblemLevel() {
+        return problemLevel;
+    }
+
+    public void setProblemLevel(int problemLevel) {
+        this.problemLevel = problemLevel;
+    }
+
     public abstract int retrieveType();
 
     public ScheduleType getScheduleType() {
