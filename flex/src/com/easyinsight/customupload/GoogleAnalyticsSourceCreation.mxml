@@ -45,6 +45,19 @@
         private var stackIndex:int = 0;
 
         public function validate():Boolean {
+            if (stackIndex == 0) {
+                installButton.errorString = "You need to authorize Easy Insight to access your Google Analytics data.";
+                installButton.setFocus();
+                installButton.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
+
+            if (pinInput.text.length == 0) {
+                pinInput.errorString = "You need to enter your Verifier from Google Analytics here.";
+                pinInput.setFocus();
+                pinInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
             return true;
         }]]></mx:Script>
     <mx:RemoteObject destination="tokenService" id="tokenService">
@@ -52,7 +65,7 @@
     </mx:RemoteObject>
     <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your Google account. Upon granting access, you will receive a verifier token. Copy that value, return to this tab or window, and paste that value below." borderStyle="none"
             backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
-    <mx:Button label="Authorize Easy Insight Access" click="install()"/>
+    <mx:Button label="Authorize Easy Insight Access" click="install()" id="installButton"/>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
         <mx:Box/>
         <mx:Box>

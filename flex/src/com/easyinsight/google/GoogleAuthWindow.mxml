@@ -4,6 +4,7 @@
         import com.easyinsight.customupload.OAuthResponse;
         import com.easyinsight.util.ProgressAlert;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         private function gotURL():void {
@@ -20,11 +21,28 @@
 
         private function registeredToken():void {
             var response:GoogleSpreadsheetResponse = googleService.registerToken.lastResult as GoogleSpreadsheetResponse;
-            dispatchEvent(new GoogleSpreadsheetEvent(response.spreadsheets));
-            PopUpManager.removePopUp(this);
+            if (response.validOAuth) {
+                dispatchEvent(new GoogleSpreadsheetEvent(response.spreadsheets));
+                PopUpManager.removePopUp(this);
+            } else {
+                Alert.show("We encountered a problem in connecting to Google Documents. Please check the verifier value you obtained from Google and try again. If the issue continues, please contact support@easy-insight.com.");
+            }
         }
 
         private function registerToken():void {
+            if (stackIndex == 0) {
+                installButton.errorString = "You need to authorize Easy Insight to access your Google Documents data.";
+                installButton.setFocus();
+                installButton.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            if (pinInput.text.length == 0) {
+                pinInput.errorString = "You need to enter your Verifier from Google Documents here.";
+                pinInput.setFocus();
+                pinInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+
             ProgressAlert.alert(this,"Registering token and retrieving spreadsheets...", null, googleService.registerToken);
             googleService.registerToken.send(pinInput.text);
         }
@@ -41,7 +59,7 @@
     <mx:VBox>
         <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your Google account. Upon granting access, you will receive a verifier value. Copy that value, return to this tab or window, and paste that value below." borderStyle="none"
                 backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
-        <mx:Button label="Authorize Easy Insight Access" click="authorize()"/>
+        <mx:Button label="Authorize Easy Insight Access" click="authorize()" id="installButton"/>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
             <mx:Box/>
             <mx:VBox>
