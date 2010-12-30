@@ -1,5 +1,6 @@
 package com.easyinsight.api;
 
+import com.easyinsight.users.UserService;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.message.Message;
@@ -89,7 +90,12 @@ public class MessageThrottlingInterceptor extends AbstractPhaseInterceptor {
 
         public UserServiceResponse getAccount(Message message) {
             AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
-            return SecurityUtil.authenticateKeys(policy.getUserName(), policy.getPassword());
+            try {
+                return SecurityUtil.authenticateKeys(policy.getUserName(), policy.getPassword());
+            } catch (com.easyinsight.security.SecurityException e) {
+                return new UserService().authenticate(policy.getUserName(), policy.getPassword(), false);
+            }
+
         }
     }
 }
