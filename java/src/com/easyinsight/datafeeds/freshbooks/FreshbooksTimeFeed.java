@@ -50,7 +50,11 @@ public class FreshbooksTimeFeed extends FreshbooksFeed {
             int currentPage;
             do {
                 Document invoicesDoc = query("time_entry.list", "<page>" + requestPage + "</page>", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/time_entries").get(0);
+                Nodes timeNodes = invoicesDoc.query("/response/time_entries");
+                if (timeNodes.size() == 0) {
+                    return dataSet;
+                }
+                Node invoicesSummaryNode = timeNodes.get(0);
                 String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
                 String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
                 pages = Integer.parseInt(pageString);
