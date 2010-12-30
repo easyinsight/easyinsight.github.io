@@ -54,7 +54,7 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
             UserServiceResponse response = SecurityUtil.authenticateKeys(policy.getUserName(), policy.getPassword());
             message.put("accountID", response.getAccountID());
             message.put("userID", response.getUserID());
-        } catch (SecurityException se) {
+        } catch (com.easyinsight.security.SecurityException se) {
             try {
                 UserServiceResponse response = new UserService().authenticate(policy.getUserName(), policy.getPassword(), false);
                 message.put("accountID", response.getAccountID());
