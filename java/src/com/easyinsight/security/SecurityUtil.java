@@ -127,6 +127,9 @@ public class SecurityUtil {
                 throw new SecurityException();
             }
             conn.commit();
+        } catch (SecurityException se) {
+            conn.rollback();
+            throw se;
         } catch (Exception e) {
             conn.rollback();
             throw new RuntimeException(e);
