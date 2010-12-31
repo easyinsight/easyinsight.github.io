@@ -278,6 +278,8 @@ public class GoogleAnalyticsFeed extends Feed {
             }
             //String ids = "ga:16750246";
             return dataSet;
+        } catch (AuthenticationException ae) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (InvalidEntryException iee) {
             throw new ReportException(new GenericReportFault(iee.getMessage()));
         } catch (ReportException tme) {
