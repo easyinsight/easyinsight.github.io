@@ -80,6 +80,13 @@ public class FeedType {
     public static final FeedType QUICKBASE_COMPOSITE = new FeedType(72);
     public static final FeedType FRESHBOOKS_ITEMS = new FeedType(73);
     public static final FeedType FRESHBOOKS_LINE_ITEMS = new FeedType(74);
+    public static final FeedType CAMPAIGN_MONITOR_COMPOSITE = new FeedType(75);
+    public static final FeedType CAMPAIGN_MONITOR_CLIENTS = new FeedType(76);
+    public static final FeedType CAMPAIGN_MONITOR_CAMPAIGNS = new FeedType(77);
+    public static final FeedType CAMPAIGN_MONITOR_LISTS = new FeedType(78);
+    public static final FeedType CAMPAIGN_MONITOR_CAMPAIGN_RESULTS = new FeedType(79);
+    public static final FeedType CLEARDB_COMPOSITE = new FeedType(80);
+    public static final FeedType CLEARDB_CHILD = new FeedType(81);
 
     private int type;
 
