@@ -99,6 +99,11 @@
             PopUpManager.removePopUp(this);
         }
 
+        private function closeWindow():void {
+            if (timer != null) { timer.stop() }
+            PopUpManager.removePopUp(this);
+        }
+
         private function onProblem(event:ProblemDataEvent):void {
             uploadService.refreshData.send(_dataSourceID);
         }
@@ -119,7 +124,7 @@
             <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="30" width="100%">
                 <mx:ProgressBar indeterminate="true" id="progressBar" label="" labelPlacement="right"/>
                 <mx:Label selectable="false" maxWidth="400" text="{asyncLabel}" fontSize="14"/>
-                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                <mx:Button label="Cancel" click="closeWindow()"/>
             </mx:VBox>
             <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="5" width="100%">
                 <mx:Label text="{errorText}"/>

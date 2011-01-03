@@ -194,6 +194,14 @@
             _dataSourceClass = value;
         }
 
+        private function closeWindow():void {
+            if (timer != null) {
+                timer.stop();
+            }
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            PopUpManager.removePopUp(this);
+        }
+
         [Bindable]
         private var asyncLabel:String = "Retrieving data, this may take a few minutes...";
         ]]></mx:Script>
@@ -216,7 +224,7 @@
         <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="{asyncLabel}"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Create" click="validate()" enabled="{ready}" styleName="grayButton" fontSize="14"/>
-            <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)" styleName="grayButton"
+            <mx:Button label="Cancel" click="closeWindow()" styleName="grayButton"
                     fontSize="14"/>
         </mx:HBox>
 	</mx:VBox>

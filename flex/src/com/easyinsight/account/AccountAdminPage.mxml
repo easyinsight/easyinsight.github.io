@@ -16,7 +16,6 @@
                     <account:AccountTrialDate accountInfo="{accountInfo}"/>
                 </mx:Form>
                 <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="220"/>
-                <mx:Button label="Manage Credentials..." click="showPreferences()" styleName="grayButton" fontSize="14" width="220"/>
                 <mx:Button label="Billing Configuration..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
                 <mx:Button label="Cancel Account..." click="cancelPaidAccount()"
                     styleName="grayButton" fontSize="14" width="220"/>

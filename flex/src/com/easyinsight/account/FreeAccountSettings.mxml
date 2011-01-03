@@ -114,9 +114,6 @@
                     <mx:Button label="Manage Persona..." click="managePersona()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
-                    <mx:Button label="Manage Credentials..." click="showPreferences()"/>
-                </mx:FormItem>
-                <mx:FormItem label="">
                     <mx:Button label="Upgrade Account..." click="upgrade()"/>
                 </mx:FormItem>
                 <mx:FormItem>
