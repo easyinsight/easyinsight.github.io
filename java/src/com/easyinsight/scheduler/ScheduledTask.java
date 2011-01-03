@@ -5,8 +5,9 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 
 import javax.persistence.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Date;
-import java.sql.Connection;
 
 import org.hibernate.Session;
 

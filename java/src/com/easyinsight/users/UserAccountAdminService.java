@@ -611,6 +611,7 @@ public class UserAccountAdminService {
             account.setApiEnabled(accountSettings.isApiEnabled());
             account.setDateFormat(accountSettings.getDateFormat());
             account.setGroupID(accountSettings.getGroupID() > 0 ? accountSettings.getGroupID() : null);
+            account.setFirstDayOfWeek(accountSettings.getFirstDayOfWeek());
             account.setMarketplaceEnabled(accountSettings.isMarketplace());
             account.setPublicDataEnabled(accountSettings.isPublicData());
             account.setReportSharingEnabled(accountSettings.isReportSharing());
@@ -636,6 +637,7 @@ public class UserAccountAdminService {
             Account account = (Account) results.get(0);
             accountSettings = new AccountSettings();
             accountSettings.setApiEnabled(account.isApiEnabled());
+            accountSettings.setFirstDayOfWeek(account.getFirstDayOfWeek());
             accountSettings.setGroupID(account.getGroupID() != null ? account.getGroupID() : 0);
             accountSettings.setMarketplace(account.isMarketplaceEnabled());
             accountSettings.setPublicData(account.isPublicDataEnabled());

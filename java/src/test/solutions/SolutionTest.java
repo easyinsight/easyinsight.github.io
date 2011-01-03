@@ -180,7 +180,7 @@ public class SolutionTest extends TestCase {
         }
         ds = (BaseCampCompositeSource) new FeedService().getFeedDefinition(newSourceID);
         ds.setUrl("easyinsight.basecamphq.com");
-        ds.refreshData(SecurityUtil.getAccountID(), new Date(), null);
+        ds.refreshData(SecurityUtil.getAccountID(), new Date(), null, null);
         WSListDefinition defaultQuery = new WSListDefinition();
         defaultQuery.setDataFeedID(newSourceID);
         defaultQuery.setColumns(Arrays.asList(getItem(BaseCampTodoSource.CREATORNAME, ds)));

@@ -32,5 +32,9 @@ public class DataSourceConnectivityReportFault extends ReportFault {
     private function onResolved(event:ProblemDataEvent):void {
         dispatchEvent(event);
     }
+
+    override public function getMessage():String {
+        return message;
+    }
 }
 }

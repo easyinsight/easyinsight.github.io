@@ -22,5 +22,9 @@ public class ReportFault {
         PopUpManager.addPopUp(window, parent, true);
         PopUpUtil.centerPopUp(window);
     }
+
+    public function getMessage():String {
+        return null;
+    }
 }
 }

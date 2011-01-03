@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<skin:BackgroundImage xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
                       xmlns:analysis="com.easyinsight.analysis.*"
-                      xmlns:datasources="com.easyinsight.datasources.*"
                       creationComplete="initializeForWorksheet()" width="100%"
                       height="100%"
-                      xmlns:util="com.easyinsight.util.*"
                       xmlns:filtering="com.easyinsight.filtering.*"
-                      xmlns:feed="com.easyinsight.administration.feed.*" doubleClickEnabled="true"
+                      doubleClickEnabled="true"
                       implements="com.easyinsight.listing.IPerspective" xmlns:skin="com.easyinsight.skin.*" applyCenterScreenLogic="false">
     <skin:states>
         <mx:State name="NotLoggedIn">
@@ -182,18 +180,7 @@
         [Bindable]
         private var reportName:String;
 
-        private var _tutorialOnStart:int;
-
-        public function set tutorialOnStart(value:int):void {
-            _tutorialOnStart = value;
-        }
-
         private var loading:Boolean = false;
-
-        public function set previewMode(previewMode:Boolean):void {
-            this._previewMode = previewMode;
-            this.dataService.previewMode = previewMode;
-        }
 
         public function onInvalidFields(event:InvalidFieldsEvent):void {
             transformContainer.invalidateItems(event.invalidAnalysisItemIDs);
@@ -236,7 +223,6 @@
             }
             if (analysisDefinition == null) {
                 this.analysisDefinition = dataViewFactory.createNewDefinition();
-                analysisDefinition.canSaveDirectly = true;
                 analysisDefinition.visibleAtFeedLevel = shareDataSourceSettings;
                 analysisDefinition.dataFeedID = dataSourceID;
             } else {
@@ -706,18 +692,15 @@
         }
 
         private function save():void {
-            if (analysisDefinition.canSaveDirectly) {
-                dataView.updateExportMetadata();
-                var window:ImprovedSaveWindow = new ImprovedSaveWindow();
-                window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saved);
-                window.coreView = dataView.getCoreView();
-                window.report = analysisDefinition;
-                window.originConnection = originSolution;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            } else {
-                Alert.show("You are not allowed to directly modify this report--use Save As instead.");
-            }
+
+            dataView.updateExportMetadata();
+            var window:ImprovedSaveWindow = new ImprovedSaveWindow();
+            window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saved);
+            window.coreView = dataView.getCoreView();
+            window.report = analysisDefinition;
+            window.originConnection = originSolution;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function saved(event:SavedAnalysisEvent):void {
@@ -746,8 +729,6 @@
 
         private function savedAnalysis(event:SavedAnalysisEvent):void {
             //title = event.title;
-            var savedDef:AnalysisDefinition = event["report"];
-            analysisDefinition.canSaveDirectly = true;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.analysisID = String(event.report.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
@@ -858,7 +839,7 @@
 
         private function gotUserCapabilitiesForInsight():void {
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForInsight.lastResult as UserCapabilities;
-            reportSaveable = userCapabilities.groupMember;
+            reportSaveable = true;
             canSubscribeToFeed = userCapabilities.feedRole > 3;
             canSubscribeToInsight = userCapabilities.analysisRole > 3;
             canAddFeedToGroup = userCapabilities.groupMember;

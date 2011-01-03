@@ -118,14 +118,12 @@ public class PseudoContextWindow extends VBox {
         setStyle("backgroundAlpha", 1);
     }
 
-    private function defineDateLink(targetLevel:int, label:String):ContextMenuItem {
-        var item:ContextMenuItem = new ContextMenuItem(label);
-        item.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+    private function defineDateLink(targetLevel:int, label:String):PseudoContextItem {
+        return new PseudoContextItem(label, function(event:ContextMenuEvent):void {
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             date.dateLevel = targetLevel;
             passthroughFunction.call(passthroughObject, new AnalysisItemChangeEvent(date));
-        });
-        return item;
+        }, null);
     }
 
     private function composeLink(link:Link):void {

@@ -643,6 +643,7 @@ public class FeedStorage {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_PROBLEM WHERE data_source_id = ?");
         deleteStmt.setLong(1, dataSourceID);
         deleteStmt.executeUpdate();
+        deleteStmt.close();
     }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition) throws Exception {

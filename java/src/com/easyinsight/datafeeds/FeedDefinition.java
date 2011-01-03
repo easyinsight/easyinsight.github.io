@@ -62,6 +62,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private long parentSourceID;
     private boolean adjustDates;
 
+
     public boolean requiresConfiguration() {
         return true;
     }
@@ -504,7 +505,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return item;
     }
     
-     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) throws ReportException {
+     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
         throw new UnsupportedOperationException();
     }
 

@@ -12,7 +12,6 @@
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.framework.ConnectionGoEvent;
-        import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FragmentParser;
         import com.easyinsight.framework.LoginPage;
         import com.easyinsight.framework.ModulePerspective;
@@ -68,8 +67,6 @@
         import mx.managers.PopUpManager;
 
 
-        [Bindable]
-        private var messageListener:EIMessageListener;
 
 
         private var perspective:IPerspective;
@@ -99,8 +96,6 @@
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
-            EIMessageListener.initialize();
-            messageListener = EIMessageListener.instance();
             //GAHelper.initialize(tracker);
             userService.getBuildPath.send();
         }

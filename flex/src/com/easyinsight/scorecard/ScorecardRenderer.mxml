@@ -7,7 +7,6 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.ProblemDataEvent;
-        import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIEvent;
@@ -197,7 +196,6 @@
             addEventListener(KPIEvent.KPI_EDITED, onKPIEdit);
             addEventListener(KPIEvent.KPI_ADDED, addedKPI);
             addEventListener(KPIEvent.KPI_REMOVED, onKPIDelete);
-            EIMessageListener.instance().addEventListener(ScorecardMessageEvent.SCORECARD_MESSAGE, onMessage, false, 0, true);
             BindingUtils.bindProperty(kpiNameFactory, "contextMenuAvailable", this, "contextMenuAvailable");
             BindingUtils.bindProperty(kpiIconFactory, "contextMenuAvailable", this, "contextMenuAvailable");
         }

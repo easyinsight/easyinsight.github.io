@@ -21,6 +21,7 @@ import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.easyinsight.util.ServiceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.hibernate.Session;
 
@@ -31,16 +32,17 @@ import org.hibernate.Session;
  */
 public abstract class ServerDataSourceDefinition extends FeedDefinition implements IServerDataSourceDefinition {
 
-    public void loadingProgress(int current, int total, String message, boolean async) {
-        DataSourceRefreshEvent info = new DataSourceRefreshEvent();
-        info.setDataSourceID(getParentSourceID() == 0 ? getDataFeedID() : getParentSourceID());
-        info.setDataSourceName(message);
-        info.setType(DataSourceRefreshEvent.PROGRESS);
-        info.setUserId(SecurityUtil.getUserID());
-        info.setCurrent(current);
-        info.setMax(total);
-        MessageUtils.sendMessage("generalNotifications", info);
-
+    public void loadingProgress(int current, int total, String message, String callDataID) {
+        if (callDataID != null) {
+            DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+            info.setDataSourceID(getParentSourceID() == 0 ? getDataFeedID() : getParentSourceID());
+            info.setDataSourceName(message);
+            info.setType(DataSourceRefreshEvent.PROGRESS);
+            info.setUserId(SecurityUtil.getUserID());
+            info.setCurrent(current);
+            info.setMax(total);
+            ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info);
+        }
     }
 
     public void exchangeTokens(EIConnection conn) throws Exception {        
@@ -50,7 +52,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         DataStorage metadata = null;
         try {
             Map<String, Key> keys = newDataSourceFields();
-            DataSet dataSet = getDataSet(keys, new Date(), null, null, conn);
+            DataSet dataSet = getDataSet(keys, new Date(), null, null, conn, null);
             if (externalAnalysisItems != null) {
                 /*for (AnalysisItem field : externalAnalysisItems) {
                     dataSet.refreshKey(field.getKey());
@@ -132,11 +134,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            refreshData(accountID, now, conn, null);
+            refreshData(accountID, now, conn, parentDefinition, callDataID);
             conn.commit();
             ReportCache.instance().flushResults(getDataFeedID());
             return new CredentialsResponse(true, getDataFeedID());
@@ -152,9 +154,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID) {
         try {
-            refreshData(accountID, now, conn, null);
+            refreshData(accountID, now, conn, parentDefinition, callDataID);
             return new CredentialsResponse(true, getDataFeedID());
         } catch (ReportException re) {
             return new CredentialsResponse(false, re.getReportFault());
@@ -163,7 +165,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID) throws Exception {
         DataStorage dataStorage = null;
         try {
             Map<String, Key> keys = newDataSourceFields();
@@ -172,7 +174,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             if (clearsData()) {
                 dataStorage.truncate(); 
             }
-            DataSet dataSet = getDataSet(newDataSourceFields(), now, parentDefinition, dataStorage, conn);
+            DataSet dataSet = getDataSet(newDataSourceFields(), now, parentDefinition, dataStorage, conn, callDataID);
             //List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             //int version = dataStorage.getVersion();
             //int newVersion = dataStorage.migrate(getFields(), items);

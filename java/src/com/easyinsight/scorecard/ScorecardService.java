@@ -394,7 +394,7 @@ public class ScorecardService {
     }
 
     public List<KPI> refreshValuesForList(List<KPI> kpis, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean allSources) throws Exception {
-        if (allSources) {
+        /*if (allSources) {
             Set<Long> dataSourceIDs = new HashSet<Long>();
             for (KPI kpi : kpis) {
                 dataSourceIDs.add(kpi.getCoreFeedID());
@@ -405,14 +405,14 @@ public class ScorecardService {
                     IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
                     if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                         try {
-                            dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null);
+                            dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null, null);
                         } finally {
                             DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                         }
                     }
                 }
             }
-        }
+        }*/
         for (KPI kpi : kpis) {
             KPIOutcome kpiValue = refreshKPIValue(kpi, conn, insightRequestMetadata);
             kpi.setKpiOutcome(kpiValue);

@@ -197,7 +197,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         return taskInfos;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
@@ -209,7 +209,7 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         Map<String, String> categoryCache = new HashMap<String, String>();
         try {
             Set<TaskInfo> tasks = new HashSet<TaskInfo>();
-            loadingProgress(0, 1, "Synchronizing with tasks...", true);
+            loadingProgress(0, 1, "Synchronizing with tasks...", callDataID);
             tasks.addAll(getTasks(token.getTokenValue(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
             tasks.addAll(getTasks(token.getTokenValue(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
             tasks.addAll(getTasks(token.getTokenValue(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));

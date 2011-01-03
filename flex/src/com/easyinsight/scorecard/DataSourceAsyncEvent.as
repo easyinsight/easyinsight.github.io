@@ -12,8 +12,6 @@ public class DataSourceAsyncEvent extends OutboundEvent {
     public static const PROGRESS:int = 3;
     public static const BLOCKED:int = 4;
 
-    public var dataSourceID:int;
-
     public var dataSourceName:String;
 
     public var current:int;
@@ -23,8 +21,6 @@ public class DataSourceAsyncEvent extends OutboundEvent {
     public var type:int;
 
     public var timestamp:Date;
-
-    public var async:Boolean;
     
     public function DataSourceAsyncEvent() {
         super();

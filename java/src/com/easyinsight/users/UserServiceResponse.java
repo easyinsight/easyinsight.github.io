@@ -38,6 +38,7 @@ public class UserServiceResponse {
     private Scenario scenario;
     private String currencySymbol;
     private ApplicationSkin applicationSkin;
+    private int firstDayOfWeek;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -50,7 +51,7 @@ public class UserServiceResponse {
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
                                boolean firstLogin, Date lastLoginDate, String accountName,
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
-                               boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin) {
+                               boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -75,6 +76,15 @@ public class UserServiceResponse {
         this.guestUser = guestUser;
         this.currencySymbol = currencySymbol;
         this.applicationSkin = applicationSkin;
+        this.firstDayOfWeek = firstDayOfWeek;
+    }
+
+    public int getFirstDayOfWeek() {
+        return firstDayOfWeek;
+    }
+
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        this.firstDayOfWeek = firstDayOfWeek;
     }
 
     public ApplicationSkin getApplicationSkin() {

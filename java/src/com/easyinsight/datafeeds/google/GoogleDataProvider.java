@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.google;
 
+import com.cleardb.app.Client;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.EIDescriptor;
@@ -7,6 +8,8 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
+import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.dataset.DataSet;
@@ -28,6 +31,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -161,6 +166,76 @@ public class GoogleDataProvider {
     private static final String AUTHENTICATE_XML = "<username>{0}</username><password>{1}</password><hours>24</hours>";
     private static final String GET_APPLICATIONS_XML = "<ticket>{0}</ticket>";
     private static final String GET_SCHEMA_XML = "<ticket>{0}</ticket><apptoken>{1}</apptoken>";
+
+    public EIDescriptor createClearDBDataSource(String apiKey, String appID) {
+        SecurityUtil.authorizeAccountTier(Account.BASIC);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+            ClearDBCompositeSource clearDBCompositeSource = new ClearDBCompositeSource();
+            clearDBCompositeSource.setFeedName("ClearDB");
+            clearDBCompositeSource.setCdApiKey(apiKey);
+            clearDBCompositeSource.setAppToken(appID);
+            clearDBCompositeSource.setUploadPolicy(uploadPolicy);
+            new FeedCreation().createFeed(clearDBCompositeSource, conn, new DataSet(), uploadPolicy);
+            Client client = new Client(apiKey, appID);
+            JSONObject result = client.query("SHOW TABLES");
+            JSONArray tables = result.getJSONArray("response");
+            Map<String, String> tableSet = new HashMap<String, String>();
+            for (int i = 0; i < tables.length(); i++) {
+                JSONObject tablePair = (JSONObject) tables.get(i);
+                String value = (String) tablePair.get((String) tablePair.keys().next());
+                System.out.println(value);
+                if (value != null && !"".equals(value.trim())) {
+                    tableSet.put(value, (String) tablePair.keys().next());
+                }
+            }
+            List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
+            for (String table : tableSet.keySet()) {
+                ClearDBDataSource clearDBDataSource = new ClearDBDataSource();
+                clearDBDataSource.setFeedName(table);
+                clearDBDataSource.setVisible(false);
+                clearDBDataSource.setParentSourceID(clearDBCompositeSource.getDataFeedID());
+                clearDBDataSource.setTableName(table);
+                String command = "DESCRIBE " + table;
+                System.out.println(command);
+                JSONObject description = client.query(command);
+                List<AnalysisItem> fieldList = new ArrayList<AnalysisItem>();
+                JSONArray fields = description.getJSONArray("response");
+                for (int i = 0; i < fields.length(); i++) {
+                    JSONObject field = (JSONObject) fields.get(i);
+                    String fieldName = (String) field.get("Field");
+                    String type = (String) field.get("Type");
+                    if (type.indexOf("char") != -1 || type.indexOf("text") != -1) {
+                        fieldList.add(new AnalysisDimension(fieldName, true));
+                    } else if (type.indexOf("date") != -1 || type.indexOf("timestamp") != -1) {
+                        fieldList.add(new AnalysisDateDimension(fieldName,  true, AnalysisDateDimension.DAY_LEVEL));
+                    } else if (type.indexOf("int") != -1 || type.indexOf("double") != -1 || type.indexOf("float") != -1 ||
+                            type.indexOf("numeric") != -1) {
+                        fieldList.add(new AnalysisMeasure(fieldName, AggregationTypes.SUM));
+                    }
+                }
+                clearDBDataSource.setFields(fieldList);
+                System.out.println(description.toString());
+                UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+                clearDBDataSource.setUploadPolicy(childPolicy);
+                new FeedCreation().createFeed(clearDBDataSource, conn, new DataSet(), childPolicy);
+                CompositeFeedNode node = new CompositeFeedNode(clearDBDataSource.getDataFeedID(), 0, 0);
+                nodes.add(node);
+            }
+            clearDBCompositeSource.setCompositeFeedNodes(nodes);
+            clearDBCompositeSource.populateFields(conn);
+
+            new FeedStorage().updateDataFeedConfiguration(clearDBCompositeSource, conn);
+            return new DataSourceDescriptor(clearDBCompositeSource.getFeedName(), clearDBCompositeSource.getDataFeedID(),
+                    clearDBCompositeSource.getFeedType().getType());
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public QuickbaseResponse authenticate(String userName, String password) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
@@ -373,4 +448,6 @@ public class GoogleDataProvider {
         String string = client.execute(httpRequest, responseHandler);
         return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
     }
+
+
 }

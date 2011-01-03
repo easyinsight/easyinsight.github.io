@@ -23,6 +23,9 @@
         private var availableGroups:ArrayCollection;
 
         [Bindable]
+        private var firstDayOfWeek:int;
+
+        [Bindable]
         private var groupID:int;
 
         private function gotSettings():void {
@@ -33,6 +36,7 @@
             groupID = accountSettings.groupID;
             dateFormat = accountSettings.dateFormat;
             currencySymbol = accountSettings.currencySymbol;
+            firstDayOfWeek = accountSettings.firstDayOfWeek;
         }
 
         private function save():void {
@@ -43,6 +47,7 @@
             accountSettings.groupID = groupBox.selectedItem.groupID;
             accountSettings.dateFormat = dateBox.selectedItem.data;
             accountSettings.currencySymbol = currencySymbolInput.text;
+            accountSettings.firstDayOfWeek = dayBox.selectedItem.data;
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -103,6 +108,21 @@
             </mx:FormItem>
             <mx:FormItem label="Currency Symbol">
                 <mx:TextInput id="currencySymbolInput" maxChars="1" text="{currencySymbol}"/>
+            </mx:FormItem>
+            <mx:FormItem label="First Day of Week">
+                <util:SmartComboBox id="dayBox" rowCount="6" selectedValue="{firstDayOfWeek}" selectedProperty="data">
+                    <util:dataProvider>
+                        <mx:Array>
+                            <mx:Object label="Sunday" data="1"/>
+                            <mx:Object label="Monday" data="2"/>
+                            <mx:Object label="Tuesday" data="3"/>
+                            <mx:Object label="Wednesday" data="4"/>
+                            <mx:Object label="Thursday" data="5"/>
+                            <mx:Object label="Friday" data="6"/>
+                            <mx:Object label="Saturday" data="7"/>
+                        </mx:Array>
+                    </util:dataProvider>
+                </util:SmartComboBox>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

@@ -41,7 +41,7 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_COMPANY_PROJECT_JOIN;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
 
@@ -62,7 +62,7 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
                 if ("template".equals(projectStatus)) {
                     continue;
                 }
-                loadingProgress(i, projectNodes.size(), "Synchronizing with additional metadata of " + projectName + "...", false);
+                loadingProgress(i, projectNodes.size(), "Synchronizing with additional metadata of " + projectName + "...", callDataID);
                 String projectID = queryField(curProject, "id/text()");
                 Document companies = runRestRequest("/projects/" + projectID + "/companies.xml", client, builder, url, null, false, parentDefinition);
                 Nodes companyNodes = companies.query("/companies/company");

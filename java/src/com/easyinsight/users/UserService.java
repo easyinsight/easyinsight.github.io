@@ -730,7 +730,7 @@ public class UserService {
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                     user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                    userInfo.settings);
+                    userInfo.settings, account.getFirstDayOfWeek());
             response.setScenario(existing.getScenario());
             return response;
         }
@@ -762,7 +762,7 @@ public class UserService {
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                            ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()));
+                            ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
                 } else {
                     userServiceResponse = null;
                 }
@@ -807,7 +807,7 @@ public class UserService {
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                            ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()));
+                            ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     userServiceResponse.setSessionCookie(sessionCookie);
                     user.setLastLoginDate(new Date());
@@ -905,7 +905,7 @@ public class UserService {
                                 (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
-                                account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
+                                account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
 
 
                 } else {
@@ -996,7 +996,7 @@ public class UserService {
                     user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                     !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                    ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
+                    ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
             user.setLastLoginDate(new Date());
             session.update(user);
             conn.commit();
@@ -1083,7 +1083,7 @@ public class UserService {
                         user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                         !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                        ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
+                        ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
                 user.setLastLoginDate(new Date());
                 session.update(user);
 
@@ -1139,7 +1139,7 @@ public class UserService {
                                 user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
                                 !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                                ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
+                                ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
                         userServiceResponse.setScenario(scenario);
                         user.setLastLoginDate(new Date());
                         session.update(user);

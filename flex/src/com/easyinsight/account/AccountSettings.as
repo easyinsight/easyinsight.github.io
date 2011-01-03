@@ -10,6 +10,7 @@ public class AccountSettings {
     public var groupID:int;
     public var dateFormat:int;
     public var currencySymbol:String;
+    public var firstDayOfWeek:int;
     
     public function AccountSettings() {
     }

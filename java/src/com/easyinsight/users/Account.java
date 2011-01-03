@@ -72,6 +72,9 @@ public class Account {
     @Column(name="account_type")
     private int accountType;
 
+    @Column(name="first_day_of_week")
+    private int firstDayOfWeek;
+
     @Column(name="source")
     private int accountSource;
 
@@ -140,6 +143,14 @@ public class Account {
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
+
+    public int getFirstDayOfWeek() {
+        return firstDayOfWeek;
+    }
+
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        this.firstDayOfWeek = firstDayOfWeek;
+    }
 
     public String getCurrencySymbol() {
         return currencySymbol;

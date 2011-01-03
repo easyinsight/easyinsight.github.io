@@ -331,6 +331,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 saveTokenStmt.setBoolean(3, true);
                 saveTokenStmt.execute();
             }
+            saveTokenStmt.close();
         }
     }
 

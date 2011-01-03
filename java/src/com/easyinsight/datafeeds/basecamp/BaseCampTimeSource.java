@@ -58,7 +58,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
     
 
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
         String url = baseCampCompositeSource.getUrl();
 
@@ -78,7 +78,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                 Node curProject = projectNodes.get(i);
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
                 String projectName = queryField(curProject, "name/text()");
-                loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", false);
+                loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
                 if ("template".equals(projectStatus)) {
                     continue;

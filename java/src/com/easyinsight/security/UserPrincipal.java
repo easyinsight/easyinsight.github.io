@@ -19,8 +19,10 @@ public class UserPrincipal implements Principal, Serializable {
     private boolean accountAdmin;
     private boolean guestUser;
     private Scenario scenario;
+    private int firstDayOfWeek;
 
-    public UserPrincipal(String userName, long accountID, long userID, int accountType, boolean accountAdmin, boolean guestUser, Scenario scenario) {
+    public UserPrincipal(String userName, long accountID, long userID, int accountType, boolean accountAdmin, boolean guestUser, Scenario scenario,
+                         int firstDayOfWeek) {
         this.userName = userName;
         this.accountID = accountID;
         this.userID = userID;
@@ -28,6 +30,15 @@ public class UserPrincipal implements Principal, Serializable {
         this.accountAdmin = accountAdmin;
         this.guestUser = guestUser;
         this.scenario = scenario;
+        this.firstDayOfWeek = firstDayOfWeek;
+    }
+
+    public int getFirstDayOfWeek() {
+        return firstDayOfWeek;
+    }
+
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        this.firstDayOfWeek = firstDayOfWeek;
     }
 
     public boolean isGuestUser() {

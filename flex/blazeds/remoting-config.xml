@@ -16,6 +16,12 @@
         </properties>
     </destination>
 
+    <destination id="asyncService">
+        <properties>
+            <source>com.easyinsight.util.AsyncService</source>
+        </properties>
+    </destination>
+
     <destination id="scorecardService">
         <properties>
             <source>com.easyinsight.scorecard.ScorecardService</source>

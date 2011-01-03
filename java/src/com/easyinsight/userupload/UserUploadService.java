@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.Date;
 import java.sql.*;
 
+import com.easyinsight.util.ServiceUtil;
 import org.hibernate.Session;
 
 /**
@@ -484,22 +485,50 @@ public class UserUploadService implements IUserUploadService {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             CredentialsResponse credentialsResponse;
-            IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
+            final IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
             if (SecurityUtil.getAccountTier() < dataSource.getRequiredAccountTier()) {
                 return new CredentialsResponse(false, "Your account level is no longer valid for this data source connection.", feedID);
             }
-            FeedDefinition feedDefinition = (FeedDefinition) dataSource;
+            final FeedDefinition feedDefinition = (FeedDefinition) dataSource;
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                    try {
-                        credentialsResponse = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null);
-                        if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
-                            feedDefinition.setVisible(true);
-                            feedStorage.updateDataFeedConfiguration(feedDefinition);
+                    final String callID = ServiceUtil.instance().longRunningCall(feedDefinition.getDataFeedID());
+                    credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
+                    credentialsResponse.setCallDataID(callID);
+                    final String userName = SecurityUtil.getUserName();
+                    final long userID = SecurityUtil.getUserID();
+                    final long accountID = SecurityUtil.getAccountID();
+                    final int accountType = SecurityUtil.getAccountTier();
+                    final boolean accountAdmin = SecurityUtil.isAccountAdmin();
+                    final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+                    new Thread(new Runnable() {
+
+                        public void run() {
+                            SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                            try {
+                                CredentialsResponse credentialsResponse = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null, callID);
+                                if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
+                                    feedDefinition.setVisible(true);
+                                    feedStorage.updateDataFeedConfiguration(feedDefinition);
+                                }
+                                if (credentialsResponse.isSuccessful()) {
+                                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
+                                } else {
+                                    if (credentialsResponse.getReportFault() == null) {
+                                        ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, credentialsResponse.getFailureMessage());
+                                    } else {
+                                        ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, credentialsResponse.getReportFault());
+                                    }
+                                }
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
+                            } finally {
+                                DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                                SecurityUtil.clearThreadLocal();
+                            }
                         }
-                    } finally {
-                        DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
-                    }
+                    }).start();
                 } else {
                     credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                 }

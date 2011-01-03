@@ -163,7 +163,6 @@
                 }
                 feedDefinition.fields = analysisItems;
                 feedDefinition.feedName = feedNameInput.text;
-                feedDefinition.uploadPolicy.publiclyVisible = anyoneCheckbox.selected;
                 var owners:ArrayCollection = new ArrayCollection();
                 for each (var consumer:FeedConsumer in feedDefinition.uploadPolicy.owners) {
                     if (consumer is UserStub) {
@@ -335,9 +334,6 @@
                             </mx:FormItem>
                             <mx:FormItem label="Anyone in the Account Can View:">
                                 <mx:CheckBox selected="{accountVisible}" id="accountVisibleCheckBox"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Anyone Can View:">
-                                <mx:CheckBox selected="{anyoneCanView}" id="anyoneCheckbox" enabled="{!liveData}"/>
                             </mx:FormItem>
                             <mx:FormItem id="clearDataFormItem" label="Delete All Data:">
                                 <mx:Button label="Clear Data Source Data" click="clearFeedData()"/>

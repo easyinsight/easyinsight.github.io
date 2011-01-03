@@ -170,7 +170,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
         String token = tokenObj.getTokenValue();
         try {
@@ -183,7 +183,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 Node curProject = projectNodes.get(i);
                 String id = queryField(curProject, "id/text()");
                 String name = queryField(curProject, "name/text()");
-                loadingProgress(i, projectNodes.size(), "Synchronizing with " + name + "...", false);
+                loadingProgress(i, projectNodes.size(), "Synchronizing with " + name + "...", callDataID);
                 int initialVelocity = Integer.parseInt(queryField(curProject, "initial_velocity/text()"));
                 int currentVelocity = Integer.parseInt(queryField(curProject, "current_velocity/text()"));
                 String labels = queryField(curProject, "labels/text()");

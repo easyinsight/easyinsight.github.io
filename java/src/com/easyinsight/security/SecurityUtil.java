@@ -29,8 +29,8 @@ public class SecurityUtil {
     private static ISecurityProvider securityProvider;
     private static ThreadLocal<UserPrincipal> threadLocal = new ThreadLocal<UserPrincipal>();
 
-    public static void populateThreadLocal(String userName, long userID, long accountID, int accountType, boolean accountAdmin, boolean guestUser) {
-        threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin, guestUser, null));
+    public static void populateThreadLocal(String userName, long userID, long accountID, int accountType, boolean accountAdmin, boolean guestUser, int firstDayOfWeek) {
+        threadLocal.set(new UserPrincipal(userName, accountID, userID, accountType, accountAdmin, guestUser, null, firstDayOfWeek));
     }
 
     public static void setSecurityProvider(ISecurityProvider securityProvider) {
@@ -39,6 +39,13 @@ public class SecurityUtil {
 
     public static ISecurityProvider getSecurityProvider(){
         return SecurityUtil.securityProvider;
+    }
+
+    public static int getFirstDayOfWeek() {
+        UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
+        if(userPrincipal == null)
+            userPrincipal = threadLocal.get();
+        return userPrincipal.getFirstDayOfWeek();
     }
 
     public static boolean isGuestUser() {
@@ -105,7 +112,7 @@ public class SecurityUtil {
                         account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
                         user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
-                        account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()));
+                        account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
             } else {
                 /*results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
                 if (results.size() > 0) {

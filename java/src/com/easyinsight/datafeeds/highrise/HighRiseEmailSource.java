@@ -57,7 +57,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_EMAILS;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
 
         String url = highRiseCompositeSource.getUrl();
@@ -84,7 +84,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
                     companies = runRestRequest("/people.xml?n=" + offset, client, builder, url, true, false, parentDefinition);
                 }
                 Nodes companyNodes = companies.query("/people/person");
-                loadingProgress(0, 1, "Synchronizing with emails...", true);
+                loadingProgress(0, 1, "Synchronizing with emails...", callDataID);
                 contactCount = 0;
                 for (int i = 0; i < companyNodes.size(); i++) {
                     Node companyNode = companyNodes.get(i);

@@ -18,5 +18,9 @@ public class ServerError extends ReportFault {
         window.errorMessage = message;
         return window;
     }
+
+    override public function getMessage():String {
+        return message;
+    }
 }
 }

@@ -15,6 +15,7 @@ import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.eventing.*;
 import com.easyinsight.scorecard.LongKPIRefreshEvent;
 import com.easyinsight.scorecard.LongKPIRefreshListener;
+import com.easyinsight.util.ServiceUtil;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
@@ -37,6 +38,7 @@ public class DMSServlet extends HttpServlet {
             if (Database.instance() == null) {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
+                ServiceUtil.initialize();
                 new Migrations().migrate();
                 // create schedulers...
                 

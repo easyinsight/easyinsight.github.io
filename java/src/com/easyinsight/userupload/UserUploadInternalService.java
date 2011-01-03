@@ -28,6 +28,7 @@ public class UserUploadInternalService {
                 updateLinkStmt.setLong(1, owner);
                 updateLinkStmt.setLong(2, existingID);
                 updateLinkStmt.executeUpdate();
+                updateLinkStmt.close();
             } else {
                 PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO UPLOAD_POLICY_USERS (USER_ID, FEED_ID, ROLE) " +
                         "VALUES (?, ?, ?)");
@@ -35,7 +36,9 @@ public class UserUploadInternalService {
                 insertFeedStmt.setLong(2, dataFeedID);
                 insertFeedStmt.setLong(3, owner);
                 insertFeedStmt.execute();
+                insertFeedStmt.close();
             }
+            existingLinkQuery.close();
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -47,7 +50,7 @@ public class UserUploadInternalService {
         try {
             createUserFeedLink(userID, dataFeedID, owner, conn);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 }

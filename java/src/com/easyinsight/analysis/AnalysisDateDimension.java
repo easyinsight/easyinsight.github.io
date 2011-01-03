@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import com.easyinsight.security.SecurityUtil;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -11,7 +12,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * User: James Boe
@@ -165,7 +165,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         calendar.set(Calendar.MILLISECOND, 0);
                         break;
                     case WEEK_LEVEL:
-                        calendar.set(Calendar.DAY_OF_WEEK, 1);
+                        calendar.set(Calendar.DAY_OF_WEEK, SecurityUtil.getFirstDayOfWeek());
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);

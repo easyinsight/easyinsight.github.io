@@ -79,7 +79,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return FeedType.BASECAMP;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();
@@ -101,7 +101,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 String projectCreatedAtString = queryField(curProject, "created-on/text()");
                 Date projectCreatedAt = deadlineFormat.parse(projectCreatedAtString);
                 String announcement = queryField(curProject, "announcement/text()"); 
-                loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", false);
+                loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
                 if ("template".equals(projectStatus)) {
                     continue;

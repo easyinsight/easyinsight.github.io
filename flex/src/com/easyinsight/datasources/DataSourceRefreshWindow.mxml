@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="setupListeners()" headerHeight="4">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setupListeners()">
     <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.CallData;
         import com.easyinsight.administration.feed.CredentialsResponse;
+        import com.easyinsight.analysis.ReportFault;
         import com.easyinsight.customupload.ProblemDataEvent;
-        import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
-        import com.easyinsight.scorecard.DataSourceMessageEvent;
 
         import com.easyinsight.util.PopUpUtil;
 
@@ -23,10 +23,8 @@
         private var asyncLabel:String = "Synchronizing with the data source...";
 
         private function setupListeners():void {
-            EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
             uploadService.refreshData.send(_dataSourceID);
         }
-
 
         public function set dataSourceID(value:int):void {
             _dataSourceID = value;
@@ -52,10 +50,50 @@
                     PopUpManager.removePopUp(this);
                 }
             } else {
-                PopUpManager.removePopUp(this);
+                if (response.callDataID != null) {
+                    callDataID = response.callDataID;
+                    timer = new Timer(5000, 0);
+                    timer.addEventListener(TimerEvent.TIMER, onTimer);
+                    timer.start();
+                } else {
+                    PopUpManager.removePopUp(this);
+                }
             }
 
         }
+
+        private var callDataID:String;
+
+        private function onTimer(event:TimerEvent):void {
+            asyncService.getCallData.send(callDataID);
+        }
+
+        private function gotCallData():void {
+            var callData:CallData = asyncService.getCallData.lastResult as CallData;
+            if (callData.status == CallData.DONE) {
+                timer.stop();
+                PopUpManager.removePopUp(this);
+            } else if (callData.status == CallData.FAILED) {
+                timer.stop();
+                if (callData.result is String) {
+                    Alert.show(String(callData.statusMessage));
+                    PopUpManager.removePopUp(this);
+                } else {
+                    var window:UIComponent = ReportFault(callData.result).createFaultWindow();
+                    window.addEventListener(ProblemDataEvent.PROBLEM_RESOLVED, onProblem, false, 0, true);
+                    window.addEventListener(Event.CANCEL, onCancel, false, 0, true);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpUtil.centerPopUp(window);
+                }
+            } else if (callData.status == CallData.RUNNING) {
+                if (callData.result != null) {
+                    var scorecardEvent:DataSourceAsyncEvent = callData.result as DataSourceAsyncEvent;
+                    asyncLabel = scorecardEvent.dataSourceName;
+                }
+            }
+        }
+
+        private var timer:Timer;
 
         private function onCancel(event:Event):void {
             PopUpManager.removePopUp(this);
@@ -69,40 +107,24 @@
             errorText = event.fault.faultString;
             index = 1;
         }
-
-        private function onMessage(event:DataSourceMessageEvent):void {
-            var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
-            //Alert.show("got a message with type = " + scorecardEvent.type);
-            if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
-                lastMessage = scorecardEvent.timestamp;
-                if (scorecardEvent.dataSourceID == _dataSourceID) {
-                    if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
-                        asyncLabel = scorecardEvent.dataSourceName;
-                        if (scorecardEvent.max > 0 && progressBar != null) {
-                            progressBar.maximum = scorecardEvent.max;
-                            progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
-                        }
-                    } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
-                        asyncLabel = scorecardEvent.dataSourceName;
-                    }
-                }
-            }
-        }
         ]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="refreshData" result="onResult(event)" fault="onFault(event)"/>
     </mx:RemoteObject>
+    <mx:RemoteObject destination="asyncService" id="asyncService">
+        <mx:method name="getCallData" result="gotCallData()" fault="onFault(event)"/>
+    </mx:RemoteObject>
     <mx:Canvas width="500">
         <mx:ViewStack selectedIndex="{index}" resizeToContent="true" width="100%">
             <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="30" width="100%">
-                <mx:ProgressBar indeterminate="false" mode="manual" id="progressBar" label=""/>
-                <mx:TextArea editable="false" selectable="false" borderStyle="none" backgroundAlpha="0" width="400" height="50" text="{asyncLabel}"/>
+                <mx:ProgressBar indeterminate="true" id="progressBar" label="" labelPlacement="right"/>
+                <mx:Label selectable="false" maxWidth="400" text="{asyncLabel}" fontSize="14"/>
                 <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:VBox>
-            <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" width="100%">
+            <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="5" width="100%">
                 <mx:Label text="{errorText}"/>
                 <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
             </mx:VBox>
         </mx:ViewStack>
     </mx:Canvas>
-</util:EITitleWindow>
+</util:EISlimWindow>

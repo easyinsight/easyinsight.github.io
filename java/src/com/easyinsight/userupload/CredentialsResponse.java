@@ -14,6 +14,7 @@ public class CredentialsResponse {
     private Credentials encryptedResponse;
     private long dataSourceID;
     private ReportFault reportFault;
+    private String callDataID;
 
     public CredentialsResponse() {
     }
@@ -32,6 +33,14 @@ public class CredentialsResponse {
         this.successful = successful;
         this.failureMessage = failureMessage;
         this.dataSourceID = dataSourceID;
+    }
+
+    public String getCallDataID() {
+        return callDataID;
+    }
+
+    public void setCallDataID(String callDataID) {
+        this.callDataID = callDataID;
     }
 
     public ReportFault getReportFault() {

@@ -13,6 +13,7 @@ import com.easyinsight.framework.Credentials;
         public var encryptedResponse:Credentials;
         public var dataSourceID:int;
         public var reportFault:ReportFault;
+        public var callDataID:String;
 		
 		public function CredentialsResponse()
 		{

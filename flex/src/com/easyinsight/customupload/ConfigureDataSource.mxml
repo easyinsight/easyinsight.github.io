@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupListeners()">
     <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.CallData;
         import com.easyinsight.administration.feed.CredentialsResponse;
         import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.ReportFault;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
-        import com.easyinsight.scorecard.DataSourceMessageEvent;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
 
@@ -29,7 +29,6 @@
 
         private function setupListeners():void {
             stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
-            EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage, false, 0, true);
         }
 
         private var _dataSourceClass:Class;
@@ -41,20 +40,6 @@
 
         [Bindable]
         private var ready:Boolean;
-
-
-        private var _credentialsSaved:Boolean = false;
-
-        [Bindable(event="credentialsSavedChanged")]
-        public function get credentialsSaved():Boolean {
-            return _credentialsSaved;
-        }
-
-        public function set credentialsSaved(value:Boolean):void {
-            if (_credentialsSaved == value) return;
-            _credentialsSaved = value;
-            dispatchEvent(new Event("credentialsSavedChanged"));
-        }
 
         public function set onlyDataSource(value:Boolean):void {
             _onlyDataSource = value;
@@ -124,28 +109,6 @@
             }
         }
 
-        private var lastMessage:Date;
-
-        private function onMessage(event:DataSourceMessageEvent):void {
-            if (event != null && event.dataSourceAsyncEvent != null && dataSourceDefinition != null) {
-                var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
-                if (lastMessage == null || lastMessage.time < scorecardEvent.timestamp.time) {
-                    lastMessage = scorecardEvent.timestamp;
-                    if (scorecardEvent.dataSourceID == dataSourceDefinition.dataFeedID) {
-                        if (scorecardEvent.type == DataSourceAsyncEvent.PROGRESS) {
-                            asyncLabel = scorecardEvent.dataSourceName;
-                            if (scorecardEvent.max > 0 && progressBar != null) {
-                                progressBar.maximum = scorecardEvent.max;
-                                progressBar.setProgress(scorecardEvent.current, scorecardEvent.max);
-                            }
-                        } else if (scorecardEvent.type == DataSourceAsyncEvent.BLOCKED) {
-                            asyncLabel = scorecardEvent.dataSourceName;
-                        }
-                    }
-                }
-            }
-        }
-
         private function created():void {
             var string:String = feedService.updateFeedDefinition.lastResult as String;
             if (string == null) uploadService.refreshData.send(dataSourceDefinition.dataFeedID);
@@ -156,10 +119,17 @@
             }
         }
 
-        private function refreshed():void {
-            progressBar.visible = false;
-            var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
-            if (response.successful) {
+        private var callDataID:String;
+        private var timer:Timer;
+
+        private function onTimer(event:TimerEvent):void {
+            asyncService.getCallData.send(callDataID);
+        }
+
+        private function gotCallData():void {
+            var callData:CallData = asyncService.getCallData.lastResult as CallData;
+            if (callData.status == CallData.DONE) {
+                timer.stop();
                 var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
                 descriptor.id = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
@@ -167,7 +137,54 @@
                 UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
                 PopUpManager.removePopUp(this);
+            } else if (callData.status == CallData.FAILED) {
+                timer.stop();
+                progressBar.visible = false;
+                asyncLabel = "Retrieving data, this may take a few minutes...";
+                ready = true;
+                if (callData.result is String) {
+                    Alert.show(String(callData.statusMessage));
+                } else {
+                    var fault:ReportFault = callData.result as ReportFault;
+                    Alert.show(fault.getMessage());
+                }
+            } else if (callData.status == CallData.RUNNING) {
+                if (callData.result != null) {
+                    var scorecardEvent:DataSourceAsyncEvent = callData.result as DataSourceAsyncEvent;
+                    asyncLabel = scorecardEvent.dataSourceName;
+                } else {
+                    asyncLabel = "Retrieving data, this may take a few minutes...";
+                }
+            }
+        }
+
+        private function onCancel(event:Event):void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onProblem(event:ProblemDataEvent):void {
+            uploadService.refreshData.send(_dataSourceID);
+        }
+
+        private function refreshed():void {
+            var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+            if (response.successful) {
+                if (response.callDataID != null) {
+                    callDataID = response.callDataID;
+                    timer = new Timer(5000, 0);
+                    timer.addEventListener(TimerEvent.TIMER, onTimer);
+                    timer.start();
+                } else {
+                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                    descriptor.id = dataSourceDefinition.dataFeedID;
+                    descriptor.name = dataSourceDefinition.feedName;
+                    dispatchEvent(new DataSourceConfiguredEvent(descriptor));
+                    UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
+                    stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+                    PopUpManager.removePopUp(this);
+                }
             } else {
+                progressBar.visible = false;
                 ready = true;
                 Alert.show(response.failureMessage);
             }
@@ -188,12 +205,15 @@
         <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)" />
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
+    <mx:RemoteObject destination="asyncService" id="asyncService">
+        <mx:method name="getCallData" result="gotCallData()"/>
+    </mx:RemoteObject>
     <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Label text="Let's configure your connection to the external system:" fontSize="16"/>
         </mx:HBox>
         <mx:Box id="coreContent"/>
-        <mx:ProgressBar id="progressBar" indeterminate="false" mode="manual" visible="false" label="{asyncLabel}"/>
+        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="{asyncLabel}"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Create" click="validate()" enabled="{ready}" styleName="grayButton" fontSize="14"/>
             <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)" styleName="grayButton"

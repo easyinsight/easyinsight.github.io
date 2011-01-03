@@ -40,6 +40,7 @@
             var k:CrunchbaseSolutionDetail;
             var l:ConstantContactSolutionDetail;
             var m:QuickbaseSolutionDetail;
+            var n:ClearDBSolutionDetail;
         }
 
         public function gotFocus():void {

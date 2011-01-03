@@ -14,12 +14,12 @@
         <login-command class="com.easyinsight.security.EasyInsightLoginCommand" server="Tomcat"/>
         <!-- Uncomment the correct app server
         <login-command class="flex.messaging.security.TomcatLoginCommand" server="JBoss">
-		<login-command class="flex.messaging.security.JRunLoginCommand" server="JRun"/>        
+		<login-command class="flex.messaging.security.JRunLoginCommand" server="JRun"/>
         <login-command class="flex.messaging.security.WeblogicLoginCommand" server="Weblogic"/>
         <login-command class="flex.messaging.security.WebSphereLoginCommand" server="WebSphere"/>
         -->
 
-        <!-- 
+        <!--
         <security-constraint id="basic-read-access">
             <auth-method>Basic</auth-method>
             <roles>
@@ -44,7 +44,7 @@
                 <add-no-cache-headers>false</add-no-cache-headers>
             </properties>
         </channel-definition>-->
-        
+
         <channel-definition id="my-secure-amf" class="mx.messaging.channels.SecureAMFChannel">
             <endpoint url="https://{server.name}:443/{context.root}/messagebroker/amfsecure"
                       class="flex.messaging.endpoints.SecureAMFEndpoint"/>
@@ -57,6 +57,45 @@
             <endpoint url="https://{server.name}:443/{context.root}/messagebroker/amfpolling"
                       class="flex.messaging.endpoints.SecureAMFEndpoint"/>
             <properties>
+                <polling-enabled>false</polling-enabled>
+                <polling-interval-seconds>4</polling-interval-seconds>
+                <flex-client-outbound-queue-processor class="com.easyinsight.outboundnotifications.UserNotificationProcessor"/>
+            </properties>
+        </channel-definition>
+
+        <channel-definition id="my-longpolling-amf" class="mx.messaging.channels.AMFChannel">
+            <endpoint url="https://{server.name}:443/{context.root}/messagebroker/amflongpolling"
+                      class="flex.messaging.endpoints.AMFEndpoint"/>
+            <properties>
+                <polling-enabled>false</polling-enabled>
+                <polling-interval-seconds>5</polling-interval-seconds>
+                <wait-interval-millis>60000</wait-interval-millis>
+                <client-wait-interval-millis>1</client-wait-interval-millis>
+                <max-waiting-poll-requests>200</max-waiting-poll-requests>
+            </properties>
+        </channel-definition>
+
+        <!--
+        <channel-definition id="my-amf" class="mx.messaging.channels.AMFChannel">
+            <endpoint url="http://{server.name}:8080/{context.root}/messagebroker/amf"
+                      class="flex.messaging.endpoints.AMFEndpoint"/>
+            <properties>
+                <add-no-cache-headers>false</add-no-cache-headers>
+            </properties>
+        </channel-definition>
+
+        <channel-definition id="my-secure-amf" class="mx.messaging.channels.SecureAMFChannel">
+            <endpoint url="https://{server.name}:4443/{context.root}/messagebroker/amfsecure"
+                      class="flex.messaging.endpoints.SecureAMFEndpoint"/>
+            <properties>
+                <add-no-cache-headers>false</add-no-cache-headers>
+            </properties>
+        </channel-definition>
+
+        <channel-definition id="my-polling-amf" class="mx.messaging.channels.AMFChannel">
+            <endpoint url="http://{server.name}:8080/{context.root}/messagebroker/amfpolling"
+                      class="flex.messaging.endpoints.AMFEndpoint"/>
+            <properties>
                 <polling-enabled>true</polling-enabled>
                 <polling-interval-seconds>4</polling-interval-seconds>
                 <flex-client-outbound-queue-processor class="com.easyinsight.outboundnotifications.UserNotificationProcessor"/>
@@ -64,7 +103,7 @@
         </channel-definition>
 
         <channel-definition id="my-longpolling-amf" class="mx.messaging.channels.AMFChannel">
-            <endpoint url="https://{server.name}:{server.port}/{context.root}/messagebroker/amflongpolling"
+            <endpoint url="http://{server.name}:8080/{context.root}/messagebroker/amflongpolling"
                       class="flex.messaging.endpoints.AMFEndpoint"/>
             <properties>
                 <polling-enabled>true</polling-enabled>
@@ -74,7 +113,7 @@
                 <max-waiting-poll-requests>200</max-waiting-poll-requests>
             </properties>
         </channel-definition>
-
+        -->
         <!--
         <channel-definition id="my-http" class="mx.messaging.channels.HTTPChannel">
             <endpoint url="http://{server.name}:{server.port}/{context.root}/messagebroker/http" class="flex.messaging.endpoints.HTTPEndpoint"/>
@@ -90,7 +129,7 @@
     </channels>
 
     <logging>
-        <target class="flex.messaging.log.ConsoleTarget" level="Error">
+        <target class="flex.messaging.log.ConsoleTarget" level="Info">
             <properties>
                 <prefix>[BlazeDS]</prefix>
                 <includeDate>false</includeDate>
@@ -99,9 +138,7 @@
                 <includeCategory>false</includeCategory>
             </properties>
             <filters>
-                <pattern>Endpoint.*</pattern>
-                <pattern>Service.*</pattern>
-                <pattern>Configuration</pattern>
+                <pattern>*</pattern>                
             </filters>
         </target>
     </logging>

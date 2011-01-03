@@ -92,7 +92,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                 doc = builder.build(restMethod.getResponseBodyAsStream());                
                 String rootValue = doc.getRootElement().getValue();
                 if ("The API is not available to this account".equals(rootValue)) {
-                    throw new BaseCampDataException("You need to enable API access to your Highrise account--you can do this under Account (Upgrade/Invoice), Highrise API in the Highrise user interface.");
+                    throw new ReportException(new DataSourceConnectivityReportFault("You need to enable API access to your Highrise account--you can do this under Account (Upgrade/Invoice), Highrise API in the Highrise user interface.", parentDefinition));
                 }
                 successful = true;
             } catch (IOException e) {
@@ -110,7 +110,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                    throw new HighRiseLoginException("Could not locate a Highrise instance at " + url);
+                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Highrise instance at " + url, parentDefinition));
                 } else if (statusLine.indexOf("503") != -1 ||
                         statusLine.indexOf("403") != -1) {
                     System.out.println("Highrise 503, retrying");
@@ -134,8 +134,9 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                         throw e;
                     }
                 }
-            }
-            catch (Throwable e) {
+            } catch (ReportException re) {
+                throw re;
+            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         } while (!successful && retryCount < 3);

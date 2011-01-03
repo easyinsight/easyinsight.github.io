@@ -117,7 +117,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_DEAL;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
@@ -141,7 +141,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 categoryCache.put(categoryID, categoryName);
             }
                 Document deals = runRestRequest("/deals.xml", client, builder, url, true, false, parentDefinition);
-                loadingProgress(0, 1, "Synchronizing with deals...", true);
+                loadingProgress(0, 1, "Synchronizing with deals...", callDataID);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
                     try {

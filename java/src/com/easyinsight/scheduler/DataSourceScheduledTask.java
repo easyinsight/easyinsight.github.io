@@ -56,7 +56,8 @@ public class DataSourceScheduledTask extends ScheduledTask {
             if (dataSourceUser == null) {
                 LogClass.info("No user for data data source refresh.");
             } else {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user FROM USER, ACCOUNT " +
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin, USER.guest_user," +
+                        "ACCOUNT.FIRST_DAY_OF_WEEK FROM USER, ACCOUNT " +
                         "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
                 queryStmt.setInt(1, Account.ACTIVE);
                 queryStmt.setInt(2, Account.TRIAL);
@@ -69,10 +70,11 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     int accountType = rs.getInt(4);
                     boolean accountAdmin = rs.getBoolean(5);
                     boolean guestUser = rs.getBoolean(6);
-                    SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser);
+                    int firstDayOfWeek = rs.getInt(7);
+                    SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser, firstDayOfWeek);
                     if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                         try {
-                            dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null);
+                            dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null);
                         } finally {
                             DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                         }

@@ -2,7 +2,6 @@ package com.easyinsight.datafeeds.custom;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.custom.client.*;
@@ -58,7 +57,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         return new DataSet();
     }
 

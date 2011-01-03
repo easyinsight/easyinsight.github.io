@@ -20,7 +20,8 @@ public class TestSecurityProvider implements ISecurityProvider {
 
     public void setUserPrincipal(long userID) {
         User user = new InternalUserService().retrieveUser(userID);
-        userPrincipal = new UserPrincipal(user.getUserName(), user.getAccount().getAccountID(), user.getUserID(), user.getAccount().getAccountType(), user.isAccountAdmin(), user.isGuestUser(), null);
+        userPrincipal = new UserPrincipal(user.getUserName(), user.getAccount().getAccountID(), user.getUserID(), user.getAccount().getAccountType(), user.isAccountAdmin(), user.isGuestUser(), null,
+                user.getAccount().getFirstDayOfWeek());
     }
 
     public UserPrincipal getUserPrincipal() {

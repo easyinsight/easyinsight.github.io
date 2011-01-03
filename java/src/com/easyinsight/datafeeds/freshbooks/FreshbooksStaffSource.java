@@ -69,7 +69,7 @@ public class FreshbooksStaffSource extends FreshbooksBaseSource {
         return items;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         return new DataSet();
     }
 

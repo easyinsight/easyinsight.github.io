@@ -25,7 +25,7 @@ public class HighriseCache extends HighRiseBaseSource {
         Document tagDoc = runRestRequest("/tags.xml", client, builder, url, true, false, parentDefinition);
         Nodes tagNodes = tagDoc.query("/tags/tag");
         for (int i = 0; i < tagNodes.size(); i++) {
-            loadingProgress(i, tagNodes.size(), "Synchronizing with tags...", true);
+            //loadingProgress(i, tagNodes.size(), "Synchronizing with tags...", callDataID);
             Node tagNode = tagNodes.get(i);
             String tag = queryField(tagNode, "name/text()");            
             String id = queryField(tagNode, "id/text()");

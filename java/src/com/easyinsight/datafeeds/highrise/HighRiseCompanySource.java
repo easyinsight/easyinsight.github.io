@@ -69,7 +69,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_COMPANY;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
@@ -93,7 +93,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     companies = runRestRequest("/companies.xml?n=" + offset, client, builder, url, true, false, parentDefinition);
                 }
                 Nodes companyNodes = companies.query("/companies/company");
-                loadingProgress(0, 1, "Synchronizing with companies...", true);
+                loadingProgress(0, 1, "Synchronizing with companies...", callDataID);
                 for (int i = 0; i < companyNodes.size(); i++) {
                     IRow row = ds.createRow();
                     Node companyNode = companyNodes.get(i);

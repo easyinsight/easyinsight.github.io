@@ -103,7 +103,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
             } else {
                 throw new RuntimeException();
             }
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin FROM USER, ACCOUNT " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
+                    "ACCOUNT.FIRST_DAY_OF_WEEK FROM USER, ACCOUNT " +
                         "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
             queryStmt.setInt(1, Account.ACTIVE);
             queryStmt.setInt(2, Account.TRIAL);
@@ -115,7 +116,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 long accountID = queryRS.getLong(3);
                 int accountType = queryRS.getInt(4);
                 boolean accountAdmin = queryRS.getBoolean(5);
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false);
+                int firstDayOfWeek = queryRS.getInt(6);
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
 
                 try {
                     if (deliveryFormat == ReportDelivery.EXCEL) {

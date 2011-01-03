@@ -22,7 +22,6 @@
 
         import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.framework.Constants;
-        import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
@@ -40,7 +39,6 @@
         private var reportName:String;
 
         private function handleFlashVars():void {
-            EIMessageListener.initialize();
             Constants.setup();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);

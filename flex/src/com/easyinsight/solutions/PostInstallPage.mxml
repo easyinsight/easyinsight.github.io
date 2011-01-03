@@ -79,7 +79,7 @@
                         
         -->
     <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-        <mx:ProgressBar label="Getting ready for the next step..." indeterminate="true"/>
+        <mx:ProgressBar label="Generating values for your key metrics..." indeterminate="true"/>
     </mx:Box>
     <solutions:SolutionKPIWindow kpis="{kpis}" connectionProgression="coreStackIndex = 2" width="100%" height="100%"
             dataSourceDescriptor="{dataSourceDescriptor}" solution="{solution}"/>

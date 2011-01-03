@@ -62,7 +62,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
         return analysisItems;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
         DataSet ds = new DataSet();
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
@@ -83,7 +83,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectName = queryField(curProject, "name/text()");                                
-                loadingProgress(i, projectNodes.size(), "Synchronizing with comments of " + projectName + "...", false);
+                loadingProgress(i, projectNodes.size(), "Synchronizing with comments of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
                 if (!source.isIncludeArchived() && "archived".equals(projectStatus)) {
                     continue;

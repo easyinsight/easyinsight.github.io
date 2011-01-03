@@ -53,11 +53,11 @@
         }]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Basecamp Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
+			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
 		</mx:FormItem>
         <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.basecamphq.com&quot;" fontSize="10"/>            
 		<mx:FormItem label="Basecamp API Authentication Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
 		</mx:FormItem>
         <mx:FormItem label="You can find the token on your Basecamp page under My Info - API Token." fontSize="10"/>
         <mx:FormItem label="Include On Hold/Inactive Projects:" direction="horizontal">
@@ -77,14 +77,4 @@
             <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on todo comments, you can save dramatic time on your synchronization by not pulling that field across into Easy Insight. Please note that for performance reasons, only comments associated to open todo items will be pulled across if you enable this option."/>
         </mx:FormItem>
 	</mx:Form>
-    <!--<mx:VRule/>
-    <mx:VBox>
-        <mx:VBox borderStyle="solid" cornerRadius="10"
-                             backgroundColor="0xFFFFFF" verticalAlign="middle" paddingLeft="10" paddingRight="10" paddingTop="10"
-                            paddingBottom="10" horizontalAlign="center">
-            <mx:Image source="../assets/logos/film.png" click="video1()"
-                      useHandCursor="true" buttonMode="true"/>
-            <mx:LinkButton label="Video Intro" fontSize="14" click="video1()" textDecoration="underline"/>
-        </mx:VBox>        
-    </mx:VBox>-->
 </mx:HBox>

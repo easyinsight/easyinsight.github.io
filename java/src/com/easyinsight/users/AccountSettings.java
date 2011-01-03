@@ -13,8 +13,17 @@ public class AccountSettings {
     private long groupID;
     private int dateFormat;
     private String currencySymbol;
+    private int firstDayOfWeek;
 
     public AccountSettings() {
+    }
+
+    public int getFirstDayOfWeek() {
+        return firstDayOfWeek;
+    }
+
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        this.firstDayOfWeek = firstDayOfWeek;
     }
 
     public String getCurrencySymbol() {

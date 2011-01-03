@@ -12,6 +12,7 @@ import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 import com.google.gdata.client.authn.oauth.OAuthSigner;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.util.AuthenticationException;
 
 import java.util.Set;
 import java.util.Collection;
@@ -112,6 +113,8 @@ public class GoogleSpreadsheetFeed extends Feed {
                 }
             }
             return dataSet;
+        } catch (AuthenticationException ae) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
