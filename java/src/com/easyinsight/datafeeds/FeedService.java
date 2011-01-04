@@ -282,13 +282,13 @@ public class FeedService {
             while (goalTreeRS.next()) {
                 descriptorList.add(new GoalTreeDescriptor(goalTreeRS.getLong(1), goalTreeRS.getString(2), goalTreeRS.getInt(3), goalTreeRS.getString(4), null));
             }
-            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, dashboard.DASHBOARD_ID, DASHBOARD.URL_KEY FROM DASHBOARD, user_to_dashboard where " +
+            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, dashboard.DASHBOARD_ID, DASHBOARD.URL_KEY, DASHBOARD.data_source_id FROM DASHBOARD, user_to_dashboard where " +
                     "dashboard.dashboard_id = user_to_dashboard.dashboard_id and dashboard.temporary_dashboard = ? and user_to_dashboard.user_id = ?");
             dashboardStmt.setBoolean(1, false);
             dashboardStmt.setLong(2, SecurityUtil.getUserID());
             ResultSet dashboardRS = dashboardStmt.executeQuery();
             while (dashboardRS.next()) {
-                descriptorList.add(new DashboardDescriptor(dashboardRS.getString(1), dashboardRS.getLong(2), dashboardRS.getString(3)));
+                descriptorList.add(new DashboardDescriptor(dashboardRS.getString(1), dashboardRS.getLong(2), dashboardRS.getString(3), dashboardRS.getLong(4)));
             }
             Map<String, Integer> countMap = new HashMap<String, Integer>();
             Set<String> dupeNames = new HashSet<String>();
@@ -843,6 +843,7 @@ public class FeedService {
                 }
                 lookupTable.setLookupPairs(pairs);
             } else {
+
                 throw new RuntimeException();
             }
             conn.commit();

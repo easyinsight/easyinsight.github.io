@@ -7,6 +7,7 @@
  */
 package com.easyinsight.google {
 import com.easyinsight.customupload.QuickbaseDataSourceCreation;
+import com.easyinsight.datasources.ClearDBDataSourceCreation;
 import com.easyinsight.datasources.CompositeServerDataSource;
 import com.easyinsight.listing.DataFeedDescriptor;
 
@@ -27,11 +28,11 @@ public class ClearDBCompositeSource extends CompositeServerDataSource {
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.QUICKBASE;
+        return DataFeedDescriptor.CLEARDB;
     }
 
     override public function configClass():Class {
-        return QuickbaseDataSourceCreation;
+        return ClearDBDataSourceCreation;
     }
 }
 }

@@ -23,6 +23,10 @@ public class AnalysisZipCode extends AnalysisDimension {
         super(key, group);
     }
 
+    public AnalysisZipCode(Key key, String displayName) {
+        super(key, displayName);
+    }
+
     @Override
     public int getType() {
         return super.getType() | AnalysisItemTypes.ZIP_CODE;

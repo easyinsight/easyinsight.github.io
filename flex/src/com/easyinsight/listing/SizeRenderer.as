@@ -20,12 +20,14 @@ public class SizeRenderer extends Label{
                     break;
                 case DataFeedDescriptor.SALESFORCE:
                 case DataFeedDescriptor.GOOGLE_ANALYTICS:
+                case DataFeedDescriptor.FRESHBOOKS:
                 case DataFeedDescriptor.SENDGRID:
                 case DataFeedDescriptor.GOOGLE:
                 case DataFeedDescriptor.TWITTER:
                 case DataFeedDescriptor.CLOUD_WATCH:
                 case DataFeedDescriptor.REDIRECT:
                 case DataFeedDescriptor.QUICKBASE:
+                case DataFeedDescriptor.CLEARDB:
                     this.text = "( Live )";
                     break;
                 case DataFeedDescriptor.COMPOSITE:

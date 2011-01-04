@@ -74,6 +74,41 @@
         <load-on-startup>3</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>DefineDataSource</servlet-name>
+        <display-name>DefineDataSource</display-name>
+        <servlet-class>com.easyinsight.api.v3.DefineDataSourceServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>DefineCompositeDataSource</servlet-name>
+        <display-name>DefineCompositeDataSource</display-name>
+        <servlet-class>com.easyinsight.api.v3.DefineCompositeDataSourceServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ReplaceRows</servlet-name>
+        <display-name>ReplaceRows</display-name>
+        <servlet-class>com.easyinsight.api.v3.ReplaceRowsServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AddRows</servlet-name>
+        <display-name>AddRows</display-name>
+        <servlet-class>com.easyinsight.api.v3.AddRowsServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>UpdateRows</servlet-name>
+        <display-name>UpdateRows</display-name>
+        <servlet-class>com.easyinsight.api.v3.UpdateRowsServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
     <!-- MessageBroker Servlet -->
     <servlet>
         <servlet-name>MessageBrokerServlet</servlet-name>
@@ -88,14 +123,6 @@
             <param-value>/WEB-INF/flex</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet>
-        <servlet-name>QuickBooksSubscribe</servlet-name>
-        <servlet-class>com.easyinsight.servlet.QuickBooksSubscribe</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>QuickBooksChange</servlet-name>
-        <servlet-class>com.easyinsight.servlet.QuickBooksChange</servlet-class>
     </servlet>
 
     <servlet>
@@ -126,6 +153,31 @@
     <servlet-mapping>
         <servlet-name>TokenRedirect</servlet-name>
         <url-pattern>/TokenRedirect</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DefineDataSource</servlet-name>
+        <url-pattern>/defineDataSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DefineCompositeDataSource</servlet-name>
+        <url-pattern>/defineCompositeDataSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReplaceRows</servlet-name>
+        <url-pattern>/replaceRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AddRows</servlet-name>
+        <url-pattern>/addRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>UpdateRows</servlet-name>
+        <url-pattern>/updateRows</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

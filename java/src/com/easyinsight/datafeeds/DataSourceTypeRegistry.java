@@ -2,6 +2,8 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
 import com.easyinsight.datafeeds.basecamp.*;
+import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
+import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
 import com.easyinsight.datafeeds.constantcontact.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
@@ -97,6 +99,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BASECAMP_TODO_COMMENTS, BaseCampTodoCommentsSource.class);
         registerType(FeedType.QUICKBASE_COMPOSITE, QuickbaseCompositeSource.class);
         registerType(FeedType.QUICKBASE_CHILD, QuickbaseDatabaseSource.class);
+        registerType(FeedType.CLEARDB_COMPOSITE, ClearDBCompositeSource.class);
+        registerType(FeedType.CLEARDB_CHILD, ClearDBDataSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

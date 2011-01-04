@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.google.ClearDBCompositeSource;
+
+        [Bindable]
+        private var appToken:String;
+
+        [Bindable]
+        private var apiKey:String;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new ClearDBCompositeSource();
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:ClearDBCompositeSource = feedDefinition as ClearDBCompositeSource;
+            apiKey = ds.cdApiKey;
+            appToken = ds.appToken;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:ClearDBCompositeSource = feedDefinition as ClearDBCompositeSource;
+            ds.cdApiKey = userNameInput.text;
+            ds.appToken = passwordInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form>
+		<mx:FormItem label="ClearDB API Key:">
+            <mx:TextInput id="userNameInput" width="400" text="{apiKey}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Clear App Token:">
+            <mx:TextInput id="passwordInput" width="400" text="{appToken}"/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:VBox>

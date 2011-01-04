@@ -88,6 +88,18 @@ public abstract class DataSourceMigration {
         }
     }
 
+    protected void changeDisplayName(String existingName, String newDisplayName) {
+        AnalysisItem matchedItem = null;
+        for (AnalysisItem analysisItem : dataSource.getFields()) {
+            if (analysisItem.toDisplay().equals(existingName)) {
+                matchedItem = analysisItem;
+            }
+        }
+        if (matchedItem != null) {
+            matchedItem.setDisplayName(newDisplayName);
+        }
+    }
+
     protected void addAnalysisItem(AnalysisItem analysisItem) {
         dataSource.getFields().add(analysisItem);
     }

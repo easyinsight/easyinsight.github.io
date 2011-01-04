@@ -9,6 +9,8 @@ import com.easyinsight.core.EIDescriptor;
  */
 public class DashboardDescriptor extends EIDescriptor {
 
+    private long dataSourceID;
+
     public DashboardDescriptor() {
     }
 
@@ -16,8 +18,17 @@ public class DashboardDescriptor extends EIDescriptor {
         super(name, id);
     }*/
 
-    public DashboardDescriptor(String name, long id, String urlKey) {
+    public DashboardDescriptor(String name, long id, String urlKey, long dataSourceID) {
         super(name, id, urlKey);
+        this.dataSourceID = dataSourceID;
+    }
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
     }
 
     @Override

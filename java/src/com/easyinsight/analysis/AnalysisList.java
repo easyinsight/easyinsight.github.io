@@ -30,6 +30,12 @@ public class AnalysisList extends AnalysisDimension {
     public AnalysisList() {
     }
 
+    public AnalysisList(Key key, String displayName, boolean expanded, String delimiter) {
+        super(key, displayName);
+        this.expanded = expanded;
+        this.delimiter = delimiter;
+    }
+
     public AnalysisList(Key key, boolean expanded, String delimiter) {
         super(key, true);
         this.expanded = expanded;

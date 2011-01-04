@@ -36,6 +36,7 @@ import mx.collections.ArrayCollection;
         public static const WHOLE_FOODS:int = 56;
         public static const CONSTANT_CONTACT:int = 63;
         public static const QUICKBASE:int = 72;
+        public static const CLEARDB:int = 80;
 
 		public static const OWNER:int = 1;
 		public static const SUBSCRIBER:int = 3;

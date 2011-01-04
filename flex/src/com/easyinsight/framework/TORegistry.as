@@ -63,6 +63,7 @@ import com.easyinsight.filtering.LastValueFilterDefinition;
 import com.easyinsight.filtering.NullValueFilterDefinition;
 import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
 import com.easyinsight.goals.KPITreeWrapper;
+import com.easyinsight.google.ClearDBCompositeSource;
 import com.easyinsight.google.GoogleSpreadsheetUploadContext;
 import com.easyinsight.google.QuickbaseCompositeSource;
 import com.easyinsight.google.QuickbaseResponse;
@@ -158,6 +159,7 @@ public class TORegistry {
         var redirect:RedirectDataSource;
         var constantContact:ConstantContactDataSource;
         var qbSource:QuickbaseCompositeSource;
+        var clearDBSource:ClearDBCompositeSource;
         var connection:CompositeFeedConnection;
         var node:CompositeFeedNode;
         var wf:WholeFoodsDataSource;

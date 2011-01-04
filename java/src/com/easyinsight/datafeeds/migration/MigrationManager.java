@@ -43,10 +43,10 @@ public class MigrationManager {
                 EIConnection conn = Database.instance().getConnection();
                 try {
                     conn.setAutoCommit(false);
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT VERSION, DATA_FEED_ID FROM DATA_FEED WHERE FEED_TYPE = ? AND VERSION < ?");
                     for (Map.Entry<FeedType, Class> entry : dataSourceTypeRegistry.getDataSourceMap().entrySet()) {
                         FeedDefinition feedDefinition = dataSourceTypeRegistry.createDataSource(entry.getKey());
                         List<MigrationInfo> infos = new ArrayList<MigrationInfo>();
-                        PreparedStatement queryStmt = conn.prepareStatement("SELECT VERSION, DATA_FEED_ID FROM DATA_FEED WHERE FEED_TYPE = ? AND VERSION < ?");
                         queryStmt.setInt(1, entry.getKey().getType());
                         queryStmt.setInt(2, feedDefinition.getVersion());                        
                         ResultSet migrationTargetRS = queryStmt.executeQuery();

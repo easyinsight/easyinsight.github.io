@@ -1,6 +1,7 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
@@ -70,7 +71,7 @@ public class UserUploadService implements IUserUploadService {
             List<Object> objects = new ArrayList<Object>();
             List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
             objects.addAll(new GoalStorage().getTreesForUser(userID));
-            objects.addAll(new DashboardService().getDashboardsForUser());
+
             Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
             for (FeedDescriptor descriptor : descriptors) {
                 descriptorMap.put(descriptor.getId(), descriptor);
@@ -107,6 +108,10 @@ public class UserUploadService implements IUserUploadService {
                 defList.add(analysisDefinition);
             }
 
+            List<DashboardDescriptor> dashboards = new DashboardService().getDashboardsForUser();
+
+
+
             if (includeGroups) {
                 for (InsightDescriptor analysisDefinition : groupReports) {
                     List<EIDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
@@ -124,6 +129,10 @@ public class UserUploadService implements IUserUploadService {
                     analysisDefList = new ArrayList<EIDescriptor>();
                 }
                 feedDescriptor.setChildren(new ArrayList<EIDescriptor>(new HashSet<EIDescriptor>(analysisDefList)));
+            }
+            for (DashboardDescriptor dashboard : dashboards) {
+                FeedDescriptor feedDescriptor = descriptorMap.get(dashboard.getDataSourceID());
+                feedDescriptor.getChildren().add(dashboard);
             }
             for (LookupTableDescriptor lookupTableDescriptor : new FeedService().getLookupTableDescriptors()) {
                 FeedDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());

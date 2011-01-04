@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.cleardb;
 
+import com.cleardb.app.Client;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -37,6 +38,17 @@ public class ClearDBCompositeSource extends CompositeServerDataSource {
 
     public void setAppToken(String appToken) {
         this.appToken = appToken;
+    }
+
+    @Override
+    public String validateCredentials() {
+        try {
+            Client client = new Client(cdApiKey, appToken);
+            client.query("SELECT 1");
+            return null;
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 
     @Override

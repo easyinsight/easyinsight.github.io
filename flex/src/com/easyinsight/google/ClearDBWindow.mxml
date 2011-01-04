@@ -7,7 +7,6 @@
 
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.controls.Alert;
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
