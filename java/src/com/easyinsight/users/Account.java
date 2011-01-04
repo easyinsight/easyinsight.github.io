@@ -73,7 +73,7 @@ public class Account {
     private int accountType;
 
     @Column(name="first_day_of_week")
-    private int firstDayOfWeek;
+    private int firstDayOfWeek = 1;
 
     @Column(name="source")
     private int accountSource;
