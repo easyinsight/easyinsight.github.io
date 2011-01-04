@@ -66,7 +66,7 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
 
             }
             return contactName;
-        } catch (HighRiseLoginException e) {
+        } catch (ReportException re) {
             peopleCache.put(contactId, "");
             return "";
         }

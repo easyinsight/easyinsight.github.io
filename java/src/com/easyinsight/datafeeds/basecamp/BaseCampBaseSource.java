@@ -44,7 +44,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
 
             }
             return contactName;
-        } catch (BaseCampLoginException e) {
+        } catch (ReportException re) {
             peopleCache.put(contactId, "");
             return "";
         }

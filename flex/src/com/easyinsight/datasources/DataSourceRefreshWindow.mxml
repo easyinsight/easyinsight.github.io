@@ -78,12 +78,14 @@
                 if (callData.result is String) {
                     Alert.show(String(callData.statusMessage));
                     PopUpManager.removePopUp(this);
-                } else {
+                } else if (callData.result is ReportFault) {
                     var window:UIComponent = ReportFault(callData.result).createFaultWindow();
                     window.addEventListener(ProblemDataEvent.PROBLEM_RESOLVED, onProblem, false, 0, true);
                     window.addEventListener(Event.CANCEL, onCancel, false, 0, true);
                     PopUpManager.addPopUp(window, this, true);
                     PopUpUtil.centerPopUp(window);
+                } else {
+                    Alert.show("Something went wrong in trying to retrive data. Please double check your configuration information.");
                 }
             } else if (callData.status == CallData.RUNNING) {
                 if (callData.result != null) {
