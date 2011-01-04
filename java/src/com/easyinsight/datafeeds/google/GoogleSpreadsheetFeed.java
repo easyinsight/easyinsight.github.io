@@ -39,6 +39,7 @@ public class GoogleSpreadsheetFeed extends Feed {
     }
 
     private SpreadsheetService getService() throws OAuthException {
+
         if (as == null) {
             as = new SpreadsheetService("easyinsight_eidocs_v1.0");
             GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
@@ -115,7 +116,12 @@ public class GoogleSpreadsheetFeed extends Feed {
             return dataSet;
         } catch (AuthenticationException ae) {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
+        } catch (OAuthException oe) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (Exception e) {
+            if (e.getCause() != null && e.getCause() instanceof OAuthException) {
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
+            }
             LogClass.error(e);
             throw new RuntimeException(e);
         }

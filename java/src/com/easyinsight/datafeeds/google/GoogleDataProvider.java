@@ -21,6 +21,7 @@ import com.easyinsight.users.Account;
 import com.easyinsight.userupload.UploadPolicy;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.util.AuthenticationException;
 import flex.messaging.FlexContext;
 import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
@@ -71,6 +72,9 @@ public class GoogleDataProvider {
             provider.retrieveAccessToken(consumer, verifier.trim());
             String tokenKey = consumer.getToken();
             String tokenSecret = consumer.getTokenSecret();
+            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM GOOGLE_DOCS_TOKEN WHERE USER_ID = ?");
+            clearStmt.setLong(1, SecurityUtil.getUserID());
+            clearStmt.executeUpdate();
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO GOOGLE_DOCS_TOKEN (TOKEN_KEY, TOKEN_SECRET, USER_ID) VALUES (?, ?, ?)");
             insertStmt.setString(1, tokenKey);
             insertStmt.setString(2, tokenSecret);
@@ -103,14 +107,18 @@ public class GoogleDataProvider {
         queryStmt.setLong(1, SecurityUtil.getUserID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
-            List<Spreadsheet> spreadsheets = getSpreadsheets(rs.getString(1), rs.getString(2));
-            return new GoogleSpreadsheetResponse(spreadsheets, true);
+            try {
+                List<Spreadsheet> spreadsheets = getSpreadsheets(rs.getString(1), rs.getString(2));
+                return new GoogleSpreadsheetResponse(spreadsheets, true);
+            } catch (AuthenticationException ae) {
+                return new GoogleSpreadsheetResponse(false);
+            }
         } else {
             return new GoogleSpreadsheetResponse(false);
         }
     }
 
-    private List<Spreadsheet> getSpreadsheets(String tokenKey, String tokenSecret) {
+    private List<Spreadsheet> getSpreadsheets(String tokenKey, String tokenSecret) throws AuthenticationException {
         List<Spreadsheet> worksheets = new ArrayList<Spreadsheet>();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -155,6 +163,8 @@ public class GoogleDataProvider {
                     LogClass.debug("Skipping over spreadsheet");
                 }
             }
+        } catch (AuthenticationException ae) {
+            throw ae;
         } catch (Exception e) {
             throw new RuntimeException(e);        
         } finally {

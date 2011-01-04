@@ -56,6 +56,11 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
         return DataSourceInfo.LIVE;
     }
 
+    @Override
+    public String validateCredentials() {
+        return null;
+    }
+
     public boolean requiresConfiguration() {
         return false;
     }
@@ -92,10 +97,10 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     @Override
     public void exchangeTokens(EIConnection conn) throws Exception {
         try {
-            if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecret == null) {
+            if (pin != null && !"".equals(pin)) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
                 OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
-                provider.retrieveAccessToken(consumer, pin);
+                provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecret = consumer.getTokenSecret();
             }
