@@ -1,5 +1,7 @@
 package com.easyinsight.dashboard;
 
+import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.analysis.ReportMetrics;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -8,6 +10,7 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
+import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,15 +37,38 @@ public class DashboardService {
     public void keepDashboard(long dashboardID) {
         SecurityUtil.authorizeDashboard(dashboardID);
         EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
+            conn.setAutoCommit(false);
+            Dashboard dashboard = getDashboard(dashboardID);
+            Set<Long> reportIDs = dashboard.containedReports();
+            List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
+
+            for (Long containedReportID : reportIDs) {
+                AnalysisDefinition report = new AnalysisStorage().getPersistableReport(containedReportID, session);
+                reports.add(report);
+                Set<Long> containedReportIDs = report.containedReportIDs();
+                for (Long childReportID : containedReportIDs) {
+                    reports.add(new AnalysisStorage().getPersistableReport(childReportID, session));
+                }
+            }
+            for (AnalysisDefinition report : reports) {
+                report.setTemporaryReport(false);
+                session.update(report);
+            }
+            session.flush();
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? where dashboard_id = ?");
             updateStmt.setBoolean(1, false);
             updateStmt.setLong(2, dashboardID);
             updateStmt.executeUpdate();
-        } catch (SQLException e) {
+            conn.commit();
+        } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            session.close();
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }

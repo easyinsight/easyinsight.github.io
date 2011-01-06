@@ -21,6 +21,7 @@ import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.containers.VBox;
+import mx.controls.Alert;
 import mx.controls.Button;
 import mx.managers.PopUpManager;
 
@@ -137,6 +138,7 @@ public class ReportEventProcessor extends EITitleWindow {
         report.id = reportID;
         report.reportType = reportType;
         dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, report, reportFilters));
+        PopUpManager.removePopUp(this);
     }
 
     private function onRetrievalFault(event:ReportRetrievalFault):void {        

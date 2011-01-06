@@ -678,10 +678,13 @@ public class ExportService {
         }
     }
 
-    public static String toTable(WSAnalysisDefinition report, int dateFormat) {
+    public static String toTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn) throws SQLException {
+        PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+        dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet rs = dateFormatStmt.executeQuery();
+        rs.next();
+        int dateFormat = rs.getInt(1);
         StringBuilder sb = new StringBuilder();
-        report.updateMetadata();
-        com.easyinsight.analysis.ListDataResults listDataResults = (com.easyinsight.analysis.ListDataResults) new com.easyinsight.analysis.DataService().list(report, new com.easyinsight.analysis.InsightRequestMetadata());
         java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
         items.remove(null);
         java.util.Collections.sort(items, new java.util.Comparator<AnalysisItem>() {
@@ -690,13 +693,13 @@ public class ExportService {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
         });
-        String style = "style=\"font-size:" + report.getFontSize() + "px;font-family=" + report.getFontName() + ";serif\"";
+        String style = "style=\"font-size:" + report.getFontSize() + "px;font-family:" + report.getFontName() + ",serif;border-style:solid;border-width:1px;border-spacing:0\"";
         sb.append("<table " + style + ">");
-        sb.append("<tr>");
+        sb.append("<tr style=\"background-color:#EEEEEE\">");
         for (AnalysisItem analysisItem : items) {
             for (AnalysisItem headerItem : listDataResults.getHeaders()) {
                 if (headerItem == analysisItem) {
-                    sb.append("<td>");
+                    sb.append("<td style=\"border-style:solid;border-width:1px\">");
                     sb.append(headerItem.toDisplay());
                     sb.append("</td>");
                 }
@@ -710,7 +713,7 @@ public class ExportService {
                     AnalysisItem headerItem = listDataResults.getHeaders()[i];
                     if (headerItem == analysisItem) {
                         com.easyinsight.core.Value value = listRow.getValues()[i];
-                        sb.append("<td>");
+                        sb.append("<td style=\"border-style:solid;border-width:1px\">");
                         sb.append(com.easyinsight.export.ExportService.createValue(dateFormat, headerItem, value));
                         sb.append("</td>");
                     }

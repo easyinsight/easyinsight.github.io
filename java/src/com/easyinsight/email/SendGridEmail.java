@@ -108,6 +108,70 @@ public class SendGridEmail {
 
     }
 
+    public void sendNoAttachmentEmail(String emailAddress, String subject, String htmlBody, boolean htmlEmail, String fromAddress, String fromName)
+            throws MessagingException, UnsupportedEncodingException {
+
+
+        // Then add to your message:
+        //messageContent.addBodyPart(bodyPart);
+        Properties props = new Properties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.host", SMTP_HOST_NAME);
+        props.put("mail.smtp.auth", "true");
+        props.put("vendor", "SendGrid");
+
+        Authenticator auth = new SMTPAuthenticator();
+        Session mailSession = Session.getInstance(props, auth);
+        // uncomment for debugging infos to stdout
+        // mailSession.setDebug(true);
+        Transport transport = mailSession.getTransport();
+
+        MimeMessage message = new MimeMessage(mailSession);
+
+
+
+        Multipart multipart = new MimeMultipart();
+
+        message.setSubject(subject, "UTF-8");
+
+        if (htmlEmail) {
+            htmlBody = "<html><head>\n" +
+                    "    <style type=\"text/css\" media=\"screen\">\n" +
+                    "        tr {\n" +
+                    "\n" +
+                    "        }\n" +
+                    "\n" +
+                    "        td {\n" +
+                    "            border-style: solid;\n" +
+                    "            border-width: 1px;\n" +
+                    "        }\n" +
+                    "    </style>\n" +
+                    "</head><body>" + htmlBody + "</body></html>";
+            BodyPart part2 = new MimeBodyPart();
+            part2.setContent(htmlBody, "text/html;charset=UTF-8");
+            multipart.addBodyPart(part2);
+        } else {
+            BodyPart part1 = new MimeBodyPart();
+            part1.setContent(htmlBody,"text/plain;charset=utf-8");
+            multipart.addBodyPart(part1);
+        }
+
+        message.setContent(multipart);
+
+        if (fromAddress == null) {
+            fromAddress = "reports@easy-insight.com";
+        }
+        if (fromName == null) {
+            fromName = "Easy Insight Reports";
+        }
+        message.setFrom(new InternetAddress(fromAddress, fromName));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailAddress));
+
+        transport.connect();
+        transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+        transport.close();
+    }
+
     public void sendAttachmentEmail(String emailAddress, String subject, String htmlBody, byte[] file, String attachmentName, boolean htmlEmail, String fromAddress, String fromName,
                                     String mimeEncoding)
             throws MessagingException, UnsupportedEncodingException {

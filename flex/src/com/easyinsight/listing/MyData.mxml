@@ -2,7 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
            creationComplete="initListeners()"
            implements="com.easyinsight.listing.IPerspective" xmlns:listing="com.easyinsight.listing.*"
-           xmlns:customupload="com.easyinsight.customupload.*" doubleClickEnabled="true" percentHeight="100" percentWidth="100">
+           doubleClickEnabled="true" percentHeight="100" percentWidth="100">
     <mx:Script>
 		<![CDATA[        
         import com.easyinsight.account.Account;
@@ -528,7 +528,14 @@
         private var addDashboardAvailable:Boolean = true;
 
         private function createDashboard():void {
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR)));
+            var dataSourceID:int;
+            if (uploadGrid.selectedItems != null && uploadGrid.selectedItems.length > 0) {
+                var obj:Object = uploadGrid.selectedItems[0];
+                if (obj is DataFeedDescriptor) {
+                    dataSourceID = DataFeedDescriptor(obj).id;
+                }
+            }
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { startDataSourceID: dataSourceID} )));
         }
 
 		]]>

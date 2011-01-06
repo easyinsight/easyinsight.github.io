@@ -43,6 +43,13 @@
 
         private var dataSource:DataSourceDescriptor;
 
+        private var _startDataSourceID:int;
+
+
+        public function set startDataSourceID(value:int):void {
+            _startDataSourceID = value;
+        }
+
         private function choseDataSource():void {
             dataSource = DataFeedDescriptor(dataSourceBox.selectedItem).toDataSourceDescriptor();
             currentState = "defineGrid";
@@ -54,6 +61,16 @@
             } else if (dataSources.length == 1) {
                 dataSource = DataFeedDescriptor(dataSources.getItemAt(0)).toDataSourceDescriptor();
                 currentState = "defineGrid";
+            } else if (_startDataSourceID != 0) {
+                for each (var ds:DataFeedDescriptor in dataSources) {
+                    if (ds.id == _startDataSourceID) {
+                        dataSource = ds.toDataSourceDescriptor();
+                        currentState = "defineGrid";
+                    }
+                }
+                if (ds == null) {
+                    currentState = "chooseDataSource";
+                }
             } else {
                 currentState = "chooseDataSource";
             }

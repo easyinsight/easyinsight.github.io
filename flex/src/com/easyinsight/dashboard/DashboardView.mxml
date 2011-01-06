@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
                       xmlns:filtering="com.easyinsight.filtering.*" xmlns:util="com.easyinsight.util.*"
-                      xmlns:datasources="com.easyinsight.datasources.*" xmlns:analysis="com.easyinsight.analysis.*"
+                      xmlns:analysis="com.easyinsight.analysis.*"
                       applyCenterScreenLogic="false" creationComplete="onCreation()">
     <skin:states>
         <mx:State name="fullScreen">
@@ -18,6 +18,10 @@
 
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
+
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.report.ReportNavigationEvent;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -45,6 +49,11 @@
         private function onCreation():void {
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
+            addEventListener(ReportNavigationEvent.TO_REPORT, onNavigation);
+        }
+
+        private function onNavigation(event:ReportNavigationEvent):void {
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
         }
 
         private var commandProcessor:CommandProcessor;

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.*"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:filtering="com.easyinsight.filtering.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
          paddingLeft="5"
@@ -52,6 +52,12 @@
             }
         }
 
+        private var _startDataSourceID:int;
+
+        public function set startDataSourceID(value:int):void {
+            _startDataSourceID = value;
+        }
+
         private var commandProcessor:CommandProcessor;
 
         private function onCommand(event:CommandEvent):void {
@@ -89,6 +95,7 @@
 
         private function gotDataSources():void {
             var window:DashboardSetupWindow = new DashboardSetupWindow();
+            window.startDataSourceID = _startDataSourceID;
             window.dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
             window.addEventListener(DashboardSetupEvent.DASHBOARD_SETUP, onDimensions, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
@@ -217,7 +224,8 @@
         }
 
         public function cleanup():void {
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
     </mx:RemoteObject>

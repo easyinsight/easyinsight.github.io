@@ -29,6 +29,9 @@ public class ReportDelivery extends ScheduledDelivery {
             case 3:
                 type = " as PDF";
                 break;
+            case 4:
+                type = " as Inline HTML Table";
+                break;
         }
         return "Email " + reportName + type;
     }

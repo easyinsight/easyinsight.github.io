@@ -20,6 +20,7 @@ public class ReportDelivery extends ScheduledDelivery {
     public static final int EXCEL = 1;
     public static final int PNG = 2;
     public static final int PDF = 3;
+    public static final int HTML_TABLE = 4;
 
     private int reportFormat;
     private long reportID;

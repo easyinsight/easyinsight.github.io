@@ -232,6 +232,7 @@
                                         <mx:Object label="Excel" data="1"/>
                                         <mx:Object label="PNG" data="2"/>
                                         <mx:Object label="PDF" data="3"/>
+                                        <mx:Object label="HTML Table" data="4"/>
                                     </mx:Array>
                                 </mx:ArrayCollection>
                             </util:dataProvider>

@@ -132,7 +132,9 @@ public class UserUploadService implements IUserUploadService {
             }
             for (DashboardDescriptor dashboard : dashboards) {
                 FeedDescriptor feedDescriptor = descriptorMap.get(dashboard.getDataSourceID());
-                feedDescriptor.getChildren().add(dashboard);
+                if (feedDescriptor != null) {
+                    feedDescriptor.getChildren().add(dashboard);
+                }
             }
             for (LookupTableDescriptor lookupTableDescriptor : new FeedService().getLookupTableDescriptors()) {
                 FeedDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());

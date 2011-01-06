@@ -132,6 +132,17 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             String reportName = analysisDefinition.getName();
                             sendEmails(conn, bytes, reportName + ".xls", accountID, "application/excel", activityID);
                         }
+                    } else if (deliveryFormat == ReportDelivery.HTML_TABLE) {
+                        WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                        analysisDefinition.updateMetadata();
+                        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                        insightRequestMetadata.setUtcOffset(timezoneOffset);
+                        DataResults dataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
+                        if (dataResults instanceof ListDataResults) {
+                            ListDataResults listDataResults = (ListDataResults) dataResults;
+                            String table = ExportService.toTable(analysisDefinition, listDataResults, conn);
+                            sendNoAttachEmails(conn, table, accountID, activityID);
+                        }
                     } else if (deliveryFormat == ReportDelivery.PNG) {
                         new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
                     } else if (deliveryFormat == ReportDelivery.PDF) {
@@ -228,6 +239,75 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
         for (String email : emails) {
             new SendGridEmail().sendAttachmentEmail(email, subjectLine, body, bytes, attachmentName, htmlEmail, senderEmail, senderName, encoding);
+            deliveryAuditStmt.setLong(1, accountID);
+            deliveryAuditStmt.setLong(2, deliveryID);
+            deliveryAuditStmt.setBoolean(3, true);
+            deliveryAuditStmt.setString(4, null);
+            deliveryAuditStmt.setString(5, email);
+            deliveryAuditStmt.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
+            deliveryAuditStmt.execute();
+        }
+        deliveryAuditStmt.close();
+    }
+
+    public static void sendNoAttachEmails(EIConnection conn, String extraBody, long accountID, long activityID) throws SQLException, MessagingException, UnsupportedEncodingException {
+        PreparedStatement getInfoStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, REPORT_DELIVERY_ID FROM REPORT_DELIVERY WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+        getInfoStmt.setLong(1, activityID);
+        ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
+        deliveryInfoRS.next();
+        String subjectLine = deliveryInfoRS.getString(3);
+        String body = deliveryInfoRS.getString(4);
+        boolean htmlEmail = deliveryInfoRS.getBoolean(5);
+        long deliveryID = deliveryInfoRS.getLong(6);
+        PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? and " +
+                "delivery_to_user.user_id = user.user_id");
+        List<UserInfo> userStubs = new ArrayList<UserInfo>();
+        userStmt.setLong(1, activityID);
+        ResultSet rs = userStmt.executeQuery();
+        while (rs.next()) {
+            String email = rs.getString(1);
+            String firstName = rs.getString(2);
+            String lastName = rs.getString(3);
+            userStubs.add(new UserInfo(email, firstName, lastName));
+        }
+
+        String senderName = null;
+        String senderEmail = null;
+        PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, REPORT_DELIVERY WHERE REPORT_DELIVERY.sender_user_id = user.user_id and " +
+                "REPORT_DELIVERY.scheduled_account_activity_id = ?");
+        getSernderStmt.setLong(1, activityID);
+        ResultSet senderRS = getSernderStmt.executeQuery();
+        if (senderRS.next()) {
+            String email = senderRS.getString(1);
+            String firstName = senderRS.getString(2);
+            String lastName = senderRS.getString(3);
+            senderName = firstName + " " + lastName;
+            senderEmail = email;
+        }
+
+        PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where scheduled_account_activity_id = ?");
+        emailQueryStmt.setLong(1, activityID);
+        List<String> emails = new ArrayList<String>();
+        ResultSet emailRS = emailQueryStmt.executeQuery();
+        while (emailRS.next()) {
+            String email = emailRS.getString(1);
+            emails.add(email);
+        }
+
+        PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (ACCOUNT_ID," +
+                "REPORT_DELIVERY_ID, SUCCESSFUL, MESSAGE, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?, ?, ?)");
+        for (UserInfo userInfo : userStubs) {
+            new SendGridEmail().sendNoAttachmentEmail(userInfo.email, subjectLine, body + extraBody, htmlEmail, senderEmail, senderName);
+            deliveryAuditStmt.setLong(1, accountID);
+            deliveryAuditStmt.setLong(2, deliveryID);
+            deliveryAuditStmt.setBoolean(3, true);
+            deliveryAuditStmt.setString(4, null);
+            deliveryAuditStmt.setString(5, userInfo.email);
+            deliveryAuditStmt.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
+            deliveryAuditStmt.execute();
+        }
+        for (String email : emails) {
+            new SendGridEmail().sendNoAttachmentEmail(email, subjectLine, body + extraBody, htmlEmail, senderEmail, senderName);
             deliveryAuditStmt.setLong(1, accountID);
             deliveryAuditStmt.setLong(2, deliveryID);
             deliveryAuditStmt.setBoolean(3, true);

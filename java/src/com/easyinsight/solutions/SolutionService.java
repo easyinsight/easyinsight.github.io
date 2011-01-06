@@ -639,7 +639,12 @@ public class SolutionService {
             List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
 
             for (Long containedReportID : reportIDs) {
-                reports.add(new AnalysisStorage().getPersistableReport(containedReportID, session));
+                AnalysisDefinition report = new AnalysisStorage().getPersistableReport(containedReportID, session);
+                reports.add(report);
+                Set<Long> containedReportIDs = report.containedReportIDs();
+                for (Long childReportID : containedReportIDs) {
+                    reports.add(new AnalysisStorage().getPersistableReport(childReportID, session));
+                }
             }
 
             Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
