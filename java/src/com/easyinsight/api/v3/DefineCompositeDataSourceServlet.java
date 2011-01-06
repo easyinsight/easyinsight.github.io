@@ -73,7 +73,7 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 }
             }
 
-            Nodes connectionNodes = document.query("/defineDataSource/connections");
+            Nodes connectionNodes = document.query("/defineDataSource/connections/connection");
 
             for (int i = 0; i < connectionNodes.size(); i++) {
                 Node connectionNode = connectionNodes.get(i);

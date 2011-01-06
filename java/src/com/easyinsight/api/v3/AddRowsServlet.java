@@ -67,22 +67,22 @@ public class AddRowsServlet extends APIServlet {
                     }
                     String value = columnNode.getValue().trim();
                     if ("".equals(value)) {
-                        row.addValue(analysisItem.createAggregateKey(), new EmptyValue());
+                        row.addValue(analysisItem.getKey(), new EmptyValue());
                     } else {
                         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             try {
-                                row.addValue(analysisItem.createAggregateKey(), dateFormat.parse(value));
+                                row.addValue(analysisItem.getKey(), dateFormat.parse(value));
                             } catch (ParseException e) {
                                 throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
                             }
                         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                             try {
-                                row.addValue(analysisItem.createAggregateKey(), Double.parseDouble(value));
+                                row.addValue(analysisItem.getKey(), Double.parseDouble(value));
                             } catch (NumberFormatException e) {
                                 throw new ServiceRuntimeException("We couldn't parse the numeric value of " + value + " that you passed in with " + nodeName + ".");
                             }
                         } else {
-                            row.addValue(analysisItem.createAggregateKey(), value);
+                            row.addValue(analysisItem.getKey(), value);
                         }
                     }
                 }

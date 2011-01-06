@@ -157,27 +157,27 @@
 
     <servlet-mapping>
         <servlet-name>DefineDataSource</servlet-name>
-        <url-pattern>/defineDataSource</url-pattern>
+        <url-pattern>/xml/defineDataSource</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>DefineCompositeDataSource</servlet-name>
-        <url-pattern>/defineCompositeDataSource</url-pattern>
+        <url-pattern>/xml/defineCompositeDataSource</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>ReplaceRows</servlet-name>
-        <url-pattern>/replaceRows</url-pattern>
+        <url-pattern>/xml/replaceRows</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>AddRows</servlet-name>
-        <url-pattern>/addRows</url-pattern>
+        <url-pattern>/xml/addRows</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>UpdateRows</servlet-name>
-        <url-pattern>/updateRows</url-pattern>
+        <url-pattern>/xml/updateRows</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

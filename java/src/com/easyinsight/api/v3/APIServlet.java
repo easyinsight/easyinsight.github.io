@@ -70,6 +70,7 @@ public abstract class APIServlet extends HttpServlet {
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
+
                     Document doc = new Builder().build(req.getInputStream());
                     responseInfo = processXML(doc, conn);
                     conn.commit();

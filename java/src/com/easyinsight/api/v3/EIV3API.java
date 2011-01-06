@@ -31,10 +31,10 @@ import java.util.*;
  */
 public abstract class EIV3API implements IEIV3API {
 
-    private static final int TRANSACTION_OPENED = 1;
-    private static final int TRANSACTION_FAILED = 2;
-    private static final int TRANSACTION_COMMITTED = 3;
-    private static final int TRANSACTION_ROLLED_BACK = 4;
+    public static final int TRANSACTION_OPENED = 1;
+    public static final int TRANSACTION_FAILED = 2;
+    public static final int TRANSACTION_COMMITTED = 3;
+    public static final int TRANSACTION_ROLLED_BACK = 4;
 
     protected abstract long getUserID();
 
@@ -98,7 +98,7 @@ public abstract class EIV3API implements IEIV3API {
             LogClass.debug(sre.getMessage());
             conn.rollback();
             throw sre;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
             throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
@@ -125,8 +125,6 @@ public abstract class EIV3API implements IEIV3API {
             conn.setAutoCommit(false);
             CallData callData = convertData(dataSourceName, new FieldDefinitions(fields), null, conn, true);
             dataStorage = callData.dataStorage;
-            dataStorage.truncate();
-            dataStorage.insertData(callData.dataSet);
             dataStorage.commit();
             conn.commit();
             return callData.apiKey;
@@ -137,7 +135,7 @@ public abstract class EIV3API implements IEIV3API {
             }
             conn.rollback();
             throw sre;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
@@ -174,7 +172,7 @@ public abstract class EIV3API implements IEIV3API {
             }
             conn.rollback();
             throw sre;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
@@ -210,7 +208,7 @@ public abstract class EIV3API implements IEIV3API {
             }
             conn.rollback();
             throw sre;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
@@ -243,7 +241,7 @@ public abstract class EIV3API implements IEIV3API {
             }
             conn.rollback();
             throw sre;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
@@ -280,7 +278,7 @@ public abstract class EIV3API implements IEIV3API {
             }
             conn.rollback();
             throw sre;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
@@ -315,7 +313,7 @@ public abstract class EIV3API implements IEIV3API {
             }
             conn.rollback();
             throw sre;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
@@ -745,7 +743,7 @@ public abstract class EIV3API implements IEIV3API {
             insertTxnStmt.execute();
             conn.commit();
             return txnString;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
             throw new ServiceRuntimeException(e.getMessage());
@@ -792,7 +790,7 @@ public abstract class EIV3API implements IEIV3API {
             conn.rollback();
             commitResult.setSuccessful(false);
             commitResult.setFailureMessage(sre.getMessage());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
             if (dataStorage != null) {
@@ -830,7 +828,7 @@ public abstract class EIV3API implements IEIV3API {
             LogClass.debug(sre.getMessage());
             conn.rollback();
             throw sre;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
             throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
