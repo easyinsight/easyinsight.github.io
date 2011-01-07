@@ -73,7 +73,7 @@ public class DefineDataSourceServlet extends APIServlet {
                 }
                 analysisItems.add(analysisItem);
             }
-            CallData callData = convertData(dataSourceName, analysisItems, null, conn, true);
+            CallData callData = convertData(dataSourceName, analysisItems, conn, true);
             dataStorage = callData.dataStorage;
             dataStorage.commit();
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "<dataSourceKey>" + callData.apiKey + "</dataSourceKey>");

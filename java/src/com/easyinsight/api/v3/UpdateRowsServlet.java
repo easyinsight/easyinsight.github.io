@@ -74,86 +74,92 @@ public class UpdateRowsServlet extends APIServlet {
                 Node rowNode = rowNodes.get(i);
                 IRow row = dataSet.createRow();
                 for (int j = 0; j < rowNode.getChildCount(); j++) {
-                    Element columnNode = (Element) rowNode.getChild(j);
-                    String nodeName = columnNode.getLocalName().toLowerCase();
-                    AnalysisItem analysisItem = fieldMap.get(nodeName);
-                    if (analysisItem == null) {
-                        throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
-                    }
-                    String value = columnNode.getValue().trim();
-                    if ("".equals(value)) {
-                        row.addValue(analysisItem.getKey(), new EmptyValue());
-                    } else {
-                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            try {
-                                row.addValue(analysisItem.getKey(), dateFormat.parse(value));
-                            } catch (ParseException e) {
-                                throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
-                            }
-                        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                            try {
-                                row.addValue(analysisItem.getKey(), Double.parseDouble(value));
-                            } catch (NumberFormatException e) {
-                                throw new ServiceRuntimeException("We couldn't parse the numeric value of " + value + " that you passed in with " + nodeName + ".");
-                            }
+                    Node node = rowNode.getChild(j);
+                    if (node instanceof Element) {
+                        Element columnNode = (Element) node;
+                        String nodeName = columnNode.getLocalName().toLowerCase();
+                        AnalysisItem analysisItem = fieldMap.get(nodeName);
+                        if (analysisItem == null) {
+                            throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
+                        }
+                        String value = columnNode.getValue().trim();
+                        if ("".equals(value)) {
+                            row.addValue(analysisItem.getKey(), new EmptyValue());
                         } else {
-                            row.addValue(analysisItem.getKey(), value);
+                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                try {
+                                    row.addValue(analysisItem.getKey(), dateFormat.parse(value));
+                                } catch (ParseException e) {
+                                    throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
+                                }
+                            } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                try {
+                                    row.addValue(analysisItem.getKey(), Double.parseDouble(value));
+                                } catch (NumberFormatException e) {
+                                    throw new ServiceRuntimeException("We couldn't parse the numeric value of " + value + " that you passed in with " + nodeName + ".");
+                                }
+                            } else {
+                                row.addValue(analysisItem.getKey(), value);
+                            }
                         }
                     }
                 }
             }
             List<IWhere> wheres = new ArrayList<IWhere>();
             for (int i = 0; i < whereRows.size(); i++) {
-                Element whereNode = (Element) whereRows.get(i);
-                Nodes keyNodes = whereNode.query("key/text()");
-                if (keyNodes.size() == 0) {
-                    throw new ServiceRuntimeException("You need to specify a key node for each where in your update call.");
+                Node node = whereRows.get(i);
+                if (node instanceof Element) {
+                    Element whereNode = (Element) node;
+                    Nodes keyNodes = whereNode.query("key/text()");
+                    if (keyNodes.size() == 0) {
+                        throw new ServiceRuntimeException("You need to specify a key node for each where in your update call.");
+                    }
+                    Node keyNode = keyNodes.get(0);
+                    String key = keyNode.getValue().toLowerCase();
+                    AnalysisItem analysisItem = fieldMap.get(key);
+                    if (analysisItem == null) {
+                        throw new ServiceRuntimeException("We couldn't find " + key + " in the data source.");
+                    }
+                    Attribute typeAttribute = whereNode.getAttribute("whereType");
+                    if (typeAttribute == null) {
+                        throw new ServiceRuntimeException("You need to specify a whereType attribute for each where in your update call.");
+                    }
+                    String whereType = typeAttribute.getValue().toLowerCase().trim();
+                    IWhere where;
+                    if ("day".equals(whereType)) {
+                        Nodes yearNodes = whereNode.query("year/text()");
+                        if (yearNodes.size() == 0) {
+                            throw new ServiceRuntimeException("You need to specify a year node with a type of day for where clauses.");
+                        }
+                        int year;
+                        try {
+                            year = Integer.parseInt(yearNodes.get(0).getValue());
+                        } catch (NumberFormatException e) {
+                            throw new ServiceRuntimeException(yearNodes.get(0).getValue() + " in your where clause is an invalid value for a year.");
+                        }
+                        int dayOfYear;
+                        Nodes dayNodes = whereNode.query("day/text()");
+                        if (dayNodes.size() == 0) {
+                            throw new ServiceRuntimeException("You need to specify a day node with a type of day for where clauses.");
+                        }
+                        try {
+                            dayOfYear = Integer.parseInt(dayNodes.get(0).getValue());
+                        } catch (NumberFormatException e) {
+                            throw new ServiceRuntimeException(dayNodes.get(0).getValue() + " in your where clause is an invalid value for a day of the year.");
+                        }
+                        where = new DayWhere(analysisItem.getKey(), year, dayOfYear);
+                    } else if ("string".equals(whereType)) {
+                        Nodes valueNodes = whereNode.query("value/text()");
+                        if (valueNodes.size() == 0) {
+                            throw new ServiceRuntimeException("You must specify a value node with a type of string for where clauses.");
+                        }
+                        String value = valueNodes.get(0).getValue();
+                        where = new StringWhere(analysisItem.getKey(), value);
+                    } else {
+                        throw new ServiceRuntimeException(whereType + " is an unrecognized where type. Valid options are day and string.");
+                    }
+                    wheres.add(where);
                 }
-                Node keyNode = keyNodes.get(0);
-                String key = keyNode.getValue().toLowerCase();
-                AnalysisItem analysisItem = fieldMap.get(key);
-                if (analysisItem == null) {
-                    throw new ServiceRuntimeException("We couldn't find " + key + " in the data source.");
-                }
-                Attribute typeAttribute = whereNode.getAttribute("whereType");
-                if (typeAttribute == null) {
-                    throw new ServiceRuntimeException("You need to specify a whereType attribute for each where in your update call.");
-                }
-                String whereType = typeAttribute.getValue().toLowerCase().trim();
-                IWhere where;
-                if ("day".equals(whereType)) {
-                    Nodes yearNodes = whereNode.query("year/text()");
-                    if (yearNodes.size() == 0) {
-                        throw new ServiceRuntimeException("You need to specify a year node with a type of day for where clauses.");
-                    }
-                    int year;
-                    try {
-                        year = Integer.parseInt(yearNodes.get(0).getValue());
-                    } catch (NumberFormatException e) {
-                        throw new ServiceRuntimeException(yearNodes.get(0).getValue() + " in your where clause is an invalid value for a year.");
-                    }
-                    int dayOfYear;
-                    Nodes dayNodes = whereNode.query("day/text()");
-                    if (dayNodes.size() == 0) {
-                        throw new ServiceRuntimeException("You need to specify a day node with a type of day for where clauses.");
-                    }
-                    try {
-                        dayOfYear = Integer.parseInt(dayNodes.get(0).getValue());
-                    } catch (NumberFormatException e) {
-                        throw new ServiceRuntimeException(dayNodes.get(0).getValue() + " in your where clause is an invalid value for a day of the year.");
-                    }
-                    where = new DayWhere(analysisItem.getKey(), year, dayOfYear);
-                } else if ("string".equals(whereType)) {
-                    Nodes valueNodes = whereNode.query("value/text()");
-                    if (valueNodes.size() == 0) {
-                        throw new ServiceRuntimeException("You must specify a value node with a type of string for where clauses.");
-                    }
-                    String value = valueNodes.get(0).getValue();
-                    where = new StringWhere(analysisItem.getKey(), value);
-                } else {
-                    throw new ServiceRuntimeException(whereType + " is an unrecognized where type. Valid options are day and string.");
-                }
-                wheres.add(where);
 
             }
 

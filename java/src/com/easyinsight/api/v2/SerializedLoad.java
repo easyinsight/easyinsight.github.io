@@ -1,9 +1,13 @@
 package com.easyinsight.api.v2;
 
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.api.DatePair;
 import com.easyinsight.api.NumberPair;
 import com.easyinsight.api.Row;
 import com.easyinsight.api.StringPair;
+import com.easyinsight.cds.NumberValue;
+import com.easyinsight.core.*;
+import com.easyinsight.dataset.DataSet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -70,6 +74,71 @@ public class SerializedLoad implements Serializable {
             rows.add(row);
         }
         return rows;
+    }
+
+    public static SerializedLoad fromDataSet(DataSet dataSet) {
+        SerializedLoad load = new SerializedLoad();
+        load.rows = new ArrayList<SerialRow>();
+        for (IRow row : dataSet.getRows()) {
+            List<SerialStringValue> stringValues = new ArrayList<SerialStringValue>();
+            List<SerialNumericValue> numberValues = new ArrayList<SerialNumericValue>();
+            List<SerialDateValue> dateValues = new ArrayList<SerialDateValue>();
+            for (Key key : row.getKeys()) {
+                Value value = row.getValue(key);
+                if (value.type() == Value.EMPTY) {
+                    SerialStringValue serialStringValue = new SerialStringValue();
+                    serialStringValue.setKey(key.toKeyString());
+                    serialStringValue.setValue("");
+                    stringValues.add(serialStringValue);
+                } else if (value.type() == Value.STRING) {
+                    SerialStringValue serialStringValue = new SerialStringValue();
+                    serialStringValue.setKey(key.toKeyString());
+                    serialStringValue.setValue(value.toString());
+                    stringValues.add(serialStringValue);
+                } else if (value.type() == Value.DATE) {
+                    DateValue dateValue = (DateValue) value;
+                    SerialDateValue serialDateValue = new SerialDateValue();
+                    serialDateValue.setKey(key.toKeyString());
+                    serialDateValue.setValue(dateValue.getDate());
+                    dateValues.add(serialDateValue);
+                } else if (value.type() == Value.NUMBER) {
+                    NumericValue numberValue = (NumericValue) value;
+                    SerialNumericValue serialNumericValue = new SerialNumericValue();
+                    serialNumericValue.setKey(key.toKeyString());
+                    serialNumericValue.setValue(numberValue.getValue());
+                    numberValues.add(serialNumericValue);
+                }
+            }
+            SerialStringValue[] stringArray = new SerialStringValue[stringValues.size()];
+            stringValues.toArray(stringArray);
+            SerialNumericValue[] numberArray = new SerialNumericValue[numberValues.size()];
+            numberValues.toArray(numberArray);
+            SerialDateValue[] dateArray = new SerialDateValue[dateValues.size()];
+            dateValues.toArray(dateArray);
+            SerialRow serialRow = new SerialRow();
+            serialRow.setDateValues(dateArray);
+            serialRow.setNumberValues(numberArray);
+            serialRow.setStringValues(stringArray);
+            load.rows.add(serialRow);
+        }
+        return load;
+    }
+
+    public DataSet toDataSet() {
+        DataSet dataSet = new DataSet();
+        for (SerialRow serialRow : getRows()) {
+            IRow row = dataSet.createRow();
+            for (SerialStringValue serialStringValue : serialRow.getStringValues()) {
+                row.addValue(serialStringValue.getKey(), serialStringValue.getValue());
+            }
+            for (SerialNumericValue serialNumericValue : serialRow.getNumberValues()) {
+                row.addValue(serialNumericValue.getKey(), serialNumericValue.getValue());
+            }
+            for (SerialDateValue serialDateValue : serialRow.getDateValues()) {
+                row.addValue(new NamedKey(serialDateValue.getKey()), serialDateValue.getValue());
+            }
+        }
+        return dataSet;
     }
 
     public static SerializedLoad fromRows(List<Row> rows) {

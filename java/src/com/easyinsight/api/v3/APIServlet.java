@@ -1,9 +1,7 @@
 package com.easyinsight.api.v3;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.IRow;
 import com.easyinsight.api.*;
-import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -11,7 +9,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.storage.IWhere;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.userupload.UploadPolicy;
@@ -28,7 +25,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +73,7 @@ public abstract class APIServlet extends HttpServlet {
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
                     LogClass.error(sre);
-                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message> + " + sre.getMessage() + "</message>");
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>" + sre.getMessage() + "</message>");
                 } catch (Exception e) {
                     conn.rollback();
                     LogClass.error(e);
@@ -104,17 +100,15 @@ public abstract class APIServlet extends HttpServlet {
 
     protected static class CallData {
         DataStorage dataStorage;
-        DataSet dataSet;
         String apiKey;
 
-        private CallData(DataStorage dataStorage, DataSet dataSet, String apiKey) {
+        private CallData(DataStorage dataStorage, String apiKey) {
             this.dataStorage = dataStorage;
-            this.dataSet = dataSet;
             this.apiKey = apiKey;
         }
     }
 
-    protected CallData convertData(String dataSourceName, List<AnalysisItem> analysisItems, List<com.easyinsight.api.Row> rows, EIConnection conn, boolean updateIfNecessary) throws Exception {
+    protected CallData convertData(String dataSourceName, List<AnalysisItem> analysisItems, EIConnection conn, boolean updateIfNecessary) throws Exception {
         if (dataSourceName == null) {
             throw new ServiceRuntimeException("You must specify a data source name or API key.");
         }
@@ -176,11 +170,6 @@ public abstract class APIServlet extends HttpServlet {
                 }
                 apiKey = feedDefinition.getApiKey();
             }
-            if (rows == null) {
-                dataSet = new DataSet();
-            } else {
-                dataSet = toDataSet(rows);
-            }
         } else {
             if (dataSourceIDs.size() == 0) {
                 throw new ServiceRuntimeException("No data source was found by that name or API key.");
@@ -190,16 +179,11 @@ public abstract class APIServlet extends HttpServlet {
                 FeedStorage feedStorage = new FeedStorage();
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceIDs.keySet().iterator().next(), conn);
                 DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-                if (rows == null) {
-                    dataSet = new DataSet();
-                } else {
-                    dataSet = dataTransformation.toDataSet(rows);
-                }
                 dataStorage = DataStorage.writeConnection(feedDefinition, conn, SecurityUtil.getAccountID());
                 apiKey = feedDefinition.getApiKey();
             }
         }
-        return new CallData(dataStorage, dataSet, apiKey);
+        return new CallData(dataStorage, apiKey);
     }
 
     protected Map<Long, Boolean> findDataSourceIDsByName(String dataSourceName, Connection conn) throws SQLException {
@@ -217,103 +201,5 @@ public abstract class APIServlet extends HttpServlet {
             dataSourceIDs.put(rs.getLong(1), rs.getBoolean(2));
         }
         return dataSourceIDs;
-    }
-
-    protected final DataSet toDataSet(com.easyinsight.api.Row row) {
-        DataSet dataSet = new DataSet();
-        dataSet.addRow(toRow(row));
-        return dataSet;
-    }
-
-    protected final DataSet toDataSet(List<com.easyinsight.api.Row> rows) {
-        DataSet dataSet = new DataSet();
-        for (com.easyinsight.api.Row row : rows) {
-            dataSet.addRow(toRow(row));
-        }
-        return dataSet;
-    }
-
-    private IRow toRow(com.easyinsight.api.Row row) {
-        IRow transformedRow = new com.easyinsight.analysis.Row();
-        StringPair[] stringPairs = row.getStringPairs();
-        if (stringPairs != null) {
-            for (StringPair stringPair : stringPairs) {
-                if (stringPair.getKey() == null) {
-                    throw new ServiceRuntimeException("StringPair with value " + stringPair.getValue() + " had no key--key is a required field.");
-                }
-                transformedRow.addValue(stringPair.getKey(), stringPair.getValue() == null ? new EmptyValue() : new StringValue(stringPair.getValue()));
-            }
-        }
-        NumberPair[] numberPairs = row.getNumberPairs();
-        if (numberPairs != null) {
-            for (NumberPair numberPair : numberPairs) {
-                if (numberPair.getKey() == null) {
-                    throw new ServiceRuntimeException("NumberPair with value " + numberPair.getValue() + " had no key--key is a required field.");
-                }
-                transformedRow.addValue(numberPair.getKey(), new NumericValue(numberPair.getValue()));
-            }
-        }
-        DatePair[] datePairs = row.getDatePairs();
-        if (datePairs != null) {
-            for (DatePair datePair : datePairs) {
-                if (datePair.getKey() == null) {
-                    throw new ServiceRuntimeException("DatePair with value " + datePair.getValue() + " had no key--key is a required field.");
-                }
-                transformedRow.addValue(datePair.getKey(), datePair.getValue() == null ? new EmptyValue() : new DateValue(datePair.getValue()));
-            }
-        }
-        return transformedRow;
-    }
-
-    protected final List<IWhere> createWheres(Where where) {
-        List<IWhere> wheres = new ArrayList<IWhere>();
-        StringWhere[] stringWheres = where.getStringWheres();
-        if (stringWheres != null) {
-            for (StringWhere stringWhere : stringWheres) {
-                if (stringWhere.getKey() == null) {
-                    throw new ServiceRuntimeException("StringWhere with value " + stringWhere.getValue() + " had no key--key is a required field.");
-                }
-                wheres.add(new com.easyinsight.storage.StringWhere(new NamedKey(stringWhere.getKey()), stringWhere.getValue()));
-            }
-        }
-        NumberWhere[] numberWheres = where.getNumberWheres();
-        if (numberWheres != null) {
-            for (NumberWhere numberWhere : numberWheres) {
-                if (numberWhere.getKey() == null) {
-                    throw new ServiceRuntimeException("NumberWhere with value " + numberWhere.getValue() + " had no key--key is a required field.");
-                }
-                Comparison comparison = numberWhere.getComparison();
-                if (comparison == null) {
-                    throw new ServiceRuntimeException("NumberWhere with key " + numberWhere.getKey() + " had no comparison--comparison is a required field.");
-                }
-                wheres.add(new com.easyinsight.storage.NumericWhere(new NamedKey(numberWhere.getKey()), numberWhere.getValue(), comparison.createStorageComparison()));
-            }
-        }
-        DateWhere[] dateWheres = where.getDateWheres();
-        if (dateWheres != null) {
-            for (DateWhere dateWhere : dateWheres) {
-                if (dateWhere.getKey() == null) {
-                    throw new ServiceRuntimeException("DateWhere with value " + dateWhere.getValue() + " had no key--key is a required field.");
-                }
-                Comparison comparison = dateWhere.getComparison();
-                if (comparison == null) {
-                    throw new ServiceRuntimeException("DateWhere with key " + dateWhere.getKey() + " had no comparison--comparison is a required field.");
-                }
-                wheres.add(new com.easyinsight.storage.DateWhere(new NamedKey(dateWhere.getKey()), dateWhere.getValue(), comparison.createStorageComparison()));
-            }
-        }
-        DayWhere[] dayWheres = where.getDayWheres();
-        if (dayWheres != null) {
-            for (DayWhere dayWhere : dayWheres) {
-                if (dayWhere.getKey() == null) {
-                    throw new ServiceRuntimeException("DayWhere with value " + dayWhere.getDayOfYear() + " had no key--key is a required field.");
-                }
-                if (dayWhere.getYear() == 0) {
-                    throw new ServiceRuntimeException("DayWhere with key " + dayWhere.getKey() + " was set to year 0.");
-                }
-                wheres.add(new com.easyinsight.storage.DayWhere(new NamedKey(dayWhere.getKey()), dayWhere.getYear(), dayWhere.getDayOfYear()));
-            }
-        }
-        return wheres;
     }
 }
