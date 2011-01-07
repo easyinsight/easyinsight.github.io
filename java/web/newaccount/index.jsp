@@ -87,6 +87,9 @@
     </div>
             <div id="contentHeaderStart"></div>
         <div id="midContent">
+            <div style="font-size:36px;font-weight:bold;padding-top:20px;padding-bottom:20px">
+30 Day Free Trial on All Accounts
+            </div>
             <div style="height:450px;padding-left:50px">
                 <div id="personal" class="pricingBox">
                     <h2 style="font-size:20px">PERSONAL</h2>
