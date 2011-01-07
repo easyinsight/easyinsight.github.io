@@ -27,7 +27,7 @@
                     out.println("<li>Apparently none of our data in the session</li>");
                 } else {
                     com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
-                             (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false);
+                             (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
                     try {
                         java.util.List<com.easyinsight.datafeeds.FeedDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
                         for (com.easyinsight.datafeeds.FeedDescriptor dataSource : dataSources) {

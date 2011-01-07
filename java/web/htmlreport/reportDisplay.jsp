@@ -3,11 +3,10 @@
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="java.sql.ResultSet" %>
-<%@ page import="com.easyinsight.analysis.AnalysisService" %>
-<%@ page import="com.easyinsight.analysis.WSAnalysisDefinition" %>
 <%@ page import="com.easyinsight.export.ExportService" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
+<%@ page import="com.easyinsight.analysis.*" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -28,7 +27,7 @@
         <%
             try {
                 com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
-                         (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false);
+                         (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
                 try {
                     EIConnection conn = Database.instance().getConnection();
                     int dateFormat = 0;
@@ -38,19 +37,21 @@
                         ResultSet rs = dateFormatStmt.executeQuery();
                         rs.next();
                         dateFormat = rs.getInt(1);
+
+
+
+                        com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(Long.parseLong(request.getParameter("reportID")));
+                        if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
+                            WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
+                            ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
+                            if (report.getReportType() == WSAnalysisDefinition.LIST) {
+                                out.println(ExportService.toTable(report, dataResults, conn));
+                            } else {
+                                out.println("<p>To be implemented...</p>");
+                            }
+                        }
                     } finally {
                         Database.closeConnection(conn);
-                    }
-
-
-                    com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(Long.parseLong(request.getParameter("reportID")));
-                    if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
-                        WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
-                        if (report.getReportType() == WSAnalysisDefinition.LIST) {
-                            out.println(ExportService.toTable(report, dateFormat));
-                        } else {
-                            out.println("<p>To be implemented...</p>");
-                        }
                     }
                 } finally {
                     SecurityUtil.clearThreadLocal();

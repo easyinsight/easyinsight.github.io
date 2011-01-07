@@ -25,7 +25,7 @@
         <ul data-role="listview">
             <%
                 com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
-                     (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false);
+                     (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
                 try {
                     long dataSourceID = Long.parseLong(request.getParameter("dataSourceID"));
                     Collection<InsightDescriptor> reports = new AnalysisService().getInsightDescriptorsForDataSource(dataSourceID);
