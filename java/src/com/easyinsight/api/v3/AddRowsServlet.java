@@ -59,30 +59,33 @@ public class AddRowsServlet extends APIServlet {
                 Node rowNode = rowNodes.get(i);
                 IRow row = dataSet.createRow();
                 for (int j = 0; j < rowNode.getChildCount(); j++) {
-                    Element columnNode = (Element) rowNode.getChild(j);
-                    String nodeName = columnNode.getLocalName().toLowerCase();
-                    AnalysisItem analysisItem = fieldMap.get(nodeName);
-                    if (analysisItem == null) {
-                        throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
-                    }
-                    String value = columnNode.getValue().trim();
-                    if ("".equals(value)) {
-                        row.addValue(analysisItem.getKey(), new EmptyValue());
-                    } else {
-                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            try {
-                                row.addValue(analysisItem.getKey(), dateFormat.parse(value));
-                            } catch (ParseException e) {
-                                throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
-                            }
-                        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                            try {
-                                row.addValue(analysisItem.getKey(), Double.parseDouble(value));
-                            } catch (NumberFormatException e) {
-                                throw new ServiceRuntimeException("We couldn't parse the numeric value of " + value + " that you passed in with " + nodeName + ".");
-                            }
+                    Node node = rowNode.getChild(j);
+                    if (node instanceof Element) {
+                        Element columnNode = (Element) rowNode.getChild(j);
+                        String nodeName = columnNode.getLocalName().toLowerCase();
+                        AnalysisItem analysisItem = fieldMap.get(nodeName);
+                        if (analysisItem == null) {
+                            throw new ServiceRuntimeException("No field was found in the data source definition matching the key of " + nodeName + ".");
+                        }
+                        String value = columnNode.getValue().trim();
+                        if ("".equals(value)) {
+                            row.addValue(analysisItem.getKey(), new EmptyValue());
                         } else {
-                            row.addValue(analysisItem.getKey(), value);
+                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                try {
+                                    row.addValue(analysisItem.getKey(), dateFormat.parse(value));
+                                } catch (ParseException e) {
+                                    throw new ServiceRuntimeException("We couldn't parse the date value of " + value + " that you passed in with " + nodeName + ". Date values should match the pattern of yyyy-MM-dd'T'HH:mm:ss.");
+                                }
+                            } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                try {
+                                    row.addValue(analysisItem.getKey(), Double.parseDouble(value));
+                                } catch (NumberFormatException e) {
+                                    throw new ServiceRuntimeException("We couldn't parse the numeric value of " + value + " that you passed in with " + nodeName + ".");
+                                }
+                            } else {
+                                row.addValue(analysisItem.getKey(), value);
+                            }
                         }
                     }
                 }
