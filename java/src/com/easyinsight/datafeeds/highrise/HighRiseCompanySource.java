@@ -122,10 +122,11 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     String responsiblePartyName = highriseCache.getUserName(personId);
                     row.addValue(OWNER, responsiblePartyName);
 
-                    List<String> tagList = highriseCache.getCompanyTagMap().get(id);
-                    if (tagList != null) {
+                    Nodes tagNodes = companyNode.query("tags/tag/name/text()");
+                    if (tagNodes.size() > 0) {
                         StringBuilder tagBuilder = new StringBuilder();
-                        for (String tag : tagList) {
+                        for (int j = 0; j < tagNodes.size(); j++) {
+                            String tag = tagNodes.get(j).getValue();
                             tagBuilder.append(tag).append(",");
                         }
                         String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
