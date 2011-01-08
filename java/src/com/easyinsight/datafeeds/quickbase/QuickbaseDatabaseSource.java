@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.quickbase;
 
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -21,6 +22,11 @@ import java.util.List;
 public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
     private String databaseID;
+
+    @Override
+    public int getDataSourceType() {
+        return DataSourceInfo.LIVE;
+    }
 
     @Override
     public void customStorage(Connection conn) throws SQLException {

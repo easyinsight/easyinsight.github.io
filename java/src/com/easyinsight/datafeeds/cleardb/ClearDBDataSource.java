@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.cleardb;
 
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -20,6 +21,11 @@ import java.util.List;
 public class ClearDBDataSource extends ServerDataSourceDefinition {
 
     private String tableName;
+
+    @Override
+    public int getDataSourceType() {
+        return DataSourceInfo.LIVE;
+    }
 
     public String getTableName() {
         return tableName;
