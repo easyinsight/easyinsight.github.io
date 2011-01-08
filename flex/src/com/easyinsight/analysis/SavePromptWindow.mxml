@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var prompt:String;
+
+        private function save():void {
+            dispatchEvent(new PromptEvent(PromptEvent.PROMPT_SAVE));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function discard():void {
+            dispatchEvent(new PromptEvent(PromptEvent.PROMPT_DISCARD));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            dispatchEvent(new PromptEvent(PromptEvent.PROMPT_CANCEL));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:VBox>
+        <mx:Label text="{prompt}" fontSize="14"/>
+        <mx:HBox>
+            <mx:Button label="Save" styleName="grayButton" fontSize="14" click="save()"/>
+            <mx:Button label="Discard Changes" styleName="grayButton" fontSize="14" click="discard()"/>
+            <mx:Button label="Cancel" styleName="grayButton" fontSize="14" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

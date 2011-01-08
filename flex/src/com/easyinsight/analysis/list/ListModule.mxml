@@ -292,6 +292,9 @@
         private var firstLoad:Boolean = true;
 
         private function globalListeners():void {
+            dataGrid.setStyle("borderThickness", 1);
+            dataGrid.setStyle("borderStyle", "solid");
+            dataGrid.setStyle("borderColor", 0xB7BABC);
             addEventListener(KeyboardEvent.KEY_DOWN, stageKeyDown);
         }
 
@@ -337,8 +340,6 @@
             var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
             if (newItem.isAnalysisItem()) {
                 var targetGrid:AdvancedDataGrid = AdvancedDataGrid(event.currentTarget);
-                dataGrid.setStyle("borderThickness", 1);
-                dataGrid.setStyle("borderStyle", "solid");
                 dataGrid.setStyle("borderColor", "green");
                 DragManager.acceptDragDrop(targetGrid);
             }
@@ -349,7 +350,6 @@
             var newItem:AnalysisItemWrapper = event.dragSource.dataForFormat("treeDataGridItems")[0];
             if (newItem.isAnalysisItem()) {
                 var targetGrid:AdvancedDataGrid = AdvancedDataGrid(event.currentTarget);
-                dataGrid.setStyle("borderStyle", "inset");
                 dataGrid.setStyle("borderColor", 0xB7BABC);
                 dispatchEvent(new ReportRendererEvent(ReportRendererEvent.ADD_ITEM, newItem.analysisItem));
             }
@@ -360,7 +360,6 @@
         }
 
         protected function dragExitHandler(event:DragEvent):void {
-            dataGrid.setStyle("borderStyle", "inset");
             dataGrid.setStyle("borderColor", 0xB7BABC);
         }
 
