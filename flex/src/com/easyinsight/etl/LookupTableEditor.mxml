@@ -228,7 +228,7 @@
         }
 
         private function cancel():void {
-            dispatchEvent(new AnalysisCloseEvent(this));
+            dispatchEvent(new AnalysisCloseEvent());
         }
 
         [Bindable]
