@@ -109,6 +109,27 @@
         <load-on-startup>4</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>Commit</servlet-name>
+        <display-name>Commit</display-name>
+        <servlet-class>com.easyinsight.api.v3.CommitServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BeginTransaction</servlet-name>
+        <display-name>BeginTransaction</display-name>
+        <servlet-class>com.easyinsight.api.v3.BeginTransactionServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>LoadRows</servlet-name>
+        <display-name>LoadRows</display-name>
+        <servlet-class>com.easyinsight.api.v3.LoadRowsServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
     <!-- MessageBroker Servlet -->
     <servlet>
         <servlet-name>MessageBrokerServlet</servlet-name>
@@ -178,6 +199,21 @@
     <servlet-mapping>
         <servlet-name>UpdateRows</servlet-name>
         <url-pattern>/xml/updateRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BeginTransaction</servlet-name>
+        <url-pattern>/xml/beginTransaction</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Commit</servlet-name>
+        <url-pattern>/xml/commit</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>LoadRows</servlet-name>
+        <url-pattern>/xml/loadRows</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

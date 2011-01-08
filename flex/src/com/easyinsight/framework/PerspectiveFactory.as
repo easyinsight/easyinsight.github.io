@@ -2,21 +2,18 @@ package com.easyinsight.framework {
 import com.easyinsight.DataAnalysisContainer;
 import com.easyinsight.account.AccountBasePage;
 import com.easyinsight.account.AccountSetupWizard;
-import com.easyinsight.account.NewFreeUserWelcome;
-import com.easyinsight.customupload.api.APIPage;
+import com.easyinsight.account.Help;
 import com.easyinsight.dashboard.DashboardEditor;
 import com.easyinsight.dashboard.DashboardView;
 import com.easyinsight.etl.LookupTableEditor;
 import com.easyinsight.feedassembly.NewCompositeFeedWorkspace;
-import com.easyinsight.genredata.GenreDataProvider;
+import com.easyinsight.genredata.Exchange;
 import com.easyinsight.groups.GroupsSummary;
 import com.easyinsight.listing.MyData;
 import com.easyinsight.listing.SimpleIntro;
-import com.easyinsight.report.MultiReportView;
-import com.easyinsight.report.MultiScreenView;
 import com.easyinsight.report.ReportView;
 import com.easyinsight.schedule.ScheduleManagement;
-import com.easyinsight.scorecard.LoggedInHome;
+import com.easyinsight.scorecard.ScorecardHome;
 import com.easyinsight.solutions.PostInstallPage;
 import com.easyinsight.solutions.RevisedSolutionSummary;
 
@@ -32,9 +29,6 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.REPORT_VIEW:
                 perspective = new DirectUIComponent(new ReportView());
-                break;
-            case PerspectiveInfo.MULTI_REPORT_VIEW:
-                perspective = new DirectUIComponent(new MultiReportView());
                 break;
             case PerspectiveInfo.SPREADSHEET_WIZARD:
                 perspective = new ModuleUIComponent("SpreadsheetWizard", "Loading the wizard to process your spreadsheet...");
@@ -60,14 +54,11 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.LOOKUP_TABLE:
                 perspective = new DirectUIComponent(new LookupTableEditor());
                 break;
-            case PerspectiveInfo.MULTI_SCREEN_VIEW:
-                perspective = new DirectUIComponent(new MultiScreenView());
-                break;
             case PerspectiveInfo.HOME_PAGE:
                 perspective = new DirectUIComponent(new SimpleIntro());
                 break;
             case PerspectiveInfo.SCORECARDS:
-                perspective = new DirectUIComponent(new LoggedInHome());
+                perspective = new DirectUIComponent(new ScorecardHome());
                 break;
             case PerspectiveInfo.MY_DATA:
                 perspective = new DirectUIComponent(new MyData());
@@ -75,14 +66,14 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.GROUPS:
                 perspective = new DirectUIComponent(new GroupsSummary());
                 break;
-            case PerspectiveInfo.API:
+            /*case PerspectiveInfo.API:
                 perspective = new DirectUIComponent(new APIPage());
-                break;
+                break;*/
             case PerspectiveInfo.EXCHANGE:
-                perspective = new DirectUIComponent(new GenreDataProvider());
+                perspective = new DirectUIComponent(new Exchange());
                 break;
             case PerspectiveInfo.HELP:
-                perspective = new DirectUIComponent(new NewFreeUserWelcome());
+                perspective = new DirectUIComponent(new Help());
                 break;
             case PerspectiveInfo.ACCOUNT:
                 perspective = new DirectUIComponent(new AccountBasePage());

@@ -18,7 +18,6 @@ public class User extends EventDispatcher
     static private var _user:User;
     static private var notifier:UserEventNotifier;
     static private var sharedObject:SharedObject;
-    public var commercialEnabled:Boolean;
     public var spaceAllowed:int;
     public var nonCookieLogin:Boolean;
     private var _userName:String;
@@ -40,6 +39,8 @@ public class User extends EventDispatcher
     public var applicationSkin:ApplicationSkinTO;
     private var _guestUser:Boolean;
     public var scenario:Scenario;
+    public var apiKey:String;
+    public var apiSecretKey:String;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -110,7 +111,9 @@ public class User extends EventDispatcher
         _user.defaultReportSharing = response.defaultReportSharing;
         _user.scenario = response.scenario;
         _user.currencySymbol = response.currencySymbol;
-        _user.applicationSkin = response.applicationSkin;        
+        _user.applicationSkin = response.applicationSkin;
+        _user.apiKey = response.apiKey;
+        _user.apiSecretKey = response.apiSecretKey;
         _user.guestUser = response.guestUser;
         if (response.uiSettings != null) {
             _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);

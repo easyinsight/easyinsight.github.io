@@ -41,6 +41,7 @@ import mx.collections.ArrayCollection;
         public static const MAP_AFRICA:int = 28;
         public static const GANTT:int = 29;
         public static const FORM:int = 30;
+        public static const STACKED_COLUMN:int = 31;
 
 		public var dataFeedID:int;
         public var urlKey:String;

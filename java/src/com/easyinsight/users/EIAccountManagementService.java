@@ -207,8 +207,8 @@ public class EIAccountManagementService {
                             user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(), !account.isUpgraded(),
                             !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
-                            account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
-                    // FlexContext.getFlexSession().getRemoteCredentials();
+                            account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()),
+                            account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey());
                 } else {
                     userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                 }

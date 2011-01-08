@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="*" xmlns:listing="com.easyinsight.listing.*"
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
          width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="0" verticalAlign="middle"
         creationComplete="setup()" height="68">
     <mx:Metadata>
@@ -106,10 +106,6 @@
         private var accountIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/headericons/application_enterprise.png")]
-        private var apiIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/headericons/help.png")]
         private var helpIcon:Class;
 
@@ -150,7 +146,7 @@
         private function createState(config:UIConfiguration):void {
             currentState = "";
             var ops:Array = [];
-            evaluate(apiListingOption, UIConfiguration.SHOW_APIS, config, ops);
+            //evaluate(apiListingOption, UIConfiguration.SHOW_APIS, config, ops);
             evaluate(accountsOption, UIConfiguration.SHOW_ACCOUNT, config, ops);
             evaluate(myDataOption, UIConfiguration.SHOW_MY_DATA, config, ops);
             evaluate(connectionsOption, UIConfiguration.SHOW_CONNECTIONS, config, ops);
@@ -211,10 +207,10 @@
         <mx:Image source="{groupsIcon}" id="groupsImage"/>
         <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.API}" displayName="Developers" listingChange="onListingChange(event)" id="apiListingOption" width="85">
+    <!--<listing:ListingOption perspectiveClass="{PerspectiveInfo.API}" displayName="Developers" listingChange="onListingChange(event)" id="apiListingOption" width="85">
         <mx:Image source="{apiIcon}" id="apiImage"/>
         <mx:Label text="Developers" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
+    </listing:ListingOption>-->
     <listing:ListingOption perspectiveClass="{PerspectiveInfo.ACCOUNT}" displayName="Accounts" listingChange="onListingChange(event)"
             id="accountsOption" width="85">
         <mx:Image source="{accountIcon}" id="accountImage"/>

@@ -235,6 +235,7 @@ public class PseudoContextWindow extends VBox {
 
     private function onDrill(event:DrillThroughEvent):void {
         var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
+        filterDefinition.singleValue = true;
         filterDefinition.field = analysisDefinition.getCoreAnalysisItem(analysisItem);
         filterDefinition.filteredValues = new ArrayCollection([analysisDefinition.getValue(analysisItem, data)]);
         filterDefinition.enabled = true;

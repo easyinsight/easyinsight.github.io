@@ -38,7 +38,7 @@
 
         private function applied():void {
             User.getInstance().changeSettings(Persona(setupData.personas.getItemAt(setupData.myPersona)).uiSettings);
-            dispatchEvent(new AnalysisCloseEvent(this));
+            dispatchEvent(new AnalysisCloseEvent());
         }
 
         public function gotFocus():void {

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
                       xmlns:filtering="com.easyinsight.filtering.*"
                       xmlns:datasources="com.easyinsight.datasources.*"
                       xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
@@ -17,7 +17,6 @@
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.AnalysisItemOverride;
         import com.easyinsight.analysis.AnalysisItemOverrideEvent;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
@@ -493,7 +492,7 @@
         }
 
         private function close():void {
-            dispatchEvent(new AnalysisCloseEvent(this));
+            dispatchEvent(new AnalysisCloseEvent());
         }
 
         private function toFullScreen():void {
@@ -605,11 +604,11 @@
 
         private function toExchange(event:MouseEvent):void {
             var props:Object = new Object();
-            dispatchEvent(new AnalysisCloseEvent(this, null, "Exchange", props));
+            dispatchEvent(new AnalysisCloseEvent());
         }
 
         private function toMyData(event:MouseEvent):void {
-            dispatchEvent(new AnalysisCloseEvent(this));
+            dispatchEvent(new AnalysisCloseEvent());
         }
 
         override protected function createChildren():void {

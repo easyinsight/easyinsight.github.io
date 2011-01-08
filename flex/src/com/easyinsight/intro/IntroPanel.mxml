@@ -32,6 +32,6 @@
 
 
     <mx:VBox width="100%" height="100%" horizontalAlign="center" backgroundColor="#818285" id="coreBox">
-        <scorecard:LoggedInHome id="loggedInHome"/>
+        <scorecard:ScorecardHome id="loggedInHome"/>
     </mx:VBox>
 </mx:VBox>

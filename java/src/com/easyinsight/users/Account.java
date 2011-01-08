@@ -85,7 +85,7 @@ public class Account {
     private int maxUsers;
 
     @Column(name="api_enabled")
-    private boolean apiEnabled;
+    private boolean apiEnabled = true;
 
     @Column(name="name")
     private String name;

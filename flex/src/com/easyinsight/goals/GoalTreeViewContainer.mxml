@@ -156,7 +156,7 @@
 
         private function close():void {
 
-            dispatchEvent(new AnalysisCloseEvent(this));
+            dispatchEvent(new AnalysisCloseEvent());
         }
 
         public function getContainer():Container {

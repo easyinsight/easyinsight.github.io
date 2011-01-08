@@ -143,6 +143,7 @@ public class StandardContextWindow {
     private function onDrill(event:DrillThroughEvent):void {
         var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
         filterDefinition.field = analysisItem;
+        filterDefinition.singleValue = true;
         filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
         filterDefinition.enabled = true;
         filterDefinition.inclusive = true;

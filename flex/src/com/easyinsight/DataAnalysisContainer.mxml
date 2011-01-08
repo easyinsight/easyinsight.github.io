@@ -6,27 +6,8 @@
                       xmlns:filtering="com.easyinsight.filtering.*"
                       doubleClickEnabled="true"
                       implements="com.easyinsight.listing.IPerspective" xmlns:skin="com.easyinsight.skin.*" applyCenterScreenLogic="false">
-    <skin:states>
-        <mx:State name="NotLoggedIn">
-            <mx:RemoveChild target="{saveButton}"/>
-            <mx:RemoveChild target="{saveAsButton}"/>
-        </mx:State>
-        <mx:State name="Professional">
-
-        </mx:State>
-        <mx:State name="Group" basedOn="Professional">
-
-        </mx:State>
-        <mx:State name="Individual" basedOn="Group">
-            <!--<mx:RemoveChild target="{createFeedButton}"/>-->
-        </mx:State>
-        <mx:State name="Free" basedOn="Individual">
-
-        </mx:State>
-    </skin:states>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.account.Account;
         import com.easyinsight.analysis.AddedItemUpdateEvent;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisItemCopyEvent;
@@ -45,17 +26,17 @@
 
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ImprovedSaveWindow;
+        import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
+        import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.InvalidFieldsEvent;
-        import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.preferences.UIConfiguration;
-        import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.ErrorReportView;
@@ -77,15 +58,12 @@
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.controls.Alert;
-        import mx.events.CloseEvent;
 
         import com.easyinsight.commands.CommandProcessor;
-        import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.DataService;
         import com.easyinsight.analysis.SavedAnalysisEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
-        import com.easyinsight.feedassembly.CompositeFeedCreatedEvent;
 
         import mx.managers.PopUpManager;
 
@@ -212,8 +190,6 @@
             var dataViewFactory:DataViewFactory = controller.createDataView();
             dataViewFactory.availableFields = wrappers;
             if (dataView != null) {
-                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
-                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
                 dataView.removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 dataView.removeEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
                 dataControlVBox.removeChild(dataView);
@@ -231,8 +207,6 @@
             }
             dataView = dataViewFactory;
             dataView.dataSourceID = dataSourceID;
-            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
-            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             dataView.addEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
 
@@ -301,59 +275,18 @@
             _reportID = val;
         }
 
-        public function openAnalysis(analysisDefinition:AnalysisDefinition):void {
-            BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
-            this.analysisDefinition = analysisDefinition;
-
-            //analysisPolicy = analysisDefinition.policy;
-        }
-
-        private function onLogin(event:LoginEvent):void {
-            setState();
-            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
-        }
-
-        private function setState():void {
-            switch (User.getInstance().getAccountType()) {
-                case Account.PREMIUM:
-                    currentState = "Professional";
-                    break;
-                case Account.PRO:
-                    currentState = "Group";
-                    break;
-                case Account.BASIC:
-                case Account.PLUS:
-                    currentState = "Individual";
-                    break;
-                case Account.PERSONAL:
-                    currentState = "Free";
-                    break;
-            }
-        }
-
         private function goAdmin():void {
             if (analysisChanged) {
-                Alert.show("You have unsaved changes. Are you sure you want to go to data source administration?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
+                createPromptWindow("You have unsaved changes to this report.", function():void {
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
+                });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
-            }
-        }
-
-        private function adminAlertListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID})));
             }
         }
 
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             try {
-                if (User.getInstance() == null) {
-                    currentState = "NotLoggedIn";
-                    User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
-                } else {
-                    setState();
-                }
 
                 dataSourceID = feedMetadata.dataFeedID;
                 this.feedMetadata = feedMetadata;
@@ -437,7 +370,6 @@
                 }
                 dataView.availableFields = wrappers;
                 loading = false;
-                stopLoading(null);
             } catch(e:Error) {
                 var errorWindow:ErrorReportView = new ErrorReportView();
                 errorWindow.error = e;
@@ -465,17 +397,6 @@
             } else {
                 return ObjectUtil.stringCompare(wrapper1.displayName, wrapper2.displayName, true);
             }
-        }
-
-        public function deleteItem(item:AnalysisItem):void {
-            var index:int = 0;
-            for each (var wrapper:AnalysisItemWrapper in availableFields) {
-                if (wrapper.analysisItem.analysisItemID == item.analysisItemID) {
-                    break;
-                }
-                index++;
-            }
-            availableFields.removeItemAt(index);
         }
 
         public function getAnalysisItems():ArrayCollection {
@@ -524,8 +445,6 @@
                 //stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
                 addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
                 addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-                dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
-                dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
                 dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                 try {
@@ -537,7 +456,6 @@
                     }
                 } catch(e:Error) {
                 }
-                startLoading(null);
                 if (_reportID > 0) {
                     ProgressAlert.alert(this, "Retrieving the report...", null, analysisService.openAnalysisDefinition);
                     analysisService.openAnalysisDefinition.send(_reportID);
@@ -550,24 +468,6 @@
                 PopUpManager.addPopUp(errorWindow, this, true);
                 PopUpUtil.centerPopUp(errorWindow);
             }
-        }
-
-        private function hideHints():void {
-            try {
-                User.getSharedObject().data["reportHints"] = "n";
-                User.getSharedObject().flush();
-            } catch(e:Error) {
-            }
-            fieldIndex = 0;
-        }
-
-        private function restoreHints(event:Event):void {
-            try {
-                User.getSharedObject().data["reportHints"] = "y";
-                User.getSharedObject().flush();
-            } catch(e:Error) {
-            }
-            fieldIndex = 1;
         }
 
         private function uiConfig():void {
@@ -672,12 +572,6 @@
             return transformContainer.getFilterDefinitions().toArray();
         }
 
-        private function compositeFeedCreated(event:CompositeFeedCreatedEvent):void {
-            dataService.dataFeedID = event.compositeFeedID;
-            analysisDefinition.dataFeedID = event.compositeFeedID;
-            dataService.reloadInitialContent(this, onMetadataReceipt);
-        }
-
         private function exclude():void {
             var filterRawData:FilterRawData = dataView.createFilterRawData();
             if (filterRawData.keys == null || filterRawData.keys.length == 0) {
@@ -691,11 +585,14 @@
             dataView.retrieveData();
         }
 
-        private function save():void {
-
+        private function save(closeAfterSave:Boolean = false, saveHandler:Function = null):void {
             dataView.updateExportMetadata();
             var window:ImprovedSaveWindow = new ImprovedSaveWindow();
-            window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saved);
+            if (saveHandler == null) {
+                saveHandler = saved;
+            }
+            window.closeAfterSave = closeAfterSave;
+            window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saveHandler, false, 0, true);
             window.coreView = dataView.getCoreView();
             window.report = analysisDefinition;
             window.originConnection = originSolution;
@@ -739,17 +636,6 @@
             this.analysisChanged = false;
         }
 
-        private function startLoading(event:DataServiceLoadingEvent):void {
-        }
-
-        private function stopLoading(event:DataServiceLoadingEvent):void {
-        }
-
-        protected function geticon(item:Object):Class {
-            return item["icon"];
-        }
-
-
         private function undo():void {
             commandProcessor.undo();
         }
@@ -767,16 +653,12 @@
             removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             reportMetadataTab.cleanup();
             if (dataService != null) {
-                dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
-                dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
                 dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             }
             if (transformContainer != null) {
                 transformContainer.removeEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             }
             if (dataView != null) {
-                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
-                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
                 dataView.removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 dataView.removeEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
                 dataView.cleanup();
@@ -785,17 +667,27 @@
 
         private function close():void {
             if (analysisChanged) {
-                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                createPromptWindow("You have unsaved changes to this report.", function():void {
+                    dispatchEvent(new AnalysisCloseEvent());
+                });
             } else {
-                dispatchEvent(new AnalysisCloseEvent(this));
+                dispatchEvent(new AnalysisCloseEvent());
             }
         }
 
-        private function alertListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalysisCloseEvent(this));
-            }
+        private function createPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.prompt = prompt;
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                save(true, function(event:SavedAnalysisEvent):void {
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
+                doneHandler.call();
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
 
@@ -847,11 +739,6 @@
             canMultiViewAnalysis = userCapabilities.reportingAvailable;
         }
 
-        private function subscribedToFeed():void {
-            canSubscribeToFeed = false;
-            Alert.show("This data source will now show in your My Data page.");
-        }
-
 
         private function onItemDoubleClick(event:FieldDoubleClickEvent):void {
             var field:AnalysisItemWrapper = event.analysisItem;
@@ -884,60 +771,31 @@
             return AnalysisItemTypeRenderer.getImageClass(wrapper);
         }
 
-        private function toReports():void {
-            if (analysisChanged) {
-                Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, multiReportAlertListener, null, Alert.CANCEL);
-            } else {
-                dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(dataSourceID)));
-            }
-        }
-
-        private function multiReportAlertListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(dataSourceID)));
-            }
-        }
-
         private function goReport():void {
-            if (analysisDefinition.analysisID == 0) {
-                Alert.show("You need to save this report first.");
-            } else if (analysisChanged) {
-                Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, goReportListener, null, Alert.CANCEL);
+            if (analysisChanged) {
+                createPromptWindow("You have unsaved changes to this report.", function():void {
+                    reportView();
+                });
             } else {
-                var report:InsightDescriptor = new InsightDescriptor();
-                report.dataFeedID = dataSourceID;
-                report.id = analysisDefinition.analysisID;
-                report.name = analysisDefinition.name;
-                report.reportType = analysisDefinition.reportType;
-                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(report)));
+                reportView();
             }
         }
 
-        private function goReportListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var report:InsightDescriptor = new InsightDescriptor();
-                report.dataFeedID = dataSourceID;
-                report.id = analysisDefinition.analysisID;
-                report.name = analysisDefinition.name;
-                report.reportType = analysisDefinition.reportType;
-                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(report)));
-            }
+        private function reportView():void {
+            var report:InsightDescriptor = new InsightDescriptor();
+            report.dataFeedID = dataSourceID;
+            report.id = analysisDefinition.analysisID;
+            report.name = analysisDefinition.name;
+            report.reportType = analysisDefinition.reportType;
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(report)));
         }
-
 
         private function newReport():void {
             if (analysisChanged) {
-                Alert.show("You have unsaved changes. Are you sure you want to create a new report?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, newReportListener, null, Alert.CANCEL);
+                createPromptWindow("You have unsaved changes to this report.", function():void {
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
+                });
             } else {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
-            }
-        }
-
-        private function newReportListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
                 dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceID)));
             }
         }
@@ -1007,9 +865,6 @@
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
                        icon="@Embed(source='../../../assets/table.png')" click="newReport()"/>
-            <mx:Button id="reportsButton" icon="@Embed(source='../../../assets/tables_x16.png')" click="toReports()"
-                       toolTip="View All Reports for Data Source"
-                       enabled="{!_previewMode &amp;&amp; canMultiViewAnalysis}"/>
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"

@@ -39,6 +39,8 @@ public class UserServiceResponse {
     private String currencySymbol;
     private ApplicationSkin applicationSkin;
     private int firstDayOfWeek;
+    private String apiKey;
+    private String apiSecretKey;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -51,7 +53,8 @@ public class UserServiceResponse {
                                UISettings uiSettings, String firstName, boolean freeUpgradePossible,
                                boolean firstLogin, Date lastLoginDate, String accountName,
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
-                               boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek) {
+                               boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
+                               String apiKey, String apiSecretKey) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -77,6 +80,24 @@ public class UserServiceResponse {
         this.currencySymbol = currencySymbol;
         this.applicationSkin = applicationSkin;
         this.firstDayOfWeek = firstDayOfWeek;
+        this.apiKey = apiKey;
+        this.apiSecretKey = apiSecretKey;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public String getApiSecretKey() {
+        return apiSecretKey;
+    }
+
+    public void setApiSecretKey(String apiSecretKey) {
+        this.apiSecretKey = apiSecretKey;
     }
 
     public int getFirstDayOfWeek() {

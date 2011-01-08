@@ -36,13 +36,13 @@
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
                         Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new AnalysisCloseEvent(this));
+                dispatchEvent(new AnalysisCloseEvent());
             }
         }
 
         private function alertListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalysisCloseEvent(this));
+                dispatchEvent(new AnalysisCloseEvent());
             }
         }
 

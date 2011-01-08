@@ -36,6 +36,8 @@ public class UserServiceResponse
     public var password:String;
     public var currencySymbol:String;
     public var applicationSkin:ApplicationSkinTO;
+    public var apiKey:String;
+    public var apiSecretKey:String;
 
     public function UserServiceResponse()
         {

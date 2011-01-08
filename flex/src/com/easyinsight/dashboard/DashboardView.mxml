@@ -179,7 +179,7 @@
         private var dashboard:Dashboard;
 
         private function close():void {
-            dispatchEvent(new AnalysisCloseEvent(this));
+            dispatchEvent(new AnalysisCloseEvent());
         }
 
         private function toFullScreen():void {

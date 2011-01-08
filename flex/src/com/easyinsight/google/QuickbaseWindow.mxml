@@ -5,8 +5,10 @@
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
 
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
+        import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
@@ -22,20 +24,61 @@
         private function obtainTicket():void {
             var results:Array = Validator.validateAll([userNameValidator, passwordValidator]);
             if (results.length == 0) {
-                ProgressAlert.alert(this, "Authenticating with Quickbase...", null, quickbaseService.authenticate)
-                quickbaseService.authenticate.send(userNameInput.text, passwordInput.text);
+                ProgressAlert.alert(this, "Authenticating with Quickbase...", null, quickbaseService.authenticate);
+                host = urlInput.text;
+                quickbaseService.authenticate.send(userNameInput.text, passwordInput.text, host);
             }
         }
+
+        private var sessionTicket:String;
+        private var host:String;
 
         private function authenticated():void {
             var response:QuickbaseResponse = quickbaseService.authenticate.lastResult as QuickbaseResponse;
             if (response.errorMessage != null) {
                 Alert.show(response.errorMessage);
             } else {
-                ProgressAlert.alert(this, "Creating the data source, may take a few minutes...", null, quickbaseService.createDataSource);
-                quickbaseService.createDataSource.send(response.sessionTicket);
+                sessionTicket = response.sessionTicket;
+                ProgressAlert.alert(this, "Retrieving available applications for your account...", null, quickbaseService.getApplications);
+                quickbaseService.getApplications.send(sessionTicket, host);
             }
         }
+
+        private function gotApplications():void {
+            var appNames:ArrayCollection = quickbaseService.getApplications.lastResult as ArrayCollection;
+            apps = new ArrayCollection();
+            for each (var appName:String in appNames) {
+                var qbApp:QuickbaseApplication = new QuickbaseApplication();
+                qbApp.name = appName;
+                apps.addItem(qbApp);
+            }
+            index = 1;
+        }
+
+        private function create():void {
+            var targetApps:ArrayCollection = new ArrayCollection();
+            for each (var qbApp:QuickbaseApplication in apps) {
+                if (qbApp.selected) {
+                    targetApps.addItem(qbApp.name);
+                }
+            }
+            if (targetApps.length == 0) {
+                Alert.show("You need to select at least one application from the list to create the data source.");
+                return;
+            }
+            if (appTokenInput.text == "") {
+                Alert.show("You need to specify an application token with access to the applications you've selected.");
+                return;
+            }
+            ProgressAlert.alert(this, "Creating the data source, may take a few minutes...", null, quickbaseService.createDataSource);
+            quickbaseService.createDataSource.send(sessionTicket, appTokenInput.text, targetApps, host);
+        }
+
+        [Bindable]
+        private var apps:ArrayCollection;
+
+        [Bindable]
+        private var index:int;
 
         private function createdDataSource():void {
             var descriptor:EIDescriptor = quickbaseService.createDataSource.lastResult as EIDescriptor;
@@ -46,21 +89,42 @@
     <mx:RemoteObject destination="google" id="quickbaseService">
         <mx:method name="authenticate" result="authenticated()"/>
         <mx:method name="createDataSource" result="createdDataSource()"/>
+        <mx:method name="getApplications" result="gotApplications()"/>
     </mx:RemoteObject>
-    <mx:VBox>
-        <mx:Form>
-            <mx:FormItem label="Quickbase User Name:">
-                <mx:TextInput id="userNameInput"/>
-            </mx:FormItem>
-            <mx:FormItem label="Quickbase Password:">
-                <mx:TextInput id="passwordInput" displayAsPassword="true"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Create" click="obtainTicket()" styleName="grayButton"/>
-            <mx:LinkButton label="Cancel" click="PopUpManager.removePopUp(this)" textDecoration="underline"/>
-        </mx:HBox>
-    </mx:VBox>
+    <mx:ViewStack selectedIndex="{index}" resizeToContent="true">
+        <mx:VBox>
+            <mx:Form>
+                <mx:FormItem label="Quickbase User Name:">
+                    <mx:TextInput id="userNameInput" width="400"/>
+                </mx:FormItem>
+                <mx:FormItem label="Quickbase Password:">
+                    <mx:TextInput id="passwordInput" displayAsPassword="true" width="400"/>
+                </mx:FormItem>
+                <mx:FormItem label="URL of your Quickbase Account:">
+                    <mx:TextInput id="urlInput" text="www.quickbase.com" width="400"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button label="Authenticate" click="obtainTicket()" styleName="grayButton"/>
+                <mx:LinkButton label="Cancel" click="PopUpManager.removePopUp(this)" textDecoration="underline"/>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:VBox horizontalAlign="center" creationComplete="PopUpUtil.centerPopUp(this)">
+            <mx:Label text="Select one or more applications from the list below."/>
+            <mx:List dataProvider="{apps}" itemRenderer="com.easyinsight.google.QuickbaseApplicationSelector" height="300" width="100%"/>
+            <mx:TextArea width="100%" selectable="false" focusEnabled="false" editable="false" height="50" text="You'll also need to define an application token with access to all of your selected applications. You can define tokens inside of Quickbase under Customize -> Application -> Advanced Settings -> Manage Application Tokens."/>
+            <mx:Form>
+                <mx:FormItem label="Application Token:">
+                    <mx:TextInput id="appTokenInput" width="400"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button label="Create" click="create()" styleName="grayButton"/>
+                <mx:LinkButton label="Cancel" click="PopUpManager.removePopUp(this)" textDecoration="underline"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:ViewStack>
+
     <mx:StringValidator id="userNameValidator" minLength="1" source="{userNameInput}" property="text"/>
     <mx:StringValidator id="passwordValidator" minLength="1" source="{passwordInput}" property="text"/>
 </util:EISlimWindow>

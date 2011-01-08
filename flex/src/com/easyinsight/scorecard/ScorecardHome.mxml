@@ -12,15 +12,11 @@
         </mx:State>
     </skin:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.skin.ApplicationSkin;
 
         import mx.managers.BrowserManager;
         import mx.utils.URLUtil;
 
         public function gotFocus():void {
-            /*if (currentState == "noData") {
-             scorecardDisplay.gotFocus();
-             }*/
             var fragmentObject:Object = new Object();
             fragmentObject.page = "kpis";
             BrowserManager.getInstance().setTitle("Easy Insight - KPIs");

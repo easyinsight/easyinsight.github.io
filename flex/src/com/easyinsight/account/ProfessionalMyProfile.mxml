@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
-         xmlns:account="com.easyinsight.account.*" creationComplete="initProperties()"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="initProperties()"
          width="100%" height="100%" horizontalAlign="center">
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
@@ -8,8 +7,6 @@
         import mx.managers.PopUpManager;
 
         import com.easyinsight.framework.User;
-
-        import mx.collections.ArrayCollection;
 
         [Bindable]
         private var userName:String;
@@ -21,10 +18,10 @@
         private var firstName:String;
         [Bindable]
         private var lastName:String;
-
         [Bindable]
-        [Embed(source="../../../../assets/pencil.png")]
-        private var editIcon:Class;
+        private var apiKey:String;
+        [Bindable]
+        private var apiSecretKey:String;
 
         [Bindable]
         public var accountInfo:AccountInfo;
@@ -35,6 +32,8 @@
             this.firstName = User.getInstance().firstName;
             this.lastName = User.getInstance().getName();
             this.email = User.getInstance().getEmail();
+            this.apiKey = User.getInstance().apiKey;
+            this.apiSecretKey = User.getInstance().apiSecretKey;
         }
 
         private function editProfile():void {
@@ -64,23 +63,26 @@
             paddingBottom="5">
         <mx:Label text="My Profile" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
     </mx:Box>
-    <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid"
-             dropShadowEnabled="true">
-        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-        <mx:Box width="100%" backgroundColor="0xBFBFBF" horizontalAlign="center">
-            <mx:Label text="User Profile" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-            <mx:Button label="Edit Profile..." click="editProfile()"/>
-            <mx:Button label="Change Password..." click="editPassword()"/>
-        </mx:Box>
-        <mx:Form width="100%" backgroundColor="0xEEEEEE">
-            <mx:FormItem label="User Name: " fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput text="{userName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+    <mx:VBox id="userProfileBox" horizontalAlign="center">
+        <mx:HBox>
+            <mx:Button label="Edit Profile..." click="editProfile()" fontSize="14" styleName="grayButton"/>
+            <mx:Button label="Change Password..." click="editPassword()" fontSize="14" styleName="grayButton"/>
+        </mx:HBox>
+        <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="User Name:">
+                <mx:TextInput text="{userName}" editable="false"/>
             </mx:FormItem>
-            <mx:FormItem label="Full Name: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
-                <mx:TextInput text="{fullName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+            <mx:FormItem label="Full Name:" fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                <mx:TextInput text="{fullName}" editable="false"/>
             </mx:FormItem>
-            <mx:FormItem label="Email Address: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
-                <mx:TextInput text="{email}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+            <mx:FormItem label="Email Address:">
+                <mx:TextInput text="{email}" editable="false"/>
+            </mx:FormItem>
+            <mx:FormItem label="API Key:">
+                <mx:TextInput text="{apiKey}" editable="false"/>
+            </mx:FormItem>
+            <mx:FormItem label="API Secret Key:">
+                <mx:TextInput text="{apiSecretKey}" editable="false"/>
             </mx:FormItem>
         </mx:Form>
     </mx:VBox>

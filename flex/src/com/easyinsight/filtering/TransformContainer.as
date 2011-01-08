@@ -53,6 +53,8 @@ public class TransformContainer extends HBox
         this.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
         this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
+        setStyle("borderThickness", 1);
+        setStyle("borderStyle", "solid");
     }
 
     protected function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
@@ -300,16 +302,13 @@ public class TransformContainer extends HBox
             }
         }
         if (analysisItem != null) {
-            setStyle("borderThickness", 1);
-            setStyle("borderStyle", "solid");
             setStyle("borderColor", "green");
             DragManager.acceptDragDrop(event.target as TransformContainer);
         }
     }
 
     protected function dragExitHandler(event:DragEvent):void {
-        setStyle("borderThickness", 0);
-        setStyle("borderStyle", "none");
+        setStyle("borderColor", 0xFFFFFF);
         showingFeedback = false;
     }
 
@@ -341,8 +340,7 @@ public class TransformContainer extends HBox
     }
 
     protected function dragDropHandler(event:DragEvent):void {
-        setStyle("borderThickness", 0);
-        setStyle("borderStyle", "none");
+        setStyle("borderColor", 0xFFFFFF);
         showingFeedback = false;
         var analysisItem:AnalysisItem;
         if (event.dragInitiator is DataGrid) {

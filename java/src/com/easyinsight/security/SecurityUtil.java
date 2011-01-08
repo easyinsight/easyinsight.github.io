@@ -112,25 +112,9 @@ public class SecurityUtil {
                         account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
                         user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
-                        account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek());
+                        account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()),
+                        account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey());
             } else {
-                /*results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
-                if (results.size() > 0) {
-                    Account account = (Account) results.get(0);
-                    if(!Arrays.asList(Account.TRIAL, Account.ACTIVE).contains(account.getAccountState())) {
-                        return new UserServiceResponse(false, "This account is not active. Please log in to re-activate your account.");
-                    }
-                    if (user.getPersonaID() != null) {
-                        user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
-                    }
-                    userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                    user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
-                            account.isBillingInformationGiven() == null ? false : account.isBillingInformationGiven(), account.getAccountState(),
-                            user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
-                            user.isRenewalOptionAvailable(), user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser());
-                } else {
-                    
-                }*/
                 throw new SecurityException();
             }
             conn.commit();

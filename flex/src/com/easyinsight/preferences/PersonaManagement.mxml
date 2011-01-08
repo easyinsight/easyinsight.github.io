@@ -50,7 +50,7 @@
     </mx:Box>
     <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
         <mx:Box>
-            <mx:Button label="Create Persona" click="createPersona()"/>
+            <mx:Button label="Create Persona" click="createPersona()" fontSize="14" styleName="grayButton"/>
         </mx:Box>
         <mx:VBox>
             <mx:Button label="Create Persona" click="createPersona()"/>

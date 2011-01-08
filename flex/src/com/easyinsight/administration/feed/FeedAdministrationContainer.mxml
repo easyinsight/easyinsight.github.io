@@ -208,14 +208,14 @@
                         Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
             } else {
                 //     dataAnalysisContainer.cleanup();
-                dispatchEvent(new AnalysisCloseEvent(this));
+                dispatchEvent(new AnalysisCloseEvent());
             }
         }
 
         private function alertListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
                 //   dataAnalysisContainer.cleanup();
-                dispatchEvent(new AnalysisCloseEvent(this));
+                dispatchEvent(new AnalysisCloseEvent());
             }
         }
 

@@ -35,7 +35,7 @@
 
         private function welcomed():void {
             User.getInstance().setAccountType(welcomeBackInfo.accountTier);
-            dispatchEvent(new AnalysisCloseEvent(this));
+            dispatchEvent(new AnalysisCloseEvent());
         }
 
         [Bindable]
@@ -75,7 +75,7 @@
         }
 
         private function onCancel(event:Event):void {
-            dispatchEvent(new AnalysisCloseEvent(this));
+            dispatchEvent(new AnalysisCloseEvent());
         }
         ]]></mx:Script>
     <mx:RemoteObject id="userService" destination="accountAdmin">

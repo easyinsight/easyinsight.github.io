@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<skin:BackgroundImage xmlns:listing="com.easyinsight.listing.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
                       xmlns:genredata="com.easyinsight.genredata.*"
                       implements="com.easyinsight.listing.IPerspective" creationComplete="setupListeners()"
                       xmlns:skin="com.easyinsight.skin.*">

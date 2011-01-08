@@ -6,7 +6,6 @@ import com.easyinsight.goals.GoalDataAnalyzeSource;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.listing.ReportEditorAnalyzeSource;
-import com.easyinsight.report.MultiReportAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -47,10 +46,6 @@ public class ScorecardContextWindow {
             }
             if (kpi.reports != null && kpi.reports.length > 0) {
 
-                var multiReportItem:ContextMenuItem = new ContextMenuItem("View all reports for this KPI...");
-                multiReportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, multiReports);
-                items.push(multiReportItem);
-
                 for each (var report:InsightDescriptor in kpi.reports) {
                     var reportContextItem:ContextMenuItem = new ContextMenuItem(report.name);
                     reportContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, createReport(report, kpi.filters));
@@ -77,10 +72,6 @@ public class ScorecardContextWindow {
         return function(event:ContextMenuEvent):void {
             passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportAnalyzeSource(report, filters)));
         };
-    }
-
-    private function multiReports(event:ContextMenuEvent):void {
-        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new MultiReportAnalyzeSource(kpi.coreFeedID, kpi.coreFeedName)));
     }
 
     private function findReports(event:ContextMenuEvent):void {

@@ -90,7 +90,17 @@
         private function saved():void {
             _report = analysisService.saveAnalysisDefinition.lastResult as AnalysisDefinition;
             dispatchEvent(new SavedAnalysisEvent(_report));
-            stackIndex = 4;
+            if (_closeAfterSave) {
+                PopUpManager.removePopUp(this);
+            } else {
+                stackIndex = 4;
+            }
+        }
+
+        private var _closeAfterSave:Boolean = false;
+
+        public function set closeAfterSave(value:Boolean):void {
+            _closeAfterSave = value;
         }
 
         private function nextFromName():void {
@@ -182,7 +192,8 @@
 
         public function set report(value:AnalysisDefinition):void {
             _report = value;
-        }]]></mx:Script>
+        }
+        ]]></mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="saveAnalysisDefinition" result="saved()" fault="onFault(event)"/>
     </mx:RemoteObject>

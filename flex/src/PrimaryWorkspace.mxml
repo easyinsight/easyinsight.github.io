@@ -306,14 +306,10 @@
                 coreVBox.addChild(headerBar);
                 coreVBox.addChild(highBar);
                 coreVBox.addChild(coreSpace);
-                if (event.targetPerspective != null) {
-                    headerBar.explicitChange(event.targetPerspective, event.properties);
+                if (this.perspective == null) {
+                    navigation(new NavigationEvent("Home"));
                 } else {
-                    if (this.perspective == null) {
-                        navigation(new NavigationEvent("Home"));
-                    } else {
-                        this.perspective.gotFocus();
-                    }
+                    this.perspective.gotFocus();
                 }
             } catch(e:Error) {
                 Alert.show(e.message);
