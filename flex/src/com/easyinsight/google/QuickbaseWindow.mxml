@@ -16,7 +16,11 @@
         private function setup():void {
             addEventListener(KeyboardEvent.KEY_UP, function(event:KeyboardEvent):void {
                 if (event.keyCode == Keyboard.ENTER) {
-                    obtainTicket();
+                    if (index == 0) {
+                        obtainTicket();
+                    } else {
+                        create();
+                    }
                 }
             });
         }
