@@ -134,12 +134,12 @@
         </div>
     </div>
     <div class="headline">
-        <a id="productPage" href="/product.html">Features</a>
-        <a id="dataPage" href="/data.html">Connections</a>
-        <a id="solutionsPage" href="/webanalytics.html">Solutions</a>
-        <a id="customersPage" href="/customers.html">Customers</a>
-        <a id="partnersPage" href="/partners.html">Partners</a>
-        <a id="companyPage" href="/company.html">Company</a>
+        <a class="inactive" href="/product.html">Features</a>
+        <a class="inactive" href="/data.html">Connections</a>
+        <a class="inactive" href="/webanalytics.html">Solutions</a>
+        <a class="inactive" href="/customers.html">Customers</a>
+        <a class="inactive" href="/partners.html">Partners</a>
+        <a class="inactive" href="/company.html">Company</a>
     </div>
     <div id="contentHeaderStart"></div>
         <div id="midContent">
