@@ -343,27 +343,29 @@ public class GoogleDataProvider {
             for (Connection connection : connections) {
                 QuickbaseDatabaseSource source = map.get(connection.sourceDatabaseID);
                 QuickbaseDatabaseSource target = map.get(connection.targetDatabaseID);
-                Key sourceKey = null;
-                for (AnalysisItem field : source.getFields()) {
-                    Key key = field.getKey();
-                    if (key.toKeyString().split("\\.")[1].equals(connection.sourceDatabaseFieldID)) {
-                        sourceKey = key;
+                if (source != null && target != null) {
+                    Key sourceKey = null;
+                    for (AnalysisItem field : source.getFields()) {
+                        Key key = field.getKey();
+                        if (key.toKeyString().split("\\.")[1].equals(connection.sourceDatabaseFieldID)) {
+                            sourceKey = key;
+                        }
                     }
-                }
-                Key targetKey = null;
-                for (AnalysisItem field : target.getFields()) {
-                    Key key = field.getKey();
-                    if (key.toKeyString().split("\\.")[1].equals(connection.targetDatabaseFieldID)) {
-                        targetKey = key;
+                    Key targetKey = null;
+                    for (AnalysisItem field : target.getFields()) {
+                        Key key = field.getKey();
+                        if (key.toKeyString().split("\\.")[1].equals(connection.targetDatabaseFieldID)) {
+                            targetKey = key;
+                        }
                     }
+                    if (sourceKey == null) {
+                        throw new RuntimeException("Couldn't find " + connection.sourceDatabaseFieldID + " on " + source.getFeedName());
+                    }
+                    if (targetKey == null) {
+                        throw new RuntimeException("Couldn't find " + connection.targetDatabaseFieldID + " on " + target.getFeedName());
+                    }
+                    compositeFeedConnectionList.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceKey, targetKey));
                 }
-                if (sourceKey == null) {
-                    throw new RuntimeException("Couldn't find " + connection.sourceDatabaseFieldID + " on " + source.getFeedName());
-                }
-                if (targetKey == null) {
-                    throw new RuntimeException("Couldn't find " + connection.targetDatabaseFieldID + " on " + target.getFeedName());
-                }
-                compositeFeedConnectionList.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceKey, targetKey));
             }
             quickbaseCompositeSource.setConnections(compositeFeedConnectionList);
             quickbaseCompositeSource.populateFields(conn);
