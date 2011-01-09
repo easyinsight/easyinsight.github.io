@@ -297,7 +297,7 @@ public class GoogleDataProvider {
         try {
             //String applicationToken = "txxe32vjyuwicxbjpnpdwjatqb";
             String requestBody = MessageFormat.format(GET_DATABASES_XML, sessionTicket);
-            Document doc = executeRequest("www.quickbase.com", null, "API_GrantedDBs", requestBody);
+            Document doc = executeRequest(host, null, "API_GrantedDBs", requestBody);
             Nodes databases = doc.query("/qdbapi/databases/dbinfo");
             List<Connection> connections = new ArrayList<Connection>();
             QuickbaseCompositeSource quickbaseCompositeSource = new QuickbaseCompositeSource();
