@@ -359,10 +359,12 @@ public class GoogleDataProvider {
                         }
                     }
                     if (sourceKey == null) {
-                        throw new RuntimeException("Couldn't find " + connection.sourceDatabaseFieldID + " on " + source.getFeedName());
+                        continue;
+                        //throw new RuntimeException("Couldn't find " + connection.sourceDatabaseFieldID + " on " + source.getFeedName());
                     }
                     if (targetKey == null) {
-                        throw new RuntimeException("Couldn't find " + connection.targetDatabaseFieldID + " on " + target.getFeedName());
+                        continue;
+                        //throw new RuntimeException("Couldn't find " + connection.targetDatabaseFieldID + " on " + target.getFeedName());
                     }
                     compositeFeedConnectionList.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceKey, targetKey));
                 }

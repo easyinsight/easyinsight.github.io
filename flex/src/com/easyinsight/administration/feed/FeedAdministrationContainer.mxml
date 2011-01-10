@@ -84,17 +84,12 @@
             dispatchEvent(new Event("feedIDChanged"));
         }
 
-        override protected function createChildren():void {
-            super.createChildren();
-
-        }
-
         private function gotFeedDefinition():void {
             this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
             liveData = feedDefinition.isLiveData();
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             this.feedType = feedDefinition.getFeedType();
-            if (feedType == DataFeedDescriptor.COMPOSITE) {
+            if (feedType == DataFeedDescriptor.COMPOSITE || feedType == DataFeedDescriptor.CLEARDB) {
                 var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
                 var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
                 compositeWorkspace.addExistingDef(compositeFeedDefinition.compositeFeedNodes, compositeFeedDefinition.connections);

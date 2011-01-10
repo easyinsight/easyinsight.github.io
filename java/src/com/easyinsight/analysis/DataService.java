@@ -190,7 +190,7 @@ public class DataService {
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
         } catch (ReportException re) {
-            EmbeddedResults results = new EmbeddedResults();
+            EmbeddedDataResults results = new EmbeddedDataResults();
             results.setReportFault(re.getReportFault());
             return results;
         } catch (Exception e) {

@@ -10,6 +10,10 @@ import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.kpi.KPI;
+import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.scorecard.ScorecardStorage;
+import com.easyinsight.scorecard.ScorecardWrapper;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Value;
@@ -381,12 +385,18 @@ public class ExportService {
     public static String createValue(int dateFormat, AnalysisItem headerItem, Value value) {
         String valueString;
         if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
+            double doubleValue = value.toDouble();
+            if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+                doubleValue = 0.;
+            }
             FormattingConfiguration formattingConfiguration = headerItem.getFormattingConfiguration();
             if (formattingConfiguration.getFormattingType() == FormattingConfiguration.CURRENCY) {
                 NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance();
-                valueString = currencyFormatter.format(value.toDouble());
+                valueString = currencyFormatter.format(doubleValue);
             } else {
-                valueString = String.valueOf(value.toDouble());
+                NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                numberFormat.setMaximumFractionDigits(2);
+                valueString = numberFormat.format(doubleValue);
             }
         } else if (headerItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && value.type() == Value.DATE) {
             AnalysisDateDimension dateDim = new AnalysisDateDimension();
@@ -679,6 +689,9 @@ public class ExportService {
     }
 
     public static String toTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn) throws SQLException {
+        if (listDataResults.getReportFault() != null) {
+            return listDataResults.getReportFault().toString();
+        }
         PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
         dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
         ResultSet rs = dateFormatStmt.executeQuery();
@@ -719,6 +732,53 @@ public class ExportService {
                     }
                 }
             }
+            sb.append("</tr>");
+        }
+        sb.append("</table>");
+        return sb.toString();
+    }
+
+    public static String exportScorecard(long scorecardID, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws Exception {
+        SecurityUtil.authorizeScorecard(scorecardID);
+        ScorecardWrapper scorecardWrapper = new ScorecardStorage().getScorecard(scorecardID, conn, insightRequestMetadata, false);
+        Scorecard scorecard = scorecardWrapper.getScorecard();
+        StringBuilder sb = new StringBuilder();
+        String style = "style=\"font-size:12px;font-family:Verdana,serif;border-style:solid;border-width:1px;border-spacing:0\"";
+        sb.append("<table " + style + ">");
+        sb.append("<tr style=\"background-color:#EEEEEE\">");
+        sb.append("<td>KPI Name</td>");
+        sb.append("<td>Latest Value</td>");
+        sb.append("<td>Time</td>");
+        sb.append("<td>% Change</td>");
+        NumberFormat nf = NumberFormat.getNumberInstance();
+        nf.setMaximumFractionDigits(2);
+        sb.append("</tr>");
+        for (KPI kpi : scorecard.getKpis()) {
+            sb.append("<tr>");
+            sb.append("<td style=\"border-style:solid;border-width:1px\">");
+            sb.append(kpi.getName());
+            sb.append("</td>");
+            sb.append("<td style=\"border-style:solid;border-width:1px\">");
+            sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue())));
+            sb.append("</td>");
+            sb.append("<td style=\"border-style:solid;border-width:1px\";padding-left:6px>");
+            sb.append(kpi.getDayWindow());
+            sb.append(" days");
+            sb.append("</td>");
+            sb.append("<td style=\"border-style:solid;border-width:1px\">");
+            String percent;
+            if (kpi.getKpiOutcome() != null) {
+                Double percentChange = kpi.getKpiOutcome().getPercentChange();
+                if (percentChange == null || Double.isNaN(percentChange) || Double.isInfinite(percentChange)) {
+                    percent = "";
+                } else {
+                    percent = nf.format(percentChange) + "%";
+                }
+            } else {
+                percent = "";
+            }
+            sb.append(percent);
+            sb.append("</td>");
             sb.append("</tr>");
         }
         sb.append("</table>");
