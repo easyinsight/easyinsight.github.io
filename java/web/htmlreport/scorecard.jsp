@@ -36,12 +36,7 @@
                     try {
                         EIConnection conn = Database.instance().getConnection();
                         try {
-                            com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(Long.parseLong(request.getParameter("reportID")));
-                            if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
-                                WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
-                                ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
-                                out.println(ExportService.toTable(report, dataResults, conn));
-                            }
+                            out.println(ExportService.exportScorecard(Long.parseLong(request.getParameter("scorecardID")), new InsightRequestMetadata(), conn));
                         } finally {
                             Database.closeConnection(conn);
                         }

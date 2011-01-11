@@ -59,7 +59,7 @@
 	</div><!-- /content -->
 
 	<div data-role="footer">
-		<h4>Page Footer</h4>
+		<h4>Easy Insight Mobile</h4>
 	</div><!-- /footer -->
 </div><!-- /page -->
 

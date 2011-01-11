@@ -22,9 +22,9 @@
         <ul data-role="listview">
             <%
                 if (session == null) {
-                    out.println("<li>No session found</li>");
-                } else if (session.getAttribute("userName") == null) {
-                    out.println("<li>Apparently none of our data in the session</li>");
+                    response.sendRedirect("index.jsp");
+                } else if (session.getAttribute("accountID") == null) {
+                    response.sendRedirect("index.jsp");
                 } else {
                     com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
                              (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
@@ -34,7 +34,7 @@
                             out.println("<li><a href=\"reports.jsp?dataSourceID=" + dataSource.getId() + "\">" + dataSource.getName() + "</a></li>");
                         }
                         if (dataSources.size() == 0) {
-                            out.println("<li>No Data sources!</li>");
+                            out.println("<li>You haven't defined any data sources yet.</li>");
                         }
                     } finally {
                         com.easyinsight.security.SecurityUtil.clearThreadLocal();
@@ -46,7 +46,7 @@
 	</div><!-- /content -->
 
 	<div data-role="footer">
-		<h4>Page Footer</h4>
+		<h4>Easy Insight Mobile</h4>
 	</div><!-- /footer -->
 </div><!-- /page -->
 
