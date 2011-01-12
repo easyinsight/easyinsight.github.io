@@ -296,6 +296,9 @@ public class UserUploadService implements IUserUploadService {
             LogClass.error(e);
             conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
         return uploadResponse;
     }

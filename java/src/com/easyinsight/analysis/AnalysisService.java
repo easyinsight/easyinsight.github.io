@@ -134,6 +134,7 @@ public class AnalysisService {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
