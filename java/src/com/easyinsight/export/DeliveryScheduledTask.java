@@ -125,7 +125,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         analysisDefinition.updateMetadata();
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        DataResults dataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
+                        DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
                         if (dataResults instanceof ListDataResults) {
                             ListDataResults listDataResults = (ListDataResults) dataResults;
                             byte[] bytes = new ExportService().toExcelEmail(analysisDefinition, listDataResults, conn);
@@ -137,7 +137,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         analysisDefinition.updateMetadata();
                         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                         insightRequestMetadata.setUtcOffset(timezoneOffset);
-                        DataResults dataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
+                        DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
                         if (dataResults instanceof ListDataResults) {
                             ListDataResults listDataResults = (ListDataResults) dataResults;
                             String table = ExportService.toTable(analysisDefinition, listDataResults, conn);
@@ -151,7 +151,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                             analysisDefinition.updateMetadata();
                             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                             insightRequestMetadata.setUtcOffset(timezoneOffset);
-                            DataResults dataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
+                            DataResults dataResults = DataService.list(analysisDefinition, insightRequestMetadata, conn);
                             if (dataResults instanceof ListDataResults) {
                                 ListDataResults listDataResults = (ListDataResults) dataResults;
                                 byte[] bytes = new ExportService().toListPDF(analysisDefinition, listDataResults, conn);

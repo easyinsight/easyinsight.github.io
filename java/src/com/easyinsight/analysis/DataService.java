@@ -241,6 +241,67 @@ public class DataService {
         }
     }
 
+    public static DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata,
+                            EIConnection conn) {
+        try {
+            long startTime = System.currentTimeMillis();
+            Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
+            if (insightRequestMetadata == null) {
+                insightRequestMetadata = new InsightRequestMetadata();
+            }
+            DataResults results;
+
+            List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
+            if (analysisDefinition.getAddedItems() != null) {
+                allFields.addAll(analysisDefinition.getAddedItems());
+            }
+            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
+            Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
+                    validQueryItems.add(analysisItem);
+                }
+            }
+            boolean aggregateQuery = true;
+            Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+            items.remove(null);
+            for (AnalysisItem analysisItem : items) {
+                if (analysisItem.blocksDBAggregation()) {
+                    aggregateQuery = false;
+                }
+            }
+            insightRequestMetadata.setAggregateQuery(aggregateQuery);
+            Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
+            List<String> auditMessages = dataSet.getAudits();
+            auditMessages.add("At raw data source level, had " + dataSet.getRows().size() + " rows of data");
+            //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
+            Pipeline pipeline = new StandardReportPipeline();
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+            results = pipeline.toList(dataSet);
+            DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
+            if (dataSet.getLastTime() == null) {
+                dataSet.setLastTime(new Date());
+            }
+            dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+            //dataSourceInfo.setLastDataTime(dataSet.getLastTime());
+            results.setDataSourceInfo(dataSourceInfo);
+            results.setAuditMessages(auditMessages);
+            // }
+            BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
+            return results;
+        } catch (ReportException dae) {
+            ListDataResults embeddedDataResults = new ListDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e);
+            ListDataResults embeddedDataResults = new ListDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        }
+    }
+
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
