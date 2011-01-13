@@ -8,6 +8,9 @@ import com.easyinsight.listing.DataFeedDescriptor;
 	[RemoteClass(alias="com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource")]
 	public class SalesforceFeedDefinition extends ServerDataSourceDefinition
 	{
+
+    public var pin:String;
+
 		public function SalesforceFeedDefinition()
 		{
 			super();
