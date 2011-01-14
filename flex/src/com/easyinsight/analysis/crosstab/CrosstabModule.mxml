@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.analysis.IReportRenderer">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:crosstab="com.easyinsight.analysis.crosstab.*" width="100%"
+           height="100%" implements="com.easyinsight.analysis.IReportRenderer">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
