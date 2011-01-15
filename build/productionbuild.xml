@@ -388,7 +388,7 @@
 
     <target name="modules1" depends="report.area3dchart, report.areachart, report.bar3dchart, report.barchart, report.bubblechart"/>
     <target name="modules2" depends="report.column3dchart, report.columnchart, report.linechart, report.line3dchart, report.list"/>
-    <target name="modules3" depends="report.pie3dchart, report.piechart, report.plotchart"/>
+    <target name="modules3" depends="report.pie3dchart, report.piechart, report.plotchart, report.stackedbarchart, report.stackedcolumnchart"/>
     <target name="modules4" depends="report.gauge, report.crosstab, report.tree, report.treemap"/>
     <target name="modules5" depends="report.worldmap, report.usmap, report.americasmap, report.asiamap, report.europemap, report.middleeastmap"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.kpitreeadmin, perspective.groupdetail"/>
@@ -502,6 +502,14 @@
 
     <target name="report.bubblechart">
         <buildSWF mainMXML="com/easyinsight/analysis/charts/bubble/BubbleChartModule.mxml" swfName="BubbleChartModule" buildFile="modules/bubble-chart-module.xml"/>
+    </target>
+
+    <target name="report.stackedcolumnchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/xaxisbased/column/StackedColumnChartModule.mxml" swfName="StackedColumnChartModule" buildFile="modules/stacked-column-chart-module.xml"/>
+    </target>
+
+    <target name="report.stackedbarchart">
+        <buildSWF mainMXML="com/easyinsight/analysis/charts/yaxisbased/bar/StackedBarChartModule.mxml" swfName="StackedBarChartModule" buildFile="modules/stacked-bar-chart-module.xml"/>
     </target>
 
     <target name="report.plotchart">

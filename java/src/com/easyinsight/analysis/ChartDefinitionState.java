@@ -127,6 +127,10 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
                 wsChartDefinition = new WSColumnChartDefinition();
                 wsChartDefinition.setReportType(WSAnalysisDefinition.COLUMN);
                 break;
+            case ChartDefinitionState.COLUMN_2D_STACKED:
+                wsChartDefinition = new WSStackedColumnChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.STACKED_COLUMN);
+                break;
             case ChartDefinitionState.COLUMN_3D:
                 wsChartDefinition = new WS3DColumnChartDefinition();
                 wsChartDefinition.setReportType(WSAnalysisDefinition.COLUMN3D);
@@ -134,6 +138,10 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
             case ChartDefinitionState.BAR_2D:
                 wsChartDefinition = new WSBarChartDefinition();
                 wsChartDefinition.setReportType(WSAnalysisDefinition.BAR);
+                break;
+            case ChartDefinitionState.BAR_2D_STACKED:
+                wsChartDefinition = new WSStackedBarChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.STACKED_BAR);
                 break;
             case ChartDefinitionState.BAR_3D:
                 wsChartDefinition = new WS3DBarChartDefinition();

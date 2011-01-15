@@ -1,0 +1,348 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
+           implements="com.easyinsight.analysis.IReportRenderer"
+           width="100%" height="100%">
+    <mx:Style>
+        .axisTitles {
+            fontSize: 14;
+            fontFamily: "Tahoma";
+        }
+
+        CartesianChart {
+            axisTitleStyleName:axisTitles;
+            fontFamily: "Tahoma";
+            fontSize: 14;
+        }
+    </mx:Style>
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+
+
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.ChartDefinition;
+
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.FillProvider;
+        import com.easyinsight.analysis.SortFunctionFactory;
+
+
+        import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
+
+
+        import mx.binding.utils.BindingUtils;
+
+        import mx.charts.BarChart;
+        import mx.charts.CategoryAxis;
+        import mx.charts.ChartItem;
+        import mx.charts.ColumnChart;
+        import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.IAxis;
+        import mx.charts.chartClasses.Series;
+        import mx.charts.events.ChartItemEvent;
+        import mx.charts.series.BarSeries;
+        import mx.charts.series.BarSet;
+        import mx.charts.series.ColumnSeries;
+        import mx.charts.series.ColumnSet;
+        import mx.charts.series.items.BarSeriesItem;
+        import mx.charts.series.items.ColumnSeriesItem;
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.controls.Alert;
+        import mx.events.FlexEvent;
+        import mx.formatters.Formatter;
+        import mx.graphics.BitmapFill;
+        import mx.graphics.IFill;
+        import mx.graphics.SolidColor;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var graphData:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
+        private var xAxisTitle:String = "";
+
+        [Bindable]
+        private var yAxisTitle:String = "";
+
+        [Bindable]
+        private var xAxisItem:AnalysisItem;
+        [Bindable]
+        private var yAxisItem:AnalysisItem;
+
+        private var xField:String;
+        [Bindable]
+        private var _yField:String;
+
+        private var measureFormatter:Formatter;
+        private var dimensionFormatter:Formatter;
+
+        private var customColors:Boolean = false;
+
+        private var barChart:BarChart;
+
+        private var xAxis:LinearAxis;
+        private var yAxis:CategoryAxis;
+
+        private var xAxisTitleRendererFactory:ClassFactory;
+
+        private var yAxisTitleRendererFactory:ClassFactory;
+
+        private var bgFills:Array;
+
+        private var sortable:Boolean = true;
+        private var selectable:Boolean = true;
+
+        [Bindable]
+        [Embed(source="../../../../../../../assets/water4.JPG")]
+        private var standardFill:Class;
+
+        [Bindable]
+        public function get yField():String {
+            return _yField;
+        }
+
+        public function set yField(val:String):void {
+            _yField = val;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            bgFills = [];
+            for (var i:int = 0; i < 15; i++) {
+                var bgFill:BitmapFill = new BitmapFill();
+                bgFill.source = standardFill;
+                bgFill.originX = Math.random() * 60;
+                bgFill.originY = Math.random() * 60;
+                bgFills.push(bgFill);
+            }
+        }
+
+        private function onClick(event:ChartItemEvent):void {
+            if (event.shiftKey) {
+
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this, barChartDef, event.hitData.item);
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
+        private function createChart():void {
+            if (barChart == null) {
+
+                // define the chart itself
+
+                barChart = new BarChart();
+                barChart.percentHeight = 100;
+                barChart.percentWidth = 100;
+                barChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
+                /*barChart.addEventListener(ChartItemEvent.ITEM_CLICK, drilldown);
+                 barChart.addEventListener(ChartDrilldownEvent.DRILLDOWN, drilldownEvent);
+                 barChart.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);*/
+                barChart.showDataTips = true;
+                /*if (selectable) {
+                 barChart.selectionMode = "multiple";
+                 }*/
+                barChart.dataProvider = graphData;
+
+                // define the X axis
+
+                yAxis = new CategoryAxis();
+                BindingUtils.bindProperty(yAxis, "categoryField", this, "yField");
+                //xAxis.categoryField = xField;
+                yAxis.labelFunction = renderDimensionAxis;
+                yAxis.title = yAxisTitle;
+                barChart.verticalAxis = yAxis;
+                // define the Y axis
+
+                xAxis = new LinearAxis();
+                xAxis.title = xAxisTitle;
+                xAxis.labelFunction = renderAxis;
+                barChart.horizontalAxis = xAxis;
+
+                // create the data series
+
+                canvas.addChild(barChart);
+            } else {
+                barChart.visible = true;
+            }
+        }
+
+        private function myDataFunction(series:Series, item:Object, fieldName:String):Object {
+            if (fieldName == 'xValue')
+                return(item[xAxisItem.qualifiedName()].toNumber());
+            else if (fieldName == "yValue")
+                return(item[yAxisItem.qualifiedName()].toString());
+            else
+                return null;
+        }
+
+        private function renderChartLabel(element:ChartItem, series:Series):String {
+            var barSeriesItem:BarSeriesItem = element as BarSeriesItem;
+            return measureFormatter.format(barSeriesItem.xNumber);
+        }
+
+        private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
+            return measureFormatter.format(labelValue);
+        }
+
+        private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
+            return dimensionFormatter.format(item);
+        }
+
+        public function createFilterRawData():FilterRawData {
+            var filterRawData:FilterRawData = new FilterRawData();
+            for (var i:int = 0; i < barChart.selectedChartItems.length; i++) {
+                var obj:ChartItem = barChart.selectedChartItems[i];
+                filterRawData.addPair(xAxisItem, obj.item[xAxisItem.key.createString()]);
+            }
+            return filterRawData;
+        }
+
+        private var barChartDef:StackedBarChartDefinition;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            barChartDef = analysisDefinition as StackedBarChartDefinition;
+
+            if (dataSet.length > 0) {
+                canvas.setStyle("backgroundAlpha", barChartDef.backgroundAlpha);
+                stackIndex = 0;
+                if (barChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
+                    var sort:Sort = new Sort();
+                    if (barChartDef.columnSort == ChartDefinition.SORT_X_ASCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, false);
+                    } else if (barChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, true);
+                    } else if (barChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measure, false);
+                    } else if (barChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measure, true);
+                    }
+                    dataSet.sort = sort;
+                    dataSet.refresh();
+                }
+
+                yField = barChartDef.yaxis.qualifiedName();
+                createChart();
+
+                var mySeries:Array = new Array();
+
+                var uniques:ArrayCollection = new ArrayCollection();
+
+
+                var dataObjs:ArrayCollection = barChartDef.populateGroupings(dataSet, uniques);
+                var barSet:BarSet = new BarSet();
+                barSet.type = "stacked";
+                for (var i:int = 0; i < uniques.length; i++) {
+                    var key:String = uniques.getItemAt(i) as String;
+
+                    var uniqueLineSeries:BarSeries = new BarSeries();
+                    //uniqueLineSeries.fillFunction = customFill;
+                    if (key == null || key == "") {
+                        key = "[ No Value ]";
+                    }
+                    uniqueLineSeries.xField = key;
+                    uniqueLineSeries.displayName = key;
+                    mySeries.push(uniqueLineSeries);
+                }
+
+                barSet.series = mySeries;
+                barChart.series = [ barSet ];
+
+                measureFormatter = barChartDef.measure.getFormatter();
+                dimensionFormatter = barChartDef.yaxis.getFormatter();
+
+                var newXAxisItem:AnalysisItem = barChartDef.measure;
+                if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
+                    xAxisItem = newXAxisItem;
+                }
+
+                var newYAxisItem:AnalysisItem = barChartDef.yaxis;
+                yAxis.categoryField = barChartDef.yaxis.qualifiedName();
+                if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
+                    yAxisItem = newYAxisItem;
+                }
+
+                var newXField:String = newXAxisItem.qualifiedName();
+                if (newXField != xField) {
+                    xField = newXField;
+                }
+
+                var newXAxisTitle:String = newXAxisItem.display;
+                if (newXAxisTitle != xAxisTitle) {
+                    xAxisTitle = newXAxisTitle;
+                    xAxis.title = xAxisTitle;
+                }
+
+                var newYAxisTitle:String = newYAxisItem.display;
+                if (newYAxisTitle != yAxisTitle) {
+                    yAxisTitle = newYAxisTitle;
+                    yAxis.title = yAxisTitle;
+                }
+
+                barChart.dataProvider = dataObjs;
+            } else {
+                if (barChartDef.measure != null && barChartDef.yaxis != null) stackIndex = 2;
+                else stackIndex = 1;
+                if (barChart != null) {
+                    barChart.dataProvider = new ArrayCollection();
+                    yAxis.dataProvider = new ArrayCollection();
+                    barChart.visible = false;
+                }
+            }
+
+            graphData = dataSet;
+        }
+
+        private function customFill(element:ChartItem, index:Number):IFill {
+            return FillProvider.getColor(barChartDef.colorScheme, bgFills, index);
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        public function preserveValues():Boolean {
+            return true;
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+        ]]></mx:Script>
+    <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
+    <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
+    <mx:Canvas width="100%" height="100%" id="canvas" backgroundAlpha="1" backgroundColor="#FFFFFF">
+        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
+                      mouseEnabled="false">
+            <mx:Canvas width="100%" height="100%"/>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+                </mx:Box>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
+                    backgroundAlpha=".1">
+                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
+                        verticalAlign="middle"
+                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+                    <mx:TextArea fontSize="22"
+                                 text="We didn't find any data for the fields and filters that you specified in the report."
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+                </mx:Box>
+            </mx:Box>
+        </mx:ViewStack>
+    </mx:Canvas>
+</mx:Module>

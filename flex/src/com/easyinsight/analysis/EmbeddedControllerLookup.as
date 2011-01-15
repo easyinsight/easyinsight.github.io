@@ -7,10 +7,12 @@ import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartEmbeddedCont
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartEmbeddedController;
+import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartEmbeddedController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartEmbeddedController;
+import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartEmbeddedController;
 import com.easyinsight.analysis.crosstab.CrosstabEmbeddedController;
 import com.easyinsight.analysis.form.FormEmbeddedController;
 import com.easyinsight.analysis.gantt.GanttEmbeddedController;
@@ -66,11 +68,17 @@ public class EmbeddedControllerLookup {
             case AnalysisDefinition.COLUMN:
                 controller = ColumnChartEmbeddedController;
                 break;
+            case AnalysisDefinition.STACKED_COLUMN:
+                controller = StackedColumnChartEmbeddedController;
+                break;
             case AnalysisDefinition.COLUMN3D:
                 controller = Column3DChartEmbeddedController;
                 break;
             case AnalysisDefinition.BAR:
                 controller = BarChartEmbeddedController;
+                break;
+            case AnalysisDefinition.STACKED_BAR:
+                controller = StackedBarChartEmbeddedController;
                 break;
             case AnalysisDefinition.BAR3D:
                 controller = Bar3DChartEmbeddedController;

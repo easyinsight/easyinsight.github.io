@@ -57,6 +57,8 @@ public class AnalysisService {
             return new SimpleDateFormat().format(date);
         } catch (ParseException e) {
             return "";
+        } catch (IllegalArgumentException iae) {
+            return "";
         }
     }
 

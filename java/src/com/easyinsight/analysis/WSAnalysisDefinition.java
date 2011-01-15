@@ -49,6 +49,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int HEATMAP = 27;
     public static final int MAP_AFRICA = 28;
     public static final int GANTT = 29;
+    public static final int FORM = 30;
+    public static final int STACKED_COLUMN = 31;
+    public static final int STACKED_BAR = 32;
 
     private String name;
     private String authorName;

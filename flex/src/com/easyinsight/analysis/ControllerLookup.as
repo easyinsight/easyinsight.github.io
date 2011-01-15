@@ -7,10 +7,12 @@ import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController;
 import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController;
+import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartController;
 import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController;
 import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
+import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartController;
 import com.easyinsight.analysis.crosstab.CrosstabController;
 import com.easyinsight.analysis.form.FormController;
 import com.easyinsight.analysis.gantt.GanttController;
@@ -41,6 +43,12 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.CROSSTAB:
                 controller = CrosstabController;
+                break;
+            case AnalysisDefinition.STACKED_COLUMN:
+                controller = StackedColumnChartController;
+                break;
+            case AnalysisDefinition.STACKED_BAR:
+                controller = StackedBarChartController;
                 break;
             case AnalysisDefinition.MAP_USA:
                 controller = USMapController;

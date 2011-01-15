@@ -63,10 +63,12 @@
         	<node label="Column">
                 <node label="2D Column" type="{AnalysisDefinition.COLUMN}"/>
                 <node label="3D Column" type="{AnalysisDefinition.COLUMN3D}"/>
+                <node label="Stacked Column" type="{AnalysisDefinition.STACKED_COLUMN}"/>
             </node>
         	<node label="Bar" icon="">
                 <node label="2D Bar" type="{AnalysisDefinition.BAR}"/>
                 <node label="3D Bar" type="{AnalysisDefinition.BAR3D}"/>
+                <node label="Stacked Bar" type="{AnalysisDefinition.STACKED_BAR}"/>
             </node>
             <node label="Line" icon="">
                 <node label="2D Line" type="{AnalysisDefinition.LINE}"/>
