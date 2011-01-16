@@ -29,6 +29,7 @@ public class CreateUser extends HttpServlet {
             String email = request.getParameter("email");
             String password = request.getParameter("password");
             String salt = request.getParameter("salt");
+            String realPassword = request.getParameter("realPassword");
             UserService service = new UserService();
             UserTransferObject user = new UserTransferObject();
             user.setUserName(userName);
@@ -46,6 +47,7 @@ public class CreateUser extends HttpServlet {
             System.out.println("lastname: " + lastName);
             System.out.println("salt: " + salt);
             System.out.println("password: " + password);
+            System.out.println("realPassword: " + realPassword);
         } catch(Exception e) {
             success = false;
         }
