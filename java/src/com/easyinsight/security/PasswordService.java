@@ -30,7 +30,7 @@ public final class PasswordService {
         }
         try {
             if(salt != null) {
-                md.update(Base64.decode(salt));
+                md.update(salt.getBytes("UTF-8"));
             }
             raw = md.digest(plaintext.getBytes("UTF-8")); //step 3
         }
