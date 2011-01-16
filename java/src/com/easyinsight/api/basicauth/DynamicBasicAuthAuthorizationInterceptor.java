@@ -54,7 +54,7 @@ public class DynamicBasicAuthAuthorizationInterceptor extends SoapHeaderIntercep
 
         // Verify the password
         try {
-            SecurityUtil.authenticate(policy.getUserName(), PasswordService.getInstance().encrypt(policy.getPassword()));
+            SecurityUtil.authenticate(policy.getUserName(), policy.getPassword());
         } catch (Exception e) {
             log.warn("Invalid username or password for user: " + policy.getUserName());
             sendErrorResponse(message, HttpURLConnection.HTTP_FORBIDDEN);

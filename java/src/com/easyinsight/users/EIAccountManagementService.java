@@ -191,7 +191,7 @@ public class EIAccountManagementService {
             if (results.size() > 0) {
                 User user = (User) results.get(0);
                 String actualPassword = user.getPassword();
-                String encryptedPassword = PasswordService.getInstance().encrypt(password);
+                String encryptedPassword = PasswordService.getInstance().encrypt(password, user.getHashSalt(), user.getHashType());
                 if (encryptedPassword.equals(actualPassword)) {
                     List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                     Account account = (Account) accountResults.get(0);
@@ -258,7 +258,8 @@ public class EIAccountManagementService {
     private User createInitialUser(UserTransferObject userTransferObject, String password, Account account) {
         User user = userTransferObject.toUser();
         user.setAccount(account);        
-        user.setPassword(PasswordService.getInstance().encrypt(password));
+        user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
+        user.setHashType("SHA-256");
         return user;
     }
 

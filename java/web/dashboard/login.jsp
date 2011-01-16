@@ -13,19 +13,23 @@
     Session s = Database.instance().createSession();
     try {
         if(request.getParameter("login") != null && request.getParameter("password") != null) {
-            String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"));
-            List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("login")).setString(1, encryptedPass).list();
+            List results = s.createQuery("from User where userName = ?").setString(0, request.getParameter("login")).list();
             if(results.size() != 1) {
                 success = false;
             }
             else {
                 User user =(User) results.get(0);
-                Account account = user.getAccount();
-                long accountID = account.getAccountID();
-                request.getSession().setAttribute("accountID", accountID);
-                request.getSession().setAttribute("userID", user.getUserID());
-                userID = user.getUserID();
-                success = true;
+                String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"), user.getHashSalt(), user.getHashType());
+                if(!encryptedPass.equals(user.getPassword())) {
+                    success = false;
+                } else {
+                    Account account = user.getAccount();
+                    long accountID = account.getAccountID();
+                    request.getSession().setAttribute("accountID", accountID);
+                    request.getSession().setAttribute("userID", user.getUserID());
+                    userID = user.getUserID();
+                    success = true;
+                }
             }
         }
     } finally {

@@ -173,7 +173,7 @@ public class UserService {
             final String userEmail = user.getEmail();
             final String userName = user.getUserName();
             final String password = RandomTextGenerator.generateText(12);
-            user.setPassword(PasswordService.getInstance().encrypt(password));
+            user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), user.getHashType()));
             account.addUser(user);
             user.setAccount(account);
             new Thread(new Runnable() {
@@ -258,7 +258,7 @@ public class UserService {
                     List l = s.createQuery("from User where userName = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
                     if(l.size() == 1) {
                         User u = (User) l.get(0);
-                        u.setPassword(PasswordService.getInstance().encrypt(password));
+                        u.setPassword(PasswordService.getInstance().encrypt(password, u.getHashSalt(), u.getHashType()));
                         s.update(u);
                         success = true;
                         PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
@@ -269,7 +269,7 @@ public class UserService {
                         l = s.createQuery("from User where email = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
                         if (l.size() == 1) {
                             User u = (User) l.get(0);
-                            u.setPassword(PasswordService.getInstance().encrypt(password));
+                            u.setPassword(PasswordService.getInstance().encrypt(password, u.getHashSalt(), u.getHashType()));
                             s.update(u);
                             success = true;
                             PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
@@ -570,7 +570,7 @@ public class UserService {
         try {
             session.beginTransaction();
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);            
-            String encryptedPassword = PasswordService.getInstance().encrypt(password);
+            String encryptedPassword = PasswordService.getInstance().encrypt(password, user.getHashSalt(), user.getHashType());
             user.setPassword(encryptedPassword);
             user.setInitialSetupDone(true);
             session.update(user);
@@ -589,13 +589,14 @@ public class UserService {
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
-            String encryptedExistingPassword = PasswordService.getInstance().encrypt(existingPassword);
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+            String encryptedExistingPassword = PasswordService.getInstance().encrypt(existingPassword, user.getHashSalt(), user.getHashType());
             if (!encryptedExistingPassword.equals(user.getPassword())) {
                 return null;
             }
-            String encryptedPassword = PasswordService.getInstance().encrypt(password);
+            String encryptedPassword = PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256");
             user.setPassword(encryptedPassword);
+            user.setHashType("SHA-256");
             session.update(user);
             session.getTransaction().commit();
             return encryptedPassword;
@@ -617,6 +618,10 @@ public class UserService {
     }
 
     public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password, String sourceURL, int accountSource) {
+        return createAccount(userTransferObject, accountTransferObject, password, sourceURL, accountSource, null);
+    }
+
+    public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password, String sourceURL, int accountSource, String salt) {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
@@ -625,7 +630,7 @@ public class UserService {
             account.setCreationDate(new Date());
             account.setAccountSource(accountSource);
             configureNewAccount(account);
-            User user = createInitialUser(userTransferObject, password, account);
+            User user = createInitialUser(userTransferObject, password, account, salt);
             account.addUser(user);
             session.save(account);
             user.setAccount(account);
@@ -684,9 +689,18 @@ public class UserService {
     }
 
     private User createInitialUser(UserTransferObject userTransferObject, String password, Account account) {
+        return createInitialUser(userTransferObject, password, account, null);
+    }
+
+    private User createInitialUser(UserTransferObject userTransferObject, String password, Account account, String salt) {
         User user = userTransferObject.toUser();
         user.setAccount(account);
-        user.setPassword(PasswordService.getInstance().encrypt(password));
+        user.setHashSalt(salt);
+        if(salt == null) {
+            password = PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256");
+        }
+        user.setPassword(password);
+        user.setHashType("SHA-256");
         return user;
     }
 
@@ -894,7 +908,7 @@ public class UserService {
             if (results.size() > 0) {
                 User user = (User) results.get(0);
                 String actualPassword = user.getPassword();
-                if (encryptedPassword.equals(actualPassword)) {
+                if (PasswordService.getInstance().encrypt(encryptedPassword, user.getHashSalt(), user.getHashType()).equals(actualPassword)) {
                     List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                     Account account = (Account) accountResults.get(0);
 
@@ -1073,7 +1087,7 @@ public class UserService {
     private UserServiceResponse getUser(String password, Session session, User user, EIConnection conn) throws SQLException {
         UserServiceResponse userServiceResponse;
         String actualPassword = user.getPassword();
-        String encryptedPassword = PasswordService.getInstance().encrypt(password);
+        String encryptedPassword = PasswordService.getInstance().encrypt(password, user.getHashSalt(), user.getHashType());
         if (encryptedPassword.equals(actualPassword)) {
             List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
             Account account = (Account) accountResults.get(0);

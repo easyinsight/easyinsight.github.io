@@ -47,6 +47,12 @@ public class User {
     @Column(name="account_admin")
     private boolean accountAdmin;
 
+    @Column(name="hash_type")
+    private String hashType;
+
+    @Column(name="hash_salt")
+    private String hashSalt;
+
     @Column(name="user_key")
     private String userKey;
     @Column(name="user_secret_key")
@@ -85,6 +91,14 @@ public class User {
         return userTransferObject;
     }
 
+    public String getHashType() {
+        return hashType;
+    }
+
+    public void setHashType(String hashType) {
+        this.hashType = hashType;
+    }
+
     public boolean isGuestUser() {
         return guestUser;
     }
@@ -99,6 +113,14 @@ public class User {
 
     public void setOptInEmail(boolean optInEmail) {
         this.optInEmail = optInEmail;
+    }
+
+    public String getHashSalt() {
+        return hashSalt;
+    }
+
+    public void setHashSalt(String hashSalt) {
+        this.hashSalt = hashSalt;
     }
 
     public boolean isInitialSetupDone() {

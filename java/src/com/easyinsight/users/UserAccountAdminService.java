@@ -265,7 +265,8 @@ public class UserAccountAdminService {
                     final String userEmail = user.getEmail();
                     final String userName = user.getUserName();
                     final String password = RandomTextGenerator.generateText(12);
-                    user.setPassword(PasswordService.getInstance().encrypt(password));
+                    user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
+                    user.setHashType("SHA-256");
                     account.addUser(user);
                     user.setAccount(account);
                     session.update(account);

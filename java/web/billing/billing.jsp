@@ -26,14 +26,17 @@
     Session s = Database.instance().createSession();
     try {
         if(request.getParameter("username") != null && request.getParameter("password") != null) {
-            String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"));
-
-            List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
+            List results = s.createQuery("from User where userName = ?").setString(0, request.getParameter("username")).list();
             if(results.size() != 1) {
                 response.sendRedirect("login.jsp?error=true");
                 return;
             }
             user =(User) results.get(0);
+            String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"), user.getHashSalt(), user.getHashType());
+            if(!encryptedPass.equals(user.getPassword())) {
+               response.sendRedirect("login.jsp?error=true");
+               return;
+            }
             account = user.getAccount();
             accountID = account.getAccountID();
             request.getSession().setAttribute("accountID", accountID);
@@ -75,7 +78,9 @@
 
       DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
       df.setTimeZone(TimeZone.getTimeZone("UTC"));
-      String time = df.format(new Date());
+      Date d = new Date();
+      d.setTime(new Date().getTime() - 36000 * 60 * 24);
+      String time = df.format(d);
       request.getSession().setAttribute("billingTime", time);
       String hashString = orderID + "|" + amount + "|" + String.valueOf(accountID) + "|" + time + "|" + key;
       String hash = BillingUtil.MD5Hash(hashString);

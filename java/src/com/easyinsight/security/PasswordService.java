@@ -18,21 +18,24 @@ public final class PasswordService {
     private PasswordService() {
     }
 
-    public synchronized String encrypt(String plaintext) {
+    public synchronized String encrypt(String plaintext, String salt, String algorithm) {
         MessageDigest md;
+        byte raw[] = null;
         try {
-            md = MessageDigest.getInstance("SHA"); //step 2
+            md = MessageDigest.getInstance(algorithm); //step 2
         }
         catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
         try {
-            md.update(plaintext.getBytes("UTF-8")); //step 3
+            if(salt != null) {
+                md.update(salt.getBytes("UTF-8"));
+            }
+            raw = md.digest(plaintext.getBytes("UTF-8")); //step 3
         }
         catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        byte raw[] = md.digest(); //step 4
         return (new BASE64Encoder()).encode(raw); //step 5
     }
 
