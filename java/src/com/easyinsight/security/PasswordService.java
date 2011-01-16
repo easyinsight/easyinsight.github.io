@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import sun.misc.BASE64Encoder;
+import org.bouncycastle.util.encoders.Base64;
 
 public final class PasswordService {
     private static PasswordService instance;
@@ -29,7 +30,7 @@ public final class PasswordService {
         }
         try {
             if(salt != null) {
-                md.update(salt.getBytes("UTF-8"));
+                md.update(Base64.decode(salt));
             }
             raw = md.digest(plaintext.getBytes("UTF-8")); //step 3
         }
