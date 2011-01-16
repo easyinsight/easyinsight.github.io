@@ -41,7 +41,11 @@ public class CreateUser extends HttpServlet {
             account.setName(userName);
             account.setAccountType(Account.PROFESSIONAL);
             service.createAccount(user, account, password, null, Account.SNAPPCLOUD, salt);
-            System.out.println(password);
+            System.out.println("email: " + email);
+            System.out.println("firstname: " + firstName);
+            System.out.println("lastname: " + lastName);
+            System.out.println("salt: " + salt);
+            System.out.println("password: " + password);
         } catch(Exception e) {
             success = false;
         }
