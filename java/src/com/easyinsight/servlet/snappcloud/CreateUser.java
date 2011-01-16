@@ -28,6 +28,7 @@ public class CreateUser extends HttpServlet {
             String lastName = request.getParameter("customerlastname");
             String email = request.getParameter("email");
             String password = request.getParameter("password");
+            String salt = request.getParameter("salt");
             UserService service = new UserService();
             UserTransferObject user = new UserTransferObject();
             user.setUserName(userName);
@@ -39,7 +40,7 @@ public class CreateUser extends HttpServlet {
             AccountTransferObject account = new AccountTransferObject();
             account.setName(userName);
             account.setAccountType(Account.PROFESSIONAL);
-            service.createAccount(user, account, password, null, Account.SNAPPCLOUD);
+            service.createAccount(user, account, password, null, Account.SNAPPCLOUD, salt);
             System.out.println(password);
         } catch(Exception e) {
             success = false;
