@@ -86,7 +86,8 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
             components.add(new StepTransformComponent((AnalysisStep) step));
         }
-        
+
+        components.add(new NormalizationComponent());
         components.add(new AggregationComponent());
 
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false));

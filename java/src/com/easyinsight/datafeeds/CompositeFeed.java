@@ -249,10 +249,14 @@ public class CompositeFeed extends Feed {
             }
         }
 
+        QueryStateNode firstVertex = null;
         for (CompositeFeedConnection connection : connections) {
             if (neededNodes.containsKey(connection.getSourceFeedID()) && neededNodes.containsKey(connection.getTargetFeedID())) {
                 Edge edge = new Edge(connection);
                 QueryStateNode source = queryNodeMap.get(connection.getSourceFeedID());
+                if (firstVertex == null) {
+                    firstVertex = source;
+                }
                 QueryStateNode target = queryNodeMap.get(connection.getTargetFeedID());
                 reducedGraph.addEdge(source, target, edge);
             }
@@ -263,7 +267,7 @@ public class CompositeFeed extends Feed {
         DataSet dataSet = null;
 
         List<String> auditStrings = new ArrayList<String>();
-        ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph);
+        ClosestFirstIterator<QueryStateNode, Edge> iter = new ClosestFirstIterator<QueryStateNode, Edge>(reducedGraph, firstVertex);
 
         while (iter.hasNext()) {
             QueryStateNode sourceNode = iter.next();
@@ -294,6 +298,8 @@ public class CompositeFeed extends Feed {
                 //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
                 sourceNode.myDataSet = dataSet;
                 targetNode.myDataSet = dataSet;
+                sourceNode.neededItems.addAll(targetNode.neededItems);
+                targetNode.neededItems.addAll(sourceNode.neededItems);
             }
 
         }

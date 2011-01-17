@@ -139,7 +139,6 @@ public class FallthroughConnection extends CompositeFeedConnection {
 
         // start by merging items by to-do to-do ID -> time tracking to-do ID
         // for those items which can't be merged by IDs, merge by project name
-
         List<IRow> compositeRows = new ArrayList<IRow>();
         List<IRow> sourceRows = sourceSet.getRows();
         List<IRow> targetRows = dataSet.getRows();
@@ -181,7 +180,9 @@ public class FallthroughConnection extends CompositeFeedConnection {
         //compositeRows.addAll(sourceRows);
         //compositeRows.addAll(targetRows);
         compositeRows.addAll(outerJoinRows);
-        return new MergeAudit(mergeStrings, new DataSet(compositeRows));
+        DataSet result = new DataSet(compositeRows);
+        result.normalize();
+        return new MergeAudit(mergeStrings, result);
     }
 
     private DataSet combinedData(Set<AnalysisItem> neededItems, long sourceID, DataSet dataSet, EIConnection conn) {

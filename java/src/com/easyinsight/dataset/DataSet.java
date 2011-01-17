@@ -2,6 +2,7 @@ package com.easyinsight.dataset;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListDataResults;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
@@ -168,6 +169,31 @@ public class DataSet implements Serializable {
             for (IWhere where : wheres) {
                 if (where.hasConcreteValue()) {
                     row.addValue(where.getKey(), where.getConcreteValue());
+                }
+            }
+        }
+    }
+
+
+
+    public void normalize() {
+        Set<Key> keySet = new HashSet<Key>();
+        for (IRow row : rows) {
+            Collection<Key> keys = row.getKeys();
+            for (Key key : keys) {
+                keySet.add(key);
+            }
+        }
+
+        for (IRow row : rows) {
+            for (Key key : keySet) {
+                Value value = row.getValue(key);
+                if (value == null) {
+                    row.addValue(key, new EmptyValue());
+                } else if (value.type() == Value.STRING) {
+                    if ("".equals(value.toString())) {
+                        row.addValue(key, new EmptyValue());
+                    }
                 }
             }
         }

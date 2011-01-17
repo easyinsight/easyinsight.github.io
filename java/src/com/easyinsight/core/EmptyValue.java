@@ -11,7 +11,7 @@ import com.easyinsight.logging.LogClass;
 public class EmptyValue extends Value {
     private static final long serialVersionUID = -3929345976490773936L;
 
-    private static String blah = "";
+    private String blah = "";
 
     public int type() {
         return Value.EMPTY;
@@ -26,6 +26,7 @@ public class EmptyValue extends Value {
         return this == o || !(o == null || getClass() != o.getClass());
     }*/
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -37,12 +38,13 @@ public class EmptyValue extends Value {
         return true;
     }
 
+    @Override
     public int hashCode() {
         return blah.hashCode();
     }
 
     @Override
     public String toString() {
-        return "";
+        return "(Empty)";
     }
 }

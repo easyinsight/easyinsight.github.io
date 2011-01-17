@@ -17,6 +17,7 @@ public class CompositeReportPipeline extends Pipeline {
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
+        components.add(new NormalizationComponent());
         components.add(new AggregationComponent());
         return components;
     }
