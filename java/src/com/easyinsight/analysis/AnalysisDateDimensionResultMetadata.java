@@ -45,17 +45,12 @@ public class AnalysisDateDimensionResultMetadata extends AnalysisItemResultMetad
                 latestDate = date;
             } else {
                 if (date.compareTo(earliestDate) < 0) {
-                    earliestDate = date;
-                } else if (date.compareTo(latestDate) > 0) {
-                    latestDate = date;
+                    earliestDate = new Date(date.getTime() + insightRequestMetadata.getUtcOffset() * 60 * 1000);
+                }
+                if (date.compareTo(latestDate) > 0) {
+                    latestDate = new Date(date.getTime() + insightRequestMetadata.getUtcOffset() * 60 * 1000);
                 }
             }
-        }
-        if (earliestDate != null) {
-            earliestDate = new Date(earliestDate.getTime() + insightRequestMetadata.getUtcOffset() * 60 * 1000);
-        }
-        if (latestDate != null) {
-            latestDate = new Date(latestDate.getTime() + insightRequestMetadata.getUtcOffset() * 60 * 1000);
         }
     }
 }
