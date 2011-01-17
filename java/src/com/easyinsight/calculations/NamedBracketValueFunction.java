@@ -21,23 +21,27 @@ public class NamedBracketValueFunction extends Function {
         boolean found = false;
         String result = null;
         int index = 0;
-        while (!found) {
-            int startIndex = string.indexOf("[", index);
-            int endIndex = string.indexOf("]", index);
-            if (startIndex != -1 && endIndex != -1) {
-                String substring = string.substring(startIndex + 1, endIndex);
-                int colonIndex = substring.indexOf(":");
-                if (colonIndex != -1) {
-                    String prefix = substring.substring(0, colonIndex).trim();
-                    if (prefix.equals(pairValue)) {
-                        result = substring.substring(colonIndex + 1).trim();
-                        found = true;
+        try {
+            while (!found) {
+                int startIndex = string.indexOf("[", index);
+                int endIndex = string.indexOf("]", index);
+                if (startIndex > -1 && endIndex > -1) {
+                    String substring = string.substring(startIndex + 1, endIndex);
+                    int colonIndex = substring.indexOf(":");
+                    if (colonIndex > -1) {
+                        String prefix = substring.substring(0, colonIndex).trim();
+                        if (prefix.equals(pairValue)) {
+                            result = substring.substring(colonIndex + 1).trim();
+                            found = true;
+                        }
                     }
+                    index = endIndex + 1;
+                } else {
+                    found = true;
                 }
-                index = endIndex + 1;
-            } else {
-                found = true;
             }
+        } catch (StringIndexOutOfBoundsException e) {
+            return new EmptyValue();
         }
 
         if (result == null) {
