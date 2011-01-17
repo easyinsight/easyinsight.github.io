@@ -29,6 +29,7 @@ public final class PasswordService {
             throw new RuntimeException(e);
         }
         try {
+            System.out.println("salt: "+ salt);
             if(salt != null) {
                 md.update(salt.getBytes("UTF-8"));
             }
