@@ -2,12 +2,16 @@
 <solutions:SolutionDetailRenderer xmlns:mx="http://www.adobe.com/2006/mxml"
                                   xmlns:solutions="com.easyinsight.solutions.*">
     <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
         import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.google.QuickbaseWindow;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
+        import mx.events.CloseEvent;
         import mx.managers.PopUpManager;
 
 
@@ -16,10 +20,19 @@
         }
 
         private function initialSetup():void {
-            var window:QuickbaseWindow = new QuickbaseWindow();
-            window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, created);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            if (User.getInstance().getAccountType() < Account.PRO) {
+                Alert.show("If you want to use Easy Insight with Quickbase, you'll need to upgrade to the Professional or higher account tier.", "Upgrade Required",
+                        Alert.OK | Alert.CANCEL, this, upgradeListener, null, Alert.CANCEL);
+            } else {
+                var window:QuickbaseWindow = new QuickbaseWindow();
+                window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, created);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+        }
+
+        private function upgradeListener(event:CloseEvent):void {
+            upgrade();
         }
 
         private function uploadConfigComplete(event:UploadConfigEvent):void {
