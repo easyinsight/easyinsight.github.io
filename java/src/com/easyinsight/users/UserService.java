@@ -80,6 +80,7 @@ public class UserService {
                 addTimedState.setTimestamp(3, new java.sql.Timestamp(cal.getTimeInMillis()));
                 addTimedState.execute();
                 session.update(account);
+                new AccountActivityStorage().generateSalesEmailSchedules(SecurityUtil.getUserID(), conn);
             } else {
                 throw new RuntimeException("Attempt to reactivate an account not in reactivation possible state");
             }
@@ -656,6 +657,7 @@ public class UserService {
                 new AccountMemberInvitation().sendActivationEmail(user.getEmail(), user.getFirstName(), activationKey);
                 new Thread(new SalesEmail(account, user)).start();
             }
+            new AccountActivityStorage().generateSalesEmailSchedules(user.getUserID(), conn);
             return account.getAccountID();
         } catch (Exception e) {
             LogClass.error(e);

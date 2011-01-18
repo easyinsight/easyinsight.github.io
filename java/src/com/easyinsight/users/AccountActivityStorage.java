@@ -1,13 +1,17 @@
 package com.easyinsight.users;
 
-import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+import com.easyinsight.salesautomation.SalesEmail;
 import org.jetbrains.annotations.Nullable;
+
+import javax.mail.MessagingException;
 
 /**
  * User: James Boe
@@ -30,6 +34,43 @@ public class AccountActivityStorage {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public void generateSalesEmailSchedules(long userID, Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO user_sales_email_schedule (user_id, target_number, send_date) VALUES (?, ?, ?)");
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        stmt.setLong(1, userID);
+        stmt.setInt(2, SalesEmail.ONE_DAY);
+        stmt.setTimestamp(3, new Timestamp(cal.getTime().getTime()));
+        stmt.execute();
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        for (int i = 1; i <= 4; i++) {
+            stmt.setLong(1, userID);
+            stmt.setInt(2, i + 1);
+            cal.add(Calendar.WEEK_OF_YEAR, 1);
+            stmt.setTimestamp(3, new Timestamp(cal.getTime().getTime()));
+            stmt.execute();
+        }
+    }
+
+    public void executeSalesEmails(EIConnection conn) throws SQLException, UnsupportedEncodingException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT USER_ID, TARGET_NUMBER, user_sales_email_schedule_id FROM user_sales_email_schedule WHERE SEND_DATE < ?");
+        queryStmt.setTimestamp(1, new java.sql.Timestamp(System.currentTimeMillis()));
+        ResultSet rs = queryStmt.executeQuery();
+        PreparedStatement updateStmt = conn.prepareStatement("DELETE FROM user_sales_email_schedule WHERE user_sales_email_schedule_id = ?");
+        while (rs.next()) {
+            long userID = rs.getLong(1);
+            int targetNumber = rs.getInt(2);
+            long scheduleID = rs.getLong(3);
+            try {
+                SalesEmail.leadNurture(userID, targetNumber, conn);
+            } catch (MessagingException e) {
+                LogClass.error(e);
+            }
+            updateStmt.setLong(1, scheduleID);
+            updateStmt.executeUpdate();
+        }
     }
 
     public void updateTrialTime(long accountID, Connection conn, Date newTrialDate) throws SQLException {

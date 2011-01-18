@@ -16,7 +16,6 @@ import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
@@ -48,34 +47,27 @@ public class EIAccountManagementService {
     }
 
     public void specialOffer() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, 30);
-        Date newDate = cal.getTime();
-        Calendar previous = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, 0);
-        Date oldTime = previous.getTime();
-        Timestamp oldTimestamp = new Timestamp(oldTime.getTime());
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_TIMED_STATE.account_id FROM ACCOUNT_TIMED_STATE, ACCOUNT WHERE " +
-                    "state_change_time < ? and ACCOUNT_TIMED_STATE.account_state = ? AND ACCOUNT_TIMED_STATE.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND " +
-                    "ACCOUNT.account_state = ?");
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ?, RENEWAL_OPTION_AVAILABLE = ? WHERE ACCOUNT_ID = ?");
-            queryStmt.setTimestamp(1, oldTimestamp);
-            queryStmt.setInt(2, Account.ACTIVE);
-            queryStmt.setInt(3, Account.DELINQUENT);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.email, USER.first_name, USER.name FROM USER, ACCOUNT WHERE ACCOUNT_STATE = ? AND " +
+                    "USER.account_id = account.account_id and user.account_admin = ?");
+            queryStmt.setLong(1, Account.DELINQUENT);
+            queryStmt.setBoolean(2, true);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                long accountID = rs.getLong(1);
-                new AccountActivityStorage().updateTrialTime(accountID, conn, newDate);
-                updateStmt.setInt(1, Account.TRIAL);
-                updateStmt.setBoolean(2, true);
-                updateStmt.setLong(3, accountID);
-                updateStmt.executeUpdate();
+                // send email
+                String email = rs.getString(1);
+                String firstName = rs.getString(2);
+                String lastName = rs.getString(3);
+
+                String message = "Hello {0}, We've been making a constant stream of improvements to every aspect ";
             }
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_STATE = ?");
+            updateStmt.setInt(1, Account.REACTIVATION_POSSIBLE);
+            updateStmt.setInt(2, Account.DELINQUENT);
+            updateStmt.executeUpdate();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
