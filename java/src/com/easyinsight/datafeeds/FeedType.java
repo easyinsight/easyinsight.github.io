@@ -87,6 +87,13 @@ public class FeedType {
     public static final FeedType CAMPAIGN_MONITOR_CAMPAIGN_RESULTS = new FeedType(79);
     public static final FeedType CLEARDB_COMPOSITE = new FeedType(80);
     public static final FeedType CLEARDB_CHILD = new FeedType(81);
+    public static final FeedType BATCHBOOK_COMPOSITE = new FeedType(82);
+    public static final FeedType BATCHBOOK_DEALS = new FeedType(83);
+    public static final FeedType BATCHBOOK_PEOPLE = new FeedType(84);
+    public static final FeedType BATCHBOOK_COMPANIES = new FeedType(85);
+    public static final FeedType BATCHBOOK_COMMUNICATIONS = new FeedType(86);
+    public static final FeedType BATCHBOOK_USERS = new FeedType(87);
+    public static final FeedType BATCHBOOK_TODOS = new FeedType(88);
 
     private int type;
 

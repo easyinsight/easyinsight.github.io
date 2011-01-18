@@ -7,6 +7,7 @@
 
         import com.easyinsight.util.ProgressAlert;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
@@ -27,9 +28,14 @@
         }
 
         private function createdDataSource():void {
-            var descriptor:EIDescriptor = quickbaseService.createClearDBDataSource.lastResult as EIDescriptor;
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.id, descriptor.name));
-            PopUpManager.removePopUp(this);
+            var response:ClearDBResponse = quickbaseService.createClearDBDataSource.lastResult as ClearDBResponse;
+            if (response.successful) {
+                var descriptor:EIDescriptor = response.eiDescriptor;
+                dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.id, descriptor.name));
+                PopUpManager.removePopUp(this);
+            } else {
+                Alert.show(response.errorMessage);
+            }
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="google" id="quickbaseService">
@@ -37,16 +43,18 @@
     </mx:RemoteObject>
     <mx:VBox>
         <mx:Form>
-            <mx:FormItem label="ClearDB API Key:">
-                <mx:TextInput id="userNameInput" width="400"/>
-            </mx:FormItem>
-            <mx:FormItem label="Clear App Token:">
+            <mx:FormItem label="ClearDB App ID" direction="horizontal" fontSize="14">
                 <mx:TextInput id="passwordInput" width="400"/>
+                <mx:Label text="Where can I find this?" fontSize="10" textDecoration="underline" toolTip="Your App ID is found in the ClearDB user interface under App Details."/>
+            </mx:FormItem>
+            <mx:FormItem label="ClearDB API Key:" direction="horizontal" fontSize="14">
+                <mx:TextInput id="userNameInput" width="400"/>
+                <mx:Label text="Where can I find this?" fontSize="10" textDecoration="underline" toolTip="You'll need to define an API key in the ClearDB user interface with adequate read rules for Easy Insight to perform SHOW TABLES, DESCRIBE, and SELECT operations."/>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Create" click="obtainTicket()" styleName="grayButton"/>
-            <mx:LinkButton label="Cancel" click="PopUpManager.removePopUp(this)" textDecoration="underline"/>
+            <mx:Button label="Create" click="obtainTicket()" styleName="grayButton" fontSize="14"/>
+            <mx:LinkButton label="Cancel" click="PopUpManager.removePopUp(this)" textDecoration="underline" fontSize="14"/>
         </mx:HBox>
     </mx:VBox>
     <mx:StringValidator id="userNameValidator" minLength="1" source="{userNameInput}" property="text"/>

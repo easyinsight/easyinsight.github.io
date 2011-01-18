@@ -92,7 +92,8 @@
             if (feedType == DataFeedDescriptor.COMPOSITE || feedType == DataFeedDescriptor.CLEARDB) {
                 var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
                 var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
-                compositeWorkspace.addExistingDef(compositeFeedDefinition.compositeFeedNodes, compositeFeedDefinition.connections);
+                compositeWorkspace.addExistingDef(compositeFeedDefinition.compositeFeedNodes, compositeFeedDefinition.connections,
+                        compositeFeedDefinition.dataFeedID);
                 implBox.addChild(compositeWorkspace);
                 implBox.label = "Composite Details";
                 showImpl = true;

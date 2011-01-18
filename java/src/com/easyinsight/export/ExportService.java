@@ -293,7 +293,7 @@ public class ExportService {
                 toImagePDFDatabase(analysisDefinition, bytes, width, height, conn);
             }
         } catch (Exception e) {
-            LogClass.error(e);
+            LogClass.error(e.getMessage() + " on saving report " + analysisDefinition.getAnalysisID() + " - " + analysisDefinition.getReportType(), e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);

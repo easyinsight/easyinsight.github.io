@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
 import com.easyinsight.datafeeds.basecamp.*;
+import com.easyinsight.datafeeds.batchbook.*;
 import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
@@ -101,6 +102,13 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.QUICKBASE_CHILD, QuickbaseDatabaseSource.class);
         registerType(FeedType.CLEARDB_COMPOSITE, ClearDBCompositeSource.class);
         registerType(FeedType.CLEARDB_CHILD, ClearDBDataSource.class);
+        registerType(FeedType.BATCHBOOK_COMPOSITE, BatchbookCompositeSource.class);
+        registerType(FeedType.BATCHBOOK_DEALS, BatchbookDealSource.class);
+        registerType(FeedType.BATCHBOOK_PEOPLE, BatchbookPeopleSource.class);
+        registerType(FeedType.BATCHBOOK_COMPANIES, BatchbookCompanySource.class);
+        registerType(FeedType.BATCHBOOK_COMMUNICATIONS, BatchbookCommunicationsSource.class);
+        registerType(FeedType.BATCHBOOK_TODOS, BatchbookTodoSource.class);
+        registerType(FeedType.BATCHBOOK_USERS, BatchbookUserSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

@@ -33,14 +33,14 @@
                 <mx:Spacer width="100%"/>
                 <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="620"
                              height="60"
-                             text="Want the ability to perform custom Highrise reporting? Whether it's simple reports on your sales pipeline or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks!"
+                             text="Want the ability to perform custom Batchbook reporting? Whether it's simple reports on your sales pipeline or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks!"
                              fontSize="14"/>
                 <mx:Spacer width="100%"/>
 
             </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
-                <mx:Button label="Connect to Highrise" fontSize="20" click="installSolution()" styleName="grayButton"
+                <mx:Button label="Connect to Batchbook" fontSize="20" click="installSolution()" styleName="grayButton"
                            id="installButton"/>
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
@@ -50,7 +50,7 @@
             </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="150"
-                         text="Need to build Highrise reports on your companies, cases, deals, emails, tasks, or contacts? Easy Insight gives you the ability to create simple lists of contact information, pie charts of deal dollars by company, line charts of contact creation over time, and anything else you may want! Ad hoc report creation allows you to drag in fields from any of the key Highrise subject matters to create the reports you need to manage and optimize your sales activities. You can apply dynamic filters to restrict the data down to a particular date range, show only deals matching a certain tag, or only open cases. Once you have a report you like, you can export the data to Excel and set it up to deliver over email on a recurring schedule."
+                         text="Need to build Batchbook reports on your companies, todos, deals, communication, or contacts? Easy Insight gives you the ability to create simple lists of contact information, pie charts of deal dollars by company, line charts of contact creation over time, and anything else you may want! Ad hoc report creation allows you to drag in fields from any of the key Batchbook subject matters to create the reports you need to manage and optimize your sales activities. You can apply dynamic filters to restrict the data down to a particular date range, show only deals matching a certain tag, or only open cases. Once you have a report you like, you can export the data to Excel and set it up to deliver over email on a recurring schedule."
                          fontSize="14"/>
 
         </mx:VBox>

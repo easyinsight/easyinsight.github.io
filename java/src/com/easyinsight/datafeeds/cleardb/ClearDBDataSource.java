@@ -71,7 +71,6 @@ public class ClearDBDataSource extends ServerDataSourceDefinition {
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
-        ClearDBCompositeSource clearDBCompositeSource = (ClearDBCompositeSource) parent;
         return new ClearDBFeed(tableName);
     }
 }

@@ -978,6 +978,34 @@ public class FeedStorage {
         return descriptorList;
     }
 
+    public List<FeedDescriptor> getExistingHiddenChildren(long userID, long dataSourceID) throws SQLException {
+        List<FeedDescriptor> descriptorList = new ArrayList<FeedDescriptor>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
+                    "DATA_FEED.FEED_TYPE, DESCRIPTION, ROLE " +
+                    " FROM UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.PARENT_SOURCE_ID = ?");
+            queryStmt.setLong(1, userID);
+            queryStmt.setLong(2, dataSourceID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long dataFeedID = rs.getLong(1);
+                String feedName = rs.getString(2);
+                int feedType = rs.getInt(3);
+                String description = rs.getString(4);
+                int userRole = rs.getInt(5);
+
+                FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, 0, feedType, null, description, null, null);
+                descriptorList.add(feedDescriptor);
+            }
+            queryStmt.close();
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return descriptorList;
+    }
+
     public List<FeedDescriptor> searchForSubscribedFeeds(long userID) throws SQLException {
         List<FeedDescriptor> descriptorList = new ArrayList<FeedDescriptor>();
         Connection conn = Database.instance().getConnection();

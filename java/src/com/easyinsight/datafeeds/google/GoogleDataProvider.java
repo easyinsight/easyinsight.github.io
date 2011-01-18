@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.google;
 
+import com.cleardb.app.ClearDBQueryException;
 import com.cleardb.app.Client;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DataSourceDescriptor;
@@ -10,6 +11,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
+import com.easyinsight.datafeeds.cleardb.ClearDBResponse;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.dataset.DataSet;
@@ -178,10 +180,11 @@ public class GoogleDataProvider {
     private static final String GET_DATABASES_XML = "<ticket>{0}</ticket><excludeparents>1</excludeparents>";
     private static final String GET_SCHEMA_XML = "<ticket>{0}</ticket><apptoken>{1}</apptoken>";
 
-    public EIDescriptor createClearDBDataSource(String apiKey, String appID) {
+    public ClearDBResponse createClearDBDataSource(String apiKey, String appID) {
         SecurityUtil.authorizeAccountTier(Account.BASIC);
         EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
             ClearDBCompositeSource clearDBCompositeSource = new ClearDBCompositeSource();
             clearDBCompositeSource.setFeedName("ClearDB");
@@ -190,13 +193,13 @@ public class GoogleDataProvider {
             clearDBCompositeSource.setUploadPolicy(uploadPolicy);
             new FeedCreation().createFeed(clearDBCompositeSource, conn, new DataSet(), uploadPolicy);
             Client client = new Client(apiKey, appID);
+            Map<String, String> tableSet = null;
             JSONObject result = client.query("SHOW TABLES");
             JSONArray tables = result.getJSONArray("response");
-            Map<String, String> tableSet = new HashMap<String, String>();
+            tableSet = new HashMap<String, String>();
             for (int i = 0; i < tables.length(); i++) {
                 JSONObject tablePair = (JSONObject) tables.get(i);
                 String value = (String) tablePair.get((String) tablePair.keys().next());
-                System.out.println(value);
                 if (value != null && !"".equals(value.trim())) {
                     tableSet.put(value, (String) tablePair.keys().next());
                 }
@@ -238,12 +241,28 @@ public class GoogleDataProvider {
             clearDBCompositeSource.populateFields(conn);
 
             new FeedStorage().updateDataFeedConfiguration(clearDBCompositeSource, conn);
-            return new DataSourceDescriptor(clearDBCompositeSource.getFeedName(), clearDBCompositeSource.getDataFeedID(),
-                    clearDBCompositeSource.getFeedType().getType());
+            ClearDBResponse response = new ClearDBResponse();
+            response.setSuccessful(true);
+            response.setEiDescriptor(new DataSourceDescriptor(clearDBCompositeSource.getFeedName(), clearDBCompositeSource.getDataFeedID(),
+                    clearDBCompositeSource.getFeedType().getType()));
+            conn.commit();
+            return response;
+        } catch (ClearDBQueryException e) {
+            conn.rollback();
+            ClearDBResponse response = new ClearDBResponse();
+            response.setSuccessful(false);
+            if (e.getMessage().indexOf("Request failed security check") != -1) {
+                response.setErrorMessage("The rules on this API key in ClearDB are insufficient for Easy Insight to create the data source. You need to adjust the rules on the API key to allow for READ operations on the database.");
+            } else {
+                response.setErrorMessage(e.getMessage());
+            }
+            return response;
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -295,6 +314,7 @@ public class GoogleDataProvider {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             //String applicationToken = "txxe32vjyuwicxbjpnpdwjatqb";
             String requestBody = MessageFormat.format(GET_DATABASES_XML, sessionTicket);
             Document doc = executeRequest(host, null, "API_GrantedDBs", requestBody);
@@ -374,12 +394,16 @@ public class GoogleDataProvider {
 
             new FeedStorage().updateDataFeedConfiguration(quickbaseCompositeSource, conn);
 
+            conn.commit();
+
             return new DataSourceDescriptor(quickbaseCompositeSource.getFeedName(), quickbaseCompositeSource.getDataFeedID(),
                     quickbaseCompositeSource.getFeedType().getType());
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }

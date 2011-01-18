@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.BatchbookDataSource;
+
+        [Bindable]
+        private var urlInputText:String;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new BatchbookDataSource();
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:BatchbookDataSource = feedDefinition as BatchbookDataSource;
+            urlInputText = ds.url;
+        }
+
+        public function get savesCredentials():Boolean {
+            return false;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:BatchbookDataSource = feedDefinition as BatchbookDataSource;
+            ds.url = urlInput.text;
+            ds.bbApiKey = apiInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form>
+		<mx:FormItem label="Batchbook URL:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{urlInputText}"/>
+		</mx:FormItem>
+        <mx:FormItem label="Batchbook API Token:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="apiInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:HBox>

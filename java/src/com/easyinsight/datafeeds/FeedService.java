@@ -520,6 +520,16 @@ public class FeedService {
         }
     }
 
+    public List<FeedDescriptor> searchForHiddenChildren(long dataSourceID) {
+        long userID = SecurityUtil.getUserID();
+        try {
+            return feedStorage.getExistingHiddenChildren(userID, dataSourceID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<FeedDescriptor> searchForAvailableFeeds(String keyword, String genreKey) {
         long accountID = SecurityUtil.getUserID(false);
         try {

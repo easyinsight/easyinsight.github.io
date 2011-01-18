@@ -117,9 +117,8 @@ public class DataSourceCopyUtils {
                 clonedTable.insertData(dataSet);
                 clonedTable.commit();
             } catch (SQLException e) {
-                LogClass.error(e);
                 clonedTable.rollback();
-                throw new RuntimeException(e);
+                throw e;
             } finally {
                 clonedTable.closeConnection();
             }
@@ -129,9 +128,8 @@ public class DataSourceCopyUtils {
                 clonedTable.createTable();
                 clonedTable.commit();
             } catch (SQLException e) {
-                LogClass.error(e);
                 clonedTable.rollback();
-                throw new RuntimeException(e);
+                throw e;
             } finally {
                 clonedTable.closeConnection();
             }

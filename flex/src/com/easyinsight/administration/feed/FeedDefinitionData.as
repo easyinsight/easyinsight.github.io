@@ -13,7 +13,7 @@ package com.easyinsight.administration.feed
 		public var genre:String;
 		public var uploadPolicy:UploadPolicy;
 		public var dataFeedID:int;
-		public var fields:ArrayCollection;
+		public var fields:ArrayCollection = new ArrayCollection();
 		public var size:int;
 		public var dateCreated:Date;
 		public var dateUpdated:Date;

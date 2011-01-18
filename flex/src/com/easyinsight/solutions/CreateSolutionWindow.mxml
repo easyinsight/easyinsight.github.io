@@ -280,6 +280,7 @@
                                 <mx:String>com.easyinsight.solutions.ConstantContactSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.QuickbaseSolutionDetail</mx:String>
                                 <mx:String>com.easyinsight.solutions.ClearDBSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.BatchbookSolutionDetail</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>

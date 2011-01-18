@@ -266,6 +266,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                     fileData(feedDescriptor);
                     break;
                 case DataFeedDescriptor.BASECAMP:
+                case DataFeedDescriptor.BATCHBOOK:
                 case DataFeedDescriptor.HIGHRISE:
                 case DataFeedDescriptor.PIVOTAL_TRACKER:
                 case DataFeedDescriptor.LINKEDIN:
@@ -346,6 +347,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                 case DataFeedDescriptor.WHOLE_FOODS:
                 case DataFeedDescriptor.LINKEDIN:
                 case DataFeedDescriptor.CONSTANT_CONTACT:
+                case DataFeedDescriptor.BATCHBOOK:
                     refreshVisible = true;
                     break;
                 default:

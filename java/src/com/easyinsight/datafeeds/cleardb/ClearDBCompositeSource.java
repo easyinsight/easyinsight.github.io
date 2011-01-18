@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.cleardb;
 
 import com.cleardb.app.Client;
+import com.easyinsight.datafeeds.CompositeFeedConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -10,10 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -54,6 +52,11 @@ public class ClearDBCompositeSource extends CompositeServerDataSource {
     @Override
     protected Set<FeedType> getFeedTypes() {
         return new HashSet<FeedType>();
+    }
+
+    @Override
+    public List<CompositeFeedConnection> obtainChildConnections() throws SQLException {
+        return getConnections();
     }
 
     @Override

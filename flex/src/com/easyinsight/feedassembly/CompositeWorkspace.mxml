@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
                      creationComplete="initializeData()" xmlns:adobe="com.adobe.flex.extras.controls.springgraph.*"
                      implements="com.easyinsight.administration.feed.IFeedAdminDetail">
     <mx:Metadata>
@@ -60,14 +60,18 @@
             this.initialFeedIDs = feedList;
         }
 
-        public function addExistingDef(nodes:ArrayCollection, edges:ArrayCollection):void {
+        public function addExistingDef(nodes:ArrayCollection, edges:ArrayCollection, dataSourceID:int):void {
             definedNodes = nodes;
             definedEdges = edges;
+            compositeFeedID = dataSourceID;
         }
 
         private function initializeData():void {
             testEdgeRenderer = new TestEdgeRenderer(s);
             feedService.searchForSubscribedFeeds.send();
+            if (compositeFeedID > 0) {
+                feedService.searchForHiddenChildren.send(compositeFeedID);
+            }
             s.addEventListener(NodeSelectionEvent.NODE_SELECTED, nodeSelected);
             s.addEventListener(NodeSelectionEvent.NODE_CTRL_SELECT, nodeCtrlSelect);
             s.addEventListener(NodeSelectionEvent.NODE_DESELECTED, nodeDeselected);
@@ -238,8 +242,11 @@
             updateState();
         }
 
-        private function gotFeeds():void {
-            allFeeds = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+        private function gotHiddenChildren():void {
+            var children:ArrayCollection = feedService.searchForHiddenChildren.lastResult as ArrayCollection;
+            for each (var child:DataFeedDescriptor in children) {
+                allFeeds.addItem(child);
+            }
             var sort:Sort = new Sort();
             var sortField:SortField = new SortField("name");
             sort.fields = [ sortField ];
@@ -271,6 +278,11 @@
                 }
                 //s.dataProvider = graph;
             }
+        }
+
+        private function gotFeeds():void {
+            allFeeds = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+
         }
 
         private function findDescriptor(feedID:int):DataFeedDescriptor {
@@ -459,6 +471,7 @@
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="initialDefine" result="gotDefine()"/>
         <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+        <mx:method name="searchForHiddenChildren" result="gotHiddenChildren()"/>
         <mx:method name="testJoin" result="tested()"/>
     </mx:RemoteObject>
     <mx:VBox width="250" paddingLeft="5" paddingRight="10" height="100%" backgroundColor="#333333" paddingBottom="10" paddingTop="10">
