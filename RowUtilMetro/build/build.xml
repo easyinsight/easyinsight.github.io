@@ -3,6 +3,12 @@
 
     <property name="out.path" value="../out"/>
     <property name="out.classes.path" value="../out/classes"/>
+    <property name="distro.docs.path" value="../distro/docs"/>
+
+    <property name="distro.path" value="../distro"/>
+    <property name="distro.bin.path" value="../distro/bin"/>
+
+    <property name="source.path" value="../src"/>
     <target name="RowUtilJar">
         <mkdir dir="${out.path}"/>
         <mkdir dir="${out.classes.path}"/>
@@ -10,15 +16,63 @@
                optimize="off"
                debug="on" failonerror="false"
                srcdir="../src"
-               excludes="**/*.smap">
+               excludes="**/example/**,**/helper/**,**/restexample/**">
             <classpath>
                 <fileset dir="../lib">
                     <include name="*.jar"/>
                 </fileset>
             </classpath>
             <include name="**"/>
-            <exclude name="tags/**"/>
         </javac>
-        <jar destfile="${out.path}/eimetro.jar" baseDir="${out.classes.path}"/>
+        <jar destfile="${distro.bin.path}/eijavaapimetro.jar" baseDir="${out.classes.path}"/>
     </target>
+
+    <target name="RestJar">
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${out.classes.path}"/>
+        <javac destdir="${out.classes.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../src"
+               excludes="**/example/**,**/rowutil/**,**/restexample/**">
+            <include name="**"/>
+        </javac>
+        <jar destfile="${distro.bin.path}/eirestapi.jar" baseDir="${out.classes.path}"/>
+    </target>
+
+    <target name="RowUtilDoc">
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${distro.docs.path}"/>
+        <javadoc destdir="${distro.docs.path}" sourcepath="${source.path}" excludepackagenames="com.easyinsight.example,com.easyinsight.rowutil.v3web,com.easyinsight.helper,com.easyinsight.restexample">
+
+        </javadoc>
+    </target>
+
+    <target name="RestDoc">
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${distro.docs.path}"/>
+        <javadoc destdir="${distro.docs.path}" sourcepath="${source.path}" excludepackagenames="com.easyinsight.rowutil,com.easyinsight.rowutil.v3web,com.easyinsight.example,com.easyinsight.restexample">
+
+        </javadoc>
+    </target>
+
+    <target name="setup">
+        <delete dir="${distro.path}"/>
+        <delete dir="${out.path}"/>
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${distro.path}"/>
+    </target>
+
+    <target name="metroDistro" depends="setup, RowUtilJar, RowUtilDoc">
+        <mkdir dir="${distro.path}/examples"/>
+        <copydir src="../src" excludes="**/rowutil/**,**/helper/**,**/restexample/**" dest="${distro.path}/examples"/>
+        <zip basedir="${distro.path}" destfile="${out.path}/eijavaapi.zip"/>
+    </target>
+
+    <target name="restDistro" depends="setup, RestJar, RestDoc">
+        <mkdir dir="${distro.path}/examples"/>
+        <copydir src="../src" excludes="**/example/**,**/rowutil/**,**/helper/**" dest="${distro.path}/examples"/>
+        <zip basedir="${distro.path}" destfile="${out.path}/eirestapi.zip"/>
+    </target>
+
 </project>
