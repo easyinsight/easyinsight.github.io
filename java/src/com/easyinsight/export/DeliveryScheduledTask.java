@@ -157,9 +157,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                                 byte[] bytes = new ExportService().toListPDF(analysisDefinition, listDataResults, conn);
                                 String reportName = analysisDefinition.getName();
                                 sendEmails(conn, bytes, reportName + ".pdf", accountID, "application/pdf", activityID);
-                            } else {
-                                new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
                             }
+                        } else {
+                            new SeleniumLauncher().requestSeleniumDrawForEmail(activityID, userID, accountID, conn);
                         }
                     }
                 } finally {
