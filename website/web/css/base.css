@@ -120,13 +120,18 @@ pre {
     padding-top: 15px;
     margin-left: 8px;
     width: 984px;
+    margin-bottom:0;
+    padding-bottom: 0;
+    height: 5px;
 }
 
 #midContent {
+    margin-top:0;
     width: 984px;
     background: #FFFFFF url(../images/rounded_corner_mid_gray.png) 50% 0 repeat-y;
     margin-left: 8px;
-    padding-bottom: 0;
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
 
 #contentHeaderEnd {
@@ -229,14 +234,12 @@ pre {
 }
 
 .headline > a {
-	padding-left:80px;
+	margin-left:80px;
 	text-decoration:none;
     outline:none;
-	color:#FFFFFF
 }
 
 .headline > a:visited {
-	color:#FFFFFF;
 }
 
 .headline > a:hover {
@@ -248,7 +251,7 @@ pre {
 }
 
 .signupHeadline {
-	width:400px;
+	width:450px;
 	height:24px;
 	text-align:right;
 	position:absolute;
@@ -475,4 +478,21 @@ pre {
     border-width: 1px;
     border-color: #888888;
     margin: 1em;
+}
+
+.active {
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    background: #ffffff;
+    text-decoration: none;
+    padding: 2px 8px;
+    color:#444444;
+}
+
+.inactive {
+    color:#ffffff;
+}
+
+.getStartedLink {
+    color:#000000;
 }
