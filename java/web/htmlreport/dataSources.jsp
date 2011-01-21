@@ -1,7 +1,4 @@
-<%@ page import="com.easyinsight.datafeeds.FeedService" %>
-<%@ page import="com.easyinsight.datafeeds.FeedDescriptor" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -29,8 +26,8 @@
                     com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
                              (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
                     try {
-                        java.util.List<com.easyinsight.datafeeds.FeedDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
-                        for (com.easyinsight.datafeeds.FeedDescriptor dataSource : dataSources) {
+                        java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
+                        DataSourceDescriptor dataSource : dataSources) {
                             out.println("<li><a href=\"reports.jsp?dataSourceID=" + dataSource.getId() + "\">" + dataSource.getName() + "</a></li>");
                         }
                         if (dataSources.size() == 0) {

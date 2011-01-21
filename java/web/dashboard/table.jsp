@@ -18,7 +18,7 @@
     Session hibernateSession = Database.instance().createSession();
     try {
         User u = (User)hibernateSession.get(User.class, userID);
-        SecurityUtil.populateThreadLocal(u.getUserName(), userID, u.getAccount().getAccountID(), u.getAccount().getAccountType(), false, false);
+        SecurityUtil.populateThreadLocal(u.getUserName(), userID, u.getAccount().getAccountID(), u.getAccount().getAccountType(), false, false, 1);
     } finally {
         hibernateSession.close();
     }
