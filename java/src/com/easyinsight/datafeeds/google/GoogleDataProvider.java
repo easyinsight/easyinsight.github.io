@@ -130,11 +130,11 @@ public class GoogleDataProvider {
             existsStmt.setLong(1, SecurityUtil.getUserID());
             existsStmt.setInt(2, Roles.OWNER);
             ResultSet rs = existsStmt.executeQuery();
-            Map<String, FeedDescriptor> worksheetToFeedMap = new HashMap<String, FeedDescriptor>();
+            Map<String, DataSourceDescriptor> worksheetToFeedMap = new HashMap<String, DataSourceDescriptor>();
             while (rs.next()) {
                 long dataFeedID = rs.getLong(1);
                 String worksheetURL = rs.getString(2);
-                FeedDescriptor feedDescriptor = new FeedDescriptor();
+                DataSourceDescriptor feedDescriptor = new DataSourceDescriptor();
                 feedDescriptor.setId(dataFeedID);
                 worksheetToFeedMap.put(worksheetURL, feedDescriptor);
             }

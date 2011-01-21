@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.google;
 
-import com.easyinsight.datafeeds.FeedDescriptor;
+
+import com.easyinsight.core.DataSourceDescriptor;
 
 /**
  * User: jboe
@@ -11,13 +12,13 @@ public class Worksheet {
     private String title;
     private String url;
     private String spreadsheet;
-    private FeedDescriptor feedDescriptor;
+    private DataSourceDescriptor feedDescriptor;
 
-    public FeedDescriptor getFeedDescriptor() {
+    public DataSourceDescriptor getFeedDescriptor() {
         return feedDescriptor;
     }
 
-    public void setFeedDescriptor(FeedDescriptor feedDescriptor) {
+    public void setFeedDescriptor(DataSourceDescriptor feedDescriptor) {
         this.feedDescriptor = feedDescriptor;
     }
 
