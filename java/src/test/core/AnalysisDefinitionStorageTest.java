@@ -95,7 +95,6 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         assertNotNull(retrievedDefinition.getFilterDefinitions());
         assertEquals(1, retrievedDefinition.getFilterDefinitions().size());
         assertEquals(1, retrievedDefinition.getAllAnalysisItems().size());
-        analysisService.getAnalysisDefinitions();
         analysisService.saveAnalysisDefinition(retrievedDefinition);
     }
 

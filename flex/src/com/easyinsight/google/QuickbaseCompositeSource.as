@@ -8,7 +8,7 @@
 package com.easyinsight.google {
 import com.easyinsight.customupload.QuickbaseDataSourceCreation;
 import com.easyinsight.datasources.CompositeServerDataSource;
-import com.easyinsight.listing.DataFeedDescriptor;
+import com.easyinsight.datasources.DataSourceType;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource")]
@@ -31,7 +31,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.QUICKBASE;
+        return DataSourceType.QUICKBASE;
     }
 
     override public function configClass():Class {

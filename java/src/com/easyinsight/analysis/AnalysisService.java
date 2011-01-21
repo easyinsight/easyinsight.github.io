@@ -85,21 +85,27 @@ public class AnalysisService {
 
     public Collection<InsightDescriptor> getInsightDescriptorsForDataSource(long dataSourceID) {
         long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
         try {
-            return analysisStorage.getInsightDescriptors(userID, dataSourceID);
+            return analysisStorage.getInsightDescriptorsForDataSource(userID, SecurityUtil.getAccountID(), dataSourceID, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
     public Collection<InsightDescriptor> getInsightDescriptors() {
         long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
         try {
-            return analysisStorage.getInsightDescriptors(userID);
+            return analysisStorage.getReports(userID, SecurityUtil.getAccountID(), conn).values();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -156,45 +162,6 @@ public class AnalysisService {
         }
     }
 
-    public Collection<WSAnalysisDefinition> getAnalysisDefinitions() {
-        long userID = SecurityUtil.getUserID();
-        try {
-            Collection<WSAnalysisDefinition> analysisDefinitions = new ArrayList<WSAnalysisDefinition>();
-            for (WSAnalysisDefinition analysisDefinition : analysisStorage.getAllDefinitions(userID)) {
-                if (analysisDefinition.isRootDefinition()) {
-                    continue;
-                }
-                analysisDefinitions.add(analysisDefinition);
-            }
-            return analysisDefinitions;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<InsightDescriptor> getWidgetAnalyses() {
-        List<InsightDescriptor> descriptorList = new ArrayList<InsightDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement getInsightsStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS, user_to_analysis WHERE " +
-                    "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.user_id = ? AND analysis.root_definition = ?");
-            getInsightsStmt.setLong(1, SecurityUtil.getUserID());
-            getInsightsStmt.setBoolean(2, false);
-            ResultSet reportRS = getInsightsStmt.executeQuery();
-            while (reportRS.next()) {
-                // TODO: Add urlKey
-                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4), null));
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return descriptorList;
-    }
-
     public String validateCalculation(String calculationString, long dataSourceID, List<AnalysisItem> reportItems) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
         EIConnection conn = Database.instance().getConnection();
@@ -224,12 +191,9 @@ public class AnalysisService {
 
             Set<KeySpecification> specs = variableVisitor.getVariableList();
 
-            List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
-
             for (KeySpecification spec : specs) {
-                AnalysisItem analysisItem = null;
                 try {
-                    analysisItem = spec.findAnalysisItem(allItems);
+                    spec.findAnalysisItem(allItems);
                 } catch (CloneNotSupportedException e) {
                     throw new RuntimeException(e);
                 }
@@ -249,16 +213,15 @@ public class AnalysisService {
         }
     }
 
-    public void addAnalysisView(long analysisID) {
-        analysisStorage.addAnalysisView(analysisID);
-    }
-
     public ReportMetrics getReportMetrics(long reportID) {
+        EIConnection conn = Database.instance().getConnection();
         try {
-            return analysisStorage.getRating(reportID);
+            return analysisStorage.getRating(reportID, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -363,35 +326,15 @@ public class AnalysisService {
         return report;
     }
 
-    private void saveImage(byte[] image, long reportID, Connection conn) throws SQLException {
-        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM REPORT_IMAGE WHERE REPORT_ID = ?");
-        clearStmt.setLong(1, reportID);
-        clearStmt.executeUpdate();
-        PreparedStatement saveImageStmt = conn.prepareStatement("INSERT INTO REPORT_IMAGE (REPORT_ID, REPORT_IMAGE) VALUES (?, ?)");
-        saveImageStmt.setLong(1, reportID);
-        saveImageStmt.setBytes(2, image);
-        saveImageStmt.execute();
-    }
-
     public void deleteAnalysisDefinition(long reportID) {
-        long userID = SecurityUtil.getUserID();
-        SecurityUtil.authorizeInsight(reportID);
+        int role = SecurityUtil.authorizeInsight(reportID);
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
             AnalysisDefinition dbAnalysisDef = analysisStorage.getPersistableReport(reportID, session);
-            boolean canDelete = analysisStorage.canUserDelete(userID, dbAnalysisDef);
+            boolean canDelete = role == Roles.OWNER;
             if (canDelete) {
                 session.delete(dbAnalysisDef);
-            } else {
-                Iterator<UserToAnalysisBinding> bindingIter = dbAnalysisDef.getUserBindings().iterator();
-                while (bindingIter.hasNext()) {
-                    UserToAnalysisBinding binding = bindingIter.next();
-                    if (binding.getUserID() == userID) {
-                        bindingIter.remove();
-                    }
-                }
-                analysisStorage.saveAnalysis(dbAnalysisDef, session);
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -435,7 +378,6 @@ public class AnalysisService {
     public WSAnalysisDefinition openAnalysisDefinition(long analysisID) {
         try {
             SecurityUtil.authorizeInsight(analysisID);
-            addAnalysisView(analysisID);
             return analysisStorage.getAnalysisDefinition(analysisID);
         } catch (Exception e) {
             LogClass.error(e);
@@ -448,7 +390,6 @@ public class AnalysisService {
         try {
             try {
                 long analysisID = SecurityUtil.authorizeInsight(urlKey);
-                addAnalysisView(analysisID);
                 //AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
                 Connection conn = Database.instance().getConnection();
                 try {
@@ -456,9 +397,8 @@ public class AnalysisService {
                     queryStmt.setLong(1, analysisID);
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
-                    // TODO: Add urlKey
                     insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
-                            rs.getLong(2), rs.getInt(3), null));
+                            rs.getLong(2), rs.getInt(3), urlKey, Roles.NONE));
                 } finally {
                     Database.closeConnection(conn);
                 }
@@ -481,17 +421,14 @@ public class AnalysisService {
         try {
             try {
                 SecurityUtil.authorizeInsight(analysisID);
-                addAnalysisView(analysisID);
-                //AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
                 Connection conn = Database.instance().getConnection();
                 try {
-                    PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS WHERE ANALYSIS_ID = ?");
                     queryStmt.setLong(1, analysisID);
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
-                    // TODO: Add urlKey
                     insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
-                            rs.getLong(2), rs.getInt(3), null));
+                            rs.getLong(2), rs.getInt(3), rs.getString(4), Roles.NONE));
                 } finally {
                     Database.closeConnection(conn);
                 }

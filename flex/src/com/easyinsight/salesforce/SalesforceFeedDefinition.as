@@ -2,7 +2,7 @@ package com.easyinsight.salesforce
 {
 import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 import com.easyinsight.customupload.SalesforceDataSourceCreation;
-import com.easyinsight.listing.DataFeedDescriptor;
+import com.easyinsight.datasources.DataSourceType;
 
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource")]
@@ -23,7 +23,7 @@ import com.easyinsight.listing.DataFeedDescriptor;
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.SALESFORCE;
+        return DataSourceType.SALESFORCE;
     }
 
     override public function isLiveData():Boolean {

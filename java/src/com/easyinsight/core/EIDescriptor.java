@@ -1,5 +1,7 @@
 package com.easyinsight.core;
 
+import com.easyinsight.security.Roles;
+
 /**
  * User: James Boe
  * Date: Mar 28, 2009
@@ -20,8 +22,17 @@ public abstract class EIDescriptor {
     private String name;
     private String urlKey;
     private long id;
+    private int role = Roles.SUBSCRIBER;
 
     public abstract int getType();
+
+    public int getRole() {
+        return role;
+    }
+
+    public void setRole(int role) {
+        this.role = role;
+    }
 
     public String getName() {
         return name;

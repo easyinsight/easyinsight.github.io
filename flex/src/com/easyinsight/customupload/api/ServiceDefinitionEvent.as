@@ -1,6 +1,6 @@
 package com.easyinsight.customupload.api
 {
-	import com.easyinsight.listing.DataFeedDescriptor;
+
 	
 	import flash.events.Event;
 

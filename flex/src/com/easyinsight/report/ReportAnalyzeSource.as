@@ -11,9 +11,6 @@ import mx.collections.ArrayCollection;
 
 public class ReportAnalyzeSource extends PerspectiveInfo {
 
-    public static const ORIGIN_MY_DATA:int = 1;
-    public static const ORIGIN_EXCHANGE:int = 2;
-
     public function ReportAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null, installOption:Boolean = false, origin:int = 0,
             originalReportID:int = 0, originScore:Number = 0, templateUrlKey:String = null) {
         super(PerspectiveInfo.REPORT_VIEW);
@@ -23,8 +20,6 @@ public class ReportAnalyzeSource extends PerspectiveInfo {
         properties.dataSourceID = insightDescriptor.dataFeedID;
         properties.parameterFilters = filters;
         properties.showAddBar = installOption;
-        properties.origin = origin;
-        properties.showLogo = false;
         properties.originReportID = originalReportID;
         properties.originReportScore = originScore;
         properties.templateUrlKey = templateUrlKey;

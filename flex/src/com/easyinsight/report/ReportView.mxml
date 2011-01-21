@@ -108,19 +108,6 @@
             _prefix = value;
         }
 
-        private function subscribedToInsight():void {
-            var result:Boolean = analysisService.subscribeToAnalysis.lastResult as Boolean;
-            if (result) {
-                Alert.show("This report will now show in your My Data page.");
-            } else {
-                Alert.show("This report is already in your My Data page.");
-            }
-        }
-
-        private function bookmark():void {
-            analysisService.subscribeToAnalysis.send(_reportID);
-        }
-
         private function onCreation():void {
             // initializeTransformContainer();
             commandProcessor = new CommandProcessor();
@@ -210,14 +197,6 @@
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/chart_area_x32.png")]
-        private var myDataIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/shopping_bag_x32.png")]
-        private var exchangeIcon:Class;
 
         [Bindable]
         private var dataSource:DataSourceInfo;
@@ -527,36 +506,13 @@
             viewFactory.retrieveData(false);
         }
 
-        public function canRefresh():Boolean {
-            return false;
-        }
-
-        public function canViewInBrowser():Boolean {
-            return false;
-        }
-
-        public function getBrowserURL():String {
-            return null;
-        }
-
         private var _showBack:Boolean = true;
         private var _showFullScreen:Boolean = true;
         private var _showRefresh:Boolean = true;
-        private var _showBookmark:Boolean = true;
         private var _showExport:Boolean = true;
         private var _showReportEditor:Boolean = true;
         private var _showFilters:Boolean = true;
         private var _showMetadata:Boolean = true;
-        private var _showBrowser:Boolean = false;
-        private var _showLogo:Boolean = false;
-
-        public function set showLogo(value:Boolean):void {
-            _showLogo = value;
-        }
-
-        public function set showBrowser(value:Boolean):void {
-            _showBrowser = value;
-        }
 
         public function set showFilterButton(value:Boolean):void {
             _showFilters = value;
@@ -572,10 +528,6 @@
 
         public function set showRefresh(value:Boolean):void {
             _showRefresh = value;
-        }
-
-        public function set showBookmark(value:Boolean):void {
-            _showBookmark = value;
         }
 
         public function set showExport(value:Boolean):void {
@@ -616,27 +568,6 @@
             try {
                 if (!_showBack) {
                     leftButtonBar.removeChild(backButton);
-                } else {
-                    if (_origin == ReportAnalyzeSource.ORIGIN_EXCHANGE) {
-                        var idx1:int = leftButtonBar.getChildIndex(backButton);
-                        leftButtonBar.removeChild(backButton);
-                        var exchangeButton:Button = new Button();
-                        exchangeButton.label = "More Reports";
-                        exchangeButton.labelPlacement = "bottom";
-                        exchangeButton.setStyle("icon", exchangeIcon);
-                        exchangeButton.addEventListener(MouseEvent.CLICK, toExchange);
-                        leftButtonBar.addChildAt(exchangeButton, idx1);
-                    } else if (_origin == ReportAnalyzeSource.ORIGIN_MY_DATA) {
-                        var idx2:int = leftButtonBar.getChildIndex(backButton);
-                        leftButtonBar.removeChild(backButton);
-                        var myDataButton:Button = new Button();
-                        myDataButton.label = "My Data";
-
-                        myDataButton.labelPlacement = "bottom";
-                        myDataButton.setStyle("icon", myDataIcon);
-                        myDataButton.addEventListener(MouseEvent.CLICK, toMyData);
-                        leftButtonBar.addChildAt(myDataButton, idx2);
-                    }
                 }
                 if (!_showFullScreen) {
                     leftButtonBar.removeChild(fullScreenButton);
@@ -880,7 +811,6 @@
     </mx:VBox>
     </mx:VBox>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
-        <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
         <mx:method name="keepReport" result="confirmedKeep()"/>
         <mx:method name="getReportMetrics" result="gotMetrics()"/>
     </mx:RemoteObject>

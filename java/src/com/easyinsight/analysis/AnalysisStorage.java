@@ -1,10 +1,8 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.core.PersistableValue;
-import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.core.Key;
 
 import java.util.*;
 import java.sql.Connection;
@@ -13,10 +11,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
-import org.hibernate.Query;
 
 /**
  * User: James Boe
@@ -25,32 +23,28 @@ import org.hibernate.Query;
  */
 public class AnalysisStorage {
 
-    public ReportMetrics getRating(long analysisID) throws SQLException {
+    public ReportMetrics getRating(long analysisID, EIConnection conn) throws SQLException {
         double ratingAverage = 0;
         int ratingCount = 0;
         int myRating = 0;
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM USER_REPORT_RATING WHERE " +
-                    "REPORT_ID = ?");
-            queryStmt.setLong(1, analysisID);
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                ratingAverage = rs.getDouble(1);
-                ratingCount = rs.getInt(2);
-            }
-            queryStmt.close();
-            PreparedStatement myRatingStmt = conn.prepareStatement("SELECT RATING FROM USER_REPORT_RATING WHERE USER_ID = ? AND " +
-                    "REPORT_ID = ?");
-            myRatingStmt.setLong(1, SecurityUtil.getUserID());
-            myRatingStmt.setLong(2, analysisID);
-            ResultSet myRS = myRatingStmt.executeQuery();
-            if (myRS.next()) {
-                myRating = myRS.getInt(1);
-            }
-        } finally {
-            Database.closeConnection(conn);
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM USER_REPORT_RATING WHERE " +
+                "REPORT_ID = ?");
+        queryStmt.setLong(1, analysisID);
+        ResultSet rs = queryStmt.executeQuery();
+        if (rs.next()) {
+            ratingAverage = rs.getDouble(1);
+            ratingCount = rs.getInt(2);
         }
+        queryStmt.close();
+        PreparedStatement myRatingStmt = conn.prepareStatement("SELECT RATING FROM USER_REPORT_RATING WHERE USER_ID = ? AND " +
+                "REPORT_ID = ?");
+        myRatingStmt.setLong(1, SecurityUtil.getUserID());
+        myRatingStmt.setLong(2, analysisID);
+        ResultSet myRS = myRatingStmt.executeQuery();
+        if (myRS.next()) {
+            myRating = myRS.getInt(1);
+        }
+        myRatingStmt.close();
         return new ReportMetrics(ratingCount, ratingAverage, myRating);
     }
 
@@ -230,50 +224,91 @@ public class AnalysisStorage {
         }
     }
 
-    public Collection<InsightDescriptor> getInsightDescriptors(long userID) {
-        Collection<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ANALYSIS.update_date FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
-                    "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? and root_definition = ? AND temporary_report = ?");
-            queryStmt.setLong(1, userID);
-            queryStmt.setBoolean(2, false);
-            queryStmt.setBoolean(3, false);
-            
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime())));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            Database.instance().closeConnection(conn);
+    public RolePrioritySet<InsightDescriptor> getReports(long userID, long accountID, EIConnection conn) throws SQLException {
+        RolePrioritySet<InsightDescriptor> descriptors = new RolePrioritySet<InsightDescriptor>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ANALYSIS.update_date FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+                "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? AND temporary_report = ?");
+        queryStmt.setLong(1, userID);
+        queryStmt.setBoolean(2, false);
+
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime()), Roles.OWNER));
         }
+        queryStmt.close();
+        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+                "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ?");
+        queryAccountStmt.setLong(1, accountID);
+        queryAccountStmt.setBoolean(2, true);
+        queryAccountStmt.setBoolean(3, false);
+        ResultSet accountRS = queryAccountStmt.executeQuery();
+        while (accountRS.next()) {
+            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.OWNER));
+        }
+        queryAccountStmt.close();
+        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, group_to_user_join.binding_type FROM ANALYSIS, group_to_user_join," +
+                "group_to_insight WHERE " +
+                "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ?");
+        userGroupStmt.setLong(1, userID);
+        ResultSet groupRS = userGroupStmt.executeQuery();
+        while (groupRS.next()) {
+            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), groupRS.getInt(6)));
+        }
+        userGroupStmt.close();
         return descriptors;
     }
 
-    public Collection<InsightDescriptor> getInsightDescriptors(long userID, long reportID) {
-        Collection<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
-                    "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? and root_definition = ? AND temporary_report = ? AND " +
-                    "analysis.data_feed_id = ?");
-            queryStmt.setLong(1, userID);
-            queryStmt.setBoolean(2, false);
-            queryStmt.setBoolean(3, false);
-            queryStmt.setLong(4, reportID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                // TODO: Add urlKey
-                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), null));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            Database.instance().closeConnection(conn);
+    public RolePrioritySet<InsightDescriptor> getReportsForGroup(long groupID, EIConnection conn) throws SQLException {
+        RolePrioritySet<InsightDescriptor> descriptors = new RolePrioritySet<InsightDescriptor>();
+        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, " +
+                "group_to_insight WHERE " +
+                "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = ?");
+        userGroupStmt.setLong(1, groupID);
+        ResultSet groupRS = userGroupStmt.executeQuery();
+        while (groupRS.next()) {
+            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), Roles.SUBSCRIBER));
         }
+        userGroupStmt.close();
         return descriptors;
+    }
+
+    public List<InsightDescriptor> getInsightDescriptorsForDataSource(long userID, long accountID, long dataSourceID, EIConnection conn) throws SQLException {
+        Collection<InsightDescriptor> descriptors = new HashSet<InsightDescriptor>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+                "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? AND temporary_report = ? AND " +
+                "analysis.data_feed_id = ?");
+        queryStmt.setLong(1, userID);
+        queryStmt.setBoolean(2, false);
+        queryStmt.setLong(3, dataSourceID);
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), Roles.OWNER));
+        }
+        queryStmt.close();
+        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+                "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ? AND " +
+                "analysis.data_feed_id = ?");
+        queryAccountStmt.setLong(1, accountID);
+        queryAccountStmt.setBoolean(2, true);
+        queryAccountStmt.setBoolean(3, false);
+        queryAccountStmt.setLong(4, dataSourceID);
+        ResultSet accountRS = queryAccountStmt.executeQuery();
+        while (accountRS.next()) {
+            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.OWNER));
+        }
+        queryAccountStmt.close();
+        PreparedStatement queryVizStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+                "analysis.feed_visibility = ? and temporary_report = ? AND " +
+                "analysis.data_feed_id = ?");
+        queryVizStmt.setBoolean(1, true);
+        queryVizStmt.setBoolean(2, false);
+        queryVizStmt.setLong(3, dataSourceID);
+        ResultSet vizRS = queryVizStmt.executeQuery();
+        while (vizRS.next()) {
+            descriptors.add(new InsightDescriptor(vizRS.getLong(1), vizRS.getString(2), vizRS.getLong(3), vizRS.getInt(4), vizRS.getString(5), Roles.SUBSCRIBER));
+        }
+        queryVizStmt.close();
+        return new ArrayList<InsightDescriptor>(descriptors);
     }
 
     public Collection<WSAnalysisDefinition> getAllDefinitions(long userID) {
@@ -300,228 +335,6 @@ public class AnalysisStorage {
             session.close();
         }
         return analysisDefinitionList;
-    }
-
-    public List<InsightDescriptor> getMostPopularAnalyses(String genre, int maxResults) {
-        Connection conn = Database.instance().getConnection();
-
-        List<InsightDescriptor> analysisList = new ArrayList<InsightDescriptor>();
-        Session session = Database.instance().createSession(conn);
-        try {
-            PreparedStatement analysisQueryStmt;
-            if (genre == null) {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED " +
-                        " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                        "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
-                        "ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
-                analysisQueryStmt.setBoolean(1, true);
-                analysisQueryStmt.setBoolean(2, true);
-                analysisQueryStmt.setBoolean(3, true);
-                analysisQueryStmt.setBoolean(4, false);
-            } else {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED, " +
-                        "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                        "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
-                        "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?) OR " +
-                        "(ANALYSIS_TO_TAG.ANALYSIS_ID = ANALYSIS.ANALYSIS_ID AND ANALYSIS_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?))" +
-                        "AND ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
-                analysisQueryStmt.setBoolean(1, true);
-                analysisQueryStmt.setBoolean(2, true);
-                analysisQueryStmt.setBoolean(3, true);
-                analysisQueryStmt.setString(4, genre);
-                analysisQueryStmt.setString(5, genre);
-                analysisQueryStmt.setBoolean(6, false);
-            }
-            ResultSet analysisRS = analysisQueryStmt.executeQuery();
-            while (analysisRS.next()) {
-                long analysisID = analysisRS.getLong(1);
-                String title = analysisRS.getString(2);
-                long dataSourceID = analysisRS.getLong(3);
-                // TODO: Add urlKey
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4), null));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            Database.instance().closeConnection(conn);
-        }
-        return analysisList;
-    }
-
-    public List<InsightDescriptor> getBestRatedAnalyses(String genre, int maxResults) {
-
-        Connection conn = Database.instance().getConnection();
-
-        List<InsightDescriptor> analysisList = new ArrayList<InsightDescriptor>();
-        Session session = Database.instance().createSession(conn);
-        try {
-            PreparedStatement analysisQueryStmt;
-            if (genre == null) {
-                analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED " +
-                        " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                        "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
-                        "ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
-                analysisQueryStmt.setBoolean(1, true);
-                analysisQueryStmt.setBoolean(2, true);
-                analysisQueryStmt.setBoolean(3, true);
-                analysisQueryStmt.setBoolean(4, false);
-            } else {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED, " +
-                        "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                        "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
-                        "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?) OR " +
-                        "(ANALYSIS_TO_TAG.ANALYSIS_ID = ANALYSIS.ANALYSIS_ID AND ANALYSIS_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?))" +
-                        "AND ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
-                analysisQueryStmt.setBoolean(1, true);
-                analysisQueryStmt.setBoolean(2, true);
-                analysisQueryStmt.setBoolean(3, true);
-                analysisQueryStmt.setString(4, genre);
-                analysisQueryStmt.setString(5, genre);
-                analysisQueryStmt.setBoolean(6, false);
-            }
-            ResultSet analysisRS = analysisQueryStmt.executeQuery();
-            while (analysisRS.next()) {
-                long analysisID = analysisRS.getLong(1);
-                String title = analysisRS.getString(2);
-                long dataSourceID = analysisRS.getLong(3);
-                // TODO: Add urlKey
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4), null));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            Database.instance().closeConnection(conn);
-        }
-        return analysisList;
-    }
-
-    public List<InsightDescriptor> getMostRecentAnalyses(String genre, int maxResults) {
-
-        Connection conn = Database.instance().getConnection();
-
-        List<InsightDescriptor> analysisList = new ArrayList<InsightDescriptor>();
-        Session session = Database.instance().createSession(conn);
-        try {
-            PreparedStatement analysisQueryStmt;
-            if (genre == null) {
-                analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED " +
-                        " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                        "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
-                        "ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
-                analysisQueryStmt.setBoolean(1, true);
-                analysisQueryStmt.setBoolean(2, true);
-                analysisQueryStmt.setBoolean(3, true);
-                analysisQueryStmt.setBoolean(4, false);
-            } else {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED, " +
-                        "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                        "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
-                        "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?) OR " +
-                        "(ANALYSIS_TO_TAG.ANALYSIS_ID = ANALYSIS.ANALYSIS_ID AND ANALYSIS_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?))" +
-                        "AND ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
-                analysisQueryStmt.setBoolean(1, true);
-                analysisQueryStmt.setBoolean(2, true);
-                analysisQueryStmt.setBoolean(3, true);
-                analysisQueryStmt.setString(4, genre);
-                analysisQueryStmt.setString(5, genre);
-                analysisQueryStmt.setBoolean(6, false);
-            }
-            ResultSet analysisRS = analysisQueryStmt.executeQuery();
-            while (analysisRS.next()) {
-                long analysisID = analysisRS.getLong(1);
-                String title = analysisRS.getString(2);
-                long dataSourceID = analysisRS.getLong(3);
-                // TODO: Add urlKey
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4), null));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            Database.instance().closeConnection(conn);
-        }
-        return analysisList;
-    }
-
-    public void addAnalysisView(long analysisID) {
-        Connection conn = Database.instance().getConnection();
-        PreparedStatement getViewCountStmt;
-        PreparedStatement updateViewsStmt;
-        try {
-            getViewCountStmt = conn.prepareStatement("SELECT VIEWS FROM ANALYSIS WHERE " +
-                    "ANALYSIS_ID = ?");
-            updateViewsStmt = conn.prepareStatement("UPDATE ANALYSIS SET VIEWS = ? WHERE " +
-                    "ANALYSIS_ID = ?");
-            getViewCountStmt.setLong(1, analysisID);
-            ResultSet rs = getViewCountStmt.executeQuery();
-            if (rs.next()) {
-                int feedViews = rs.getInt(1);
-                updateViewsStmt.setInt(1, feedViews + 1);
-                updateViewsStmt.setLong(2, analysisID);
-                updateViewsStmt.executeUpdate();
-            }
-            getViewCountStmt.close();
-            updateViewsStmt.close();
-        } catch (SQLException e) {
-
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void rateAnalysis(long analysisID, long accountID, int rating) {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement getExistingRatingStmt = conn.prepareStatement("SELECT RATING_COUNT, RATING_AVERAGE FROM " +
-                    "ANALYSIS WHERE ANALYSIS_ID = ?");
-            PreparedStatement updateRatingStmt = conn.prepareStatement("UPDATE ANALYSIS SET RATING_COUNT = ?, " +
-                    "RATING_AVERAGE = ? WHERE ANALYSIS_ID = ?");
-            getExistingRatingStmt.setLong(1, analysisID);
-            ResultSet rs = getExistingRatingStmt.executeQuery();
-            while (rs.next()) {
-                int count = rs.getInt(1);
-                double average = rs.getDouble(2);
-                int newCount = count + 1;
-                double newAverage = ((average + rating) * newCount) / newCount;
-                updateRatingStmt.setInt(1, count);
-                updateRatingStmt.setDouble(2, newAverage);
-                updateRatingStmt.setLong(3, analysisID);
-                updateRatingStmt.executeUpdate();
-            }
-        } catch (SQLException e) {
-
-            throw new RuntimeException(e);
-        } finally {
-            Database.instance().closeConnection(conn);
-        }
-    }
-
-    public List<InsightDescriptor> getAllDefinitions(String genre) {
-        List<InsightDescriptor> analysisList = new ArrayList<InsightDescriptor>();
-        Session session = Database.instance().createSession();
-        try {
-            session.beginTransaction();
-            Query query;
-            query = session.createQuery("from AnalysisDefinition as analysisDefinition where analysisDefinition.analysisPolicy = ? order by dateCreated desc").
-                    setInteger(0, AnalysisPolicy.PUBLIC);
-            Iterator iter = query.iterate();
-            while (iter.hasNext()) {
-                AnalysisDefinition analysisDefinition = (AnalysisDefinition) iter.next();
-                // TODO: Add urlKey
-                analysisList.add(new InsightDescriptor(analysisDefinition.getAnalysisID(), analysisDefinition.getTitle(), analysisDefinition.getDataFeedID(), analysisDefinition.getReportType(), null));
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-        return analysisList;
     }
 
     private boolean isOwner(Long userID, AnalysisDefinition analysisDefinition) {
@@ -586,73 +399,5 @@ public class AnalysisStorage {
         } finally {
             session.close();
         }
-    }
-
-    public List<InsightDescriptor> getReportsForGroups(long userID) throws SQLException {
-        List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type, analysis.url_key " +
-                    "from group_to_insight, group_to_user_join, analysis where " +
-                        "group_to_user_join.group_id = group_to_insight.group_id and group_to_insight.insight_id = analysis.analysis_id and group_to_user_join.user_id = ? AND " +
-                    "analysis.account_visible = ?");
-            queryStmt.setLong(1, userID);
-            queryStmt.setBoolean(2, true);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5)));
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return reports;
-    }
-
-    public List<InsightDescriptor> getReportsForAccount(long accountID) throws SQLException {
-        List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type, analysis.url_key, analysis.update_date " +
-                    "from user_to_analysis, user, analysis where " +
-                        "user_to_analysis.user_id = user.user_id and user_to_analysis.analysis_id = analysis.analysis_id and user.account_id = ? AND " +
-                    "analysis.account_visible = ?");
-            queryStmt.setLong(1, accountID);
-            queryStmt.setBoolean(2, true);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime())));
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return reports;
-    }
-
-    public List<InsightDescriptor> getReportsForGroup(long groupID) throws SQLException {
-        List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type, analysis.url_key, analysis.update_date " +
-                    "from group_to_insight, analysis where " +
-                        "(group_to_insight.group_id = ? and group_to_insight.insight_id = analysis.analysis_id)");
-            queryStmt.setLong(1, groupID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime())));
-            }
-            PreparedStatement dsShareStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type, analysis.url_key, analysis.update_date " +
-                    "from analysis, data_feed, upload_policy_groups where " +
-                    "(analysis.feed_visibility = ? AND analysis.data_feed_id = data_feed.data_feed_id AND data_feed.data_feed_id = upload_policy_groups.feed_id AND " +
-                    "upload_policy_groups.group_id = ?)");
-            dsShareStmt.setBoolean(1, true);
-            dsShareStmt.setLong(2, groupID);
-            ResultSet shareRS = dsShareStmt.executeQuery();
-            while (shareRS.next()) {
-                reports.add(new InsightDescriptor(shareRS.getLong(1), shareRS.getString(2), shareRS.getLong(3), shareRS.getInt(4), shareRS.getString(5), new Date(shareRS.getTimestamp(6).getTime())));
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return reports;
     }
 }

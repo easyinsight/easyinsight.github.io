@@ -2,6 +2,7 @@ package com.easyinsight.listing
 {
 import com.easyinsight.framework.User;
 
+import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import mx.controls.Label;
@@ -40,8 +41,8 @@ import mx.formatters.DateFormatter;
 		override public function set data(value:Object):void {
 			this.object = value;
 			if (value != null) {
-				if (value is DataFeedDescriptor) {
-					var descriptor:DataFeedDescriptor = value as DataFeedDescriptor;
+				if (value is DataSourceDescriptor) {
+					var descriptor:DataSourceDescriptor = value as DataSourceDescriptor;
                     if (descriptor.lastDataTime == null) {
                         this.text = "( No Data )";
                     } else {

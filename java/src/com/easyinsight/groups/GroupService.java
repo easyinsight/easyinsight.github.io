@@ -1,22 +1,15 @@
 package com.easyinsight.groups;
 
-import com.easyinsight.analysis.AnalysisStorage;
-import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.goals.GoalTreeNode;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.audit.AuditMessage;
 import com.easyinsight.users.Account;
-import com.easyinsight.goals.GoalTreeDescriptor;
-import com.easyinsight.goals.GoalStorage;
-import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.userupload.MyDataTree;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -216,107 +209,15 @@ public class GroupService {
         }
     }
 
-    /*public void addUserToGroup(long userID, long groupID, int userRole) {
+    public List<DataSourceDescriptor> getGroupDataSources(long groupID) {
+        EIConnection conn = Database.instance().getConnection();
         try {
-            groupStorage.addUserToGroup(userID, groupID, userRole);
+            return new FeedStorage().getDataSourcesForGroup(SecurityUtil.getUserID(), groupID, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
-        }
-    }
-
-    public void removeUserFromGroup(long userID, long groupID) {
-        try {
-            groupStorage.removeUserFromGroup(userID, groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    } */
-
-    public void addMemberToGroup(long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
-        long userID = SecurityUtil.getUserID();
-        try {
-            Group group = getGroup(groupID);
-            int role;
-            if (group.isPubliclyVisible()) {
-                role = Roles.SUBSCRIBER;
-            } else if (group.isPubliclyJoinable()) {
-                role = Roles.SHARER;
-            } else {
-                throw new RuntimeException();
-            }
-            groupStorage.addUserToGroup(userID, groupID, role);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<FeedDescriptor> getGroupDataSources(long groupID) {
-        try {
-            return new FeedStorage().getDataSourcesForGroup(groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public MyDataTree getFeedAnalysisTree(long groupID) {
-        try {
-            FeedStorage feedStorage = new FeedStorage();
-            List<Object> objects = new ArrayList<Object>();
-
-            Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
-
-            List<FeedDescriptor> groupDataSources = feedStorage.getDataSourcesForGroup(groupID);
-            for (FeedDescriptor groupDescriptor : groupDataSources) {
-                if (!descriptorMap.containsKey(groupDescriptor.getId())) {
-                    descriptorMap.put(groupDescriptor.getId(), groupDescriptor);
-                }
-            }
-
-            objects.addAll(descriptorMap.values());
-            AnalysisStorage analysisStorage = new AnalysisStorage();
-            Map<Long, Set<EIDescriptor>> analysisDefinitions = new HashMap<Long, Set<EIDescriptor>>();
-
-
-
-            for (InsightDescriptor analysisDefinition : analysisStorage.getReportsForGroup(groupID)) {
-                Set<EIDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
-                if (defList == null) {
-                    defList = new HashSet<EIDescriptor>();
-                    analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
-                }
-                defList.add(analysisDefinition);
-            }
-
-            for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
-                Set<EIDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getId());
-                if (analysisDefList == null) {
-                    analysisDefList = new HashSet<EIDescriptor>();
-                }
-                feedDescriptor.setChildren(new ArrayList<EIDescriptor>(analysisDefList));
-            }
-            for (Set<EIDescriptor> defList : analysisDefinitions.values()) {
-                objects.addAll(defList);
-            }
-            return new MyDataTree(objects, true);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-    
-    public void inviteNewUserToGroup(String emailAddress, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        try {
-            String activationID = groupStorage.inviteNewUserToGroup(groupID);
-            
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
@@ -340,6 +241,16 @@ public class GroupService {
         }
     }
 
+    public void removeGoalTreeFromGroup(long goalTreeID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        try {
+            groupStorage.removeGoalTreeFromGroup(goalTreeID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<GroupDescriptor> getGroupsForDataSource(long dataSourceID) {
         try {
             return groupStorage.getGroupsForDataSource(dataSourceID);
@@ -354,109 +265,6 @@ public class GroupService {
             groupStorage.updateGroupsForDataSource(dataSourceID, groups);
         } catch (Exception e) {
             LogClass.error(e);
-        }
-    }
-
-    public List<GroupDescriptor> getGroupsForReport(long reportID) {
-        try {
-            return groupStorage.getGroupsForReport(reportID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void updateGroupsForReport(long reportID, List<GroupDescriptor> groups) {
-        try {
-            groupStorage.updateGroupsForReport(reportID, groups);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-    }
-
-    public void removeGoalTreeFromGroup(long goalTreeID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
-        try {
-            groupStorage.removeGoalTreeFromGroup(goalTreeID, groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void removeGoalFromGroup(long goalID, long groupID) {
-         SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
-        try {
-            groupStorage.removeGoalFromGroup(goalID, groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void addDataSourceToDefaultGroup(long feedID) {
-        SecurityUtil.authorizeFeed(feedID, Roles.SHARER);
-        long groupID;
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT GROUP_ID FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-            queryStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                groupID = rs.getLong(1);
-            } else {
-                throw new RuntimeException("Couldn't find a group");
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        try {
-            groupStorage.addFeedToGroup(feedID, groupID, Roles.OWNER);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void addReportToDefaultGroup(long reportID) {
-        SecurityUtil.authorizeInsight(reportID);
-        long groupID;
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT GROUP_ID FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-            queryStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                groupID = rs.getLong(1);
-            } else {
-                throw new RuntimeException("Couldn't find a group");
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        try {
-            groupStorage.addReportToGroup(reportID, groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void addFeedToGroup(long feedID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        SecurityUtil.authorizeFeed(feedID, Roles.SHARER);
-        try {
-            groupStorage.addFeedToGroup(feedID, groupID, Roles.OWNER);
-            FeedRegistry.instance().flushCache(feedID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         }
     }
 
@@ -482,60 +290,12 @@ public class GroupService {
         }
     }
 
-    public void addGoalToGroup(long goalID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
-        SecurityUtil.authorizeGoal(goalID, Roles.SUBSCRIBER);
-        try {
-            groupStorage.addGoalToGroup(goalID, groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<GroupChange> getChanges(long groupID) {
-        throw new UnsupportedOperationException();
-    }
-
-    public List<InsightDescriptor> getInsights(long groupID) {
+    public void addFeedToGroup(long feedID, long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeFeed(feedID, Roles.SHARER);
         try {
-            return groupStorage.getInsights(groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<FeedDescriptor> getFeeds(long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        long userID = SecurityUtil.getUserID();
-        try {
-            return groupStorage.getFeeds(groupID, userID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<GoalTreeDescriptor> getGoalTrees(long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        try {
-            return groupStorage.getGoalTrees(groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<GoalTreeNode> getGoals(long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        try {
-            Calendar cal = Calendar.getInstance();
-            Date endDate = cal.getTime();
-            cal.add(Calendar.DAY_OF_YEAR, -7);
-            Date startDate = cal.getTime();
-            return new GoalStorage().getGoalsForGroup(groupID);
+            groupStorage.addFeedToGroup(feedID, groupID, Roles.OWNER);
+            FeedRegistry.instance().flushCache(feedID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

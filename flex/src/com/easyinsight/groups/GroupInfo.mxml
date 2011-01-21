@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5"
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5"
         width="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.TagCloud;
@@ -36,12 +36,6 @@
         private var tags:String;
 
         [Bindable]
-        private var publiclyVisible:Boolean;
-
-        [Bindable]
-        private var anyoneCanJoin:Boolean;
-
-        [Bindable]
         private var ownerText:String;
 
         [Bindable]
@@ -58,8 +52,6 @@
             _group.name = groupNameInput.text;
             _group.description = descriptionInput.text;
             _group.tags = TagCloud.fromString(tagsInput.text);
-            _group.publiclyJoinable = anyoneCanJoinCheckbox.selected;
-            _group.publiclyVisible = publiclyVisibleCheckbox.selected;
             groupService.updateGroup.send(_group);
         }
 
@@ -92,8 +84,6 @@
                     ownerLabel = "Group Owners:";
                 }
                 tags = TagCloud.toString(_group.tags);
-                publiclyVisible = _group.publiclyVisible;
-                anyoneCanJoin = _group.publiclyJoinable;
             }
         }]]></mx:Script>
     <mx:RemoteObject id="groupService" destination="groupService">
@@ -150,12 +140,6 @@
                         <mx:TextInput text="{tags}" id="tagsInput" width="100%" change="onChange(event)"/>
                     </mx:Box>
                 </mx:ViewStack>
-			</mx:FormItem>
-			<mx:FormItem label="Publicly Visible:">
-				<mx:CheckBox selected="{publiclyVisible}" id="publiclyVisibleCheckbox" enabled="{_groupAdmin}" change="onChange(event)"/>
-			</mx:FormItem>
-			<mx:FormItem label="Anyone Can Join:">
-				<mx:CheckBox selected="{anyoneCanJoin}" id="anyoneCanJoinCheckbox" enabled="{_groupAdmin}" change="onChange(event)"/>
 			</mx:FormItem>
         </mx:Form>
     </mx:VBox>

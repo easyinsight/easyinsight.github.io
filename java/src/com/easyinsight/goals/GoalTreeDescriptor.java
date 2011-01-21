@@ -8,8 +8,8 @@ import com.easyinsight.core.EIDescriptor;
  * Time: 1:29:33 PM
  */
 public class GoalTreeDescriptor extends EIDescriptor {
-    private int role;
     private String iconName;
+    private long dataSourceID;
 
     @Override
     public int getType() {
@@ -19,10 +19,19 @@ public class GoalTreeDescriptor extends EIDescriptor {
     public GoalTreeDescriptor() {
     }
 
-    public GoalTreeDescriptor(long id, String name, int role, String iconName, String urlKey) {
+    public GoalTreeDescriptor(long id, String name, int role, String iconName, String urlKey, long dataSourceID) {
         super(name, id, urlKey);
-        this.role = role;
+        setRole(role);
         this.iconName = iconName;
+        this.dataSourceID = dataSourceID;
+    }
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
     }
 
     public String getIconName() {
@@ -31,13 +40,5 @@ public class GoalTreeDescriptor extends EIDescriptor {
 
     public void setIconName(String iconName) {
         this.iconName = iconName;
-    }
-
-    public int getRole() {
-        return role;
-    }
-
-    public void setRole(int role) {
-        this.role = role;
     }
 }

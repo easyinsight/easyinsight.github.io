@@ -175,7 +175,7 @@ public class DataService {
             results.setDataSourceAccessible(dataSourceAccessible);
             results.setDefinition(analysisDefinition);
 
-            ReportMetrics reportMetrics = new AnalysisStorage().getRating(reportID);
+            ReportMetrics reportMetrics = new AnalysisStorage().getRating(reportID, conn);
             results.setRatingsAverage(reportMetrics.getAverage());
             results.setRatingsCount(reportMetrics.getCount());
             results.setMyRating(reportMetrics.getMyRating());

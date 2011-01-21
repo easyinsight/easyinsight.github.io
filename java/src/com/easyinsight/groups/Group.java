@@ -13,8 +13,6 @@ import java.util.ArrayList;
 public class Group {
     private long groupID;
     private String name;
-    private boolean publiclyVisible;
-    private boolean publiclyJoinable;
     private String description;
     private List<Tag> tags;
     private List<GroupUser> groupUsers = new ArrayList<GroupUser>();
@@ -50,22 +48,6 @@ public class Group {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isPubliclyVisible() {
-        return publiclyVisible;
-    }
-
-    public void setPubliclyVisible(boolean publiclyVisible) {
-        this.publiclyVisible = publiclyVisible;
-    }
-
-    public boolean isPubliclyJoinable() {
-        return publiclyJoinable;
-    }
-
-    public void setPubliclyJoinable(boolean publiclyJoinable) {
-        this.publiclyJoinable = publiclyJoinable;
     }
 
     public String getDescription() {

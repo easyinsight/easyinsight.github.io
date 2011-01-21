@@ -7,7 +7,6 @@ import com.easyinsight.kpi.KPI;
 import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
-import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
@@ -35,56 +34,20 @@ public class GoalService {
         }
     }                                                                
 
-    public GoalSaveInfo createGoalTree(GoalTree goalTree) {
+    public GoalSaveInfo saveGoalTree(GoalTree goalTree) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         if (goalTree.getAdministrators() == null || goalTree.getAdministrators().size() == 0) {
             throw new RuntimeException("At least one administrator must be defined.");
         }
         long userID = SecurityUtil.getUserID();
         try {
-            UserStub userStub = new UserStub();
-            userStub.setUserID(userID);
-            return goalStorage.addGoalTree(goalTree);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void deleteMilestone(long milestoneID) {
-        SecurityUtil.authorizeMilestone(milestoneID);
-        try {
-            goalStorage.deleteMilestone(milestoneID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public long saveMilestone(GoalTreeMilestone goalTreeMilestone) {
-        long accountID = SecurityUtil.getAccountID();
-        try {
-            return goalStorage.addMilestone(goalTreeMilestone, accountID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<GoalTreeMilestone> getMilestones() {
-        long accountID = SecurityUtil.getAccountID();
-        try {
-            return goalStorage.getMilestones(accountID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void updateMilestone(GoalTreeMilestone goalTreeMilestone) {
-        SecurityUtil.authorizeMilestone(goalTreeMilestone.getMilestoneID());
-        try {
-            goalStorage.updateMilestone(goalTreeMilestone);
+            if (goalTree.getGoalTreeID() == 0) {
+                UserStub userStub = new UserStub();
+                userStub.setUserID(userID);
+                return goalStorage.addGoalTree(goalTree);
+            } else {
+                return goalStorage.updateGoalTree(goalTree);
+            }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -110,16 +73,6 @@ public class GoalService {
             throw new RuntimeException(e);
         }
     }*/
-
-    public GoalSaveInfo updateGoalTree(GoalTree goalTree) {
-        SecurityUtil.authorizeGoalTree(goalTree.getGoalTreeID(), Roles.OWNER);
-        try {
-            return goalStorage.updateGoalTree(goalTree);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
 
     public GoalSaveInfo splitGoalTree(GoalTree originalTree, GoalTree newTree, GoalTreeNode parentNode) {
         SecurityUtil.authorizeGoalTree(originalTree.getGoalTreeID(), Roles.OWNER);
@@ -152,10 +105,8 @@ public class GoalService {
         }
     }
 
-    public AvailableGoalTreeList getGoalTreesForInstall(long goalTreeID) {
-        AvailableGoalTreeList availableGoalTreeList = new AvailableGoalTreeList();
+    public List<GoalTreeDescriptor> getGoalTreesForInstall(long goalTreeID, long dataSourceID) {
         List<GoalTreeDescriptor> myTrees = new ArrayList<GoalTreeDescriptor>();
-        List<SolutionGoalTreeDescriptor> solutionTrees;
         try {
             List<GoalTreeDescriptor> goalTrees = getGoalTrees();
             Iterator<GoalTreeDescriptor> iter = goalTrees.iterator();
@@ -164,16 +115,16 @@ public class GoalService {
                 if (descriptor.getId() == goalTreeID) {
                     iter.remove();
                 }
+                if (descriptor.getDataSourceID() != dataSourceID) {
+                    iter.remove();
+                }
             }
             myTrees.addAll(goalTrees);
-            solutionTrees = new SolutionService().getTreesFromSolutions();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-        availableGoalTreeList.setMyTrees(myTrees);
-        availableGoalTreeList.setSolutionTrees(solutionTrees);
-        return availableGoalTreeList;
+        return myTrees;
     }
 
     public AvailableSolutionList getSolutionsByTags(List<Tag> tags) {
@@ -248,32 +199,14 @@ public class GoalService {
     }
 
     public List<GoalTreeDescriptor> getGoalTrees() {
+        EIConnection conn = Database.instance().getConnection();
         try {
-            return goalStorage.getTreesForUser(SecurityUtil.getUserID());
+            return goalStorage.getTrees(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn).values();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
-        }
-    }
-
-    public boolean subscribeToGoal(long goalTreeNodeID) {
-        SecurityUtil.authorizeGoal(goalTreeNodeID, Roles.SUBSCRIBER);
-        long userID = SecurityUtil.getUserID();
-        try {
-            return goalStorage.addUserToGoal(userID, goalTreeNodeID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void unsubscribeToGoal(long goalTreeNodeID) {
-        long userID = SecurityUtil.getUserID();
-        try {
-            goalStorage.removeUserFromGoal(userID, goalTreeNodeID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 

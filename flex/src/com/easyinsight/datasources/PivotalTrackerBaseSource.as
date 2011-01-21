@@ -1,7 +1,7 @@
 package com.easyinsight.datasources {
 import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 import com.easyinsight.customupload.PivotalTrackerDataSourceCreation;
-import com.easyinsight.listing.DataFeedDescriptor;
+
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource")]
@@ -20,7 +20,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.PIVOTAL_TRACKER;
+        return DataSourceType.PIVOTAL_TRACKER;
     }
 
     override public function configClass():Class {

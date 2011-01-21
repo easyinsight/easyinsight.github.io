@@ -1,6 +1,6 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.HighRiseDataSourceCreation;
-import com.easyinsight.listing.DataFeedDescriptor;
+
 
 import mx.collections.ArrayCollection;
 
@@ -29,7 +29,7 @@ public class HighRiseDataSource extends CompositeServerDataSource {
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.HIGHRISE;
+        return DataSourceType.HIGHRISE;
     }
 
     override public function configClass():Class {

@@ -1,11 +1,10 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:account="com.easyinsight.account.*" creationComplete="initProperties()"
          width="100%" height="100%">
     <mx:Script><![CDATA[
 
         import com.easyinsight.preferences.PersonaConfigurationWindow;
-        import com.easyinsight.preferences.PreferencesWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
@@ -83,12 +82,6 @@
 
         private function managePersona():void {
             var window:PersonaConfigurationWindow = new PersonaConfigurationWindow();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function showPreferences():void {
-            var window:PreferencesWindow = new PreferencesWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

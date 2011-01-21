@@ -16,7 +16,7 @@ public class SolutionGoalTreeDescriptor extends GoalTreeDescriptor {
 
     public SolutionGoalTreeDescriptor(long goalTreeID, String goalTreeName, int role, long solutionID, String solutionName, String iconImage) {
         // TODO: add urlKey
-        super(goalTreeID, goalTreeName, role, iconImage, null);
+        super(goalTreeID, goalTreeName, role, iconImage, null, 0);
         this.solutionID = solutionID;
         this.solutionName = solutionName;
     }

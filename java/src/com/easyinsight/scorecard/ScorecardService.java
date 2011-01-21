@@ -4,7 +4,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.*;
 import com.easyinsight.kpi.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.HistoryRun;
@@ -164,7 +163,7 @@ public class ScorecardService {
 
         boolean hasData = true;
         if (scorecards.isEmpty()) {
-            hasData = (new UserUploadService().getFeedAnalysisTree(true, true).getObjects().size() > 0);
+            hasData = (new UserUploadService().getFeedAnalysisTree(false, 0).getObjects().size() > 0);
         }
         return new ScorecardList(scorecards, hasData);
     }

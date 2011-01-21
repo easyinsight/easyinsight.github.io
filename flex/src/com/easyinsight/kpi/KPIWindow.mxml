@@ -27,7 +27,8 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.icons.IconSelectionEvent;
         import com.easyinsight.icons.IconSelectionWindow;
-        import com.easyinsight.listing.DataFeedDescriptor;
+
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.CompletionItemEvent;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -48,7 +49,7 @@
         }
 
         [Bindable]
-        private var dataSource:DataFeedDescriptor;
+        private var dataSource:DataSourceDescriptor;
 
         [Bindable]
         private var tagString:String;
@@ -93,7 +94,7 @@
         private var editIcon:Class;
 
         private function onDataSourceChange(event:CompletionItemEvent):void {
-            var descriptor:DataFeedDescriptor = event.selectedItem as DataFeedDescriptor;
+            var descriptor:DataSourceDescriptor = event.selectedItem as DataSourceDescriptor;
             feedID = descriptor.id;
             dataSource = descriptor;
             insightBound = true;
@@ -163,7 +164,7 @@
 
                 analysisMeasure = _kpi.analysisMeasure;
                 insightBound = true;
-                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
                 descriptor.id = _kpi.coreFeedID;
                 descriptor.name = _kpi.coreFeedName;
                 //connectionVisible = _kpi.connectionVisible;
@@ -211,7 +212,7 @@
             descriptors.sort = sort;
             descriptors.refresh();
             if (dataSource != null) {
-                for each (var desc:DataFeedDescriptor in descriptors) {
+                for each (var desc:DataSourceDescriptor in descriptors) {
                     if (desc.id == dataSource.id) {
                         dataSource = desc;
                         break;
@@ -228,7 +229,7 @@
             descriptors.sort = sort;
             descriptors.refresh();
             if (dataSource != null) {
-                for each (var desc:DataFeedDescriptor in descriptors) {
+                for each (var desc:DataSourceDescriptor in descriptors) {
                     if (desc.id == dataSource.id) {
                         dataSource = desc;
                         break;

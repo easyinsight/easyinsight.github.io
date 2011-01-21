@@ -1,17 +1,18 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*"
-           xmlns:schedule="com.easyinsight.schedule.*" width="100%"
+           width="100%"
            height="100%">
     <mx:Metadata>
         [Event(name="connectionProgression", type="flash.events.Event")]
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
+        import com.easyinsight.datasources.DataSourceBehavior;
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.kpi.KPI;
-        import com.easyinsight.listing.DataFeedDescriptor;
+
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.schedule.DailyScheduleType;
         import com.easyinsight.schedule.DataSourceRefreshActivity;
@@ -35,11 +36,7 @@
             kpiLabel = kpiLabel + value.name + " data to create executive scorecards";
             reportLabel = reportLabel + value.name + " data";
             syncLabel = "Easy Insight synchronizes with data from " + value.name + " in order to provide an optimal user experience. You can set the data source to refresh on demand or on a scheduled basis.";
-            if (value.dataSourceType == DataFeedDescriptor.BASECAMP ||
-                    value.dataSourceType == DataFeedDescriptor.HIGHRISE ||
-                    value.dataSourceType == DataFeedDescriptor.PIVOTAL_TRACKER ||
-                    value.dataSourceType == DataFeedDescriptor.WHOLE_FOODS ||
-                    value.dataSourceType == DataFeedDescriptor.CONSTANT_CONTACT) {
+            if (DataSourceBehavior.pullDataSource(value.dataSourceType)) {
                 syncButton = "Next";
             } else {
                 syncButton = "Finish";

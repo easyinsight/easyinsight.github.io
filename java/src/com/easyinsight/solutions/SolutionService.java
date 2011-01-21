@@ -10,6 +10,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.AuthorizationManager;
 import com.easyinsight.security.AuthorizationRequirement;
@@ -442,7 +443,7 @@ public class SolutionService {
                 Date dateCreated = new Date(rs.getTimestamp(4).getTime());
                 String authorName = rs.getString(5);
                 String description = rs.getString(6);
-                EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, null);
+                EIDescriptor descriptor = new InsightDescriptor(reportID, null, dataSourceID, 0, null, Roles.NONE);
                 PreparedStatement ratingStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM USER_REPORT_RATING WHERE REPORT_ID = ?");
                 ratingStmt.setLong(1, reportID);
                 ResultSet ratingRS = ratingStmt.executeQuery();
@@ -466,7 +467,7 @@ public class SolutionService {
                     Date dateCreated = new Date(dashboardRS.getTimestamp(4).getTime());
                     String authorName = dashboardRS.getString(5);
                     String description = dashboardRS.getString(6);
-                    EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey, 0);
+                    EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey, 0, Roles.NONE);
                     blah = determineDataSourceForDashboard(dashboardID, conn);
                     PreparedStatement ratingStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM DASHBOARD_USER_RATING WHERE DASHBOARD_ID = ?");
                     ratingStmt.setLong(1, dashboardID);
@@ -678,7 +679,7 @@ public class SolutionService {
 
             dashboardStorage.saveDashboard(copiedDashboard, conn);
 
-            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0);
+            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE);
 
             session.flush();
 
@@ -739,9 +740,8 @@ public class SolutionService {
             session.flush();
 
             AnalysisDefinition copiedBaseReport = reportReplacementMap.get(reportID);
-            // TODO: Add urlKey
             InsightDescriptor insightDescriptor = new InsightDescriptor(copiedBaseReport.getAnalysisID(), copiedBaseReport.getTitle(),
-                    copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType(),null);
+                    copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType(), copiedBaseReport.getUrlKey(), Roles.OWNER);
 
             conn.commit();
             session.close();
@@ -824,7 +824,7 @@ public class SolutionService {
                 ratingRS.next();
                 double ratingAverage = ratingRS.getLong(1);
                 int ratingCount = ratingRS.getInt(2);
-                InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey);
+                InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey, Roles.NONE);
                 SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID,
                         ratingAverage, ratingCount, created, description, authorName, insightDescriptor, connectionID, connectionName);
                 reports.add(item);
@@ -858,7 +858,7 @@ public class SolutionService {
 
                 double ratingAverage = ratingRS.getDouble(1);
                 int ratingCount = ratingRS.getInt(2);
-                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0);
+                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, Roles.NONE);
                 SolutionReportExchangeItem item = new SolutionReportExchangeItem(dashboardName, dashboardID, ratingAverage,
                         ratingCount, createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName);
                 reports.add(item);
@@ -901,34 +901,8 @@ public class SolutionService {
         }
     }
 
-    public List<FeedDescriptor> getAvailableFeeds() {
-        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
-        List<FeedDescriptor> feedDescriptors = new ArrayList<FeedDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
-            queryStmt.setLong(1, SecurityUtil.getUserID());
-            queryStmt.setBoolean(2, true);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long feedID = rs.getLong(1);
-                String name = rs.getString(2);
-                FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setId(feedID);
-                feedDescriptor.setName(name);
-                feedDescriptors.add(feedDescriptor);
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return feedDescriptors;
-    }
-
-    public List<FeedDescriptor> getDescriptorsForSolution(long solutionID) {
-        List<FeedDescriptor> feedDescriptors = new ArrayList<FeedDescriptor>();
+    public List<DataSourceDescriptor> getDescriptorsForSolution(long solutionID) {
+        List<DataSourceDescriptor> feedDescriptors = new ArrayList<DataSourceDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME FROM SOLUTION_TO_FEED, DATA_FEED " +
@@ -938,9 +912,7 @@ public class SolutionService {
             while (rs.next()) {
                 long feedID = rs.getLong(1);
                 String name = rs.getString(2);
-                FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setId(feedID);
-                feedDescriptor.setName(name);
+                DataSourceDescriptor feedDescriptor = new DataSourceDescriptor(name, feedID, 0);
                 feedDescriptors.add(feedDescriptor);
             }
         } catch (Exception e) {

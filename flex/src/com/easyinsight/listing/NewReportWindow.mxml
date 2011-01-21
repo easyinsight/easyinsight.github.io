@@ -7,11 +7,7 @@
         import com.easyinsight.solutions.DataSourceDescriptor;
 
         import mx.collections.ArrayCollection;
-        import mx.containers.GridItem;
-        import mx.containers.GridRow;
-        import mx.containers.HBox;
         import mx.controls.Button;
-        import mx.controls.Label;
         import mx.managers.PopUpManager;
 
         public var dataSources:ArrayCollection;
@@ -29,7 +25,7 @@
                 var dsButton:Button = new Button();
                 dsButton.label = ds.name;
                 dsButton.data = ds;
-                dsButton.styleName = "blueButton";
+                dsButton.styleName = "grayButton";
                 dsButton.setStyle("fontSize", 14);
                 dsButton.width = 220;
                 dsButton.addEventListener(MouseEvent.CLICK, onChoice);

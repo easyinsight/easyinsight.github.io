@@ -6,16 +6,10 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.analysis.Tag;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.audit.AuditMessage;
-import com.easyinsight.goals.GoalTreeDescriptor;
-import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.notifications.ReportToGroupNotification;
-import com.easyinsight.notifications.NotificationBase;
-import com.easyinsight.users.User;
 
 import java.util.*;
 import java.util.Date;
@@ -61,13 +55,11 @@ public class GroupStorage {
 
     public long addGroup(Group group, long userID, Connection conn) throws SQLException {
         PreparedStatement insertGroupStmt = conn.prepareStatement("INSERT INTO COMMUNITY_GROUP " +
-                    "(NAME, DESCRIPTION, PUBLICLY_JOINABLE, PUBLICLY_VISIBLE, URL_KEY)" +
-                    "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "(NAME, DESCRIPTION, URL_KEY)" +
+                    "VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertGroupStmt.setString(1, group.getName());
         insertGroupStmt.setString(2, group.getDescription());
-        insertGroupStmt.setBoolean(3, group.isPubliclyJoinable());
-        insertGroupStmt.setBoolean(4, group.isPubliclyVisible());
-        insertGroupStmt.setString(5, group.getUrlKey());
+        insertGroupStmt.setString(3, group.getUrlKey());
         insertGroupStmt.execute();
         long groupID = Database.instance().getAutoGenKey(insertGroupStmt);
         addUserToGroup(userID, groupID, GroupToUserBinding.OWNER, conn);
@@ -98,22 +90,18 @@ public class GroupStorage {
         Group group = null;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, PUBLICLY_JOINABLE, PUBLICLY_VISIBLE, URL_KEY FROM " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, URL_KEY FROM " +
                     "COMMUNITY_GROUP WHERE COMMUNITY_GROUP_ID = ?");
             queryStmt.setLong(1, groupID);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
                 String name = rs.getString(1);
                 String description = rs.getString(2);
-                boolean publiclyJoinable = rs.getBoolean(3);
-                boolean publiclyVisible = rs.getBoolean(4);
-                String urlKey = rs.getString(5);
+                String urlKey = rs.getString(3);
                 group = new Group();
                 group.setName(name);
                 group.setGroupID(groupID);
                 group.setDescription(description);
-                group.setPubliclyJoinable(publiclyJoinable);
-                group.setPubliclyVisible(publiclyVisible);
                 group.setUrlKey(urlKey);
                 group.setTags(new ArrayList<Tag>(getTags(groupID, conn)));
             }
@@ -126,12 +114,10 @@ public class GroupStorage {
     public void updateGroup(Group group, Connection conn) {
         try {
             PreparedStatement updateGroupStmt = conn.prepareStatement("UPDATE COMMUNITY_GROUP " +
-                    "SET NAME = ?, DESCRIPTION = ?, PUBLICLY_JOINABLE = ?, PUBLICLY_VISIBLE = ? WHERE COMMUNITY_GROUP_ID = ?");
+                    "SET NAME = ?, DESCRIPTION = ? WHERE COMMUNITY_GROUP_ID = ?");
             updateGroupStmt.setString(1, group.getName());
             updateGroupStmt.setString(2, group.getDescription());
-            updateGroupStmt.setBoolean(3, group.isPubliclyJoinable());
-            updateGroupStmt.setBoolean(4, group.isPubliclyVisible());
-            updateGroupStmt.setLong(5, group.getGroupID());
+            updateGroupStmt.setLong(3, group.getGroupID());
             int rows = updateGroupStmt.executeUpdate();
             if (rows != 1) {
                 throw new RuntimeException("Update failed");
@@ -316,51 +302,10 @@ public class GroupStorage {
     }
 
     public void removeUserFromGroup(long userID, long groupID, Connection conn) throws SQLException {
-            PreparedStatement deleteUserStmt = conn.prepareStatement("DELETE FROM GROUP_TO_USER_JOIN WHERE USER_ID = ? AND GROUP_ID = ?");
-            deleteUserStmt.setLong(1, userID);
-            deleteUserStmt.setLong(2, groupID);
-            deleteUserStmt.executeUpdate();
-    }
-
-    public List<InsightDescriptor> getInsights(long groupID) throws SQLException {
-        List<InsightDescriptor> analysisIDs = new ArrayList<InsightDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT INSIGHT_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, " +
-                    "ANALYSIS.REPORT_TYPE FROM GROUP_TO_INSIGHT, ANALYSIS WHERE GROUP_ID = ? AND " +
-                    "ANALYSIS.ANALYSIS_ID = GROUP_TO_INSIGHT.INSIGHT_ID");
-            queryStmt.setLong(1, groupID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long analysisID = rs.getLong(1);
-                String title = rs.getString(2);
-                long dataSourceID = rs.getLong(3);
-                int reportType = rs.getInt(4);
-                // TODO: Add urlKey
-                analysisIDs.add(new InsightDescriptor(analysisID, title, dataSourceID, reportType,null));
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return analysisIDs;
-    }
-
-    public List<GoalTreeDescriptor> getGoalTrees(long groupID) throws SQLException {
-        List<GoalTreeDescriptor> goalTrees = new ArrayList<GoalTreeDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name, goal_tree_icon FROM GROUP_TO_GOAL_TREE_JOIN, GOAL_TREE WHERE GROUP_ID = ? AND " +
-                    "GROUP_TO_GOAL_TREE_JOIN.GOAL_TREE_ID = GOAL_TREE.goal_tree_id");
-            queryStmt.setLong(1, groupID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                // TODO: add urlKey
-                goalTrees.add(new GoalTreeDescriptor(rs.getLong(1), rs.getString(2), Roles.SHARER, rs.getString(3), null));
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return goalTrees;
+        PreparedStatement deleteUserStmt = conn.prepareStatement("DELETE FROM GROUP_TO_USER_JOIN WHERE USER_ID = ? AND GROUP_ID = ?");
+        deleteUserStmt.setLong(1, userID);
+        deleteUserStmt.setLong(2, groupID);
+        deleteUserStmt.executeUpdate();
     }
 
     public String inviteNewUserToGroup(long groupID) throws SQLException {
@@ -424,13 +369,60 @@ public class GroupStorage {
         }
     }
 
-    public void removeGoalFromGroup(long dataSourceID, long groupID) throws SQLException {
+    public void addReportToGroup(long reportID, long groupID) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        Session s = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_INSIGHT_ID FROM GROUP_TO_INSIGHT WHERE " +
+                    "GROUP_ID = ? AND INSIGHT_ID = ?");
+            existingLinkQuery.setLong(1, groupID);
+            existingLinkQuery.setLong(2, reportID);
+            ResultSet existingRS = existingLinkQuery.executeQuery();
+            if (existingRS.next()) {
+                long existingID = existingRS.getLong(1);
+                PreparedStatement updateLinkStmt = conn.prepareStatement("UPDATE GROUP_TO_INSIGHT SET ROLE = ? WHERE " +
+                        "GROUP_TO_INSIGHT_ID = ?");
+                updateLinkStmt.setLong(1, Roles.OWNER);
+                updateLinkStmt.setLong(2, existingID);
+                updateLinkStmt.executeUpdate();
+                updateLinkStmt.close();
+            } else {
+                PreparedStatement insightReportStmt = conn.prepareStatement("INSERT INTO GROUP_TO_INSIGHT (GROUP_ID, INSIGHT_ID, ROLE) " +
+                        "VALUES (?, ?, ?)");
+                insightReportStmt.setLong(1, groupID);
+                insightReportStmt.setLong(2, reportID);
+                insightReportStmt.setLong(3, Roles.OWNER);
+                insightReportStmt.execute();
+                insightReportStmt.close();
+            }
+            existingLinkQuery.close();
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            s.close();
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void addGoalTreeToGroup(long goalTreeID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GROUP_TO_GOAL_TREE_NODE_JOIN WHERE goal_tree_node_id = ? AND GROUP_ID = ?");
-            deleteStmt.setLong(1, dataSourceID);
-            deleteStmt.setLong(2, groupID);
-            deleteStmt.executeUpdate();
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_GOAL_TREE_JOIN_ID FROM GROUP_TO_GOAL_TREE_JOIN WHERE " +
+                    "GROUP_ID = ? AND GOAL_TREE_ID = ?");
+            existingLinkQuery.setLong(1, groupID);
+            existingLinkQuery.setLong(2, goalTreeID);
+            ResultSet existingRS = existingLinkQuery.executeQuery();
+            if (!existingRS.next()) {
+                PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO GROUP_TO_GOAL_TREE_JOIN (GROUP_ID, GOAL_TREE_ID) " +
+                        "VALUES (?, ?)");
+                insertFeedStmt.setLong(1, groupID);
+                insertFeedStmt.setLong(2, goalTreeID);
+                insertFeedStmt.execute();
+            }
         } finally {
             Database.closeConnection(conn);
         }
@@ -464,134 +456,6 @@ public class GroupStorage {
         } finally {
             Database.closeConnection(conn);
         }
-    }
-
-    public void addReportToGroup(long reportID, long groupID) throws SQLException {
-        EIConnection conn = Database.instance().getConnection();
-        Session s = Database.instance().createSession(conn);
-        try {
-            conn.setAutoCommit(false);
-            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_INSIGHT_ID FROM GROUP_TO_INSIGHT WHERE " +
-                    "GROUP_ID = ? AND INSIGHT_ID = ?");
-            existingLinkQuery.setLong(1, groupID);
-            existingLinkQuery.setLong(2, reportID);
-            ResultSet existingRS = existingLinkQuery.executeQuery();
-            if (existingRS.next()) {
-                long existingID = existingRS.getLong(1);
-                PreparedStatement updateLinkStmt = conn.prepareStatement("UPDATE GROUP_TO_INSIGHT SET ROLE = ? WHERE " +
-                        "GROUP_TO_INSIGHT_ID = ?");
-                updateLinkStmt.setLong(1, Roles.OWNER);
-                updateLinkStmt.setLong(2, existingID);
-                updateLinkStmt.executeUpdate();
-            } else {
-                PreparedStatement insightReportStmt = conn.prepareStatement("INSERT INTO GROUP_TO_INSIGHT (GROUP_ID, INSIGHT_ID, ROLE) " +
-                        "VALUES (?, ?, ?)");
-                insightReportStmt.setLong(1, groupID);
-                insightReportStmt.setLong(2, reportID);
-                insightReportStmt.setLong(3, Roles.OWNER);
-                insightReportStmt.execute();
-            }
-            ReportToGroupNotification notification = new ReportToGroupNotification();
-            notification.setActingUser((User) s.get(User.class, SecurityUtil.getUserID()));
-            notification.setAnalysisAction(NotificationBase.ADD);
-            notification.setAnalysisRole(NotificationBase.VIEWER);
-            notification.setGroupID(groupID);
-            notification.setNotificationDate(new Date());
-            notification.setAnalysisID(reportID);
-            notification.setNotificationType(NotificationBase.REPORT_TO_GROUP);
-            s.save(notification);
-            conn.commit();
-        } catch (Exception e) {
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            s.close();
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void addGoalTreeToGroup(long goalTreeID, long groupID) throws SQLException {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_GOAL_TREE_JOIN_ID FROM GROUP_TO_GOAL_TREE_JOIN WHERE " +
-                    "GROUP_ID = ? AND GOAL_TREE_ID = ?");
-            existingLinkQuery.setLong(1, groupID);
-            existingLinkQuery.setLong(2, goalTreeID);
-            ResultSet existingRS = existingLinkQuery.executeQuery();
-            if (!existingRS.next()) {
-                PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO GROUP_TO_GOAL_TREE_JOIN (GROUP_ID, GOAL_TREE_ID) " +
-                        "VALUES (?, ?)");
-                insertFeedStmt.setLong(1, groupID);
-                insertFeedStmt.setLong(2, goalTreeID);
-                insertFeedStmt.execute();
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void addGoalToGroup(long goalID, long groupID) throws SQLException {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_GOAL_TREE_NODE_JOIN_ID FROM GROUP_TO_GOAL_TREE_NODE_JOIN WHERE " +
-                    "GROUP_ID = ? AND GOAL_TREE_NODE_ID = ?");
-            existingLinkQuery.setLong(1, groupID);
-            existingLinkQuery.setLong(2, goalID);
-            ResultSet existingRS = existingLinkQuery.executeQuery();
-            if (!existingRS.next()) {
-                PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO GROUP_TO_GOAL_TREE_NODE_JOIN (GROUP_ID, GOAL_TREE_NODE_ID) " +
-                        "VALUES (?, ?)");
-                insertFeedStmt.setLong(1, groupID);
-                insertFeedStmt.setLong(2, goalID);
-                insertFeedStmt.execute();
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public List<FeedDescriptor> getFeeds(long groupID, long userID) throws SQLException {
-        List<FeedDescriptor> descriptors = new ArrayList<FeedDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, " +
-                    "DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, UPLOAD_POLICY_GROUPS.ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE " +
-                    "FROM UPLOAD_POLICY_GROUPS, DATA_FEED WHERE " +
-                    "UPLOAD_POLICY_GROUPS.GROUP_ID = ? AND " +
-                    "UPLOAD_POLICY_GROUPS.FEED_ID = DATA_FEED.DATA_FEED_ID");
-            PreparedStatement getUserRoleStmt = conn.prepareStatement("SELECT ROLE FROM UPLOAD_POLICY_USERS WHERE USER_ID = ? AND FEED_ID = ?");
-            queryStmt.setLong(1, groupID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long feedID = rs.getLong(1);
-                String name = rs.getString(2);
-                int feedType = rs.getInt(3);
-                String ownerName = rs.getString(4);
-                String description = rs.getString(5);
-                String attribution = rs.getString(6);
-                int groupRole = rs.getInt(7);
-                getUserRoleStmt.setLong(1, userID);
-                getUserRoleStmt.setLong(2, feedID);
-                ResultSet userRS = getUserRoleStmt.executeQuery();
-                int userRole = Integer.MAX_VALUE;
-                if (userRS.next()) {
-                    userRole = userRS.getInt(1);
-                }
-
-                int role = Math.min(groupRole, userRole);
-                FeedDescriptor feedDescriptor = createDescriptor(feedID, name, role, 0, feedType, ownerName, description, attribution, null);
-                descriptors.add(feedDescriptor);
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return descriptors; 
-    }
-
-    private FeedDescriptor createDescriptor(long dataFeedID, String feedName, Integer userRole,
-                                            long size, int feedType, String ownerName, String description, String attribution, Date lastDataTime) throws SQLException {
-        return new FeedDescriptor(feedName, dataFeedID, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
     }
 
     public List<AuditMessage> getGroupMessages(long groupID, Date startDate, Date endDate, int limit) throws SQLException {
@@ -654,43 +518,6 @@ public class GroupStorage {
             Database.closeConnection(conn);
         }
         return groupComments;
-    }
-
-    public List<GroupDescriptor> getGroupsForReport(long reportID) throws SQLException {
-        List<GroupDescriptor> groups = new ArrayList<GroupDescriptor>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement groupStmt = conn.prepareStatement("SELECT group_id, community_group.name FROM group_to_insight, community_group where insight_id = ? and " +
-                    "community_group.community_group_id = group_to_insight.group_id");
-            groupStmt.setLong(1, reportID);
-            ResultSet rs = groupStmt.executeQuery();
-            while (rs.next()) {
-                long groupID = rs.getLong(1);
-                String name = rs.getString(2);
-                groups.add(new GroupDescriptor(name, groupID, 0, null));
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return groups;
-    }
-
-    public void updateGroupsForReport(long reportID, List<GroupDescriptor> groups) throws SQLException {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM GROUP_TO_INSIGHT WHERE INSIGHT_ID = ?");
-            clearStmt.setLong(1, reportID);
-            clearStmt.executeUpdate();
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO GROUP_TO_INSIGHT (INSIGHT_ID, GROUP_ID, ROLE) VALUES (?, ?, ?)");
-            for (GroupDescriptor desc : groups) {
-                insertStmt.setLong(1, reportID);
-                insertStmt.setLong(2, desc.getGroupID());
-                insertStmt.setInt(3, Roles.OWNER);
-                insertStmt.execute();
-            }
-        } finally {
-            Database.closeConnection(conn);
-        }
     }
 
     public List<GroupDescriptor> getGroupsForDataSource(long dataSourceID) throws SQLException {

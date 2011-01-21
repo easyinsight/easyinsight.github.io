@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-         xmlns:listing="com.easyinsight.listing.*" xmlns:scorecards="com.easyinsight.scorecard.*" width="100%"
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
+         xmlns:scorecards="com.easyinsight.scorecard.*" width="100%"
          height="100%"
          implements="com.easyinsight.listing.IPerspective"
          xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*"
          creationComplete="setup()" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*">
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.listing.DataFeedDescriptor;
+
         import com.easyinsight.listing.DeleteDataSourceEvent;
-        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
@@ -74,7 +74,6 @@
             addEventListener(RemoveItemFromGroupEvent.REMOVE_DATA_SOURCE_FROM_GROUP, removeFromGroup);
             addEventListener(RemoveItemFromGroupEvent.REMOVE_REPORT_FROM_GROUP, removeFromGroup);
             addEventListener(RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP, removeFromGroup);
-            addEventListener(RemoveItemFromGroupEvent.REMOVE_GOAL_FROM_GROUP, removeFromGroup);
             addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
         }
 
@@ -84,12 +83,9 @@
 
         private function deleteItem(selectedItem:Object):void {
             this.selectedItem = selectedItem;
-            if (selectedItem is DataFeedDescriptor) {
+            if (selectedItem is DataSourceDescriptor) {
                 Alert.show("Are you sure you want to remove this data source from the group?", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-            } else if (selectedItem is InsightDescriptor) {
-                Alert.show("Are you sure you want to remove this report from the group?", "Alert",
-                        Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
             }
         }
 
@@ -97,25 +93,9 @@
 
         private function alertFeedListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                var feedDescriptor:DataFeedDescriptor = selectedItem as DataFeedDescriptor;
+                var feedDescriptor:DataSourceDescriptor = selectedItem as DataSourceDescriptor;
                 ProgressAlert.alert(this, "Removing data source...", null, groupService.removeDataSourceFromGroup);
                 groupService.removeDataSourceFromGroup.send(feedDescriptor.id, groupID);
-            }
-        }
-
-        private function alertPackageListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                /*var reportDescriptor:ReportPackageDescriptor = uploadGrid.selectedItem as ReportPackageDescriptor;
-                 ProgressAlert.alert(this, "Deleting package...", "Deleted package!", packageService.deleteReportPackage);
-                 packageService.deleteReportPackage.send(reportDescriptor.id);*/
-            }
-        }
-
-        private function alertInsightListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                var definition:InsightDescriptor = selectedItem as InsightDescriptor;
-                ProgressAlert.alert(this, "Removing report...", null, groupService.removeReportFromGroup);
-                groupService.removeReportFromGroup.send(definition.id, groupID);
             }
         }
 
@@ -168,17 +148,6 @@
             gotFocus();
         }
 
-
-        private function joinGroup():void {
-            groupService.addMemberToGroup.send(_group.groupID);
-        }
-
-        private function addedToGroup():void {
-            numberMembersText = (_group.groupUsers.length) + _group.groupUsers.length + " members";
-            joinEnabled = false;
-            Alert.show("You are now a member of this group.");
-        }
-
         private function gotGroupMessages():void {
             this.messages = groupService.getGroupMessages.lastResult as ArrayCollection;
         }
@@ -199,8 +168,6 @@
                 groupService.removeReportFromGroup.send(event.id, groupID);
             } else if (event.type == RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP) {
                 groupService.removeGoalTreeFromGroup.send(event.id, groupID);
-            } else if (event.type == RemoveItemFromGroupEvent.REMOVE_GOAL_FROM_GROUP) {
-                groupService.removeGoalFromGroup.send(event.id, groupID);
             }
         }
 
@@ -219,22 +186,11 @@
     <mx:RemoteObject destination="groupService" id="groupService">
         <mx:method name="getGroup" result="gotGroupDetails()"/>
         <mx:method name="getGroupMessages" result="gotGroupMessages()"/>
-        <mx:method name="addMemberToGroup" result="addedToGroup()"/>
         <mx:method name="addGroupComment" result="addedComment()"/>
-        <mx:method name="removeReportFromGroup" result="removed()"/>
         <mx:method name="removeDataSourceFromGroup" result="removed()"/>
-        <mx:method name="removeGoalTreeFromGroup" result="removed()"/>
-        <mx:method name="removeGoalFromGroup" result="removed()"/>
+        <mx:method name="removeReportFromGroup" result="removed()"/>
+        <mx:method name="removeKPITreeFromGroup" result="removed()"/>
     </mx:RemoteObject>
-    <!--
-        a few things we have to address:
-
-        what actually shows up in the group screen
-            scorecards
-        for non-admin users
-            persona concept?
-            
-    -->
     <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
     <mx:Canvas width="100%" height="100%">
         <mx:VBox width="100%" height="100%" verticalGap="0">
@@ -249,7 +205,6 @@
                 <mx:dataProvider>
                     <mx:Array>
                         <mx:String>Scorecards</mx:String>
-                        <mx:String>Messages</mx:String>
                         <mx:String>Data Sources and Reports</mx:String>
                         <mx:String>Info</mx:String>
                         <mx:String>Members</mx:String>
@@ -259,7 +214,6 @@
             <mx:ViewStack width="100%" creationPolicy="all"
                     paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" id="viewStack" height="100%">
                 <scorecards:ScorecardGroupDisplay groupID="{groupID}" label="Scorecards" hideEffect="leftEffect" showEffect="leftEffect"/>
-                <discussion:DiscussionPanel dataProvider="{messages}" width="100%" label="Messages" hideEffect="leftEffect" showEffect="leftEffect"/>
                 <groups:GroupMyData groupID="{groupID}" label="Data Sources and Reports" groupAdmin="{editorEnabled}" id="groupData" hideEffect="leftEffect" showEffect="leftEffect"/>
                 <groups:GroupInfo group="{_group}" label="Info" groupAdmin="{adminEnabled}" hideEffect="leftEffect" showEffect="leftEffect"/>
                 <groups:ManageGroupUsers groupID="{groupID}" id="manageUsers" label="Members" groupAdmin="{adminEnabled}" hideEffect="leftEffect" showEffect="leftEffect"/>

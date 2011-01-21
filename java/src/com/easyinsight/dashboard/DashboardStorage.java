@@ -1,10 +1,12 @@
 package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.core.RolePrioritySet;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.security.Roles;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
@@ -36,6 +38,32 @@ public class DashboardStorage {
         }
     }
 
+    public RolePrioritySet<DashboardDescriptor> getDashboards(long userID, long accountID, EIConnection conn) throws SQLException {
+        RolePrioritySet<DashboardDescriptor> dashboards = new RolePrioritySet<DashboardDescriptor>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id from " +
+                "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
+                "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id");
+        queryStmt.setLong(1, accountID);
+        queryStmt.setBoolean(2, false);
+        queryStmt.setBoolean(3, true);
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.OWNER));
+        }
+        queryStmt.close();
+        PreparedStatement ueryAccountStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id from " +
+                "dashboard, user_to_dashboard where user_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
+                "dashboard.temporary_dashboard = ?");
+        ueryAccountStmt.setLong(1, userID);
+        ueryAccountStmt.setBoolean(2, false);
+        ResultSet accountRS = ueryAccountStmt.executeQuery();
+        while (accountRS.next()) {
+            dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.OWNER));
+        }
+        ueryAccountStmt.close();
+        return dashboards;
+    }
+
     public void saveDashboard(Dashboard dashboard, EIConnection conn) throws SQLException {
         if (dashboard.getId() == 0) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD (DASHBOARD_NAME, URL_KEY, " +
@@ -53,6 +81,7 @@ public class DashboardStorage {
             insertStmt.setBoolean(10, dashboard.isTemporary());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
+            insertStmt.close();
         } else {
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET DASHBOARD_NAME = ?," +
                     "URL_KEY = ?, ACCOUNT_VISIBLE = ?, UPDATE_DATE = ?, DESCRIPTION = ?, EXCHANGE_VISIBLE = ?, AUTHOR_NAME = ?, TEMPORARY_DASHBOARD = ? WHERE DASHBOARD_ID = ?");
@@ -66,15 +95,19 @@ public class DashboardStorage {
             updateStmt.setBoolean(8, dashboard.isTemporary());
             updateStmt.setLong(9, dashboard.getId());
             updateStmt.executeUpdate();
+            updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
             clearStmt.setLong(1, dashboard.getId());
             clearStmt.executeUpdate();
+            clearStmt.close();
             PreparedStatement clearUserStmt = conn.prepareStatement("DELETE FROM USER_TO_DASHBOARD WHERE DASHBOARD_ID = ?");
             clearUserStmt.setLong(1, dashboard.getId());
             clearUserStmt.executeUpdate();
+            clearUserStmt.close();
             PreparedStatement clearDSStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_FILTER WHERE DASHBOARD_ID = ?");
             clearDSStmt.setLong(1, dashboard.getId());
             clearDSStmt.executeUpdate();
+            clearDSStmt.close();
         }
 
         long id = dashboard.getRootElement().save(conn);
@@ -83,6 +116,7 @@ public class DashboardStorage {
         saveRootStmt.setLong(1, dashboard.getId());
         saveRootStmt.setLong(2, id);
         saveRootStmt.execute();
+        saveRootStmt.close();
 
         Session session = Database.instance().createSession(conn);
         try {
@@ -101,6 +135,7 @@ public class DashboardStorage {
             filterStmt.setLong(2, filterDefinition.getFilterID());
             filterStmt.execute();
         }
+        filterStmt.close();
 
         PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO USER_TO_DASHBOARD (USER_ID, DASHBOARD_ID) VALUES (?, ?)");
         for (FeedConsumer feedConsumer : dashboard.getAdministrators()) {
@@ -109,6 +144,7 @@ public class DashboardStorage {
             saveStmt.setLong(2, dashboard.getId());
             saveStmt.execute();
         }
+        saveStmt.close();
     }
 
     public Dashboard getDashboard(long dashboardID, EIConnection conn) throws Exception {
@@ -140,9 +176,11 @@ public class DashboardStorage {
                 DashboardElement dashboardElement = getElement(conn, elementID, elementType);
                 dashboard.setRootElement(dashboardElement);
             }
+            findElementsStmt.close();
         } else {
             throw new RuntimeException("Couldn't find dashboard " + dashboardID);
         }
+        queryStmt.close();
 
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         Session session = Database.instance().createSession(conn);
@@ -155,6 +193,7 @@ public class DashboardStorage {
                 filter.afterLoad();
                 filters.add(filter);
             }
+            filterStmt.close();
         } finally {
             session.close();
         }
@@ -168,6 +207,7 @@ public class DashboardStorage {
             // TODO: cleanup
             admins.add(new UserStub(userID, null, null, null, 0, null));
         }
+        getUserStmt.close();
         dashboard.setAdministrators(admins);
         return dashboard;
     }
@@ -212,6 +252,7 @@ public class DashboardStorage {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DASHBOARD WHERE DASHBOARD_ID = ?");
             deleteStmt.setLong(1, dashboardID);
             deleteStmt.executeUpdate();
+            deleteStmt.close();
             conn.commit();
         } catch (Exception e) {
             conn.rollback();

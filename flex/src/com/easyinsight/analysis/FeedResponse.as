@@ -1,8 +1,8 @@
 package com.easyinsight.analysis
 {
-	import com.easyinsight.listing.DataFeedDescriptor;
-	
-	[Bindable]
+import com.easyinsight.solutions.DataSourceDescriptor;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.FeedResponse")]
 	public class FeedResponse
 	{
@@ -11,7 +11,7 @@ package com.easyinsight.analysis
         public static const REJECTED:int = 3;
 
 
-		public var feedDescriptor:DataFeedDescriptor;
+		public var feedDescriptor:DataSourceDescriptor;
 		public var status:int;
 		
 		public function FeedResponse()

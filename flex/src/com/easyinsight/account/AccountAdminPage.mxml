@@ -40,7 +40,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.preferences.PreferencesWindow;
         import com.easyinsight.skin.ApplicationSkinWindow;
         import com.easyinsight.util.PopUpUtil;
 
@@ -84,12 +83,6 @@
             var accountSettingsWindow:AccountSettingsWindow = new AccountSettingsWindow();
             PopUpManager.addPopUp(accountSettingsWindow, this, true);
             PopUpUtil.centerPopUp(accountSettingsWindow);
-        }
-
-        private function showPreferences():void {
-            var window:PreferencesWindow = new PreferencesWindow();
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function invoices():void {

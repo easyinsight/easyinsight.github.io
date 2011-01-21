@@ -1,8 +1,7 @@
 package com.easyinsight.analysis
 {
-	import com.easyinsight.framework.LoginEvent;
 
-import com.easyinsight.framework.User;
+
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.ReportAnalyzeSource;
 	import flash.events.EventDispatcher;
@@ -29,18 +28,10 @@ import com.easyinsight.report.ReportAnalyzeSource;
 		private function gotAnalysisDefinition(event:ResultEvent):void {
         	var insightResponse:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
         	if (insightResponse.status == InsightResponse.SUCCESS) {
-                if (User.getInstance() == null) {
-        		    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightResponse.insightDescriptor, null, false, ReportAnalyzeSource.ORIGIN_EXCHANGE)));
-                } else {
-                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightResponse.insightDescriptor)));
-                }
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightResponse.insightDescriptor)));
         	} else {
                 // silently fail, user trying to spoof an ID
             }
-        }  
-        
-        private function delayedAnalysis(event:LoginEvent):void {
-        	analysisService.openAnalysisIfPossible.send(analysisID);
         }
 	}
 }

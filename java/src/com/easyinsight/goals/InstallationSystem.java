@@ -78,8 +78,6 @@ public class InstallationSystem {
             installedObjectMap.put(new SolutionElementKey(solutionInstallInfo.getDescriptor().getType(), solutionInstallInfo.getPreviousID()), solutionInstallInfo.getDescriptor().getId());
         }
 
-        goalTree.setNewSolutions(new ArrayList<Integer>());
-
         installSubTrees(goalTree);
 
         installDataSourcesAndReports(goalTree);
@@ -97,7 +95,7 @@ public class InstallationSystem {
         goalStorage.addGoalTree(clonedTree, conn);
         // TODO: add urlKey
         allSolutions.add(new SolutionInstallInfo(goalTree.getGoalTreeID(), new GoalTreeDescriptor(clonedTree.getGoalTreeID(), clonedTree.getName(), Roles.OWNER,
-                clonedTree.getIconImage(), null), null, false));
+                clonedTree.getIconImage(), null, 0), null, false));
         return clonedTree.getGoalTreeID();
     }
 

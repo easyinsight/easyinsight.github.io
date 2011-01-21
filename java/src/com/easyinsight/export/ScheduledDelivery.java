@@ -81,6 +81,7 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
             String email = emailRS.getString(1);
             emails.add(email);
         }
+        queryEmailStmt.close();
         setUsers(users);
         setEmails(emails);
     }

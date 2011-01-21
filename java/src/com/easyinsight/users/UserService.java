@@ -639,8 +639,6 @@ public class UserService {
             if (account.getAccountType() != Account.PERSONAL) {
                 Group group = new Group();
                 group.setName(account.getName());
-                group.setPubliclyVisible(false);
-                group.setPubliclyJoinable(false);
                 group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
                 account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
                 session.update(account);

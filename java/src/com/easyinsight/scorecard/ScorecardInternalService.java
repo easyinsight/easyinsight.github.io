@@ -87,7 +87,7 @@ public class ScorecardInternalService {
 
         boolean hasData = true;
         if (scorecards.isEmpty()) {
-            hasData = (new UserUploadService().getFeedAnalysisTree(true, true).getObjects().size() > 0);
+            hasData = (new UserUploadService().getFeedAnalysisTree(false, 0).getObjects().size() > 0);
         }
         return new ScorecardList(scorecards, hasData);
     }

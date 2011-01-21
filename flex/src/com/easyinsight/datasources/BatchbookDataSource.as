@@ -1,6 +1,6 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.BatchbookDataSourceCreation;
-import com.easyinsight.listing.DataFeedDescriptor;
+
 
 
 [Bindable]
@@ -20,7 +20,7 @@ public class BatchbookDataSource extends CompositeServerDataSource {
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.BATCHBOOK;
+        return DataSourceType.BATCHBOOK;
     }
 
     override public function configClass():Class {

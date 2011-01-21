@@ -1,8 +1,6 @@
 package com.easyinsight.datasources {
 import com.easyinsight.administration.feed.ServerDataSourceDefinition;
-import com.easyinsight.customupload.BaseCampDataSourceCreation;
 import com.easyinsight.customupload.TwitterDataSourceCreation;
-import com.easyinsight.listing.DataFeedDescriptor;
 
 import mx.collections.ArrayCollection;
 
@@ -22,7 +20,7 @@ public class TwitterDataSource extends ServerDataSourceDefinition {
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.TWITTER;
+        return DataSourceType.TWITTER;
     }
 
     override public function configClass():Class {

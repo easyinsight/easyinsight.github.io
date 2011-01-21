@@ -1,6 +1,6 @@
 package com.easyinsight.solutions
 {
-	import com.easyinsight.listing.DataFeedDescriptor;
+
 	
 	import flash.events.MouseEvent;
 	
@@ -12,7 +12,7 @@ package com.easyinsight.solutions
 		[Embed(source="../../../../assets/navigate_cross.png")]
         public var refreshIcon:Class;
         
-        private var feedDescriptor:DataFeedDescriptor;
+        private var feedDescriptor:DataSourceDescriptor;
         
         private var deleteButton:Button;
         
@@ -33,7 +33,7 @@ package com.easyinsight.solutions
 		}
 		
 		override public function set data(value:Object):void {
-			this.feedDescriptor = value as DataFeedDescriptor;
+			this.feedDescriptor = value as DataSourceDescriptor;
 		}
 		
 		override public function get data():Object {

@@ -1,11 +1,13 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.DashboardDescriptor;
-import com.easyinsight.dashboard.DashboardService;
+import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.goals.GoalStorage;
+import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
@@ -35,7 +37,7 @@ import org.hibernate.Session;
  * Date: Jan 26, 2008
  * Time: 9:17:37 PM
  */
-public class UserUploadService implements IUserUploadService {
+public class UserUploadService {
 
 
     private static FeedStorage feedStorage = new FeedStorage();
@@ -65,99 +67,131 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public MyDataTree getFeedAnalysisTree(boolean includeGroups, boolean firstCall) {
+    private boolean keep(EIDescriptor descriptor, boolean onlyMyData) {
+        return !onlyMyData || descriptor.getRole() == Roles.OWNER;
+    }
+
+    private long getDataSourceID(EIDescriptor descriptor) {
+        if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+            return ((DashboardDescriptor) descriptor).getDataSourceID();
+        } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
+            return ((GoalTreeDescriptor) descriptor).getDataSourceID();
+        } else if (descriptor.getType() == EIDescriptor.REPORT) {
+            return ((InsightDescriptor) descriptor).getDataFeedID();
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
+    public MyDataTree getFeedAnalysisTree(boolean onlyMyData) {
+        return getFeedAnalysisTree(onlyMyData, 0);
+    }
+
+    public MyDataTree getFeedAnalysisTree(boolean onlyMyData, long groupID) {
         long userID = SecurityUtil.getUserID();
+        long accountID = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
         try {
-            List<Object> objects = new ArrayList<Object>();
-            List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
-            objects.addAll(new GoalStorage().getTreesForUser(userID));
-
-            Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
-            for (FeedDescriptor descriptor : descriptors) {
-                descriptorMap.put(descriptor.getId(), descriptor);
+            conn.setAutoCommit(false);
+            List<EIDescriptor> objects = new ArrayList<EIDescriptor>();
+            List<EIDescriptor> results = new ArrayList<EIDescriptor>();
+            List<DataSourceDescriptor> dataSources;
+            if (groupID == 0) {
+                dataSources = feedStorage.getDataSources(userID, accountID, conn);
+            } else {
+                dataSources = feedStorage.getDataSourcesForGroup(userID, groupID, conn);
             }
-            if (includeGroups) {
-                List<FeedDescriptor> groupDataSources = new ArrayList<FeedDescriptor>();
-                groupDataSources.addAll(feedStorage.getDataSourcesFromGroups(userID));
-                groupDataSources.addAll(feedStorage.getDataSourcesFromAccount(SecurityUtil.getAccountID()));
-                for (FeedDescriptor groupDescriptor : groupDataSources) {
-                    if (!descriptorMap.containsKey(groupDescriptor.getId())) {
-                        descriptorMap.put(groupDescriptor.getId(), groupDescriptor);
-                    }
+
+            Iterator<DataSourceDescriptor> dataSourceIter = dataSources.iterator();
+            while (dataSourceIter.hasNext()) {
+                DataSourceDescriptor dataSource = dataSourceIter.next();
+                if (!keep(dataSource, onlyMyData)) {
+                    dataSourceIter.remove();
                 }
             }
-            objects.addAll(descriptorMap.values());
+
             AnalysisStorage analysisStorage = new AnalysisStorage();
-            Map<Long, List<EIDescriptor>> analysisDefinitions = new HashMap<Long, List<EIDescriptor>>();
-            Set<InsightDescriptor> groupReports = new HashSet<InsightDescriptor>();
-            if (includeGroups) {
-                groupReports.addAll(analysisStorage.getReportsForGroups(userID));
-                groupReports.addAll(analysisStorage.getReportsForAccount(SecurityUtil.getAccountID()));
-                objects.addAll(new DashboardService().getDashboardsForAccount());
+
+            if (groupID == 0) {
+                objects.addAll(new GoalStorage().getTrees(userID, accountID, conn).values());
+                objects.addAll(new DashboardStorage().getDashboards(userID, accountID, conn).values());
+                objects.addAll(analysisStorage.getReports(userID, accountID, conn).values());
+            } else {
+                objects.addAll(analysisStorage.getReportsForGroup(groupID, conn).values());
             }
 
-            for (InsightDescriptor analysisDefinition : analysisStorage.getInsightDescriptors(userID)) {
-                if (includeGroups) {
-                    groupReports.remove(analysisDefinition);
+            Iterator<EIDescriptor> iter = objects.iterator();
+            while (iter.hasNext()) {
+                EIDescriptor descriptor = iter.next();
+                if (!keep(descriptor, onlyMyData)) {
+                    iter.remove();
                 }
-                List<EIDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
-                if (defList == null) {
-                    defList = new ArrayList<EIDescriptor>();
-                    analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
-                }
-                defList.add(analysisDefinition);
             }
 
-            List<DashboardDescriptor> dashboards = new DashboardService().getDashboardsForUser();
+            Map<Long, DataSourceDescriptor> descriptorMap = new HashMap<Long, DataSourceDescriptor>();
+            for (DataSourceDescriptor dataSource : dataSources) {
+                descriptorMap.put(dataSource.getId(), dataSource);
+            }
 
+            if (groupID != 0) {
+                int role = SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+                for (EIDescriptor descriptor : objects) {
+                    descriptor.setRole(role);
+                }
+            }
 
+            iter = objects.iterator();
+            while (iter.hasNext()) {
+                EIDescriptor descriptor = iter.next();
+                long dataSourceID = getDataSourceID(descriptor);
+                DataSourceDescriptor dataSource = descriptorMap.get(dataSourceID);
+                if (dataSource != null) {
+                    dataSource.getChildren().add(descriptor);
+                    iter.remove();
+                }
+            }
 
-            if (includeGroups) {
-                for (InsightDescriptor analysisDefinition : groupReports) {
-                    List<EIDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
-                    if (defList == null) {
-                        defList = new ArrayList<EIDescriptor>();
-                        analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
+            if (groupID == 0) {
+                results.addAll(objects);
+                for (LookupTableDescriptor lookupTableDescriptor : feedStorage.getLookupTableDescriptors(conn)) {
+                    DataSourceDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());
+                    if (feedDescriptor != null) {
+                        lookupTableDescriptor.setRole(feedDescriptor.getRole());
+                        feedDescriptor.getChildren().add(lookupTableDescriptor);
                     }
-                    defList.add(analysisDefinition);
+                }
+            }
+            results.addAll(dataSources);
+
+            if (groupID != 0) {
+                int role = SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+                for (EIDescriptor descriptor : results) {
+                    descriptor.setRole(role);
                 }
             }
 
-            for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
-                List<EIDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getId());
-                if (analysisDefList == null) {
-                    analysisDefList = new ArrayList<EIDescriptor>();
+            Collections.sort(results, new Comparator<EIDescriptor>() {
+
+                public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
+                    return eiDescriptor.getName().compareTo(eiDescriptor1.getName());
                 }
-                feedDescriptor.setChildren(new ArrayList<EIDescriptor>(new HashSet<EIDescriptor>(analysisDefList)));
-            }
-            for (DashboardDescriptor dashboard : dashboards) {
-                FeedDescriptor feedDescriptor = descriptorMap.get(dashboard.getDataSourceID());
-                if (feedDescriptor != null) {
-                    feedDescriptor.getChildren().add(dashboard);
-                }
-            }
-            for (LookupTableDescriptor lookupTableDescriptor : new FeedService().getLookupTableDescriptors()) {
-                FeedDescriptor feedDescriptor = descriptorMap.get(lookupTableDescriptor.getDataSourceID());
-                feedDescriptor.getChildren().add(lookupTableDescriptor);
-            }
-            for (List<EIDescriptor> defList : analysisDefinitions.values()) {
-                objects.addAll(new ArrayList<EIDescriptor>(new HashSet<EIDescriptor>(defList)));
-            }
-            if (objects.isEmpty() && firstCall && !includeGroups) {
-                objects = getFeedAnalysisTree(true, false).getObjects();
-                return new MyDataTree(objects, true);
-            }
-            return new MyDataTree(objects, includeGroups);
+            });
+
+            conn.commit();
+            return new MyDataTree(results, onlyMyData);
         } catch (Throwable e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(false);
+            Database.closeConnection(conn);
         }
     }    
 
     public FeedDefinition getDataFeedConfiguration(long dataFeedID) {
         SecurityUtil.authorizeFeed(dataFeedID, Roles.SUBSCRIBER);
         try {
-            //SecurityUtil.authorizeFeed(dataFeedID, Roles.OWNER);
             return getFeedDefinition(dataFeedID);
         } catch (Throwable e) {
             LogClass.error(e);
@@ -409,7 +443,6 @@ public class UserUploadService implements IUserUploadService {
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
                 feedDefinition.delete(conn);
             } else if (role == Roles.SUBSCRIBER || role == Roles.SHARER) {
-                deleteUserFeedLink(SecurityUtil.getUserID(), dataFeedID, conn);
             } else {
                 throw new SecurityException();
             }
@@ -429,16 +462,6 @@ public class UserUploadService implements IUserUploadService {
                 LogClass.error(e);
             }
             Database.closeConnection(conn);
-        }
-    }
-
-    public List<FeedDescriptor> getOwnedFeeds() {
-        long userID = SecurityUtil.getUserID();
-        try {
-            return feedStorage.searchForSubscribedFeeds(userID);
-        } catch (Throwable e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         }
     }
 
@@ -595,16 +618,6 @@ public class UserUploadService implements IUserUploadService {
                 userID = null;    
             }
             return new PNGExportOperation().write(bytes, userID);
-        } catch (Throwable e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public FeedDescriptor getFeedDescriptor(long feedID) {
-        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
-        try {
-            return feedStorage.getFeedDescriptor(feedID);
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);

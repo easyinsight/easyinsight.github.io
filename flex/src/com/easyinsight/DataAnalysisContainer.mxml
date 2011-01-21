@@ -30,7 +30,6 @@
         import com.easyinsight.analysis.ReportEditorFieldEvent;
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.analysis.list.ListController;
-        import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.PerspectiveInfo;
@@ -119,18 +118,6 @@
         private var dataView:DataViewFactory;
 
         private var commandProcessor:CommandProcessor;
-
-        [Bindable]
-        private var canSubscribeToInsight:Boolean;
-
-        [Bindable]
-        private var canAddInsightToGroup:Boolean;
-
-        [Bindable]
-        private var canSubscribeToFeed:Boolean;
-
-        [Bindable]
-        private var canAddFeedToGroup:Boolean;
 
         [Bindable]
         private var wrappers:ArrayCollection;
@@ -496,9 +483,6 @@
                     } else {
                         tabNavigator.removeChild(exportTab);
                     }
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_SHARING).selected) {
-                        tabNavigator.removeChild(reportSharingTab);
-                    }
                     guestMode = User.getInstance().guestUser;
                 }
             } catch(e:Error) {
@@ -521,18 +505,10 @@
         private function gotReport():void {
             this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
             BrowserManager.getInstance().setTitle("Easy Insight - " + this.analysisDefinition.name);
-            //analysisPolicy = this.analysisDefinition.policy;
             initializeState();
         }
 
         private function initializeState():void {
-            if (analysisDefinition != null && analysisDefinition.analysisID > 0) {
-                ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForInsight);
-                analysisService.getUserCapabilitiesForInsight.send(dataSourceID, analysisDefinition.analysisID);
-            } else {
-                ProgressAlert.alert(this, "Retrieving security metadata...", null, analysisService.getUserCapabilitiesForFeed);
-                analysisService.getUserCapabilitiesForFeed.send(dataSourceID);
-            }
             dataService.reloadInitialContent(this, onMetadataReceipt);
         }
 
@@ -610,7 +586,6 @@
             reportName = event.report.name;
             BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
             aboutReportTab.invalidateProperties();
-            reportSaveable = true;
             this.analysisChanged = false;
             saveAsEnabled = true;
         }
@@ -690,17 +665,6 @@
             PopUpUtil.centerPopUp(window);
         }
 
-
-        [Bindable]
-        private var reportSaveable:Boolean;
-
-        private function gotUserCapabilitiesForFeed():void {
-            var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForFeed.lastResult as UserCapabilities;
-            canSubscribeToFeed = userCapabilities.feedRole > 3;
-            canAddFeedToGroup = userCapabilities.groupMember;
-            canMultiViewAnalysis = userCapabilities.reportingAvailable;
-        }
-
         private function onCopy(event:AnalysisItemCopyEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
 
@@ -728,17 +692,6 @@
             analysisDefinition.addedItems.removeItemAt(analysisDefinition.addedItems.getItemIndex(event.previousItem));
             analysisDefinition.addedItems.addItem(event.newItem);
         }
-
-        private function gotUserCapabilitiesForInsight():void {
-            var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForInsight.lastResult as UserCapabilities;
-            reportSaveable = true;
-            canSubscribeToFeed = userCapabilities.feedRole > 3;
-            canSubscribeToInsight = userCapabilities.analysisRole > 3;
-            canAddFeedToGroup = userCapabilities.groupMember;
-            canAddInsightToGroup = userCapabilities.groupMember;
-            canMultiViewAnalysis = userCapabilities.reportingAvailable;
-        }
-
 
         private function onItemDoubleClick(event:FieldDoubleClickEvent):void {
             var field:AnalysisItemWrapper = event.analysisItem;
@@ -844,8 +797,6 @@
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="openAnalysisDefinition" result="gotReport()"/>
-        <mx:method name="getUserCapabilitiesForFeed" result="gotUserCapabilitiesForFeed()"/>
-        <mx:method name="getUserCapabilitiesForInsight" result="gotUserCapabilitiesForInsight()"/>
     </mx:RemoteObject>
     <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}"/>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
@@ -897,13 +848,6 @@
                            toolTip="{excludeFilterDataTooltip}" click="exclude()" enabled="{reportSelectionEnabled}"/>
             </filtering:TransformContainer>
             <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
-            <analysis:ReportSharingTab analysisDefinition="{analysisDefinition}" originSolution="{originSolution}"
-                                       id="reportSharingTab"
-                                       reportSaveable="{reportSaveable}" canSubscribeToFeed="{canSubscribeToFeed}"
-                                       canAddFeedToGroup="{canAddFeedToGroup}"
-                                       canSaveToMyData="{canSubscribeToInsight}" dataService="{dataService}"
-                     backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
-
         </mx:TabNavigator>
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">

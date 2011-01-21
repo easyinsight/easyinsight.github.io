@@ -14,6 +14,19 @@
         [Bindable]
         private var _kpi:KPI;
 
+        private var _dataSourceID:int;
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
+
         [Bindable(event="groupIDChanged")]
         public function get groupID():int {
             return _groupID;
@@ -26,7 +39,6 @@
         }
 
         private function determineEditor():void {
-
             if (User.getSharedObject() != null) {
                 var editorType:String = User.getSharedObject().data["kpiEditor"];
                 if (editorType != null) {
@@ -70,7 +82,6 @@
 
         [Bindable]
         private var stackIndex:int = 0;
-
         ]]></mx:Script>
 
     <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true" width="100%" height="100%">
@@ -78,7 +89,7 @@
         <kpi:KPIWizard kpi="{_kpi}" scorecardID="{_scorecardID}" kpiAdded="onKPIEvent(event)"
                        kpiEdited="onKPIEvent(event)"
                        expertMode="toExpertMode()" width="100%" height="100%" kpiCancel="PopUpManager.removePopUp(IFlexDisplayObject(this.parent.parent))"
-                       groupID="{groupID}"/>
+                       groupID="{groupID}" dataSourceID="{dataSourceID}"/>
         <kpi:KPIWindow kpi="{_kpi}" scorecardID="{_scorecardID}" kpiAdded="onKPIEvent(event)"
                        kpiEdited="onKPIEvent(event)"
                        wizardMode="toWizardMode()" width="100%" height="100%" kpiCancel="PopUpManager.removePopUp(IFlexDisplayObject(this.parent.parent))"

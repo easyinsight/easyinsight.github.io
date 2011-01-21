@@ -27,7 +27,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
         private function gotGoalTree(event:ResultEvent):void {
             var result:int = goalService.canAccessGoalTree.lastResult as int;
             if (result > 0) {
-                dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(result)));
+                dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(result, 0)));
             }
         }
 	}

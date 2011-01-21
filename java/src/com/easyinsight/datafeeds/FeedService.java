@@ -2,11 +2,11 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
-import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
-import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableUtil;
+import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.storage.DatabaseShardException;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
@@ -15,7 +15,6 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
-import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.notifications.UserToDataSourceNotification;
@@ -24,7 +23,6 @@ import com.easyinsight.notifications.DataSourceToGroupNotification;
 import com.easyinsight.users.User;
 
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
@@ -39,158 +37,26 @@ import org.hibernate.Session;
 public class FeedService {
 
     private FeedStorage feedStorage = new FeedStorage();
-    private MarketplaceStorage marketplaceStorage = new MarketplaceStorage();
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
     public FeedService() {
         // this goes into a different data provider        
     }
 
-    /*public List<HighriseNotesData> retrieveHighriseDetails(HighriseNotesSpec notesSpec, long dataSourceID) {
-        try {
-            HighRiseCompositeSource highrise = (HighRiseCompositeSource) feedStorage.getFeedDefinitionData(dataSourceID);
-            return highrise.getDataForSpec(notesSpec);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }*/
-
     public HomeState determineHomeState() {
-        // has a data source been successfully defined?
-        // have any reports been successfully created?
-        Map<Long, DataSourceDescriptor> dataSourceMap = new HashMap<Long, DataSourceDescriptor>();
-        Map<Long, InsightDescriptor> reportMap = new HashMap<Long, InsightDescriptor>();
+
         EIConnection conn = Database.instance().getConnection();
         try {
-            Map<Long, ExtraDataSourceInfo> infos = new HashMap<Long, ExtraDataSourceInfo>();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, DATA_FEED.feed_name, DATA_FEED.feed_type, DATA_FEED.create_date" +
-                    " FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE VISIBLE = ? AND " +
-                    "UPLOAD_POLICY_USERS.user_id = ? AND UPLOAD_POLICY_USERS.feed_id = data_feed.data_feed_id");
-            queryStmt.setBoolean(1, true);
-            queryStmt.setLong(2, SecurityUtil.getUserID());
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long dataSourceID = rs.getLong(1);
-                String name = rs.getString(2);
-                int feedType = rs.getInt(3);
-                Date creationDate = new Date(rs.getTimestamp(4).getTime());
-                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID, feedType);
-                infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
-                dataSourceMap.put(dataSourceID, dataSourceDescriptor);
-            }
-            queryStmt.close();
-            PreparedStatement queryGroupStmt = conn.prepareStatement("SELECT DATA_FEED_ID, DATA_FEED.feed_name, DATA_FEED.feed_type," +
-                    "DATA_FEED.create_date FROM DATA_FEED, UPLOAD_POLICY_GROUPS, group_to_user_join WHERE " +
-                    "DATA_FEED.data_feed_id = upload_policy_groups.feed_id and group_to_user_join.group_id = upload_policy_groups.group_id and " +
-                    "group_to_user_join.user_id = ? AND DATA_FEED.VISIBLE = ?");
-            queryGroupStmt.setLong(1, SecurityUtil.getUserID());
-            queryGroupStmt.setBoolean(2, true);
-            ResultSet groupRS = queryGroupStmt.executeQuery();
-            while (groupRS.next()) {
-                long dataSourceID = groupRS.getLong(1);
-                String name = groupRS.getString(2);
-                int feedType = groupRS.getInt(3);
-                Date creationDate = new Date(groupRS.getTimestamp(4).getTime());
-                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID, feedType);
-                infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
-                dataSourceMap.put(dataSourceID, dataSourceDescriptor);
-            }
-             PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT DATA_FEED_ID, DATA_FEED.feed_name, DATA_FEED.feed_type, DATA_FEED.create_date" +
-                    " FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE VISIBLE = ? AND " +
-                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.account_id = ? and UPLOAD_POLICY_USERS.feed_id = data_feed.data_feed_id AND " +
-                     "data_feed.account_visible = ?");
-            queryAccountStmt.setBoolean(1, true);
-            queryAccountStmt.setLong(2, SecurityUtil.getAccountID());
-            queryAccountStmt.setBoolean(3, true);
-            ResultSet accountRS = queryAccountStmt.executeQuery();
-            while (accountRS.next()) {
-                long dataSourceID = accountRS.getLong(1);
-                String name = accountRS.getString(2);
-                int feedType = accountRS.getInt(3);
-                Date creationDate = new Date(accountRS.getTimestamp(4).getTime());
-                DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(name, dataSourceID, feedType);
-                infos.put(dataSourceID, new ExtraDataSourceInfo(creationDate, feedType));
-                dataSourceMap.put(dataSourceID, dataSourceDescriptor);
-            }
-            queryAccountStmt.close();
-            for (DataSourceDescriptor dataSource : dataSourceMap.values()) {
-                describe(dataSource, infos.get(dataSource.getId()), conn);
-            }
-            queryGroupStmt.close();
-            PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.data_feed_id, analysis.title, analysis.report_type," +
-                    "analysis.url_key FROM " +
-                        "USER_TO_ANALYSIS, ANALYSIS WHERE " +
-                        "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and analysis.temporary_report = ? and user_to_analysis.user_id = ?");
-            reportQueryStmt.setBoolean(1, false);
-            reportQueryStmt.setLong(2, SecurityUtil.getUserID());
-            ResultSet queryRS = reportQueryStmt.executeQuery();
-            while (queryRS.next()) {
-                long reportID = queryRS.getLong(1);
-                long dataSourceID = queryRS.getLong(2);
-                String reportName = queryRS.getString(3);
-                int reportType = queryRS.getInt(4);
-                String urlKey = queryRS.getString(5);
-                reportMap.put(reportID, new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey));
-            }
-            reportQueryStmt.close();
-            PreparedStatement groupReportStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.data_feed_id, analysis.title, analysis.report_type," +
-                    "analysis.url_key FROM " +
-                        "group_to_insight, analysis, group_to_user_join WHERE " +
-                            "GROUP_TO_INSIGHT.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and " +
-                            "group_to_insight.insight_id = analysis.analysis_id and analysis.temporary_report = ?");
-            groupReportStmt.setLong(1, SecurityUtil.getUserID());
-            groupReportStmt.setBoolean(2, false);
-            ResultSet groupReportRS = groupReportStmt.executeQuery();
-            while (groupReportRS.next()) {
-                long reportID = groupReportRS.getLong(1);
-                long dataSourceID = groupReportRS.getLong(2);
-                String reportName = groupReportRS.getString(3);
-                int reportType = groupReportRS.getInt(4);
-                String urlKey = groupReportRS.getString(5);
-                reportMap.put(reportID, new InsightDescriptor(reportID, reportName, dataSourceID, reportType, urlKey));
-            }
-            groupReportStmt.close();
+            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn);
+            List<InsightDescriptor> reports = analysisStorage.getReports(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn).values();
+            return new HomeState(dataSources, reports);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
-        return new HomeState(new ArrayList<DataSourceDescriptor>(dataSourceMap.values()), new ArrayList<InsightDescriptor>(reportMap.values()));
-    }
 
-    private static class ExtraDataSourceInfo {
-        private Date creationDate;
-        private int feedType;
-
-        private ExtraDataSourceInfo(Date creationDate, int feedType) {
-            this.creationDate = creationDate;
-            this.feedType = feedType;
-        }
-    }
-
-    private void describe(DataSourceDescriptor descriptor, ExtraDataSourceInfo extraInfo, EIConnection conn) throws SQLException {
-        PreparedStatement queryReportCountStmt = conn.prepareStatement("SELECT COUNT(ANALYSIS_ID) FROM ANALYSIS WHERE " +
-                "ANALYSIS.data_feed_id = ? AND ANALYSIS.temporary_report = ?");            
-        String description;
-        queryReportCountStmt.setLong(1, descriptor.getId());
-        queryReportCountStmt.setBoolean(2, false);
-        ResultSet rs = queryReportCountStmt.executeQuery();
-        int count = 0;
-        if (rs.next()) {
-            count = rs.getInt(1);
-        }
-        String dateString = SimpleDateFormat.getDateInstance().format(extraInfo.creationDate);
-        if (count == 0) {
-            description = "this data source was created on " + dateString + " and has no reports.";
-        } else if (count == 1) {
-            description = "this data source was created on " + dateString + " and has 1 report.";
-        } else {
-            description = "this data source was created on " + dateString + " and has " + count + " reports.";
-        }
-        descriptor.setDescription(description);
-        queryReportCountStmt.close();
     }
     
     public ReportFault getCredentials(List<Integer> dataSourceIDs) {
@@ -212,84 +78,17 @@ public class FeedService {
         }
     }
 
-    public MultiReportInfo getReportsForDataSource(long dataSourceID) {
-        List<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
-        String apiKey;
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement keyStmt = conn.prepareStatement("SELECT DATA_FEED.API_KEY FROM DATA_FEED WHERE DATA_FEED.data_feed_id = ?");
-            keyStmt.setLong(1, dataSourceID);
-            ResultSet keyRS = keyStmt.executeQuery();
-            keyRS.next();
-            apiKey = keyRS.getString(1);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, REPORT_TYPE FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
-                    "data_feed_id = ? and root_definition = ? AND " +
-                    "USER_TO_ANALYSIS.analysis_id = ANALYSIS.analysis_id AND USER_TO_ANALYSIS.user_id = ? AND TEMPORARY_REPORT = ?");
-            queryStmt.setLong(1, dataSourceID);
-            queryStmt.setBoolean(2, false);
-            queryStmt.setLong(3, SecurityUtil.getUserID());
-            queryStmt.setBoolean(4, false);
-            ResultSet reportRS = queryStmt.executeQuery();
-            while (reportRS.next()) {
-                // TODO: Add urlKey
-                descriptors.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), dataSourceID, reportRS.getInt(3),null));
-            }
-            queryStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        List<InsightDescriptor> validDescriptors = new ArrayList<InsightDescriptor>();
-        for (InsightDescriptor descriptor : descriptors) {
-            try {
-                SecurityUtil.authorizeInsight(descriptor.getId());
-                validDescriptors.add(descriptor);
-            } catch (Exception e) {
-                // ignore
-            }
-        }
-        return new MultiReportInfo(apiKey, validDescriptors);
-    }
-
     public List<EIDescriptor> getDescriptors() {
         List<EIDescriptor> descriptorList = new ArrayList<EIDescriptor>();
-        Connection conn = Database.instance().getConnection();
-
+        long userID = SecurityUtil.getUserID();
+        long accountID = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryDataSources = conn.prepareStatement("SELECT FEED_NAME, DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_TYPE FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
-                    "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.user_id = ? AND DATA_FEED.visible = ?");
-            queryDataSources.setLong(1, SecurityUtil.getUserID());
-            queryDataSources.setBoolean(2, true);
-            ResultSet queryRS = queryDataSources.executeQuery();
-            while (queryRS.next()) {
-                descriptorList.add(new DataSourceDescriptor(queryRS.getString(1), queryRS.getLong(2), queryRS.getInt(3)));
-            }
-            PreparedStatement getInsightsStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, user_to_analysis WHERE " +
-                    "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.user_id = ? AND ANALYSIS.ROOT_DEFINITION = ? AND ANALYSIS.TEMPORARY_REPORT = ?");
-            getInsightsStmt.setLong(1, SecurityUtil.getUserID());
-            getInsightsStmt.setBoolean(2, false);
-            getInsightsStmt.setBoolean(3, false);
-            ResultSet reportRS = getInsightsStmt.executeQuery();
-            while (reportRS.next()) {
-                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4), reportRS.getString(5)));
-            }
-            PreparedStatement getGoalTreeStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name, USER_TO_GOAL_TREE.user_role, GOAL_TREE.goal_tree_icon FROM GOAL_TREE, USER_TO_GOAL_TREE " +
-                    "WHERE GOAL_TREE.goal_tree_id = user_to_goal_tree.goal_tree_id and user_to_goal_tree.user_id = ?");
-            getGoalTreeStmt.setLong(1, SecurityUtil.getUserID());
-            ResultSet goalTreeRS = getGoalTreeStmt.executeQuery();
-            while (goalTreeRS.next()) {
-                descriptorList.add(new GoalTreeDescriptor(goalTreeRS.getLong(1), goalTreeRS.getString(2), goalTreeRS.getInt(3), goalTreeRS.getString(4), null));
-            }
-            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, dashboard.DASHBOARD_ID, DASHBOARD.URL_KEY, DASHBOARD.data_source_id FROM DASHBOARD, user_to_dashboard where " +
-                    "dashboard.dashboard_id = user_to_dashboard.dashboard_id and dashboard.temporary_dashboard = ? and user_to_dashboard.user_id = ?");
-            dashboardStmt.setBoolean(1, false);
-            dashboardStmt.setLong(2, SecurityUtil.getUserID());
-            ResultSet dashboardRS = dashboardStmt.executeQuery();
-            while (dashboardRS.next()) {
-                descriptorList.add(new DashboardDescriptor(dashboardRS.getString(1), dashboardRS.getLong(2), dashboardRS.getString(3), dashboardRS.getLong(4)));
-            }
+            conn.setAutoCommit(false);
+            descriptorList.addAll(feedStorage.getDataSources(userID, accountID, conn));
+            descriptorList.addAll(analysisStorage.getReports(userID, accountID, conn).values());
+            descriptorList.addAll(new DashboardStorage().getDashboards(userID, accountID, conn).values());
+            descriptorList.addAll(new GoalStorage().getTrees(userID, accountID, conn).values());
             Map<String, Integer> countMap = new HashMap<String, Integer>();
             Set<String> dupeNames = new HashSet<String>();
             Set<String> allNames = new HashSet<String>();
@@ -310,10 +109,13 @@ public class FeedService {
                     descriptor.setName(descriptor.getName() + " (" + count + ")");
                 }    
             }
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
         return descriptorList;
@@ -325,7 +127,7 @@ public class FeedService {
             try {
                 long feedID = SecurityUtil.authorizeFeedAccess(urlKey);
                 //long userID = SecurityUtil.getUserID();
-                FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(feedID);
+                DataSourceDescriptor feedDescriptor = feedStorage.getFeedDescriptor(feedID);
                 feedResponse = new FeedResponse(FeedResponse.SUCCESS, feedDescriptor);
             } catch (SecurityException e) {
                 if (e.getReason() == SecurityException.LOGIN_REQUIRED)
@@ -345,7 +147,7 @@ public class FeedService {
         try {
             try {
                 long feedID = feedStorage.getFeedForAPIKey(SecurityUtil.getUserID(), apiKey);
-                FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(feedID);
+                DataSourceDescriptor feedDescriptor = feedStorage.getFeedDescriptor(feedID);
                 feedResponse = new FeedResponse(FeedResponse.SUCCESS, feedDescriptor);
             } catch (SecurityException e) {
                 if (e.getReason() == SecurityException.LOGIN_REQUIRED)
@@ -397,61 +199,6 @@ public class FeedService {
         }
     }
 
-    public void addView(long feedID) {
-        try {
-            feedStorage.addFeedView(feedID);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-    }
-
-    public void addRating(long feedID, long userID, int rating) {
-        try {
-            feedStorage.rateFeed(feedID, userID, rating);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-    }
-
-    public List<Tag> getAllFeedTags(boolean solution) {
-        try {
-            return new TagStorage().getTags(20, solution);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<FeedDescriptor> getMostPopularFeeds(String genreKey, int cutoff) {
-        long accountID = SecurityUtil.getUserID(false);
-        try {
-            return marketplaceStorage.getMostPopularFeeds(accountID, genreKey, cutoff);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<FeedDescriptor> getMostRecentFeeds(String genreKey, int cutoff) {
-        long accountID = SecurityUtil.getUserID(false);
-        try {
-            return marketplaceStorage.getRecentFeeds(cutoff, accountID, genreKey);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<FeedDescriptor> getTopRatedFeeds(String genreKey, int cutoff) {
-        long accountID = SecurityUtil.getUserID(false);
-        try {
-            return marketplaceStorage.getBestRatedFeeds(cutoff, accountID, genreKey);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public JoinAnalysis testJoin(CompositeFeedConnection connection) {
         try {
             return new JoinTester(connection).generateReport();
@@ -461,12 +208,12 @@ public class FeedService {
         }
     }
 
-    public List<CompositeFeedConnection> initialDefine(List<CompositeFeedNode> nodes, List<FeedDescriptor> newFeeds) {
+    public List<CompositeFeedConnection> initialDefine(List<CompositeFeedNode> nodes, List<DataSourceDescriptor> newFeeds) {
         try {
             Set<Set<Long>> connectionMap = new HashSet<Set<Long>>();
             List<CompositeFeedConnection> allNewEdges = new ArrayList<CompositeFeedConnection>();
             JoinDiscovery joinDiscovery = new JoinDiscovery();
-            for (FeedDescriptor newFeed : newFeeds) {
+            for (DataSourceDescriptor newFeed : newFeeds) {
                 for (CompositeFeedNode node : nodes) {
                     Set<Long> ids = new HashSet<Long>();
                     ids.add(newFeed.getId());
@@ -477,7 +224,7 @@ public class FeedService {
                         allNewEdges.addAll(potentialJoins);
                     }
                 }
-                for (FeedDescriptor otherNewFeed : newFeeds) {
+                for (DataSourceDescriptor otherNewFeed : newFeeds) {
                     if (otherNewFeed == newFeed) {
                         continue;
                     }
@@ -510,75 +257,20 @@ public class FeedService {
         return feeds;
     }
 
-    public List<FeedDescriptor> searchForSubscribedFeeds() {
+    public List<DataSourceDescriptor> searchForSubscribedFeeds() {
         long userID = SecurityUtil.getUserID();
         try {
-            return feedStorage.searchForSubscribedFeeds(userID);
+            return feedStorage.getDataSources(userID, SecurityUtil.getAccountID());
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
 
-    public List<FeedDescriptor> searchForHiddenChildren(long dataSourceID) {
+    public List<DataSourceDescriptor> searchForHiddenChildren(long dataSourceID) {
         long userID = SecurityUtil.getUserID();
         try {
             return feedStorage.getExistingHiddenChildren(userID, dataSourceID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<FeedDescriptor> searchForAvailableFeeds(String keyword, String genreKey) {
-        long accountID = SecurityUtil.getUserID(false);
-        try {
-            return marketplaceStorage.searchForAvailableFeeds(accountID, keyword, genreKey);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<InsightDescriptor> getMostPopularAnalyses(String genre,  int cutoff) {
-        try {
-            return analysisStorage.getMostPopularAnalyses(genre, cutoff);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<InsightDescriptor> getTopRatedAnalyses(String genre, int cutoff) {
-        try {
-            return analysisStorage.getBestRatedAnalyses(genre, cutoff);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<InsightDescriptor> getMostRecentAnalyses(String genre, int cutoff) {
-        try {
-            return analysisStorage.getMostRecentAnalyses(genre, cutoff);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<InsightDescriptor> getHeadlineAnalysesForGenre(String genre) {
-        try {
-            return marketplaceStorage.getAnalysisDefinitionsForGenre(genre);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<InsightDescriptor> getAllAnalysesForGenre(String genre) {
-        try {
-            return analysisStorage.getAllDefinitions(genre);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -642,20 +334,11 @@ public class FeedService {
         }
     }
 
-    public String updateFeedDefinition(FeedDefinition feedDefinition, String tagString) {
+    public String updateFeedDefinition(FeedDefinition feedDefinition) {
         SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            if (tagString == null) {
-                tagString = "";
-            }
-            String[] tags = tagString.split(" ");
-            List<Tag> tagList = new ArrayList<Tag>();
-            for (String tagName : tags) {
-                tagList.add(new Tag(tagName));
-            }
-            feedDefinition.setTags(tagList);
             new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
             FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
             conn.commit();
@@ -760,29 +443,7 @@ public class FeedService {
         }
     }
 
-    public List<LookupTableDescriptor> getLookupTableDescriptors() {
-        List<LookupTableDescriptor> descriptors = new ArrayList<LookupTableDescriptor>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT LOOKUP_TABLE_ID, LOOKUP_TABLE_NAME, DATA_SOURCE_ID FROM LOOKUP_TABLE, UPLOAD_POLICY_USERS " +
-                    "WHERE LOOKUP_TABLE.data_source_id = UPLOAD_POLICY_USERS.feed_id  AND UPLOAD_POLICY_USERS.user_id = ?");
-            queryStmt.setLong(1, SecurityUtil.getUserID());
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                LookupTableDescriptor lookupTableDescriptor = new LookupTableDescriptor();
-                lookupTableDescriptor.setId(rs.getLong(1));
-                lookupTableDescriptor.setName(rs.getString(2));
-                lookupTableDescriptor.setDataSourceID(rs.getLong(3));
-                descriptors.add(lookupTableDescriptor);
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return descriptors;
-    }
+
 
     public LookupTable getLookupTable(long lookupTableID) {
         LookupTable lookupTable;

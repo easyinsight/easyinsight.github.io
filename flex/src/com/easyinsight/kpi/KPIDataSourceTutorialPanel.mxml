@@ -5,7 +5,7 @@
         [Event(name="expertMode", type="com.easyinsight.kpi.KPIModeEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
-        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.solutions.DataSourceDescriptor;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -15,7 +15,7 @@
         private var descriptors:ArrayCollection;
 
         [Bindable]
-        private var dataSource:DataFeedDescriptor;
+        private var dataSource:DataSourceDescriptor;
 
         [Bindable]
         private var _groupID:int;
@@ -27,7 +27,7 @@
 
         public function gotFocus():void {
             if (kpiData.dataSourceID > 0) {
-                dataSource = new DataFeedDescriptor();
+                dataSource = new DataSourceDescriptor();
                 dataSource.id = kpiData.dataSourceID;
                 dataSource.name = kpiData.dataSourceName;
             }
@@ -54,7 +54,7 @@
             descriptors.sort = sort;
             descriptors.refresh();
             if (dataSource != null) {
-                for each (var desc:DataFeedDescriptor in descriptors) {
+                for each (var desc:DataSourceDescriptor in descriptors) {
                     if (desc.id == dataSource.id) {
                         dataSource = desc;
                         break;
@@ -71,7 +71,7 @@
             descriptors.sort = sort;
             descriptors.refresh();
             if (dataSource != null) {
-                for each (var desc:DataFeedDescriptor in descriptors) {
+                for each (var desc:DataSourceDescriptor in descriptors) {
                     if (desc.id == dataSource.id) {
                         dataSource = desc;
                         break;

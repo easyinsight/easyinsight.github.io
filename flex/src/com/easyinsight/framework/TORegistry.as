@@ -32,6 +32,7 @@ import com.easyinsight.analysis.ServerError;
 import com.easyinsight.analysis.SixSigmaMeasure;
 import com.easyinsight.analysis.StringValue;
 import com.easyinsight.analysis.URLLink;
+import com.easyinsight.customupload.CampaignMonitorDataSourceCreation;
 import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.CsvFileUploadFormat;
 import com.easyinsight.customupload.ExcelUploadFormat;
@@ -161,6 +162,7 @@ public class TORegistry {
         var batchbook:BatchbookDataSource;
         var redirect:RedirectDataSource;
         var constantContact:ConstantContactDataSource;
+        var campaignMonitor:CampaignMonitorDataSourceCreation;
         var qbSource:QuickbaseCompositeSource;
         var clearDBSource:ClearDBCompositeSource;
         var clearDBDataSource:ClearDBDataSource;

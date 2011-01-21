@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="goalService.getGoalTrees.send(); addEventListener(DataSourceSolutionEvent.DELETE_DATA_SOURCE, onDelete)">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="addEventListener(DataSourceSolutionEvent.DELETE_DATA_SOURCE, onDelete)">
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.goals.GoalTreeDescriptor;
-        import com.easyinsight.listing.DataFeedDescriptor;
+
 
         import com.easyinsight.util.PopUpUtil;
 
@@ -112,24 +111,17 @@
                 _solution = new Solution();
             }
             _solution.name = nameInput.text;
-            _solution.description = descriptionInput.htmlText;
             _solution.logoLink = logoLinkInput.text;
             //_solution.author = authorInput.text;
             //_solution.industry = industryInput.text;
-            _solution.footerText = footerInput.htmlText;
             _solution.copyData = includeDataCheckbox.selected;
             _solution.solutionTier = accountTierBox.selectedIndex + 1;
             _solution.category = solutionCategoryBox.selectedIndex + 1;
             _solution.detailPageClass = detailClassComboBox.selectedItem as String;
-            if (goalTreeComboBox.selectedIndex > 0) {
-                _solution.goalTreeID = goalTreeComboBox.selectedItem.id;
-            } else {
-                _solution.goalTreeID = 0;
-            }
             _solution.screencastDirectory = screencastDirectoryInput.text;
             _solution.screencastName = screencastNameInput.text;
             var feedIDs:ArrayCollection = new ArrayCollection();
-            for each (var feedDescriptor:DataFeedDescriptor in includedFeeds) {
+            for each (var feedDescriptor:DataSourceDescriptor in includedFeeds) {
                 feedIDs.addItem(feedDescriptor.id);
             }
             if (_solution.solutionID == 0) {
@@ -161,25 +153,6 @@
         private function feedSelected(event:FeedSelectionEvent):void {
             this.includedFeeds.addItem(event.feedDescriptor);
         }
-
-        private function gotGoalTrees():void {
-            var goalTrees:ArrayCollection = goalService.getGoalTrees.lastResult as ArrayCollection;
-            var treesWithNoneOption:ArrayCollection = new ArrayCollection(goalTrees.source);
-            treesWithNoneOption.addItemAt({name: "[ No Selection ]"}, 0);
-            this.goalTrees = treesWithNoneOption;
-            if (_solution != null) {
-                if (_solution.goalTreeID > 0) {
-                    for each (var obj:Object in goalTrees) {
-                        if (obj is GoalTreeDescriptor) {
-                            var descriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
-                            if (descriptor.id == _solution.goalTreeID) {
-                                goalTreeComboBox.selectedItem = descriptor;
-                            }
-                        }
-                    }
-                }
-            }
-        }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject destination="solutionService" id="solutionService">
@@ -187,9 +160,6 @@
 		<mx:method name="addSolution" result="saveCompleted()"/>
 		<mx:method name="updateSolution" result="saveCompleted()"/>
 	</mx:RemoteObject>
-    <mx:RemoteObject destination="goalService" id="goalService">
-        <mx:method name="getGoalTrees" result="gotGoalTrees()"/>
-    </mx:RemoteObject>
     <mx:HBox>
         <mx:Form>
             <mx:FormItem label="Name: ">
@@ -232,9 +202,6 @@
             </mx:FormItem>
             <mx:FormItem label="Include Data Source Data: ">
                 <mx:CheckBox id="includeDataCheckbox" selected="{includeData}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Associate Goal Tree: ">
-                <mx:ComboBox id="goalTreeComboBox" dataProvider="{goalTrees}" labelField="name"/>
             </mx:FormItem>
             <mx:FormItem label="Image: " direction="vertical">
                 <mx:Button label="Update Image" click="updateImage()"/>
@@ -291,13 +258,5 @@
                 <mx:Button label="Cancel" click="cancel()"/>
             </mx:FormItem>
         </mx:Form>
-        <mx:TabNavigator width="500" height="100%" creationPolicy="all">
-            <mx:Box height="100%" width="100%" label="Description">
-                <mx:RichTextEditor id="descriptionInput" htmlText="{descriptionText}" height="100%" width="100%"/>
-            </mx:Box>
-            <mx:Box label="Footer" width="100%" height="100%">
-                <mx:RichTextEditor id="footerInput" htmlText="{footerText}" width="100%" height="100%"/>
-            </mx:Box>
-        </mx:TabNavigator>
     </mx:HBox>
 </util:EITitleWindow>

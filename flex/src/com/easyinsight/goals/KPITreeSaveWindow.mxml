@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.framework.User;
+
+        import com.easyinsight.icons.IconSelectionEvent;
+        import com.easyinsight.icons.IconSelectionWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+        import mx.validators.Validator;
+
+        private var _kpiTree:GoalTree;
+
+        public function set kpiTree(value:GoalTree):void {
+            _kpiTree = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            kpiTreeName = _kpiTree.name;
+            accountVisible = _kpiTree.accountVisible;
+            kpiTreeDescription = _kpiTree.description;
+            showConnectionSave = _originConnection > 0;
+            if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                firstNextButton = "Next";
+            } else {
+                firstNextButton = "Save";
+            }
+            connectionSave = _kpiTree.exchangeVisible ? "yes" : "no";
+            if (_kpiTree.goalTreeID == 0) {
+                kpiTreeShare = "yes";
+            } else {
+                kpiTreeShare = _kpiTree.accountVisible ? "yes" : "no";
+            }
+        }
+
+        private var _originConnection:int;
+
+        public function set originConnection(value:int):void {
+            _originConnection = value;
+        }
+
+        [Bindable]
+        private var accountVisible:Boolean;
+
+        [Bindable]
+        private var iconString:String;
+        private var iconName:String;
+
+        [Bindable]
+        private var showIcon:Boolean = false;
+
+        [Bindable]
+        private var stackIndex:int;
+
+        [Bindable]
+        private var kpiTreeName:String;
+
+        [Bindable]
+        private var kpiTreeDescription:String;
+
+        [Bindable]
+        private var kpiTreeShare:String;
+
+        [Bindable]
+        private var connectionSave:String;
+
+        [Bindable]
+        private var showConnectionSave:Boolean;
+
+        [Bindable]
+        private var errorText:String;
+
+        [Bindable]
+        private var firstNextButton:String;
+
+        private function nextFromName():void {
+            var results:Array = Validator.validateAll([kpiTreeNameValidator]);
+            if (results.length > 0) {
+                kpiTreeNameInput.setFocus();
+                kpiTreeNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            } else {
+                kpiTreeName = kpiTreeNameInput.text;
+                kpiTreeDescription = kpiTreeDescriptionInput.text;
+
+                if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                    stackIndex++;
+                } else {
+                    save();
+                }
+            }
+        }
+
+        private function onIconSelected(event:IconSelectionEvent):void {
+            iconString = "/app/assets/icons/32x32/" + event.icon.path;
+            iconName = event.icon.path;
+            showIcon = true;
+        }
+
+        private function onIconRemoved(event:IconSelectionEvent):void {
+            iconString = null;
+            showIcon = false;
+        }
+
+        private function changeIcon():void {
+            var iconWindow:IconSelectionWindow = new IconSelectionWindow();
+            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, onIconSelected, false, 0, true);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, onIconRemoved, false, 0, true);
+            PopUpManager.addPopUp(iconWindow, this, true);
+            PopUpUtil.centerPopUp(iconWindow);
+        }
+
+        private function save():void {
+            _kpiTree.name = kpiTreeName;
+            _kpiTree.description = kpiTreeDescription;
+            _kpiTree.accountVisible = sharingGroup.selectedValue == "yes";
+            _kpiTree.exchangeVisible = exchangeGroup.selectedValue == "yes";
+            stackIndex = 2;
+            goalService.saveGoalTree.send(_kpiTree);
+        }
+
+        private function savedTree():void {
+            var info:GoalSaveInfo = goalService.saveGoalTree.lastResult as GoalSaveInfo;
+            dispatchEvent(new KPITreeSaveEvent(info.goalTree));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onFault(event:FaultEvent):void {
+            errorText = event.fault.faultString;
+            stackIndex = 3;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="saveGoalTree" result="savedTree()" fault="onFault(event)"/>
+    </mx:RemoteObject>
+    <mx:Canvas width="600" height="400">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="#000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="#CCCCCC"/>
+        </mx:VBox>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ViewStack selectedIndex="{stackIndex}" width="550" height="350" backgroundColor="#FFFFFF">
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="What do you want to name this KPI tree?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextInput text="{kpiTreeName}" id="kpiTreeNameInput" width="530" fontSize="14"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="How do you want to describe this KPI tree?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextArea width="530" height="75" id="kpiTreeDescriptionInput"
+                                         text="{kpiTreeDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="What icon do you want to associate to this KPI tree?" fontSize="14" fontWeight="bold"/>
+                    <mx:HBox>
+                        <mx:Image id="iconImage" source="{iconString}" visible="{showIcon}"/>
+                        <mx:Button label="Change Icon..." click="changeIcon()"/>
+                    </mx:HBox>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="{firstNextButton}" click="nextFromName()" fontSize="14"/>
+                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="Do you want to share this KPI tree with other users in the account?" fontSize="14"
+                            fontWeight="bold"/>
+                    <mx:RadioButtonGroup id="sharingGroup" selectedValue="{kpiTreeShare}"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:RadioButton label="Yes" value="yes" groupName="sharingGroup" fontSize="14" tabIndex="0"/>
+                        <mx:RadioButton label="No" value="no" groupName="sharingGroup" fontSize="14" tabIndex="1"/>
+                    </mx:HBox>
+                    <mx:Spacer height="20"/>
+                    <mx:TextArea text="Do you want to share the template of this KPI tree on the Exchange for other Easy Insight users?" fontSize="14"
+                            width="530" borderStyle="none" editable="false" selectable="false" fontWeight="bold" backgroundAlpha="0" visible="{showConnectionSave}"/>
+                    <mx:RadioButtonGroup id="exchangeGroup" selectedValue="{connectionSave}"/>
+                    <mx:HBox width="100%" horizontalAlign="center" visible="{showConnectionSave}">
+                        <mx:RadioButton label="Yes" value="yes" groupName="exchangeGroup" fontSize="14" tabIndex="2"/>
+                        <mx:RadioButton label="No" value="no" groupName="exchangeGroup" fontSize="14" tabIndex="3"/>
+                    </mx:HBox>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="Back" click="stackIndex--" fontSize="14" tabIndex="4"/>
+                        <mx:Button label="Save" click="save()" fontSize="14" tabIndex="5"/>
+                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14" tabIndex="6"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar label="Saving the KPI tree..." indeterminate="true"/>
+                </mx:Box>
+                <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="We're sorry, but something went wrong in saving the KPI tree." fontSize="14"/>
+                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200" editable="false"/>
+                    <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                </mx:VBox>
+            </mx:ViewStack>
+        </mx:Box>
+    </mx:Canvas>
+    <mx:StringValidator id="kpiTreeNameValidator" source="{kpiTreeNameInput}" property="text" minLength="3" maxLength="100"/>
+</util:EITitleWindow>

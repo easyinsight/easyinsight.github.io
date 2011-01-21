@@ -59,6 +59,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 scorecardDelivery(conn);
             }
         }
+        typeStmt.close();
     }
 
     private void scorecardDelivery(EIConnection conn) throws SQLException, IOException, MessagingException {
@@ -103,6 +104,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             } else {
                 throw new RuntimeException();
             }
+            findOwnerStmt.close();
             PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
                     "ACCOUNT.FIRST_DAY_OF_WEEK FROM USER, ACCOUNT " +
                         "WHERE USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID AND (ACCOUNT.account_state = ? OR ACCOUNT.ACCOUNT_STATE = ?) AND USER.USER_ID = ?");
@@ -166,7 +168,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     SecurityUtil.clearThreadLocal();
                 }
             }
+            queryStmt.close();
         }
+        getInfoStmt.close();
     }
 
     private static class UserInfo {
@@ -186,6 +190,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         deliveryInfoRS.next();
+        getInfoStmt.close();
         String subjectLine = deliveryInfoRS.getString(3);
         String body = deliveryInfoRS.getString(4);
         boolean htmlEmail = deliveryInfoRS.getBoolean(5);
@@ -201,6 +206,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             String lastName = rs.getString(3);
             userStubs.add(new UserInfo(email, firstName, lastName));
         }
+        userStmt.close();
 
         String senderName = null;
         String senderEmail = null;
@@ -215,6 +221,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             senderName = firstName + " " + lastName;
             senderEmail = email;
         }
+        getSernderStmt.close();
 
         PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where scheduled_account_activity_id = ?");
         emailQueryStmt.setLong(1, activityID);
@@ -224,6 +231,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             String email = emailRS.getString(1);
             emails.add(email);
         }
+        emailQueryStmt.close();
 
         PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (ACCOUNT_ID," +
                 "REPORT_DELIVERY_ID, SUCCESSFUL, MESSAGE, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?, ?, ?)");
@@ -255,6 +263,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         deliveryInfoRS.next();
+        getInfoStmt.close();
         String subjectLine = deliveryInfoRS.getString(3);
         String body = deliveryInfoRS.getString(4);
         boolean htmlEmail = deliveryInfoRS.getBoolean(5);
@@ -270,6 +279,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             String lastName = rs.getString(3);
             userStubs.add(new UserInfo(email, firstName, lastName));
         }
+        userStmt.close();
 
         String senderName = null;
         String senderEmail = null;
@@ -284,6 +294,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             senderName = firstName + " " + lastName;
             senderEmail = email;
         }
+        getSernderStmt.close();
 
         PreparedStatement emailQueryStmt = conn.prepareStatement("SELECT EMAIL_ADDRESS FROM delivery_to_email where scheduled_account_activity_id = ?");
         emailQueryStmt.setLong(1, activityID);
@@ -293,6 +304,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             String email = emailRS.getString(1);
             emails.add(email);
         }
+        emailQueryStmt.close();
 
         PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (ACCOUNT_ID," +
                 "REPORT_DELIVERY_ID, SUCCESSFUL, MESSAGE, TARGET_EMAIL, SEND_DATE) VALUES (?, ?, ?, ?, ?, ?)");

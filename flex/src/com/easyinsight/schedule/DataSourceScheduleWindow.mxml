@@ -2,14 +2,14 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                     xmlns:schedule="com.easyinsight.schedule.*">
     <mx:Script><![CDATA[
-        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.UserAudit;
 
         import mx.managers.PopUpManager;
 
-        private var _dataSource:DataFeedDescriptor;
+        private var _dataSource:DataSourceDescriptor;
 
-        public function set dataSource(value:DataFeedDescriptor):void {
+        public function set dataSource(value:DataSourceDescriptor):void {
             _dataSource = value;
         }
 

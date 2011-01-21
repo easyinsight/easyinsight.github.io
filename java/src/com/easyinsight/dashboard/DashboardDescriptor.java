@@ -14,13 +14,10 @@ public class DashboardDescriptor extends EIDescriptor {
     public DashboardDescriptor() {
     }
 
-    /*public DashboardDescriptor(String name, long id) {
-        super(name, id);
-    }*/
-
-    public DashboardDescriptor(String name, long id, String urlKey, long dataSourceID) {
+    public DashboardDescriptor(String name, long id, String urlKey, long dataSourceID, int role) {
         super(name, id, urlKey);
         this.dataSourceID = dataSourceID;
+        setRole(role);
     }
 
     public long getDataSourceID() {

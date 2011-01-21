@@ -1,4 +1,8 @@
 package com.easyinsight.listing {
+import com.easyinsight.datasources.DataSourceBehavior;
+
+import com.easyinsight.solutions.DataSourceDescriptor;
+
 import mx.controls.Label;
 public class SizeRenderer extends Label{
 
@@ -12,38 +16,9 @@ public class SizeRenderer extends Label{
 
     override public function set data(value:Object):void {
         _data = value;
-        if (_data is DataFeedDescriptor) {
-            var descriptor:DataFeedDescriptor = _data as DataFeedDescriptor;
-            switch (descriptor.feedType) {
-                case DataFeedDescriptor.ANALYSIS:
-                    this.text = "( Derived )";
-                    break;
-                case DataFeedDescriptor.SALESFORCE:
-                case DataFeedDescriptor.GOOGLE_ANALYTICS:
-                case DataFeedDescriptor.FRESHBOOKS:
-                case DataFeedDescriptor.SENDGRID:
-                case DataFeedDescriptor.GOOGLE:
-                case DataFeedDescriptor.TWITTER:
-                case DataFeedDescriptor.CLOUD_WATCH:
-                case DataFeedDescriptor.REDIRECT:
-                case DataFeedDescriptor.QUICKBASE:
-                case DataFeedDescriptor.CLEARDB:
-                    this.text = "( Live )";
-                    break;
-                case DataFeedDescriptor.COMPOSITE:
-                    this.text = "( Composite )";
-                    break;
-                default:
-                    this.text = String(descriptor.size);
-                    break;
-            }
-            if (descriptor.solutionTemplate) {
-                setStyle("textDecoration", "underline");
-                toolTip = "This data source is the template for a solution.";
-            } else {
-                setStyle("textDecoration", "");
-                toolTip = "";
-            }
+        if (_data is DataSourceDescriptor) {
+            var descriptor:DataSourceDescriptor = _data as DataSourceDescriptor;
+            this.text = DataSourceBehavior.sizeLabel(descriptor.dataSourceType, descriptor.size);
         } else {
             this.text = "";
         }

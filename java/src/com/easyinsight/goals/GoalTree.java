@@ -1,5 +1,6 @@
 package com.easyinsight.goals;
 
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.datafeeds.FeedConsumer;
 
 import java.util.List;
@@ -20,21 +21,53 @@ public class GoalTree implements Cloneable {
 
     private String description;
 
-    private List<FeedConsumer> administrators = new ArrayList<FeedConsumer>();
+    private long dataSourceID;
 
-    private List<FeedConsumer> consumers = new ArrayList<FeedConsumer>();
+    private List<FeedConsumer> administrators = new ArrayList<FeedConsumer>();
 
     private long goalTreeID;
 
-    private List<Integer> newSolutions = new ArrayList<Integer>();
-
-    private List<GoalTreeMilestone> milestones = new ArrayList<GoalTreeMilestone>();
-
     private List<GoalTreeDescriptor> subTreeParents = new ArrayList<GoalTreeDescriptor>();
+
+    private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
 
     private String iconImage;
 
-    private GoalTreeMilestone defaultMilestone;
+    private boolean accountVisible;
+
+    private boolean exchangeVisible;
+
+    public boolean isAccountVisible() {
+        return accountVisible;
+    }
+
+    public void setAccountVisible(boolean accountVisible) {
+        this.accountVisible = accountVisible;
+    }
+
+    public boolean isExchangeVisible() {
+        return exchangeVisible;
+    }
+
+    public void setExchangeVisible(boolean exchangeVisible) {
+        this.exchangeVisible = exchangeVisible;
+    }
+
+    public List<FilterDefinition> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<FilterDefinition> filters) {
+        this.filters = filters;
+    }
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
+    }
 
     public String getUrlKey() {
         return urlKey;
@@ -42,14 +75,6 @@ public class GoalTree implements Cloneable {
 
     public void setUrlKey(String urlKey) {
         this.urlKey = urlKey;
-    }
-
-    public GoalTreeMilestone getDefaultMilestone() {
-        return defaultMilestone;
-    }
-
-    public void setDefaultMilestone(GoalTreeMilestone defaultMilestone) {
-        this.defaultMilestone = defaultMilestone;
     }
 
     public String getIconImage() {
@@ -68,36 +93,12 @@ public class GoalTree implements Cloneable {
         this.subTreeParents = subTreeParents;
     }
 
-    public List<GoalTreeMilestone> getMilestones() {
-        return milestones;
-    }
-
-    public void setMilestones(List<GoalTreeMilestone> milestones) {
-        this.milestones = milestones;
-    }
-
-    public List<Integer> getNewSolutions() {
-        return newSolutions;
-    }
-
-    public void setNewSolutions(List<Integer> newSolutions) {
-        this.newSolutions = newSolutions;
-    }
-
     public List<FeedConsumer> getAdministrators() {
         return administrators;
     }
 
     public void setAdministrators(List<FeedConsumer> administrators) {
         this.administrators = administrators;
-    }
-
-    public List<FeedConsumer> getConsumers() {
-        return consumers;
-    }
-
-    public void setConsumers(List<FeedConsumer> consumers) {
-        this.consumers = consumers;
     }
 
     public GoalTreeNode getRootNode() {
@@ -138,7 +139,6 @@ public class GoalTree implements Cloneable {
         goalTree.setRootNode(rootNode.clone());
         goalTree.setGoalTreeID(0);
         goalTree.setAdministrators(new ArrayList<FeedConsumer>());
-        goalTree.setConsumers(new ArrayList<FeedConsumer>());
         goalTree.setUrlKey(null);
         return goalTree;
     }

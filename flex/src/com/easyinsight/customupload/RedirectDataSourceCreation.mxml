@@ -8,7 +8,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.framework.Credentials;
-        import com.easyinsight.listing.DataFeedDescriptor;
+
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -19,7 +19,6 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:RedirectDataSource = feedDefinition as RedirectDataSource;
-            var descriptor:DataFeedDescriptor;
         }
 
         public function get savesCredentials():Boolean {

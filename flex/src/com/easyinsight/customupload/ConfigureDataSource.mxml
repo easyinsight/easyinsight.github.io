@@ -6,8 +6,8 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.ReportFault;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.scorecard.DataSourceAsyncEvent;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
 
@@ -130,7 +130,7 @@
             var callData:CallData = asyncService.getCallData.lastResult as CallData;
             if (callData.status == CallData.DONE) {
                 timer.stop();
-                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
                 descriptor.id = dataSourceDefinition.dataFeedID;
                 descriptor.name = dataSourceDefinition.feedName;
                 dispatchEvent(new DataSourceConfiguredEvent(descriptor));
@@ -177,7 +177,7 @@
                     timer.addEventListener(TimerEvent.TIMER, onTimer);
                     timer.start();
                 } else {
-                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                    var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
                     descriptor.id = dataSourceDefinition.dataFeedID;
                     descriptor.name = dataSourceDefinition.feedName;
                     dispatchEvent(new DataSourceConfiguredEvent(descriptor));
@@ -190,10 +190,6 @@
                 ready = true;
                 Alert.show(response.failureMessage);
             }
-        }
-
-        public function set dataSourceClass(value:Class):void {
-            _dataSourceClass = value;
         }
 
         private function closeWindow():void {

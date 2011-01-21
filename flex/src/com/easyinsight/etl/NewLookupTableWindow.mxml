@@ -10,7 +10,7 @@
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.NamedKey;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -26,9 +26,9 @@
         [Bindable]
         private var availableFields:ArrayCollection;
 
-        private var _selectedDataSource:DataFeedDescriptor;
+        private var _selectedDataSource:DataSourceDescriptor;
 
-        public function set selectedDataSource(value:DataFeedDescriptor):void {
+        public function set selectedDataSource(value:DataSourceDescriptor):void {
             _selectedDataSource = value;
             if (_selectedDataSource != null) {
                 dataSourceID = _selectedDataSource.id;
@@ -39,7 +39,7 @@
         private var dataSourceID:int;
 
         private function save():void {
-            if (!(dataSourceBox.selectedItem is DataFeedDescriptor)) {
+            if (!(dataSourceBox.selectedItem is DataSourceDescriptor)) {
                 Alert.show("You need to select a data source.");
                 return;
             }

@@ -4,49 +4,35 @@
         creationComplete="setupListeners()" backgroundColor="#DCE2F8" implements="com.easyinsight.listing.IPerspective">
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.PromptEvent;
+        import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.groups.GroupDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
         import mx.validators.Validator;
         import mx.controls.Alert;
 
         import com.easyinsight.feedassembly.CompositeFeedDefinition;
         import com.easyinsight.feedassembly.CompositeWorkspace;
-        import com.easyinsight.listing.DataFeedDescriptor;
+
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
         import mx.collections.ArrayCollection;
 
-        import com.easyinsight.customupload.UploadPolicy;
-
 
         private var feedAdminMode:Boolean = false;
-        [Bindable]
-        private var feedName:String;
-        [Bindable]
-        private var feedTags:String;
-        [Bindable]
-        private var feedUploadPolicy:UploadPolicy;
-        [Bindable]
-        private var feedDescription:String;
-        [Bindable]
-        private var feedAttribution:String;
-        [Bindable]
-        private var feedOwnerName:String;
+
         private var feedType:int;
         [Bindable]
         private var feedDefinition:FeedDefinitionData;
-
-        [Bindable]
-        private var accountVisible:Boolean;
 
         [Bindable]
         private var haveFeed:Boolean = false;
@@ -66,10 +52,8 @@
 
         private function setupListeners():void {
             addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onChange);
-            addEventListener(DeleteHierarchyEvent.DELETE_HIERARCHY, onHierarchyDelete);
             ProgressAlert.alert(this, "Retrieving the data source details...", null, feedService.getFeedDefinition);
             feedService.getFeedDefinition.send(_feedID);
-            groupService.getMemberGroups.send();
         }
 
 
@@ -89,7 +73,7 @@
             liveData = feedDefinition.isLiveData();
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             this.feedType = feedDefinition.getFeedType();
-            if (feedType == DataFeedDescriptor.COMPOSITE || feedType == DataFeedDescriptor.CLEARDB) {
+            if (feedType == DataSourceType.COMPOSITE || feedType == DataSourceType.CLEARDB) {
                 var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
                 var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
                 compositeWorkspace.addExistingDef(compositeFeedDefinition.compositeFeedNodes, compositeFeedDefinition.connections,
@@ -115,14 +99,8 @@
                 tabNav.removeChild(fieldsBox);
             }
             this.feedAdminMode = true;
-            this.feedName = feedDefinition.feedName;
-            this.feedTags = TagCloud.toString(feedDefinition.tags);
-            this.feedUploadPolicy = feedDefinition.uploadPolicy;
-            this.feedDescription = feedDefinition.description;
-            this.feedOwnerName = feedDefinition.ownerName;
-            this.feedAttribution = feedDefinition.attribution;
-            this.anyoneCanView = feedDefinition.uploadPolicy.publiclyVisible;
-            this.accountVisible = feedDefinition.accountVisible;
+
+
 
             var fragmentObject:Object = new Object();
             fragmentObject.feedAdminID = String(feedDefinition.apiKey);
@@ -137,11 +115,7 @@
             }
         }
 
-        private function onHierarchyDelete(event:DeleteHierarchyEvent):void {
-            //dataAnalysisContainer.deleteItem(event.hierarchy);
-        }
-
-        private function save():void {
+        private function save(saveHandler:Function = null):void {
             var results:Array = Validator.validateAll(generalValidators);
             var detailValidated:Boolean = true;
             if (feedAdminDetail != null) {
@@ -158,7 +132,17 @@
                     feedDefinition.folders = fieldAdministration.getFolders(analysisItems);
                 }
                 feedDefinition.fields = analysisItems;
-                feedDefinition.feedName = feedNameInput.text;
+
+                if (saveHandler == null) {
+                    saveHandler = onSave;
+                }
+                var window:DataSourceSaveWindow = new DataSourceSaveWindow();
+                window.addEventListener(DataSourceSaveEvent.DATA_SOURCE_SAVE, saveHandler, false, 0, true);
+                window.dataSource = feedDefinition;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+
+                /*feedDefinition.feedName = feedNameInput.text;
                 var owners:ArrayCollection = new ArrayCollection();
                 for each (var consumer:FeedConsumer in feedDefinition.uploadPolicy.owners) {
                     if (consumer is UserStub) {
@@ -178,61 +162,48 @@
                 }
                 ProgressAlert.alert(this, "Updating data source...", "Updated data source!", feedService.updateFeedDefinition);
                 feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text);
-                this.unsavedChanges = false;
+                this.unsavedChanges = false;*/
             }
+        }
+
+        private function onSave(event:DataSourceSaveEvent):void {
+            unsavedChanges = false;
+        }
+
+        private function createPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.prompt = prompt;
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                save(function(event:DataSourceSaveEvent):void {
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
+                doneHandler.call();
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function toReport():void {
             if (unsavedChanges) {
-                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                createPromptWindow("You have unsaved changes to this data source.", function():void {
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID)));
+                });
             } else {
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID)));
-            }
-        }
-
-        private function toReportListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                //   dataAnalysisContainer.cleanup();
                 dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDefinition.dataFeedID)));
             }
         }
 
         private function close():void {
             if (unsavedChanges) {
-                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                createPromptWindow("You have unsaved changes to this data source.", function():void {
+                    dispatchEvent(new AnalysisCloseEvent());
+                });
             } else {
-                //     dataAnalysisContainer.cleanup();
                 dispatchEvent(new AnalysisCloseEvent());
             }
         }
-
-        private function alertListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                //   dataAnalysisContainer.cleanup();
-                dispatchEvent(new AnalysisCloseEvent());
-            }
-        }
-
-        private function clearFeedData():void {
-            Alert.show("Are you sure you want to clear all stored data for this feed?", "Alert",
-                    Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-        }
-
-        private function alertFeedListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                feedService.wipeData.send(_feedID);
-            }
-        }
-
-        [Bindable]
-        private var anyoneCanView:Boolean;
-
-        private function wipedData():void {
-            Alert.show("All data cleared!");
-        }
-
         [Bindable]
         private var liveData:Boolean;
 
@@ -250,39 +221,6 @@
         public function cleanup():void {
         }
 
-        private function updated():void {
-            trace("update call completed");
-        }
-
-        [Bindable]
-        private var availableGroups:ArrayCollection;
-
-        [Bindable]
-        private var sourceGroups:ArrayCollection;
-
-        private function gotGroups():void {
-            var groups:ArrayCollection = groupService.getMemberGroups.lastResult as ArrayCollection;
-            availableGroups = new ArrayCollection();
-            sourceGroups = new ArrayCollection();
-            for each (var desc:GroupDescriptor in groups) {
-                var contained:Boolean = false;
-                for each (var consumer:FeedConsumer in feedUploadPolicy.owners) {
-                    if (consumer is GroupDescriptor) {
-                        var dsGroup:GroupDescriptor = consumer as GroupDescriptor;
-                        if (dsGroup.groupID == desc.groupID) {
-                            contained = true;
-                            break;
-                        }
-                    }
-                }
-                if (contained) {
-                    sourceGroups.addItem(desc);
-                } else {
-                    availableGroups.addItem(desc);
-                }
-            }
-        }
-
         public function gotFocus():void {
         }
 		]]>
@@ -290,12 +228,7 @@
 
 	<mx:RemoteObject id="feedService" destination="feeds">
 		<mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
-		<mx:method name="updateFeedDefinition" result="updated()"/>
-		<mx:method name="wipeData" result="wipedData()"/>
 	</mx:RemoteObject>
-    <mx:RemoteObject id="groupService" destination="groupService">
-        <mx:method name="getMemberGroups" result="gotGroups()"/>
-    </mx:RemoteObject>
     <mx:HBox width="100%" height="100%" horizontalAlign="center">
         <mx:VBox width="1000" height="100%" paddingLeft="5">
             <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" enabled="{controlsEnabled}">
@@ -306,52 +239,6 @@
             </mx:HBox>
             <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
                 paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNav" enabled="{haveFeed}">
-                <mx:HBox label="General" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" horizontalGap="40">
-                    <mx:VBox>
-                        <mx:HBox width="100%" horizontalAlign="center">
-                            <mx:Label text="Fields" fontSize="14"/>
-                        </mx:HBox>
-                        <mx:Form paddingRight="0" paddingTop="0" paddingBottom="0" paddingLeft="0">
-                            <mx:FormItem label="Name:" paddingTop="20">
-                                <mx:TextInput id="feedNameInput" text="{feedName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Tags:">
-                                <mx:TextInput id="feedTagsInput" text="{feedTags}" change="dispatchEvent(new AnalysisChangedEvent())"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Description:">
-                                <mx:TextArea id="feedDescriptionTextArea" width="300" height="100" text="{feedDescription}" change="dispatchEvent(new AnalysisChangedEvent())"
-                                        borderStyle="solid" borderThickness="1"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Attribution:">
-                                <mx:TextInput id="feedAttributionInput" text="{feedAttribution}" change="dispatchEvent(new AnalysisChangedEvent())"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Owner Name:">
-                                <mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Anyone in the Account Can View:">
-                                <mx:CheckBox selected="{accountVisible}" id="accountVisibleCheckBox"/>
-                            </mx:FormItem>
-                            <mx:FormItem id="clearDataFormItem" label="Delete All Data:">
-                                <mx:Button label="Clear Data Source Data" click="clearFeedData()"/>
-                            </mx:FormItem>
-                        </mx:Form>
-                    </mx:VBox>
-                    <mx:VBox horizontalAlign="center">
-                        <mx:Label text="Data Source Access" fontSize="14"/>
-                        <mx:HBox>
-                            <mx:VBox horizontalAlign="center">
-                                <mx:Label text="Available Groups"/>
-                                <mx:List dataProvider="{availableGroups}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" labelField="name"
-                                        width="180"/>
-                            </mx:VBox>
-                            <mx:VBox horizontalAlign="center">
-                                <mx:Label text="Data Source Groups"/>
-                                <mx:List dataProvider="{sourceGroups}" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" labelField="name"
-                                        width="180" id="sourceList"/>
-                            </mx:VBox>
-                        </mx:HBox>
-                    </mx:VBox>
-                </mx:HBox>
                 <mx:Box label="Fields" id="fieldsBox">
                     <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
                             enableControls="enableControls()"/>
@@ -362,5 +249,4 @@
             </mx:TabNavigator>
         </mx:VBox>
     </mx:HBox>
-	<mx:StringValidator id="nameValidator" source="{feedNameInput}" property="text" minLength="3" maxLength="40"/>
 </mx:Module>

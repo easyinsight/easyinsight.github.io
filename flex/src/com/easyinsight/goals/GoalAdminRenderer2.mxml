@@ -9,6 +9,7 @@
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
         import mx.controls.DataGrid;
         import mx.controls.List;
         import mx.core.IUIComponent;
@@ -49,6 +50,13 @@
         private var associationIcon:Class;
 
         private var orgChartItem:OrgChartItem;
+
+        private var _adminContainer:GoalOrganizationChart;
+
+
+        public function set adminContainer(value:GoalOrganizationChart):void {
+            _adminContainer = value;
+        }
 
         [Bindable]
         private var goalIcon:String;
@@ -108,23 +116,7 @@
             } else {
                 var dragNode:GoalTreeNode = event.dragSource.dataForFormat("GoalTreeNode") as GoalTreeNode;
             }
-            /* if (obj is Solution) {
-             var solution:Solution = obj as Solution;
-             var goalSolution:GoalSolution = new GoalSolution();
-             goalSolution.solutionID = solution.solutionID;
-             goalSolution.solutionName = solution.name;
-             goalSolution.solutionArchiveName = solution.solutionArchiveName;
-             goalTreeNode.associatedSolutions.addItem(goalSolution);
-             } else if (obj is DataFeedDescriptor) {
-             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-             var goalFeed:GoalFeed = new GoalFeed();
-             goalFeed.feedID = descriptor.dataFeedID;
-             goalFeed.feedName = descriptor.name;
-             goalTreeNode.associatedFeeds.addItem(goalFeed);
-             } else if (obj is InsightDescriptor) {
-             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
-             goalTreeNode.associatedInsights.addItem(analysisDefinition);
-             } else */
+
             if (obj is GoalTreeDescriptor) {
                 var goalTreeDescriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
                 var window:GoalTreeDropWindow = new GoalTreeDropWindow();
@@ -201,14 +193,14 @@
         private function defineContextMenu(goalTreeNode:GoalTreeNode):void {
 
             var items:Array = [];
-            var editItem:ContextMenuItem = new ContextMenuItem("Edit Goal", true);
+            var editItem:ContextMenuItem = new ContextMenuItem("Edit KPI", true);
             editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editNode);
             items.push(editItem);
             var createChildItem:ContextMenuItem = new ContextMenuItem("Create Child", true);
             createChildItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, addChildNode);
             items.push(createChildItem);
             if (goalTreeNode.parent != null || (goalTreeNode.children != null && goalTreeNode.children.length > 0)) {
-                var deleteItem:ContextMenuItem = new ContextMenuItem("Delete Goal", true);
+                var deleteItem:ContextMenuItem = new ContextMenuItem("Delete KPI", true);
                 deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteSelf);
                 items.push(deleteItem);
             }
@@ -311,8 +303,8 @@
 
         private function assignIcon():void {
             var iconWindow:IconSelectionWindow = IconSelectionWindow(PopUpManager.createPopUp(this, IconSelectionWindow, true));
-            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected);
-            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, iconRemoved);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected, false, 0, true);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, iconRemoved, false, 0, true);
             PopUpUtil.centerPopUp(iconWindow);
         }
 
@@ -333,7 +325,8 @@
             goalTreeNode.updateName();
             var kpiWindow:GoalKPIWindow = new GoalKPIWindow();
             kpiWindow.goalTreeNode = goalTreeNode;
-            kpiWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
+            kpiWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited, false, 0, true);
+            kpiWindow.dataSourceID = _adminContainer.dataSourceID;
             PopUpManager.addPopUp(kpiWindow, this, true);
             PopUpUtil.centerPopUp(kpiWindow);
         }
@@ -356,7 +349,7 @@
         private function subTreeConfiguration():void {
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             var window:SubTreeConfigWindow = new SubTreeConfigWindow();
-            window.addEventListener(SubTreeInstallEvent.SUB_TREE_INSTALL, uninstall);
+            window.addEventListener(SubTreeInstallEvent.SUB_TREE_INSTALL, uninstall, false, 0, true);
             window.goalTreeNode = goalTreeNode;
             window.subTreeName = goalTreeNode.subTreeName;
             PopUpManager.addPopUp(window, this);
@@ -366,7 +359,7 @@
         private function uninstall(event:SubTreeInstallEvent):void {
             subTreePresent = false;
         }
-		]]>
+        ]]>
 	</mx:Script>
 	<mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10" 
            paddingRight="10" paddingTop="0" paddingBottom="0" width="140" height="60" horizontalAlign="center" mouseChildren="true">

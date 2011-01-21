@@ -10,10 +10,8 @@ public class EIDescriptor {
     public static const GOAL_TREE:int = 4;
 
     public static const MY_GOALS:int = 5;
-    public static const AIR_INTRO:int = 6;
 
     public static const GOAL_HISTORY:int = 7;
-    public static const PACKAGE:int = 8;
     public static const SCORECARD:int = 9;
     public static const LOOKUP_TABLE:int = 10;
     public static const DASHBOARD:int = 11;
@@ -22,6 +20,7 @@ public class EIDescriptor {
     public var name:String;
     public var icon:Class;
     public var urlKey:String;
+    public var role:int;
     
     public function EIDescriptor() {
     }

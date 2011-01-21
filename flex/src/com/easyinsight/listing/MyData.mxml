@@ -19,7 +19,8 @@
         import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
         import com.easyinsight.goals.GoalTreeDescriptor;
         import com.easyinsight.preferences.UIConfiguration;
-        import com.easyinsight.report.ReportAnalyzeSource;        
+        import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -28,7 +29,6 @@
         import mx.collections.ArrayCollection;
         import mx.collections.HierarchicalData;
         import mx.collections.ICollectionView;
-        import mx.collections.IHierarchicalCollectionView;
         import mx.collections.Sort;
         import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
@@ -39,8 +39,6 @@
         import mx.rpc.events.FaultEvent;
         import mx.utils.ObjectUtil;
         import mx.utils.URLUtil;
-
-        private var initialEntry:Boolean = true;
 
         [Embed(source="../../../../assets/data_blue_x16.png")]
         private var listIcon:Class;
@@ -136,15 +134,10 @@
 
         private function deleteItem(selectedItem:Object):void {
 
-            if (selectedItem is DataFeedDescriptor) {
-                var descriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
-                if (descriptor.role == DataFeedDescriptor.OWNER) {
-                    Alert.show("Are you sure you want to delete this data source? You will not be able to undo this operation.", "Alert",
-                            Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-                } else {
-                    Alert.show("Are you sure you want to cancel your subscription to this data source?", "Alert",
-                            Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-                }
+            if (selectedItem is DataSourceDescriptor) {
+                var descriptor:DataSourceDescriptor = uploadGrid.selectedItem as DataSourceDescriptor;
+                Alert.show("Are you sure you want to delete this data source? You will not be able to undo this operation.", "Alert",
+                        Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
             } else if (selectedItem is InsightDescriptor) {
                 Alert.show("Are you sure you want to delete this report? You will not be able to undo this operation.", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
@@ -162,7 +155,7 @@
 
         private function alertFeedListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                var feedDescriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
+                var feedDescriptor:DataSourceDescriptor = uploadGrid.selectedItem as DataSourceDescriptor;
                 ProgressAlert.alert(this, "Deleting data source...", null, uploadService.deleteUserUpload);
                 uploadService.deleteUserUpload.send(feedDescriptor.id);
             }
@@ -195,19 +188,19 @@
         private function deletedTree():void {
             ProgressAlert.alert(this, "Refreshing...", null, uploadService.getFeedAnalysisTree);
             showLoading = true;
-            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+            uploadService.getFeedAnalysisTree.send(includeGroups);
         }
 
         private function deletedPackage():void {
             ProgressAlert.alert(this, "Refreshing...", null, uploadService.getFeedAnalysisTree);
             showLoading = true;
-            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+            uploadService.getFeedAnalysisTree.send(includeGroups);
         }
 
         private function deletedLookupTable():void {
             ProgressAlert.alert(this, "Refreshing...", null, uploadService.getFeedAnalysisTree);
             showLoading = true;
-            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+            uploadService.getFeedAnalysisTree.send(includeGroups);
         }
 
         private function alertInsightListener(event:CloseEvent):void {
@@ -221,14 +214,14 @@
         private function deletedAnalysis():void {
             ProgressAlert.alert(this, "Refreshing...", null, uploadService.getFeedAnalysisTree);
             showLoading = true;
-            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+            uploadService.getFeedAnalysisTree.send(includeGroups);
         }
 
         private function gridDoubleClick(event:ListEvent):void {
             var analyzeSource:PerspectiveInfo = null;
             var selectedObject:Object = event.currentTarget.selectedItem;
-            if (selectedObject is DataFeedDescriptor) {
-                var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
+            if (selectedObject is DataSourceDescriptor) {
+                var descriptor:DataSourceDescriptor = selectedObject as DataSourceDescriptor;
                 analyzeSource = new DescriptorAnalyzeSource(descriptor.id);
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else if (selectedObject is LookupTableDescriptor) {
@@ -260,7 +253,7 @@
             }
 
             uiChangeEvent(null);
-            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+            uploadService.getFeedAnalysisTree.send(includeGroups);
 
         }
 
@@ -335,9 +328,9 @@
 
         private function uploadConfigComplete(event:UploadConfigEvent):void {
             showLoading = true;
-            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+            uploadService.getFeedAnalysisTree.send(includeGroups);
             if (event.feedID > 0) {
-                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
                 descriptor.id = event.feedID;
                 descriptor.name = event.name;
                 if (event.startInAdmin) {
@@ -360,31 +353,19 @@
                 stackIndex = MY_DATA;
             }
 
-            if (initialEntry) {
-                initialEntry = false;
-                includeGroups = myDataTree.includeGroup;
-            }
             sourceTreeData = myDataTree.objects;
             displayTreeData = new ArrayCollection(sourceTreeData.toArray());
             var hierarchicalData:HierarchicalData = new HierarchicalData();
             hierarchicalData.source = displayTreeData;
             uploadGrid.dataProvider = hierarchicalData;
-            IHierarchicalCollectionView(uploadGrid.dataProvider).filterFunction = filterFunction;
             displayTreeData.sort = sort;
             displayTreeData.refresh();
             fromLastState();
             showLoading = false;
         }
 
-        private function filterFunction(item:Object):Boolean {
-            if (keyword != null && keyword.length > 0) {
-                return (item.name.toLowerCase().indexOf(keyword) > -1);
-            }
-            return true;
-        }
-
         private function iconFunction(item:Object, depth:int):Class {
-            if (item is DataFeedDescriptor) {
+            if (item is DataSourceDescriptor) {
                 return listIcon;
             } else if (item is InsightDescriptor) {
                 return crosstabIcon;
@@ -399,7 +380,7 @@
         }
 
         private function simpleIconFunction(item:Object):Class {
-            if (item is DataFeedDescriptor) {
+            if (item is DataSourceDescriptor) {
                 return listIcon;
             } else if (item is InsightDescriptor) {
                 return crosstabIcon;
@@ -419,7 +400,7 @@
 
         private function deleted():void {
             showLoading = true;
-            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
+            uploadService.getFeedAnalysisTree.send(includeGroups);
         }
 
         private function createCompositeFeed():void {
@@ -427,7 +408,7 @@
             if (uploadGrid.selectedItems != null) {
 
                 for each (var obj:Object in uploadGrid.selectedItems) {
-                    if (obj is DataFeedDescriptor) {
+                    if (obj is DataSourceDescriptor) {
                         descriptors.addItem(obj);
                     }
                 }
@@ -459,17 +440,17 @@
 
         private function groupIncludeChanged():void {
             showLoading = true;
-            uploadService.getFeedAnalysisTree.send(groupInclude.selected, initialEntry);
+            uploadService.getFeedAnalysisTree.send(groupInclude.selected);
         }
 
         private function customSort(obj1:Object, obj2:Object):int {
             var date1:Date = null;
             var date2:Date = null;
-            if (obj1 is DataFeedDescriptor) {
-                date1 = DataFeedDescriptor(obj1).lastDataTime;
+            if (obj1 is DataSourceDescriptor) {
+                date1 = DataSourceDescriptor(obj1).lastDataTime;
             }
-            if (obj2 is DataFeedDescriptor) {
-                date2 = DataFeedDescriptor(obj2).lastDataTime;
+            if (obj2 is DataSourceDescriptor) {
+                date2 = DataSourceDescriptor(obj2).lastDataTime;
             }
             if (date1 == null) {
                 date1 = new Date();
@@ -501,8 +482,8 @@
             window.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
             if (uploadGrid.selectedItems != null && uploadGrid.selectedItems.length > 0) {
                 var obj:Object = uploadGrid.selectedItems[0];
-                if (obj is DataFeedDescriptor) {
-                    window.selectedDataSource = obj as DataFeedDescriptor;
+                if (obj is DataSourceDescriptor) {
+                    window.selectedDataSource = obj as DataSourceDescriptor;
                 }
             }
             PopUpManager.addPopUp(window, this, true);
@@ -514,7 +495,14 @@
         }
 
         private function createGoalTree():void {
-            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(0)));
+            var dataSourceID:int;
+            if (uploadGrid.selectedItems != null && uploadGrid.selectedItems.length > 0) {
+                var obj:Object = uploadGrid.selectedItems[0];
+                if (obj is DataSourceDescriptor) {
+                    dataSourceID = DataSourceDescriptor(obj).id;
+                }
+            }
+            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(0, dataSourceID)));
         }
 
         [Bindable]
@@ -531,8 +519,8 @@
             var dataSourceID:int;
             if (uploadGrid.selectedItems != null && uploadGrid.selectedItems.length > 0) {
                 var obj:Object = uploadGrid.selectedItems[0];
-                if (obj is DataFeedDescriptor) {
-                    dataSourceID = DataFeedDescriptor(obj).id;
+                if (obj is DataSourceDescriptor) {
+                    dataSourceID = DataSourceDescriptor(obj).id;
                 }
             }
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { startDataSourceID: dataSourceID} )));
@@ -580,7 +568,7 @@
                        label="Go to Connections" labelPlacement="bottom" x="635" y="10"
                        visible="{showConnections}"/>
             <mx:CheckBox id="groupInclude" change="groupIncludeChanged()" selected="{includeGroups}" x="786" y="10"
-                         label="Include Data from Other Users"/>
+                         label="Only Show My Data"/>
 
             <mx:TextArea
                     text="The tree below shows your data sources and reports. You can click on the arrow to the left of any data source to show reports associated with that data source. Use the icons on the right side of the table to create new reports, open existing reports, or take admin actions."

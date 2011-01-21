@@ -79,7 +79,7 @@ public class GoalTest extends TestCase {
         List<FeedConsumer> admins = new ArrayList<FeedConsumer>();
         admins.add(user);
         goalTree.setAdministrators(admins);
-        GoalTree savedTree = goalService.createGoalTree(goalTree).getGoalTree();
+        GoalTree savedTree = goalService.saveGoalTree(goalTree).getGoalTree();
         long goalTreeID = savedTree.getGoalTreeID();
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 2009);
@@ -88,12 +88,9 @@ public class GoalTest extends TestCase {
         Date startDate = cal.getTime();
         cal.set(Calendar.DAY_OF_MONTH, 30);
         Date endDate = cal.getTime();
-        GoalTreeMilestone milestone = new GoalTreeMilestone();
-        milestone.setMilestoneName("Milestone");
-        milestone.setMilestoneDate(cal.getTime());
-        goalService.saveMilestone(milestone);
+
         //dataNode.setMilestone(milestone);
-        goalService.updateGoalTree(goalTree);
+        goalService.saveGoalTree(goalTree);
         /*GoalTree dataTree = goalService.createDataTree(goalTreeID);
         GoalTreeNodeData data = (GoalTreeNodeData) dataTree.getRootNode().getChildren().get(0);
         goalService.subscribeToGoal(data.getGoalTreeNodeID());

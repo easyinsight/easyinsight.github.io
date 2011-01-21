@@ -4,7 +4,7 @@
                       creationComplete="setup()"
                       xmlns:skin="com.easyinsight.skin.*" implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
-        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -44,7 +44,7 @@
             dataSourceWarnings.removeAllChildren();
             var dataSources:ArrayCollection = exportService.getRefreshableDataSources.lastResult as ArrayCollection;
             if (dataSources.length != 0) {
-                for each (var ds:DataFeedDescriptor in dataSources) {
+                for each (var ds:DataSourceDescriptor in dataSources) {
                     var line:ReportDeliverySetupLine = new ReportDeliverySetupLine();
                     line.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, newActivity, false, 0, true);
                     line.dataSource = ds;

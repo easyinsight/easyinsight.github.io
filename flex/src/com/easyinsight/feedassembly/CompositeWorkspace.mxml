@@ -14,7 +14,7 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.ReportFault;
         import com.easyinsight.customupload.ProblemDataEvent;
-        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.EdgeSelectionEvent;
         import com.easyinsight.util.GraphEvent;
         import com.easyinsight.util.GraphFeedNode;
@@ -244,7 +244,7 @@
 
         private function gotHiddenChildren():void {
             var children:ArrayCollection = feedService.searchForHiddenChildren.lastResult as ArrayCollection;
-            for each (var child:DataFeedDescriptor in children) {
+            for each (var child:DataSourceDescriptor in children) {
                 allFeeds.addItem(child);
             }
             var sort:Sort = new Sort();
@@ -254,21 +254,14 @@
             allFeeds.refresh();
             if (initialFeedIDs != null && initialFeedIDs.length > 0) {
                 var dsIDs:ArrayCollection = new ArrayCollection();
-                for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
+                for each (var feedDescriptor:DataSourceDescriptor in initialFeedIDs) {
                     //allFeeds.removeItemAt(allFeeds.getItemIndex(feedDescriptor));
                     addDescriptorToGraph(feedDescriptor, 0, 0);
                     dsIDs.addItem(feedDescriptor.id);
                 }
-                /*queuedExistings = new ArrayCollection();
-                 queuedNews = initialFeedIDs;
-
-                 for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
-
-                 }*/
-                //feedService.initialDefine.send(new ArrayCollection(), initialFeedIDs);
             } else {
                 for each (var compositeFeedNode:CompositeFeedNode in definedNodes) {
-                    var descriptor:DataFeedDescriptor = findDescriptor(compositeFeedNode.dataFeedID);
+                    var descriptor:DataSourceDescriptor = findDescriptor(compositeFeedNode.dataFeedID);
                     addDescriptorToGraph(descriptor, compositeFeedNode.x, compositeFeedNode.y);
                 }
                 for each (var compositeFeedConnection:CompositeFeedConnection in definedEdges) {
@@ -285,8 +278,8 @@
 
         }
 
-        private function findDescriptor(feedID:int):DataFeedDescriptor {
-            for each (var descriptor:DataFeedDescriptor in allFeeds) {
+        private function findDescriptor(feedID:int):DataSourceDescriptor {
+            for each (var descriptor:DataSourceDescriptor in allFeeds) {
                 if (descriptor.id == feedID) {
                     return descriptor;
                 }
@@ -297,7 +290,7 @@
         private function gotDefine():void {
             var edges:ArrayCollection = feedService.initialDefine.lastResult as ArrayCollection;
             var connections:ArrayCollection = new ArrayCollection();
-            for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
+            for each (var feedDescriptor:DataSourceDescriptor in initialFeedIDs) {
                 //allFeeds.removeItemAt(allFeeds.getItemIndex(feedDescriptor));
                 addDescriptorToGraph(feedDescriptor, 0, 0);
             }
@@ -337,7 +330,7 @@
         }
 
 
-        private function addDescriptorToGraph(descriptor:DataFeedDescriptor, xPosition:int, yPosition:int):void {
+        private function addDescriptorToGraph(descriptor:DataSourceDescriptor, xPosition:int, yPosition:int):void {
             var item:Item = new Item(String(descriptor.id));
             item.data = new Object();
             if (xPosition > 0) {
@@ -351,7 +344,7 @@
 
         private function dragEnterHandler(event:DragEvent):void {
             var initialList:List = List(event.dragInitiator);
-            var selectedObject:DataFeedDescriptor = DataFeedDescriptor(initialList.selectedItem);
+            var selectedObject:DataSourceDescriptor = DataSourceDescriptor(initialList.selectedItem);
             var target:SpringGraph = SpringGraph(event.currentTarget);
             DragManager.acceptDragDrop(target);
         }
@@ -359,7 +352,7 @@
         private function dragDropHandler(event:DragEvent):void {
             var target:SpringGraph = SpringGraph(event.currentTarget);
             var initialList:List = List(event.dragInitiator);
-            var selectedObject:DataFeedDescriptor = DataFeedDescriptor(initialList.selectedItem);
+            var selectedObject:DataSourceDescriptor = DataSourceDescriptor(initialList.selectedItem);
             //allFeeds.removeItemAt(allFeeds.getItemIndex(selectedObject));
             var compositeFeedNodes:ArrayCollection = new ArrayCollection();
             for each (var item:Item in graph.nodes) {

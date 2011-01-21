@@ -78,6 +78,7 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
             setProblemLevel(1);
             setProblemMessage(message);
         }
+        queryProblemStmt.close();
     }
 
     @Override
@@ -90,10 +91,13 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM TASK_GENERATOR WHERE TASK_GENERATOR_ID = ?");
             deleteStmt.setLong(1, rs.getLong(1));
             deleteStmt.executeUpdate();
+            deleteStmt.close();
             PreparedStatement arghStmt = conn.prepareStatement("DELETE FROM DATA_ACTIVITY_TASK_GENERATOR WHERE SCHEDULED_ACTIVITY_ID = ?");
             arghStmt.setLong(1, getScheduledActivityID());
             arghStmt.executeUpdate();
+            arghStmt.close();
         }
+        queryStmt.close();
         Session session = Database.instance().createSession(conn);
         try {    
             DataSourceTaskGenerator generator = new DataSourceTaskGenerator();

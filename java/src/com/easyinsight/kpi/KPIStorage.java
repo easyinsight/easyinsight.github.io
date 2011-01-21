@@ -2,14 +2,15 @@ package com.easyinsight.kpi;
 
 import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.groups.GroupDescriptor;
+import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
 
 import java.sql.*;
@@ -85,7 +86,28 @@ public class KPIStorage {
         saveUsers(kpi, conn);
     }
 
-    
+    public List<KPI> getKPIsForDataSource(long dataSourceID) throws Exception {
+        List<KPI> kpis = new ArrayList<KPI>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement getKPIStmt = conn.prepareStatement("SELECT KPI.KPI_ID, ANALYSIS_MEASURE_ID, KPI.DATA_FEED_ID, KPI.DESCRIPTION," +
+                "ICON_IMAGE, KPI_NAME, DATA_FEED.feed_name, KPI.goal_defined, KPI.goal_value, KPI.high_is_good, KPI.temporary, KPI.DAY_WINDOW, KPI.THRESHOLD," +
+                    "DATA_FEED.API_KEY, KPI.DATE_DIMENSION_ID FROM KPI, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
+                "data_feed.data_feed_id = kpi.data_feed_id AND UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND " +
+                    "KPI.TEMPORARY = ? and data_feed.data_feed_id = ?");
+            getKPIStmt.setLong(1, SecurityUtil.getUserID());
+            getKPIStmt.setBoolean(2, false);
+            getKPIStmt.setLong(3, dataSourceID);
+            ResultSet kpiRS = getKPIStmt.executeQuery();
+            while (kpiRS.next()) {
+                kpis.add(getKPIFromResultSet(conn, kpiRS));
+            }
+            getKPIStmt.close();
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return kpis;
+    }
 
     public List<KPI> getKPIsForUser(long userID) throws Exception {
         List<KPI> kpis = new ArrayList<KPI>();
@@ -166,7 +188,7 @@ public class KPIStorage {
         kpi.setFilters(getFilters(kpiID, conn));
         kpi.setProblemConditions(getProblemFilters(kpiID, conn));
         kpi.setTemporary(temporary);
-        kpi.setReports(getReports(dataFeedID, conn));
+        kpi.setReports(new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataFeedID, conn));
         kpi.setKpiTrees(getKPITrees(dataFeedID, conn));
         kpi.setDayWindow(dayWindow);
         kpi.setThreshold(threshold);
@@ -183,24 +205,6 @@ public class KPIStorage {
         return kpi;
     }
 
-    private List<InsightDescriptor> getReports(long dataFeedID, EIConnection conn) throws SQLException {
-        List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, REPORT_TYPE, URL_KEY FROM ANALYSIS WHERE DATA_FEED_ID = ? AND " +
-                "ANALYSIS.temporary_report = ?");
-        queryStmt.setLong(1, dataFeedID);
-        queryStmt.setBoolean(2, false);
-        ResultSet rs = queryStmt.executeQuery();
-        while (rs.next()) {
-            long reportID = rs.getLong(1);
-            String reportName = rs.getString(2);
-            int reportType = rs.getInt(3);
-            String urlKey = rs.getString(4);
-            reports.add(new InsightDescriptor(reportID, reportName, dataFeedID, reportType, urlKey));
-        }
-        queryStmt.close();
-        return reports;
-    }
-
     private List<GoalTreeDescriptor> getKPITrees(long dataSourceID, EIConnection conn) throws SQLException {
         Map<Long, GoalTreeDescriptor> reportMap = new HashMap<Long, GoalTreeDescriptor>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.goal_tree_id, GOAL_TREE.name, GOAL_TREE.url_key FROM GOAL_TREE, GOAL_TREE_NODE, KPI WHERE GOAL_TREE.goal_tree_id = GOAL_TREE_NODE.goal_tree_id AND " +
@@ -211,7 +215,7 @@ public class KPIStorage {
             long kpiTreeID = rs.getLong(1);
             String kpiTreeName = rs.getString(2);
             String urlKey = rs.getString(3);
-            reportMap.put(kpiTreeID, new GoalTreeDescriptor(kpiTreeID, kpiTreeName, 0, null, urlKey));
+            reportMap.put(kpiTreeID, new GoalTreeDescriptor(kpiTreeID, kpiTreeName, 0, null, urlKey, 0));
         }
         queryStmt.close();
         return new ArrayList<GoalTreeDescriptor>(reportMap.values());

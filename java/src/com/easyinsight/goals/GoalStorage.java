@@ -1,26 +1,22 @@
 package com.easyinsight.goals;
 
+import com.easyinsight.core.RolePrioritySet;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIStorage;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.scorecard.*;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
-import com.easyinsight.users.Credentials;
 import com.easyinsight.util.RandomTextGenerator;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -40,87 +36,8 @@ public class GoalStorage {
         return scorecardWrapper;
     }
 
-    public void deleteMilestone(long milestoneID) throws SQLException {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM MILESTONE WHERE MILESTONE_ID = ?");
-            deleteStmt.setLong(1, milestoneID);
-            deleteStmt.executeUpdate();
-            deleteStmt.close();
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public List<GoalTreeMilestone> getMilestones(long accountID) throws SQLException {
-        List<GoalTreeMilestone> milestones = new ArrayList<GoalTreeMilestone>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT MILESTONE_ID, MILESTONE_NAME, MILESTONE_DATE FROM " +
-                    "MILESTONE WHERE ACCOUNT_ID = ?");
-            queryStmt.setLong(1, accountID);
-            ResultSet milestoneRS = queryStmt.executeQuery();
-            while (milestoneRS.next()) {
-                long milestoneID = milestoneRS.getLong(1);
-                String milestoneName = milestoneRS.getString(2);
-                Date milestoneDate = new Date(milestoneRS.getDate(3).getTime());
-                milestones.add(new GoalTreeMilestone(milestoneDate, milestoneID, milestoneName));
-            }
-            queryStmt.close();
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return milestones;
-    }
-
-    @Nullable
-    private GoalTreeMilestone getMilestoneForGoal(long goalMilestoneID, Connection conn) throws SQLException {
-        GoalTreeMilestone goalTreeMilestone = null;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT MILESTONE_DATE, MILESTONE_NAME FROM MILESTONE WHERE MILESTONE_ID = ?");
-        queryStmt.setLong(1, goalMilestoneID);
-        ResultSet rs = queryStmt.executeQuery();
-        if (rs.next()) {
-            goalTreeMilestone = new GoalTreeMilestone(new Date(rs.getDate(1).getTime()), goalMilestoneID, rs.getString(2));
-        }
-        queryStmt.close();
-        return goalTreeMilestone;
-    }
-
-    public long addMilestone(GoalTreeMilestone goalTreeMilestone, long accountID) throws SQLException {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO MILESTONE (MILESTONE_NAME, MILESTONE_DATE, ACCOUNT_ID) vALUES (?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            insertStmt.setString(1, goalTreeMilestone.getMilestoneName());
-            insertStmt.setDate(2, new java.sql.Date(goalTreeMilestone.getMilestoneDate().getTime()));
-            insertStmt.setLong(3, accountID);
-            insertStmt.execute();
-            long id = Database.instance().getAutoGenKey(insertStmt);
-            goalTreeMilestone.setMilestoneID(id);
-            return id;
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void updateMilestone(GoalTreeMilestone goalTreeMilestone) throws SQLException {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE MILESTONE SET MILESTONE_NAME = ? AND MILESTONE_DATE = ? WHERE " +
-                    "GOAL_TREE_MILESTONE_ID = ?");
-            updateStmt.setString(1, goalTreeMilestone.getMilestoneName());
-            updateStmt.setDate(2, new java.sql.Date(goalTreeMilestone.getMilestoneDate().getTime()));
-            updateStmt.setLong(3, goalTreeMilestone.getMilestoneID());
-            updateStmt.executeUpdate();
-        } finally {
-            Database.closeConnection(conn);
-        }
-
-    }
-
     private void populateUsers(GoalTree goalTree, Connection conn) throws SQLException {
         List<FeedConsumer> administrators = new ArrayList<FeedConsumer>();
-        List<FeedConsumer> consumers = new ArrayList<FeedConsumer>();
         PreparedStatement getUsersStmt = conn.prepareStatement("SELECT USER.USER_ID, USER_ROLE, USER.email, USER.name, USER.username, USER.account_id, USER.first_name FROM " +
                 "USER_TO_GOAL_TREE, USER WHERE GOAL_TREE_ID = ? AND USER_TO_GOAL_TREE.USER_ID = USER.USER_ID");
         getUsersStmt.setLong(1, goalTree.getGoalTreeID());
@@ -135,8 +52,6 @@ public class GoalStorage {
             String firstName = userRS.getString(7);
             if (role == Roles.OWNER) {
                 administrators.add(new UserStub(userID, userName, email, fullName, accountID, firstName));
-            } else {
-                consumers.add(new UserStub(userID, userName, email, fullName, accountID, firstName));
             }
         }
         getUsersStmt.close();
@@ -151,12 +66,9 @@ public class GoalStorage {
             String name = groupRS.getString(3);
             if (role == Roles.OWNER) {
                 administrators.add(new GroupDescriptor(name, groupID, 0, null));
-            } else {
-                consumers.add(new GroupDescriptor(name, groupID, 0, null));
             }
         }
         goalTree.setAdministrators(administrators);
-        goalTree.setConsumers(consumers);
         getGroupsStmt.close();
     }
 
@@ -190,25 +102,33 @@ public class GoalStorage {
         addGroupStmt.close();
     }
 
-    public List<GoalTreeDescriptor> getTreesForUser(long userID) throws SQLException {
-        List<GoalTreeDescriptor> descriptors = new ArrayList<GoalTreeDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement getTreesStmt = conn.prepareStatement("SELECT NAME, GOAL_TREE.GOAL_TREE_ID, USER_ROLE, GOAL_TREE.GOAL_TREE_ICON FROM GOAL_TREE, user_to_goal_tree WHERE " +
-                    "user_id = ? AND user_to_goal_tree.goal_tree_id = goal_tree.goal_tree_id");
-            getTreesStmt.setLong(1, userID);
-            ResultSet rs = getTreesStmt.executeQuery();
-            while (rs.next()) {
-                String name = rs.getString(1);
-                long treeID = rs.getLong(2);
-                int role = rs.getInt(3);
-                // TODO: add urlKey
-                descriptors.add(new GoalTreeDescriptor(treeID, name, role, rs.getString(4), null));
-            }
-            getTreesStmt.close();
-        } finally {
-            Database.closeConnection(conn);
+    public RolePrioritySet<GoalTreeDescriptor> getTrees(long userID, long accountID, EIConnection conn) throws SQLException {
+        RolePrioritySet<GoalTreeDescriptor> descriptors = new RolePrioritySet<GoalTreeDescriptor>();
+
+        PreparedStatement getTreesStmt = conn.prepareStatement("SELECT NAME, GOAL_TREE.GOAL_TREE_ID, USER_ROLE, GOAL_TREE.goal_tree_icon, GOAL_TREE.URL_KEY, GOAL_TREE.DATA_SOURCE_ID FROM GOAL_TREE, user_to_goal_tree WHERE " +
+                "user_id = ? AND user_to_goal_tree.goal_tree_id = goal_tree.goal_tree_id");
+        getTreesStmt.setLong(1, userID);
+        ResultSet rs = getTreesStmt.executeQuery();
+        while (rs.next()) {
+            String name = rs.getString(1);
+            long treeID = rs.getLong(2);
+            int role = rs.getInt(3);
+            descriptors.add(new GoalTreeDescriptor(treeID, name, Roles.OWNER, rs.getString(4), rs.getString(5), rs.getLong(6)));
         }
+        getTreesStmt.close();
+        PreparedStatement accountStmt = conn.prepareStatement("SELECT GOAL_TREE.NAME, GOAL_TREE.GOAL_TREE_ID, USER_ROLE, GOAL_TREE.goal_tree_icon, GOAL_TREE.URL_KEY, GOAL_TREE.DATA_SOURCE_ID " +
+                "FROM GOAL_TREE, user_to_goal_tree, user WHERE " +
+                "user_to_goal_tree.user_id = user.user_id AND user_to_goal_tree.goal_tree_id = goal_tree.goal_tree_id and user.account_id = ? and goal_tree.account_visible = ?");
+        accountStmt.setLong(1, accountID);
+        accountStmt.setBoolean(2, true);
+        ResultSet accountRS = accountStmt.executeQuery();
+        while (accountRS.next()) {
+            String name = accountRS.getString(1);
+            long treeID = accountRS.getLong(2);
+            int role = accountRS.getInt(3);
+            descriptors.add(new GoalTreeDescriptor(treeID, name, Roles.OWNER, accountRS.getString(4), accountRS.getString(5), accountRS.getLong(6)));
+        }
+        accountStmt.close();
         return descriptors;
     }
 
@@ -217,7 +137,7 @@ public class GoalStorage {
         try {
             conn.setAutoCommit(false);
             InstallationSystem installationSystem = new InstallationSystem(conn);
-            installationSystem.installUserTree(goalTree, goalTree.getNewSolutions());
+            installationSystem.installUserTree(goalTree, new ArrayList<Integer>());
             addGoalTree(goalTree, conn);
             conn.commit();
             return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
@@ -237,11 +157,15 @@ public class GoalStorage {
         if (goalTree.getUrlKey() == null) {
             goalTree.setUrlKey(RandomTextGenerator.generateText(20));
         }
-        PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION, goal_tree_icon, URL_KEY) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION, goal_tree_icon, URL_KEY, ACCOUNT_VISIBLE, EXCHANGE_VISIBLE, DATA_SOURCE_ID) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertTreeStmt.setString(1, goalTree.getName());
         insertTreeStmt.setString(2, goalTree.getDescription());
         insertTreeStmt.setString(3, goalTree.getIconImage());
         insertTreeStmt.setString(4, goalTree.getUrlKey());
+        insertTreeStmt.setBoolean(5, goalTree.isAccountVisible());
+        insertTreeStmt.setBoolean(6, goalTree.isExchangeVisible());
+        insertTreeStmt.setLong(7, goalTree.getDataSourceID());
         insertTreeStmt.execute();
         long treeID = Database.instance().getAutoGenKey(insertTreeStmt);
         goalTree.setGoalTreeID(treeID);
@@ -251,7 +175,6 @@ public class GoalStorage {
         updateStmt.setLong(2, treeID);
         updateStmt.executeUpdate();
         saveUsers(treeID, goalTree.getAdministrators(), Roles.OWNER, conn);
-        saveUsers(treeID, goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
         //setUserRole(userID, treeID, Roles.OWNER, conn);
         //goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
     }
@@ -260,23 +183,9 @@ public class GoalStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            InstallationSystem installationSystem = new InstallationSystem(conn);
-            installationSystem.installUserTree(goalTree, goalTree.getNewSolutions());
-            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
-            deleteOldNodes(goalTree.getRootNode(), conn);
-            PreparedStatement updateTreeStmt = conn.prepareStatement("UPDATE GOAL_TREE SET NAME = ?, DESCRIPTION = ?, ROOT_NODE = ?, GOAL_TREE_ICON = ? " +
-                    "WHERE GOAL_TREE_ID = ?");
-            updateTreeStmt.setString(1, goalTree.getName());
-            updateTreeStmt.setString(2, goalTree.getDescription());
-            updateTreeStmt.setLong(3, nodeID);
-            updateTreeStmt.setString(4, goalTree.getIconImage());
-            updateTreeStmt.setLong(5, goalTree.getGoalTreeID());
-            updateTreeStmt.executeUpdate();
-            saveUsers(goalTree.getGoalTreeID(), goalTree.getAdministrators(), Roles.OWNER, conn);
-            saveUsers(goalTree.getGoalTreeID(), goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
-            //goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
+            updateGoalTree(goalTree, conn);
             conn.commit();
-            return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
+            return new GoalSaveInfo(goalTree, null);
         } catch (Exception e) {
             conn.rollback();
             throw new RuntimeException(e);
@@ -289,21 +198,23 @@ public class GoalStorage {
     public GoalSaveInfo updateGoalTree(GoalTree goalTree, EIConnection conn) throws Exception {
 
             InstallationSystem installationSystem = new InstallationSystem(conn);
-            installationSystem.installUserTree(goalTree, goalTree.getNewSolutions());
+            installationSystem.installUserTree(goalTree, new ArrayList<Integer>());
             long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
             // deleteOldNodes(goalTree.getRootNode(), conn);
-            PreparedStatement updateTreeStmt = conn.prepareStatement("UPDATE GOAL_TREE SET NAME = ?, DESCRIPTION = ?, ROOT_NODE = ?, GOAL_TREE_ICON = ? " +
+            PreparedStatement updateTreeStmt = conn.prepareStatement("UPDATE GOAL_TREE SET NAME = ?, DESCRIPTION = ?, ROOT_NODE = ?, GOAL_TREE_ICON = ?," +
+                    "ACCOUNT_VISIBLE = ?, EXCHANGE_VISIBLE = ? " +
                     "WHERE GOAL_TREE_ID = ?");
             updateTreeStmt.setString(1, goalTree.getName());
             updateTreeStmt.setString(2, goalTree.getDescription());
             updateTreeStmt.setLong(3, nodeID);
             updateTreeStmt.setString(4, goalTree.getIconImage());
-            updateTreeStmt.setLong(5, goalTree.getGoalTreeID());
+            updateTreeStmt.setBoolean(5, goalTree.isAccountVisible());
+            updateTreeStmt.setBoolean(6, goalTree.isExchangeVisible());
+            updateTreeStmt.setLong(7, goalTree.getGoalTreeID());
             updateTreeStmt.executeUpdate();
             saveUsers(goalTree.getGoalTreeID(), goalTree.getAdministrators(), Roles.OWNER, conn);
-            saveUsers(goalTree.getGoalTreeID(), goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
             //goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
-            
+            updateTreeStmt.close();
             return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
     }
 
@@ -314,9 +225,11 @@ public class GoalStorage {
             PreparedStatement deleteNodeStmt = conn.prepareStatement("DELETE FROM GOAL_TREE_NODE WHERE GOAL_TREE_ID = ?");
             deleteNodeStmt.setLong(1, goalTreeID);
             deleteNodeStmt.executeUpdate();
+            deleteNodeStmt.close();
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GOAL_TREE WHERE GOAL_TREE_ID = ?");
             deleteStmt.setLong(1, goalTreeID);
             deleteStmt.executeUpdate();
+            deleteStmt.close();
             conn.commit();
         } catch (Exception e) {
             conn.rollback();
@@ -375,6 +288,7 @@ public class GoalStorage {
                 goalTreeNode.setSubTreeName(subTreeName);
                 goalTreeNode.setSubTreeIcon(treeIconImage);
             }
+            queryNodeStmt.close();
             querySubTreeStmt.close();
             return goalTreeNode;
         } else {
@@ -391,6 +305,7 @@ public class GoalStorage {
             String tag = rs.getString(1);
             tags.add(new Tag(tag));
         }
+        insightQueryStmt.close();
         return tags;
     }
 
@@ -413,7 +328,8 @@ public class GoalStorage {
 
     public GoalTree retrieveGoalTree(long goalTreeID, EIConnection conn) throws Exception {
         GoalTree goalTree = null;
-        PreparedStatement retrieveGoalTreeStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, ROOT_NODE, GOAL_TREE_ICON, URL_KEY FROM GOAL_TREE WHERE GOAL_TREE_ID = ?");
+        PreparedStatement retrieveGoalTreeStmt = conn.prepareStatement("SELECT NAME, DESCRIPTION, ROOT_NODE, GOAL_TREE_ICON, URL_KEY, " +
+                "DATA_SOURCE_ID, ACCOUNT_VISIBLE, EXCHANGE_VISIBLE FROM GOAL_TREE WHERE GOAL_TREE_ID = ?");
         retrieveGoalTreeStmt.setLong(1, goalTreeID);
         ResultSet rs = retrieveGoalTreeStmt.executeQuery();
         if (rs.next()) {
@@ -422,6 +338,9 @@ public class GoalStorage {
             long rootNodeID = rs.getLong(3);
             String iconPath = rs.getString(4);
             String urlKey = rs.getString(5);
+            long dataSourceID = rs.getLong(6);
+            boolean accountVisible = rs.getBoolean(7);
+            boolean exchangeVisible = rs.getBoolean(8);
             GoalTreeNode rootNode = retrieveNode(rootNodeID, conn);
             goalTree = new GoalTree();
             goalTree.setName(name);
@@ -430,8 +349,12 @@ public class GoalStorage {
             goalTree.setRootNode(rootNode);
             goalTree.setIconImage(iconPath);
             goalTree.setUrlKey(urlKey);
+            goalTree.setDataSourceID(dataSourceID);
+            goalTree.setAccountVisible(accountVisible);
+            goalTree.setExchangeVisible(exchangeVisible);
             populateUsers(goalTree, conn);
         }
+        retrieveGoalTreeStmt.close();
         return goalTree;
     }
 
@@ -540,41 +463,6 @@ public class GoalStorage {
         queryStmt.close();
     }
 
-    public boolean addUserToGoal(long userID, long goalTreeNodeID) throws SQLException {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT goal_node_to_user_id from goal_node_to_user where goal_tree_node_id = ? AND " +
-                    "user_id = ?");
-            queryStmt.setLong(1, goalTreeNodeID);
-            queryStmt.setLong(2, userID);
-            ResultSet rs = queryStmt.executeQuery();
-            if (!rs.next()) {
-                PreparedStatement saveUserStmt = conn.prepareStatement("INSERT INTO goal_node_to_user (GOAL_TREE_NODE_ID, user_id) VALUES (?, ?)");
-                saveUserStmt.setLong(1, goalTreeNodeID);
-                saveUserStmt.setLong(2, userID);
-                saveUserStmt.execute();
-                saveUserStmt.close();
-                return true;
-            }
-            return false;
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void removeUserFromGoal(long userID, long goalTreeNodeID) throws SQLException {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement saveUserStmt = conn.prepareStatement("DELETE FROM goal_node_to_user WHERE GOAL_TREE_NODE_ID = ? AND user_id = ?");
-            saveUserStmt.setLong(1, goalTreeNodeID);
-            saveUserStmt.setLong(2, userID);
-            saveUserStmt.executeUpdate();
-            saveUserStmt.close();
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
     private void saveTags(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM GOAL_TREE_NODE_TAG WHERE GOAL_TREE_NODE_ID = ?");
         clearExistingStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
@@ -587,39 +475,6 @@ public class GoalStorage {
         }
         saveTagStmt.close();
     }
-
-    /*public List<GoalTreeNodeData> getGoalsForUser(long userID) throws Exception {
-        List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT GOAL_TREE_NODE_ID FROM goal_node_to_user WHERE USER_ID = ?");
-            stmt.setLong(1, userID);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                long goalTreeNodeID = rs.getLong(1);
-                populateGoal(nodes, conn, goalTreeNodeID);
-            }
-            stmt.close();
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return nodes;
-    }*/
-
-    /*private void populateGoal(List<GoalTreeNodeData> nodes, EIConnection conn, long goalTreeNodeID) throws Exception {
-        GoalTreeNode goalTreeNode = retrieveNode(goalTreeNodeID, conn);
-        GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTreeNode);
-        nodes.add(dataNode);
-        GoalTreeVisitor visitor = new GoalTreeVisitor() {
-
-            protected void accept(GoalTreeNode goalTreeNode) {
-                GoalTreeNode data = (GoalTreeNode) goalTreeNode;
-                data.populateCurrentValue();
-            }
-        };
-        visitor.visit(dataNode);
-        dataNode.summarizeOutcomes();
-    }*/
 
     public List<GoalTreeNode> getGoalsForGroup(long groupID) throws Exception {
         List<GoalTreeNode> nodes = new ArrayList<GoalTreeNode>();
@@ -651,7 +506,7 @@ public class GoalStorage {
             ResultSet subTreeRS = queryStmt.executeQuery();
             while (subTreeRS.next()) {
                 // TODO: add urlKey
-                descriptors.add(new GoalTreeDescriptor(subTreeRS.getLong(1), subTreeRS.getString(2), subTreeRS.getInt(3), subTreeRS.getString(4), null));
+                descriptors.add(new GoalTreeDescriptor(subTreeRS.getLong(1), subTreeRS.getString(2), subTreeRS.getInt(3), subTreeRS.getString(4), null, 0));
             }
             goalTree.setSubTreeParents(descriptors);
             queryStmt.close();

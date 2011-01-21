@@ -1,6 +1,6 @@
 package com.easyinsight.solutions
 {
-	import com.easyinsight.listing.DataFeedDescriptor;
+
 	
 	import flash.events.Event;
 
@@ -9,9 +9,9 @@ package com.easyinsight.solutions
 		public static const FEED_SELECTED:String = "feedSelected";
 		public static const FEED_DELETED:String = "feedDeleted";
 		
-		public var feedDescriptor:DataFeedDescriptor;
+		public var feedDescriptor:DataSourceDescriptor;
 		
-		public function FeedSelectionEvent(type:String, feedDescriptor:DataFeedDescriptor)
+		public function FeedSelectionEvent(type:String, feedDescriptor:DataSourceDescriptor)
 		{
 			super(type);
 			this.feedDescriptor = feedDescriptor;

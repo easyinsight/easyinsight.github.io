@@ -29,6 +29,7 @@
                                     <mx:String>Whole Foods</mx:String>
                                     <mx:String>Constant Contact</mx:String>
                                     <mx:String>Batchbook</mx:String>
+                                    <mx:String>Campaign Monitor</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
                         </mx:dataProvider>
@@ -103,6 +104,10 @@
                                 userConfigCancel="cancel(event)" />
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.BatchbookDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)" />
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.CampaignMonitorDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)" />
                     </mx:ViewStack>

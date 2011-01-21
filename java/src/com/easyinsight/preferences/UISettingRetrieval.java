@@ -29,6 +29,7 @@ public class UISettingRetrieval {
             setting.setSelected(visible);
             settings.add(setting);
         }
+        visibilitySettingsStmt.close();
         UISettings uiSettings = new UISettings();
         uiSettings.setVisibilitySettings(settings);
         uiSettings.setMarketplace(account.isMarketplaceEnabled());

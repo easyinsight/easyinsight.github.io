@@ -23,85 +23,39 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
-        import com.easyinsight.customupload.ConfigureDataSource;
+        import com.easyinsight.analysis.PromptEvent;
+        import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.icons.IconSelectionEvent;
-        import com.easyinsight.icons.IconSelectionWindow;
-        import com.easyinsight.quicksearch.EIDescriptor;
-        import com.easyinsight.solutions.SolutionInstallInfo;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.collections.ArrayCollection;
-
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
-        import mx.controls.Alert;
-        import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
-        import mx.validators.Validator;
 
-        private function onIconSelected(event:IconSelectionEvent):void {
-            iconString = "/app/assets/icons/32x32/" + event.icon.path;
-            iconName = event.icon.path;
-            showIcon = true;
-        }
-
-        private function onIconRemoved(event:IconSelectionEvent):void {
-            iconString = null;
-            showIcon = false;
-        }
-
-        private function changeIcon():void {
-            var iconWindow:IconSelectionWindow = new IconSelectionWindow();
-            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, onIconSelected);
-            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, onIconRemoved);
-            PopUpManager.addPopUp(iconWindow, this, true);
-            PopUpUtil.centerPopUp(iconWindow);
-        }
 
         private function viewData():void {
             if (changed) {
-                Alert.show("You have unsaved changes. Are you sure you want to view the KPI tree data?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, viewListener, null, Alert.CANCEL);
+                createPromptWindow("You have unsaved changes to this KPI tree.", function():void {
+                    dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(_goalTreeID)));
+                });
             } else {
                 dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(_goalTreeID)));
             }
         }
 
-        private function viewListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(_goalTreeID)));
-            }
-        }
-
-        [Bindable]
-        private var iconString:String;
-        private var iconName:String;
-
-        [Bindable]
-        private var showIcon:Boolean = false;
-
         [Bindable]
         private var _goalTree:GoalTree;
         [Bindable]
-        private var goalTreeName:String;
-        [Bindable]
         private var _goalTreeID:int;
         [Bindable]
-        private var goalTreeDescription:String;
-        [Bindable]
         private var rootNode:GoalTreeNode;
-        [Bindable]
-        private var newSolutions:ArrayCollection = new ArrayCollection();
 
         [Bindable]
         private var saved:Boolean;
-
-        private var validators:Array;
 
         private var changed:Boolean = false;
 
@@ -109,10 +63,32 @@
             _goalTreeID = val;
         }
 
+        private var _startDataSourceID:int = 0;
+
+        public function set startDataSourceID(value:int):void {
+            _startDataSourceID = value;
+        }
+
+        private var _dataSourceID:int = 0;
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
+
         private function onCreation():void {
-            addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, onNewSolution);
             addEventListener(GoalTreeChangedEvent.GOAL_TREE_CHANGED, onTreeChanged);
-            validators = [ nameValidator ];
+        }
+
+        private function choseDataSource(event:KPITreeSetupEvent):void {
+            dataSourceID = event.dataSource.id;
+            _goalTree.dataSourceID = dataSourceID;
         }
 
         private function onTreeChanged(event:GoalTreeChangedEvent):void {
@@ -131,11 +107,18 @@
                 userStub.name = User.getInstance().userName;
                 _goalTree.administrators.addItem(userStub);
                 rootNode = _goalTree.rootNode;
-                if (_goalTreeID == 0) {
-                    var feedFragmentObject:Object = new Object();
-                    feedFragmentObject.newGoalTree = "true";
-                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.newGoalTree = "true";
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+                if (_startDataSourceID == 0) {
+                    var window:KPITreeSetupWindow = new KPITreeSetupWindow();
+                    window.addEventListener(KPITreeSetupEvent.KPI_TREE_SETUP, choseDataSource);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpUtil.centerPopUp(window);
+                } else {
+                    dataSourceID = _startDataSourceID;
+                    _goalTree.dataSourceID = dataSourceID;
                 }
             } else {
                 saved = true;
@@ -146,25 +129,15 @@
 
         private function gotGoalTree():void {
             _goalTree = goalService.getGoalTree.lastResult as GoalTree;
+            dataSourceID = _goalTree.dataSourceID;
             rootNode = _goalTree.rootNode;
-            goalTreeName = _goalTree.name;
 
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.goalTreeAdminID = String(_goalTree.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
 
-            goalTreeDescription = _goalTree.description;
-            if (_goalTree.iconImage != null) {
-                iconName = _goalTree.iconImage;
-                iconString = "/app/assets/icons/32x32/" + iconName;
-                showIcon = true;
-            }
-            BrowserManager.getInstance().setTitle("Easy Insight - " + goalTreeName);
-        }
-
-        private function onNewSolution(event:SolutionInstallRequiredEvent):void {
-            newSolutions.addItem(event.solutionDescriptor.solutionID);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + _goalTree.name);
         }
 
         private function process(rootNode:GoalTreeNode):void {
@@ -177,135 +150,49 @@
             }
         }
 
-        private function onSaveClose(event:CloseEvent):void {
-            event.currentTarget.removeEventListener(CloseEvent.CLOSE, onSaveClose);
-            var info:GoalSaveInfo = goalService.createGoalTree.lastResult as GoalSaveInfo;
-            if (info.installInfos.length > 0) {
-                newSolutionInstalls(info);
+        private function save(saveHandler:Function = null):void {
+            process(_goalTree.rootNode);
+            var window:KPITreeSaveWindow = new KPITreeSaveWindow();
+            if (saveHandler == null) {
+                saveHandler = onSave;
             }
+            window.addEventListener(KPITreeSaveEvent.SAVE_KPI_TREE, saveHandler, false, 0, true);
+            //window.originConnection = connectionID;
+            window.kpiTree = _goalTree;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
-        private function onUpdateClose(event:CloseEvent):void {
-            event.currentTarget.removeEventListener(CloseEvent.CLOSE, onSaveClose);
-            var info:GoalSaveInfo = goalService.updateGoalTree.lastResult as GoalSaveInfo;
-            if (info.installInfos.length > 0) {
-                newSolutionInstalls(info);
-            }
-        }
-
-        private function onSplitTree(event:SplitGoalTreeEvent):void {
-            var results:Array = Validator.validateAll(validators);
-            if (results.length == 0) {
-                _goalTree.name = nameInput.text;
-                _goalTree.description = descriptionTextArea.text;
-                _goalTree.newSolutions = newSolutions;
-                _goalTree.iconImage = iconName;
-                goalsPolicy.updateContents();
-                process(_goalTree.rootNode);
-
-                var newGoalTree:GoalTree = new GoalTree();
-                newGoalTree.administrators = _goalTree.administrators;
-                newGoalTree.consumers = _goalTree.consumers;
-                var node:GoalTreeNode = event.node;
-                var parent:GoalTreeNode = node.parent;
-                var index:int = parent.children.getItemIndex(node);
-                parent.children.removeItemAt(index);
-                node.parent = null;
-                newGoalTree.rootNode = node;
-                newGoalTree.name = event.name;
-                var newNode:GoalTreeNode = new GoalTreeNode();
-                newNode.name = node.name;
-                parent.children.addItemAt(newNode, index);
-                newNode.parent = parent;
-
-                ProgressAlert.alert(this, "Splitting the tree...", null, goalService.splitGoalTree);
-                goalService.splitGoalTree.send(_goalTree, newGoalTree, newNode);
-            } else {
-                if (tabNavigator.selectedIndex > 0) {
-                    tabNavigator.selectedIndex = 0;
-                    Alert.show("You have one or more errors you must fix.");
-                }
-            }
-        }
-
-        private function splitTree():void {
-            var id:int = goalService.splitGoalTree.lastResult as int;
-            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(id)));
-        }
-
-        private function save():void {
-            var results:Array = Validator.validateAll(validators);
-            if (results.length == 0) {
-                _goalTree.name = nameInput.text;
-                _goalTree.description = descriptionTextArea.text;
-                _goalTree.newSolutions = newSolutions;
-                _goalTree.iconImage = iconName;
-                goalsPolicy.updateContents();
-                process(_goalTree.rootNode);
-                if (_goalTree.goalTreeID == 0) {
-                    var saveAlert:ProgressAlert = ProgressAlert.alert(this, "Saving KPI tree...", "Saved successfully!", goalService.createGoalTree);
-                    saveAlert.addEventListener(CloseEvent.CLOSE, onSaveClose);
-                    goalService.createGoalTree.send(_goalTree);
-                } else {
-                    var updateAlert:ProgressAlert = ProgressAlert.alert(this, "Updating KPI tree...", "Updated successfully!", goalService.updateGoalTree);
-                    updateAlert.addEventListener(CloseEvent.CLOSE, onUpdateClose);
-                    goalService.updateGoalTree.send(_goalTree);
-                }
-            } else {
-                if (tabNavigator.selectedIndex > 0) {
-                    tabNavigator.selectedIndex = 0;
-                    Alert.show("You have one or more errors you must fix.");
-                }
-            }
-        }
-
-        private function close():void {
-            if (changed) {
-                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
-            } else {
-                dispatchEvent(new AnalysisCloseEvent());
-            }
-        }
-
-        private function alertListener(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                dispatchEvent(new AnalysisCloseEvent());
-            }
-        }
-
-        private function savedGoalTree():void {
+        private function onSave(event:KPITreeSaveEvent):void {
             changed = false;
-            var info:GoalSaveInfo = goalService.createGoalTree.lastResult as GoalSaveInfo;
-            _goalTree = info.goalTree;
-            newSolutions = new ArrayCollection();
+            _goalTree = event.goalTree;
             rootNode = _goalTree.rootNode;
             goalTreeID = _goalTree.goalTreeID;
         }
 
-        private function updatedGoalTree():void {
-            changed = false;
-            var info:GoalSaveInfo = goalService.updateGoalTree.lastResult as GoalSaveInfo;
-            _goalTree = info.goalTree;
-            newSolutions = new ArrayCollection();
-            rootNode = _goalTree.rootNode;
+        private function createPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.prompt = prompt;
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                save(function(event:KPITreeSaveEvent):void {
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
+                doneHandler.call();
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
-        private function newSolutionInstalls(info:GoalSaveInfo):void {
-            for each (var solutionInstallInfo:SolutionInstallInfo in info.installInfos) {
-                if (solutionInstallInfo.descriptor.getType() == EIDescriptor.DATA_SOURCE && solutionInstallInfo.requiresConfiguration) {
-                    var configWindow:ConfigureDataSource = new ConfigureDataSource();
-                    configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
-                    PopUpManager.addPopUp(configWindow, this, true);
-                    PopUpUtil.centerPopUp(configWindow);
-                }
+        private function close():void {
+            if (changed) {
+                createPromptWindow("You have unsaved changes to this KPI tree.", function():void {
+                    dispatchEvent(new AnalysisCloseEvent());
+                });
+            } else {
+                dispatchEvent(new AnalysisCloseEvent());
             }
-
-            // once you've set up a goal tree, should provide an option to view the result
-        }
-
-        private function saveComplete():void {
-
         }
 
         public function cleanup():void {
@@ -313,12 +200,9 @@
 
         public function gotFocus():void {
         }
-    ]]>
+        ]]>
 	</mx:Script>
 	<mx:RemoteObject destination="goalService" id="goalService">
-		<mx:method name="createGoalTree" result="savedGoalTree()"/>
-		<mx:method name="updateGoalTree" result="updatedGoalTree()"/>
-		<mx:method name="splitGoalTree" result="splitTree()"/>
 		<mx:method name="getGoalTree" result="gotGoalTree()"/>
 	</mx:RemoteObject>
 	<mx:VBox  width="100%" height="100%" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
@@ -328,47 +212,6 @@
 			<mx:Button id="playButton" icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewData()" toolTip="View Data"
                     enabled="{saved}"/>
 		</mx:HBox>
-        <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
-			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNavigator">
-            <mx:HBox width="100%" height="100%" label="General">
-                <mx:VBox>
-					<mx:HBox width="100%" horizontalAlign="center">
-						<mx:Box backgroundColor="#FFFFFF" backgroundAlpha=".8" color="#000000" width="50%" horizontalAlign="center">
-							<mx:Label text="Fields" fontSize="14"/>
-						</mx:Box>
-					</mx:HBox>
-                    <mx:VBox verticalGap="0">
-                        <mx:Box width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
-                        <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
-                            <mx:Label text="KPI Tree Attributes" color="0xFFFFFF"/>
-                        </mx:Box>
-                        <mx:Form paddingTop="0" paddingLeft="0" paddingBottom="0" paddingRight="0">
-                            <mx:FormItem label="Name:" paddingTop="20" fontFamily="Tahoma" fontWeight="bold">
-                                <mx:TextInput id="nameInput" text="{goalTreeName}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
-                                <mx:TextArea id="descriptionTextArea" width="300" height="60" text="{goalTreeDescription}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Icon:" fontFamily="Tahoma" fontWeight="bold" direction="vertical">
-                                <mx:Image id="iconImage" source="{iconString}" visible="{showIcon}"/>
-                                <mx:Button label="Change Icon..." click="changeIcon()"/>
-                            </mx:FormItem>
-                        </mx:Form>
-                    </mx:VBox>
-                </mx:VBox>
-                <mx:VBox>
-					<mx:HBox width="100%" horizontalAlign="center">
-						<mx:Box backgroundColor="#FFFFFF" backgroundAlpha=".8" width="50%" horizontalAlign="center">
-							<mx:Label text="Sharing" fontSize="14"/>
-						</mx:Box>
-					</mx:HBox>
-					<goals:GoalSharing id="goalsPolicy" paddingTop="15" paddingLeft="45" goalTree="{_goalTree}"/>
-				</mx:VBox>
-            </mx:HBox>
-            <mx:Canvas width="100%" height="100%" label="Tree">
-                <goals:GoalTreeAdminWindow goalTreeNode="{rootNode}" goalTreeID="{_goalTreeID}" splitTree="onSplitTree(event)"/>
-            </mx:Canvas>
-        </mx:TabNavigator>
+        <goals:GoalTreeAdminWindow goalTreeNode="{rootNode}" goalTreeID="{_goalTreeID}" dataSourceID="{dataSourceID}"/>
 	</mx:VBox>
-    <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3" maxLength="30"/>
 </mx:Module>

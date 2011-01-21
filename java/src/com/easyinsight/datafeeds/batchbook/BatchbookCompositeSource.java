@@ -54,7 +54,8 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
         client.getParams().setAuthenticationPreemptive(true);
         Credentials defaultcreds = new UsernamePasswordCredentials(bbApiKey, "");
         client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
-        HttpMethod restMethod = new GetMethod(getUrl() + " /service/users.xml");
+        String string = getUrl() + "/service/users.xml";
+        HttpMethod restMethod = new GetMethod(string);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         try {
@@ -93,13 +94,14 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
     }
 
     public String getUrl() {
-        String basecampUrl = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "http://") + url;
-        if(basecampUrl.endsWith("/")) {
-            basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
+        String batchbookURL = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "http://") + url;
+        if(batchbookURL.endsWith("/")) {
+            batchbookURL = batchbookURL.substring(0, batchbookURL.length() - 1);
         }
-        if(!(basecampUrl.endsWith(".batchbook.com")))
-            basecampUrl = basecampUrl + ".batchbook.com";
-        return basecampUrl;
+        if(!(batchbookURL.endsWith(".batchbook.com")))
+            batchbookURL = batchbookURL + ".batchbook.com";
+        batchbookURL = batchbookURL.trim();
+        return batchbookURL;
     }
 
     @Override

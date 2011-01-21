@@ -32,18 +32,6 @@ public class UploadTest extends TestCase {
         System.out.println(dataFeedID);
         FeedService dataProviderService = new FeedService();
 
-        System.out.println(dataProviderService.searchForAvailableFeeds(null, null).size());
-        dataProviderService.searchForSubscribedFeeds();
-        dataProviderService.getMostPopularFeeds(null, 10);
-
-        System.out.println(dataProviderService.searchForAvailableFeeds("Test", "Testing").size());
-        dataProviderService.getMostPopularFeeds("Testing", 10);
-        // next up, test the retrieval...
-
-        System.out.println(dataProviderService.searchForAvailableFeeds(null, "Financial").size());
-        System.out.println(dataProviderService.searchForAvailableFeeds("Com", null).size());
-        dataProviderService.getMostPopularFeeds("Financial", 10);
-
         // all right, next test...
 
         System.gc();

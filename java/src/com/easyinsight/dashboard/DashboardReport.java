@@ -3,6 +3,7 @@ package com.easyinsight.dashboard;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.security.Roles;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -74,7 +75,7 @@ public class DashboardReport extends DashboardElement {
     public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
         AnalysisDefinition replacement = reportReplacementMap.get(report.getId());
         report = new InsightDescriptor(replacement.getAnalysisID(), replacement.getTitle(), replacement.getDataFeedID(), replacement.getReportType(),
-                replacement.getUrlKey());
+                replacement.getUrlKey(), Roles.SUBSCRIBER);
     }
 
     public static DashboardElement loadReport(long elementID, EIConnection conn) throws SQLException {
@@ -86,7 +87,7 @@ public class DashboardReport extends DashboardElement {
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             dashboardReport = new DashboardReport();
-            dashboardReport.setReport(new InsightDescriptor(rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getInt(3), rs.getString(5)));
+            dashboardReport.setReport(new InsightDescriptor(rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getInt(3), rs.getString(5), Roles.SUBSCRIBER));
             dashboardReport.setLabelPlacement(rs.getInt(6));
             dashboardReport.setShowLabel(rs.getBoolean(7));
         }

@@ -1,6 +1,6 @@
 package com.easyinsight.schedule {
-import com.easyinsight.listing.DataFeedDescriptor;
 
+import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -13,7 +13,7 @@ import mx.managers.PopUpManager;
 
 public class ReportDeliverySetupLine extends HBox {
 
-    private var _dataSource:DataFeedDescriptor;
+    private var _dataSource:DataSourceDescriptor;
 
     [Embed(source="../../../../assets/sign_warning.png")]
     private var warningIcon:Class;
@@ -23,7 +23,7 @@ public class ReportDeliverySetupLine extends HBox {
         setStyle("verticalAlign", "middle");
     }
 
-    public function set dataSource(value:DataFeedDescriptor):void {
+    public function set dataSource(value:DataSourceDescriptor):void {
         _dataSource = value;
     }
 

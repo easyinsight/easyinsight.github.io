@@ -134,6 +134,7 @@ public class DashboardService {
     }
 
     public Dashboard getDashboard(long dashboardID) {
+        SecurityUtil.authorizeDashboard(dashboardID);
         try {
             return dashboardStorage.getDashboard(dashboardID);
         } catch (Exception e) {
@@ -150,52 +151,5 @@ public class DashboardService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public List<DashboardDescriptor> getDashboardsForUser() {
-        long userID = SecurityUtil.getUserID();
-        List<DashboardDescriptor> dashboards = new ArrayList<DashboardDescriptor>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id from " +
-                    "dashboard, user_to_dashboard where user_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
-                    "dashboard.temporary_dashboard = ?");
-            queryStmt.setLong(1, userID);
-            queryStmt.setBoolean(2, false);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4)));
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return dashboards;
-    }
-
-    public List<DashboardDescriptor> getDashboardsForAccount() {
-        long accountID = SecurityUtil.getAccountID();
-        List<DashboardDescriptor> dashboards = new ArrayList<DashboardDescriptor>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.dashboard_id, dashboard.dashboard_name, dashboard.url_key, dashboard.data_source_id from " +
-                    "dashboard, user_to_dashboard, user where user.account_id = ? and dashboard.dashboard_id = user_to_dashboard.dashboard_id and " +
-                    "dashboard.temporary_dashboard = ? and dashboard.account_visible = ? and user_to_dashboard.user_id = user.user_id");
-            queryStmt.setLong(1, accountID);
-            queryStmt.setBoolean(2, false);
-            queryStmt.setBoolean(3, true);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4)));
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return dashboards;
     }
 }

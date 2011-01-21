@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.framework.User;
+
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+        import mx.validators.Validator;
+
+        private var _dataSource:FeedDefinitionData;
+
+        public function set dataSource(value:FeedDefinitionData):void {
+            _dataSource = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            dataSourceName = _dataSource.feedName;
+            accountVisible = _dataSource.accountVisible;
+            dataSourceDescription = _dataSource.description;
+            if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                firstNextButton = "Next";
+            } else {
+                firstNextButton = "Save";
+            }
+            if (_dataSource.dataFeedID == 0) {
+                dataSourceShare = "yes";
+            } else {
+                dataSourceShare = _dataSource.accountVisible ? "yes" : "no";
+            }
+        }
+
+        [Bindable]
+        private var accountVisible:Boolean;
+
+        [Bindable]
+        private var stackIndex:int;
+
+        [Bindable]
+        private var dataSourceName:String;
+
+        [Bindable]
+        private var dataSourceTags:String;
+
+        [Bindable]
+        private var dataSourceDescription:String;
+
+        [Bindable]
+        private var dataSourceShare:String;
+
+        [Bindable]
+        private var errorText:String;
+
+        [Bindable]
+        private var firstNextButton:String;
+
+        private function nextFromName():void {
+            var results:Array = Validator.validateAll([dataSourceNameValidator]);
+            if (results.length > 0) {
+                dataSourceNameInput.setFocus();
+                dataSourceNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+            } else {
+                dataSourceName = dataSourceNameInput.text;
+                dataSourceDescription = dataSourceDescriptionInput.text;
+
+                if (User.getInstance().getAccountType() > Account.PERSONAL) {
+                    stackIndex++;
+                } else {
+                    save();
+                }
+            }
+        }
+
+        private function save():void {
+            _dataSource.feedName = dataSourceName;
+            _dataSource.description = dataSourceDescription;
+            _dataSource.accountVisible = sharingGroup.selectedValue == "yes";
+            stackIndex = 2;
+            feedService.updateFeedDefinition.send(_dataSource);
+        }
+
+        private function saved():void {
+            dispatchEvent(new DataSourceSaveEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onFault(event:FaultEvent):void {
+            errorText = event.fault.faultString;
+            stackIndex = 3;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+		<mx:method name="updateFeedDefinition" result="saved()" fault="onFault(event)"/>
+	</mx:RemoteObject>
+    <mx:Canvas width="600" height="400">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:Box height="50%" width="100%" backgroundColor="#000000"/>
+            <mx:Box height="50%" width="100%" backgroundColor="#CCCCCC"/>
+        </mx:VBox>
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ViewStack selectedIndex="{stackIndex}" width="550" height="350" backgroundColor="#FFFFFF">
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <!-- what do you want to call this report? -->
+                    <mx:Label text="What do you want to name this data source?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextInput text="{dataSourceName}" id="dataSourceNameInput" width="530" fontSize="14"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="What tags should be applied to this data source?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextInput text="{dataSourceTags}" id="reportTagsInput" width="530" fontSize="14"/>
+                    <mx:Spacer height="20"/>
+                    <mx:Label text="How do you want to describe this data source?" fontSize="14" fontWeight="bold"/>
+                    <mx:TextArea width="530" height="75" id="dataSourceDescriptionInput"
+                                         text="{dataSourceDescription}" fontSize="14" borderStyle="inset" borderThickness="1"/>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="{firstNextButton}" click="nextFromName()" fontSize="14"/>
+                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox height="100%" width="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="Do you want to share this data source with other users in the account?" fontSize="14"
+                            fontWeight="bold"/>
+                    <mx:RadioButtonGroup id="sharingGroup" selectedValue="{dataSourceShare}"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:RadioButton label="Yes" value="yes" groupName="sharingGroup" fontSize="14" tabIndex="0"/>
+                        <mx:RadioButton label="No" value="no" groupName="sharingGroup" fontSize="14" tabIndex="1"/>
+                    </mx:HBox>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="Back" click="stackIndex--" fontSize="14" tabIndex="4"/>
+                        <mx:Button label="Save" click="save()" fontSize="14" tabIndex="5"/>
+                        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14" tabIndex="6"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar label="Saving the data source..." indeterminate="true"/>
+                </mx:Box>
+                <mx:VBox width="100%" height="100%" horizontalAlign="center" paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10">
+                    <mx:Label text="We're sorry, but something went wrong in saving the data source." fontSize="14"/>
+                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200" editable="false"/>
+                    <mx:Button label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                </mx:VBox>
+            </mx:ViewStack>
+        </mx:Box>
+    </mx:Canvas>
+    <mx:StringValidator id="dataSourceNameValidator" source="{dataSourceNameInput}" property="text" minLength="3" maxLength="100"/>
+</util:EITitleWindow>

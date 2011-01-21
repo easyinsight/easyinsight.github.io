@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    xmlns:kpi="com.easyinsight.kpi.*" xmlns:framework="com.easyinsight.framework.*" width="900"
+                    width="900"
                     height="550" headerHeight="0">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.ModulePerspective;
@@ -9,6 +9,11 @@
         private var _scorecardID:int;
         private var _groupID:int;
         private var _kpi:KPI;
+        private var _dataSourceID:int;
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
 
         public function set scorecardID(value:int):void {
             _scorecardID = value;
@@ -24,6 +29,8 @@
 
         protected override function createChildren():void {
             super.createChildren();
-            addChild(new ModulePerspective(new PerspectiveInfo(PerspectiveInfo.KPI_WINDOW, {scorecardID: _scorecardID, kpi: _kpi, groupID: _groupID})));
-        }]]></mx:Script>
+            addChild(new ModulePerspective(new PerspectiveInfo(PerspectiveInfo.KPI_WINDOW, {scorecardID: _scorecardID, kpi: _kpi, groupID: _groupID,
+                dataSourceID: _dataSourceID})));
+        }
+        ]]></mx:Script>
 </util:EITitleWindow>

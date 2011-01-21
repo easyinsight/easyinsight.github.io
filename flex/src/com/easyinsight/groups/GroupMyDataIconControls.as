@@ -4,6 +4,7 @@ import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.listing.*;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.Event;
@@ -106,8 +107,8 @@ public class GroupMyDataIconControls extends HBox
     }
 
     private function analyzeCalled(event:MouseEvent):void {
-        if (obj is DataFeedDescriptor) {
-            var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
+        if (obj is DataSourceDescriptor) {
+            var descriptor:DataSourceDescriptor = obj as DataSourceDescriptor;
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.id)));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
@@ -116,8 +117,8 @@ public class GroupMyDataIconControls extends HBox
     }
 
     private function adminCalled(event:MouseEvent):void {
-        if (obj is DataFeedDescriptor) {
-            var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
+        if (obj is DataSourceDescriptor) {
+            var descriptor:DataSourceDescriptor = obj as DataSourceDescriptor;
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
@@ -127,7 +128,7 @@ public class GroupMyDataIconControls extends HBox
 
     override public function set data(value:Object):void {
         this.obj = value;
-        if (value is DataFeedDescriptor) {
+        if (value is DataSourceDescriptor) {
             adminVisible = false;            
         } else if (value is InsightDescriptor) {
             adminVisible = true;

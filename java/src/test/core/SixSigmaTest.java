@@ -45,7 +45,7 @@ public class SixSigmaTest extends TestCase {
         SixSigmaMeasure defectsPerMil = createSigmaMeasure(defects, opportunities, SixSigmaMeasure.DEFECTS_PER_MILLION_OPPS, "DefectsPerMillion");
         SixSigmaMeasure yieldPercentage = createSigmaMeasure(defects, opportunities, SixSigmaMeasure.YIELD_PERCENTAGE, "YieldPercentage");
         feedDefinition.setFields(Arrays.asList(customer, defects, opportunities, processSigma, defectsPercentage, defectsPerMil, yieldPercentage));
-        new FeedService().updateFeedDefinition(feedDefinition, null);
+        new FeedService().updateFeedDefinition(feedDefinition);
         ValidatingPublishService validatingPublishService = new ValidatingPublishService() {
 
             protected String getUserName() {

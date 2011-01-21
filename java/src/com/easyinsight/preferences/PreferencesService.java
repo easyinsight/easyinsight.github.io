@@ -254,6 +254,7 @@ public class PreferencesService {
                 uiSettings.setVisibilitySettings(settings);
                 persona.setUiSettings(uiSettings);
                 personas.add(persona);
+                visibilitySettingsStmt.close();
             }
         } catch (Exception e) {
             LogClass.error(e);

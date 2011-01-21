@@ -1,9 +1,10 @@
 package com.easyinsight.listing
 {
 import com.easyinsight.customupload.FileFeedUpdateWindow;
-import com.easyinsight.customupload.UploadConfigEvent;
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.datasources.DataSourceBehavior;
 import com.easyinsight.datasources.DataSourceRefreshWindow;
+import com.easyinsight.datasources.DataSourceType;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.etl.LookupTableSource;
 import com.easyinsight.framework.PerspectiveInfo;
@@ -11,7 +12,9 @@ import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.goals.GoalDataAnalyzeSource;
 import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
 import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
@@ -258,21 +261,13 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     }
 
     private function refreshCalled(event:MouseEvent):void {
-        if (obj is DataFeedDescriptor) {
-            var feedDescriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            switch (feedDescriptor.feedType) {
-                case DataFeedDescriptor.STATIC:
-                case DataFeedDescriptor.EMPTY:
-                    fileData(feedDescriptor);
-                    break;
-                case DataFeedDescriptor.BASECAMP:
-                case DataFeedDescriptor.BATCHBOOK:
-                case DataFeedDescriptor.HIGHRISE:
-                case DataFeedDescriptor.PIVOTAL_TRACKER:
-                case DataFeedDescriptor.LINKEDIN:
-                case DataFeedDescriptor.CONSTANT_CONTACT:
-                    refreshData(feedDescriptor);
-                    break;
+        if (obj is DataSourceDescriptor) {
+            var feedDescriptor:DataSourceDescriptor = obj as DataSourceDescriptor;
+            if (feedDescriptor.dataSourceType == DataSourceType.STATIC ||
+                    feedDescriptor.dataSourceType == DataSourceType.EMPTY) {
+                fileData(feedDescriptor);
+            } else {
+                refreshData(feedDescriptor);
             }
         }
     }
@@ -282,8 +277,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     }
 
     private function analyzeCalled(event:MouseEvent):void {
-        if (obj is DataFeedDescriptor) {
-            var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
+        if (obj is DataSourceDescriptor) {
+            var descriptor:DataSourceDescriptor = obj as DataSourceDescriptor;
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.id)));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
@@ -297,18 +292,14 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         }
     }
 
-    private function refreshData(feedDescriptor:DataFeedDescriptor):void {
+    private function refreshData(feedDescriptor:DataSourceDescriptor):void {
         var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
         dsRefreshWindow.dataSourceID = feedDescriptor.id;
         PopUpManager.addPopUp(dsRefreshWindow, this, true);
         PopUpUtil.centerPopUp(dsRefreshWindow);
     }
 
-    private function passEvent(event:UploadConfigEvent):void {
-        dispatchEvent(event);
-    }
-
-    private function fileData(feedDescriptor:DataFeedDescriptor):void {
+    private function fileData(feedDescriptor:DataSourceDescriptor):void {
         var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
         feedUpdateWindow.feedID = feedDescriptor.id;
         feedUpdateWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
@@ -317,14 +308,14 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     }
 
     private function adminCalled(event:MouseEvent):void {
-        if (obj is DataFeedDescriptor) {
-            var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
+        if (obj is DataSourceDescriptor) {
+            var descriptor:DataSourceDescriptor = obj as DataSourceDescriptor;
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
         } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
         } else if (obj is GoalTreeDescriptor) {
-            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(GoalTreeDescriptor(obj).id)));
+            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(GoalTreeDescriptor(obj).id, 0)));
         }  else if (obj is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {dashboardID: DashboardDescriptor(obj).id}))); 
         }
@@ -333,41 +324,28 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
     [Bindable("dataChange")]
     public function set data(value:Object):void {
         this.obj = value;
-        if (value is DataFeedDescriptor) {
-            var descriptor:DataFeedDescriptor = value as DataFeedDescriptor;
-            adminVisible = descriptor.role == DataFeedDescriptor.OWNER;
-            adminTooltip = "Administer the data source...";
-            deleteVisible = descriptor.groupSourceID == 0;
-            switch (descriptor.feedType) {
-                case DataFeedDescriptor.STATIC:
-                case DataFeedDescriptor.EMPTY:
-                case DataFeedDescriptor.BASECAMP:
-                case DataFeedDescriptor.HIGHRISE:
-                case DataFeedDescriptor.PIVOTAL_TRACKER:
-                case DataFeedDescriptor.WHOLE_FOODS:
-                case DataFeedDescriptor.LINKEDIN:
-                case DataFeedDescriptor.CONSTANT_CONTACT:
-                case DataFeedDescriptor.BATCHBOOK:
-                    refreshVisible = true;
-                    break;
-                default:
-                    refreshVisible = false;
-                    break;
+        if (value is EIDescriptor) {
+            var desc:EIDescriptor = value as EIDescriptor;
+            deleteVisible = desc.role == DataSourceType.OWNER;
+            if (value is DataSourceDescriptor) {
+                var descriptor:DataSourceDescriptor = value as DataSourceDescriptor;
+                adminVisible = descriptor.role == DataSourceType.OWNER;
+                adminTooltip = "Administer the data source...";
+                refreshVisible = DataSourceBehavior.pullDataSource(descriptor.dataSourceType);
+            } else if (value is InsightDescriptor) {
+                refreshVisible = false;
+                adminVisible = true;
+                adminTooltip = "Open report in the report editor...";
+            } else if (value is LookupTableDescriptor) {
+                refreshVisible = false;
+                adminVisible = false;
+            } else if (value is GoalTreeDescriptor) {
+                refreshVisible = false;
+                adminVisible = true;
+            } else if (value is DashboardDescriptor) {
+                refreshVisible = false;
+                adminVisible = true;
             }
-
-        } else if (value is InsightDescriptor) {
-            refreshVisible = false;
-            adminVisible = true;
-            adminTooltip = "Open report in the report editor...";
-        } else if (value is LookupTableDescriptor) {
-            refreshVisible = false;
-            adminVisible = false;
-        } else if (value is GoalTreeDescriptor) {
-            refreshVisible = false;
-            adminVisible = true;
-        } else if (value is DashboardDescriptor) {
-            refreshVisible = false;
-            adminVisible = true;
         }
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }

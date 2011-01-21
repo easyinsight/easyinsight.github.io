@@ -1,5 +1,7 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.core.EIDescriptor;
+
 import java.util.List;
 
 /**
@@ -8,22 +10,22 @@ import java.util.List;
  * Time: 3:49:26 PM
  */
 public class MyDataTree {
-    private List<Object> objects;
+    private List<EIDescriptor> objects;
     private boolean includeGroup;
 
     public MyDataTree() {
     }
 
-    public MyDataTree(List<Object> objects, boolean includeGroup) {
+    public MyDataTree(List<EIDescriptor> objects, boolean includeGroup) {
         this.objects = objects;
         this.includeGroup = includeGroup;
     }
 
-    public List<Object> getObjects() {
+    public List<EIDescriptor> getObjects() {
         return objects;
     }
 
-    public void setObjects(List<Object> objects) {
+    public void setObjects(List<EIDescriptor> objects) {
         this.objects = objects;
     }
 

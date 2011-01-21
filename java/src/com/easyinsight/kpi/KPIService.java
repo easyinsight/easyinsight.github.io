@@ -183,7 +183,7 @@ public class KPIService {
 
     public List<KPI> getKPIsForDataSource(long dataSourceID) {
         try {
-            return kpiStorage.getKPIsForUser(dataSourceID);
+            return kpiStorage.getKPIsForDataSource(dataSourceID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

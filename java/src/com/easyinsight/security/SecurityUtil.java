@@ -291,30 +291,6 @@ public class SecurityUtil {
         return getRole(userID, feedID);
     }
 
-    public static void authorizeMilestone(long milestoneID) {
-        long accountID = getAccountID();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_ID FROM MILESTONE WHERE MILESTONE_ID = ?");
-            queryStmt.setLong(1, milestoneID);
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getLong(1) != accountID) {
-                    SecurityLogger.error("Invalid attempt for milestone " + milestoneID + ".");
-                    throw new SecurityException();
-                }
-            } else {
-                SecurityLogger.error("Invalid attempt for milestone " + milestoneID + ".");
-                throw new SecurityException();
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new SecurityException();
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
     public static int getInsightRole(long userID, long insightID) {
         Connection conn = Database.instance().getConnection();
         try {
@@ -324,7 +300,7 @@ public class SecurityUtil {
             existingLinkQuery.setLong(2, insightID);
             ResultSet rs = existingLinkQuery.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                return Roles.OWNER;
             } else {
                 PreparedStatement groupQueryStmt = conn.prepareStatement("select role from group_to_insight, group_to_user_join where " +
                         "group_to_user_join.group_id = group_to_insight.group_id and group_to_user_join.user_id = ? and group_to_insight.insight_id = ?");
@@ -332,37 +308,7 @@ public class SecurityUtil {
                 groupQueryStmt.setLong(2, insightID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
                 if (groupRS.next()) {
-                    return groupRS.getInt(1);
-                } else {
-                    return Integer.MAX_VALUE;
-                }
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public static int getPackageRole(long userID, long packageID) {
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT ROLE FROM user_to_report_package WHERE " +
-                    "USER_ID = ? AND REPORT_PACKAGE_ID = ?");
-            existingLinkQuery.setLong(1, userID);
-            existingLinkQuery.setLong(2, packageID);
-            ResultSet rs = existingLinkQuery.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            } else {
-                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from GROUP_TO_REPORT_PACKAGE, group_to_user_join where " +
-                        "group_to_user_join.group_id = GROUP_TO_REPORT_PACKAGE.group_id and group_to_user_join.user_id = ? and GROUP_TO_REPORT_PACKAGE.REPORT_PACKAGE_ID = ?");
-                groupQueryStmt.setLong(1, userID);
-                groupQueryStmt.setLong(2, packageID);
-                ResultSet groupRS = groupQueryStmt.executeQuery();
-                if (groupRS.next()) {
-                    return groupRS.getInt(1);
+                    return Roles.SUBSCRIBER;
                 } else {
                     return Integer.MAX_VALUE;
                 }
@@ -392,7 +338,7 @@ public class SecurityUtil {
                 groupQueryStmt.setLong(2, feedID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
                 if (groupRS.next()) {
-                    return groupRS.getInt(1);
+                    return Roles.SUBSCRIBER;
                 } else {
                     PreparedStatement accountQueryStmt = conn.prepareStatement("select role from upload_policy_users, user, data_feed where " +
                             "data_feed.data_feed_id = ? AND data_feed.data_feed_id = upload_policy_users.feed_id and " +
@@ -403,7 +349,7 @@ public class SecurityUtil {
                     accountQueryStmt.setLong(3, getAccountID());
                     ResultSet accountRS = accountQueryStmt.executeQuery();
                     if (accountRS.next()) {
-                        return accountRS.getInt(1);
+                        return Roles.OWNER;
                     } else {
                         PreparedStatement forTimeBeingStmt = conn.prepareStatement("select account_id from user, data_feed, upload_policy_users where " +
                                 "data_feed.data_feed_id = ? and data_feed.data_feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id");
@@ -412,7 +358,7 @@ public class SecurityUtil {
                         if (hackRS.next()) {
                             long accountID = hackRS.getLong(1);
                             if (accountID == getAccountID()) {
-                                return Roles.SHARER;
+                                return Roles.OWNER;
                             } else {
                                 return Integer.MAX_VALUE;
                             }
@@ -506,7 +452,7 @@ public class SecurityUtil {
         }
     }
 
-    private static int getRoleForGoalTree(long userID, long goalTreeID) {
+    private static int getRoleForGoalTree(long userID, long accountID, long goalTreeID) {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT USER_ROLE FROM USER_TO_GOAL_TREE WHERE " +
@@ -515,78 +461,47 @@ public class SecurityUtil {
             existingLinkQuery.setLong(2, goalTreeID);
             ResultSet rs = existingLinkQuery.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                existingLinkQuery.close();
+                return Roles.OWNER;
             } else {
-                PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_goal_tree_join_id from group_to_goal_tree_join, group_to_user_join where " +
-                        "group_to_user_join.group_id = group_to_goal_tree_join.group_id and group_to_user_join.user_id = ? and group_to_goal_tree_join.goal_tree_id = ?");
-                groupQueryStmt.setLong(1, userID);
-                groupQueryStmt.setLong(2, goalTreeID);
-                ResultSet groupRS = groupQueryStmt.executeQuery();
-                if (groupRS.next()) {
-                    return Roles.SUBSCRIBER;
+                existingLinkQuery.close();
+                PreparedStatement accountStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID " +
+                    "FROM GOAL_TREE, user_to_goal_tree, user WHERE " +
+                    "user_to_goal_tree.user_id = user.user_id AND user_to_goal_tree.goal_tree_id = goal_tree.goal_tree_id and user.account_id = ? and goal_tree.account_visible = ? AND " +
+                        "goal_tree.goal_tree_id = ?");
+                accountStmt.setLong(1, accountID);
+                accountStmt.setBoolean(2, true);
+                accountStmt.setLong(3, goalTreeID);
+                ResultSet accountRS = accountStmt.executeQuery();
+                if (accountRS.next()) {
+                    accountStmt.close();
+                    return Roles.OWNER;
                 } else {
-                    return Integer.MAX_VALUE;
-                }
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public static void authorizePackage(long packageID) {
-        boolean publiclyVisible = false;
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE FROM REPORT_PACKAGE WHERE REPORT_PACKAGE_ID = ?");
-            authorizeStmt.setLong(1, packageID);
-            ResultSet rs = authorizeStmt.executeQuery();
-            if (rs.next()) {
-                publiclyVisible = rs.getBoolean(1);
-            } else {
-                throw new SecurityException();
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-
-        if (publiclyVisible) {
-            // we're okay
-        } else {
-            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
-            if (userPrincipal == null) {
-                userPrincipal = threadLocal.get();
-                if(userPrincipal == null) {
+                    accountStmt.close();
                     throw new SecurityException();
                 }
             }
-            int role = getPackageRole(userPrincipal.getUserID(), packageID);
-            if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
-                throw new SecurityException();
-            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 
-    public static void authorizeInsight(long insightID) {
-        boolean publiclyVisible = false;
+    public static int authorizeInsight(long insightID) {
         boolean feedVisibility = false;
         boolean accountVisibility = false;
         long dataFeedID = 0;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, FEED_VISIBILITY, ACCOUNT_VISIBLE, DATA_FEED_ID FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT FEED_VISIBILITY, ACCOUNT_VISIBLE, DATA_FEED_ID FROM ANALYSIS WHERE ANALYSIS_ID = ?");
             authorizeStmt.setLong(1, insightID);
             ResultSet rs = authorizeStmt.executeQuery();
             if (rs.next()) {
-                publiclyVisible = rs.getBoolean(1);
-                feedVisibility = rs.getBoolean(2);
-                accountVisibility = rs.getBoolean(3);
-                dataFeedID = rs.getLong(4);
+                feedVisibility = rs.getBoolean(1);
+                accountVisibility = rs.getBoolean(2);
+                dataFeedID = rs.getLong(3);
             } else {
                 throw new SecurityException();
             }
@@ -597,9 +512,7 @@ public class SecurityUtil {
             Database.closeConnection(conn);
         }
 
-        if (publiclyVisible) {
-            // we're okay
-        } else if (accountVisibility) {
+        if (accountVisibility) {
             conn = Database.instance().getConnection();
             try {
                 PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, USER_TO_ANALYSIS WHERE USER.USER_ID = " +
@@ -609,6 +522,7 @@ public class SecurityUtil {
                 if (rs.next()) {
                     long accountID = rs.getLong(1);
                     if (accountID == getAccountID()) {
+                        return Roles.OWNER;
                         // all good
                     } else {
                         throw new SecurityException();
@@ -624,6 +538,7 @@ public class SecurityUtil {
             }
         } else if (feedVisibility) {
             authorizeFeedAccess(dataFeedID);
+            return Roles.OWNER;
         } else {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
@@ -636,26 +551,25 @@ public class SecurityUtil {
             if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
                 throw new SecurityException();
             }
+            return role;
         }
     }
 
     public static long authorizeInsight(String urlKey) {
-        boolean publiclyVisible = false;
         boolean feedVisibility = false;
         boolean accountVisibility = false;
         long dataFeedID = 0;
         long reportID;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, FEED_VISIBILITY, DATA_FEED_ID, ANALYSIS_ID, ACCOUNT_VISIBLE FROM ANALYSIS WHERE URL_KEY = ?");
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT FEED_VISIBILITY, DATA_FEED_ID, ANALYSIS_ID, ACCOUNT_VISIBLE FROM ANALYSIS WHERE URL_KEY = ?");
             authorizeStmt.setString(1, urlKey);
             ResultSet rs = authorizeStmt.executeQuery();
             if (rs.next()) {
-                publiclyVisible = rs.getBoolean(1);
-                feedVisibility = rs.getBoolean(2);
-                dataFeedID = rs.getLong(3);
-                reportID = rs.getLong(4);
-                accountVisibility = rs.getBoolean(5);
+                feedVisibility = rs.getBoolean(1);
+                dataFeedID = rs.getLong(2);
+                reportID = rs.getLong(3);
+                accountVisibility = rs.getBoolean(4);
             } else {
                 throw new SecurityException();
             }
@@ -666,9 +580,7 @@ public class SecurityUtil {
             Database.closeConnection(conn);
         }
 
-        if (publiclyVisible) {
-            // we're okay
-        } else if (accountVisibility) {
+        if (accountVisibility) {
             conn = Database.instance().getConnection();
             try {
                 PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, USER_TO_ANALYSIS WHERE USER.USER_ID = " +
@@ -717,7 +629,7 @@ public class SecurityUtil {
                 throw new SecurityException();
             }
         }
-        int role = getRoleForGoalTree(userPrincipal.getUserID(), goalTreeID);
+        int role = getRoleForGoalTree(userPrincipal.getUserID(), userPrincipal.getAccountID(), goalTreeID);
         if (role > requiredRole) {
             throw new SecurityException();
         }
@@ -815,7 +727,7 @@ public class SecurityUtil {
             }
         }
         long kpiTreeID = getKPITreeForKey(urlKey);
-        int role = getRoleForGoalTree(userPrincipal.getUserID(), kpiTreeID);
+        int role = getRoleForGoalTree(userPrincipal.getUserID(), userPrincipal.getAccountID(), kpiTreeID);
         if (role > requiredRole) {
             throw new SecurityException();
         }
@@ -830,7 +742,7 @@ public class SecurityUtil {
                 throw new SecurityException();
             }
         }
-        int role = getRoleForGoalTree(userPrincipal.getUserID(), goalTreeID);
+        int role = getRoleForGoalTree(userPrincipal.getUserID(), userPrincipal.getAccountID(), goalTreeID);
         boolean valid = false;
         if (role == Integer.MAX_VALUE) {
             Connection conn = Database.instance().getConnection();
@@ -856,7 +768,7 @@ public class SecurityUtil {
         }
     }
 
-    public static void authorizeGroup(long groupID, int requiredRole) {
+    public static int authorizeGroup(long groupID, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
             throw new SecurityException();
@@ -865,6 +777,7 @@ public class SecurityUtil {
         if (role > requiredRole) {
             throw new SecurityException();
         }
+        return role;
     }
 
     public static long authorizeGroupByKey(String urlKey, int requiredRole) {

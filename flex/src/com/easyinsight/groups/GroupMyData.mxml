@@ -3,10 +3,11 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.listing.DataFeedDescriptor;
+
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.MyDataTree;
         import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
@@ -29,12 +30,12 @@
         }
 
         public function gotFocus():void {
-            groupService.getFeedAnalysisTree.send(_groupID);
+            uploadService.getFeedAnalysisTree.send(false, _groupID);
         }
 
         private function gotFeedAnalysisTree():void {
             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
-            var myDataTree:MyDataTree = groupService.getFeedAnalysisTree.lastResult as MyDataTree;
+            var myDataTree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
             sourceTreeData = myDataTree.objects;
             displayTreeData = new ArrayCollection(sourceTreeData.toArray());
             var hierarchicalData:HierarchicalData = new HierarchicalData();
@@ -47,8 +48,8 @@
         private function gridDoubleClick(event:ListEvent):void {
             var analyzeSource:PerspectiveInfo = null;
             var selectedObject:Object = event.currentTarget.selectedItem;
-            if (selectedObject is DataFeedDescriptor) {
-                var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
+            if (selectedObject is DataSourceDescriptor) {
+                var descriptor:DataSourceDescriptor = selectedObject as DataSourceDescriptor;
                 analyzeSource = new DescriptorAnalyzeSource(descriptor.id);
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else {
@@ -66,7 +67,7 @@
         public var crosstabIcon:Class;
 
         private function simpleIconFunction(item:Object):Class {
-            if (item is DataFeedDescriptor) {
+            if (item is DataSourceDescriptor) {
                 return listIcon;
             } else if (item is InsightDescriptor) {
                 return crosstabIcon;
@@ -75,9 +76,9 @@
         }
 
         private function customSort(obj1:Object, obj2:Object):int {
-            if (obj1 is DataFeedDescriptor && obj2 is DataFeedDescriptor) {
-                var date1:Date = DataFeedDescriptor(obj1).lastDataTime;
-                var date2:Date = DataFeedDescriptor(obj2).lastDataTime;
+            if (obj1 is DataSourceDescriptor && obj2 is DataSourceDescriptor) {
+                var date1:Date = DataSourceDescriptor(obj1).lastDataTime;
+                var date2:Date = DataSourceDescriptor(obj2).lastDataTime;
                 return ObjectUtil.dateCompare(date1, date2);
             }
             if (dataColumn.sortDescending) {
@@ -89,18 +90,18 @@
 
         private var dataColumn:AdvancedDataGridColumn;
 
-        private function addReport():void {
-            var window:AddReportToGroupWindow = new AddReportToGroupWindow();
+        private function addDataSource():void {
+            var window:AddDataSourceToGroupWindow = new AddDataSourceToGroupWindow();
             window.groupID = _groupID;
-            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
 
-        private function addDataSource():void {
-            var window:AddDataSourceToGroupWindow = new AddDataSourceToGroupWindow();
+        private function addReport():void {
+            var window:AddReportToGroupWindow = new AddReportToGroupWindow();
             window.groupID = _groupID;
-            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -141,7 +142,7 @@
 
             dispatchEvent(new Event("groupAdminChanged"));
         }]]></mx:Script>
-    <mx:RemoteObject destination="groupService" id="groupService">
+    <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
     </mx:RemoteObject>
     <groups:GroupDataControlsFactory id="controlsFactory" groupAdmin="{groupAdmin}"/>
@@ -166,8 +167,6 @@
                                                    id="lastDataColumn"
                                                    width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
                                                    sortCompareFunction="customSort"/>
-                        <mx:AdvancedDataGridColumn width="100" headerText="" dataField="name" sortable="false"
-                                                   itemRenderer="com.easyinsight.groups.GroupMyDataIconControls"/>
                     </mx:columns>
                 </mx:AdvancedDataGrid>
             </mx:VBox>
@@ -191,7 +190,7 @@
                         <mx:AdvancedDataGridColumn headerText="Last Data Time" dataField="lastDataTime" id="lastDataAdminColumn"
                                                    width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
                                                    sortCompareFunction="customSort"/>
-                        <mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" sortable="false"
+                        <mx:AdvancedDataGridColumn width="50" headerText="" dataField="name" sortable="false"
                                                    itemRenderer="com.easyinsight.groups.GroupAdminMyDataIconControls"/>
                     </mx:columns>
                 </mx:AdvancedDataGrid>
@@ -201,7 +200,7 @@
                 <mx:HRule width="100%"/>
                 <mx:LinkButton label="Add data source..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
                                click="addDataSource()"/>
-                <mx:LinkButton label="Add a report..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                <mx:LinkButton label="Add report..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
                                click="addReport()"/>
             </mx:VBox>
         </mx:HBox>

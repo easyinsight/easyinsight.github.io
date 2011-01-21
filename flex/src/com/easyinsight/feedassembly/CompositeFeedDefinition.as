@@ -1,7 +1,7 @@
 package com.easyinsight.feedassembly
 {
 	import com.easyinsight.administration.feed.FeedDefinitionData;
-import com.easyinsight.listing.DataFeedDescriptor;
+import com.easyinsight.datasources.DataSourceType;
 
 import mx.collections.ArrayCollection;
 
@@ -19,7 +19,7 @@ import mx.collections.ArrayCollection;
 
 
         override public function getFeedType():int {
-            return DataFeedDescriptor.COMPOSITE;
+            return DataSourceType.COMPOSITE;
         }
     }
 }

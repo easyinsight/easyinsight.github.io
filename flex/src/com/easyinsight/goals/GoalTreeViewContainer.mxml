@@ -32,7 +32,7 @@
 
 
         private function editTree():void {
-            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(_goalTreeID)));
+            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(_goalTreeID, 0)));
         }
 
 

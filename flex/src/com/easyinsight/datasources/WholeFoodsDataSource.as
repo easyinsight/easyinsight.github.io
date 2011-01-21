@@ -1,6 +1,5 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.WholeFoodsDataSourceCreation;
-import com.easyinsight.listing.DataFeedDescriptor;
 
 import flash.utils.ByteArray;
 
@@ -24,7 +23,7 @@ public class WholeFoodsDataSource extends CompositeServerDataSource {
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.WHOLE_FOODS;
+        return DataSourceType.WHOLE_FOODS;
     }
 
     override public function configClass():Class {

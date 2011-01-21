@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
-	creationComplete="solutionService.getAvailableFeeds.send()">
+	creationComplete="feedService.searchForSubscribedFeeds.send()">
 	<mx:Script>
 		<![CDATA[			
 			import mx.managers.PopUpManager;
-			import com.easyinsight.listing.DataFeedDescriptor;
+
 			import mx.rpc.events.ResultEvent;
 			import mx.collections.ArrayCollection;
 			[Bindable]
 			private var descriptors:ArrayCollection;
 		
 			private function gotFeeds(event:ResultEvent):void {
-				descriptors = solutionService.getAvailableFeeds.lastResult as ArrayCollection;				
+				descriptors = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
 			}
 			
 			private function chose():void {
-				var descriptor:DataFeedDescriptor = feedBox.selectedItem as DataFeedDescriptor;
+				var descriptor:DataSourceDescriptor = feedBox.selectedItem as DataSourceDescriptor;
 				dispatchEvent(new FeedSelectionEvent(FeedSelectionEvent.FEED_SELECTED, descriptor));
 				PopUpManager.removePopUp(this);
 			}
@@ -25,8 +25,8 @@
 			}
 		]]>
 	</mx:Script>
-	<mx:RemoteObject destination="solutionService" id="solutionService">
-		<mx:method name="getAvailableFeeds" result="gotFeeds(event)"/>		
+	<mx:RemoteObject destination="feeds" id="feedService">
+		<mx:method name="searchForSubscribedFeeds" result="gotFeeds(event)"/>
 	</mx:RemoteObject>
 	<mx:Form styleName="TitleWindowContents">
 		<mx:FormItem label="Choose a Data Source:">

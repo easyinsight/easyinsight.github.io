@@ -11,15 +11,14 @@ package com.easyinsight.goals
 		public var description:String;
 		public var stage:String;
 		public var goalTreeID:int;
-		public var milestones:ArrayCollection;
-		public var trackingIntervals:ArrayCollection;
+        public var dataSourceID:int;
         public var administrators:ArrayCollection = new ArrayCollection();
-        public var consumers:ArrayCollection = new ArrayCollection();
-        public var newSolutions:ArrayCollection = new ArrayCollection();
         public var subTreeParents:ArrayCollection = new ArrayCollection();
         public var iconImage:String;
         public var urlKey:String;
-		
+        public var accountVisible:Boolean;
+        public var exchangeVisible:Boolean;
+
 		public function GoalTree()
 		{
 		}

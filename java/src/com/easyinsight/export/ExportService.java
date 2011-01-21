@@ -3,10 +3,10 @@ package com.easyinsight.export;
 import com.easyinsight.analysis.DataService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
@@ -16,10 +16,6 @@ import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.scorecard.ScorecardWrapper;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.StringValue;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.ListRow;
 import com.easyinsight.analysis.*;
@@ -55,6 +51,7 @@ import java.util.List;
 public class ExportService {
 
     public static final String CURRENCY_STYLE = "currency";
+    public static final String TEXT_STYLE = "currency";
     public static final String GENERIC_STYLE = "generic";
     
     public void seleniumDraw(long requestID, byte[] bytes) {
@@ -109,11 +106,11 @@ public class ExportService {
         scheduledActivity.setup(conn);        
     }
 
-    public List<FeedDescriptor> getRefreshableDataSources(ScheduledActivity scheduledActivity) {
-        List<FeedDescriptor> validSources = new ArrayList<FeedDescriptor>();
-        List<FeedDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();
-        for (FeedDescriptor fd : dataSources) {
-            if (isRefreshable(fd.getFeedType())) {
+    public List<DataSourceDescriptor> getRefreshableDataSources(ScheduledActivity scheduledActivity) {
+        List<DataSourceDescriptor> validSources = new ArrayList<DataSourceDescriptor>();
+        List<DataSourceDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();
+        for (DataSourceDescriptor fd : dataSources) {
+            if (isRefreshable(fd.getDataSourceType())) {
                 validSources.add(fd);
             }
         }
@@ -130,10 +127,10 @@ public class ExportService {
                 int feedType = rs.getInt(1);
                 long id = rs.getLong(2);
                 if (scheduledActivity != null && id == scheduledActivity.getScheduledActivityID()) continue;
-                Iterator<FeedDescriptor> descIter = validSources.iterator();
+                Iterator<DataSourceDescriptor> descIter = validSources.iterator();
                 while (descIter.hasNext()) {
-                    FeedDescriptor fd = descIter.next();
-                    if (fd.getFeedType() == feedType) {
+                    DataSourceDescriptor fd = descIter.next();
+                    if (fd.getDataSourceType() == feedType) {
                         descIter.remove();
                     }
                 }
@@ -662,6 +659,10 @@ public class ExportService {
                 styleMap.put(analysisItem.qualifiedName(), cellStyle);
                 style = cellStyle;
             }
+        } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+            HSSFCellStyle cellStyle = wb.createCellStyle();
+            cellStyle.setWrapText(true);
+            style = cellStyle;
         } else {
             style = styleMap.get(GENERIC_STYLE);
         }

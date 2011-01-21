@@ -29,7 +29,6 @@
         </mx:State>
     </util:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.solutions.DataSourceDescriptor;
 
         import mx.collections.ArrayCollection;
@@ -51,7 +50,7 @@
         }
 
         private function choseDataSource():void {
-            dataSource = DataFeedDescriptor(dataSourceBox.selectedItem).toDataSourceDescriptor();
+            dataSource = DataSourceDescriptor(dataSourceBox.selectedItem);
             currentState = "defineGrid";
         }
 
@@ -59,12 +58,12 @@
             if (dataSources.length == 0) {
 
             } else if (dataSources.length == 1) {
-                dataSource = DataFeedDescriptor(dataSources.getItemAt(0)).toDataSourceDescriptor();
+                dataSource = DataSourceDescriptor(dataSources.getItemAt(0));
                 currentState = "defineGrid";
             } else if (_startDataSourceID != 0) {
-                for each (var ds:DataFeedDescriptor in dataSources) {
+                for each (var ds:DataSourceDescriptor in dataSources) {
                     if (ds.id == _startDataSourceID) {
-                        dataSource = ds.toDataSourceDescriptor();
+                        dataSource = ds;
                         currentState = "defineGrid";
                     }
                 }

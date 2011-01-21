@@ -18,7 +18,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.AuthorizationRequirement;
         import com.easyinsight.google.AuthSubNavWindow;
-        import com.easyinsight.listing.DataFeedDescriptor;
+
         import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.PopUpUtil;
 

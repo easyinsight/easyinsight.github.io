@@ -32,8 +32,7 @@ public class GroupTest extends TestCase {
         Group group = new Group();
         group.setName("Test Group");
         group.setDescription("Test Description");
-        group.setPubliclyJoinable(false);
-        group.setPubliclyVisible(false);
+
         List<Tag> tagList = Arrays.asList(new Tag("Test"), new Tag("Group"));
         group.setTags(tagList);
         GroupUser groupUser = new GroupUser(userID, null, null, null, Roles.OWNER, null);
@@ -46,18 +45,12 @@ public class GroupTest extends TestCase {
         groupService.addGroupComment(null);
         groupService.addMemberToGroup(groupID);
         groupService.addReportToGroup(0, groupID);*/
-        groupService.getFeeds(groupID);
-        groupService.getGoals(groupID);
-        groupService.getGoalTrees(groupID);
         groupService.getGroupMessages(groupID, null, null);
-        groupService.getInsights(groupID);
         groupService.getMemberGroups();
         groupService.getPublicGroups();
         groupService.getUsers(groupID);
         Group retrievedGroup = groupService.getGroup(groupID);
         assertEquals(group.getName(), retrievedGroup.getName());
         assertEquals(group.getDescription(), retrievedGroup.getDescription());
-        assertEquals(group.isPubliclyJoinable(), retrievedGroup.isPubliclyJoinable());
-        assertEquals(group.isPubliclyVisible(), retrievedGroup.isPubliclyVisible());
     }
 }

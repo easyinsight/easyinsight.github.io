@@ -1,6 +1,6 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.FreshbooksDataSourceCreation;
-import com.easyinsight.listing.DataFeedDescriptor;
+
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource")]
@@ -21,7 +21,7 @@ public class FreshbooksDataSource extends CompositeServerDataSource {
     }
 
     override public function getFeedType():int {
-        return DataFeedDescriptor.FRESHBOOKS;
+        return DataSourceType.FRESHBOOKS;
     }
 
     override public function configClass():Class {

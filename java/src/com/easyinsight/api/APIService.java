@@ -6,7 +6,6 @@ import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
@@ -165,34 +164,6 @@ public class APIService {
             Database.closeConnection(conn);
         }
         return apis;
-    }
-
-    public List<FeedDescriptor> getAvailableFeeds() {
-        long userID = SecurityUtil.getUserID();
-        List<FeedDescriptor> descriptors = new ArrayList<FeedDescriptor>();
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME FROM DATA_FEED, UPLOAD_POLICY_USERS " +
-                    "WHERE DYNAMIC_SERVICE_DEFINITION_ID IS NULL AND UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND UPLOAD_POLICY_USERS.ROLE = ?");
-            queryStmt.setLong(1, userID);
-            queryStmt.setInt(2, Roles.OWNER);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long feedID = rs.getLong(1);
-                String feedName = rs.getString(2);
-                FeedDescriptor feedDescriptor = new FeedDescriptor();
-                feedDescriptor.setId(feedID);
-                feedDescriptor.setName(feedName);
-                descriptors.add(feedDescriptor);
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        return descriptors;
     }
 
     public List<DynamicServiceDescriptor> getDeployedServices() {

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:orgchart="ilog.orgchart.*"
-        creationComplete="blah()" width="100%" height="100%" xmlns:goals="com.easyinsight.goals.*" doubleClickEnabled="true">
+        creationComplete="blah()" width="100%" height="100%" doubleClickEnabled="true"
+        initialize="onInitialize()">
     <mx:Metadata>
         [Event(name="solutionInstall", type="com.easyinsight.goals.SolutionInstallRequiredEvent")]
         [Event(name="splitTree", type="com.easyinsight.goals.SplitGoalTreeEvent")]
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
-        import ilog.orgchart.OrgChartEvent;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
@@ -36,8 +37,28 @@
         [Embed(source="../../../../assets/element_delete.png")]
         private var deleteNodeIcon:Class;
 
+        private var _dataSourceID:int;
+
+        private function onInitialize():void {
+            var factory:ClassFactory = new ClassFactory(GoalAdminRenderer2);
+            factory.properties = {adminContainer: this };
+            this.factory = factory;
+        }
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
+
         public function set goalTreeNodes(nodes:GoalTreeNode):void {
             this._goalTreeNodes = nodes;
+            invalidateProperties();
         }
 
         private function newTree(event:GoalContextEvent):void {
@@ -56,10 +77,15 @@
             myOrgChart.addEventListener(OrganizationChartRefreshEvent.ORG_CHART_REFRESH, orgRefresh);
             myOrgChart.addEventListener(GoalContextEvent.NEW_PARENT, newParent);
             myOrgChart.addEventListener(GoalContextEvent.NEW_TREE, newTree);
+
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
             myOrgChart.dataProvider = _goalTreeNodes;
         }
 
-        private function orgRefresh(event:OrganizationChartRefreshEvent):void {            
+        private function orgRefresh(event:OrganizationChartRefreshEvent):void {
             myOrgChart.dataProvider = _goalTreeNodes;
             dispatchEvent(new GoalTreeChangedEvent());
         }
@@ -98,7 +124,7 @@
 
         private function copyNode():void {
             var goalTreeNode:GoalTreeNode = getSelectedNode();
-            
+
         }
 
         private function deleteNode():void {
@@ -119,37 +145,30 @@
         }
 
         /*private function onItemDoubleClick(event:OrgChartEvent):void {
-            //var item:OrgChartItem = event.item as OrgChartItem;
-            var node:GoalTreeNode = event.item as GoalTreeNode;
-            var goalNodeWindow:GoalNodeAdminWindow = new GoalNodeAdminWindow();
-            goalNodeWindow.goalTreeNode = node;
-            goalNodeWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
-            PopUpManager.addPopUp(goalNodeWindow, this, true);
-            goalNodeWindow.x = 20;
-            goalNodeWindow.y = 20;
-        }*/
+         //var item:OrgChartItem = event.item as OrgChartItem;
+         var node:GoalTreeNode = event.item as GoalTreeNode;
+         var goalNodeWindow:GoalNodeAdminWindow = new GoalNodeAdminWindow();
+         goalNodeWindow.goalTreeNode = node;
+         goalNodeWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
+         PopUpManager.addPopUp(goalNodeWindow, this, true);
+         goalNodeWindow.x = 20;
+         goalNodeWindow.y = 20;
+         }*/
 
         private function goalEdited(event:GoalEditEvent):void {
             dispatchEvent(new GoalTreeChangedEvent());
         }
-		]]>
+
+        [Bindable]
+        private var factory:IFactory;
+        ]]>
     </mx:Script>
     <mx:HBox width="100%" backgroundColor="#BDC5E2" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Label text="Right click on the goals in the tree below to manipulate the tree structure or edit properties."/>
-        <!--<mx:Button icon="{addNodeIcon}" click="newNode()" toolTip="New Child" enabled="{itemSelected}"/>
-        <mx:Button icon="{newParentIcon}" click="newParent()" toolTip="New Parent" enabled="{itemSelected}"/>
-        <mx:Button icon="{copyNodeIcon}" click="copyNode()" toolTip="Copy Goal" enabled="{itemSelected}"/>
-        <mx:Button icon="{deleteNodeIcon}" click="deleteNode()" toolTip="Delete Goal" enabled="{itemSelected}"/>-->
+        <mx:Label text="Right click on the KPIs in the tree below to manipulate the tree structure or edit properties."/>
     </mx:HBox>
     <mx:Canvas height="100%" width="100%">
         <orgchart:OrgChart id="myOrgChart"
                        width="100%" height="100%" minZoomLevel="1" maxZoomLevel="1" allowSelection="true" allowMultipleSelection="false"
-                       allowNavigation="true" layoutXPadding="50" itemClick="onOrgClick()">
-            <orgchart:itemRenderer>
-                <mx:Component>
-                    <goals:GoalAdminRenderer2/>
-                </mx:Component>
-            </orgchart:itemRenderer>
-        </orgchart:OrgChart>
+                       allowNavigation="true" layoutXPadding="50" itemClick="onOrgClick()" itemRenderer="{factory}"/>
     </mx:Canvas>
 </mx:VBox>
