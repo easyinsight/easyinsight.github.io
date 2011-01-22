@@ -170,12 +170,12 @@ public class UserUploadService {
                 }
             }
 
-            results.remove(null);
-
             Collections.sort(results, new Comparator<EIDescriptor>() {
 
                 public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
-                    return eiDescriptor.getName().compareTo(eiDescriptor1.getName());
+                    String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName() : "";
+                    String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName() : "";
+                    return name1.compareTo(name2);
                 }
             });
 
