@@ -126,7 +126,7 @@ public class GoalStorage {
             String name = accountRS.getString(1);
             long treeID = accountRS.getLong(2);
             int role = accountRS.getInt(3);
-            descriptors.add(new GoalTreeDescriptor(treeID, name, Roles.OWNER, accountRS.getString(4), accountRS.getString(5), accountRS.getLong(6)));
+            descriptors.add(new GoalTreeDescriptor(treeID, name, Roles.SHARER, accountRS.getString(4), accountRS.getString(5), accountRS.getLong(6)));
         }
         accountStmt.close();
         return descriptors;

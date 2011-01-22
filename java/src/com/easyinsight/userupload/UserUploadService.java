@@ -441,10 +441,10 @@ public class UserUploadService {
         try {
             conn.setAutoCommit(false);
             int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
-            if (role == Roles.OWNER) {
+            if (role <= Roles.SHARER) {
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
                 feedDefinition.delete(conn);
-            } else if (role == Roles.SUBSCRIBER || role == Roles.SHARER) {
+            } else if (role == Roles.SUBSCRIBER) {
             } else {
                 throw new SecurityException();
             }

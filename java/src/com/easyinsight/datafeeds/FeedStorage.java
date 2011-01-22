@@ -964,7 +964,7 @@ public class FeedStorage {
             if (lastTime != null) {
                 lastDataTime = new Date(lastTime.getTime());
             }
-            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.OWNER, feedSize, feedType, lastDataTime);
+            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.SHARER, feedSize, feedType, lastDataTime);
             descriptorList.add(feedDescriptor);
         }
         queryStmt.close();

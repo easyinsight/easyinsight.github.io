@@ -58,7 +58,7 @@ public class DashboardStorage {
         ueryAccountStmt.setBoolean(2, false);
         ResultSet accountRS = ueryAccountStmt.executeQuery();
         while (accountRS.next()) {
-            dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.OWNER));
+            dashboards.add(new DashboardDescriptor(accountRS.getString(2), accountRS.getLong(1), accountRS.getString(3), accountRS.getLong(4), Roles.SHARER));
         }
         ueryAccountStmt.close();
         return dashboards;

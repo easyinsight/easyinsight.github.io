@@ -243,7 +243,7 @@ public class AnalysisStorage {
         queryAccountStmt.setBoolean(3, false);
         ResultSet accountRS = queryAccountStmt.executeQuery();
         while (accountRS.next()) {
-            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.OWNER));
+            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER));
         }
         queryAccountStmt.close();
         PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, group_to_user_join.binding_type FROM ANALYSIS, group_to_user_join," +
@@ -295,7 +295,7 @@ public class AnalysisStorage {
         queryAccountStmt.setLong(4, dataSourceID);
         ResultSet accountRS = queryAccountStmt.executeQuery();
         while (accountRS.next()) {
-            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.OWNER));
+            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER));
         }
         queryAccountStmt.close();
         PreparedStatement queryVizStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
