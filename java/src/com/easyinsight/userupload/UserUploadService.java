@@ -170,6 +170,8 @@ public class UserUploadService {
                 }
             }
 
+            results.remove(null);
+
             Collections.sort(results, new Comparator<EIDescriptor>() {
 
                 public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
