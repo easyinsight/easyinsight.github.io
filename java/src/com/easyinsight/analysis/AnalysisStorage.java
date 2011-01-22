@@ -298,7 +298,7 @@ public class AnalysisStorage {
             descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER));
         }
         queryAccountStmt.close();
-        PreparedStatement queryVizStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+        /*PreparedStatement queryVizStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
                 "analysis.feed_visibility = ? and temporary_report = ? AND " +
                 "analysis.data_feed_id = ?");
         queryVizStmt.setBoolean(1, true);
@@ -308,7 +308,7 @@ public class AnalysisStorage {
         while (vizRS.next()) {
             descriptors.add(new InsightDescriptor(vizRS.getLong(1), vizRS.getString(2), vizRS.getLong(3), vizRS.getInt(4), vizRS.getString(5), Roles.SUBSCRIBER));
         }
-        queryVizStmt.close();
+        queryVizStmt.close();*/
         return new ArrayList<InsightDescriptor>(descriptors);
     }
 
