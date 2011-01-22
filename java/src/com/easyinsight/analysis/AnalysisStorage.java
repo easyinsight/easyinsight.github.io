@@ -248,8 +248,9 @@ public class AnalysisStorage {
         queryAccountStmt.close();
         PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, group_to_user_join.binding_type FROM ANALYSIS, group_to_user_join," +
                 "group_to_insight WHERE " +
-                "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ?");
+                "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and analysis.temporary_report = ?");
         userGroupStmt.setLong(1, userID);
+        userGroupStmt.setBoolean(2, false);
         ResultSet groupRS = userGroupStmt.executeQuery();
         while (groupRS.next()) {
             descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), groupRS.getInt(6)));
