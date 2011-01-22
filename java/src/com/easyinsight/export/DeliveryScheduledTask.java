@@ -263,11 +263,12 @@ public class DeliveryScheduledTask extends ScheduledTask {
         getInfoStmt.setLong(1, activityID);
         ResultSet deliveryInfoRS = getInfoStmt.executeQuery();
         deliveryInfoRS.next();
-        getInfoStmt.close();
+
         String subjectLine = deliveryInfoRS.getString(3);
         String body = deliveryInfoRS.getString(4);
         boolean htmlEmail = deliveryInfoRS.getBoolean(5);
         long deliveryID = deliveryInfoRS.getLong(6);
+        getInfoStmt.close();
         PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, delivery_to_user WHERE delivery_to_user.scheduled_account_activity_id = ? and " +
                 "delivery_to_user.user_id = user.user_id");
         List<UserInfo> userStubs = new ArrayList<UserInfo>();
