@@ -1,10 +1,6 @@
-<%@ page import="com.easyinsight.datafeeds.FeedService" %>
-<%@ page import="com.easyinsight.datafeeds.FeedDescriptor" %>
-<%@ page import="java.util.List" %>
 <%@ page import="com.easyinsight.analysis.AnalysisService" %>
 <%@ page import="com.easyinsight.core.InsightDescriptor" %>
 <%@ page import="java.util.Collection" %>
-<%@ page import="com.easyinsight.security.SecurityUtil" %>
 <!DOCTYPE html>
 <html>
 	<head>
