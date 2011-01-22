@@ -241,6 +241,37 @@ public class DataService {
         }
     }
 
+    public DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+
+        Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID(), conn);
+        List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
+        if (analysisDefinition.getAddedItems() != null) {
+            allFields.addAll(analysisDefinition.getAddedItems());
+        }
+        Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields);
+        Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (!analysisItem.isDerived() && (analysisItem.getLookupTableID() == null || analysisItem.getLookupTableID() == 0)) {
+                validQueryItems.add(analysisItem);
+            }
+        }
+        boolean aggregateQuery = true;
+        Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+        items.remove(null);
+        for (AnalysisItem analysisItem : items) {
+            if (analysisItem.blocksDBAggregation()) {
+                aggregateQuery = false;
+            }
+        }
+        insightRequestMetadata.setAggregateQuery(aggregateQuery);
+        Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+        DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
+        Pipeline pipeline = new StandardReportPipeline();
+        pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+        return pipeline.toDataSet(dataSet);
+    }
+
     public static DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata,
                             EIConnection conn) {
         try {

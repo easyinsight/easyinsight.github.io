@@ -327,7 +327,7 @@ public class ScorecardService {
 
     private KPIOutcome refreshKPIValue(KPI kpi, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         List<KPIValue> lastTwoValues = new HistoryRun().lastTwoValues(kpi.getCoreFeedID(), kpi.getAnalysisMeasure(),
-                kpi.getFilters(), kpi.getDayWindow(), insightRequestMetadata);
+                kpi.getFilters(), kpi.getDayWindow(), insightRequestMetadata, conn);
         Double newValue = null;
         Double oldValue = null;
         Double percentChange = null;

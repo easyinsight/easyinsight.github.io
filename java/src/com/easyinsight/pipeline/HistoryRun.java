@@ -1,9 +1,8 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
-import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.core.Value;
 import com.easyinsight.kpi.KPIValue;
 
@@ -17,7 +16,7 @@ import java.util.*;
 public class HistoryRun {
 
     public List<KPIValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
-                                                     int timeWindow, InsightRequestMetadata insightRequestMetadata) {
+                                                     int timeWindow, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         // the way this should work...
 
         // if date dimension and time window
@@ -46,11 +45,11 @@ public class HistoryRun {
             Date startDate = new Date(endDate.getTime() - time);
 
 
-            KPIValue startValue = blah(createReport(dataSourceID, measure, filters), startDate, measure, insightRequestMetadata);
-            KPIValue endValue = blah(createReport(dataSourceID, measure, filters), endDate, measure, insightRequestMetadata);
+            KPIValue startValue = blah(createReport(dataSourceID, measure, filters), startDate, measure, insightRequestMetadata, conn);
+            KPIValue endValue = blah(createReport(dataSourceID, measure, filters), endDate, measure, insightRequestMetadata, conn);
             return Arrays.asList(startValue, endValue);
         } else {
-            KPIValue value = blah(createReport(dataSourceID, measure, filters), endDate, measure, insightRequestMetadata);
+            KPIValue value = blah(createReport(dataSourceID, measure, filters), endDate, measure, insightRequestMetadata, conn);
             return Arrays.asList(value);
         }
     }
@@ -64,9 +63,9 @@ public class HistoryRun {
     }
 
     public KPIValue blah(WSAnalysisDefinition analysisDefinition, Date endDate,
-                         AnalysisMeasure measure, InsightRequestMetadata insightRequestMetadata) {
+                         AnalysisMeasure measure, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         insightRequestMetadata.setNow(endDate);
-        DataSet result = new DataService().listDataSet(analysisDefinition, insightRequestMetadata);
+        DataSet result = new DataService().listDataSet(analysisDefinition, insightRequestMetadata, conn);
         //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
         KPIValue goalValue;
         if (result.getRows().size() > 0) {
