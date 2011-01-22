@@ -38,6 +38,7 @@ public class DataSourceType {
     public static const CAMPAIGN_MONITOR:int = 75;
 
     public static const OWNER:int = 1;
+    public static const EDITOR:int = 2;
     public static const SUBSCRIBER:int = 3;
 
     public function DataSourceType() {
