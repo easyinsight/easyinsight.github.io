@@ -1,6 +1,10 @@
 <%@ page import="com.easyinsight.analysis.AnalysisService" %>
 <%@ page import="com.easyinsight.core.InsightDescriptor" %>
 <%@ page import="java.util.Collection" %>
+<%@ page import="java.util.Collections" %>
+<%@ page import="com.easyinsight.core.EIDescriptor" %>
+<%@ page import="java.util.Comparator" %>
+<%@ page import="java.util.List" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -29,7 +33,15 @@
                          (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
                     try {
                         long dataSourceID = Long.parseLong(request.getParameter("dataSourceID"));
-                        Collection<InsightDescriptor> reports = new AnalysisService().getInsightDescriptorsForDataSource(dataSourceID);
+                        List<InsightDescriptor> reports = new AnalysisService().getInsightDescriptorsForDataSource(dataSourceID);
+                        Collections.sort(reports, new Comparator<EIDescriptor>() {
+
+                            public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
+                                String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName() : "";
+                                String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName() : "";
+                                return name1.compareTo(name2);
+                            }
+                        });
                         for (InsightDescriptor report : reports) {
                             out.println("<li><a href=\"reportDisplay.jsp?reportID=" + report.getId() + "\">" + report.getName() + "</a></li>");
                         }

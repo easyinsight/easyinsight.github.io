@@ -243,9 +243,11 @@
         }
 
         private function gotHiddenChildren():void {
-            var children:ArrayCollection = feedService.searchForHiddenChildren.lastResult as ArrayCollection;
-            for each (var child:DataSourceDescriptor in children) {
-                allFeeds.addItem(child);
+            if (compositeFeedID > 0) {
+                var children:ArrayCollection = feedService.searchForHiddenChildren.lastResult as ArrayCollection;
+                for each (var child:DataSourceDescriptor in children) {
+                    allFeeds.addItem(child);
+                }
             }
             var sort:Sort = new Sort();
             var sortField:SortField = new SortField("name");
@@ -275,7 +277,9 @@
 
         private function gotFeeds():void {
             allFeeds = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
-
+            if (compositeFeedID == 0) {
+                gotHiddenChildren();
+            }
         }
 
         private function findDescriptor(feedID:int):DataSourceDescriptor {

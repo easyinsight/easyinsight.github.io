@@ -83,7 +83,7 @@ public class AnalysisService {
         }
     }
 
-    public Collection<InsightDescriptor> getInsightDescriptorsForDataSource(long dataSourceID) {
+    public List<InsightDescriptor> getInsightDescriptorsForDataSource(long dataSourceID) {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {

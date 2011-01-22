@@ -1,4 +1,7 @@
 <%@ page import="com.easyinsight.core.DataSourceDescriptor" %>
+<%@ page import="java.util.Collections" %>
+<%@ page import="com.easyinsight.core.EIDescriptor" %>
+<%@ page import="java.util.Comparator" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -27,6 +30,14 @@
                              (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
                     try {
                         java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
+                        Collections.sort(dataSources, new Comparator<EIDescriptor>() {
+
+                            public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
+                                String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName() : "";
+                                String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName() : "";
+                                return name1.compareTo(name2);
+                            }
+                        });
                         for (DataSourceDescriptor dataSource : dataSources) {
                             out.println("<li><a href=\"reports.jsp?dataSourceID=" + dataSource.getId() + "\">" + dataSource.getName() + "</a></li>");
                         }
