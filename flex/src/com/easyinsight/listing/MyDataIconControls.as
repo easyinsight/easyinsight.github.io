@@ -329,7 +329,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             deleteVisible = desc.role <= DataSourceType.EDITOR;
             if (value is DataSourceDescriptor) {
                 var descriptor:DataSourceDescriptor = value as DataSourceDescriptor;
-                adminVisible = descriptor.role <= DataSourceType.OWNER;
+                adminVisible = descriptor.role <= DataSourceType.EDITOR;
                 adminTooltip = "Administer the data source...";
                 refreshVisible = DataSourceBehavior.pullDataSource(descriptor.dataSourceType);
             } else if (value is InsightDescriptor) {
