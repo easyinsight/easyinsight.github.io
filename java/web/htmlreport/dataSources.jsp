@@ -27,7 +27,7 @@
                              (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
                     try {
                         java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
-                        DataSourceDescriptor dataSource : dataSources) {
+                        for (DataSourceDescriptor dataSource : dataSources) {
                             out.println("<li><a href=\"reports.jsp?dataSourceID=" + dataSource.getId() + "\">" + dataSource.getName() + "</a></li>");
                         }
                         if (dataSources.size() == 0) {
