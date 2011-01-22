@@ -997,18 +997,18 @@ public class FeedStorage {
 
 
     private void populateChildInformation(EIConnection conn, Collection<DataSourceDescriptor> descriptorList) throws SQLException {
-        PreparedStatement versionStmt = conn.prepareStatement("SELECT MAX(VERSION) FROM FEED_PERSISTENCE_METADATA WHERE " +
-                    "FEED_ID = ?");
+        /*PreparedStatement versionStmt = conn.prepareStatement("SELECT MAX(VERSION) FROM FEED_PERSISTENCE_METADATA WHERE " +
+                    "FEED_ID = ?");*/
         PreparedStatement childQueryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE, feed_persistence_metadata.last_data_time " +
                 "FROM FEED_PERSISTENCE_METADATA, DATA_FEED WHERE FEED_PERSISTENCE_METADATA.FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                "DATA_FEED.PARENT_SOURCE_ID = ? AND feed_persistence_metadata.version = ?");
+                "DATA_FEED.PARENT_SOURCE_ID = ?");
         for (DataSourceDescriptor dataSource : descriptorList) {
-            versionStmt.setLong(1, dataSource.getId());
+            /*versionStmt.setLong(1, dataSource.getId());
             ResultSet versionRS = versionStmt.executeQuery();
-            if (versionRS.next()) {
-                int version = versionRS.getInt(1);
+            if (versionRS.next()) {*/
+                //int version = versionRS.getInt(1);
                 childQueryStmt.setLong(1, dataSource.getId());
-                childQueryStmt.setInt(2, version);
+                //childQueryStmt.setInt(2, version);
                 Date lastDataTime = dataSource.getLastDataTime();
                 long size = dataSource.getSize();
                 ResultSet childRS = childQueryStmt.executeQuery();
@@ -1025,9 +1025,9 @@ public class FeedStorage {
                 }
                 dataSource.setSize(size);
                 dataSource.setLastDataTime(lastDataTime);
-            }
+            //}
         }
-        versionStmt.close();
+        //versionStmt.close();
         childQueryStmt.close();
     }
 
