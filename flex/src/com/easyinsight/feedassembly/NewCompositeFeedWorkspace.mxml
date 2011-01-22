@@ -62,7 +62,7 @@
                 PopUpUtil.centerPopUp(saveWindow);
             } else {
                 ProgressAlert.alert(this, "Updating...", "Updated data source.", feedService.updateFeedDefinition);
-                feedService.updateFeedDefinition.send(feedDefinition, "");
+                feedService.updateFeedDefinition.send(feedDefinition);
             }
         }
 

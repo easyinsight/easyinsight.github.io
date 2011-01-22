@@ -101,7 +101,7 @@
         private function validated():void {
             var validation:CredentialsResponse = uploadService.validateCredentials.lastResult as CredentialsResponse;
             if (validation.successful) {                
-                feedService.updateFeedDefinition.send(dataSourceDefinition, "");
+                feedService.updateFeedDefinition.send(dataSourceDefinition);
             } else {
                 ready = true;
                 progressBar.visible = false;
