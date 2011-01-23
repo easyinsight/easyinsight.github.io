@@ -18,7 +18,6 @@ public class ReportPerspectiveInfo extends PerspectiveInfo {
         properties.parameterFilters = filters;
         properties.showAddBar = installOption;
         properties.origin = origin;
-        properties.showLogo = false;
         properties.originReportID = originalReportID;
         properties.originReportScore = originScore;
         properties.templateUrlKey = templateUrlKey;

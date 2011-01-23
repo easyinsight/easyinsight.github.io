@@ -19,16 +19,16 @@ public class ReportWindowFactory implements IAsyncScreenFactory{
             reportView.reportType = insightDescriptor.reportType;
             reportView.dataSourceID = insightDescriptor.dataFeedID;
             reportView.showBack = false;
-            reportView.showBookmark = false;
+
             reportView.showFullScreen = false;
             reportView.showFilterButton = false;
             reportView.showExport = false;
             reportView.showMetadata = false;
             reportView.showReportEditor = false;
             reportView.showRefresh = false;
-            reportView.showBrowser = false;
+
             reportView.showBack = false;
-            reportView.showLogo = false;
+
             var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
             var controller:IEmbeddedReportController = new controllerClass();
             reportView.viewFactory = controller.createEmbeddedView();
