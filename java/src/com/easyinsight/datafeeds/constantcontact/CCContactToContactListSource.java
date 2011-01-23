@@ -50,7 +50,7 @@ public class CCContactToContactListSource extends ConstantContactBaseSource {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();
-            Document listDoc = query("http://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
+            Document listDoc = query("https://api.constantcontact.com/ws/customers/" + ccSource.getCcUserName() + "/lists", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
             boolean hasMoreData;
             do {
                 hasMoreData = false;

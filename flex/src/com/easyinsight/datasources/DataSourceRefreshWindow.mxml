@@ -86,6 +86,7 @@
                     PopUpUtil.centerPopUp(window);
                 } else {
                     Alert.show("Something went wrong in trying to retrive data. Please double check your configuration information.");
+                    PopUpManager.removePopUp(this);
                 }
             } else if (callData.status == CallData.RUNNING) {
                 if (callData.result != null) {

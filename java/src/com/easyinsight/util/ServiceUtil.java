@@ -48,8 +48,13 @@ public class ServiceUtil {
     }
 
     public void updateStatus(String callDataID, int status, Object result) {
-        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatus(status);
         callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setResult(result);
+        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatus(status);
+    }
+
+    public void updateStatus(String callDataID, int status, String message) {
+        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatusMessage(message);
+        callDataMap.get(SecurityUtil.getUserID()).get(callDataID).setStatus(status);
     }
 
     public CallData getCallData(String callDataID) {

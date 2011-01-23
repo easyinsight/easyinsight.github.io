@@ -150,6 +150,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                     IRow row = dataSet.createRow();
                     Node node = nodes.get(i);
                     String contactIDLink = queryField(node, "id/text()");
+                    contactIDLink = contactIDLink.replace("http:", "https:");
                     String id = contactIDLink.split("/")[7];
                     Document details = query(contactIDLink, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
                     row.addValue(CONTACT_EMAIL, queryField(details, "/entry/content/Contact/EmailAddress/text()"));
