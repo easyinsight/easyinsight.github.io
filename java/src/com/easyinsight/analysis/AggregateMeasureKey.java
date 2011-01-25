@@ -52,4 +52,9 @@ public class AggregateMeasureKey extends AggregateKey {
         result = 31 * result + (displayName != null ? displayName.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return displayName == null ? super.toString() : displayName;
+    }
 }

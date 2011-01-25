@@ -166,10 +166,7 @@ public class AnalysisDimension extends AnalysisItem {
         }
     }
 
-    @Override
-    public String toString() {
-        return toDisplay() + " - " + getAnalysisItemID();
-    }
+
 
     @Override
     public String toXML() {

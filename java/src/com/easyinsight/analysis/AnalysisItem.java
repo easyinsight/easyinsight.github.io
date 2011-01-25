@@ -322,6 +322,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return toDisplay() + " - " + getAnalysisItemID();
+    }
+
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
         for (FilterDefinition filter : getFilters()) {
             filter.updateIDs(replacementMap);
@@ -336,7 +341,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                 items.addAll(filterDefinition.getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false));
             }
         }
-        if (getLookupTableID() != null && getLookupTableID() > 0) {
+        if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             items.add(new FeedService().getLookupTable(getLookupTableID()).getSourceField());
         }
         return items;
