@@ -170,7 +170,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         try {
             Map<String, Key> keys = newDataSourceFields();
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
-
+            System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
             if (clearsData()) {
                 dataStorage.truncate(); 
             }
@@ -180,6 +180,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             //int newVersion = dataStorage.migrate(getFields(), items);
             addData(dataStorage, dataSet);
             dataStorage.commit();
+            System.out.println("Completed refresh of " + getDataFeedID() + " for account " + accountID + " at " + new Date());
             //notifyOfDataUpdate();
             return true;
         } catch (Exception e) {

@@ -425,7 +425,7 @@ public class DataStorage {
      */
 
     public void truncate() throws SQLException {
-        PreparedStatement truncateStmt = storageConn.prepareStatement("TRUNCATE " + getTableName());
+        PreparedStatement truncateStmt = storageConn.prepareStatement("DELETE FROM " + getTableName());
         truncateStmt.execute();
     }
 

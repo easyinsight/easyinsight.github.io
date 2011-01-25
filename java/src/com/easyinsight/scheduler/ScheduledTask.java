@@ -65,6 +65,7 @@ public abstract class ScheduledTask implements Runnable {
 
     protected void onComplete(Session session) {
         setStatus(COMPLETED);
+        setCompletionDate(new Date());
         session.update(this);
     }
 
