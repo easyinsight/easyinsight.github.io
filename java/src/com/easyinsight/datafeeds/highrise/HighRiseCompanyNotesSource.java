@@ -133,6 +133,7 @@ public class HighRiseCompanyNotesSource extends HighRiseBaseSource {
                         }
                         notesOffset += 25;
                     } while (notesCount == 25);
+                    companyCount++;
                 }
                 if (writeDuring) {
                     dataStorage.insertData(ds);

@@ -138,6 +138,7 @@ public class HighRiseContactNotesSource extends HighRiseBaseSource {
                         }
                         notesOffset += 25;
                     } while (notesCount == 25);
+                    contactCount++;
                 }
                 offset += 500;
                 if (writeDuring) {
