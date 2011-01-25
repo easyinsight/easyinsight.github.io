@@ -1,6 +1,8 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 	<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<title>Easy Insight Mobile</title>
 	<link rel="stylesheet" href="/css/jquery.mobile-1.0a1.min.css" />
 	<script src="/js/jquery-1.4.3.min.js"></script>

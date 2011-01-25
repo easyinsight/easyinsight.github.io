@@ -1,15 +1,13 @@
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="com.easyinsight.database.Database" %>
-<%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
-<%@ page import="java.sql.ResultSet" %>
 <%@ page import="com.easyinsight.export.ExportService" %>
-<%@ page import="java.sql.SQLException" %>
-<%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page import="com.easyinsight.analysis.*" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 	<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<title>Easy Insight Mobile</title>
 	<link rel="stylesheet" href="/css/jquery.mobile-1.0a1.min.css" />
 	<script src="/js/jquery-1.4.3.min.js"></script>

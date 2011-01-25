@@ -2,6 +2,7 @@
 <%@ page import="java.util.Collections" %>
 <%@ page import="com.easyinsight.core.EIDescriptor" %>
 <%@ page import="java.util.Comparator" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 	<head>

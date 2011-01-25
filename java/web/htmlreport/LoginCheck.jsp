@@ -1,5 +1,6 @@
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.users.User" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <%
     String userName = request.getParameter("userName");
     String password = request.getParameter("password");

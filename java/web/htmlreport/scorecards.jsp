@@ -1,10 +1,7 @@
-<%@ page import="com.easyinsight.datafeeds.FeedService" %>
-<%@ page import="com.easyinsight.datafeeds.FeedDescriptor" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardService" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardList" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardDescriptor" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 	<head>

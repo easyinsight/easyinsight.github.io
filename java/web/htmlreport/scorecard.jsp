@@ -7,6 +7,7 @@
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="com.easyinsight.logging.LogClass" %>
 <%@ page import="com.easyinsight.analysis.*" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 	<head>

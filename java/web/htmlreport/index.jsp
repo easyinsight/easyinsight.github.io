@@ -1,9 +1,7 @@
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.users.User" %>
-<%@ page import="com.easyinsight.database.Database" %>
-<%@ page import="org.hibernate.Session" %>
-<!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Easy Insight Mobile</title>

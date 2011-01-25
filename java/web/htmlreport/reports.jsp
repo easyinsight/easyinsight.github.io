@@ -5,6 +5,7 @@
 <%@ page import="com.easyinsight.core.EIDescriptor" %>
 <%@ page import="java.util.Comparator" %>
 <%@ page import="java.util.List" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 	<head>
