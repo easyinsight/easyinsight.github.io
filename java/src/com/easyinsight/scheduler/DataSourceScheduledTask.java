@@ -72,12 +72,16 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     boolean guestUser = rs.getBoolean(6);
                     int firstDayOfWeek = rs.getInt(7);
                     SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, guestUser, firstDayOfWeek);
-                    if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
-                        try {
-                            dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null);
-                        } finally {
-                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                    try {
+                        if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+                            try {
+                                dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null);
+                            } finally {
+                                DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                            }
                         }
+                    } finally {
+                        SecurityUtil.clearThreadLocal();
                     }
                 }
             }
