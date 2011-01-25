@@ -392,7 +392,7 @@
     <target name="modules4" depends="report.gauge, report.crosstab, report.tree, report.treemap"/>
     <target name="modules5" depends="report.worldmap, report.usmap, report.americasmap, report.asiamap, report.europemap, report.middleeastmap"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.kpitreeadmin, perspective.groupdetail"/>
-    <target name="modules7" depends="perspective.kpiwindow, perspective.kpitreeview, perspective.datasourceadmin, perspective.analysisitemeditor"/>
+    <target name="modules7" depends="perspective.kpiwindow, perspective.kpitreeview, perspective.datasourceadmin"/>
     <target name="modules8" depends="report.africamap, report.heatmap, report.gantt, report.timeline, report.form"/>
     <target name="apps" depends="compileFlexOptimized, app.embeddedreport, app.selenium, app.admin"/>
 

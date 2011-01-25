@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-                    xmlns:analysis="com.easyinsight.analysis.*" xmlns:filters="com.easyinsight.filtering.*"
+                    xmlns:filters="com.easyinsight.filtering.*"
         creationComplete="onCreation()" width="850"
         height="500">
     <mx:Script>

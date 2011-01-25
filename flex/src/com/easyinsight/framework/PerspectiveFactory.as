@@ -3,6 +3,7 @@ import com.easyinsight.DataAnalysisContainer;
 import com.easyinsight.account.AccountBasePage;
 import com.easyinsight.account.AccountSetupWizard;
 import com.easyinsight.account.Help;
+import com.easyinsight.analysis.AnalysisItemEditor;
 import com.easyinsight.dashboard.DashboardEditor;
 import com.easyinsight.dashboard.DashboardView;
 import com.easyinsight.etl.LookupTableEditor;
@@ -63,12 +64,12 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.MY_DATA:
                 perspective = new DirectUIComponent(new MyData());
                 break;
-            case PerspectiveInfo.GROUPS:
-                perspective = new DirectUIComponent(new GroupsSummary());
-                break;
             /*case PerspectiveInfo.API:
                 perspective = new DirectUIComponent(new APIPage());
                 break;*/
+            case PerspectiveInfo.GROUPS:
+                perspective = new DirectUIComponent(new GroupsSummary());
+                break;
             case PerspectiveInfo.EXCHANGE:
                 perspective = new DirectUIComponent(new Exchange());
                 break;
@@ -91,7 +92,7 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 perspective = new ModuleUIComponent("KPIModule", "Loading the KPI editor...");
                 break;
             case PerspectiveInfo.ANALYSIS_ITEM_EDITOR:
-                perspective = new ModuleUIComponent("AnalysisItemEditor", "Loading the field editor...");
+                perspective = new DirectUIComponent(new AnalysisItemEditor());
                 break;
             case PerspectiveInfo.DASHBOARD_EDITOR:
                 perspective = new DirectUIComponent(new DashboardEditor());

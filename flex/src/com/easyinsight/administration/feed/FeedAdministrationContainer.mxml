@@ -133,6 +133,10 @@
                 }
                 feedDefinition.fields = analysisItems;
 
+                if (feedAdminDetail != null) {
+                    feedAdminDetail.updateDataSource(feedDefinition);
+                }
+
                 if (saveHandler == null) {
                     saveHandler = onSave;
                 }

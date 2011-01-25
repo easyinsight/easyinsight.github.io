@@ -3,15 +3,15 @@ public class PerspectiveInfo {
 
     public static const REPORT_EDITOR:int = 1;
     public static const REPORT_VIEW:int = 2;
-    public static const MULTI_REPORT_VIEW:int = 3;
+
     public static const SPREADSHEET_WIZARD:int = 4;
     public static const KPI_TREE_ADMIN:int = 5;
     public static const KPI_TREE_VIEW:int = 6;
     public static const DATA_SOURCE_ADMIN:int = 7;
     public static const POST_CONNECTION_INSTALL:int = 8;
-    public static const PACKAGE:int = 9;
+
     public static const LOOKUP_TABLE:int = 10;
-    public static const MULTI_SCREEN_VIEW:int = 11;
+
     public static const GOAL_DETAIL:int = 12;
     public static const COMPOSITE_WORKSPACE:int = 13;
     public static const ACCOUNT_CREATION:int = 14;
