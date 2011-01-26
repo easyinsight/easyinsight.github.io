@@ -164,7 +164,6 @@ public class Scheduler {
             lockStmt.close();
             conn.commit();
         } catch (SQLException e) {
-            LogClass.error(e);
             LogClass.debug("Failed to obtain distributed lock, assuming another app server has it.");
             conn.rollback();
         } finally {
