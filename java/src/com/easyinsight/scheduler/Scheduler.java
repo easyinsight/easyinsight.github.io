@@ -28,6 +28,7 @@ public class Scheduler {
     public static final int ONE_MINUTE = 60000;
 
     public static final String SCHEDULE_LOCK = "SCHEDULE";
+    public static final String TASK_LOCK = "TASK";
 
     private ThreadPoolExecutor executor;
     private Timer timer;
@@ -75,7 +76,11 @@ public class Scheduler {
         this.thread = new Thread() {
             @Override
             public void run() {
-                executeScheduledTasks();
+                try {
+                    executeScheduledTasks();
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
             }
         };
         thread.start();
@@ -87,7 +92,7 @@ public class Scheduler {
 
     private void scheduleTasks() {
         boolean locked = false;
-        locked = obtainLock(locked);
+        locked = obtainLock(SCHEDULE_LOCK);
         if (locked) {
             try {
                 Date now = new Date();
@@ -124,7 +129,7 @@ public class Scheduler {
                     Database.closeConnection(conn);
                 }
             } finally {
-                releaseLock();
+                releaseLock(SCHEDULE_LOCK);
             }
         }
     }
@@ -133,11 +138,11 @@ public class Scheduler {
         return session.createQuery("from TaskGenerator").list();
     }
 
-    private void releaseLock() {
+    private void releaseLock(String lockName) {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement lockStmt = conn.prepareStatement("DELETE FROM DISTRIBUTED_LOCK WHERE LOCK_NAME = ?");
-            lockStmt.setString(1, SCHEDULE_LOCK);
+            lockStmt.setString(1, lockName);
             lockStmt.executeUpdate();
             lockStmt.close();
         } catch (SQLException e) {
@@ -147,17 +152,19 @@ public class Scheduler {
         }
     }
 
-    private boolean obtainLock(boolean locked) {
+    private boolean obtainLock(String lock) {
+        boolean locked = false;
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             PreparedStatement lockStmt = conn.prepareStatement("INSERT INTO DISTRIBUTED_LOCK (LOCK_NAME) VALUES (?)");
-            lockStmt.setString(1, SCHEDULE_LOCK);
+            lockStmt.setString(1, lock);
             lockStmt.execute();
             locked = true;
             lockStmt.close();
             conn.commit();
         } catch (SQLException e) {
+            LogClass.error(e);
             LogClass.debug("Failed to obtain distributed lock, assuming another app server has it.");
             conn.rollback();
         } finally {
@@ -167,17 +174,28 @@ public class Scheduler {
         return locked;
     }
 
-    public void executeScheduledTasks() {
+    public void executeScheduledTasks() throws InterruptedException {
         // retrieve the set of tasks which are in the SCHEDULED state, limit N
         // add them to the thread pool
         while (running) {
-            List<ScheduledTask> tasks = claimScheduledTasks();
-            if (tasks.isEmpty()) {
-                try {
-                    Thread.sleep(60000);
-                } catch (InterruptedException e) {
-                    // we don't care
+            boolean obtainedLock = false;
+            while (!obtainedLock) {
+                obtainedLock = obtainLock(TASK_LOCK);
+                if (!obtainedLock) {
+                    System.out.println("Couldn't obtain lock yet, waiting...");
+                    Thread.sleep(1000);
+                } else {
+                    System.out.println("got the lock...");
                 }
+            }
+            List<ScheduledTask> tasks;
+            try {
+                tasks = claimScheduledTasks();
+            } finally {
+                releaseLock(TASK_LOCK);
+            }
+            if (tasks.isEmpty()) {
+                Thread.sleep(60000);
             } else {
                 for (ScheduledTask task : tasks) {
                     executor.execute(task);
