@@ -35,7 +35,7 @@ import java.text.ParseException;
  */
 public class GoogleAnalyticsFeed extends Feed {
 
-    private AnalyticsService as;
+    private transient AnalyticsService as;
 
     private static DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
     private static DateFormat outboundDateFormat = new SimpleDateFormat("yyyy-MM-dd");
