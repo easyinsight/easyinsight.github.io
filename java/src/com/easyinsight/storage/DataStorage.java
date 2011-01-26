@@ -235,7 +235,6 @@ public class DataStorage {
     }
 
     public void commit() throws SQLException {
-        storageConn.commit();
         long size = calculateSize();
         metadata.setSize(size);
         metadata.setLastData(new Date());
@@ -250,6 +249,7 @@ public class DataStorage {
             addOrUpdateMetadata(feedID, metadata, coreDBConn);
             validateSpace(coreDBConn);
         }
+        storageConn.commit();
         try {
             if (reportCache != null) reportCache.remove(feedID);
         } catch (CacheException e) {
@@ -425,7 +425,7 @@ public class DataStorage {
      */
 
     public void truncate() throws SQLException {
-        PreparedStatement truncateStmt = storageConn.prepareStatement("DELETE FROM " + getTableName());
+        PreparedStatement truncateStmt = storageConn.prepareStatement("TRUNCATE " + getTableName());
         truncateStmt.execute();
     }
 
