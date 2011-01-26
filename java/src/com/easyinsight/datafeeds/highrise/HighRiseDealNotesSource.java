@@ -92,9 +92,9 @@ public class HighRiseDealNotesSource extends HighRiseBaseSource {
                 do {
                     Document notes;
                     if (notesOffset == 0) {
-                        notes = runRestRequest("/deals/" + id + "/notes.xml", client, builder, highRiseCompositeSource.getUrl(), false, true, parentDefinition);
+                        notes = runRestRequest("/deals/" + id + "/notes.xml", client, builder, highRiseCompositeSource.getUrl(), false, false, parentDefinition);
                     } else {
-                        notes = runRestRequest("/deals/" + id + "/notes.xml?n=" + notesOffset, client, builder, highRiseCompositeSource.getUrl(), false, true, parentDefinition);
+                        notes = runRestRequest("/deals/" + id + "/notes.xml?n=" + notesOffset, client, builder, highRiseCompositeSource.getUrl(), false, false, parentDefinition);
                     }
                     Nodes noteNodes = notes.query("/notes/note");
                     notesCount = 0;
