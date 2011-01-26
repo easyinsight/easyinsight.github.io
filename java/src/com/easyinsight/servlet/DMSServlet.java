@@ -1,5 +1,6 @@
 package com.easyinsight.servlet;
 
+import com.easyinsight.admin.HealthListener;
 import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.migration.Migrations;
@@ -31,6 +32,7 @@ public class DMSServlet extends HttpServlet {
     public static final long HOUR = 1000 * 60 * 60;
 
     private Scheduler scheduler;
+    private HealthListener healthListener;
 
     public void init(ServletConfig servletConfig) throws ServletException {
         try {
@@ -57,6 +59,10 @@ public class DMSServlet extends HttpServlet {
                 EventDispatcher.instance().registerListener(AsyncCompletedEvent.ASYNC_COMPLETED, new AsyncCompletedListener());
                 EventDispatcher.instance().registerListener(LongKPIRefreshEvent.LONG_KPI_REFRESH_EVENT, LongKPIRefreshListener.instance());
                 scheduler.start();
+                healthListener = new HealthListener();
+                Thread thread = new Thread(healthListener);
+                thread.setDaemon(true);
+                thread.start();
             }
             LogClass.info("Started the server.");
         } catch (Throwable e) {
@@ -72,6 +78,7 @@ public class DMSServlet extends HttpServlet {
         EventDispatcher.instance().setRunning(false);
         EventDispatcher.instance().interrupt();
         scheduler.stop();
+        healthListener.stop();
         super.destroy();
     }
 }

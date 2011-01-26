@@ -130,6 +130,13 @@
         <load-on-startup>4</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>Health</servlet-name>
+        <display-name>Health</display-name>
+        <servlet-class>com.easyinsight.api.v3.HealthServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
     <!-- MessageBroker Servlet -->
     <servlet>
         <servlet-name>MessageBrokerServlet</servlet-name>
@@ -214,6 +221,11 @@
     <servlet-mapping>
         <servlet-name>LoadRows</servlet-name>
         <url-pattern>/xml/loadRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Health</servlet-name>
+        <url-pattern>/admin/health</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
