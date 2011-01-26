@@ -79,7 +79,6 @@
       DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
       df.setTimeZone(TimeZone.getTimeZone("UTC"));
       Date d = new Date();
-      d.setTime(new Date().getTime() - 36000 * 60 * 24);
       String time = df.format(d);
       request.getSession().setAttribute("billingTime", time);
       String hashString = orderID + "|" + amount + "|" + String.valueOf(accountID) + "|" + time + "|" + key;
@@ -149,35 +148,46 @@
 
     </style>
 <!-- InstanceEndEditable -->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
-    	<div style="width:100%;text-align:left;height:70px;position:relative">
-        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
-            <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
-            <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
+    	<div id="topBar">
+        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+        <div class="signupHeadline">
+            <a href="https://www.easy-insight.com/app/">Customer Login</a>
+            <a href="/app/newaccount/">Pricing &amp; Signup</a>
+            <a href="/contactus.html">Contacts</a>
         </div>
-	    <!-- InstanceBeginEditable name="submenu" -->
-    	<!-- InstanceEndEditable -->
-        <div id="content">
-		    <!-- InstanceBeginEditable name="content" -->
+    </div>
+    <div class="headline">
+        <a class="inactive" href="/product.html">Features</a>
+        <a class="inactive" href="/data.html">Connections</a>
+        <a class="inactive" href="/webanalytics.html">Solutions</a>
+        <a class="inactive" href="/customers.html">Customers</a>
+        <a class="inactive" href="/partners.html">Partners</a>
+        <a class="inactive" href="/company.html">Company</a>
+    </div>
             <div style="width:100%;background-color:#FFFFFF">
                 <div style="width:100%;text-align:center"><h1 style="color:#FFFFFF;background-image:url(/images/banner-wide.jpg);background-repeat:repeat-y;padding:10px;">Billing</h1></div>
                 <p>Please input your billing information below. Your first billing cycle will start upon completion of any remaining trial time. Easy Insight does not offer any type of refund after billing.</p>
         <% if(request.getParameter("error") != null) { %>
             <p><span class="error"><%
-                String errorCode = request.getParameter("responseCode");
+                String errorCode = request.getParameter("response_code");
+                String responseString = request.getParameter("responsetext");
                 if ("200".equals(errorCode)) out.println("The transaction was declined by the credit card processor. If this error continues, contact support@easy-insight.com.");
-                else if ("202".equals(errorCode)) out.println("The transaction was declined due to insufficient funds.");
-                else if ("203".equals(errorCode)) out.println("The transaction was declined due to being over the credit limit.");
                 else if ("204".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
                 else if ("220".equals(errorCode)) out.println("There was an error with your billing information. Please double check the payment information below. If this error continues, contact support@easy-insight.com.");
                 else if ("221".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
                 else if ("222".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
                 else if ("223".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
                 else if ("224".equals(errorCode)) out.println("The transaction was not allowed by the credit card processor. Please contact support@easy-insight.com.");
-                else out.println("There was an error with your billing information. Please input the correct information below.");
+                else if ("300".equals(errorCode)) {
+                    out.println("There was an error with your billing information. Please input the correct information below.");
+                } else {
+                    out.println("There was an error with your billing information. Please input the correct information below.");
+                }
             %></span></p>
         <% } %>
   <form method="post" action="https://secure.braintreepaymentgateway.com/api/transact.php" onsubmit="setCCexp()">
@@ -240,9 +250,8 @@
 
 
   </form>
-            </div>
-    		<!-- InstanceEndEditable -->
-<div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
+
+    <div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
             	<div style="float:right;padding-right:200px;">
                     <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
                     <ul>
@@ -260,6 +269,6 @@
                 </div>
             </div>
 	    </div>
-    </div>
+        </div>
 </body>
 <!-- InstanceEnd --></html>
