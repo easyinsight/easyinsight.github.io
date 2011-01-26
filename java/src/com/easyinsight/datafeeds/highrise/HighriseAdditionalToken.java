@@ -1,11 +1,13 @@
 package com.easyinsight.datafeeds.highrise;
 
+import java.io.Serializable;
+
 /**
  * User: jamesboe
  * Date: Nov 16, 2010
  * Time: 9:29:46 AM
  */
-public class HighriseAdditionalToken {
+public class HighriseAdditionalToken implements Serializable {
     private long userID;
     private String token;
 
