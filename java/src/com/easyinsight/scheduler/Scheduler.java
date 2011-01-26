@@ -181,10 +181,7 @@ public class Scheduler {
             while (!obtainedLock) {
                 obtainedLock = obtainLock(TASK_LOCK);
                 if (!obtainedLock) {
-                    System.out.println("Couldn't obtain lock yet, waiting...");
                     Thread.sleep(1000);
-                } else {
-                    System.out.println("got the lock...");
                 }
             }
             List<ScheduledTask> tasks;

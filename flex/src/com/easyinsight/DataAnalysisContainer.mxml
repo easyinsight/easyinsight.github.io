@@ -34,6 +34,7 @@
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.ReportAnalyzeSource;
@@ -595,12 +596,13 @@
             var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
             dataView.updateExportMetadata();
             saveDialog.analysisDefinition = analysisDefinition;
-            saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
+            saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saveAsReport);
             PopUpUtil.centerPopUp(saveDialog);
         }
 
-        private function savedAnalysis(event:SavedAnalysisEvent):void {
+        private function saveAsReport(event:SavedAnalysisEvent):void {
             //title = event.title;
+            /*this.analysisDefinition = event.report;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.analysisID = String(event.report.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
@@ -608,7 +610,13 @@
             reportName = analysisDefinition.name;
             aboutReportTab.invalidateProperties();
             BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
-            this.analysisChanged = false;
+            this.analysisChanged = false;*/
+            var report:InsightDescriptor = new InsightDescriptor();
+            report.name = event.report.name;
+            report.id = event.report.analysisID;
+            report.dataFeedID = event.report.dataFeedID;
+            report.reportType = event.report.reportType;
+            dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(report)));
         }
 
         private function undo():void {

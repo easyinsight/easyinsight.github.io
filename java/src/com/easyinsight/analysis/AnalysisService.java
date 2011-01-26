@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.apache.jcs.access.exception.CacheException;
 
@@ -328,50 +329,33 @@ public class AnalysisService {
 
     public void deleteAnalysisDefinition(long reportID) {
         int role = SecurityUtil.authorizeInsight(reportID);
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.getTransaction().begin();
+            conn.setAutoCommit(false);
             AnalysisDefinition dbAnalysisDef = analysisStorage.getPersistableReport(reportID, session);
             boolean canDelete = role == Roles.OWNER;
             if (canDelete) {
-                session.delete(dbAnalysisDef);
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
+                try {
+                    session.delete(dbAnalysisDef);
+                    session.flush();
+                } catch (ObjectNotFoundException e) {
 
-    public boolean subscribeToAnalysis(long analysisID) {
-        SecurityUtil.authorizeInsight(analysisID);
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            long userID = SecurityUtil.getUserID();
-            AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID, session);
-            boolean found = false;
-            for (UserToAnalysisBinding existingBinding : analysisDefinition.getUserBindings()) {
-                if (existingBinding.getUserID() == userID) {
-                    found = true;
+                    // hibernate not cooperating, so delete it the hard way
+
+                    PreparedStatement manualDeleteStmt = conn.prepareStatement("DELETE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                    manualDeleteStmt.setLong(1, reportID);
+                    manualDeleteStmt.executeUpdate();
                 }
             }
-            if (!found) {
-                UserToAnalysisBinding binding = new UserToAnalysisBinding(userID, Roles.SUBSCRIBER);
-                analysisDefinition.getUserBindings().add(binding);
-                analysisStorage.saveAnalysis(analysisDefinition, session);
-            }
-            session.getTransaction().commit();
-            return !found;
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();
+            Database.closeConnection(conn);
         }
     }
 

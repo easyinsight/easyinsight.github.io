@@ -180,6 +180,10 @@ public class Database {
         }
     }
 
+    public int getMaxConnections() {
+        return dataSource.getMaxPoolSize();
+    }
+
     public static Object deproxy(Object obj) {
         Hibernate.initialize(obj);
 

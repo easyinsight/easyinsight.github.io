@@ -371,7 +371,7 @@ public class AnalysisDefinition implements Cloneable {
         allFields = new ArrayList<AnalysisItem>(allFields);
         allFields.addAll(addedItems);
 
-        Collection<AnalysisItem> reportItems = createBlazeDefinition().getAllAnalysisItems();
+        Collection<AnalysisItem> reportItems = getReportStructure().values();
         reportItems.remove(null);
         for (AnalysisItem baseItem : reportItems) {
             if (replacementMap.get(baseItem.getAnalysisItemID()) == null) {
@@ -482,10 +482,8 @@ public class AnalysisDefinition implements Cloneable {
             }
         }
         analysisDefinition.setName(title);
-        analysisDefinition.setFilterDefinitions(filterDefinitions);
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromPersistableFilters(filterDefinitions));
         analysisDefinition.setPolicy(analysisPolicy);
-        analysisDefinition.setRootDefinition(rootDefinition);
         analysisDefinition.populateProperties(properties);
         for (AnalysisItem analysisItem : reportStructure.values()) {
             analysisItem.afterLoad();

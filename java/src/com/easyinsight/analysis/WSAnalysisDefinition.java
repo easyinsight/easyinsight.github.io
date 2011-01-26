@@ -65,7 +65,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int policy;
     private List<Tag> tagCloud = new ArrayList<Tag>();
     private List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
-    private boolean rootDefinition;
     private boolean canSaveDirectly;
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
@@ -228,14 +227,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setCanSaveDirectly(boolean canSaveDirectly) {
         this.canSaveDirectly = canSaveDirectly;
-    }
-
-    public boolean isRootDefinition() {
-        return rootDefinition;
-    }
-
-    public void setRootDefinition(boolean rootDefinition) {
-        this.rootDefinition = rootDefinition;
     }
 
     public List<AnalysisItem> getAddedItems() {

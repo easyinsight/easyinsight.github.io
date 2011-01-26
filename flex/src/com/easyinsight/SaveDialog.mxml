@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Save Report"
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
                     creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(analysisName);
 	validators = [nameValidator]">
     <mx:Script>
@@ -49,7 +49,7 @@
         }
                 ]]>
     </mx:Script>
-    <mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
+    <mx:VBox width="100%" height="100%">
         <mx:Form>
             <mx:FormItem label="Report Name:" direction="horizontal">
                 <mx:TextInput id="analysisName"/>
@@ -64,4 +64,4 @@
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="saveAs" result="saved()"/>
     </mx:RemoteObject>
-</util:EITitleWindow>
+</util:EISlimWindow>

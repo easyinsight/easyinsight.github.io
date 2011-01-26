@@ -27,6 +27,10 @@ public class DatabaseManager {
         return instance;
     }
 
+    public Map<String, Database> getDbMap() {
+        return dbMap;
+    }
+
     public void shutdown() {
         for (Database database : dbMap.values()) {
             database.shutdown();
