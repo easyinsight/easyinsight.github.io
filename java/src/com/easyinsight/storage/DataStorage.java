@@ -235,6 +235,7 @@ public class DataStorage {
     }
 
     public void commit() throws SQLException {
+        storageConn.commit();
         long size = calculateSize();
         metadata.setSize(size);
         metadata.setLastData(new Date());
@@ -249,7 +250,6 @@ public class DataStorage {
             addOrUpdateMetadata(feedID, metadata, coreDBConn);
             validateSpace(coreDBConn);
         }
-        storageConn.commit();
         try {
             if (reportCache != null) reportCache.remove(feedID);
         } catch (CacheException e) {
