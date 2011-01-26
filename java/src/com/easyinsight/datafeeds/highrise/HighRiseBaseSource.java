@@ -5,7 +5,6 @@ import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
-import com.easyinsight.datafeeds.basecamp.BaseCampDataException;
 
 import nu.xom.*;
 import org.apache.commons.httpclient.*;
@@ -106,7 +105,6 @@ public abstract class HighRiseBaseSource extends ServerDataSourceDefinition {
                     throw new RuntimeException(e);
                 }
             } catch (nu.xom.ParsingException e) {
-                e.printStackTrace();
                 retryCount++;
                 String statusLine = restMethod.getStatusLine().toString();
                 if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
