@@ -33,7 +33,7 @@
     <property name="size.api.key" value="LeKXRECmALcL"/>
     <property name="analysis.api.key" value="JeSfljXxeIcw"/>
 
-    <property name="flex.prefix" value="www"/>
+    <property name="flex.prefix" value="${build.flex.prefix}"/>
 
     <target name="testVCS">
         <echo>Blah ${build.vcs.number}</echo>
