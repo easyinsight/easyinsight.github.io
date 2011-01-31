@@ -55,6 +55,8 @@ public class HealthServlet extends HttpServlet {
             resp.getOutputStream().flush();
         } catch (Exception e) {
             LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 }
