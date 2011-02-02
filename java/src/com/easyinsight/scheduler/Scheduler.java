@@ -181,7 +181,11 @@ public class Scheduler {
             while (!obtainedLock) {
                 obtainedLock = obtainLock(TASK_LOCK);
                 if (!obtainedLock) {
-                    Thread.sleep(1000);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
                 }
             }
             List<ScheduledTask> tasks;
@@ -191,7 +195,11 @@ public class Scheduler {
                 releaseLock(TASK_LOCK);
             }
             if (tasks.isEmpty()) {
-                Thread.sleep(60000);
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
             } else {
                 for (ScheduledTask task : tasks) {
                     executor.execute(task);
