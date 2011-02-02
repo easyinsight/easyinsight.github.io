@@ -36,22 +36,39 @@ public class HealthServlet extends HttpServlet {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT SERVER_HOST FROM SERVER WHERE ENABLED = ?");
             queryStmt.setBoolean(1, true);
             ResultSet rs = queryStmt.executeQuery();
-            String response = "<response><status>Success</status><message>All Good</message></response>";
+            List<Status> statusList = new ArrayList<Status>();
             while (rs.next()) {
                 String host = rs.getString(1);
                 Status status = (Status) JCS.getInstance("servers").get(host);
+
                 if (status == null) {
-                    response = "<response><status>Failure</status><message>" + host + " has failed to update with any status information.</message></response>";
-                    break;
+                    status = new Status();
+                    status.setExtendedCode("Failure");
+                    status.setExtendedMessage(host + " has failed to update with any status information");
+                    statusList.add(status);
                 } else if ((System.currentTimeMillis() - status.getTime()) > (1000 * 60 * 2)) {
-                    response = "<response><status>Failure</status><message>" + host + " hasn't updated updated status for at least two minutes.</message></response>";
-                    break;
+                    status.setExtendedCode("Failure");
+                    status.setExtendedMessage(host + " hasn't updated updated status for at least two minutes");
+                    statusList.add(status);
                 } else if (HealthListener.FAILURE.equals(status.getCode())) {
-                    response = "<response><status>Failure</status><message>" + status.getMessage() + "</message></response>";
-                    break;
+                    status.setExtendedCode("Failure");
+                    status.setExtendedMessage(status.getMessage());
+                    statusList.add(status);
                 }
             }
-            resp.getOutputStream().write(response.getBytes());
+            StringBuilder xmlBuilder = new StringBuilder();
+            xmlBuilder.append("<response>");
+            for (Status status : statusList) {
+                xmlBuilder.append("<status>");
+                xmlBuilder.append(status.getExtendedCode());
+                xmlBuilder.append("</status>");
+                xmlBuilder.append(status.getHealthInfo().toXML());
+                xmlBuilder.append("<message>");
+                xmlBuilder.append(status.getExtendedMessage());
+                xmlBuilder.append("</message>");
+            }
+            xmlBuilder.append("</response>");
+            resp.getOutputStream().write(xmlBuilder.toString().getBytes());
             resp.getOutputStream().flush();
         } catch (Exception e) {
             LogClass.error(e);
