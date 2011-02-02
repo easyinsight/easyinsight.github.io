@@ -1,11 +1,20 @@
 package com.easyinsight.admin;
 
+import java.io.Serializable;
+import java.text.MessageFormat;
+
 /**
  * User: James Boe
  * Date: Aug 17, 2008
  * Time: 1:49:49 PM
  */
-public class HealthInfo {
+public class HealthInfo implements Serializable {
+
+    private static final String HEALTH_XML = "<health><currentMemory>{0}</currentMemory>" +
+            "<freeMemory>{1}</freeMemory><maxMemory>{2}</maxMemory><threadCount>{3}</threadCount>" +
+            "<activeDBConnections>{4}</activeDBConnections><activeUsers>{5}</activeUsers><systemLoadAverage>{6}</systemLoadAverage>" +
+            "<clientCount>{7}</clientCount><server>{8}</server></health>";
+
     private long currentMemory;
     private long freeMemory;
     private long maxMemory;
@@ -21,6 +30,11 @@ public class HealthInfo {
     private long compilationTime;
     private int clientCount;
     private String server;
+
+    public String toXML() {
+        return MessageFormat.format(HEALTH_XML, currentMemory, freeMemory, maxMemory, threadCount, activeDBConnections,
+                activeUsers, systemLoadAverage, clientCount, server);
+    }
 
     public String getServer() {
         return server;

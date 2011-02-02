@@ -11,6 +11,33 @@ public class Status implements Serializable {
     private long time;
     private String code;
     private String message;
+    private HealthInfo healthInfo;
+    private String extendedMessage;
+    private String extendedCode;
+
+    public String getExtendedMessage() {
+        return extendedMessage;
+    }
+
+    public void setExtendedMessage(String extendedMessage) {
+        this.extendedMessage = extendedMessage;
+    }
+
+    public String getExtendedCode() {
+        return extendedCode;
+    }
+
+    public void setExtendedCode(String extendedCode) {
+        this.extendedCode = extendedCode;
+    }
+
+    public HealthInfo getHealthInfo() {
+        return healthInfo;
+    }
+
+    public void setHealthInfo(HealthInfo healthInfo) {
+        this.healthInfo = healthInfo;
+    }
 
     public long getTime() {
         return time;

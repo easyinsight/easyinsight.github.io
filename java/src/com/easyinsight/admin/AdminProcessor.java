@@ -34,7 +34,7 @@ public class AdminProcessor {
             long currentMemory = maxMemory - freeMemory;
             healthInfo.setCurrentMemory(currentMemory);
             healthInfo.setMaxMemory(maxMemory);
-            healthInfo.setServer(InetAddress.getLocalHost().getHostAddress());
+            healthInfo.setServer(InetAddress.getLocalHost().getHostName());
             ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
             healthInfo.setThreadCount(threadMXBean.getThreadCount());
             healthInfo.setSystemLoadAverage(ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage());

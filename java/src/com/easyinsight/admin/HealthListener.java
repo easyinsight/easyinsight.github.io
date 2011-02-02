@@ -92,6 +92,7 @@ public class HealthListener implements Runnable {
                 status.setTime(System.currentTimeMillis());
                 status.setCode(code);
                 status.setMessage(response);
+                status.setHealthInfo(new AdminService().getHealthInfo());
                 serverCache.put(InetAddress.getLocalHost().getHostName(), status);
                 try {
                     Thread.sleep(60000);
