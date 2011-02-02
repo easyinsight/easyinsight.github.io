@@ -54,7 +54,7 @@ public class AdminProcessor {
                         FlexClientManagerControlMBean.class);
                 healthInfo.setClientCount(mb.getFlexClientCount());
             } catch (Exception e) {
-                LogClass.error(e);
+                //LogClass.error(e);
             }
             return healthInfo;
         } catch (Exception e) {
