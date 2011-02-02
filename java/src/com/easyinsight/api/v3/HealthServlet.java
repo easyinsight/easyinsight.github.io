@@ -54,6 +54,8 @@ public class HealthServlet extends HttpServlet {
                     status.setExtendedCode("Failure");
                     status.setExtendedMessage(status.getMessage());
                     statusList.add(status);
+                } else {
+                    statusList.add(status);
                 }
             }
             StringBuilder xmlBuilder = new StringBuilder();
