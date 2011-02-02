@@ -78,6 +78,8 @@ public class Scheduler {
             public void run() {
                 try {
                     executeScheduledTasks();
+                } catch (InterruptedException ie) {
+                    // ignore
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
@@ -91,7 +93,7 @@ public class Scheduler {
     }
 
     private void scheduleTasks() {
-        boolean locked = false;
+        boolean locked;
         locked = obtainLock(SCHEDULE_LOCK);
         if (locked) {
             try {
@@ -181,11 +183,7 @@ public class Scheduler {
             while (!obtainedLock) {
                 obtainedLock = obtainLock(TASK_LOCK);
                 if (!obtainedLock) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        // ignore
-                    }
+                    Thread.sleep(1000);
                 }
             }
             List<ScheduledTask> tasks;
@@ -195,11 +193,7 @@ public class Scheduler {
                 releaseLock(TASK_LOCK);
             }
             if (tasks.isEmpty()) {
-                try {
-                    Thread.sleep(60000);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
+                Thread.sleep(60000);
             } else {
                 for (ScheduledTask task : tasks) {
                     executor.execute(task);
