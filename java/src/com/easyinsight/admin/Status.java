@@ -12,8 +12,8 @@ public class Status implements Serializable {
     private String code;
     private String message;
     private HealthInfo healthInfo;
-    private String extendedMessage;
-    private String extendedCode;
+    private String extendedMessage = "All Good!";
+    private String extendedCode = "Success";
 
     public String getExtendedMessage() {
         return extendedMessage;
