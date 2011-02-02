@@ -365,7 +365,7 @@ public class AdminService {
     public static final String CLIENT_COUNT = "Client Count";
 
     public HealthInfo getHealthInfo() {
-        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        //SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         return new AdminProcessor().getHealthInfo();
     }
 }
