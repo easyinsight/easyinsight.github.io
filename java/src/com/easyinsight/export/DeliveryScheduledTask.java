@@ -102,7 +102,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             if (ownerRS.next()) {
                 ownerID = ownerRS.getLong(1);
             } else {
-                throw new RuntimeException();
+                return;
             }
             findOwnerStmt.close();
             PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, USER_ID, USER.ACCOUNT_ID, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
