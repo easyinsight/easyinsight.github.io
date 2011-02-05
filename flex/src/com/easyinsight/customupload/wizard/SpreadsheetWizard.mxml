@@ -1,7 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
                         xmlns:kpi="com.easyinsight.kpi.*" xmlns:wizard="com.easyinsight.customupload.wizard.*"
-                        xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
                         width="100%" height="100%" implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
@@ -63,8 +62,6 @@
                 controls.addEventListener(KPITutorialEvent.FINISH, onFinish);
                 controls.addEventListener(KPITutorialEvent.CANCEL, onCancel);
                 controls.tutorialPanel = panel;
-                tutorialPanel.setStyle("hideEffect", leftEffect);
-                tutorialPanel.setStyle("showEffect", leftEffect);
                 tutorialPanel.addChild(controls);
                 viewStack.addChild(tutorialPanel);
             }
@@ -106,7 +103,6 @@
         public function cleanup():void {
         }
         ]]></mx:Script>
-    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="createDataSource" result="createdDataSource()"/>
     </mx:RemoteObject>
@@ -119,14 +115,14 @@
             <mx:ViewStack selectedIndex="{panelIndex}" change="onChange(event)"
                           id="viewStack" resizeToContent="true" width="1000" height="550" creationPolicy="all"
                           backgroundColor="0xFFFFFF">
-                <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+                <kpi:TutorialPanel width="100%" height="100%">
                     <wizard:DataSourceNamePanel id="dsNamePanel"/>
                     <kpi:TutorialButtons tutorialPanel="{dsNamePanel}" backEnabled="false" nextEnabled="true"
                                          finishEnabled="false"
                                          kpiTutorialNext="dataSourceName = dsNamePanel.dataSourceName; accountVisible = dsNamePanel.accountVisible; panelIndex++"
                                          kpiTutorialCancel="onCancel(event)"/>
                 </kpi:TutorialPanel>
-                <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+                <kpi:TutorialPanel width="100%" height="100%">
                     <wizard:SpreadsheetFieldIntro id="explainPanel"/>
                     <kpi:TutorialButtons tutorialPanel="{explainPanel}" backEnabled="true" nextEnabled="true"
                                          finishEnabled="true"

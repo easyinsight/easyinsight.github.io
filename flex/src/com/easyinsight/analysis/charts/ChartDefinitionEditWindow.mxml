@@ -115,8 +115,8 @@
         </mx:FormItem>
     </mx:Form>
         <mx:HBox horizontalAlign="center" width="100%">
-            <mx:Button label="Save" click="save()" styleName="grayButton"/>
-            <mx:Button label="Cancel" click="cancel()"/>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
 </util:EISlimWindow>

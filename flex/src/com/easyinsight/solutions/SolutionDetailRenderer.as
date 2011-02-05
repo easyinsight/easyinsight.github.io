@@ -54,6 +54,8 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
         solutionService.getSolutionArchive.addEventListener(ResultEvent.RESULT, gotSolutionArchive);
         solutionService.alreadyHasConnection.addEventListener(ResultEvent.RESULT, checkedValidity);
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+        setStyle("borderStyle", "none");
+        setStyle("borderThickness", 0);
     }
 
     private function onCreation(event:FlexEvent):void {
@@ -221,6 +223,7 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     public function cleanup():void {
+        cleanupBindings();
     }
 
     private var fileRef:FileReference;
@@ -254,8 +257,8 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
         trace(event);
     }
 
-    protected override function commitProperties():void {
-        super.commitProperties();
+    override protected function createChildren():void {
+        super.createChildren();
         if (solution != null && solution.image != null) {
             var loader:Loader = new Loader();
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
@@ -266,7 +269,7 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     private function onComplete(event:Event):void {
         var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
         logo = Bitmap(loaderContent.loader.content);
-        loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
+        loaderContent.loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onComplete);
     }
 }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
-                      xmlns:util="com.easyinsight.util.*" creationComplete="setup()">
+                      xmlns:util="com.easyinsight.util.*" creationComplete="setup()"
+        implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -65,7 +66,7 @@
         }
 
         private function scorecardView():void {
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_EDITOR, {scorecardID: _scorecardID } )));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_EDITOR, {scorecardID: _scorecardID })));
         }
 
         private function close():void {
@@ -94,6 +95,13 @@
                     }
                 }
             }
+        }
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
+            cleanupBindings();
         }
         ]]></mx:Script>
     <mx:RemoteObject id="scorecardService" destination="scorecardService">

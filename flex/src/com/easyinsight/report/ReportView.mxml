@@ -653,6 +653,7 @@
         }
 
         public function cleanup():void {
+            cleanupBindings();
             //reportBox.removeChild(viewFactory);
         }
 

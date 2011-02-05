@@ -300,8 +300,8 @@
 
         private function analysisClosed(event:AnalysisCloseEvent):void {
             try {
-                removeListeners(dataAnalysis);
                 fullScreenPage.cleanup();
+                removeListeners(dataAnalysis);
                 coreVBox.removeChild(dataAnalysis);
                 fullScreenPage = null;
                 dataAnalysis = null;
@@ -318,14 +318,13 @@
             }
         }
 
-        private var moduleInfo:IModuleInfo;
-
         public function changePerspective(event:ListingChangeEvent):void {
             try {
                 if (event.perspective != null) {
                     if (this.perspective != null) {
                         var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
                         removeListeners(existingDispatcher);
+                        this.perspective.cleanup();
                     }
                     if (dataAnalysis != null) {
                         fullScreenPage.cleanup();

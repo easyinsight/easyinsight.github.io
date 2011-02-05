@@ -2,7 +2,7 @@
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
                       xmlns:filtering="com.easyinsight.filtering.*" xmlns:util="com.easyinsight.util.*"
                       xmlns:analysis="com.easyinsight.analysis.*"
-                      applyCenterScreenLogic="false" creationComplete="onCreation()">
+                      applyCenterScreenLogic="false" creationComplete="onCreation()" implements="com.easyinsight.listing.IPerspective">
     <skin:states>
         <mx:State name="fullScreen">
             <mx:RemoveChild target="{topDisplay}"/>
@@ -179,6 +179,7 @@
         private var dashboard:Dashboard;
 
         private function close():void {
+
             dispatchEvent(new AnalysisCloseEvent());
         }
 
@@ -228,6 +229,13 @@
 
         [Bindable]
         private var dataSource:DataSourceInfo;
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
+            cleanupBindings();
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
         <mx:method name="getDashboard" result="gotDashboard()"/>

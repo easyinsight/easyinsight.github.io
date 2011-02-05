@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
                       xmlns:util="com.easyinsight.util.*" creationComplete="setup()"
-                      width="100%" height="100%" xmlns:skin="com.easyinsight.skin.*">
+                      width="100%" height="100%" xmlns:skin="com.easyinsight.skin.*"
+        implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -134,7 +135,7 @@
         }
 
         private function scorecardView():void {
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: _scorecardID } )));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: _scorecardID })));
         }
 
         private function gotScorecard():void {
@@ -179,7 +180,6 @@
         }
 
 
-
         private function onKPIChange(event:CollectionEvent):void {
             invalidateSize();
         }
@@ -207,6 +207,13 @@
             kpis.addItem(event.kpi);
             scorecardChanged = true;
             refreshValues();
+        }
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
+            cleanupBindings();
         }
         ]]></mx:Script>
     <mx:RemoteObject id="scorecardService" destination="scorecardService">

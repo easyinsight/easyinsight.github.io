@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
-        xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*" width="100%"
-        height="100%" xmlns:account="com.easyinsight.account.*" creationComplete="setupListeners()">
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
+        height="100%" creationComplete="setupListeners()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
@@ -82,8 +81,6 @@
                         container["accountInfo"] = accountInfo;
                         container.addEventListener("refreshAccount", onAccountRefresh, false, 0, true);
                         coreBox.addChild(container);
-                        accountOption.container.setStyle("hideEffect", leftEffect);
-                        accountOption.container.setStyle("showEffect", leftEffect);
                     }
                     startIndex = 0;
                 }
@@ -117,7 +114,6 @@
     <mx:RemoteObject destination="accountAdmin" id="userService">
 		<mx:method name="getAccountInfo" result="gotAccountInfo()"/>
 	</mx:RemoteObject>
-    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
     <mx:VBox width="100%" height="100%" paddingTop="15">
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:ToggleButtonBar itemClick="choseButton(event)" dataProvider="{toggleOptions}" visible="{showToggle}"

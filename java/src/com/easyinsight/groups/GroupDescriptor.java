@@ -59,7 +59,6 @@ public class GroupDescriptor extends FeedConsumer {
         GroupDescriptor that = (GroupDescriptor) o;
 
         if (groupID != that.groupID) return false;
-        if (groupMembers != that.groupMembers) return false;
 
         return true;
     }
@@ -68,7 +67,6 @@ public class GroupDescriptor extends FeedConsumer {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (int) (groupID ^ (groupID >>> 32));
-        result = 31 * result + groupMembers;
         return result;
     }
 }

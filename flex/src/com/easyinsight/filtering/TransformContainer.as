@@ -8,8 +8,6 @@ import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
 
-import flash.geom.Point;
-
 import flash.utils.Dictionary;
 
 import flexlib.containers.FlowBox;
@@ -20,13 +18,11 @@ import mx.containers.HBox;
 import mx.controls.AdvancedDataGrid;
 import mx.controls.DataGrid;
 import mx.controls.List;
-import mx.controls.ToolTip;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
 import mx.events.FlexEvent;
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
-import mx.managers.ToolTipManager;
 
 [Event(name="updatedTransforms", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
 
@@ -165,11 +161,11 @@ public class TransformContainer extends HBox
         _analysisItems = analysisItems;
     }
 
-    private var dropToolTip:ToolTip;
+    //private var dropToolTip:ToolTip;
 
     public function showDropMessage():void {
 
-        if (dropToolTip == null) {
+        /*if (dropToolTip == null) {
 
             var point:Point = new Point();
             point.x = 0;
@@ -182,14 +178,14 @@ public class TransformContainer extends HBox
             dropToolTip.width = 250;
             dropToolTip.height = 35;
             dropToolTip.setStyle("fontSize", 18);
-        }
+        }*/
     }
 
     public function closeDropMessage():void {
-        if (dropToolTip != null) {
+        /*if (dropToolTip != null) {
             ToolTipManager.destroyToolTip(dropToolTip);
             dropToolTip = null;
-        }
+        }*/
     }
 
     override protected function createChildren():void {

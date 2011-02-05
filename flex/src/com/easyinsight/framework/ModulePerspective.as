@@ -93,6 +93,7 @@ public class ModulePerspective extends Canvas implements IPerspective, IModulePe
     public function cleanup():void {
         if (actualModule != null && actualModule is IPerspective) {
             IPerspective(actualModule).cleanup();
+            actualModule.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, passThrough);
         }
     }
 
@@ -101,6 +102,7 @@ public class ModulePerspective extends Canvas implements IPerspective, IModulePe
             moduleInfo.removeEventListener(ModuleEvent.READY, reportLoadHandler);
             moduleInfo.removeEventListener(ModuleEvent.ERROR, moduleFailHandler);
             actualModule = moduleInfo.factory.create() as UIComponent;
+            moduleInfo = null;
         }
         if (properties != null) {
             for (var p:String in properties) {

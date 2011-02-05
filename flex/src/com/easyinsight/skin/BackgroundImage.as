@@ -3,6 +3,7 @@ import flash.display.Bitmap;
 import flash.display.DisplayObject;
 
 import mx.binding.utils.BindingUtils;
+import mx.binding.utils.ChangeWatcher;
 import mx.containers.Canvas;
 import mx.controls.Image;
 import mx.core.Container;
@@ -52,18 +53,46 @@ public class BackgroundImage extends Canvas {
         createBindings();
     }
 
+    protected function cleanupBindings():void {
+        if (watcher1 != null) {
+            watcher1.unwatch();
+        }
+        if (watcher2 != null) {
+            watcher2.unwatch();
+        }
+        if (watcher3 != null) {
+            watcher3.unwatch();
+        }
+        if (watcher4 != null) {
+            watcher4.unwatch();
+        }
+        if (watcher5 != null) {
+            watcher5.unwatch();
+        }
+        if (watcher6 != null) {
+            watcher6.unwatch();
+        }
+    }
+
+    private var watcher1:ChangeWatcher;
+    private var watcher2:ChangeWatcher;
+    private var watcher3:ChangeWatcher;
+    private var watcher4:ChangeWatcher;
+    private var watcher5:ChangeWatcher;
+    private var watcher6:ChangeWatcher;
+
     private function createBindings():void {
         if (_applyCenterScreenLogic) {
-            BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "coreAppBackgroundImage");
-            BindingUtils.bindProperty(this, "skinBackgroundColor", ApplicationSkin.instance(), "coreAppBackgroundColor");
-            BindingUtils.bindProperty(this, "backgroundImageStyle", ApplicationSkin.instance(), "coreAppBackgroundSize");
+            watcher1 = BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "coreAppBackgroundImage");
+            watcher2 = BindingUtils.bindProperty(this, "skinBackgroundColor", ApplicationSkin.instance(), "coreAppBackgroundColor");
+            watcher3 = BindingUtils.bindProperty(this, "backgroundImageStyle", ApplicationSkin.instance(), "coreAppBackgroundSize");
         } else {
-            BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "reportBackground");
+            watcher4 = BindingUtils.bindProperty(this, "backgroundImageSource", ApplicationSkin.instance(), "reportBackground");
             //BindingUtils.bindProperty(this, "backgroundImageStyle", ApplicationSkin.instance(), "reportBackgroundSize");
         }
         if (_applyCenterScreenLogic && centerScreen != null) {
-            BindingUtils.bindProperty(this, "centerCanvasBackgroundColor", ApplicationSkin.instance(), "centerCanvasBackgroundColor");
-            BindingUtils.bindProperty(this, "centerCanvasBackgroundAlpha", ApplicationSkin.instance(), "centerCanvasBackgroundAlpha");
+            watcher5 = BindingUtils.bindProperty(this, "centerCanvasBackgroundColor", ApplicationSkin.instance(), "centerCanvasBackgroundColor");
+            watcher6 = BindingUtils.bindProperty(this, "centerCanvasBackgroundAlpha", ApplicationSkin.instance(), "centerCanvasBackgroundAlpha");
         }
     }
 

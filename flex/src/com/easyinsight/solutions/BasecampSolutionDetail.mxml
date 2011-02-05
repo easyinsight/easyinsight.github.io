@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <solutions:SolutionDetailRenderer xmlns:mx="http://www.adobe.com/2006/mxml"
-                                  xmlns:solutions="com.easyinsight.solutions.*" xmlns:help="com.easyinsight.help.*"
+                                  xmlns:solutions="com.easyinsight.solutions.*"
                                   width="100%" height="100%">
     <solutions:states>
         <mx:State name="AccountBelowRequired">
@@ -17,7 +17,6 @@
         </mx:State>
     </solutions:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.skin.ApplicationSkin;
 
         override protected function toAccountBelowRequiredState():void {
             currentState = "AccountBelowRequired";

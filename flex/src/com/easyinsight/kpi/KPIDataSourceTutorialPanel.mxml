@@ -43,7 +43,13 @@
         }
 
         public function saveValues():void {
-            kpiData.dataSourceID = dataSourceComboBox.selectedItem.id;
+            var existingID:int = kpiData.dataSourceID;
+            var newID:int = dataSourceComboBox.selectedItem.id;
+            if (existingID != newID) {
+                kpiData.filters = new ArrayCollection();
+                kpiData.measure = null;
+            }
+            kpiData.dataSourceID = newID;
         }
 
         private function gotFeeds():void {

@@ -1,6 +1,9 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.listing.IPerspective" width="100%" height="100%">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
+        borderStyle="none" borderThickness="0">
     <mx:Script><![CDATA[
+        import com.easyinsight.listing.IPerspective;
+
         import mx.core.UIComponent;
 
         private var _solution:Solution;
@@ -48,5 +51,7 @@
         }
 
         public function cleanup():void {
+            var perspective:IPerspective = getChildAt(0) as IPerspective;
+            perspective.cleanup();
         }]]></mx:Script>
 </mx:Module>

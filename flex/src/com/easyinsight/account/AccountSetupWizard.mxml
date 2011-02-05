@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
                         xmlns:kpi="com.easyinsight.kpi.*"
-                        xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*" xmlns:account="com.easyinsight.account.*"
+                        xmlns:account="com.easyinsight.account.*"
                         width="100%" height="100%" implements="com.easyinsight.listing.IPerspective"
         creationComplete="setup()">
     <mx:Script><![CDATA[
@@ -50,7 +50,6 @@
     <mx:RemoteObject destination="login" id="userService">
         <mx:method name="applySetupData" result="applied()"/>
     </mx:RemoteObject>
-    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
     <mx:VBox width="100%" height="100%" verticalGap="0">
         <mx:Box height="50%" width="100%" backgroundColor="0x000000"/>
         <mx:Box height="50%" width="100%" backgroundColor="0xAAAAAA"/>
@@ -59,14 +58,14 @@
         <mx:ViewStack selectedIndex="{panelIndex}"
                       id="viewStack" resizeToContent="true" width="800" height="550" creationPolicy="all"
                       backgroundColor="0xFFFFFF">
-            <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+            <kpi:TutorialPanel width="100%" height="100%">
                 <account:DefaultPersonaPanel id="personaPanel" setupData="{setupData}"
                         kpiTutorialNext="panelIndex++"/>
                 <kpi:TutorialButtons tutorialPanel="{personaPanel}" backEnabled="false"
                                      finishEnabled="false" backVisible="false" nextVisible="false"
                                      kpiTutorialCancel="onCancel(event)"/>
             </kpi:TutorialPanel>
-            <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
+            <kpi:TutorialPanel width="100%" height="100%">
                 <account:AddUsersPanel id="addUsersPanel" setupData="{setupData}"/>
                 <kpi:TutorialButtons tutorialPanel="{addUsersPanel}" backEnabled="true" nextEnabled="true"
                                      finishEnabled="true"

@@ -137,8 +137,8 @@
         </mx:FormItem>
     </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="cancel()"/>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
 </util:EITitleWindow>

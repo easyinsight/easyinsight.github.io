@@ -626,6 +626,7 @@
         }
 
         public function cleanup():void {
+            cleanupBindings();
             removeEventListener(CommandEvent.COMMAND, onCommand);
             /*if (stage != null)
              stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);*/
