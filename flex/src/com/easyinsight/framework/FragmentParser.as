@@ -11,7 +11,8 @@ import com.easyinsight.genredata.DelayedReportTemplate;
 import com.easyinsight.goals.DelayedDashboardAdminLink;
 import com.easyinsight.goals.DelayedGoalAdminLink;
 import com.easyinsight.goals.DelayedGoalLink;
-import com.easyinsight.groups.DelayedGroupLink;
+import com.easyinsight.goals.DelayedScorecardAdminLink;
+import com.easyinsight.goals.DelayedScorecardViewLink;
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.solutions.DelayedSolutionLink;
 
@@ -41,11 +42,6 @@ public class FragmentParser {
                 deepAPILink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 deepAPILink.execute();
             }),
-            new FragmentTester("groupID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
-                var groupLink:DelayedGroupLink = new DelayedGroupLink(key);
-                groupLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
-                groupLink.execute();
-            }),
             new FragmentTester("goalTreeID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var goalLink:DelayedGoalLink = new DelayedGoalLink(key);
                 goalLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
@@ -65,6 +61,16 @@ public class FragmentParser {
                 var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(key);
                 delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedGoalAdminLink.execute();
+            }),
+            new FragmentTester("scorecardAdminID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var delayedScorecardAdminLink:DelayedScorecardAdminLink = new DelayedScorecardAdminLink(key);
+                delayedScorecardAdminLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                delayedScorecardAdminLink.execute();
+            }),
+            new FragmentTester("scorecardViewID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
+                var delayedScorecardViewLink:DelayedScorecardViewLink = new DelayedScorecardViewLink(key);
+                delayedScorecardViewLink.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                delayedScorecardViewLink.execute();
             }),
             new FragmentTester("dashboardAdminID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 var delayedDashboardAdminLink:DelayedDashboardAdminLink = new DelayedDashboardAdminLink(key);

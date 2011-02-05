@@ -39,53 +39,31 @@ public class ScorecardService {
         return null;
     }
 
-
-    private ScorecardStorage scorecardStorage = new ScorecardStorage();
-
-    /*private Set<Long> visibilityMatrix(EIConnection conn) throws SQLException {
-        Set<Long> ids = new HashSet<Long>();
-        PreparedStatement queryAnalysisStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM user_to_analysis WHERE USER_ID = ?");
-        queryAnalysisStmt.setLong(1, SecurityUtil.getUserID());
-        ResultSet reportRS = queryAnalysisStmt.executeQuery();
-        while (reportRS.next()) {
-            ids.add(reportRS.getLong(1));
-        }
-        PreparedStatement queryGroupReportStmt = conn.prepareStatement("SELECT GROUP_TO_INSIGHT.insight_id FROM GROUP_TO_INSIGHT, GROUP_TO_USER_JOIN " +
-                "WHERE GROUP_TO_INSIGHT.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ?");
-        queryGroupReportStmt.setLong(1, SecurityUtil.getUserID());
-        ResultSet groupRS = queryAnalysisStmt.executeQuery();
-        while (groupRS.next()) {
-            ids.add(groupRS.getLong(1));
-        }
-        return ids;
-    }*/
-
-    public void saveScorecardOrdering(List<ScorecardDescriptor> descriptors) {
+    public long canAccessScorecard(String urlKey) {
         EIConnection conn = Database.instance().getConnection();
+        long scorecardID = 0;
         try {
-            conn.setAutoCommit(false);
-            PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_SCORECARD_ORDERING WHERE USER_ID = ?");
-            clearStmt.setLong(1, SecurityUtil.getUserID());
-            clearStmt.executeUpdate();
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_SCORECARD_ORDERING (USER_ID, SCORECARD_ID, SCORECARD_ORDER) " +
-                    "VALUES (?, ?, ?)");
-            for (int i = 0; i < descriptors.size(); i++) {
-                ScorecardDescriptor scorecardDescriptor = descriptors.get(i);
-                insertStmt.setLong(1, SecurityUtil.getUserID());
-                insertStmt.setLong(2, scorecardDescriptor.getId());
-                insertStmt.setInt(3, i);
-                insertStmt.execute();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id FROM SCORECARD where url_key = ?");
+            queryStmt.setString(1, urlKey);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                scorecardID = rs.getLong(1);
             }
-            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            conn.rollback();
             throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
         }
+        if (scorecardID != 0) {
+            try {
+                SecurityUtil.authorizeScorecard(scorecardID);
+            } catch (com.easyinsight.security.SecurityException e) {
+                scorecardID = 0;
+            }
+        }
+        return scorecardID;
     }
+
+    private ScorecardStorage scorecardStorage = new ScorecardStorage();
 
     public long determineInitialDisplay() {
         // process here ->
@@ -122,78 +100,42 @@ public class ScorecardService {
         }
     }
 
-    public ScorecardList getScorecardDescriptors(boolean includeGroups) {
+    public List<ScorecardDescriptor> getScorecardDescriptors() {
         long userID = SecurityUtil.getUserID();
-        return new ScorecardInternalService().getScorecardDescriptors(userID, includeGroups);
+        long accountID = SecurityUtil.getAccountID();
+        return new ScorecardInternalService().getScorecardDescriptors(userID, accountID).values();
     }
 
-    public ScorecardList getScorecardDescriptorsForGroup(long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        List<ScorecardDescriptor> scorecards = new ArrayList<ScorecardDescriptor>();
+    public Scorecard getScorecard(long scorecardID) {
+        SecurityUtil.authorizeScorecard(scorecardID);
+        try {
+            return scorecardStorage.getScorecard(scorecardID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
+    public ScorecardResults getValues(Scorecard scorecard, InsightRequestMetadata insightRequestMetadata) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, GROUP_TO_USER_JOIN.binding_type," +
-                    "COMMUNITY_GROUP.name from " +
-                    "scorecard, GROUP_TO_USER_JOIN, community_group where scorecard.group_id = ? AND scorecard.group_id = GROUP_TO_USER_JOIN.group_id AND " +
-                    "GROUP_TO_USER_JOIN.user_id = ? AND SCORECARD.GROUP_ID = COMMUNITY_GROUP.community_group_id");
-            queryStmt.setLong(1, groupID);
-            queryStmt.setLong(2, SecurityUtil.getUserID());
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long scorecardID = rs.getLong(1);
-                String scorecardName = rs.getString(2);
-                int role = rs.getInt(3);
-                String groupName = rs.getString(4);
-                ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
-                scorecardDescriptor.setGroupID(groupID);
-                scorecardDescriptor.setId(scorecardID);
-                scorecardDescriptor.setName(scorecardName);
-                scorecardDescriptor.setGroupRole(role);
-                scorecardDescriptor.setGroupName(groupName);
-                scorecards.add(scorecardDescriptor);
-            }
-
-        } catch (SQLException e) {
+            List<KPIOutcome> kpis = getValues(scorecard.getKpis(), conn, insightRequestMetadata);
+            ScorecardResults scorecardResults = new ScorecardResults();
+            scorecardResults.setOutcomes(kpis);
+            return scorecardResults;
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
-
-        boolean hasData = true;
-        if (scorecards.isEmpty()) {
-            hasData = (new UserUploadService().getFeedAnalysisTree(false, 0).getObjects().size() > 0);
-        }
-        return new ScorecardList(scorecards, hasData);
     }
 
-    public ScorecardWrapper getScorecard(long scorecardID, boolean forceRefresh, InsightRequestMetadata insightRequestMetadata) {
-        SecurityUtil.authorizeScorecard(scorecardID);
-        try {
-            return scorecardStorage.getScorecard(scorecardID, insightRequestMetadata, forceRefresh);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public long saveScorecardForUser(Scorecard scorecard) {
+    public Scorecard saveScorecard(Scorecard scorecard) {
         long userID = SecurityUtil.getUserID();
         try {
             scorecardStorage.saveScorecardForUser(scorecard, userID);
-            return scorecard.getScorecardID();
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public long saveScorecardForGroup(Scorecard scorecard, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        try {
-            scorecardStorage.saveScorecardForGroup(scorecard, groupID);
-            return scorecard.getScorecardID();
+            return scorecard;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -214,39 +156,10 @@ public class ScorecardService {
 
     }
 
-    public KPI addKPIToScorecard(KPI kpi, long scorecardID, InsightRequestMetadata insightRequestMetadata) {
-        SecurityUtil.authorizeScorecard(scorecardID);
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            scorecardStorage.addKPIToScorecard(kpi, scorecardID, conn);
-            refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
-            conn.commit();
-            return kpi;
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-    }
-
     public void deleteScorecard(long scorecardID) {
         SecurityUtil.authorizeScorecard(scorecardID);
         try {
             scorecardStorage.deleteScorecard(scorecardID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void removeKPIFromScorecard(long kpiID, long scorecardID) {
-        SecurityUtil.authorizeScorecard(scorecardID);
-        try {
-            scorecardStorage.removeKPIFromScorecard(kpiID, scorecardID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -259,7 +172,7 @@ public class ScorecardService {
         try {
             conn.setAutoCommit(false);
             new KPIStorage().saveKPI(kpi, conn);
-            refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
+            //refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
             conn.commit();
             return kpi;
         } catch (Exception e) {
@@ -389,10 +302,10 @@ public class ScorecardService {
         if (percentChange != null && Double.isNaN(percentChange)) {
             percentChange = null;
         }
-        return new KPIOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), kpi.getKpiID(), percentChange, directional);
+        return new KPIOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), kpi.getName(), percentChange, directional);
     }
 
-    public List<KPI> refreshValuesForList(List<KPI> kpis, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean allSources) throws Exception {
+    public List<KPIOutcome> getValues(List<KPI> kpis, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws Exception {
         /*if (allSources) {
             Set<Long> dataSourceIDs = new HashSet<Long>();
             for (KPI kpi : kpis) {
@@ -412,16 +325,18 @@ public class ScorecardService {
                 }
             }
         }*/
+        List<KPIOutcome> outcomes = new ArrayList<KPIOutcome>();
         for (KPI kpi : kpis) {
             KPIOutcome kpiValue = refreshKPIValue(kpi, conn, insightRequestMetadata);
-            kpi.setKpiOutcome(kpiValue);
-            kpiValue.setKpiID(kpi.getKpiID());
+
+            kpiValue.setKpiName(kpi.getName());
+            outcomes.add(kpiValue);
             //kpi.setKpiValue(kpiValue);
-            new KPIStorage().saveKPIOutcome(kpi.getKpiID(), kpiValue.getOutcomeValue(), kpiValue.getPreviousValue(),
+            /*new KPIStorage().saveKPIOutcome(kpi.getKpiID(), kpiValue.getOutcomeValue(), kpiValue.getPreviousValue(),
                             kpiValue.getEvaluationDate(), kpiValue.getOutcomeState(), kpiValue.getDirection(), kpiValue.isProblemEvaluated(),
-                    kpiValue.getPercentChange(), kpiValue.isDirectional(), conn);
+                    kpiValue.getPercentChange(), kpiValue.isDirectional(), conn);*/
         }
-        return kpis;
+        return outcomes;
     }
 
     public void storeScorecardForGoogle(long scorecardID) {

@@ -1,42 +1,39 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%" creationComplete="onCreationComplete()">
-    <mx:VBox width="100%" height="100%" horizontalAlign="center">
-        <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
-                paddingTop="5"
-                paddingBottom="5">
-            <mx:Label text="Account Administration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
-        </mx:Box>
-        <mx:HBox horizontalGap="20" width="100%">
-            <mx:VBox horizontalAlign="center" width="33%">
-                <mx:Label text="Account Management" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-                    <account:AccountType accountInfo="{accountInfo}"/>
-                    <account:AccountUsers accountInfo="{accountInfo}"/>
-                    <account:AccountState accountInfo="{accountInfo}"/>
-                    <account:AccountTrialDate accountInfo="{accountInfo}"/>
-                </mx:Form>
-                <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="220"/>
-                <mx:Button label="Billing Configuration..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
-                <mx:Button label="Cancel Account..." click="cancelPaidAccount()"
-                    styleName="grayButton" fontSize="14" width="220"/>
-            </mx:VBox>
-            <mx:VRule strokeColor="#333333"/>
-             <mx:VBox horizontalAlign="center" width="33%">
-                <mx:Label text="Account Settings" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                 <mx:Button label="Edit Account Settings..." click="editAccountSettings()" styleName="grayButton" fontSize="14" width="220"/>
-                 <mx:Button label="Edit Account Skin..." click="editAccountStyling()" styleName="grayButton" fontSize="14" width="220"/>
-                 <mx:Button label="Edit My Skin..." click="editUserStyling()" styleName="grayButton" fontSize="14" width="220"/>
-            </mx:VBox>
-            <mx:VRule strokeColor="#333333"/>
-            <mx:VBox horizontalAlign="center" width="33%">
-                <mx:Label text="Account Stats" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-                    <account:AccountStorage accountInfo="{accountInfo}"/>
-                    <account:AccountAPIUse accountInfo="{accountInfo}"/>
-                </mx:Form>
-            </mx:VBox>
-        </mx:HBox>
-    </mx:VBox>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%" creationComplete="onCreationComplete()"
+        styleName="basePageVBox">
+    <mx:Box width="100%" styleName="bannerBackground">
+        <mx:Label text="Account Administration" styleName="bannerText"/>
+    </mx:Box>
+    <mx:HBox horizontalGap="20" width="100%">
+        <mx:VBox horizontalAlign="center" width="33%">
+            <mx:Label text="Account Management" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <account:AccountType accountInfo="{accountInfo}"/>
+                <account:AccountUsers accountInfo="{accountInfo}"/>
+                <account:AccountState accountInfo="{accountInfo}"/>
+                <account:AccountTrialDate accountInfo="{accountInfo}"/>
+            </mx:Form>
+            <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="220"/>
+            <mx:Button label="Billing Configuration..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
+            <mx:Button label="Cancel Account..." click="cancelPaidAccount()"
+                styleName="grayButton" fontSize="14" width="220"/>
+        </mx:VBox>
+        <mx:VRule strokeColor="#333333"/>
+         <mx:VBox horizontalAlign="center" width="33%">
+            <mx:Label text="Account Settings" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+             <mx:Button label="Edit Account Settings..." click="editAccountSettings()" styleName="grayButton" fontSize="14" width="220"/>
+             <mx:Button label="Edit Account Skin..." click="editAccountStyling()" styleName="grayButton" fontSize="14" width="220"/>
+             <mx:Button label="Edit My Skin..." click="editUserStyling()" styleName="grayButton" fontSize="14" width="220"/>
+        </mx:VBox>
+        <mx:VRule strokeColor="#333333"/>
+        <mx:VBox horizontalAlign="center" width="33%">
+            <mx:Label text="Account Stats" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            <mx:Form width="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <account:AccountStorage accountInfo="{accountInfo}"/>
+                <account:AccountAPIUse accountInfo="{accountInfo}"/>
+            </mx:Form>
+        </mx:VBox>
+    </mx:HBox>
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;

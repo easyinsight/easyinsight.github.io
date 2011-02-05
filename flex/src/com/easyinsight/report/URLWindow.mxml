@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
 
@@ -16,12 +16,12 @@
             _url = value;
             dispatchEvent(new Event("urlChanged"));
         }]]></mx:Script>
-    <mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+    <mx:VBox horizontalAlign="center" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:Text text="You can bookmark this link in your browser or send it to&#13;anyone else on your account with access to the report." fontSize="14"/>
         <mx:TextArea text="{url}" selectable="true" editable="false" width="400" height="50" borderStyle="solid" borderThickness="1"/>
-        <mx:HBox width="100%" verticalAlign="middle">
-            <mx:Button label="Copy to Clipboard" click="System.setClipboard(url)"/>
-            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Copy to Clipboard" click="System.setClipboard(url)"/>
+            <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
-</util:EITitleWindow>
+</util:EISlimWindow>

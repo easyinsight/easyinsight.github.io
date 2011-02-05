@@ -2,15 +2,9 @@ package com.easyinsight.api.v3;
 
 import com.easyinsight.admin.HealthListener;
 import com.easyinsight.admin.Status;
-import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
-import com.xerox.amazonws.sqs2.Message;
-import com.xerox.amazonws.sqs2.MessageQueue;
-import com.xerox.amazonws.sqs2.SQSException;
-import com.xerox.amazonws.sqs2.SQSUtils;
-import nu.xom.Document;
 import org.apache.jcs.JCS;
 
 import javax.servlet.ServletException;
@@ -21,6 +15,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -59,15 +54,20 @@ public class HealthServlet extends HttpServlet {
                 }
             }
             StringBuilder xmlBuilder = new StringBuilder();
-            xmlBuilder.append("<response>");
+            xmlBuilder.append("<response>\r\n");
             for (Status status : statusList) {
-                xmlBuilder.append("<status>");
-                xmlBuilder.append(status.getExtendedCode());
-                xmlBuilder.append("</status>");
-                xmlBuilder.append(status.getHealthInfo().toXML());
-                xmlBuilder.append("<message>");
-                xmlBuilder.append(status.getExtendedMessage());
-                xmlBuilder.append("</message>");
+                xmlBuilder.append("\t<server>\r\n");
+                xmlBuilder.append("\t\t<status>\r\n");
+                xmlBuilder.append("\t\t\t").append(status.getExtendedCode());
+                xmlBuilder.append("\t\t</status>\r\n");
+                xmlBuilder.append("\t\t\t").append(status.getHealthInfo() == null ? "" : status.getHealthInfo().toXML());
+                xmlBuilder.append("\t\t<message>\r\n");
+                xmlBuilder.append("\t\t\t").append(status.getExtendedMessage());
+                xmlBuilder.append("\t\t</message>\r\n");
+                xmlBuilder.append("\t\t<time>\r\n");
+                xmlBuilder.append("\t\t\t").append(new Date(status.getTime()));
+                xmlBuilder.append("\t\t</time>\r\n");
+                xmlBuilder.append("\t</server>\r\n");
             }
             xmlBuilder.append("</response>");
             resp.getOutputStream().write(xmlBuilder.toString().getBytes());

@@ -1,6 +1,6 @@
 <%@ page import="com.easyinsight.scorecard.ScorecardService" %>
-<%@ page import="com.easyinsight.scorecard.ScorecardList" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardDescriptor" %>
+<%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
@@ -29,11 +29,11 @@
                     com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
                              (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
                     try {
-                        ScorecardList scorecards = new ScorecardService().getScorecardDescriptors(true);
-                        if (scorecards.getScorecardDescriptors().size() == 0) {
+                        List<ScorecardDescriptor> scorecards = new ScorecardService().getScorecardDescriptors();
+                        if (scorecards.size() == 0) {
                             out.println("You haven't defined any scorecards.");
                         } else {
-                            for (ScorecardDescriptor scorecardDescriptor : scorecards.getScorecardDescriptors()) {
+                            for (ScorecardDescriptor scorecardDescriptor : scorecards) {
                                 out.println("<li><a href=\"scorecard.jsp?scorecardID=" + scorecardDescriptor.getId() + "\">" + scorecardDescriptor.getName() + "</a></li>");
                             }
                         }

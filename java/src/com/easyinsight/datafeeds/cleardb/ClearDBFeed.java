@@ -31,49 +31,6 @@ public class ClearDBFeed extends Feed {
     }
 
     @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
-        try{
-            ClearDBCompositeSource compositeSource = (ClearDBCompositeSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
-            DataSet dataSet = new DataSet();
-            Client client = new Client(compositeSource.getCdApiKey(), compositeSource.getAppToken());
-            StringBuilder selectBuilder = new StringBuilder();
-            String from = table;
-            StringBuilder whereBuilder = new StringBuilder();
-            StringBuilder groupByBuilder = new StringBuilder();
-            Collection<AnalysisItem> groupByItems = new HashSet<AnalysisItem>();
-            boolean aggregateQuery = insightRequestMetadata.isAggregateQuery();
-            List<AnalysisItem> analysisItems = Arrays.asList(analysisItem);
-            createSelectClause(analysisItems, selectBuilder, groupByItems, aggregateQuery);
-            selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
-            String sql = "SELECT " + selectBuilder.toString() + " FROM " + from;
-            JSONObject results = client.query(sql);
-            JSONArray response = results.getJSONArray("response");
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            for (int i = 0; i < response.length(); i++) {
-                JSONObject responseRow = (JSONObject) response.get(i);
-                IRow row = dataSet.createRow();
-                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                    try {
-                        row.addValue(analysisItem.createAggregateKey(), dateFormat.parse(responseRow.getString(analysisItem.getKey().toKeyString())));
-                    } catch (ParseException e) {
-                    }
-                } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                    row.addValue(analysisItem.createAggregateKey(), responseRow.getDouble(analysisItem.getKey().toKeyString()));
-                } else {
-                    row.addValue(analysisItem.createAggregateKey(), responseRow.getString(analysisItem.getKey().toKeyString()));
-                }
-            }
-            AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
-            for (IRow row : dataSet.getRows()) {
-                metadata.addValue(analysisItem, row.getValue(analysisItem.createAggregateKey()), insightRequestMetadata);
-            }
-            return metadata;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             ClearDBCompositeSource compositeSource = (ClearDBCompositeSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);

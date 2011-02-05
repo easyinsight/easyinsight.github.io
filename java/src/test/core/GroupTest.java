@@ -47,7 +47,6 @@ public class GroupTest extends TestCase {
         groupService.addReportToGroup(0, groupID);*/
         groupService.getGroupMessages(groupID, null, null);
         groupService.getMemberGroups();
-        groupService.getPublicGroups();
         groupService.getUsers(groupID);
         Group retrievedGroup = groupService.getGroup(groupID);
         assertEquals(group.getName(), retrievedGroup.getName());

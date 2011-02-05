@@ -113,7 +113,7 @@ public class SecurityUtil {
                         user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), false, user.isGuestUser(),
                         account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()),
-                        account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey());
+                        account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
             } else {
                 throw new SecurityException();
             }
@@ -189,25 +189,26 @@ public class SecurityUtil {
     public static void authorizeScorecard(long scorecardID, long userID) {
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER_ID FROM SCORECARD WHERE SCORECARD_ID = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.USER_ID, ACCOUNT_ID, ACCOUNT_VISIBLE FROM SCORECARD, USER WHERE SCORECARD_ID = ? AND " +
+                    "USER.USER_ID = SCORECARD.USER_ID");
             queryStmt.setLong(1, scorecardID);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
 
                 long scorecardUserID = rs.getLong(1);
-                if (scorecardUserID == 0) {
-                    PreparedStatement queryGroupStmt = conn.prepareStatement("SELECT GROUP_TO_USER_JOIN.group_to_user_join_id FROM " +
-                            "SCORECARD, GROUP_TO_USER_JOIN WHERE SCORECARD.group_id = GROUP_TO_USER_JOIN.group_id AND " +
-                            "GROUP_TO_USER_JOIN.user_id = ? AND scorecard.scorecard_id = ?");
-                    queryGroupStmt.setLong(1, userID);
-                    queryGroupStmt.setLong(2, scorecardID);
-                    ResultSet groupRS = queryGroupStmt.executeQuery();
-                    if (!groupRS.next()) {
-                        throw new SecurityException();
-                    }
-                } else {
-                    if (scorecardUserID != userID) {
-                        throw new SecurityException();
+                boolean accountVisible = rs.getBoolean(2);
+                long accountID = rs.getLong(3);
+                if (scorecardUserID != userID) {
+                    if (!accountVisible || accountID != getAccountID()) {
+                        PreparedStatement queryGroupStmt = conn.prepareStatement("SELECT GROUP_TO_USER_JOIN.group_to_user_join_id FROM " +
+                                "SCORECARD, GROUP_TO_USER_JOIN WHERE SCORECARD.group_id = GROUP_TO_USER_JOIN.group_id AND " +
+                                "GROUP_TO_USER_JOIN.user_id = ? AND scorecard.scorecard_id = ?");
+                        queryGroupStmt.setLong(1, userID);
+                        queryGroupStmt.setLong(2, scorecardID);
+                        ResultSet groupRS = queryGroupStmt.executeQuery();
+                        if (!groupRS.next()) {
+                            throw new SecurityException();
+                        }
                     }
                 }
             } else {

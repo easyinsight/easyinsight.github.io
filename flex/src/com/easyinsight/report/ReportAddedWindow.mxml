@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    headerHeight="0">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.EmbedReportWindow;
@@ -66,92 +65,115 @@
         [Bindable]
         [Embed(source="../../../../assets/edit.png")]
         private var editIcon:Class;
+
+        private function shareReport():void {
+            shareButton.enabled = false;
+            analysisService.shareReport.send(_report.analysisID);
+        }
+
+        private function sharedReport():void {
+            saveIndex++;
+        }
+
+        [Bindable]
+        private var saveIndex:int;
         ]]></mx:Script>
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
     </mx:RemoteObject>
-    <mx:Canvas width="800" height="350">
-        <mx:VBox width="100%" height="100%" verticalGap="0">
-            <mx:Box height="50%" width="100%" backgroundColor="#000000"/>
-            <mx:Box height="50%" width="100%" backgroundColor="#CCCCCC"/>
-        </mx:VBox>
-        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-            <mx:VBox width="750" horizontalAlign="center" height="300" backgroundColor="#FFFFFF" paddingBottom="10"
-                     paddingLeft="10" paddingRight="10" paddingTop="10">
-                <mx:TextArea
-                        text="Now that you've added the report to your account, here are a few of the next steps you can take..."
-                        fontSize="18" borderStyle="none"
-                        backgroundAlpha="0" editable="false" selectable="false" width="700" fontWeight="bold"
-                        height="50"/>
-                <mx:Spacer height="100%"/>
-                <mx:HBox width="100%" horizontalAlign="center">
-                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                             backgroundColor="#FFFFFF" height="140"
-                             width="150" cornerRadius="8" buttonMode="true" id="editBox"
-                             mouseOver="editBox.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="editBox.setStyle('backgroundColor', 0xFFFFFF)"
-                             click="editReport()"
-                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                        <mx:Image source="{editIcon}"/>
-                        <mx:Text text="Modify the Report" fontSize="14" selectable="false" fontWeight="bold"/>
-                        <mx:TextArea
-                                text="Tweak the report to meet your particular needs"
-                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                height="80"
-                                width="130" textAlign="center"/>
-                    </mx:VBox>
-                    <mx:Spacer width="100%"/>
-                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                             backgroundColor="#FFFFFF" height="140"
-                             width="150" cornerRadius="8" buttonMode="true" id="excelBox"
-                             mouseOver="excelBox.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="excelBox.setStyle('backgroundColor', 0xFFFFFF)"
-                             click="excel()"
-                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                        <mx:Image source="{excelIcon}"/>
-                        <mx:Text text="Export to Excel" fontSize="14" selectable="false" fontWeight="bold"/>
-                        <mx:TextArea
-                                text="Export the report as an Excel spreadsheet"
-                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                height="80"
-                                width="130" textAlign="center"/>
-                    </mx:VBox>
-                    <mx:Spacer width="100%"/>
-                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                             backgroundColor="#FFFFFF" height="140"
-                             width="150" cornerRadius="8" buttonMode="true" id="embedBox"
-                             mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
-                             click="embed()"
-                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                        <mx:Image source="{embedIcon}"/>
-                        <mx:Text text="Embed this Report" fontSize="14" selectable="false" fontWeight="bold"/>
-                        <mx:TextArea
-                                text="Generate HTML to embed the report into a web page"
-                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                height="80"
-                                width="130" textAlign="center"/>
-                    </mx:VBox>
-                    <mx:Spacer width="100%"/>
-                    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                             backgroundColor="#FFFFFF" height="140"
-                             width="150" cornerRadius="8" buttonMode="true" id="emailBox"
-                             mouseOver="emailBox.setStyle('backgroundColor', 0xDDDDDD)"
-                             mouseOut="emailBox.setStyle('backgroundColor', 0xFFFFFF)"
-                             click="email()"
-                             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                        <mx:Image source="{mailIcon}"/>
-                        <mx:Text text="Email Delivery" fontSize="14" selectable="false" fontWeight="bold"/>
-                        <mx:TextArea
-                                text="Set up scheduled email delivery of the report"
-                                fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                                height="80"
-                                width="130" textAlign="center"/>
-                    </mx:VBox>
-                </mx:HBox>
-                <mx:Spacer height="100%"/>
-                <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
-            </mx:VBox>
-        </mx:Box>
-    </mx:Canvas>
-</util:EITitleWindow>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="shareReport" result="sharedReport()"/>
+    </mx:RemoteObject>
+
+        <!--
+            Do you want to share this report with other users in the account?
+        -->
+
+            <mx:ViewStack width="750" height="300" selectedIndex="{saveIndex}" paddingBottom="0" paddingLeft="0" paddingRight="0"
+                    paddingTop="0">
+                <mx:VBox width="750" horizontalAlign="center" height="300" backgroundColor="#FFFFFF" paddingBottom="10"
+                         paddingLeft="10" paddingRight="10" paddingTop="10" verticalAlign="middle">
+                    <mx:Label text="Do you want to share this report with other users in the account?" fontSize="14"/>
+                    <mx:HBox>
+                        <util:SaveButton label="Yes" click="shareReport()" id="shareButton" fontSize="14"/>
+                        <util:CancelButton label="No" click="saveIndex++" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox width="750" horizontalAlign="center" height="300" backgroundColor="#FFFFFF" paddingBottom="10"
+                         paddingLeft="10" paddingRight="10" paddingTop="10">
+                    <mx:TextArea
+                            text="Now that you've added the report to your account, here are a few of the next steps you can take..."
+                            fontSize="18" borderStyle="none"
+                            backgroundAlpha="0" editable="false" selectable="false" width="700" fontWeight="bold"
+                            height="50"/>
+                    <mx:Spacer height="100%"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="editBox"
+                                 mouseOver="editBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="editBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="editReport()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                            <mx:Image source="{editIcon}"/>
+                            <mx:Text text="Modify the Report" fontSize="14" selectable="false" fontWeight="bold"/>
+                            <mx:TextArea
+                                    text="Tweak the report to meet your particular needs"
+                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                    height="80"
+                                    width="130" textAlign="center"/>
+                        </mx:VBox>
+                        <mx:Spacer width="100%"/>
+                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="excelBox"
+                                 mouseOver="excelBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="excelBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="excel()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                            <mx:Image source="{excelIcon}"/>
+                            <mx:Text text="Export to Excel" fontSize="14" selectable="false" fontWeight="bold"/>
+                            <mx:TextArea
+                                    text="Export the report as an Excel spreadsheet"
+                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                    height="80"
+                                    width="130" textAlign="center"/>
+                        </mx:VBox>
+                        <mx:Spacer width="100%"/>
+                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="embedBox"
+                                 mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="embed()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                            <mx:Image source="{embedIcon}"/>
+                            <mx:Text text="Embed this Report" fontSize="14" selectable="false" fontWeight="bold"/>
+                            <mx:TextArea
+                                    text="Generate HTML to embed the report into a web page"
+                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                    height="80"
+                                    width="130" textAlign="center"/>
+                        </mx:VBox>
+                        <mx:Spacer width="100%"/>
+                        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+                                 backgroundColor="#FFFFFF" height="140"
+                                 width="150" cornerRadius="8" buttonMode="true" id="emailBox"
+                                 mouseOver="emailBox.setStyle('backgroundColor', 0xDDDDDD)"
+                                 mouseOut="emailBox.setStyle('backgroundColor', 0xFFFFFF)"
+                                 click="email()"
+                                 mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+                            <mx:Image source="{mailIcon}"/>
+                            <mx:Text text="Email Delivery" fontSize="14" selectable="false" fontWeight="bold"/>
+                            <mx:TextArea
+                                    text="Set up scheduled email delivery of the report"
+                                    fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
+                                    height="80"
+                                    width="130" textAlign="center"/>
+                        </mx:VBox>
+                    </mx:HBox>
+                    <mx:Spacer height="100%"/>
+                    <util:SaveButton label="Close" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+                </mx:VBox>
+            </mx:ViewStack>
+</util:EISlimWindow>

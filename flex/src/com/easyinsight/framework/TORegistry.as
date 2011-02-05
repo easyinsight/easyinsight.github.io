@@ -82,7 +82,7 @@ import com.easyinsight.salesforce.SalesforceFeedDefinition;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.scorecard.ScorecardList;
-import com.easyinsight.scorecard.ScorecardWrapper;
+import com.easyinsight.scorecard.ScorecardResults;
 import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.SolutionInstallInfo;
 
@@ -183,7 +183,7 @@ public class TORegistry {
         var configDS:ConfigureDataSource;
         var scorecardDescriptor:ScorecardDescriptor;
         var scorecardList:ScorecardList;
-        var scorecardWrapper:ScorecardWrapper;
+        var scorecardWrapper:ScorecardResults;
         var dsd:DataSourceDescriptor;
         var sKPIData:SolutionKPIData;
         var qb:QuickbaseResponse;

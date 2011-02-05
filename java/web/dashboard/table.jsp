@@ -1,5 +1,3 @@
-<%@ page import="com.easyinsight.scorecard.ScorecardInternalService" %>
-<%@ page import="com.easyinsight.scorecard.ScorecardWrapper" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="com.easyinsight.database.Database" %>
@@ -8,6 +6,11 @@
 <%@ page import="com.easyinsight.core.InsightDescriptor" %>
 <%@ page import="com.easyinsight.goals.GoalTreeDescriptor" %>
 <%@ page import="com.easyinsight.analysis.InsightRequestMetadata" %>
+<%@ page import="com.easyinsight.kpi.KPIOutcome" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.easyinsight.scorecard.*" %>
+<%@ page import="com.easyinsight.kpi.KPI" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
 <%
     try {
     com.easyinsight.scorecard.Scorecard scorecard = null;
@@ -23,15 +26,28 @@
         hibernateSession.close();
     }
     String scorecardIDString = request.getParameter("scorecardID");
-    ScorecardInternalService service = new com.easyinsight.scorecard.ScorecardInternalService();
     // table shouldn't get rendered without scorecard ID being set
     long scorecardID = Long.parseLong(scorecardIDString);
     boolean refresh = false;
     if("true".equals(request.getParameter("refresh"))) {
         refresh = true;
     }
-    ScorecardWrapper scorecardWrapper = service.getScorecard(scorecardID, userID, refresh, new InsightRequestMetadata());
-    scorecard = scorecardWrapper.getScorecard();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+        scorecard = new ScorecardStorage().getScorecard(scorecardID, conn);
+            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        List<KPIOutcome> outcomes = new ScorecardService().getValues(scorecard.getKpis(), conn, insightRequestMetadata);
+        for (KPI kpi : scorecard.getKpis()) {
+            for (KPIOutcome outcome : outcomes) {
+                if (kpi.getName().equals(outcome.getKpiName())) {
+                    kpi.setKpiOutcome(outcome);
+                    break;
+                }
+            }
+        }
+        } finally {
+            Database.closeConnection(conn);
+        }
 
 %>
 <% if(request.getParameter("ajax") == null) { %>
@@ -54,9 +70,7 @@
                     for (com.easyinsight.kpi.KPI kpi : scorecard.getKpis()) { %>
                     <tr id="kpi_<%= kpi.getKpiID() %>" <% if(alternate) {%>class="alternate"<% } %>>
                         <td>
-                        <% if(scorecardWrapper.getAsyncRefreshKpis() != null && scorecardWrapper.getAsyncRefreshKpis().contains(kpi)) { %>
-                            <img src="/images/scorecard/ajax-loader.gif" alt="Loading" />
-                        <% } else if(kpi.getIconImage() != null) { %>
+                        <% if(kpi.getIconImage() != null) { %>
                         <img src="/app/assets/icons/16x16/<%= kpi.getIconImage() %>" alt="KPI Icon" />
                     <% } else {
                         %>&nbsp;<% } %>
@@ -109,9 +123,6 @@
                     null);
                 <% } %>
             });
-            <% if(scorecardWrapper.getAsyncRefreshKpis() != null && !scorecardWrapper.getAsyncRefreshKpis().isEmpty()) { %>
-                asyncRefresh = setInterval(checkRefresh, 5000);    
-            <% } %>
         </script>
         <% }
         else { %>

@@ -68,6 +68,8 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
 
         analysisItemList.add(this);
 
+        if (!includeFilters) return analysisItemList;
+
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem = null;
             try {

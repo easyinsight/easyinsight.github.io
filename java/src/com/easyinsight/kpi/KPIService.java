@@ -28,7 +28,7 @@ public class KPIService {
 
     private KPIStorage kpiStorage = new KPIStorage();
 
-    public KPI copyKPI(KPI sourceKPI, long scorecardID) {
+    public KPI copyKPI(KPI sourceKPI) {
         EIConnection conn = Database.instance().getConnection();
         try {
             KPI kpi = sourceKPI.clone();
@@ -36,9 +36,6 @@ public class KPIService {
             kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
             kpi.setName("Copy of " + kpi.getName());
             kpiStorage.saveKPI(kpi, conn);
-            if (scorecardID > 0) {
-                new ScorecardStorage().linkKPIToScorecard(kpi, scorecardID, conn);
-            }
             return kpi;
         } catch (Exception e) {
             LogClass.error(e);
@@ -64,21 +61,10 @@ public class KPIService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            long targetScorecardID;
-            if (newScorecard) {
-                Scorecard scorecard = new Scorecard();
-                scorecard.setName(dataSourceName + " Scorecard");
-                scorecard.setScorecardOrder(0);
-                new ScorecardStorage().saveScorecardForUser(scorecard, userID, conn);
-                targetScorecardID = scorecard.getScorecardID();
-            } else {
-                targetScorecardID = new ScorecardStorage().getFirstScorecard(conn);
-            }
-            for (KPI kpi : kpis) {
-                kpi.setTemporary(false);
-                new KPIStorage().saveKPI(kpi, conn);
-                new ScorecardStorage().linkKPIToScorecard(kpi, targetScorecardID, conn);
-            }
+            Scorecard scorecard = new Scorecard();
+            scorecard.setName(dataSourceName + " Scorecard");
+            scorecard.setKpis(kpis);
+            new ScorecardStorage().saveScorecardForUser(scorecard, userID, conn);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -107,12 +93,9 @@ public class KPIService {
 
             for (KPI kpi : kpis) {
                 kpi.setTemporary(true);
-                //kpi.setConnectionID(connectionID);
-                kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
                 kpi.setCoreFeedID(targetDataSourceID);
                 kpiStorage.saveKPI(kpi, conn);
             }
-            new ScorecardService().refreshValuesForList(kpis, conn, insightRequestMetadata, false);
             conn.commit();
             return kpis;
         } catch (Exception e) {
@@ -168,7 +151,7 @@ public class KPIService {
         try {
             conn.setAutoCommit(false);
             kpiStorage.saveKPI(kpi, conn);
-            new ScorecardService().refreshValuesForList(Arrays.asList(kpi), conn, insightRequestMetadata, false);
+            new ScorecardService().getValues(Arrays.asList(kpi), conn, insightRequestMetadata);
             conn.commit();
             return kpi;
         } catch (Exception e) {

@@ -86,7 +86,7 @@ public class CompositeFeed extends Feed {
         return metadata;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
+    /*public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         if (analysisItem.getKey() instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
             return findMetadataForComposite(derivedKey, analysisItem, insightRequestMetadata, conn);
@@ -107,10 +107,13 @@ public class CompositeFeed extends Feed {
                     analysisItemResultMetadata.addValue(analysisItem, targetValue, insightRequestMetadata);
                 }
                 return analysisItemResultMetadata;
+            } else {
+                AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
+
             }
         }
         return null;
-    }
+    }*/
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {

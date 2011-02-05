@@ -57,8 +57,4 @@ public class AnalysisBasedFeed extends Feed {
 
         return new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
     }
-
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
 }

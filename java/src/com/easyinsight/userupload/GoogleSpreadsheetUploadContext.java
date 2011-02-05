@@ -1,20 +1,16 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.google.GoogleSpreadsheetAccess;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.users.Token;
-import com.easyinsight.users.TokenStorage;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 
 import java.net.URL;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -76,7 +72,7 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
     }
 
     @Override
-    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn) throws Exception {
+    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible) throws Exception {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT GOOGLE_DOCS_TOKEN.token_key, GOOGLE_DOCS_TOKEN.token_secret FROM " +
                 "GOOGLE_DOCS_TOKEN WHERE GOOGLE_DOCS_TOKEN.user_id = ?");
         queryStmt.setLong(1, SecurityUtil.getUserID());
@@ -86,6 +82,7 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
         String tokenSecret = rs.getString(2);
         GoogleFeedDefinition googleFeedDefinition = new GoogleFeedDefinition();
         googleFeedDefinition.setFeedName(name);
+        googleFeedDefinition.setAccountVisible(accountVisible);
         googleFeedDefinition.setWorksheetURL(worksheetURL);
         googleFeedDefinition.setTokenKey(tokenKey);
         googleFeedDefinition.setTokenSecret(tokenSecret);

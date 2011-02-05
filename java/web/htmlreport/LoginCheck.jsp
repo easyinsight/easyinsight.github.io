@@ -1,12 +1,10 @@
-<%@ page import="com.easyinsight.users.Account" %>
-<%@ page import="com.easyinsight.users.User" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
     String userName = request.getParameter("userName");
     String password = request.getParameter("password");
     org.hibernate.Session hibernateSession = com.easyinsight.database.Database.instance().createSession();
     try {
-        java.util.List results = hibernateSession.createQuery("from User where userName = ?").setString(0, userName).list();
+        java.util.List results = hibernateSession.createQuery("from User where userName = ? or email = ?").setString(0, userName).setString(1, userName).list();
         if(results.size() != 1) {
             response.sendRedirect("jquerytest.jsp?error=true");
             return;

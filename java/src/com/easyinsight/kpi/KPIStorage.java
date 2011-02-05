@@ -83,7 +83,6 @@ public class KPIStorage {
         }
         saveFilters(kpi, conn);
         saveProblemFilters(kpi, conn);
-        saveUsers(kpi, conn);
     }
 
     public List<KPI> getKPIsForDataSource(long dataSourceID) throws Exception {
@@ -184,7 +183,7 @@ public class KPIStorage {
         kpi.setGoalDefined(goalDefined);
         kpi.setHighIsGood(highIsGood);
         kpi.setGoalValue(goalValue);
-        kpi.setKpiOutcome(getLatestGoalValue(kpi, conn));
+        //kpi.setKpiOutcome(getLatestGoalValue(kpi, conn));
         kpi.setFilters(getFilters(kpiID, conn));
         kpi.setProblemConditions(getProblemFilters(kpiID, conn));
         kpi.setTemporary(temporary);
@@ -319,7 +318,7 @@ public class KPIStorage {
                         percentChange = null;
                     }
                     boolean directional = rs.getBoolean(8);
-                    kpiOutcome = new KPIOutcome(outcome, direction, endValue, problem, value, evaluationDate, kpi.getKpiID(), percentChange, directional);
+                    kpiOutcome = new KPIOutcome(outcome, direction, endValue, problem, value, evaluationDate, kpi.getName(), percentChange, directional);
                 }
                 queryStmt.close();
             }

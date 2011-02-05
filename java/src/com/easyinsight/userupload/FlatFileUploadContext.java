@@ -52,14 +52,14 @@ public class FlatFileUploadContext extends UploadContext {
     }
 
     @Override
-    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn) throws Exception {
+    public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible) throws Exception {
         UploadFormat uploadFormat = new UploadFormatTester().determineFormat(bytes);
 
         FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
         task.setName(name);
         task.setUserID(SecurityUtil.getUserID());
         task.setAccountID(SecurityUtil.getAccountID());
-        task.createFeed(conn, bytes, uploadFormat, analysisItems);
+        task.createFeed(conn, bytes, uploadFormat, analysisItems, accountVisible);
         return task.getFeedID();
     }
 

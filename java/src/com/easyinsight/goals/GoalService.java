@@ -151,7 +151,7 @@ public class GoalService {
             try {
                 conn.setAutoCommit(false);                
                 List<KPI> kpis = new ArrayList<KPI>(GoalUtil.getKPIs(goalTreeID, includeSubTrees, conn));
-                new ScorecardService().refreshValuesForList(kpis, conn, insightRequestMetadata, allSources);
+                //new ScorecardService().refreshValuesForList(kpis, conn, insightRequestMetadata, allSources);
                 conn.commit();
             } catch (Exception e) {
                 conn.rollback();

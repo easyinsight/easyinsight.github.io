@@ -30,7 +30,7 @@ public class StaticFeed extends Feed implements Serializable {
         return FeedType.STATIC;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
+    /*public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
         if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
             AnalysisItemResultMetadata analysisItemResultMetadata = analysisItem.createResultMetadata();
             Map<Value, Value> lookupMap = new HashMap<Value, Value>();
@@ -76,21 +76,7 @@ public class StaticFeed extends Feed implements Serializable {
             metadata.addValue(analysisItem, value, insightRequestMetadata);
         }
         return metadata;
-    }
-
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        DataSet dataSet;
-        DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
-        try {
-            dataSet = source.allData(filters, 10);
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            source.closeConnection();
-        }
-        return dataSet;
-    }
+    }*/
 
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {

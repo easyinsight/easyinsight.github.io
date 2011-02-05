@@ -41,6 +41,7 @@ public class UserServiceResponse {
     private int firstDayOfWeek;
     private String apiKey;
     private String apiSecretKey;
+    private boolean newsletterEnabled;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -54,7 +55,7 @@ public class UserServiceResponse {
                                boolean firstLogin, Date lastLoginDate, String accountName,
                                Long personaID, int dateFormat, boolean defaultReportSharing, boolean cookieLogin,
                                boolean guestUser, String currencySymbol, ApplicationSkin applicationSkin, int firstDayOfWeek,
-                               String apiKey, String apiSecretKey) {
+                               String apiKey, String apiSecretKey, boolean newsletterEnabled) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -82,6 +83,7 @@ public class UserServiceResponse {
         this.firstDayOfWeek = firstDayOfWeek;
         this.apiKey = apiKey;
         this.apiSecretKey = apiSecretKey;
+        this.newsletterEnabled = newsletterEnabled;
     }
 
     public String getApiKey() {
@@ -325,5 +327,13 @@ public class UserServiceResponse {
 
     public void setAccountState(int accountState) {
         this.accountState = accountState;
+    }
+
+    public boolean isNewsletterEnabled() {
+        return newsletterEnabled;
+    }
+
+    public void setNewsletterEnabled(boolean newsletterEnabled) {
+        this.newsletterEnabled = newsletterEnabled;
     }
 }

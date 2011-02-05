@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
         
@@ -101,13 +101,13 @@
         }
 		]]>
 	</mx:Script>
-	<mx:VBox id="coreBox" styleName="TitleWindowContents">
+	<mx:VBox id="coreBox">
 		<mx:CheckBox label="Row Level:" selected="{beforeAgg}" id="aggregationCheckbox"/>
         <mx:Box id="filterDetailBox"/>
 		<mx:HBox width="100%" horizontalAlign="center">
-			<mx:Button label="Save" click="save()"/>
-			<mx:Button label="Cancel" click="cancel()"/>
+			<util:SaveButton label="Save" click="save()"/>
+			<util:CancelButton label="Cancel" click="cancel()"/>
 		</mx:HBox>	
 	</mx:VBox>
 	
-</util:EITitleWindow>
+</util:EISlimWindow>

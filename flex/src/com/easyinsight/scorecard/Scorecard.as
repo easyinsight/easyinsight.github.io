@@ -11,7 +11,10 @@ public class Scorecard extends EventDispatcher {
     public var kpis:ArrayCollection = new ArrayCollection();
     public var name:String;
     public var scorecardID:int;
-    public var scorecardOrder:int;
+    public var urlKey:String;
+    public var description:String;
+    public var accountVisible:Boolean;
+    public var exchangeVisible:Boolean;
     private var _configuring:Boolean;
 
     public function Scorecard() {

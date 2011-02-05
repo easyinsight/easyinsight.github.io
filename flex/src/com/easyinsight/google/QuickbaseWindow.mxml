@@ -75,7 +75,7 @@
                 return;
             }
             ProgressAlert.alert(this, "Creating the data source, may take a few minutes...", null, quickbaseService.createDataSource);
-            quickbaseService.createDataSource.send(sessionTicket, appTokenInput.text, targetApps, host);
+            quickbaseService.createDataSource.send(sessionTicket, appTokenInput.text, targetApps, host, accountVisibleCheckbox.selected);
         }
 
         [Bindable]
@@ -106,6 +106,9 @@
                 </mx:FormItem>
                 <mx:FormItem label="URL of your Quickbase Account:">
                     <mx:TextInput id="urlInput" text="www.quickbase.com" width="400"/>
+                </mx:FormItem>
+                <mx:FormItem label="Do you want to share this data source with other users in the account?">
+                    <mx:CheckBox id="accountVisibleCheckbox" selected="true"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:HBox width="100%" horizontalAlign="center">

@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="feedService.searchForSubscribedFeeds.send()" title="New Lookup Table">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="feedService.searchForSubscribedFeeds.send()">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -174,9 +174,9 @@
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
     <mx:StringValidator id="destinationValidator" source="{destinationFieldInput}" minLength="3" maxLength="50" property="text"/>
-</util:EITitleWindow>
+</util:EISlimWindow>

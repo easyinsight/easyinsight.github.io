@@ -4,6 +4,7 @@ import flash.geom.Point;
 import flash.ui.ContextMenuItem;
 
 import mx.controls.listClasses.IListItemRenderer;
+import mx.core.Application;
 import mx.core.UITextField;
 
 public class AvailableFieldTextRenderer extends UITextField implements IListItemRenderer {
@@ -40,9 +41,16 @@ public class AvailableFieldTextRenderer extends UITextField implements IListItem
             items.push(addToReportItem);
             var filterItem:ContextMenuItem = new ContextMenuItem("Filter on this Field");
             filterItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                var appHeight:int = Application(Application.application).height;
+
                 var point:Point = new Point(this.x, this.y);
                 var global:Point = localToGlobal(point);
-                dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_FILTER, wrapper, global.x, global.y));
+                var margin:int = appHeight - global.y;
+                var targY:int = global.y;
+                if (margin < 250) {
+                    targY -= (250 - margin);
+                }
+                dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_FILTER, wrapper, global.x, targY));
             });
             items.push(filterItem);
             var copyItem:ContextMenuItem = new ContextMenuItem("Copy Field", true);

@@ -23,10 +23,10 @@ Application {
 }
 
 Form {
-    paddingLeft: 5;
-    paddingRight: 5;
-    paddingTop: 5;
-    paddingBottom: 5;
+    paddingLeft: 0;
+    paddingRight: 0;
+    paddingTop: 0;
+    paddingBottom: 0;
 }
 
 FormItem {
@@ -164,6 +164,26 @@ ToggleButtonBar {
     shadowDistance: 3;
     fontSize: 11;
     fontWeight: normal;
+}
+
+SaveButton {
+    cornerRadius: 5;
+    highlightAlphas: 0.5, 0.1;
+    fillColors: #333333, #333333, #333333, #333333;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #333333;
+    dropShadow: true;
+    shadowDistance: 3;
+    fontSize: 14;
+    fontWeight: normal;
+}
+
+CancelButton {
+    textDecoration: underline;
+    fontSize:14;
 }
 
 .redButton { 
@@ -361,10 +381,10 @@ EISlimWindow {
     borderStyle: solid;
     backgroundColor: #FFFFFF;
     horizontalAlign: center;
-    paddingBottom: 5;
-    paddingLeft: 5;
-    paddingRight: 5;
-    paddingTop: 5;
+    paddingBottom: 10;
+    paddingLeft: 10;
+    paddingRight: 10;
+    paddingTop: 10;
 }
 
 .errorTip {
@@ -377,5 +397,25 @@ EISlimWindow {
     paddingLeft: 20;
     paddingTop: 20;
     paddingRight: 20;
+    horizontalAlign: center;
+}
+
+.bannerBackground {
+    horizontalAlign:center;
+    backgroundColor:#848080;
+    paddingTop:5;
+    paddingBottom:5;
+}
+
+.bannerText {
+    fontSize:20;
+    fontFamily:Tahoma;
+    fontWeight:bold;
+    color:#FFFFFF;
+}
+
+.basePageVBox {
+    verticalGap: 10;
+    paddingTop: 10;
     horizontalAlign: center;
 }

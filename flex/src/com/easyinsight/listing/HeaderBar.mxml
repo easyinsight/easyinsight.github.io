@@ -151,7 +151,6 @@
             evaluate(myDataOption, UIConfiguration.SHOW_MY_DATA, config, ops);
             evaluate(connectionsOption, UIConfiguration.SHOW_CONNECTIONS, config, ops);
             evaluate(exchangeOption, UIConfiguration.SHOW_EXCHANGE, config, ops);
-            evaluate(groupsOption, UIConfiguration.SHOW_GROUPS, config, ops);
             if (ops.length > 0) {
                 var state:State = new State();
                 state.overrides = ops;
@@ -178,11 +177,6 @@
         <mx:Image source="{homeIcon}" id="homeImage"/>
         <mx:Label text="Home" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.SCORECARDS}" displayName="Scorecards" listingChange="onListingChange(event)"
-            id="scorecardOption" width="85">
-        <mx:Image source="{scorecardIcon}" id="kpisImage"/>
-        <mx:Label text="Scorecards" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
     <listing:ListingOption perspectiveClass="{PerspectiveInfo.MY_DATA}" displayName="My Data" listingChange="onListingChange(event)" id="myDataOption" width="85">
         <mx:Image source="{myDataIcon}" id="myDataImage"/>
         <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
@@ -201,11 +195,6 @@
             id="scheduleOption" width="85">
         <mx:Image source="{scheduleIcon}" id="scheduleImage"/>
         <mx:Label text="Scheduling" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <listing:ListingOption perspectiveClass="{PerspectiveInfo.GROUPS}" displayName="Groups" listingChange="onListingChange(event)"
-            id="groupsOption" width="85">
-        <mx:Image source="{groupsIcon}" id="groupsImage"/>
-        <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <!--<listing:ListingOption perspectiveClass="{PerspectiveInfo.API}" displayName="Developers" listingChange="onListingChange(event)" id="apiListingOption" width="85">
         <mx:Image source="{apiIcon}" id="apiImage"/>

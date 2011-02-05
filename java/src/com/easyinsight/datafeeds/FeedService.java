@@ -7,6 +7,7 @@ import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.etl.LookupTableUtil;
 import com.easyinsight.goals.GoalStorage;
+import com.easyinsight.scorecard.ScorecardInternalService;
 import com.easyinsight.storage.DatabaseShardException;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
@@ -89,6 +90,7 @@ public class FeedService {
             descriptorList.addAll(analysisStorage.getReports(userID, accountID, conn).values());
             descriptorList.addAll(new DashboardStorage().getDashboards(userID, accountID, conn).values());
             descriptorList.addAll(new GoalStorage().getTrees(userID, accountID, conn).values());
+            descriptorList.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
             Map<String, Integer> countMap = new HashMap<String, Integer>();
             Set<String> dupeNames = new HashSet<String>();
             Set<String> allNames = new HashSet<String>();
@@ -260,7 +262,14 @@ public class FeedService {
     public List<DataSourceDescriptor> searchForSubscribedFeeds() {
         long userID = SecurityUtil.getUserID();
         try {
-            return feedStorage.getDataSources(userID, SecurityUtil.getAccountID());
+            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, SecurityUtil.getAccountID());
+            Collections.sort(dataSources, new Comparator<DataSourceDescriptor>() {
+
+                public int compare(DataSourceDescriptor dataSourceDescriptor, DataSourceDescriptor dataSourceDescriptor1) {
+                    return dataSourceDescriptor.getName().compareTo(dataSourceDescriptor1.getName());
+                }
+            });
+            return dataSources;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

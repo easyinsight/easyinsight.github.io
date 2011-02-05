@@ -186,10 +186,6 @@
             removeChild(hierarchyButton);
         }
 
-        public function removeAPI():void {
-            removeChild(apiButton);
-        }
-
         public function explainReport():void {
             if (reportAudit != null) {
                 var window:ReportExplanationWindow = new ReportExplanationWindow();
@@ -201,18 +197,13 @@
         ]]></mx:Script>
     <mx:Button id="calculationButton" toolTip="Create Calculation"
                icon="@Embed(source='../../../../assets/text_formula.png')"
-               click="createCalculation()"/>
+               click="createCalculation()" labelPlacement="right" label="New Calculation"/>
     <mx:Button id="derivedButton" toolTip="Create Derived Grouping"
                icon="@Embed(source='../../../../assets/code.png')"
-               click="createCalculatedGrouping()"/>
+               click="createCalculatedGrouping()" labelPlacement="right" label="New Derived Grouping"/>
     <mx:Button id="derivedDateButton" toolTip="Create Derived Date"
                icon="@Embed(source='../../../../assets/calendar.png')"
-               click="createCalculatedDate()"/>
+               click="createCalculatedDate()" labelPlacement="right" label="New Derived Date"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
-               toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton"/>
-    <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
-               icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
-    <mx:Button toolTip="Explain Report..."
-               icon="@Embed(source='../../../../assets/information.png')"
-               click="explainReport()"/>
+               toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton" labelPlacement="right" label="New Hierarchy"/>
 </mx:HBox>

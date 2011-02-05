@@ -1,7 +1,6 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.dataset.DataSet;
 
@@ -20,14 +19,14 @@ public abstract class Pipeline {
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
-        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getRefMap(), pipelineData.getAllItems());
+        components = generatePipelineCommands(allNeededAnalysisItems, pipelineData.getAllRequestedItems(), report.retrieveFilterDefinitions(), report, pipelineData.getAllItems());
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
         }
         return this;
     }
 
-    protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap, List<AnalysisItem> allItems);
+    protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems);
          
     private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
 
@@ -39,57 +38,29 @@ public abstract class Pipeline {
         Set<AnalysisItem> allRequestedAnalysisItems = report.getAllAnalysisItems();
         allRequestedAnalysisItems.remove(null);
 
-        Map<Key, Integer> refMap = new HashMap<Key, Integer>();
-
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
+
         if (report.retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 List<AnalysisItem> items = filterDefinition.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true);
-                updateCount(items, refMap);
                 allNeededAnalysisItems.addAll(items);
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
                 List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, false);
-                updateCount(baseItems, refMap);
                 allNeededAnalysisItems.addAll(baseItems);
                 List<AnalysisItem> linkItems = item.addLinkItems(allFields, allRequestedAnalysisItems);
-                updateCount(linkItems, refMap);
                 allNeededAnalysisItems.addAll(linkItems);
                 if (item.isVirtual()) {
-                    updateCount(item, refMap);
                     allNeededAnalysisItems.add(item);
                 }
             }
         }
-        updateCount(report.getLimitFields(), refMap);
         allNeededAnalysisItems.addAll(report.getLimitFields());                
 
-        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties(), allRequestedAnalysisItems, refMap);
+        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties(), allRequestedAnalysisItems);
         return allNeededAnalysisItems;
-    }
-
-    private void updateCount(AnalysisItem analysisItem, Map<Key, Integer> refMap) {
-        Key key = analysisItem.createAggregateKey();
-        Integer count = refMap.get(key);
-        if (count == null) {
-            refMap.put(key, 1);
-        } else {
-            refMap.put(key, count + 1);
-        }
-    }
-
-    private void updateCount(Collection<AnalysisItem> analysisItems, Map<Key, Integer> refMap) {
-        for (AnalysisItem analysisItem : analysisItems) {
-            Key key = analysisItem.createAggregateKey();
-            Integer count = refMap.get(key);
-            if (count == null) {
-                refMap.put(key, 1);
-            } else {
-                refMap.put(key, count + 1);
-            }
-        }
     }
 
     protected final Collection<AnalysisItem> items(int type, Collection<AnalysisItem> items) {
@@ -110,7 +81,7 @@ public abstract class Pipeline {
     }
 
     public DataResults toList(DataSet dataSet) {
-        for (IComponent component : components) {            
+        for (IComponent component : components) {
             dataSet = component.apply(dataSet, pipelineData);
         }
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));

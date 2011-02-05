@@ -32,7 +32,7 @@
 
         private function createPersona():void {
             var window:PersonaConfigurationWindow = new PersonaConfigurationWindow();
-            window.addEventListener(PersonaEvent.NEW_PERSONA, newPersona);
+            window.addEventListener(PersonaEvent.NEW_PERSONA, newPersona, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -44,23 +44,21 @@
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getPersonas" result="gotPersonas()"/>
     </mx:RemoteObject>
-    <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
-            paddingTop="5" paddingBottom="5">
-        <mx:Label text="Persona Configuration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+    <mx:Box width="100%" styleName="bannerBackground">
+        <mx:Label text="Persona Configuration" styleName="bannerText"/>
     </mx:Box>
     <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
         <mx:Box>
-            <mx:Button label="Create Persona" click="createPersona()" fontSize="14" styleName="grayButton"/>
+            <mx:Button label="Create Persona..." click="createPersona()" fontSize="14" styleName="grayButton"/>
         </mx:Box>
-        <mx:VBox>
-            <mx:Button label="Create Persona" click="createPersona()"/>
-            <mx:DataGrid dataProvider="{personas}" width="500">
+        <mx:VBox verticalGap="10">
+            <mx:Button label="Create Persona..." click="createPersona()" fontSize="14" styleName="grayButton"/>
+            <mx:DataGrid dataProvider="{personas}" width="500" id="grid" rowHeight="28">
                 <mx:columns>
                     <util:EIDataGridColumn dataField="name" headerText="Persona Name"/>
                     <util:EIDataGridColumn dataField="name" headerText="" sortable="false" itemRenderer="com.easyinsight.preferences.PersonaControls"
                             width="100"/>    
                 </mx:columns>
-
             </mx:DataGrid>
         </mx:VBox>
 

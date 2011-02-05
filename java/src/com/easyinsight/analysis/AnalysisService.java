@@ -163,6 +163,22 @@ public class AnalysisService {
         }
     }
 
+    public void shareReport(long reportID) {
+        SecurityUtil.authorizeInsight(reportID);
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET ACCOUNT_VISIBLE = ? WHERE ANALYSIS_ID = ?");
+            updateStmt.setBoolean(1, false);
+            updateStmt.setLong(2, reportID);
+            updateStmt.executeUpdate();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public String validateCalculation(String calculationString, long dataSourceID, List<AnalysisItem> reportItems) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
         EIConnection conn = Database.instance().getConnection();

@@ -113,6 +113,7 @@
             box.element = _dashboard.rootElement;
             box.allowDelete = false;
             dashboardCanvas.addChild(box);
+            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource);
             analysisService.getInsightDescriptorsForDataSource.send(_dashboard.dataSourceID);
             dashboardFilters = _dashboard.filters;
             dataService.getFeedMetadata.send(_dashboard.dataSourceID);
@@ -128,6 +129,7 @@
             dashboardCanvas.addChild(box);
             _dashboard = new Dashboard();
             dataSourceID = event.dataSource.id;
+            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource);
             analysisService.getInsightDescriptorsForDataSource.send(dataSourceID);
             dataService.getFeedMetadata.send(dataSourceID);
             _dashboard.rootElement = grid;
@@ -180,7 +182,7 @@
         private function viewDashboard():void {
             if (dashboardChanged) {
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                        Alert.OK | Alert.CANCEL, null, viewListener, null, Alert.CANCEL);
             } else {
                 dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: _dashboard.id})));
             }
@@ -240,20 +242,20 @@
     </mx:RemoteObject>
     <mx:HBox width="100%" paddingLeft="15" paddingTop="5">
         <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="closeEditor()"
-                   toolTip="Close"/>
+                   toolTip="Close" labelPlacement="right" label="Close Editor"/>
         <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                   toolTip="Save"/>
+                   toolTip="Save" labelPlacement="right" label="Save"/>
         <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewDashboard()"
-                   toolTip="View Dashboard"/>
+                   toolTip="View Dashboard" label="Dashboard View" labelPlacement="right"/>
     </mx:HBox>
     <mx:HBox width="100%" height="100%">
-        <mx:VBox height="100%" horizontalAlign="center" width="200">
+        <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20">
             <mx:Label text="Controls" fontSize="14"/>
             <mx:List id="controlsList" dataProvider="{availableControls}" labelField="name" dragEnabled="true"
                      width="100%" rowCount="3"/>
             <mx:Label text="Reports" fontSize="14"/>
             <mx:List id="reportsList" dataProvider="{availableReports}" labelField="name" dragEnabled="true"
-                     width="100%"/>
+                     width="100%" height="100%"/>
         </mx:VBox>
         <mx:VBox width="100%" height="100%" horizontalAlign="center">
             <mx:HBox>

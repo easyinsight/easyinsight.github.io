@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
 	initialize="initHandlers()" backgroundAlpha=".95" backgroundColor="#FFFFFF">
 	<mx:Script>
 		<![CDATA[
@@ -23,10 +23,16 @@
         private var _emailText:String;
 
         [Bindable]
+        private var _newsletterOptIn:Boolean;
+
+        [Bindable]
         private var _securityConfigurable:Boolean = false;
 
         private var validators:Array;
 
+        public function set newsletterOptIn(value:Boolean):void {
+            _newsletterOptIn = value;
+        }
 
         public function set userNameText(val:String):void {
             _userNameText = val;
@@ -55,39 +61,43 @@
             } else {
                 failureMessageLabel.text = "";
                 ProgressAlert.alert(this, "Updating your profile...", null, creationService.updateUserLabels);
-                creationService.updateUserLabels.send(userName.text, fullName.text, email.text, firstName.text);
+                creationService.updateUserLabels.send(userName.text, fullName.text, email.text, firstName.text, newsletterCheckbox.selected);
             }
         }
 
         private function savedUser():void {
             User.getInstance().updateLabels(userName.text, fullName.text, email.text, firstName.text);
+            User.getInstance().newsletterEnabled = newsletterCheckbox.selected;
             dispatchEvent(new RefreshAccountEvent());
             PopUpManager.removePopUp(this);
         }
-                ]]>
+        ]]>
 	</mx:Script>
 	
-	<mx:VBox width="100%" height="100%" styleName="TitleWindowContents">
+	<mx:VBox width="100%" height="100%">
 		<mx:Form>
 			<mx:FormItem label="User ID:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="userName" text="{_userNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>
+				<mx:TextInput id="userName" text="{_userNameText}" fontFamily="Lucida Grande" fontWeight="normal" width="400"/>
 			</mx:FormItem>
             <mx:FormItem label="First Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="firstName" text="{_firstNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>
+				<mx:TextInput id="firstName" text="{_firstNameText}" fontFamily="Lucida Grande" fontWeight="normal" width="400"/>
 			</mx:FormItem>
 			<mx:FormItem label="Last Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="fullName" text="{_fullNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>
+				<mx:TextInput id="fullName" text="{_fullNameText}" fontFamily="Lucida Grande" fontWeight="normal" width="400"/>
 			</mx:FormItem>
 			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="email" text="{_emailText}" fontFamily="Lucida Grande" fontWeight="normal"/>
+				<mx:TextInput id="email" text="{_emailText}" fontFamily="Lucida Grande" fontWeight="normal" width="400"/>
+			</mx:FormItem>
+            <mx:FormItem label="Send Newsletter:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:CheckBox id="newsletterCheckbox" selected="{_newsletterOptIn}" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
 			<mx:FormItem label="">
 				<mx:Text text="" id="failureMessageLabel"/>
 			</mx:FormItem>
 		</mx:Form>
         <mx:HBox width="100%">
-            <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
 	</mx:VBox>
 	<mx:StringValidator source="{userName}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>	
@@ -96,4 +106,4 @@
 	<mx:RemoteObject id="creationService" destination="login">
 		<mx:method name="updateUserLabels" result="savedUser()"/>
 	</mx:RemoteObject>
-</util:EITitleWindow>
+</util:EISlimWindow>

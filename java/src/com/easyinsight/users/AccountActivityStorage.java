@@ -52,6 +52,7 @@ public class AccountActivityStorage {
             stmt.setTimestamp(3, new Timestamp(cal.getTime().getTime()));
             stmt.execute();
         }
+        stmt.close();
     }
 
     public void executeSalesEmails(EIConnection conn) throws SQLException, UnsupportedEncodingException {
@@ -71,6 +72,7 @@ public class AccountActivityStorage {
             updateStmt.setLong(1, scheduleID);
             updateStmt.executeUpdate();
         }
+        updateStmt.close();
     }
 
     public void updateTrialTime(long accountID, Connection conn, Date newTrialDate) throws SQLException {

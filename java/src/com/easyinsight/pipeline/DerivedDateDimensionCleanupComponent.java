@@ -22,7 +22,7 @@ public class DerivedDateDimensionCleanupComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        List<AnalysisItem> items = dimension.getAnalysisItems(pipelineData.getAllItems(),
+        /*List<AnalysisItem> items = dimension.getAnalysisItems(pipelineData.getAllItems(),
                 pipelineData.getReportItems(), false, true, false);
         for (AnalysisItem item : items) {
             if (item != dimension) {
@@ -30,7 +30,7 @@ public class DerivedDateDimensionCleanupComponent implements IComponent {
                     pipelineData.getReportItems().remove(item);
                 }
             }
-        }
+        }*/
         return dataSet;
     }
 

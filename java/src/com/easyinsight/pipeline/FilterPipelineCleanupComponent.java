@@ -19,9 +19,9 @@ public class FilterPipelineCleanupComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        if (pipelineData.decrementReferenceCount(filterDefinition.getField())) {
+        /*if (pipelineData.decrementReferenceCount(filterDefinition.getField())) {
             pipelineData.getReportItems().remove(filterDefinition.getField());
-        }
+        }*/
         return dataSet;
     }
 

@@ -27,23 +27,23 @@ public class KPIOutcome {
     private Double outcomeValue;
     private Date evaluationDate;
     private Double percentChange;
-    private long kpiID;
+    private String kpiName;
     private boolean valueDefined;
     private boolean directional;
 
     public KPIOutcome() {
     }
 
-    public long getKpiID() {
-        return kpiID;
+    public String getKpiName() {
+        return kpiName;
     }
 
-    public void setKpiID(long kpiID) {
-        this.kpiID = kpiID;
+    public void setKpiName(String kpiName) {
+        this.kpiName = kpiName;
     }
 
     public KPIOutcome(int outcomeState, int direction, Double previousValue, boolean problemEvaluated, Double outcomeValue, Date evaluationDate,
-                       long kpiID, Double percentChange, boolean directional) {
+                       String kpiName, Double percentChange, boolean directional) {
         this.outcomeState = outcomeState;
         this.direction = direction;
         this.previousValue = previousValue;
@@ -51,7 +51,7 @@ public class KPIOutcome {
         this.outcomeValue = outcomeValue;
         valueDefined = this.outcomeValue != null;
         this.evaluationDate = evaluationDate;
-        this.kpiID = kpiID;
+        this.kpiName = kpiName;
         this.percentChange = percentChange;
         this.directional = directional;
 

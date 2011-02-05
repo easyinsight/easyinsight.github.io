@@ -1,0 +1,250 @@
+<?xml version="1.0"?>
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
+                      xmlns:util="com.easyinsight.util.*" creationComplete="setup()"
+                      width="100%" height="100%" xmlns:skin="com.easyinsight.skin.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        import com.easyinsight.analysis.PromptEvent;
+        import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.customupload.ProblemDataEvent;
+        import com.easyinsight.framework.InsightRequestMetadata;
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.kpi.KPI;
+        import com.easyinsight.kpi.KPIEvent;
+        import com.easyinsight.kpi.KPIOutcome;
+        import com.easyinsight.kpi.KPIParentWindow;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.CollectionEvent;
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        private var scorecard:Scorecard;
+
+        private var _scorecardID:int;
+
+        private var _startDataSourceID:int;
+
+        public function set startDataSourceID(value:int):void {
+            _startDataSourceID = value;
+        }
+
+        public function set scorecardID(value:int):void {
+            _scorecardID = value;
+        }
+
+        private function close():void {
+            if (scorecardChanged) {
+                createPromptWindow("You have unsaved changes to this report.", function():void {
+                    dispatchEvent(new AnalysisCloseEvent());
+                });
+            } else {
+                dispatchEvent(new AnalysisCloseEvent());
+            }
+        }
+
+        private function createPromptWindow(prompt:String, doneHandler:Function):void {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.prompt = prompt;
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                save(true, function(event:ScorecardSaveEvent):void {
+                    doneHandler.call();
+                });
+            }, false, 0, true);
+            window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
+                doneHandler.call();
+            }, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onKPIEdit(event:KPIEvent):void {
+            scorecardChanged = true;
+            refreshValues();
+        }
+
+        private function setup():void {
+            addEventListener(KPIEvent.KPI_ADDED, addedKPI);
+            addEventListener(KPIEvent.KPI_EDITED, onKPIEdit);
+            addEventListener(KPIEvent.KPI_REMOVED, deletedKPI);
+            if (_scorecardID > 0) {
+                ProgressAlert.alert(this, "Retrieving scorecard...", null, scorecardService.getScorecard);
+                scorecardService.getScorecard.send(_scorecardID);
+            } else {
+                scorecard = new Scorecard();
+                scorecard.kpis = kpis;
+                kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+            }
+        }
+
+        private function deletedKPI(event:KPIEvent):void {
+
+            kpis.removeItemAt(kpis.getItemIndex(event.kpi));
+        }
+
+        [Bindable]
+        private var kpis:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
+        private var controlFactory:KPIControlFactory = new KPIControlFactory(0, 0);
+
+        [Bindable]
+        private var kpiNameFactory:KPINameFactory = new KPINameFactory("name");
+        [Bindable]
+        private var kpiIconFactory:KPINameFactory = new KPINameFactory("icon");
+
+        private var scorecardChanged:Boolean;
+
+        private function save(closeAfterSave:Boolean = false, saveHandler:Function = null):void {
+            var window:ScorecardSaveWindow = new ScorecardSaveWindow();
+            if (saveHandler == null) {
+                saveHandler = saved;
+            }
+            window.addEventListener(ScorecardSaveEvent.SCORECARD_SAVE, saveHandler, false, 0, true);
+            window.scorecard = scorecard;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function saved(event:ScorecardSaveEvent):void {
+            this.kpis = event.scorecard.kpis;
+            this.scorecard = event.scorecard;
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.scorecardAdminID = String(scorecard.urlKey);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            scorecardChanged = false;
+        }
+
+        private function viewScorecard():void {
+            if (scorecardChanged) {
+                createPromptWindow("You have unsaved changes to this scorecard.", function():void {
+                    scorecardView();
+                });
+            } else {
+                scorecardView();
+            }
+        }
+
+        private function scorecardView():void {
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: _scorecardID } )));
+        }
+
+        private function gotScorecard():void {
+            scorecard = scorecardService.getScorecard.lastResult as Scorecard;
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.scorecardAdminID = String(scorecard.urlKey);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            kpis = scorecard.kpis;
+            kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+            controlFactory = new KPIControlFactory(scorecard.scorecardID, 0);
+            invalidateSize();
+            refreshValues();
+        }
+
+        private function refreshValues():void {
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
+            ProgressAlert.alert(this, "Retrieving KPI values...", null, scorecardService.getValues);
+            scorecardService.getValues.send(scorecard, metadata);
+        }
+
+        private function gotValues():void {
+            var results:ScorecardResults = scorecardService.getValues.lastResult as ScorecardResults;
+
+            if (results.reportFault != null) {
+                results.reportFault.popup(this, onProblem);
+            }
+            var outcomes:ArrayCollection = results.outcomes;
+            for each (var outcome:KPIOutcome in outcomes) {
+                for each (var kpi:KPI in kpis) {
+                    if (outcome.kpiName == kpi.name) {
+                        kpi.kpiOutcome = outcome;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private function onProblem(event:ProblemDataEvent):void {
+            refreshValues();
+        }
+
+
+
+        private function onKPIChange(event:CollectionEvent):void {
+            invalidateSize();
+        }
+
+        protected override function measure():void {
+            super.measure();
+            if (kpis != null) {
+                if (adminGrid != null) {
+                    adminGrid.verticalScrollPolicy = "off";
+                    adminGrid.height = adminGrid.measureHeightOfItems(0, kpis.length) + adminGrid.headerHeight + 4;
+                }
+            }
+        }
+
+        private function addKPI():void {
+            var kpiWindow:KPIParentWindow = new KPIParentWindow();
+            kpiWindow.scorecardID = scorecard.scorecardID;
+            kpiWindow.dataSourceID = _startDataSourceID;
+            kpiWindow.addEventListener(KPIEvent.KPI_EDITED, addedKPI, false, 0, true);
+            PopUpManager.addPopUp(kpiWindow, this, true);
+            PopUpUtil.centerPopUpWithY(kpiWindow, 20);
+        }
+
+        private function addedKPI(event:KPIEvent):void {
+            kpis.addItem(event.kpi);
+            scorecardChanged = true;
+            refreshValues();
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="scorecardService" destination="scorecardService">
+        <mx:method name="getScorecard" result="gotScorecard()"/>
+        <mx:method name="getValues" result="gotValues()"/>
+    </mx:RemoteObject>
+
+    <mx:VBox height="100%" width="1000" verticalGap="20" horizontalAlign="center">
+        <mx:HBox width="100%" paddingLeft="15" paddingTop="15">
+            <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()"
+                       toolTip="Close" label="Close Editor" labelPlacement="right"/>
+            <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+                       toolTip="Save" label="Save Scorecard" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" click="refreshValues()"
+                       toolTip="Refresh the Scorecard" label="Refresh" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewScorecard()"
+                       toolTip="View Scorecard" label="View Scorecard" labelPlacement="right"/>
+            <mx:Button label="Add KPI..." click="addKPI()" icon="@Embed(source='../../../../assets/add.png')"/>
+        </mx:HBox>
+        <mx:HRule width="100%"/>
+        <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="970" id="adminGrid">
+            <mx:columns>
+                <util:EIDataGridColumn headerText="" dataField="name"
+                                       itemRenderer="{kpiIconFactory}" width="50"
+                                       sortable="false"/>
+                <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
+                <util:EIDataGridColumn headerText="Latest Value" dataField="name"
+                                       itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
+                <util:EIDataGridColumn headerText="" dataField="name"
+                                       itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
+                                       sortable="false"/>
+                <util:EIDataGridColumn headerText="Time" dataField="name"
+                                       itemRenderer="com.easyinsight.scorecard.KPITimeRenderer" width="100"/>
+                <util:EIDataGridColumn headerText="% Change" dataField="name"
+                                       itemRenderer="com.easyinsight.scorecard.KPIChangeRenderer" width="110"/>
+                <util:EIDataGridColumn headerText="" dataField="name" sortable="false"
+                                       itemRenderer="{controlFactory}" width="150"/>
+            </mx:columns>
+        </mx:DataGrid>
+    </mx:VBox>
+</skin:BackgroundImage>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%"
-           height="100%" creationComplete="gotFocus()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%"
+           height="100%" creationComplete="gotFocus()" styleName="basePageVBox">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.preferences.Persona;
@@ -118,48 +118,40 @@
         <mx:method name="getPersonas" result="gotPersonas()"/>
     </mx:RemoteObject>
     <account:PersonaComboBoxFactory id="personaFactory" personas="{personas}"/>
-    <mx:VBox width="100%" height="100%" horizontalAlign="center">
-        <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
-                paddingTop="5"
-                paddingBottom="5">
-            <mx:Label text="User Administration" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
-        </mx:Box>
-        <mx:ViewStack selectedIndex="{changesIndex}" resizeToContent="true">
-            <mx:Box/>
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:HBox verticalAlign="middle" backgroundColor="#DDDDDD" cornerRadius="5" borderStyle="solid" borderColor="#DDDDDD" borderThickness="1"
-                        paddingLeft="10" paddingTop="5" paddingBottom="5" paddingRight="10">
-                    <mx:Label text="You have unsaved changes:"/>
-                    <mx:Button label="Save Changes" click="saveChanges()"/>
-                </mx:HBox>
+    <mx:Box width="100%" styleName="bannerBackground">
+        <mx:Label text="User Administration" styleName="bannerText"/>
+    </mx:Box>
+    <mx:ViewStack selectedIndex="{changesIndex}" resizeToContent="true">
+        <mx:Box/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:HBox verticalAlign="middle" backgroundColor="#DDDDDD" cornerRadius="5" borderStyle="solid" borderColor="#DDDDDD" borderThickness="1"
+                    paddingLeft="10" paddingTop="5" paddingBottom="5" paddingRight="10">
+                <mx:Label text="You have unsaved changes:"/>
+                <mx:Button label="Save Changes" click="saveChanges()"/>
             </mx:HBox>
-        </mx:ViewStack>
-        <mx:VBox>
-            <mx:Form paddingTop="5" paddingLeft="5">
-                <mx:FormItem label="Account Users Used: " direction="horizontal">
-                    <mx:Label text="{usersUsedString}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    <mx:Label text=" / "/>
-                    <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                </mx:FormItem>
-            </mx:Form>
-            <mx:HBox width="100%">
-                <mx:Button label="Add User..." click="addUser()" enabled="{enableAdd}" fontSize="14" styleName="grayButton"/>
-            </mx:HBox>
+        </mx:HBox>
+    </mx:ViewStack>
+    <mx:HBox horizontalAlign="center" verticalAlign="middle">
+        <mx:Label text="Account Users:"/>
+        <mx:Label text="{usersUsedString}" fontFamily="Lucida Grande" fontWeight="normal"/>
+        <mx:Label text=" / "/>
+        <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal"/>
+        <mx:Spacer width="30"/>
+        <mx:Button label="Add User..." click="addUser()" enabled="{enableAdd}" fontSize="14" styleName="grayButton"/>
+    </mx:HBox>
 
-            <mx:DataGrid dataProvider="{users}" width="100%" rowHeight="28">
-                <mx:columns>
-                    <mx:DataGridColumn dataField="userName" headerText="User Name"
-                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <mx:DataGridColumn dataField="firstName" headerText="First Name"
-                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <mx:DataGridColumn dataField="name" headerText="Last Name"
-                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <mx:DataGridColumn dataField="userName" width="150" headerText=""
-                                       itemRenderer="{personaFactory}"/>
-                    <mx:DataGridColumn dataField="userName" width="100" headerText=""
-                                       itemRenderer="{userButtonFactory}" sortable="false"/>
-                </mx:columns>
-            </mx:DataGrid>
-        </mx:VBox>
-    </mx:VBox>
-</mx:Canvas>
+    <mx:DataGrid dataProvider="{users}" rowHeight="28">
+        <mx:columns>
+            <mx:DataGridColumn dataField="userName" headerText="User Name"
+                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
+            <mx:DataGridColumn dataField="firstName" headerText="First Name"
+                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
+            <mx:DataGridColumn dataField="name" headerText="Last Name"
+                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="200"/>
+            <mx:DataGridColumn dataField="userName" width="150" headerText=""
+                               itemRenderer="{personaFactory}"/>
+            <mx:DataGridColumn dataField="userName" width="100" headerText=""
+                               itemRenderer="{userButtonFactory}" sortable="false"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

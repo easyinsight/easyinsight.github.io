@@ -9,12 +9,12 @@ import com.easyinsight.dashboard.DashboardView;
 import com.easyinsight.etl.LookupTableEditor;
 import com.easyinsight.feedassembly.NewCompositeFeedWorkspace;
 import com.easyinsight.genredata.Exchange;
-import com.easyinsight.groups.GroupsSummary;
 import com.easyinsight.listing.MyData;
 import com.easyinsight.listing.SimpleIntro;
 import com.easyinsight.report.ReportView;
 import com.easyinsight.schedule.ScheduleManagement;
-import com.easyinsight.scorecard.ScorecardHome;
+import com.easyinsight.scorecard.ScorecardEditor;
+import com.easyinsight.scorecard.ScorecardView;
 import com.easyinsight.solutions.PostInstallPage;
 import com.easyinsight.solutions.RevisedSolutionSummary;
 
@@ -58,18 +58,15 @@ public class PerspectiveFactory implements IPerspectiveFactory {
             case PerspectiveInfo.HOME_PAGE:
                 perspective = new DirectUIComponent(new SimpleIntro());
                 break;
-            case PerspectiveInfo.SCORECARDS:
+            /*case PerspectiveInfo.SCORECARDS:
                 perspective = new DirectUIComponent(new ScorecardHome());
-                break;
+                break;*/
             case PerspectiveInfo.MY_DATA:
                 perspective = new DirectUIComponent(new MyData());
                 break;
             /*case PerspectiveInfo.API:
                 perspective = new DirectUIComponent(new APIPage());
                 break;*/
-            case PerspectiveInfo.GROUPS:
-                perspective = new DirectUIComponent(new GroupsSummary());
-                break;
             case PerspectiveInfo.EXCHANGE:
                 perspective = new DirectUIComponent(new Exchange());
                 break;
@@ -81,9 +78,6 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.CONNECTIONS:
                 perspective = new DirectUIComponent(new RevisedSolutionSummary());
-                break;
-            case PerspectiveInfo.GROUP_DETAIL:
-                perspective = new ModuleUIComponent("GroupDetail", "Loading the group detail information...");
                 break;
             case PerspectiveInfo.CONNECTION_DETAIL:
                 perspective = new ModuleUIComponent("ConnectionDetail", "Loading the connection information...");
@@ -102,6 +96,12 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 break;
             case PerspectiveInfo.SCHEDULING:
                 perspective = new DirectUIComponent(new ScheduleManagement());
+                break;
+            case PerspectiveInfo.SCORECARD_EDITOR:
+                perspective = new DirectUIComponent(new ScorecardEditor());
+                break;
+            case PerspectiveInfo.SCORECARD_VIEW:
+                perspective = new DirectUIComponent(new ScorecardView());
                 break;
         }
         return perspective;

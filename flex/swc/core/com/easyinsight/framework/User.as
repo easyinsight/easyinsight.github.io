@@ -41,6 +41,7 @@ public class User extends EventDispatcher
     public var scenario:Scenario;
     public var apiKey:String;
     public var apiSecretKey:String;
+    public var newsletterEnabled:Boolean;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -114,6 +115,7 @@ public class User extends EventDispatcher
         _user.applicationSkin = response.applicationSkin;
         _user.apiKey = response.apiKey;
         _user.apiSecretKey = response.apiSecretKey;
+        _user.newsletterEnabled = response.newsletterEnabled;
         _user.guestUser = response.guestUser;
         if (response.uiSettings != null) {
             _user.uiConfiguration = UIConfiguration.fromUISettings(response.uiSettings);

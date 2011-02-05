@@ -11,9 +11,11 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.scorecard.ScorecardResults;
+import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
-import com.easyinsight.scorecard.ScorecardWrapper;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.ListDataResults;
@@ -742,8 +744,16 @@ public class ExportService {
 
     public static String exportScorecard(long scorecardID, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws Exception {
         SecurityUtil.authorizeScorecard(scorecardID);
-        ScorecardWrapper scorecardWrapper = new ScorecardStorage().getScorecard(scorecardID, conn, insightRequestMetadata, false);
-        Scorecard scorecard = scorecardWrapper.getScorecard();
+        Scorecard scorecard = new ScorecardStorage().getScorecard(scorecardID, conn);
+        List<KPIOutcome> outcomes = new ScorecardService().getValues(scorecard.getKpis(), conn, insightRequestMetadata);
+        for (KPI kpi : scorecard.getKpis()) {
+            for (KPIOutcome outcome : outcomes) {
+                if (kpi.getName().equals(outcome.getKpiName())) {
+                    kpi.setKpiOutcome(outcome);
+                    break;
+                }
+            }
+        }
         StringBuilder sb = new StringBuilder();
         String style = "style=\"font-size:12px;font-family:Verdana,serif;border-style:solid;border-width:1px;border-spacing:0\"";
         sb.append("<table " + style + ">");

@@ -160,7 +160,17 @@ public abstract class Feed implements Serializable {
         return ids;
     }
 
-    public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException;
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+        AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
+        WSListDefinition tempList = new WSListDefinition();
+        tempList.setColumns(Arrays.asList(analysisItem));
+        tempList.setDataFeedID(getFeedID());
+        DataSet dataSet = new DataService().listDataSet(tempList, insightRequestMetadata, conn);
+        for (IRow row : dataSet.getRows()) {
+            metadata.addValue(analysisItem, row.getValue(analysisItem.createAggregateKey()), insightRequestMetadata);
+        }
+        return metadata;
+    }
 
     public abstract DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException;
 

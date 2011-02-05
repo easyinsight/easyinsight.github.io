@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.*"
-                        xmlns:kpi="com.easyinsight.kpi.*" xmlns:wizard="com.easyinsight.customupload.wizard.*"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+                        xmlns:kpi="com.easyinsight.kpi.*"
                         xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*" xmlns:account="com.easyinsight.account.*"
                         width="100%" height="100%" implements="com.easyinsight.listing.IPerspective"
         creationComplete="setup()">
@@ -64,14 +64,12 @@
                         kpiTutorialNext="panelIndex++"/>
                 <kpi:TutorialButtons tutorialPanel="{personaPanel}" backEnabled="false"
                                      finishEnabled="false" backVisible="false" nextVisible="false"
-                                     showExpertMode="false"
                                      kpiTutorialCancel="onCancel(event)"/>
             </kpi:TutorialPanel>
             <kpi:TutorialPanel width="100%" height="100%" hideEffect="leftEffect" showEffect="leftEffect">
                 <account:AddUsersPanel id="addUsersPanel" setupData="{setupData}"/>
                 <kpi:TutorialButtons tutorialPanel="{addUsersPanel}" backEnabled="true" nextEnabled="true"
                                      finishEnabled="true"
-                                     showExpertMode="false"
                                      kpiTutorialNext="panelIndex++"
                                      kpiTutorialPrevious="panelIndex--"
                                      kpiTutorialFinish="onFinish(event)"

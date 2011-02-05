@@ -38,6 +38,7 @@ public class UserServiceResponse
     public var applicationSkin:ApplicationSkinTO;
     public var apiKey:String;
     public var apiSecretKey:String;
+    public var newsletterEnabled:Boolean;
 
     public function UserServiceResponse()
         {

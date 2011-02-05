@@ -1,10 +1,54 @@
 <?xml version="1.0"?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.controls.Button;
         import mx.managers.PopUpManager;
 
         [Bindable]
         public var prompt:String;
+
+        private var options:ArrayCollection = new ArrayCollection();
+
+        public function defineOption(optionName:String, optionEvent:String):void {
+            var o:Object = new Object();
+            o.name = optionName;
+            o.event = optionEvent;
+            options.addItem(o);
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (options.length == 0) {
+                var save:Object = new Object();
+                save.name = "Save";
+                save.event = PromptEvent.PROMPT_SAVE;
+                options.addItem(save);
+                var discard:Object = new Object();
+                discard.name = "Discard Changes";
+                discard.event = PromptEvent.PROMPT_DISCARD;
+                options.addItem(discard);
+                var cancel:Object = new Object();
+                cancel.name = "Cancel";
+                cancel.event = PromptEvent.PROMPT_CANCEL;
+                options.addItem(cancel);
+            }
+            for each (var o:Object in options) {
+                var button:Button = new Button();
+                button.label = o.name;
+                button.styleName = "grayButton";
+                button.setStyle("fontSize", 14);
+                button.addEventListener(MouseEvent.CLICK, createHandler(o.event, this));
+                box.addChild(button);
+            }
+        }
+
+        private function createHandler(type:String, parent:SavePromptWindow):Function {
+            return function(event:MouseEvent):void {
+                    dispatchEvent(new PromptEvent(type));
+                    PopUpManager.removePopUp(parent);
+                };
+        }
 
         private function save():void {
             dispatchEvent(new PromptEvent(PromptEvent.PROMPT_SAVE));
@@ -23,10 +67,6 @@
         ]]></mx:Script>
     <mx:VBox>
         <mx:Label text="{prompt}" fontSize="14"/>
-        <mx:HBox>
-            <mx:Button label="Save" styleName="grayButton" fontSize="14" click="save()"/>
-            <mx:Button label="Discard Changes" styleName="grayButton" fontSize="14" click="discard()"/>
-            <mx:Button label="Cancel" styleName="grayButton" fontSize="14" click="cancel()"/>
-        </mx:HBox>
+        <mx:HBox id="box" horizontalAlign="center"/>
     </mx:VBox>
 </util:EISlimWindow>

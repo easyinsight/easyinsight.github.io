@@ -285,9 +285,9 @@
     <mx:VBox width="1000" height="100%" horizontalAlign="center" paddingTop="5" backgroundColor="#FFFFFF" paddingBottom="10">
         <mx:HBox width="100%" paddingLeft="15">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
-                       toolTip="Close"/>
+                       toolTip="Close" labelPlacement="right" label="Close Editor"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                       toolTip="Save"/>
+                       toolTip="Save" labelPlacement="right" label="Save"/>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Label text="Lookup Table Name: " fontFamily="Tahoma" fontWeight="bold"/>

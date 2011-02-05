@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:range="com.easyinsight.analysis.range.*" width="100%"
-        height="100%"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:range="com.easyinsight.analysis.range.*"
         xmlns:analysis="com.easyinsight.analysis.*"
         creationComplete="initStuff()" creationPolicy="all"
         implements="com.easyinsight.analysis.IAnalysisItemEditor" horizontalAlign="center">
@@ -362,7 +361,7 @@
             </mx:Array>
         </mx:dataProvider>
     </mx:ToggleButtonBar>
-    <mx:Form id="coreForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+    <mx:Form id="coreForm">
         <mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
             <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
         </mx:FormItem>

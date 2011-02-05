@@ -19,14 +19,12 @@ public class LookupTableComponent implements IComponent {
 
     private LookupTable lookupTable;
     private Map<String, Value> lookupMap = new HashMap<String, Value>();
-    private int refs;
 
-    public LookupTableComponent(LookupTable lookupTable, int refs) {
+    public LookupTableComponent(LookupTable lookupTable) {
         this.lookupTable = lookupTable;
         for (LookupPair lookupPair : lookupTable.getLookupPairs()) {
             lookupMap.put(lookupPair.getSourceValue().toString(), lookupPair.getTargetValue());
         }
-        this.refs = refs;
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
@@ -37,9 +35,6 @@ public class LookupTableComponent implements IComponent {
                 targetValue = new EmptyValue();
             }
             row.addValue(lookupTable.getTargetField().createAggregateKey(), targetValue);
-        }
-        if (pipelineData.decreaseReferenceCount(lookupTable.getSourceField(), refs)) {
-            pipelineData.getReportItems().remove(lookupTable.getSourceField());
         }
         return dataSet;
     }

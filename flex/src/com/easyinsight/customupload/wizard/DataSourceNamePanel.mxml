@@ -8,9 +8,11 @@
         private var validators:Array;
 
         public var dataSourceName:String = "";
+        public var accountVisible:Boolean = false;
         
         public function saveValues():void {
             dataSourceName = dsNameInput.text;
+            accountVisible = shareCheckbox.selected;
         }
 
         public function validate():Boolean {
@@ -27,6 +29,9 @@
         public function gotFocus():void {
         }]]></mx:Script>
     <mx:Label text="What do you want to name this data source?" fontSize="20"/>
-    <mx:TextInput id="dsNameInput" fontSize="20" width="400"/>
+    <mx:TextInput id="dsNameInput" fontSize="22" width="400"/>
+    <mx:Spacer height="50"/>
+    <mx:Label text="Should this data source be visible to all users in the account?" fontSize="22"/>
+    <mx:CheckBox id="shareCheckbox" fontSize="20" selected="true" label="Visible to All Users"/>
     <mx:StringValidator id="nameValidator" minLength="3" maxLength="30" property="text" source="{dsNameInput}"/>
 </mx:VBox>

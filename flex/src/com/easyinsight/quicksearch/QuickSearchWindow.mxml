@@ -21,6 +21,10 @@
         private var reportIcon:Class;
 
         [Bindable]
+        [Embed(source="../../../../assets/arrow2_up_green.png")]
+        private var scorecardIcon:Class;
+
+        [Bindable]
         [Embed(source="../../../../assets/data_blue_x16.png")]
         private var dataSourceIcon:Class;
 
@@ -64,6 +68,8 @@
                         descriptor.icon = goalTreeIcon;
                     } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
                         descriptor.icon = dashboardIcon;
+                    } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
+                        descriptor.icon = scorecardIcon;
                     } else {
                         descriptor.icon = reportIcon;
                     }
@@ -115,6 +121,8 @@
                     descriptor.icon = goalTreeIcon;
                 } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
                     descriptor.icon = dashboardIcon;
+                } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
+                    descriptor.icon = scorecardIcon;
                 } else {
                     descriptor.icon = reportIcon;
                 }

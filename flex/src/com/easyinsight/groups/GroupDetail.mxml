@@ -1,29 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
-         xmlns:scorecards="com.easyinsight.scorecard.*" width="100%"
-         height="100%"
-         implements="com.easyinsight.listing.IPerspective"
-         xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*"
-         creationComplete="setup()" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+                    width="100%"
+                    height="100%"
+                    xmlns:groups="com.easyinsight.groups.*"
+                    creationComplete="setup()"
+                    xmlns:util="com.easyinsight.util.*">
     <mx:Script>
 		<![CDATA[
-
         import com.easyinsight.listing.DeleteDataSourceEvent;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
         import mx.events.CloseEvent;
-        import mx.managers.BrowserManager;
 
 
         import com.easyinsight.framework.User;
 
         import mx.collections.ArrayCollection;
 
-        import com.easyinsight.framework.NavigationEvent;
-
-        import mx.utils.URLUtil;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         public var groupID:int;
@@ -37,34 +33,16 @@
         private var groupName:String;
 
         [Bindable]
-        private var recentChanges:ArrayCollection;
-
-        [Bindable]
-        private var messages:ArrayCollection;
-
-        [Bindable]
         private var recentChangesRowCount:int;
 
         [Bindable]
         private var groupUsers:ArrayCollection;
 
         [Bindable]
-        private var ownerLabel:String = "Group Owner:";
-
-        [Bindable]
         private var adminEnabled:Boolean = false;
 
         [Bindable]
         private var editorEnabled:Boolean = false;
-
-        [Bindable]
-        private var joinEnabled:Boolean = false;
-
-        [Bindable]
-        private var ownerText:String;
-
-        [Bindable]
-        private var numberMembersText:String;
 
         [Bindable]
         private var _group:Group;
@@ -75,6 +53,7 @@
             addEventListener(RemoveItemFromGroupEvent.REMOVE_REPORT_FROM_GROUP, removeFromGroup);
             addEventListener(RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP, removeFromGroup);
             addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
+            gotFocus();
         }
 
         private function onDelete(event:DeleteDataSourceEvent):void {
@@ -106,54 +85,25 @@
             groupData.gotFocus();
         }
 
-        private function backToGroupList():void {
-            User.getEventNotifier().dispatchEvent(new NavigationEvent("Groups"));
-        }
-
         private function gotGroupDetails():void {
             var group:Group = groupService.getGroup.lastResult as Group;
 
-            var fragmentObject:Object = new Object();
-            fragmentObject.groupID = String(group.urlKey);
-            var fragmentString:String = URLUtil.objectToString(fragmentObject);
-            BrowserManager.getInstance().setFragment(fragmentString);
-
-            groupName = group.name;
-            BrowserManager.getInstance().setTitle("Easy Insight - " + group.name);
-
-            var foundUser:Boolean = false;
             for each (var groupUser:GroupUser in group.groupUsers) {
                 if (groupUser.role == GroupUser.OWNER) {
-                    if (groupUser.name == User.getInstance().userName && groupUser.role == 1) {
+                    if (groupUser.userID == User.getInstance().userID && groupUser.role == 1) {
                         editorEnabled = true;
                         adminEnabled = true;
-                    } else if (groupUser.name == User.getInstance().userName && groupUser.role == 2) {
+                    } else if (groupUser.userID == User.getInstance().userID && groupUser.role == 2) {
                         editorEnabled = true;
                     }
                 }
-                if (groupUser.name == User.getInstance().userName) {
-                    foundUser = true;
-                }
             }
 
-            if (!foundUser) {
-                joinEnabled = true;
-            }
-
-            numberMembersText = group.groupUsers.length > 1 ? (group.groupUsers.length + " members") : (group.groupUsers.length + " member");
             this._group = group;
         }
 
         private function groupUpdated(event:GroupCreatedEvent):void {
             gotFocus();
-        }
-
-        private function gotGroupMessages():void {
-            this.messages = groupService.getGroupMessages.lastResult as ArrayCollection;
-        }
-
-        private function addedComment():void {
-            groupService.getGroupMessages.send(_group.groupID);
         }
 
 
@@ -175,51 +125,35 @@
             groupData.gotFocus();
         }
 
-        public function cleanup():void {
-        }
-
         private function blah():void {
             viewStack.selectedIndex = buttonBar.selectedIndex;
         }
-		]]>		
+        ]]>
     </mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService">
         <mx:method name="getGroup" result="gotGroupDetails()"/>
-        <mx:method name="getGroupMessages" result="gotGroupMessages()"/>
-        <mx:method name="addGroupComment" result="addedComment()"/>
         <mx:method name="removeDataSourceFromGroup" result="removed()"/>
         <mx:method name="removeReportFromGroup" result="removed()"/>
         <mx:method name="removeKPITreeFromGroup" result="removed()"/>
     </mx:RemoteObject>
-    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
-    <mx:Canvas width="100%" height="100%">
-        <mx:VBox width="100%" height="100%" verticalGap="0">
-        <mx:Canvas height="50%" width="100%" backgroundColor="#888888"/>
-        <mx:Canvas height="50%" width="100%" backgroundColor="#000000"/>
-        </mx:VBox>
-    <mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
+    <mx:VBox width="800" height="400" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
              paddingBottom="10" horizontalAlign="center">
-        <mx:Label text="{groupName}" fontSize="20" color="#FFFFFF" fontFamily="Tahoma" fontWeight="bold"/>
-        <mx:VBox width="1020" horizontalAlign="center" backgroundColor="#FFFFFF" height="100%" paddingTop="10">
             <mx:ToggleButtonBar id="buttonBar" itemClick="blah()">
                 <mx:dataProvider>
                     <mx:Array>
-                        <mx:String>Scorecards</mx:String>
                         <mx:String>Data Sources and Reports</mx:String>
-                        <mx:String>Info</mx:String>
                         <mx:String>Members</mx:String>
                     </mx:Array>
                 </mx:dataProvider>
             </mx:ToggleButtonBar>
             <mx:ViewStack width="100%" creationPolicy="all"
-                    paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" id="viewStack" height="100%">
-                <scorecards:ScorecardGroupDisplay groupID="{groupID}" label="Scorecards" hideEffect="leftEffect" showEffect="leftEffect"/>
-                <groups:GroupMyData groupID="{groupID}" label="Data Sources and Reports" groupAdmin="{editorEnabled}" id="groupData" hideEffect="leftEffect" showEffect="leftEffect"/>
-                <groups:GroupInfo group="{_group}" label="Info" groupAdmin="{adminEnabled}" hideEffect="leftEffect" showEffect="leftEffect"/>
-                <groups:ManageGroupUsers groupID="{groupID}" id="manageUsers" label="Members" groupAdmin="{adminEnabled}" hideEffect="leftEffect" showEffect="leftEffect"/>
+                          paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" id="viewStack"
+                          height="100%">
+                <groups:GroupMyData groupID="{groupID}" label="Data Sources and Reports"
+                                    groupAdmin="{editorEnabled}" id="groupData"/>
+                <groups:ManageGroupUsers groupID="{groupID}" id="manageUsers" label="Members"
+                                         groupAdmin="{adminEnabled}"/>
             </mx:ViewStack>
-        </mx:VBox>
-
+        <mx:Button styleName="grayButton" click="PopUpManager.removePopUp(this)" label="Close" fontSize="14"/>
     </mx:VBox>
-    </mx:Canvas>
-</mx:Module>
+</util:EISlimWindow>

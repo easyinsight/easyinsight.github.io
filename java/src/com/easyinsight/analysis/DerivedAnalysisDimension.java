@@ -67,6 +67,8 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
 
         analysisItemList.add(this);
 
+        if (!includeFilters) return analysisItemList;
+
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem = null;
             try {

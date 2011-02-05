@@ -468,7 +468,6 @@
                     if (uiConfig.getConfiguration(UIConfiguration.SHOW_DATA_TAB).selected) {
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CALCULATION).selected) reportDataTab.removeCalculationButton();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_HIERARCHY).selected) reportDataTab.removeHierarchy();
-                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_REPORT_EDITOR_API).selected) reportDataTab.removeAPI();
                     } else {
                         tabNavigator.removeChild(reportDataTab);
                     }
@@ -477,7 +476,6 @@
                         transformContainer.removeChild(excludeButton);
                     }
                     if (uiConfig.getConfiguration(UIConfiguration.SHOW_EXPORT).selected) {
-                        if (!uiConfig.getConfiguration(UIConfiguration.SHOW_DLS).selected) exportTab.removeDLS();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_PNG).selected) exportTab.removePNG();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMBED).selected) exportTab.removeEmbed();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_EMAIL).selected) exportTab.removeEmail();
@@ -810,24 +808,26 @@
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
         <mx:HBox verticalAlign="middle" id="controlBar">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
-                       toolTip="Close"/>
+                       toolTip="Close" labelPlacement="right" label="Close Editor"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
-                       toolTip="Save" enabled="{!_previewMode &amp;&amp; !guestMode}"/>
+                       toolTip="Save" enabled="{!_previewMode &amp;&amp; !guestMode}" label="Save"
+                    labelPlacement="right"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
-                       toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !guestMode}"/>
+                       toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !guestMode}" label="Save As"
+                    labelPlacement="right"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="refreshButton" toolTip="Refresh Data"
                        icon="@Embed(source='../../../assets/refresh.png')"
-                       click="dataView.forceRetrieve()"/>
-            <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()"/>
+                       click="dataView.forceRetrieve()" label="Refresh" labelPlacement="right"/>
+            <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()" labelPlacement="right" label="Ad Hoc Mode"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
-                       icon="@Embed(source='../../../assets/table.png')" click="newReport()"/>
+                       icon="@Embed(source='../../../assets/table.png')" click="newReport()" labelPlacement="right" label="New Report"/>
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
-                       toolTip="View Report"/>
+                       toolTip="View Report" label="Report View" labelPlacement="right"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
-                       toolTip="Adminster" visible="{admin}"/>
+                       toolTip="Adminster" visible="{admin}" label="Administer Data Source" labelPlacement="right"/>
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"

@@ -61,6 +61,8 @@ public class DataStorage {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
             } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
             } else {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
             }
@@ -122,6 +124,8 @@ public class DataStorage {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
             } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
             } else {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
             }
@@ -326,7 +330,8 @@ public class DataStorage {
                     newKey = false;
                     if ((newItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !previousItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) ||
                             (newItem.hasType(AnalysisItemTypes.MEASURE) && !previousItem.hasType(AnalysisItemTypes.MEASURE)) ||
-                            (newItem.hasType(AnalysisItemTypes.DIMENSION) && previousItem.hasType(AnalysisItemTypes.MEASURE))) {
+                            (newItem.hasType(AnalysisItemTypes.DIMENSION) && previousItem.hasType(AnalysisItemTypes.MEASURE)) ||
+                            (newItem.hasType(AnalysisItemTypes.TEXT) && !previousItem.hasType(AnalysisItemTypes.TEXT))) {
                         fieldMigrations.add(new FieldMigration(newItem));
                     }
                 }
@@ -363,6 +368,8 @@ public class DataStorage {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                        } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                            keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
                         } else {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
                         }
@@ -476,6 +483,8 @@ public class DataStorage {
                     keys.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                 } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                    keys.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
                 } else {
                     keys.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
                 }
@@ -836,20 +845,20 @@ public class DataStorage {
             }
         } else if (keyMetadata.getType() == Value.NUMBER) {
             Double num = null;
-            if (value.type() == Value.STRING) {
+            if (value.type() == Value.STRING || value.type() == Value.TEXT) {
                 num = NumericValue.produceDoubleValue(value.toString());
             } else if (value.type() == Value.NUMBER) {
                 NumericValue numericValue = (NumericValue) value;
                 num = numericValue.toDouble();
             }
-            if (num == null) {
+            if (num == null || Double.isNaN(num) || Double.isInfinite(num)) {
                 insertStmt.setNull(i++, Types.DOUBLE);
             } else {
                 insertStmt.setDouble(i++, num);
             }
         } else {
             String string = null;
-            if (value.type() == Value.STRING) {
+            if (value.type() == Value.STRING || value.type() == Value.TEXT) {
                 StringValue stringValue = (StringValue) value;
                 string = stringValue.getValue();
             } else if (value.type() == Value.NUMBER) {
@@ -937,6 +946,8 @@ public class DataStorage {
             column = "k" + key.getKeyID() + " DATETIME, datedim_" + key.getKeyID() + "_id BIGINT(11)";
         } else if (type == Value.NUMBER) {
             column = "k" + key.getKeyID() + " DOUBLE";
+        } else if (type == Value.TEXT) {
+            column = "k" + key.getKeyID() + " TEXT";
         } else {
             column = "k" + key.getKeyID() + " VARCHAR(255)";
         }

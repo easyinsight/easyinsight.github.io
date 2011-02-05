@@ -11,14 +11,11 @@
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.kpi.KPI;
 
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.schedule.DailyScheduleType;
         import com.easyinsight.schedule.DataSourceRefreshActivity;
         import com.easyinsight.scorecard.Scorecard;
-        import com.easyinsight.scorecard.ScorecardList;
-        import com.easyinsight.util.Callout;
 
         import mx.collections.ArrayCollection;
 
@@ -74,24 +71,6 @@
         [Bindable]
         private var stackIndex:int;
 
-        private function esAddToExisting():void {
-            if (added) {
-                stackIndex = 3;
-            } else {
-                enableScorecards = false;
-                esKpiService.installKPIsToScorecard.send(_dataSourceDescriptor.name, _kpis, false);
-            }
-        }
-
-        private function esAddToNew():void {
-            if (added) {
-                stackIndex = 3;
-            } else {
-                enableScorecards = false;
-                esKpiService.installKPIsToScorecard.send(_dataSourceDescriptor.name, _kpis, true);
-            }
-        }
-
         private function addToNew():void {
             if (added) {
                 stackIndex = 3;
@@ -105,14 +84,7 @@
             enableScorecards = true;
             added = true;
             kpiLinkStart();
-            stackIndex = 3;
-        }
-
-        private function esInstalled():void {
-            enableScorecards = true;
-            added = true;
-            kpiLinkStart();
-            stackIndex = 3;
+            stackIndex = 2;
         }
 
         private function backFromLast():void {
@@ -121,22 +93,8 @@
 
         private function kpiLinkStart():void {
             //linksEnabled = true;
-            callout = scorecardRenderer.firstRenderer(_kpis.getItemAt(0) as KPI);
+            //callout = scorecardRenderer.firstRenderer(_kpis.getItemAt(0) as KPI);
 
-        }
-
-        private function gotScorecards():void {
-            enableGetScorecards = true;
-            var scorecardList:ScorecardList = scorecardService.getScorecardDescriptors.lastResult as ScorecardList;
-            if (scorecardList.scorecardDescriptors.length == 0) {
-                userHasKPIs = false;
-                backIndex = 1;
-                stackIndex = 1;
-            } else {
-                userHasKPIs = true;
-                backIndex = 2;
-                stackIndex = 2;
-            }
         }
 
         private function done():void {
@@ -145,14 +103,7 @@
 
         private function kpiLinkBack():void {
             linksEnabled = false;
-            if (callout != null) {
-                callout.hide();
-                scorecardRenderer.clearRenderer();
-                callout = null;
-            }
         }
-
-        private var callout:Callout;
 
         private var userHasKPIs:Boolean = false;
 
@@ -263,12 +214,6 @@
     <mx:RemoteObject id="kpiService" destination="kpiService">
         <mx:method name="installKPIsToScorecard" result="installed()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject id="esKpiService" destination="kpiService">
-        <mx:method name="installKPIsToScorecard" result="esInstalled()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="scorecardService" destination="scorecardService">
-        <mx:method name="getScorecardDescriptors" result="gotScorecards()"/>
-    </mx:RemoteObject>
     <mx:RemoteObject id="solutionService" destination="solutionService">
         <mx:method name="addKPIData" result="addedKPIData()"/>
     </mx:RemoteObject>
@@ -318,8 +263,7 @@
             </mx:VBox>
             <mx:VBox width="1000" height="100%" verticalGap="0">
                 <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle">
-                    <scorecard:ScorecardRenderer scorecard="{scorecard}" contextMenuAvailable="{linksEnabled}"
-                                                 id="scorecardRenderer"/>
+                    <scorecard:ScorecardGrid scorecard="{scorecard}" id="scorecardRenderer"/>
                 </mx:Box>
                 <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle">
                     <mx:ViewStack width="100%" selectedIndex="{stackIndex}">
@@ -332,7 +276,7 @@
                             <mx:HBox>
                                 <mx:Button label="Back" fontSize="24" click="topIndex = 0"/>
                                 <mx:Button label="Next" fontSize="24" enabled="{enableGetScorecards}"
-                                           click="enableGetScorecards = false; scorecardService.getScorecardDescriptors.send(false)"/>
+                                           click="enableGetScorecards = false; stackIndex = 1"/>
                             </mx:HBox>
                         </mx:VBox>
                         <mx:VBox width="100%" horizontalAlign="center" data="1">
@@ -344,19 +288,6 @@
                             <mx:HBox>
                                 <mx:Button label="Back" fontSize="24" click="stackIndex = 0"/>
                                 <mx:Button label="Next" fontSize="24" click="addToNew()" enabled="{enableScorecards}"/>
-                            </mx:HBox>
-                        </mx:VBox>
-                        <mx:VBox width="100%" horizontalAlign="center" data="2">
-                            <mx:TextArea
-                                    text="You already have a scorecard defined, so we can add these KPIs to that existing scorecard, add them to a new scorecard, or just skip them entirely."
-                                    editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24"
-                                    height="200"
-                                    color="#FFFFFF"/>
-                            <mx:HBox>
-                                <mx:Button label="Back" fontSize="24" click="stackIndex = 0"/>
-                                <mx:Button label="Add to Existing Scorecard" fontSize="24" click="esAddToExisting()"  enabled="{enableScorecards}"/>
-                                <mx:Button label="Add to New Scorecard" fontSize="24" click="esAddToNew()"  enabled="{enableScorecards}"/>
-                                <mx:Button label="Just Skip Them" fontSize="24" click="kpiLinkStart(); stackIndex = 3"/>
                             </mx:HBox>
                         </mx:VBox>
                         <mx:VBox width="100%" horizontalAlign="center" data="6">

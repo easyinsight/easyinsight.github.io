@@ -3,7 +3,6 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
-import mx.containers.Box;
 import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.controls.Button;
@@ -75,20 +74,6 @@ public class TutorialButtons extends Canvas {
         dispatchEvent(new Event("nextVisibleChanged"));
     }
 
-    private var _showExpertMode:Boolean = true;
-
-
-    [Bindable(event="showExpertModeChanged")]
-    public function get showExpertMode():Boolean {
-        return _showExpertMode;
-    }
-
-    public function set showExpertMode(value:Boolean):void {
-        if (_showExpertMode == value) return;
-        _showExpertMode = value;
-        dispatchEvent(new Event("showExpertModeChanged"));
-    }
-
     private var _tutorialPanel:ITutorialPanel;
 
     public function set tutorialPanel(value:ITutorialPanel):void {
@@ -117,13 +102,9 @@ public class TutorialButtons extends Canvas {
         dispatchEvent(new KPITutorialEvent(KPITutorialEvent.CANCEL));
     }
 
-    private function expertMode(event:MouseEvent):void {
-        dispatchEvent(new KPIModeEvent(KPIModeEvent.EXPERT_MODE));
-    }
-
     protected override function createChildren():void {
         super.createChildren();
-        var expertBox:Box = new Box();
+        /*var expertBox:Box = new Box();
         var expertButton:Button = new Button();
         expertButton.label = "Expert Mode";
         expertButton.setStyle("fontSize", 14);
@@ -132,7 +113,7 @@ public class TutorialButtons extends Canvas {
         expertBox.setStyle("paddingLeft", 8);
         expertBox.addChild(expertButton);
         BindingUtils.bindProperty(expertButton, "visible", this, "showExpertMode");
-        addChild(expertBox);
+        addChild(expertBox);*/
         var hbox:HBox = new HBox();
         hbox.percentWidth = 100;
         hbox.setStyle("horizontalAlign", "center");

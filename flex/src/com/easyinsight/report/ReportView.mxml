@@ -11,6 +11,9 @@
     <skin:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{topDisplay}"/>
+            <mx:AddChild relativeTo="{topLevelVBox}" position="0">
+                <mx:Button label="Close Full Screen" click="currentState=''"/>
+            </mx:AddChild>
         </mx:State>
     </skin:states>
     <mx:Script><![CDATA[
@@ -83,7 +86,7 @@
             var window:ReportExportWindow = new ReportExportWindow();
             window.report = viewFactory.report;
             window.coreView = viewFactory.getChildAt(0);
-            PopUpManager.addPopUp(window, this);
+            PopUpManager.addPopUp(window, this, true);
             window.x = exportButton.x - 20;
             window.y = exportButton.y + exportButton.height + 10;
         }
@@ -475,8 +478,6 @@
         }
 
         private function toFullScreen():void {
-            addEventListener(KeyboardEvent.KEY_UP, onKey);
-            Application.application.stage.displayState = StageDisplayState.FULL_SCREEN;
             currentState = "FullScreen";
         }
 
@@ -712,7 +713,7 @@
 
         ]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
-                      direction="vertical">
+                      direction="vertical" id="topLevelVBox">
     <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF">
         <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5">
             <mx:ViewStack resizeToContent="true">
@@ -740,7 +741,7 @@
                                    labelPlacement="bottom" id="editReportButton"
                                    toolTip="Open this report in the report editor..."/>
                         <mx:Spacer width="100%"/>
-                        <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350"
+                        <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="450"
                                   fontSize="14"/>
                         <mx:Spacer width="100%"/>
                     </mx:HBox>

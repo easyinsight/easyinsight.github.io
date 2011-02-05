@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.EmbedReportWindow;
@@ -96,18 +96,34 @@
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5" horizontalAlign="center">
-        <mx:Label text="Click any of the options below to export the report:"/>
-        <mx:HBox>
-            <mx:Button icon="@Embed(source='../../../../assets/table.png')" label="Excel" click="excel()" labelPlacement="right"/>
-            <mx:Button icon="@Embed(source='../../../../assets/document_chart.png')" label="PDF" click="pdf()" labelPlacement="right"/>
-            <mx:Button icon="@Embed(source='../../../../assets/mail.png')" label="Email" click="email()" labelPlacement="right"/>
-            <mx:Button icon="@Embed(source='../../../../assets/camera.png')" label="PNG" click="png()" labelPlacement="right"/>
-            <mx:Button icon="@Embed(source='../../../../assets/link.png')" label="Link" click="url()" labelPlacement="right"/>
-            <mx:Button icon="@Embed(source='../../../../assets/plasma_tv.png')" label="Embed" click="embed()" labelPlacement="right"/>
-        </mx:HBox>
+    <mx:VBox paddingTop="10" paddingLeft="10" paddingBottom="10" paddingRight="10" horizontalAlign="center">
+        <mx:Label text="Click any of the options below to export the report:" fontSize="14"/>
+        <mx:Grid>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/table.png')" label="Export to Excel" click="excel()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/document_chart.png')" label="Export to PDF" click="pdf()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/camera.png')" label="Export to PNG" click="png()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+            </mx:GridRow>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/mail.png')" label="Email Scheduling" click="email()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/link.png')" label="Link by URL" click="url()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/plasma_tv.png')" label="Embed Report into Website" click="embed()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+            </mx:GridRow>
+        </mx:Grid>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+            <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
-</util:EITitleWindow>
+</util:EISlimWindow>

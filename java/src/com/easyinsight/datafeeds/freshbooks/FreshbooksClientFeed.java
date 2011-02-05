@@ -19,18 +19,6 @@ public class FreshbooksClientFeed extends FreshbooksFeed {
     public FreshbooksClientFeed(String url, String tokenKey, String tokenSecretKey, FreshbooksCompositeSource parentSource) {
         super(url, tokenKey, tokenSecretKey);
     }
-
-    @Override
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
-        AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
-        Set<AnalysisItem> set = new HashSet<AnalysisItem>();
-        set.add(analysisItem);
-        DataSet dataSet = getAggregateDataSet(set, new ArrayList<FilterDefinition>(), insightRequestMetadata, null, false, conn);
-        for (IRow row : dataSet.getRows()) {
-            metadata.addValue(analysisItem, row.getValue(analysisItem.createAggregateKey()), insightRequestMetadata);
-        }
-        return metadata;
-    }
     
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {

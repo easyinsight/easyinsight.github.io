@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" keyDown="submitted(event)" creationComplete="onCreationComplete()" xmlns:yahoo="http://www.yahoo.com/astra/2006/mxml">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" keyDown="submitted(event)" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
@@ -38,7 +38,7 @@
 
         public function set includeUser(value:Boolean):void {
             _includeUser = value;
-        }	
+        }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject id="shareService" destination="share">
@@ -51,11 +51,10 @@
                 <mx:ComboBox id="userIDInput" dataProvider="{userStubs}" labelField="displayName"/>				
 			</mx:FormItem>		
 			<mx:FormItem label="" direction="horizontal">
-				<mx:Button label="Add" click="save()"/>
-				<mx:Button label="Cancel" click="cancel()"/>
+				<util:SaveButton label="Add" click="save()"/>
+				<util:CancelButton label="Cancel" click="cancel()"/>
 			</mx:FormItem>
-			<mx:FormItem label="Could not find that user." id="failureMessage" visible="false"/>
 		</mx:Form>
 	</mx:VBox>	
 	<mx:StringValidator source="{userIDInput}" property="text" minLength="0"/>
-</util:EITitleWindow>
+</util:EISlimWindow>

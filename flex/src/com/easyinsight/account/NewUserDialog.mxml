@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initHandlers()">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initHandlers()">
 	<mx:Metadata>
 		[Event(name="refreshAccount", type="com.easyinsight.account.RefreshAccountEvent")]
 	</mx:Metadata>
@@ -11,6 +11,7 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.validators.Validator;
         import mx.managers.PopUpManager;
 
@@ -28,6 +29,8 @@
         private var userTitle:String;
         [Bindable]
         private var accountAdmin:Boolean;
+        [Bindable]
+        private var newsletterSelected:Boolean;
         private var userID:int;
 
         [Bindable]
@@ -41,6 +44,7 @@
             this.accountAdmin = userTransferObject.accountAdmin;
             this.firstName = userTransferObject.firstName;
             this.personaID = userTransferObject.personaID;
+            this.newsletterSelected = userTransferObject.optInEmail;
             createLabel = "Update User";
         }
 
@@ -50,7 +54,7 @@
                 dispatchEvent(new RefreshAccountEvent());
                 PopUpManager.removePopUp(this);
             } else {
-                failureMessageLabel.text = userCreationResponse.failureMessage;
+                Alert.show(userCreationResponse.failureMessage);
             }
         }
 
@@ -70,9 +74,8 @@
         private function save():void {
             var results:Array = Validator.validateAll(validators);
             if (results.length > 0) {
-                failureMessageLabel.text = "There are one or more problems with the fields above.";
+                Alert.show("There are one or more problems with the user information you specified.");
             } else {
-                failureMessageLabel.text = "";
                 var user:UserTransferObject = new UserTransferObject();
                 user.userID = userID;
                 user.email = emailInput.text;
@@ -86,8 +89,6 @@
                     }
                 }
                 user.accountAdmin = accountAdminCheckbox.selected;
-                /*user.insightCreator = insightCreatorCheckbox.selected;
-                 user.dataSourceCreator = dataSourceCreatorCheckbox.selected;*/
                 if (userID == 0) {
                     ProgressAlert.alert(this, "Adding user to account...", null, creationService.addUserToAccount);
                     creationService.addUserToAccount.send(user);
@@ -121,21 +122,24 @@
     <mx:RemoteObject destination="preferencesService" id="preferencesService">
         <mx:method name="getPersonas" result="gotPersonas()"/>
     </mx:RemoteObject>
-	<mx:Form styleName="TitleWindowContents">
+	<mx:Form>
 		<mx:FormItem label="User ID:" direction="horizontal">
-			<mx:TextInput id="userNameInput" text="{userName}"/>
+			<mx:TextInput id="userNameInput" text="{userName}" width="400"/>
 		</mx:FormItem>
         <mx:FormItem label="First Name:" direction="horizontal">
-			<mx:TextInput id="firstNameInput" text="{firstName}"/>
+			<mx:TextInput id="firstNameInput" text="{firstName}" width="400"/>
 		</mx:FormItem>
 		<mx:FormItem label="Last Name:" direction="horizontal">
-			<mx:TextInput id="fullNameInput" text="{fullName}"/>
+			<mx:TextInput id="fullNameInput" text="{fullName}" width="400"/>
 		</mx:FormItem>
 		<mx:FormItem label="Email Address:" direction="horizontal">
-			<mx:TextInput id="emailInput" text="{email}"/>
+			<mx:TextInput id="emailInput" text="{email}" width="400"/>
 		</mx:FormItem>
-        <mx:FormItem label="Account Administrator">
+        <mx:FormItem label="Account Administrator:">
             <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Send Newsletter to User:">
+            <mx:CheckBox id="newsletterCheckbox" selected="{newsletterSelected}"/>
         </mx:FormItem>
         <mx:FormItem label="Persona" visible="{showPersonaOption}">
             <util:PersonaItemComboBox dataProvider="{personas}" labelField="name" id="personaComboBox" selectedProperty="personaID"
@@ -143,12 +147,9 @@
         </mx:FormItem>
     </mx:Form>
     <mx:HBox width="100%" horizontalAlign="center">
-        <mx:Button label="{createLabel}" click="save()"/>
-        <mx:Button label="Cancel" click="cancel()"/>
+        <util:SaveButton label="{createLabel}" click="save()"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
     </mx:HBox>
-    <mx:Box width="100%" horizontalAlign="center">
-        <mx:Text text="" id="failureMessageLabel" fontSize="14"/>
-    </mx:Box>
 	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
 	<mx:StringValidator source="{fullNameInput}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
 	<mx:EmailValidator source="{emailInput}" property="text" id="emailValidator"/>
@@ -156,4 +157,4 @@
 		<mx:method name="addUserToAccount" result="created()"/>		
 		<mx:method name="updateUser" result="updated()"/>
 	</mx:RemoteObject>
-</util:EITitleWindow>
+</util:EISlimWindow>

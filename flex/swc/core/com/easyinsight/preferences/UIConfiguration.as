@@ -41,6 +41,8 @@ public class UIConfiguration {
     public static const SHOW_KPI_TREE_ADD:String = "SHOW_KPI_TREE_ADD";
     public static const SHOW_REFRESH_DATA:String = "SHOW_REFRESH_DATA";
     public static const SHOW_SCORECARD_CONTROLS:String = "SHOW_SCORECARD_CONTROLS";
+    public static const SHOW_CREATE_DASHBOARD:String = "SHOW_CREATE_DASHBOARD";
+    public static const SHOW_CREATE_SCORECARD:String = "SHOW_CREATE_SCORECARD";
 
     public var configMap:Object = new Object();
 
@@ -85,9 +87,9 @@ public class UIConfiguration {
 
     public function getNodes():ArrayCollection {
         var showCombineSources:UIOption = new UIOption(SHOW_COMBINE_SOURCES, "Combine Sources", []);
-        var showCreatePackage:UIOption = new UIOption(SHOW_CREATE_PACKAGE, "Create Package", []);
+        var showCreateDashboard:UIOption = new UIOption(SHOW_CREATE_DASHBOARD, "Create Dashboard", []);
+        var showCreateScorecard:UIOption = new UIOption(SHOW_CREATE_SCORECARD, "Create Scorecard", []);
         var showAdminDataSource:UIOption = new UIOption(SHOW_ADMIN_DATA_SOURCES, "Administer Data Sources", []);
-        var showCopy:UIOption = new UIOption(SHOW_COPY_DATA_SOURCES, "Copy Data Sources", []);
         var showLookupTables:UIOption = new UIOption(SHOW_LOOKUP_TABLE, "Show Lookup Tables", []);
         var showRefreshData:UIOption = new UIOption(SHOW_REFRESH_DATA, "Refresh Data Sources", []);
         var copyData:UIOption = new UIOption(SHOW_COPY_DATA_SOURCES, "Copy Data Sources", []);
@@ -101,7 +103,6 @@ public class UIConfiguration {
         var showCreateCalculation:UIOption = new UIOption(SHOW_CALCULATION, "Create Calculation", []);
         var showCreateHierarchy:UIOption = new UIOption(SHOW_HIERARCHY, "Create Hierarchy", []);
         var showFilterButtons:UIOption = new UIOption(SHOW_FILTER_BUTTONS, "Filter Buttons", []);
-        var scorecardControls:UIOption = new UIOption(SHOW_SCORECARD_CONTROLS, "Scorecard Controls", []);
 
         var showDLS:UIOption = new UIOption(SHOW_DLS, "Data Level Security", []);
         var showEmbed:UIOption = new UIOption(SHOW_EMBED, "Embed Report HTML", []);
@@ -113,22 +114,15 @@ public class UIConfiguration {
         var showConnections:UIOption = new UIOption(SHOW_CONNECTIONS, "Connections", []);
         var showExchange:UIOption = new UIOption(SHOW_EXCHANGE, "Exchange", []);
         var showAccount:UIOption = new UIOption(SHOW_ACCOUNT, "Account", []);
-        var showAPI:UIOption = new UIOption(SHOW_APIS, "API", []);
-        var showGroups:UIOption = new UIOption(SHOW_GROUPS, "Groups", []);
         var showMyData:UIOption = new UIOption(SHOW_MY_DATA, "My Data", [
-            showCombineSources, showCreatePackage, showAdminDataSource, copyData, showLookupTables, showRefreshData, deleteData,
+            showCombineSources, showCreateDashboard, showCreateScorecard, showAdminDataSource, copyData, showLookupTables, showRefreshData, deleteData,
                 sizeData, timeData, kpiTreeAdd
         ]);
 
         var headerConfiguration:UIOption = new UIOption(null, "Header Configuration", [
-            showMyData, showConnections, showExchange, showGroups, showAccount, showAPI
+            showMyData, showConnections, showExchange, showAccount
         ]);
 
-        var scorecardConfiguration:UIOption = new UIOption(null, "Scorecard Configuration", [
-            scorecardControls
-        ]);
-
-        var showSharing:UIOption = new UIOption(SHOW_SHARING, "Sharing Tab", []);
 
         var showDataTab:UIOption = new UIOption(SHOW_DATA_TAB, "Data Tab", [ showAPIReportEditorOption, showCreateCalculation,
                 showCreateHierarchy, showTextReplace]);
@@ -139,10 +133,10 @@ public class UIConfiguration {
 
 
         var reportEditorConfiguration:UIOption = new UIOption(null, "Report Editor", [
-            showDataTab, showFilterButtons, showExport, showSharing
+            showDataTab, showFilterButtons, showExport
         ]);
 
-        roots = [ headerConfiguration, reportEditorConfiguration, scorecardConfiguration ];
+        roots = [ headerConfiguration, reportEditorConfiguration ];
 
         return new ArrayCollection(roots);
     }

@@ -59,7 +59,6 @@ public class KPIControls extends HBox {
         setStyle("verticalAlign", "middle");
         this.percentWidth = 100;
         this.percentHeight = 100;
-        
     }
 
     public function set groupID(value:int):void {
@@ -70,18 +69,21 @@ public class KPIControls extends HBox {
         kpiService = new RemoteObject();
         kpiService.destination = "kpiService";
         kpiService.copyKPI.addEventListener(ResultEvent.RESULT, onCopyResult);
-        kpiService.copyKPI.send(kpi, _scorecardID);
+        kpiService.copyKPI.send(kpi);
     }
 
     private function onCopyResult(event:ResultEvent):void {
         var copy:KPI = kpiService.copyKPI.lastResult as KPI;
-        dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, copy));
         var kpiWindow:KPIParentWindow = new KPIParentWindow();
         kpiWindow.scorecardID = _scorecardID;
         kpiWindow.kpi = copy;
-        kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI, false, 0, true);
+        kpiWindow.addEventListener(KPIEvent.KPI_EDITED, copiedKPI, false, 0, true);
         PopUpManager.addPopUp(kpiWindow, this, true);
         PopUpUtil.centerPopUp(kpiWindow);
+    }
+
+    private function copiedKPI(event:KPIEvent):void {
+        dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, event.kpi));
     }
 
     private function onEdit(event:MouseEvent):void {
@@ -99,14 +101,11 @@ public class KPIControls extends HBox {
     }
 
     private function onDelete(event:MouseEvent):void {
-        kpiService = new RemoteObject();
+        dispatchEvent(new KPIEvent(KPIEvent.KPI_REMOVED, kpi));
+        /*kpiService = new RemoteObject();
         kpiService.destination = "scorecardService";
         kpiService.removeKPIFromScorecard.addEventListener(ResultEvent.RESULT, onDeleteResult);
-        kpiService.removeKPIFromScorecard.send(kpi.kpiID, _scorecardID);
-    }
-
-    private function onDeleteResult(event:ResultEvent):void {
-        dispatchEvent(new KPIEvent(KPIEvent.KPI_REMOVED, kpi));
+        kpiService.removeKPIFromScorecard.send(kpi.kpiID, _scorecardID);*/
     }
 
     override public function set data(val:Object):void {

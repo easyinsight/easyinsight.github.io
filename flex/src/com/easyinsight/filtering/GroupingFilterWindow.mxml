@@ -22,10 +22,19 @@
             var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item);
             dispatchEvent(new FilterCreationEvent(comboBoxFilter));
             PopUpManager.removePopUp(this);
-        }        
+        }
+
+        private function addAutoComplete():void {
+            var autoCompleteFilter:AutoCompleteFilter = new AutoCompleteFilter(_feedID, _item);
+            dispatchEvent(new FilterCreationEvent(autoCompleteFilter));
+            PopUpManager.removePopUp(this);
+        }
 
         private var _item:AnalysisItem;
         private var _feedID:int;
+
+        [Bindable]
+        private var stackIndex:int;
 
         public function set feedID(value:int):void {
             _feedID = value;
@@ -36,7 +45,7 @@
         }
 
         ]]></mx:Script>
-    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center">
+    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10">
         <mx:Label text="What type of filter do you want to create?" fontSize="16"/>
         <mx:HBox width="100%">
             <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addComboBox()" mouseChildren="false"
@@ -59,7 +68,14 @@
                         borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
                         textAlign="center"/>
             </mx:VBox>
-            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addPatternMatch()" mouseChildren="false"
+
+        </mx:HBox>
+        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+            <mx:Box>
+                <mx:Button label="Show Me More Types of Filters" click="stackIndex = 1"/>
+            </mx:Box>
+            <mx:HBox>
+                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addPatternMatch()" mouseChildren="false"
                     buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
                     id="patternValueBox"
                     rollOver="patternValueBox.setStyle('backgroundColor', 0xDDDDDD)"
@@ -68,7 +84,19 @@
                 <mx:TextArea text="Restrict this field by text patterns using wildcards or regular expressions"
                         borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
                         textAlign="center"/>
-            </mx:VBox>
-        </mx:HBox>
+                </mx:VBox>
+                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addAutoComplete()" mouseChildren="false"
+                        buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                        id="autoCompleteBox"
+                        rollOver="autoCompleteBox.setStyle('backgroundColor', 0xDDDDDD)"
+                        rollOut="autoCompleteBox.setStyle('backgroundColor', 0xFFFFFF)">
+                    <mx:Label text="Auto Completion" fontSize="14"/>
+                    <mx:TextArea text="Restrict this field to a single value, with an autocompletion text input"
+                            borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
+                            textAlign="center"/>
+                </mx:VBox>
+            </mx:HBox>
+        </mx:ViewStack>
+        <mx:LinkButton label="Cancel" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
     </mx:VBox>
 </mx:Canvas>

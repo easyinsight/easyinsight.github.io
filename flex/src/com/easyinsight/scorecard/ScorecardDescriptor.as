@@ -5,9 +5,7 @@ import com.easyinsight.quicksearch.EIDescriptor;
 [RemoteClass(alias="com.easyinsight.scorecard.ScorecardDescriptor")]
 public class ScorecardDescriptor extends EIDescriptor {
 
-    public var groupID:int;
-    public var groupRole:int;
-    public var groupName:String;
+    public var lastDataTime:Date;
 
     public function ScorecardDescriptor() {
         super();
@@ -15,6 +13,10 @@ public class ScorecardDescriptor extends EIDescriptor {
 
     override public function getType():int {
         return EIDescriptor.SCORECARD;
+    }
+
+    public function get size():int {
+        return 0;
     }
 }
 }

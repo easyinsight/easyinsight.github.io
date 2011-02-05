@@ -23,7 +23,7 @@
             var results:Array = Validator.validateAll([userNameValidator, passwordValidator]);
             if (results.length == 0) {
                 ProgressAlert.alert(this, "Communicating with ClearDB...", null, quickbaseService.createClearDBDataSource);
-                quickbaseService.createClearDBDataSource.send(userNameInput.text, passwordInput.text);
+                quickbaseService.createClearDBDataSource.send(userNameInput.text, passwordInput.text, accountVisibleCheckbox.selected);
             }
         }
 
@@ -50,6 +50,11 @@
             <mx:FormItem label="ClearDB API Key:" direction="horizontal" fontSize="14">
                 <mx:TextInput id="userNameInput" width="400"/>
                 <mx:Label text="Where can I find this?" fontSize="10" textDecoration="underline" toolTip="You'll need to define an API key in the ClearDB user interface with adequate read rules for Easy Insight to perform SHOW TABLES, DESCRIBE, and SELECT operations."/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Form>
+            <mx:FormItem label="Do you want to share this report with other users in the account?" fontSize="14">
+                <mx:CheckBox id="accountVisibleCheckbox" selected="true"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

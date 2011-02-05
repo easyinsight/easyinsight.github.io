@@ -21,6 +21,13 @@ public class AnalysisText extends AnalysisDimension {
     @Column(name="html")
     private boolean html;
 
+    public AnalysisText() {
+    }
+
+    public AnalysisText(String key, boolean group) {
+        super(key, group);
+    }
+
     public boolean isHtml() {
         return html;
     }

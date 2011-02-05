@@ -32,7 +32,7 @@ public abstract class DataSourceMigration {
             }
         }
         if (matchedItem != null) {
-            toAnalysisItem.setAnalysisItemID(matchedItem.getAnalysisItemID());
+            toAnalysisItem.setKey(matchedItem.getKey());
             dataSource.getFields().remove(matchedItem);
             dataSource.getFields().add(toAnalysisItem);
         }

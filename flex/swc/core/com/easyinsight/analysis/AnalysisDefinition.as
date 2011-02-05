@@ -60,7 +60,6 @@ import mx.collections.ArrayCollection;
 		public var ratingCount:int;
 		public var ratingAverage:Number = 0;
 		public var addedItems:ArrayCollection;
-		public var rootDefinition:Boolean;
 		public var canSaveDirectly:Boolean;
 		public var visibleAtFeedLevel:Boolean;
         public var outerJoin:Boolean;

@@ -142,9 +142,9 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
             components.add(new FilterComponent(this, filterProcessor));
         }
-        if (beforeAggregation == isApplyBeforeAggregation()) {
+        /*if (beforeAggregation == isApplyBeforeAggregation()) {
             components.add(new FilterPipelineCleanupComponent(this));
-        }
+        }*/
         return components;
     }
 

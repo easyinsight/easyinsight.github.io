@@ -48,6 +48,21 @@ public class GroupService {
         return false;
     }
 
+    public void deleteGroup(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM COMMUNITY_GROUP WHERE COMMUNITY_GROUP_ID = ?");
+            deleteStmt.setLong(1, groupID);
+            deleteStmt.executeUpdate();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public GroupResponse openGroupIfPossible(String groupKey) {
         GroupResponse groupResponse;
         try {
@@ -194,15 +209,6 @@ public class GroupService {
             List<GroupUser> users = groupStorage.getUsersForGroup(groupID);
             group.setGroupUsers(users);
             return group;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<GroupDescriptor> getPublicGroups() {
-        try {
-            return groupStorage.getAllPublicGroups();
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

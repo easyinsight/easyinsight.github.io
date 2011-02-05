@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                      xmlns:discussion="com.easyinsight.discussion.*"
-                      implements="com.easyinsight.listing.IPerspective"
-                      xmlns:groups="com.easyinsight.groups.*"
-                      creationComplete="initListeners()" xmlns:listing="com.easyinsight.listing.*"
-                      xmlns:skin="com.easyinsight.skin.*">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+           implements="com.easyinsight.listing.IPerspective"
+           creationComplete="initListeners()" width="100%" height="100%" styleName="basePageVBox">
     <mx:Script>
 		<![CDATA[
-
         import com.easyinsight.account.Account;
-        import com.easyinsight.framework.PerspectiveInfo;
-        import com.easyinsight.skin.ApplicationSkin;
+        import com.easyinsight.account.AccountInfo;
         import com.easyinsight.util.PopUpUtil;
 
-        import mx.utils.URLUtil;
-        import mx.managers.BrowserManager;
-
-        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
+
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
@@ -29,15 +22,18 @@
         private var showMyGroups:Boolean = false;
 
         private function initListeners():void {
+            addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
+            addEventListener(GroupSelectedEvent.GROUP_DELETE, groupDelete);
+            gotFocus();
         }
 
-        [Embed(source="../../../../assets/background2.JPG")]
-        private var defaultReportBackground:Class;
+        private function groupDelete(event:GroupSelectedEvent):void {
+            ProgressAlert.alert(this, "Deleting group...", null, groupService.deleteGroup);
+            groupService.deleteGroup.send(event.groupID);
+        }
 
-        protected override function commitProperties():void {
-            super.commitProperties();
-            solutionGrid.setStyle("backgroundImage", defaultReportBackground);
-            solutionGrid.setStyle("backgroundSize", ApplicationSkin.instance().reportBackgroundSize);
+        private function deletedGroup():void {
+            groupService.getAccountGroups.send();
         }
 
         private function gotCreate():void {
@@ -51,58 +47,43 @@
         }
 
         public function gotFocus():void {
-            var fragmentObject:Object = new Object();
-            fragmentObject.page = "groups";
-            BrowserManager.getInstance().setTitle("Easy Insight - Groups");
-            var fragmentString:String = URLUtil.objectToString(fragmentObject);
-            BrowserManager.getInstance().setFragment(fragmentString);
             if (User.getInstance().getAccountType() == Account.PERSONAL) {
                 groupAddIndex = 1;
             } else {
                 groupService.canCreateGroup.send();
             }
             stackIndex = 0;
-            groupService.getMemberGroups.send();
+            groupService.getAccountGroups.send();
             //groupService.getPublicGroups.send();
         }
 
-        public function lostFocus():void {
-        }
-
         private function groupSelected(event:GroupSelectedEvent):void {
-            User.getEventNotifier().dispatchEvent(new NavigationEvent(null, new PerspectiveInfo(PerspectiveInfo.GROUP_DETAIL, {groupID : event.groupID})));
+            var window:GroupDetail = new GroupDetail();
+            window.groupID = event.groupID;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
-        private function onNewGroup(event:GroupSelectedEvent):void {
-            if (User.getInstance().getAccountType() == Account.BASIC) {
-                groupAddIndex = 2;
-            }
-            User.getEventNotifier().dispatchEvent(new NavigationEvent(null, new PerspectiveInfo(PerspectiveInfo.GROUP_DETAIL, {groupID : event.groupID})));
-        }
-
-        private function gotMemberGroups():void {
+        private function gotAccountGroups():void {
             stackIndex = 1;
-            this.myGroups = groupService.getMemberGroups.lastResult as ArrayCollection;
+            this.myGroups = groupService.getAccountGroups.lastResult as ArrayCollection;
             showMyGroups = (myGroups.length > 0);
         }
 
-        /*private function gotPublicGroups():void {
-         this.publicGroups = groupService.getPublicGroups.lastResult as ArrayCollection;
-         publicGroupRowCount = this.publicGroups.length;
-         }*/
-
         private function createNewGroup():void {
             var groupWindow:NewGroupWindow = NewGroupWindow(PopUpManager.createPopUp(this, NewGroupWindow, true));
-            groupWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
+            groupWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, onNewGroup, false, 0, true);
             PopUpUtil.centerPopUp(groupWindow);
         }
 
-        /*private function joinPublicGroup():void {
-         var groupJoinWindow:GroupJoinWindow = new GroupJoinWindow();
-         groupJoinWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
-         PopUpManager.addPopUp(groupJoinWindow, this, true);
-         PopUpUtil.centerPopUp(groupJoinWindow);
-         }*/
+        private function onNewGroup(event:GroupSelectedEvent):void {
+            groupService.getAccountGroups.send();
+            groupSelected(event);
+        }
+
+        [Bindable]
+        public var accountInfo:AccountInfo;
+
         public function cleanup():void {
         }
 
@@ -114,11 +95,13 @@
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService">
-        <mx:method name="getMemberGroups" result="gotMemberGroups()"/>
+        <mx:method name="getAccountGroups" result="gotAccountGroups()"/>
         <mx:method name="canCreateGroup" result="gotCreate()"/>
-        <!--<mx:method name="getPublicGroups" result="gotPublicGroups()"/>-->
+        <mx:method name="deleteGroup" result="deletedGroup()"/>
     </mx:RemoteObject>
-    <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Box width="100%" styleName="bannerBackground">
+        <mx:Label text="Group Configuration" styleName="bannerText"/>
+    </mx:Box>
     <mx:ViewStack resizeToContent="true" selectedIndex="{groupAddIndex}">
         <mx:Box/>
         <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
@@ -130,20 +113,15 @@
                       color="#000000"/>
         </mx:Box>
         <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
-            <mx:Button icon="@Embed('../../../../assets/users3_add.png')" label="Create a New Group..."
-                       click="createNewGroup()" labelPlacement="bottom"/>
+            <mx:Button label="Create a New Group..."
+                       click="createNewGroup()" labelPlacement="bottom" styleName="grayButton" fontSize="14"/>
         </mx:Box>
     </mx:ViewStack>
-    <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" id="groupStack"
-                  creationPolicy="all">
-        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-            <mx:ProgressBar indeterminate="{stackIndex == 0}" label="Loading available groups..."/>
-        </mx:Box>
-        <mx:Canvas width="100%" height="100%">
-            <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.groups.GroupView"
-                         dataProvider="{myGroups}" id="solutionGrid"
-                         columnWidth="240" rowHeight="160"/>
-        </mx:Canvas>
-    </mx:ViewStack>
-    </mx:VBox>
-</skin:BackgroundImage>
+    <mx:DataGrid dataProvider="{myGroups}" rowHeight="28">
+        <mx:columns>
+            <util:EIDataGridColumn dataField="name" headerText="Group Name" width="400"/>
+            <util:EIDataGridColumn dataField="name" itemRenderer="com.easyinsight.groups.GroupSummaryActions"
+                    headerText="" sortable="false" width="100"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

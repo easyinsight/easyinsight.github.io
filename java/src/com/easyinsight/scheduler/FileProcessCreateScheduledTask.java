@@ -52,7 +52,7 @@ public class FileProcessCreateScheduledTask {
     @Transient
     private long analysisID;
 
-    public void createFeed(Connection conn, byte[] bytes, UploadFormat uploadFormat, List<AnalysisItem> fields) throws Exception {
+    public void createFeed(Connection conn, byte[] bytes, UploadFormat uploadFormat, List<AnalysisItem> fields, boolean accountVisible) throws Exception {
         DataStorage tableDef = null;
         try {
             PersistableDataSetForm dataSet = uploadFormat.createDataSet(bytes, fields);
@@ -76,6 +76,7 @@ public class FileProcessCreateScheduledTask {
             }
 
             FileBasedFeedDefinition feedDefinition = new FileBasedFeedDefinition();
+            feedDefinition.setAccountVisible(accountVisible);
             feedDefinition.setUploadFormat(uploadFormat);
             feedDefinition.setFeedName(name);
             User user = UserUploadService.retrieveUser(conn, userID);

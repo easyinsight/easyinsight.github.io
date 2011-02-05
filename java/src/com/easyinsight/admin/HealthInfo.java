@@ -10,10 +10,10 @@ import java.text.MessageFormat;
  */
 public class HealthInfo implements Serializable {
 
-    private static final String HEALTH_XML = "<health><currentMemory>{0}</currentMemory>" +
-            "<freeMemory>{1}</freeMemory><maxMemory>{2}</maxMemory><threadCount>{3}</threadCount>" +
-            "<activeDBConnections>{4}</activeDBConnections><activeUsers>{5}</activeUsers><systemLoadAverage>{6}</systemLoadAverage>" +
-            "<clientCount>{7}</clientCount><server>{8}</server></health>";
+    private static final String HEALTH_XML = "<health>\r\n<currentMemory>{0}</currentMemory>\r\n" +
+            "<freeMemory>{1}</freeMemory>\r\n<maxMemory>{2}</maxMemory>\r\n<threadCount>{3}</threadCount>\r\n" +
+            "<activeDBConnections>{4}</activeDBConnections>\r\n<activeUsers>{5}</activeUsers>\r\n<systemLoadAverage>{6}</systemLoadAverage>\r\n" +
+            "<clientCount>{7}</clientCount>\r\n<server>{8}</server>\r\n</health>\r\n";
 
     private long currentMemory;
     private long freeMemory;

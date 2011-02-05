@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class StandardReportPipeline extends Pipeline {
 
-    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, Map<Key, Integer> refMap, List<AnalysisItem> allItems) {
+    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems) {
 
         // current problematic scenarios
         // a measure filter on a calculation
@@ -30,6 +30,22 @@ public class StandardReportPipeline extends Pipeline {
 
         List<IComponent> components = new ArrayList<IComponent>();
 
+
+
+        for (AnalysisItem analysisItem : allNeededAnalysisItems) {
+            if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
+                LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
+                components.add(new LookupTableComponent(lookupTable));
+            }
+        }
+        
+        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
+            AnalysisList analysisList = (AnalysisList) tag;
+            if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
+        }
+
+        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
+
         if (report instanceof WSHeatMap) {
             WSHeatMap heatMap = (WSHeatMap) report;
             if (heatMap.getZipCode() != null) {
@@ -42,20 +58,6 @@ public class StandardReportPipeline extends Pipeline {
                 components.add(new CoordinatePrecisionComponent(heatMap.getLatitudeItem()));
             }
         }
-
-        for (AnalysisItem analysisItem : allNeededAnalysisItems) {
-            if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
-                LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
-                components.add(new LookupTableComponent(lookupTable, refMap.get(lookupTable.getTargetField().createAggregateKey())));
-            }
-        }
-        
-        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
-            AnalysisList analysisList = (AnalysisList) tag;
-            if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
-        }
-
-        components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
 
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
@@ -76,17 +78,14 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
-        /*if (report.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(true, filterProcessor));
-            }
-        }*/
-
         for (AnalysisItem step : items(AnalysisItemTypes.STEP, allNeededAnalysisItems)) {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
             components.add(new StepTransformComponent((AnalysisStep) step));
         }
 
+        // done with row level operations, clean everything up
+
+        components.add(new CleanupComponent());
         components.add(new NormalizationComponent());
         components.add(new AggregationComponent());
 

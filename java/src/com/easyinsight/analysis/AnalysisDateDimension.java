@@ -25,7 +25,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
     @Column(name="date_level")
     private int dateLevel;
     @Column(name="custom_date_format")
-    private String customDateFormat;
+    private String customDateFormat = "yyyy-MM-dd";
     private transient DateFormat cachedDateFormat;
     private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     

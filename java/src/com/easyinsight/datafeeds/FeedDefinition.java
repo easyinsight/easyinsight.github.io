@@ -593,9 +593,8 @@ public class FeedDefinition implements Cloneable, Serializable {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
 
         deleteStmt.setLong(1, dataFeedID);
-
-
         deleteStmt.executeUpdate();
+        deleteStmt.close();
     }
 
     protected void onDelete(Connection conn) throws SQLException {

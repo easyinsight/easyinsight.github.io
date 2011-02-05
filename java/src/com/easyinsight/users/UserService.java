@@ -540,7 +540,7 @@ public class UserService {
         AuthRequest authReq = manager.authenticate(discovered, "");
     }
 */
-    public void updateUserLabels(String userName, String fullName, String email, String firstName) {
+    public void updateUserLabels(String userName, String fullName, String email, String firstName, boolean optIn) {
         User user = retrieveUser().user;
         if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
             throw new SecurityException();
@@ -552,6 +552,7 @@ public class UserService {
         user.setName(fullName);
         user.setEmail(email);
         user.setFirstName(firstName);
+        user.setOptInEmail(optIn);
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
@@ -744,7 +745,7 @@ public class UserService {
                     user.isAccountAdmin(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState(),
                     user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
-                    userInfo.settings, account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey());
+                    userInfo.settings, account.getFirstDayOfWeek(), user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
             response.setScenario(existing.getScenario());
             return response;
         }
@@ -777,7 +778,7 @@ public class UserService {
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                             ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                            user.getUserKey(), user.getUserSecretKey());
+                            user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
                 } else {
                     userServiceResponse = null;
                 }
@@ -823,7 +824,7 @@ public class UserService {
                             !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
                             user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                             ApplicationSkinSettings.retrieveSkin(userID, session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                            user.getUserKey(), user.getUserSecretKey());
+                            user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     userServiceResponse.setSessionCookie(sessionCookie);
                     user.setLastLoginDate(new Date());
@@ -922,7 +923,7 @@ public class UserService {
                                 user.getUiSettings(), user.getFirstName(), !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(),
                                 account.getCurrencySymbol(), ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                                user.getUserKey(), user.getUserSecretKey());
+                                user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
 
 
                 } else {
@@ -1014,7 +1015,7 @@ public class UserService {
                     !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                     user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                     ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                    user.getUserKey(), user.getUserSecretKey());
+                    user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
             user.setLastLoginDate(new Date());
             session.update(user);
             conn.commit();
@@ -1102,7 +1103,7 @@ public class UserService {
                         !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
                         user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                         ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                        user.getUserKey(), user.getUserSecretKey());
+                        user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
                 user.setLastLoginDate(new Date());
                 session.update(user);
 
@@ -1159,7 +1160,7 @@ public class UserService {
                                 !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(), 
                                 user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
                                 ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
-                                user.getUserKey(), user.getUserSecretKey());
+                                user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
                         userServiceResponse.setScenario(scenario);
                         user.setLastLoginDate(new Date());
                         session.update(user);

@@ -16,15 +16,42 @@ public class Scorecard {
     private List<KPI> kpis = new ArrayList<KPI>();
     
     private String name;
+    private String description;
+    private boolean exchangeVisible;
     private long scorecardID;
-    private int scorecardOrder;
+    private String urlKey;
+    private boolean accountVisible;
 
-    public int getScorecardOrder() {
-        return scorecardOrder;
+    public String getDescription() {
+        return description;
     }
 
-    public void setScorecardOrder(int scorecardOrder) {
-        this.scorecardOrder = scorecardOrder;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isExchangeVisible() {
+        return exchangeVisible;
+    }
+
+    public void setExchangeVisible(boolean exchangeVisible) {
+        this.exchangeVisible = exchangeVisible;
+    }
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
+
+    public boolean isAccountVisible() {
+        return accountVisible;
+    }
+
+    public void setAccountVisible(boolean accountVisible) {
+        this.accountVisible = accountVisible;
     }
 
     public long getScorecardID() {

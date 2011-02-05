@@ -196,7 +196,8 @@
                          text="Click on reports below to try them out with your data. If you just need a starting point, take one of the reports and modify it to meet your needs."
                          fontSize="16"/>
             <mx:Spacer width="100%"/>
-            <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" toolTip="Refresh Listing" click="refreshExchange()"/>
+            <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" toolTip="Refresh Listing" click="refreshExchange()" labelPlacement="right"
+                    label="Refresh Listing"/>
         </mx:HBox>
         <mx:HBox width="980" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20"
                  paddingRight="20">

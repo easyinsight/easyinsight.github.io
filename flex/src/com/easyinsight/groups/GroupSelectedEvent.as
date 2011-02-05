@@ -5,16 +5,17 @@ package com.easyinsight.groups
 	public class GroupSelectedEvent extends Event
 	{
 		public static const GROUP_SELECTED:String = "groupSelected";
+		public static const GROUP_DELETE:String = "groupDelete";
 		public var groupID:int;
 		
-		public function GroupSelectedEvent(groupID:int)
+		public function GroupSelectedEvent(type:String, groupID:int)
 		{
-			super(GROUP_SELECTED, true);
+			super(type, true);
 			this.groupID = groupID;
 		}
 		
 		override public function clone():Event {
-			return new GroupSelectedEvent(groupID);
+			return new GroupSelectedEvent(type, groupID);
 		}
 	}
 }

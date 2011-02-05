@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
-                      xmlns:util="com.easyinsight.util.*"  implements="com.easyinsight.listing.IPerspective"
+                      implements="com.easyinsight.listing.IPerspective"
                       xmlns:skin="com.easyinsight.skin.*">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.NavigationEvent;
-        import com.easyinsight.help.ScreencastWindow;
-        import com.easyinsight.skin.ApplicationSkin;
-        import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.BrowserManager;
-        import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
 
         [Bindable]
@@ -24,15 +20,6 @@
         [Bindable]
         [Embed(source="../../../../assets/headericons/components.png")]
         private var solutionsIcon:Class;
-
-        private function basecamp():void {
-            var window:ScreencastWindow = new ScreencastWindow();
-            window.width = 926;
-            window.height = 484;
-            window.screencastSource = "http://eivideo.s3.amazonaws.com/BasecampWhy.mov";
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
 
         public function gotFocus():void {
             var fragmentObject:Object = new Object();
@@ -58,7 +45,7 @@
                      paddingTop="30" height="100%">
                 <mx:Button label="Upload Your Own Data" click="dispatchEvent(new NavigationEvent('Connections'))"
                            fontSize="18"
-                           styleName="redButton"/>
+                           styleName="grayButton"/>
                 <mx:Image source="{solutionsIcon}"/>
                 <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false"
                              selectable="false" width="100%"
@@ -67,9 +54,9 @@
             <mx:VBox width="50%" horizontalAlign="center" paddingLeft="15" paddingRight="10" paddingTop="30"
                      height="100%">
                 <mx:Button label="Find Reports"
-                           click="dispatchEvent(new NavigationEvent('Exchange', null, {viewMode: 1, displayMode: 0}))"
+                           click="dispatchEvent(new NavigationEvent('Exchange'))"
                            fontSize="18"
-                           styleName="redButton"/>
+                           styleName="grayButton"/>
                 <mx:Image source="{myDataIcon}"/>
                 <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false"
                              selectable="false" width="100%"

@@ -4,6 +4,8 @@
                     creationComplete="setup()" title="Report Email Delivery">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.analysis.PromptEvent;
+        import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -75,20 +77,33 @@
                 subjectInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                 return;
             }
+            var users:ArrayCollection = new ArrayCollection();
+            var emails:ArrayCollection = new ArrayCollection();
+            for each (var obj:Object in recipients) {
+                if (obj is UserStub) {
+                    users.addItem(obj);
+                } else {
+                    emails.addItem(obj);
+                }
+            }
+            if (users.length == 0 && emails.length == 0) {
+                var window:SavePromptWindow = new SavePromptWindow();
+                window.prompt = "You must define at least one recipient.";
+                window.defineOption("Add Recipient", PromptEvent.PROMPT_SAVE);
+                window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+                window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                    addRecipient();
+                }, false, 0, true);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+                return;
+            }
             newActivity = _activity == null;
             if (activity == null) {
                 activity = new ReportDelivery();
             }
             if (scheduleConfiguration.save()) {
-                var users:ArrayCollection = new ArrayCollection();
-                var emails:ArrayCollection = new ArrayCollection();
-                for each (var obj:Object in recipients) {
-                    if (obj is UserStub) {
-                        users.addItem(obj);
-                    } else {
-                        emails.addItem(obj);
-                    }
-                }
+
                 _activity.users = users;
                 _activity.emails = emails;
                 _activity.reportFormat = int(outputFormatBox.selectedItem.data);
@@ -213,9 +228,6 @@
 		<mx:method name="getUserStubs" result="gotUserStubs()"/>
 	</mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-
-    </mx:VBox>
-    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:HBox>
             <mx:VBox>
                 <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" id="form">
@@ -281,8 +293,8 @@
             </mx:VBox>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
     <mx:StringValidator id="subjectValidator" source="{subjectInput}" property="text" minLength="1"/>

@@ -180,7 +180,7 @@ public class GoogleDataProvider {
     private static final String GET_DATABASES_XML = "<ticket>{0}</ticket><excludeparents>1</excludeparents>";
     private static final String GET_SCHEMA_XML = "<ticket>{0}</ticket><apptoken>{1}</apptoken>";
 
-    public ClearDBResponse createClearDBDataSource(String apiKey, String appID) {
+    public ClearDBResponse createClearDBDataSource(String apiKey, String appID, boolean accountVisible) {
         SecurityUtil.authorizeAccountTier(Account.BASIC);
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -310,7 +310,7 @@ public class GoogleDataProvider {
         }
     }
 
-    public EIDescriptor createDataSource(String sessionTicket, String applicationToken, List<String> appNames, String host) {
+    public EIDescriptor createDataSource(String sessionTicket, String applicationToken, List<String> appNames, String host, boolean accountVisible) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         EIConnection conn = Database.instance().getConnection();
         try {

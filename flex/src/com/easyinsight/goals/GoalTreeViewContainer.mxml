@@ -1,11 +1,12 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
-           xmlns:goals="com.easyinsight.goals.*" xmlns:skin="com.easyinsight.skin.*" width="100%" height="100%"
+           xmlns:goals="com.easyinsight.goals.*" xmlns:skin="com.easyinsight.skin.*"
+           xmlns:filtering="com.easyinsight.filtering.*" width="100%" height="100%"
            creationComplete="setup()"
            implements="com.easyinsight.util.IAsyncScreen, com.easyinsight.listing.IPerspective">
     <mx:states>
         <mx:State name="FullScreen">
-            <mx:RemoveChild target="{buttonBox}"/>
+            <mx:RemoveChild target="{leftButtonBar}"/>
             <mx:RemoveChild target="{hrule}"/>
         </mx:State>
     </mx:states>
@@ -99,18 +100,9 @@
             windows.addItem(event.displayObject);
         }
 
-        override protected function createChildren():void {
-            super.createChildren();
-            if (!_showBackButton) {
-                buttonBox.removeChild(backButton);
-            }
-            if (!_showEditButton) {
-                buttonBox.removeChild(editButton);
-            }
-            if (!_showFullScreen) {
-                buttonBox.removeChild(fullScreenButton);
-            }
-        }
+        [Bindable]
+        private var kpiTreeName:String;
+
 
         private function parentTreeClick(event:MouseEvent):void {
             var descriptor:GoalTreeDescriptor = event.currentTarget.data;
@@ -119,7 +111,10 @@
 
         private function gotTree():void {
             var kpiTreeWrapper:KPITreeWrapper = goalService.getGoalDataTree.lastResult as KPITreeWrapper;
+
             goalTree = kpiTreeWrapper.goalTree;
+            kpiTreeName = goalTree.name;
+            dataSourceID = goalTree.dataSourceID;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.goalTreeID = String(goalTree.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
@@ -183,35 +178,18 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        public function canRefresh():Boolean {
-            return false;
-        }
+        [Bindable]
+        [Embed(source="../../../../assets/banner4.jpg")]
+        public var backImage:Class;
 
-        public function canViewInBrowser():Boolean {
-            return false;
-        }
+        [Bindable]
+        private var filterIndex:int = 1;
 
-        public function getBrowserURL():String {
-            return null;
-        }
+        [Bindable]
+        private var filterDefinitions:ArrayCollection;
 
-        private var _showBackButton:Boolean = true;
-        private var _showFullScreen:Boolean = true;
-        private var _showEditButton:Boolean = true;
-
-
-        public function set showBackButton(value:Boolean):void {
-            _showBackButton = value;
-        }
-
-        public function set showFullScreen(value:Boolean):void {
-            _showFullScreen = value;
-        }
-
-        public function set showEditButton(value:Boolean):void {
-            _showEditButton = value;
-        }
-
+        [Bindable]
+        private var dataSourceID:int;
 
         public function gotFocus():void {
         }
@@ -234,23 +212,49 @@
         }
     </mx:Style>
     <skin:BackgroundImage width="100%" height="100%" applyCenterScreenLogic="false">
-        <mx:VBox width="100%" height="100%">
-            <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
-                <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" label="Back"
-                           labelPlacement="bottom"/>
-                <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data"
-                           label="Refresh" labelPlacement="bottom"/>
-                <mx:Button id="fullScreenButton" icon="{fullScreenIcon}" click="toFullScreen()"
-                           toolTip="View in Full Screen" label="Full Screen" labelPlacement="bottom"/>
-                <mx:Button id="editButton" icon="{editIcon}" click="editTree()" toolTip="Edit the Goal Tree"
-                           label="Edit Tree" labelPlacement="bottom" visible="{editAvailable}"/>
-                <mx:VRule height="60"/>
-                <mx:HBox id="parentsBox"/>
-                <!--<mx:TileList id="parentsBox" itemRenderer="com.easyinsight.goals.GoalTreeIconRenderer" dataProvider="{parentTrees}" height="80"
-                    backgroundAlpha="0" borderStyle="none" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"
-                    columnCount="{columnCount}"/>-->
-            </mx:HBox>
+        <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0"
+                 horizontalAlign="center"
+                 direction="vertical">
+            <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay"
+                     backgroundColor="#FFFFFF">
+                <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5"
+                         paddingTop="5">
+                    <mx:HBox width="1000" id="highBox">
+                        <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
+                            <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close"/>
+                            <mx:Button id="fullScreenButton" icon="{fullScreenIcon}" click="toFullScreen()"/>
+                            <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()"
+                                       toolTip="Refresh Data"/>
+                            <!--<mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
+                                       labelPlacement="bottom"
+                                       id="exportButton" toolTip="Export the report..."/>
+                            <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="bottom"
+                                       id="filterButton" toolTip="{filterTooltip}"/>-->
+                            <mx:Button id="editButton" icon="{editIcon}" click="editTree()" toolTip="Edit the Goal Tree"
+                                       visible="{editAvailable}"/>
+                            <mx:Spacer width="100%"/>
+                            <mx:Label text="{kpiTreeName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350"
+                                      fontSize="14"/>
+                            <mx:Spacer width="100%"/>
+                            <mx:HBox id="parentsBox"/>
+                        </mx:HBox>
+                    </mx:HBox>
+                </mx:HBox>
+                <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
+            </mx:VBox>
             <mx:HRule width="100%" id="hrule"/>
+            <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
+                <mx:Box/>
+                <mx:VBox width="100%" horizontalAlign="center">
+                    <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid"
+                                                  borderThickness="1"
+                                                  existingFilters="{filterDefinitions}"
+                                                  width="100%" paddingLeft="10"
+                                                  paddingTop="10" paddingBottom="10"
+                                                  paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
+                                                  backgroundColor="#FFFFFF"/>
+                </mx:VBox>
+            </mx:ViewStack>
             <mx:VBox width="100%" height="100%" paddingRight="15" paddingTop="15" paddingLeft="15" paddingBottom="15">
                 <mx:Canvas height="100%" width="100%" backgroundAlpha="0">
                     <ilog:OrgChart id="myOrgChart" dataProvider="{_goalTreeNodes}"

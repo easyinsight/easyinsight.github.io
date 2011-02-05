@@ -63,15 +63,16 @@ public class DeliveryScheduledTask extends ScheduledTask {
     }
 
     private void scorecardDelivery(EIConnection conn) throws SQLException, IOException, MessagingException {
-        PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, USER_ID FROM USER, user_scorecard_display WHERE " +
+        PreparedStatement userStmt = conn.prepareStatement("SELECT EMAIL, USER_ID. ACCOUNT_ID FROM USER, user_scorecard_display WHERE " +
                 "user_scorecard_display.scheduled_account_activity_id = ? and user_scorecard_display.user_id = user.user_id");
         userStmt.setLong(1, activityID);
         ResultSet rs = userStmt.executeQuery();
         rs.next();
         String email = rs.getString(1);
         long userID = rs.getLong(2);
+        long accountID = rs.getLong(3);
         StringBuilder stringBuilder = new StringBuilder();
-        ScorecardList scorecardList = new ScorecardInternalService().getScorecardDescriptors(userID, true);
+        //ScorecardList scorecardList = new ScorecardInternalService().getScorecardDescriptors(userID, accountID);
         /*for (ScorecardDescriptor scorecardDescriptor : scorecardList.getScorecardDescriptors()) {
             ScorecardWrapper scorecardWrapper = new ScorecardInternalService().getScorecard(scorecardDescriptor.getId(),
                     userID, new ArrayList<CredentialFulfillment>(), false);

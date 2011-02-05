@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
                     xmlns:filters="com.easyinsight.filtering.*"
-        creationComplete="onCreation()" width="850"
-        height="500">
+        creationComplete="onCreation()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.commands.CommandEvent;
@@ -11,6 +10,11 @@
 
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
+        import mx.core.Container;
+        import mx.core.UIComponent;
+        import mx.events.FlexEvent;
+        import mx.events.IndexChangedEvent;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
@@ -36,6 +40,11 @@
             }
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
+            tabNavigator.addEventListener(IndexChangedEvent.CHANGE, onIndexChange);
+        }
+
+        private function onIndexChange(event:IndexChangedEvent):void {
+            //tabNavigator.selectedChild.invalidateSize();
         }
 
         private var commandProcessor:CommandProcessor;
@@ -97,16 +106,21 @@
             if (_editorClass == null) {
                 editor = new AnalysisItemEditorPerspective(new PerspectiveInfo(PerspectiveInfo.ANALYSIS_ITEM_EDITOR, {dataSourceID: _dataSourceID,
                     analysisItem: _analysisItem, analysisItems: _analysisItems}));
-                this.width = 600;
-                this.height = 480;
+                /*this.width = 600;
+                this.height = 480;*/
             } else {
                 editor = new _editorClass();
                 editor.dataSourceID = _dataSourceID;
                 editor.analysisItem = _analysisItem;
                 editor.analysisItems = _analysisItems;
             }
+            UIComponent(editor).addEventListener(FlexEvent.UPDATE_COMPLETE, onEvent);
+            Container(editor).label = "Item";
+            tabNavigator.addChildAt(editor as DisplayObject, 0);
+        }
 
-            editorFormItem.addChildAt(editor as DisplayObject, 0);
+        private function onEvent(event:Event):void {
+            PopUpUtil.centerPopUp(this);
         }
 
         private function cancel():void {
@@ -158,11 +172,10 @@
         private var linkFactory:ClassFactory;
 		]]>
     </mx:Script>
-    <mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
-        <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120">
-            <mx:Canvas id="editorFormItem" width="100%" height="100%" label="Item"/>
-            <mx:VBox label="Links" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                 paddingTop="5" horizontalAlign="center">
+    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" id="primaryBox">
+        <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120" id="tabNavigator">
+            <mx:VBox label="Links" paddingBottom="5" paddingLeft="5" paddingRight="5"
+                 paddingTop="5" horizontalAlign="center" width="550" height="300" updateComplete="onEvent(event)">
                 <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
                                        borderStyle="none" fontSize="14"
                                        text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs), as well as links to external URLs."/>
@@ -185,8 +198,8 @@
                     </mx:VBox>
                 </mx:ViewStack>
             </mx:VBox>
-            <mx:VBox label="Filters" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                     paddingTop="5" horizontalAlign="center">
+            <mx:VBox label="Filters" width="650" height="300" paddingBottom="5" paddingLeft="5" paddingRight="5"
+                     paddingTop="5" horizontalAlign="center" updateComplete="onEvent(event)">
                 <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
                                        borderStyle="none" fontSize="14"
                                        text="You can define filters at the field level by dragging fields from the left hand list into the drop area below. Any filters you define here will only be applied to this field."/>
@@ -198,8 +211,8 @@
             </mx:VBox>
         </mx:TabNavigator>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Save" click="save()" id="saveButton"/>
-            <mx:Button label="Cancel" click="cancel()"/>
+            <util:SaveButton label="Save" click="save()" id="saveButton"/>
+            <util:CancelButton label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
 

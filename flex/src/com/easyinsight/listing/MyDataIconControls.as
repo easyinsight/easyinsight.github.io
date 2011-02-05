@@ -14,6 +14,7 @@ import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.solutions.DataSourceDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -289,6 +290,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(GoalTreeDescriptor(obj).id)));
         } else if (obj is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(obj).id})));
+        } else if (obj is ScorecardDescriptor ){
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: ScorecardDescriptor(obj).id})));
         }
     }
 
@@ -318,6 +321,8 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
             dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(GoalTreeDescriptor(obj).id, 0)));
         }  else if (obj is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {dashboardID: DashboardDescriptor(obj).id}))); 
+        } else if (obj is ScorecardDescriptor ){
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_EDITOR, {scorecardID: ScorecardDescriptor(obj).id})));
         }
     }
 
@@ -343,6 +348,9 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
                 refreshVisible = false;
                 adminVisible = true;
             } else if (value is DashboardDescriptor) {
+                refreshVisible = false;
+                adminVisible = true;
+            } else if (value is ScorecardDescriptor) {
                 refreshVisible = false;
                 adminVisible = true;
             }

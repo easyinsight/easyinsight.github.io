@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()" width="100%">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()" width="100%" height="100%">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
@@ -16,10 +16,6 @@
         private var users:ArrayCollection;
 
         private var _groupID:int;
-
-        public function get groupUsers():ArrayCollection {
-            return this.users;
-        }
 
         [Bindable]
         private var _groupAdmin:Boolean;
@@ -88,45 +84,43 @@
 		<mx:method name="getUsers" result="gotUsers()"/>
 		<mx:method name="updateGroupUsers" result="savedChanges()"/>
 	</mx:RemoteObject>
-    <mx:VBox width="100%" horizontalAlign="center">
-        <mx:Box width="100%" horizontalAlign="center" backgroundSize="#848080"
-                paddingTop="5"
-                paddingBottom="5">
-            <mx:Label text="Group Members" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
-        </mx:Box>
-        <mx:ViewStack selectedIndex="{changesIndex}" resizeToContent="true">
-            <mx:Box/>
-            <mx:HBox width="100%" horizontalAlign="center">
-                <mx:HBox verticalAlign="middle" backgroundColor="#DDDDDD" cornerRadius="5" borderStyle="solid" borderColor="#DDDDDD" borderThickness="1"
-                        paddingLeft="10" paddingTop="5" paddingBottom="5" paddingRight="10">
-                    <mx:Label text="You have unsaved changes:"/>
-                    <mx:Button label="Save Changes" click="saveChanges()"/>
-                </mx:HBox>
+    <mx:Box width="100%" horizontalAlign="center" backgroundColor="#848080"
+            paddingTop="5"
+            paddingBottom="5">
+        <mx:Label text="Group Members" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+    </mx:Box>
+    <mx:ViewStack selectedIndex="{changesIndex}" resizeToContent="true">
+        <mx:Box/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:HBox verticalAlign="middle" backgroundColor="#DDDDDD" cornerRadius="5" borderStyle="solid" borderColor="#DDDDDD" borderThickness="1"
+                    paddingLeft="10" paddingTop="5" paddingBottom="5" paddingRight="10">
+                <mx:Label text="You have unsaved changes:"/>
+                <mx:Button label="Save Changes" click="saveChanges()"/>
             </mx:HBox>
-        </mx:ViewStack>
-        <mx:ViewStack selectedIndex="{viewIndex}" resizeToContent="true">
-            <mx:Box>
-                <mx:DataGrid dataProvider="{users}">
-                    <mx:columns>
-                        <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                        <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleRenderer"
-                            headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    </mx:columns>
-                </mx:DataGrid>
-            </mx:Box>
-            <mx:VBox>
-                <mx:Button label="Add User..." click="addUser()"/>
-                <mx:DataGrid dataProvider="{users}" id="userGrid">
-                    <mx:columns>
-                        <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                        <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
-                            rendererIsEditor="true" editorDataField="data" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                        <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.groups.GroupUserIcons" width="50"/>
-                    </mx:columns>
-                </mx:DataGrid>
-            </mx:VBox>
+        </mx:HBox>
+    </mx:ViewStack>
+    <mx:ViewStack selectedIndex="{viewIndex}" resizeToContent="true">
+        <mx:Box>
+            <mx:DataGrid dataProvider="{users}">
+                <mx:columns>
+                    <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleRenderer"
+                        headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                </mx:columns>
+            </mx:DataGrid>
+        </mx:Box>
+        <mx:VBox>
+            <mx:Button label="Add User..." click="addUser()" styleName="grayButton" fontSize="14"/>
+            <mx:DataGrid dataProvider="{users}" id="userGrid">
+                <mx:columns>
+                    <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
+                        rendererIsEditor="true" editorDataField="data" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.groups.GroupUserIcons" width="50"/>
+                </mx:columns>
+            </mx:DataGrid>
+        </mx:VBox>
 
-        </mx:ViewStack>
+    </mx:ViewStack>
 
-    </mx:VBox>
 </mx:VBox>

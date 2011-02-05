@@ -29,7 +29,7 @@ public class GoalStorage {
         KPITreeWrapper scorecardWrapper = new KPITreeWrapper();
 
         try {
-            new ScorecardService().refreshValuesForList(kpis, conn, insightRequestMetadata, forceRefresh);
+            //new ScorecardService().refreshValuesForList(kpis, conn, insightRequestMetadata, forceRefresh);
         } catch (ReportException re) {
             scorecardWrapper.setReportFault(re.getReportFault());
         }

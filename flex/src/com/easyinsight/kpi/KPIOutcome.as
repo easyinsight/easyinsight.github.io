@@ -20,7 +20,7 @@ public class KPIOutcome {
     public var problemEvaluated:Boolean;
     public var outcomeValue:Number;
     public var evaluationDate:Date;
-    public var kpiID:int;
+    public var kpiName:String;
     public var valueDefined:Boolean;
     public var percentChange:Number;
     public var directional:Boolean;

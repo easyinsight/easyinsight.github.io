@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreationComplete()" title="New Group">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
 			import mx.validators.Validator;
@@ -40,7 +40,7 @@
 			
 			private function addedGroup():void {
 				var group:Group = groupService.addGroup.lastResult as Group;
-				dispatchEvent(new GroupSelectedEvent(group.groupID));
+				dispatchEvent(new GroupSelectedEvent(GroupSelectedEvent.GROUP_SELECTED, group.groupID));
 				PopUpManager.removePopUp(this);
 			}
 		]]>
@@ -48,23 +48,17 @@
 	<mx:RemoteObject destination="groupService" id="groupService">
 		<mx:method name="addGroup" result="addedGroup()"/>
 	</mx:RemoteObject>
-	<mx:Form styleName="TitleWindowContents">
+	<mx:Form>
 		<mx:FormItem label="Group Name: ">
-			<mx:TextInput id="nameInput"/>
+			<mx:TextInput id="nameInput" width="400"/>
 		</mx:FormItem>
 		<mx:FormItem label="Group Description: ">
-			<mx:TextArea id="descriptionInput"/>
+			<mx:TextArea id="descriptionInput" borderStyle="solid" borderThickness="1" width="400"/>
 		</mx:FormItem>
-		<!--<mx:FormItem label="Anyone Can View This Group: ">
-			<mx:CheckBox id="anyoneCanView"/>
-		</mx:FormItem>
-		<mx:FormItem label="Anyone Can Join This Group: ">
-			<mx:CheckBox id="anyoneCanJoin"/>
-		</mx:FormItem>-->
 		<mx:FormItem label="" direction="horizontal">
-			<mx:Button label="Create!" click="createGroup()"/>
-			<mx:Button label="Cancel" click="cancel()"/>
+			<util:SaveButton label="Create!" click="createGroup()"/>
+			<util:CancelButton label="Cancel" click="cancel()"/>
 		</mx:FormItem>
 	</mx:Form>
 	<mx:StringValidator id="nameValidator" source="{nameInput}" minLength="5" maxLength="30" property="text"/>	
-</util:EITitleWindow>
+</util:EISlimWindow>

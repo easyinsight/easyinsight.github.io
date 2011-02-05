@@ -58,13 +58,10 @@ public class CalcGraph {
                 AnalysisItem calcNode = iterator.next();
                 if (calcNode.hasType(AnalysisItemTypes.CALCULATION)) {
                     components.add(new CalculationComponent((AnalysisCalculation) calcNode));
-                    components.add(new CalculationCleanupComponent((AnalysisCalculation) calcNode));
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                     components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
-                    components.add(new DerivedDimensionCleanupComponent((DerivedAnalysisDimension) calcNode));
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                     components.add(new DerivedDateComponent((DerivedAnalysisDateDimension) calcNode));
-                    components.add(new DerivedDateDimensionCleanupComponent((DerivedAnalysisDateDimension) calcNode));
                 }
             }
         }

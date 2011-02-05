@@ -8,6 +8,8 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.scorecard.ScorecardInternalService;
+import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
@@ -78,6 +80,8 @@ public class UserUploadService {
             return ((GoalTreeDescriptor) descriptor).getDataSourceID();
         } else if (descriptor.getType() == EIDescriptor.REPORT) {
             return ((InsightDescriptor) descriptor).getDataFeedID();
+        } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
+            return 0;
         } else {
             throw new RuntimeException();
         }
@@ -116,6 +120,7 @@ public class UserUploadService {
                 objects.addAll(new GoalStorage().getTrees(userID, accountID, conn).values());
                 objects.addAll(new DashboardStorage().getDashboards(userID, accountID, conn).values());
                 objects.addAll(analysisStorage.getReports(userID, accountID, conn).values());
+                objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn).values());
             } else {
                 objects.addAll(analysisStorage.getReportsForGroup(groupID, conn).values());
             }
@@ -339,12 +344,12 @@ public class UserUploadService {
         return uploadResponse;
     }
 
-    public UploadResponse createDataSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems) {
+    public UploadResponse createDataSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible) {
         UploadResponse uploadResponse;
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn);
+            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible);
             uploadResponse = new UploadResponse(dataSourceID);
             conn.commit();
             return uploadResponse;

@@ -54,33 +54,6 @@ public class GoogleSpreadsheetFeed extends Feed {
         return as;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
-        try {
-            AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
-            SpreadsheetService myService = getService();
-            URL listFeedUrl = new URL(worksheetURL);
-            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
-            for (ListEntry listEntry : feed.getEntries()) {
-                for (String tag : listEntry.getCustomElements().getTags()) {
-                    if (analysisItem.getKey().toKeyString().equals(tag)) {
-                        String string = listEntry.getCustomElements().getValue(tag);
-                        Value value;
-                        if (string == null) {
-                            value = new EmptyValue();
-                        } else {
-                            value = new StringValue(string);
-                        }
-                        metadata.addValue(analysisItem, value, insightRequestMetadata);
-                    }
-                }
-            }
-            return metadata;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             SpreadsheetService myService = getService();

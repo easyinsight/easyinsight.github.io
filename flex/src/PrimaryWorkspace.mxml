@@ -172,6 +172,8 @@
                     internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.KPI_TREE_VIEW, {goalTreeID: event.eiDescriptor.id})));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.DASHBOARD) {
                     internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
+                } else if (event.eiDescriptor.getType() == EIDescriptor.SCORECARD) {
+                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: event.eiDescriptor.id})));
                 }
             }
         }

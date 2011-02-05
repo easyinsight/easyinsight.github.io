@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" keyDown="submitted(event)" creationComplete="onCreationComplete()">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" keyDown="submitted(event)" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
@@ -78,8 +78,8 @@
 	<mx:RemoteObject id="shareService" destination="share">
 		<mx:method name="getUserStubs" result="gotUserStubs()"/>			
 	</mx:RemoteObject>
-	<mx:VBox styleName="TitleWindowContents">
-        <mx:Label text="Do you want to send the email to another user on your account or to an external email address?" fontSize="14"/>
+	<mx:VBox>
+        <mx:Label text="Do you want to send the email to a user on your Easy Insight account or to an external email address?" fontSize="14"/>
         <mx:RadioButtonGroup id="typeGroup" change="onChange(event)"/>
         <mx:HBox>
             <mx:RadioButton label="User in Account" id="userInAccount" value="user" groupName="typeGroup" selected="true"/>
@@ -91,18 +91,18 @@
                 <mx:ComboBox id="userIDInput" dataProvider="{userStubs}" labelField="displayName"/>
             </mx:HBox>
             <mx:VBox>
-                <mx:TextArea text="You'll need to upgrade to a Plus or higher account in order to take advantage of this functionality." borderStyle="none"
-                        backgroundAlpha="0" editable="false" selectable="false"/>
+                <mx:TextArea text="You'll need to upgrade to a Plus or higher account in order to send to generic email addresses. If you want to send to another user, first add that user to your Easy Insight account." borderStyle="none"
+                        backgroundAlpha="0" editable="false" selectable="false" width="400"/>
             </mx:VBox>
             <mx:HBox>
                 <mx:Label text="Enter the email address:"/>
-                <mx:TextInput id="emailInput"/>
+                <mx:TextInput id="emailInput" width="350"/>
             </mx:HBox>
         </mx:ViewStack>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Add" click="save()"/>
-            <mx:Button label="Cancel" click="cancel()"/>
+            <mx:Button label="Add" click="save()" styleName="grayButton"/>
+            <mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline"/>
         </mx:HBox>
-	</mx:VBox>		
+	</mx:VBox>
     <mx:EmailValidator source="{emailInput}" property="text" id="emailValidator"/>
-</util:EITitleWindow>
+</util:EISlimWindow>

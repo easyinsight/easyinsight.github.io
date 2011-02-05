@@ -6,6 +6,7 @@
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
+        import com.easyinsight.groups.GroupsSummary;
         import com.easyinsight.preferences.PersonaManagement;
         import com.easyinsight.util.PopUpUtil;
 
@@ -67,6 +68,7 @@
                             // core user administration...add user, remove user, change user privileges
                             toggleOptions = new ArrayCollection([ new AccountOption("Account Administration", new AccountAdminPage()),
                                 new AccountOption("User Administration", new UserAdministration()),
+                                new AccountOption("Group Administration", new GroupsSummary()),
                                 new AccountOption("My Profile", new ProfessionalMyProfile()),
                                 new AccountOption("Persona", new PersonaManagement())]);
                             showToggle = true;

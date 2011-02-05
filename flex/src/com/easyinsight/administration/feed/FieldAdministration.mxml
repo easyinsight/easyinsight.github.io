@@ -338,7 +338,6 @@
         ]]></mx:Script>
     <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory"/>
         <mx:VBox height="100%" width="100%" horizontalAlign="center">
-            <mx:Label text="Click on the fields below to edit their properties." fontSize="14"/>
             <mx:HBox paddingLeft="5">
                 <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
                            toolTip="Add Hierarchy..." click="addHierarchy()"/>

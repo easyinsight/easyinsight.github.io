@@ -3,7 +3,6 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.core.Key;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,45 +21,19 @@ public class PipelineData {
     private InsightRequestMetadata insightRequestMetadata;
     private Map<String, String> dataSourceProperties;
     private Set<AnalysisItem> allRequestedItems;
-    private Map<Key, Integer> refMap;
 
     public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
-                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems,
-                        Map<Key, Integer> refMap) {
+                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems) {
         this.report = report;
         this.reportItems = reportItems;
         this.insightRequestMetadata = insightRequestMetadata;
         this.allItems = allItems;
         this.dataSourceProperties = dataSourceProperties;
         this.allRequestedItems = allRequestedItems;
-        this.refMap = refMap;
     }
 
-    public Map<Key, Integer> getRefMap() {
-        return refMap;
-    }
-
-    public void setRefMap(Map<Key, Integer> refMap) {
-        this.refMap = refMap;
-    }
-
-    public boolean decrementReferenceCount(AnalysisItem analysisItem) {
-        Key key = analysisItem.createAggregateKey();
-        Integer count = getRefMap().get(key);
-        if (count == null) {
-            return true;
-        }
-        count--;
-        getRefMap().put(key, count);
-        return count == 0;
-    }
-
-    public boolean decreaseReferenceCount(AnalysisItem analysisItem, int refs) {
-        Key key = analysisItem.createAggregateKey();
-        Integer count = getRefMap().get(key);
-        count -= refs;
-        getRefMap().put(key, count);
-        return count <= 0;
+    public void setAllRequestedItems(Set<AnalysisItem> allRequestedItems) {
+        this.allRequestedItems = allRequestedItems;
     }
 
     public Set<AnalysisItem> getAllRequestedItems() {

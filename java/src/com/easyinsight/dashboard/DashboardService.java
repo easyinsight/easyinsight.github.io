@@ -29,7 +29,7 @@ public class DashboardService {
     public long canAccessDashboard(String urlKey) {
         try {
             return SecurityUtil.authorizeDashboard(urlKey);
-        } catch (SecurityException e) {
+        } catch (com.easyinsight.security.SecurityException e) {
             return 0;
         }
     }

@@ -39,7 +39,7 @@ public class CorrelationTest extends TestCase {
         plotChartDefinition.setXaxisMeasure(xMeasure);
         plotChartDefinition.setYaxisMeasure(yMeasure);
         CorrelationComponent correlationComponent = new CorrelationComponent();
-        PipelineData pipelineData = new PipelineData(plotChartDefinition, null, null, null, null, null, null);
+        PipelineData pipelineData = new PipelineData(plotChartDefinition, null, null, null, null, null);
         correlationComponent.apply(dataSet, pipelineData);
     }
 }

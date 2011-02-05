@@ -61,6 +61,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
+
         CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
         CommonTokenStream tokes = new CommonTokenStream();
         tokes.setTokenSource(lexer);
@@ -83,6 +84,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
         List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
 
         analysisItemList.add(this);
+
+        if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
 
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem;
