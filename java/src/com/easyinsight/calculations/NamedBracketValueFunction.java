@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
@@ -52,9 +52,5 @@ public class NamedBracketValueFunction extends Function {
 
     public int getParameterCount() {
         return 2;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("namedbracketvalue(String, String)", "Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Name, \"Type\").");
     }
 }

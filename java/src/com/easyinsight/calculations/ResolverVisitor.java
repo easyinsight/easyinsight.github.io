@@ -4,7 +4,6 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Value;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -83,7 +82,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
         if(node.getFunction() instanceof CastFunction) {
             CastFunction f = (CastFunction) node.getFunction();
             if(node.getChildCount() != 2 || !(node.getChild(1) instanceof VariableNode)) {
-                throw new IllegalArgumentException();
+                throw new FunctionException("Incorrect number of parameters passed to cast function.");
             }
             else {
                 ((CalculationTreeNode) node.getChild(1)).accept(new ResolverVisitor(analysisItems, functionResolver, f.getAggregationType()));
@@ -92,7 +91,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
         else {
             int parameters = node.getFunction().getParameterCount();
             if (parameters != -1 && parameters != node.getChildCount() - 1) {
-                throw new RuntimeException(node.getChild(0).toString() + " requires " + parameters + " parameters. ");
+                throw new FunctionException(node.getChild(0).toString() + " requires " + parameters + " parameters. ");
             }
             for(int i = 1;i < node.getChildCount();i++) {
                 ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(analysisItems, functionResolver));

@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.StringValue;
@@ -52,15 +52,13 @@ public class NamedBracketDateFunction extends Function {
             returnValue = new DateValue(date);
         } catch (ParseException e) {
             returnValue = new EmptyValue();
+        } catch (IllegalArgumentException ie) {
+            throw new FunctionException(ie.getMessage());
         }
         return returnValue;
     }
 
     public int getParameterCount() {
         return 3;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("namedbracketdate(Field, Name, Date Pattern)", "Returns the named bracketed value found in String. For example, namedbracketvalue(Deal Description, \"Target Close\", \"MM-dd-YYYY\") will construct a date out of a sample value of [Target Close: 12-15-2010] in the Deal Description field.");
     }
 }

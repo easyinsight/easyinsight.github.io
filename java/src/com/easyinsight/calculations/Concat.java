@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
@@ -22,9 +22,5 @@ public class Concat extends Function {
 
     public int getParameterCount() {
         return -1;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("concat(value...)", "Combines the numeric parameters passed in");
     }
 }

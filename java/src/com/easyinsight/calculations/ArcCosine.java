@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
@@ -20,9 +20,5 @@ public class ArcCosine extends Function {
 
     public int getParameterCount() {
         return 1;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("acos(Number)", "Calculate the arccosine of Number", Arrays.asList("Number - what you want the arccosine of"));
     }
 }

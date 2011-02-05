@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
@@ -20,9 +20,5 @@ public class Floor extends Function {
 
     public int getParameterCount() {
         return 1;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("floor(Number)", "Calculate the floor of Number", Arrays.asList("Number - what you want the floor of"));
     }
 }

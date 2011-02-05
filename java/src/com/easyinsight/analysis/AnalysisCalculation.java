@@ -75,7 +75,10 @@ public class AnalysisCalculation extends AnalysisMeasure {
         } catch (RecognitionException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        } catch (FunctionException fe) {
+            throw new ReportException(new AnalysisItemFault(fe.getMessage(), this));
         }
+
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
 

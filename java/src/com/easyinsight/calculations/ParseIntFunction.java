@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
@@ -17,9 +17,5 @@ public class ParseIntFunction extends Function {
 
     public int getParameterCount() {
         return -1;
-    }
-    
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("", "");
     }
 }

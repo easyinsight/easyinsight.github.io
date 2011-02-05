@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
@@ -20,9 +20,5 @@ public class Ceiling extends Function {
 
     public int getParameterCount() {
         return 1;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("ceil(Number)", "Calculate the ceiling of Number", Arrays.asList("Number - what you want the ceiling of"));
     }
 }

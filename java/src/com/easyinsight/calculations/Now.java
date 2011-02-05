@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
@@ -16,9 +16,5 @@ public class Now extends Function {
 
     public int getParameterCount() {
         return 0;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("now()", "Returns the current time in milliseconds");
     }
 }

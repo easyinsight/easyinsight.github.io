@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
@@ -29,9 +29,5 @@ public class BracketValueFunction extends Function {
 
     public int getParameterCount() {
         return 1;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("bracketvalue(String)", "Returns the first bracketed value found in String. For example, bracketvalue(Deal [John]) would produce a value of John.");
     }
 }

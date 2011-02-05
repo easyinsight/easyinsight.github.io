@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.Value;
 
 /**
@@ -25,9 +25,5 @@ public class Replace extends Function {
 
     public int getParameterCount() {
         return 3;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("replace(Field, Regular Expression, Target String)", "Replace each substring of this string that matches the given regular expression with the given replacement.");
     }
 }

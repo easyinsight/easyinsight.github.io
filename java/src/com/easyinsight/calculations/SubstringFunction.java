@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
 
@@ -24,9 +24,5 @@ public class SubstringFunction extends Function {
 
     public int getParameterCount() {
         return 3;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("", "");
     }
 }

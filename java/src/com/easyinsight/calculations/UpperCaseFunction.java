@@ -1,6 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.analysis.FunctionExplanation;
+
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
 
@@ -18,9 +18,5 @@ public class UpperCaseFunction extends Function {
 
     public int getParameterCount() {
         return 1;
-    }
-
-    public FunctionExplanation explain() {
-        return new FunctionExplanation("upper(String)", "Returns a fully upper case version of String.");
     }
 }
