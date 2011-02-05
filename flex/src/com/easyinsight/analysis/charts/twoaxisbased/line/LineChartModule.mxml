@@ -133,8 +133,10 @@
                 lineChart.dataTipFunction = dataTipFunction;
                 var verticalAxis:LinearAxis = new LinearAxis();
                 verticalAxis.baseAtZero = lineChartDef.baseAtZero == "true";
-                if (lineChartDef.yaxis != null) {
+                if (!lineChartDef.multiMeasure && lineChartDef.yaxis != null) {
                     verticalAxis.title = lineChartDef.yaxis.display;
+                } else {
+                    verticalAxis.title = "Measures";
                 }
                 lineChart.verticalAxis = verticalAxis;
 
@@ -210,6 +212,7 @@
                     var categoryAxis:CategoryAxis = new CategoryAxis();
                     categoryAxis.displayName = xAxisDimension.display;
                     categoryAxis.dataProvider = categories;
+                    categoryAxis.title = xAxisDimension.display;
                     xAxis = categoryAxis;
                 }
 

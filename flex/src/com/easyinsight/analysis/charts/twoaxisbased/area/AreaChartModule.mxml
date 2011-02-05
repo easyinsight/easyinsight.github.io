@@ -124,8 +124,10 @@
             areaChart.selectionMode = "multiple";
             var verticalAxis:LinearAxis = new LinearAxis();
             verticalAxis.baseAtZero = areaChartDef.baseAtZero == "true";
-            if (areaChartDef.yaxis != null) {
+            if (!areaChartDef.multiMeasure && areaChartDef.yaxis != null) {
                 verticalAxis.title = areaChartDef.yaxis.display;
+            } else {
+                verticalAxis.title = "Measures";
             }
             areaChart.verticalAxis = verticalAxis;
 
@@ -199,6 +201,7 @@
                     var categoryAxis:CategoryAxis = new CategoryAxis();
                     categoryAxis.displayName = xAxisDimension.display;
                     categoryAxis.dataProvider = categories;
+                    categoryAxis.title = xAxisDimension.display;
                     xAxis = categoryAxis;
                 }
 
