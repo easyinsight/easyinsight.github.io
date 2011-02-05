@@ -106,6 +106,9 @@ public class WSTreeMapDefinition extends WSAnalysisDefinition {
     public Set<AnalysisItem> getAllAnalysisItems() {
         Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
         AnalysisHierarchyItem item = (AnalysisHierarchyItem) hierarchy;
+        if (hierarchy == null || item.getHierarchyLevel() == null) {
+            return new HashSet<AnalysisItem>();
+        }
         int startIndex = item.getHierarchyLevels().indexOf(item.getHierarchyLevel());
         for (int i = startIndex; i < item.getHierarchyLevels().size() && i < (startIndex + 2); i++) {
             columnList.add(item.getHierarchyLevels().get(i).getAnalysisItem());
