@@ -34,6 +34,32 @@ public class CsvFileUploadFormat extends UploadFormat {
         return key.trim();
     }
 
+    public boolean test(byte[] data) {
+        boolean valid = false;
+        CharsetDetector charsetDetector = new CharsetDetector();
+        charsetDetector.setText(data);
+        CharsetMatch charsetMatch = charsetDetector.detect();
+        String charsetName = charsetMatch.getName();
+        ByteArrayInputStream stream = new ByteArrayInputStream(data);
+        CsvReader r= new CsvReader(stream, Charset.forName(charsetName));
+        boolean foundHeaders = false;
+        boolean foundRecord = true;
+        try {
+            while (!foundHeaders && foundRecord) {
+                r.readHeaders();
+                int headerLength = r.getHeaderCount();
+                foundRecord = r.readRecord();
+                if (r.getColumnCount() > 1 && r.getColumnCount() == headerLength) {
+                    foundHeaders = true;
+                    valid = true;
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
+        return valid;
+    }
+
     protected GridData createGridData(byte[] data, IDataTypeGuesser dataTypeGuesser, Map<String, Key> keyMap, Map<String, AnalysisItem> analysisItems) {
 
         GridData gridData = new GridData();
@@ -44,15 +70,26 @@ public class CsvFileUploadFormat extends UploadFormat {
         ByteArrayInputStream stream = new ByteArrayInputStream(data);
         CsvReader r= new CsvReader(stream, Charset.forName(charsetName));
         List<Value[]> grid = new ArrayList<Value[]>();
-        String[] headerColumns;
+        String[] headerColumns = null;
         try {
-            if(r.readHeaders()) {
-                headerColumns = r.getHeaders();
+            boolean foundHeaders = false;
+            boolean foundRecord = true;
+            r.readRecord();
+            while (!foundHeaders && foundRecord) {
+                headerColumns = r.getValues();
                 gridData.headerColumns = headerColumns;
-            } else {
-                throw new RuntimeException("Couldn't locate headers.");
+                foundRecord = r.readRecord();
+                if (r.getColumnCount() > 1 && r.getColumnCount() == headerColumns.length) {
+                    foundHeaders = true;
+                }
             }
-            while(r.readRecord()) {
+            if (!foundHeaders) {
+                throw new RuntimeException("We were unable to find headers in the file.");
+            }
+            do {
+                if (r.getColumnCount() != headerColumns.length) {
+                    continue;
+                }
                 String[] values = new String[r.getColumnCount()];
                 Value[] convertedValues = new Value[r.getColumnCount()];
                 ColumnSegment columnSegment = new ColumnSegment();
@@ -82,7 +119,7 @@ public class CsvFileUploadFormat extends UploadFormat {
                         }
                     }
                 }
-            }
+            } while (r.readRecord());
             gridData.rowCount = grid.size();
             Value[][] v = new Value[grid.size()][];
             for(int i = 0; i < grid.size();i++) {

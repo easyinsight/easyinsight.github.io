@@ -29,6 +29,11 @@ public class ExcelUploadFormat extends UploadFormat {
 
     private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+    @Override
+    public boolean test(byte[] data) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     private String createName(String key, int index) {
         if (key == null || "".equals(key.trim())) {
             return String.valueOf("Column " + index);

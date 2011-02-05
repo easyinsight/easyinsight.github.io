@@ -26,6 +26,8 @@ public abstract class UploadFormat implements Serializable {
     public static final int VERTICAL_HEADERS = 1;
     public static final int HORIZONTAL_HEADERS = 2;
 
+    public abstract boolean test(byte[] data);
+
     public UserUploadAnalysis analyze(byte[] data) {
         DataTypeGuesser dataTypeGuesser = createDataTypeGuesser(data);
         UserUploadAnalysis userUploadAnalysis = new UserUploadAnalysis(dataTypeGuesser.createFeedItems());

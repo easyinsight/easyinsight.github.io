@@ -21,8 +21,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class UploadFormatTester {
 
-    private static String patterns[] = new String [] { ",", "|", "\t", " "};
-    private static String escapedPatterns[] = new String [] { ",", "\\|", "\t", " "};
+    private static String patterns[] = new String [] { ",", "|", "\t"};
+    private static String escapedPatterns[] = new String [] { ",", "\\|", "\t"};
 
     public UploadFormat determineFormat(byte[] data) throws InvalidFormatException {
         UploadFormat uploadFormat;
@@ -64,12 +64,13 @@ public class UploadFormatTester {
     }
 
     private UploadFormat isCsv(byte[] data) {
-        UploadFormat uploadFormat = null;
+        UploadFormat uploadFormat;
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(data);
-            CsvReader reader = new CsvReader(bais, Charset.defaultCharset());
-            if(reader.readHeaders() && reader.readRecord() && reader.getHeaders().length >= reader.getColumnCount()) {
-                uploadFormat = new CsvFileUploadFormat();
+            uploadFormat = new CsvFileUploadFormat();
+            if (uploadFormat.test(data)) {
+                return uploadFormat;
+            } else {
+                uploadFormat = null;
             }
         } catch(Exception e) {
             uploadFormat = null;
