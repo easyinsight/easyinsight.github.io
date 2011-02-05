@@ -72,7 +72,7 @@ public class NumericValue extends Value implements Serializable {
                         transferArray[i++] = character;
                         hitNumber = true;
                     } else {
-                        if (hitNumber && character != ',') {
+                        if (hitNumber && !(character == ',' || character == '%')) {
                             seemsValid = false;
                         }
                     }

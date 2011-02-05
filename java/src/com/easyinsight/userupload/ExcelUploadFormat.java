@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings({"unchecked"})
 public class ExcelUploadFormat extends UploadFormat {
 
-    private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static SimpleDateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     public boolean test(byte[] data) {
@@ -135,7 +135,9 @@ public class ExcelUploadFormat extends UploadFormat {
                 break;
             case HSSFCell.CELL_TYPE_NUMERIC:                                                
                 if (HSSFDateUtil.isCellDateFormatted(cell)) {
-                    obj = new DateValue(cell.getDateCellValue());
+                    DateValue dateValue = new DateValue(cell.getDateCellValue());
+                    dateValue.setFormat(defaultDateFormat.toPattern());
+                    obj = dateValue;
                 } else {
                     obj = new NumericValue(cell.getNumericCellValue());
                 }
@@ -147,8 +149,10 @@ public class ExcelUploadFormat extends UploadFormat {
                     obj = new StringValue(value);
                 } else {
                     try {
-                        Date date = defaultDateFormat.parse(value);
-                        obj = new DateValue(date);
+                        Date date = format.parse(value);
+                        DateValue dateValue = new DateValue(date);
+                        dateValue.setFormat(format.toPattern());
+                        obj = dateValue;
                     } catch (ParseException e) {
                         // ignore
                         obj = new StringValue(value);

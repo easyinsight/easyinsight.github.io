@@ -39,27 +39,29 @@ public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
-    public List<String> testFormat(String format, String value1, String value2, String value3) {
+    public List<Date> testFormat(String format, String value1, String value2, String value3) {
         try {
             DateFormat dateFormat = new SimpleDateFormat(format);
-            if (value1 != null) value1 = transform(dateFormat, value1);
-            if (value2 != null) value2 = transform(dateFormat, value2);
-            if (value3 != null) value3 = transform(dateFormat, value3);
-            return Arrays.asList(value1, value2, value3);
+            Date date1 = null;
+            Date date2 = null;
+            Date date3 = null;
+            if (value1 != null) date1 = transform(dateFormat, value1);
+            if (value2 != null) date2 = transform(dateFormat, value2);
+            if (value3 != null) date3 = transform(dateFormat, value3);
+            return Arrays.asList(date1, date2, date3);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
 
-    private String transform(DateFormat dateFormat, String value) {
+    private Date transform(DateFormat dateFormat, String value) {
         try {
-            Date date = dateFormat.parse(value);
-            return new SimpleDateFormat().format(date);
+            return dateFormat.parse(value);
         } catch (ParseException e) {
-            return "";
+            return null;
         } catch (IllegalArgumentException iae) {
-            return "";
+            return null;
         }
     }
 

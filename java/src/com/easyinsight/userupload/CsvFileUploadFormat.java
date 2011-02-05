@@ -166,6 +166,10 @@ public class CsvFileUploadFormat extends UploadFormat {
                 } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                     value = date.renameMeLater(new StringValue(string));
+                    if (value instanceof DateValue) {
+                        DateValue dateValue = (DateValue) value;
+                        dateValue.setFormat(date.getCustomDateFormat());
+                    }
                 } else {
                     value = new StringValue(string);
                 }

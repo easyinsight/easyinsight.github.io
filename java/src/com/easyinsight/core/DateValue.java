@@ -3,6 +3,7 @@ package com.easyinsight.core;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -12,9 +13,18 @@ import java.util.Date;
  */
 public class DateValue extends Value implements Serializable {
     private Date date;
+    private String format;
     private static final long serialVersionUID = 8170674055682369820L;
 
     public DateValue() {
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
     }
 
     @Override
@@ -22,7 +32,11 @@ public class DateValue extends Value implements Serializable {
         if (date == null) {
             return "";
         }
-        return date.toString();
+        if (format == null) {
+            return date.toString();
+        } else {
+            return new SimpleDateFormat(format).format(date);
+        }
     }
 
     public DateValue(Date date) {

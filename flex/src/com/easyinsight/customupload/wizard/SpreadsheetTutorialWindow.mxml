@@ -14,6 +14,9 @@
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.AnalysisZipCode;
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
+        import com.easyinsight.framework.User;
+
+        import mx.formatters.DateFormatter;
 
         [Bindable]
         private var labeledText:String;
@@ -29,6 +32,13 @@
         private var sampleValue3:String;
 
         [Bindable]
+        private var resultValue1:String;
+        [Bindable]
+        private var resultValue2:String;
+        [Bindable]
+        private var resultValue3:String;
+
+        [Bindable]
         private var initialGuessText:String;
 
         private var _info:FieldUploadInfo;
@@ -41,9 +51,22 @@
 
         private var originalType:int;
 
+        private function updateResultValues():void {
+            if (sampleValue1 != null) {
+                resultValue1 = _analysisItem.getFormatter().format(sampleValue1);
+            }
+            if (sampleValue2 != null) {
+                resultValue2 = _analysisItem.getFormatter().format(sampleValue2);
+            }
+            if (sampleValue3 != null) {
+                resultValue3 = _analysisItem.getFormatter().format(sampleValue3);
+            }
+        }
+
         protected override function commitProperties():void {
             super.commitProperties();
             var item:AnalysisItem = _info.guessedItem;
+            _analysisItem = item;
             displayName = item.display;
             labeledText = "This field was labeled as " + item.display + " in the underlying data.";
             startType = String(item.getType());
@@ -77,6 +100,7 @@
             } else {
                 type = "grouping";
             }
+            updateResultValues();
             determineStackIndex();
             initialGuessText = "Our initial guess is that this field is a " + type + ". In case we got that wrong, here are the available types:";
         }
@@ -104,6 +128,8 @@
             var type:int = int(typeGroup.selectedValue);
             startType = String(type);
             determineStackIndex();
+            saveValues();
+            updateResultValues();
         }
 
         public function saveValues():void {
@@ -168,14 +194,30 @@
 
         private function testedFormat():void {
             var results:ArrayCollection = analysisService.testFormat.lastResult as ArrayCollection;
+
             if (results.length > 0) {
-                sampleValue1 = results.getItemAt(0) as String;
+                var date1:Date = results.getItemAt(0) as Date;
+                if (date1 != null) {
+                    resultValue1 = analysisItem.getFormatter().format(date1);
+                } else {
+                    resultValue1 = "";
+                }
             }
             if (results.length > 1) {
-                sampleValue2 = results.getItemAt(1) as String;
+                var date2:Date = results.getItemAt(1) as Date;
+                if (date2 != null) {
+                    resultValue2 = analysisItem.getFormatter().format(date2);
+                } else {
+                    resultValue2 = "";
+                }
             }
             if (results.length > 2) {
-                sampleValue3 = results.getItemAt(2) as String;
+                var date3:Date = results.getItemAt(2) as Date;
+                if (date3 != null) {
+                    resultValue3 = analysisItem.getFormatter().format(date3);
+                } else {
+                    resultValue3 = "";
+                }
             }
         }
 
@@ -193,11 +235,17 @@
     </mx:HBox>
     <mx:HRule width="100%"/>
     <mx:HBox verticalAlign="middle">
-        <mx:Label text="Here's a sample of the data we found for this field:" fontSize="16"/>
+        <mx:Label text="Here's raw data we found for the field:" fontSize="16"/>
         <mx:VBox>
             <mx:Label text="{sampleValue1}" maxWidth="200"/>
             <mx:Label text="{sampleValue2}" maxWidth="200"/>
             <mx:Label text="{sampleValue3}" maxWidth="200"/>
+        </mx:VBox>
+        <mx:Label text="Which will look like this:" fontSize="16"/>
+        <mx:VBox>
+            <mx:Label text="{resultValue1}" maxWidth="200"/>
+            <mx:Label text="{resultValue2}" maxWidth="200"/>
+            <mx:Label text="{resultValue3}" maxWidth="200"/>
         </mx:VBox>
     </mx:HBox>
     <mx:HRule width="100%"/>
@@ -259,7 +307,7 @@
                 </mx:FormItem>
                 <mx:FormItem label="How do you want to format values?" fontWeight="normal" fontSize="16" fontFamily="Lucida Grande">
                     <util:SmartComboBox id="formatBox" labelField="label" selectedProperty="data" selectedValue="{selectedFormatting}"
-                             fontWeight="normal" fontSize="16" fontFamily="Lucida Grande">
+                             fontWeight="normal" fontSize="16" fontFamily="Lucida Grande" change="saveValues(); updateResultValues();">
                         <util:dataProvider>
                             <mx:Array>
                                 <mx:Object data="{FormattingConfiguration.NUMBER}" label="Number"/>
@@ -275,7 +323,7 @@
             <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
                 <mx:FormItem label="What unit of time should this date default to?" fontWeight="normal" fontSize="16" fontFamily="Lucida Grande">
                     <util:SmartComboBox id="dateLevelBox" labelField="label" selectedProperty="data" selectedValue="{selectedDateLevel}"
-                             fontWeight="normal" fontSize="16" fontFamily="Lucida Grande">
+                             fontWeight="normal" fontSize="16" fontFamily="Lucida Grande" change="saveValues(); updateResultValues();">
                         <util:dataProvider>
                             <mx:Array>
                                 <mx:Object data="{AnalysisItemTypes.YEAR_LEVEL}" label="Year"/>

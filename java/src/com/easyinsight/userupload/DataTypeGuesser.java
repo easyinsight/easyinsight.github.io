@@ -28,9 +28,14 @@ public class DataTypeGuesser implements IDataTypeGuesser {
     private Map<Key, AnalysisItem> dataTypeMap = new HashMap<Key, AnalysisItem>();
 
     private Map<Key, Set<String>> guessesMap = new HashMap<Key, Set<String>>();
+    private Map<Key, Set<String>> rawDataMap = new HashMap<Key, Set<String>>();
 
     public Map<Key, Set<String>> getGuessesMap() {
         return guessesMap;
+    }
+
+    public Map<Key, Set<String>> getRawDataMap() {
+        return rawDataMap;
     }
 
     public void addValue(Key tag, Value value) {
@@ -70,8 +75,17 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 }
                 if (newGuess == null) {
                     try {
-                        Double.parseDouble(stringValue.getValue());
-                        newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                        double numericValue = NumericValue.produceDoubleValue(stringValue.getValue());
+                        if (numericValue == 0) {
+                            SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
+                            if (dateFormat != null) {
+                                newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.DAY_LEVEL, dateFormat.toPattern());
+                            } else {
+                                newGuess = new AnalysisDimension(tag, true);
+                            }
+                        } else {
+                            newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                        }
                     } catch (NumberFormatException e) {
                         SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
                         if (dateFormat != null) {
