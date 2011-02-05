@@ -119,8 +119,13 @@
             tabNavigator.addChildAt(editor as DisplayObject, 0);
         }
 
+        private var lastTab:int = 0;
+
         private function onEvent(event:Event):void {
-            PopUpUtil.centerPopUp(this);
+            if (lastTab != tabNavigator.selectedIndex) {
+                lastTab = tabNavigator.selectedIndex;
+                PopUpUtil.centerPopUp(this);
+            }
         }
 
         private function cancel():void {

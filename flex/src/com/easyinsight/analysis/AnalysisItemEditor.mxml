@@ -2,7 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:range="com.easyinsight.analysis.range.*"
         xmlns:analysis="com.easyinsight.analysis.*"
         creationComplete="initStuff()" creationPolicy="all"
-        implements="com.easyinsight.analysis.IAnalysisItemEditor" horizontalAlign="center">
+        implements="com.easyinsight.analysis.IAnalysisItemEditor" horizontalAlign="center" paddingLeft="10">
     <mx:states>
 
         <mx:State name="Measure">
