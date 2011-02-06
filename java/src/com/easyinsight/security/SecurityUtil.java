@@ -333,13 +333,13 @@ public class SecurityUtil {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from upload_policy_groups, group_to_user_join where " +
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_user_join.binding_type from upload_policy_groups, group_to_user_join where " +
                         "group_to_user_join.group_id = upload_policy_groups.group_id and group_to_user_join.user_id = ? and upload_policy_groups.feed_id = ?");
                 groupQueryStmt.setLong(1, userID);
                 groupQueryStmt.setLong(2, feedID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
                 if (groupRS.next()) {
-                    return Roles.SUBSCRIBER;
+                    return groupRS.getInt(1);
                 } else {
                     PreparedStatement accountQueryStmt = conn.prepareStatement("select role from upload_policy_users, user, data_feed where " +
                             "data_feed.data_feed_id = ? AND data_feed.data_feed_id = upload_policy_users.feed_id and " +
