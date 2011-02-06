@@ -57,16 +57,16 @@ public class HealthServlet extends HttpServlet {
             xmlBuilder.append("<response>\r\n");
             for (Status status : statusList) {
                 xmlBuilder.append("\t<server>\r\n");
-                xmlBuilder.append("\t\t<status>\r\n");
-                xmlBuilder.append("\t\t\t").append(status.getExtendedCode());
-                xmlBuilder.append("\t\t</status>\r\n");
-                xmlBuilder.append("\t\t\t").append(status.getHealthInfo() == null ? "" : status.getHealthInfo().toXML());
-                xmlBuilder.append("\t\t<message>\r\n");
-                xmlBuilder.append("\t\t\t").append(status.getExtendedMessage());
-                xmlBuilder.append("\t\t</message>\r\n");
+                xmlBuilder.append("\t\t<status>");
+                xmlBuilder.append(status.getExtendedCode());
+                xmlBuilder.append("</status>\r\n");
+                xmlBuilder.append(status.getHealthInfo() == null ? "" : status.getHealthInfo().toXML());
+                xmlBuilder.append("\t\t<message>");
+                xmlBuilder.append(status.getExtendedMessage());
+                xmlBuilder.append("</message>\r\n");
                 xmlBuilder.append("\t\t<time>\r\n");
-                xmlBuilder.append("\t\t\t").append(new Date(status.getTime()));
-                xmlBuilder.append("\t\t</time>\r\n");
+                xmlBuilder.append(new Date(status.getTime()));
+                xmlBuilder.append("</time>\r\n");
                 xmlBuilder.append("\t</server>\r\n");
             }
             xmlBuilder.append("</response>");

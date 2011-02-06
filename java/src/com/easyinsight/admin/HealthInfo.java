@@ -10,10 +10,10 @@ import java.text.MessageFormat;
  */
 public class HealthInfo implements Serializable {
 
-    private static final String HEALTH_XML = "<health>\r\n<currentMemory>{0}</currentMemory>\r\n" +
-            "<freeMemory>{1}</freeMemory>\r\n<maxMemory>{2}</maxMemory>\r\n<threadCount>{3}</threadCount>\r\n" +
-            "<activeDBConnections>{4}</activeDBConnections>\r\n<activeUsers>{5}</activeUsers>\r\n<systemLoadAverage>{6}</systemLoadAverage>\r\n" +
-            "<clientCount>{7}</clientCount>\r\n<server>{8}</server>\r\n</health>\r\n";
+    private static final String HEALTH_XML = "\t\t<health>\r\n\t\t\t<currentMemory>{0}</currentMemory>\r\n" +
+            "\t\t\t<freeMemory>{1}</freeMemory>\r\n\t\t\t<maxMemory>{2}</maxMemory>\r\n\t\t\t<threadCount>{3}</threadCount>\r\n" +
+            "\t\t\t<activeDBConnections>{4}</activeDBConnections>\r\n\t\t\t<activeUsers>{5}</activeUsers>\r\n\t\t\t<systemLoadAverage>{6}</systemLoadAverage>\r\n" +
+            "\t\t\t<clientCount>{7}</clientCount>\r\n\t\t\t<server>{8}</server>\r\n\t\t</health>\r\n";
 
     private long currentMemory;
     private long freeMemory;
