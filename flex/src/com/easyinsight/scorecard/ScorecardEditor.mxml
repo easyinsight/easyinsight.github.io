@@ -72,6 +72,8 @@
         }
 
         private function setup():void {
+            kpiNameFactory.contextMenuAvailable = true;
+            kpiIconFactory.contextMenuAvailable = true;
             addEventListener(KPIEvent.KPI_ADDED, addedKPI);
             addEventListener(KPIEvent.KPI_EDITED, onKPIEdit);
             addEventListener(KPIEvent.KPI_REMOVED, deletedKPI);

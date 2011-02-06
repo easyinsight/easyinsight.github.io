@@ -36,6 +36,8 @@
         }
 
         private function setup():void {
+            kpiNameFactory.contextMenuAvailable = true;
+            kpiIconFactory.contextMenuAvailable = true;
             ProgressAlert.alert(this, "Retrieving scorecard...", null, scorecardService.getScorecard);
             scorecardService.getScorecard.send(_scorecardID);
         }
