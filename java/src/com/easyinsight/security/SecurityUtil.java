@@ -303,7 +303,7 @@ public class SecurityUtil {
             if (rs.next()) {
                 return Roles.OWNER;
             } else {
-                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from group_to_insight, group_to_user_join where " +
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_user_join.binding_type from group_to_insight, group_to_user_join where " +
                         "group_to_user_join.group_id = group_to_insight.group_id and group_to_user_join.user_id = ? and group_to_insight.insight_id = ?");
                 groupQueryStmt.setLong(1, userID);
                 groupQueryStmt.setLong(2, insightID);
