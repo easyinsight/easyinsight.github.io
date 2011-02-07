@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,10 +17,23 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class CancelUser extends HttpServlet {
+
+    private static final String RESPONSE_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "\t<response>\n" +
+        "\t\t<isValid>{0}</isCreated>\n" +
+        "\t</response>";
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String username = request.getParameter("username");
-        UserService service = new UserService();
-        service.cancelPaidAccount();
+        boolean success = true;
+        try {
+            String username = request.getParameter("username");
+            UserService service = new UserService();
+            service.cancelPaidAccount(username);
+        } catch(Exception e) {
+            success = false;
+        }
+        response.setStatus(success ? 422 : 200);
+        response.getWriter().print(MessageFormat.format(RESPONSE_XML, success));
+        response.flushBuffer();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
