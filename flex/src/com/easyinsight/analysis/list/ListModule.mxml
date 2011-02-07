@@ -395,17 +395,19 @@
                     var columnIndex:int = findColumnIndex(item.qualifiedName());
                     item.itemPosition = columnIndex;
                     var column:AdvancedDataGridColumn = dataGrid.columns[columnIndex];
-                    item.width = column.width;
-                    var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
-                    if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
-                        item.sortSequence = sortInfo.sequenceNumber;
-                        if (sortInfo.descending) {
-                            item.sort = 2;
+                    if (column != null) {
+                        item.width = column.width;
+                        var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);
+                        if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
+                            item.sortSequence = sortInfo.sequenceNumber;
+                            if (sortInfo.descending) {
+                                item.sort = 2;
+                            } else {
+                                item.sort = 1;
+                            }
                         } else {
-                            item.sort = 1;
+                            item.sort = 0;
                         }
-                    } else {
-                        item.sort = 0;
                     }
                 }
             }
