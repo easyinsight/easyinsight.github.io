@@ -1,0 +1,29 @@
+<project default="healthwar" basedir="." name="healthwar">
+
+    <property name="out.path" value="../out"/>
+    <property name="out.classes.path" value="../out/classes"/>
+    <target name="healthwar">
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${out.classes.path}"/>
+        <javac destdir="${out.classes.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+                <fileset file="../../java/lib/core/servlet-api.jar"/>
+            </classpath>
+            <include name="**"/>
+            <exclude name="tags/**"/>
+        </javac>
+        <war destfile="${out.path}/health.war">
+            <lib dir="../lib" />
+            <classes dir="${out.classes.path}" />
+            <fileset dir="../web" />
+        </war>
+
+    </target>
+</project>

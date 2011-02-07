@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+
+    <display-name>monitoring</display-name>
+    <description>Monitoring</description>
+
+    <servlet>
+        <servlet-name>monitor</servlet-name>
+        <display-name>monitor</display-name>
+        <servlet-class>com.easyinsight.health.HealthCheckServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>startMonitor</servlet-name>
+        <display-name>startMonitor</display-name>
+        <servlet-class>com.easyinsight.health.StartMonitoringServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>stopMonitor</servlet-name>
+        <display-name>stopMonitor</display-name>
+        <servlet-class>com.easyinsight.health.StopMonitoringServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>currentMonitor</servlet-name>
+        <display-name>currentMonitor</display-name>
+        <servlet-class>com.easyinsight.health.CurrentMonitoringServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>startMonitor</servlet-name>
+        <url-pattern>/startMonitor</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>stopMonitor</servlet-name>
+        <url-pattern>/stopMonitor</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>currentMonitor</servlet-name>
+        <url-pattern>/currentMonitor</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>monitor</servlet-name>
+        <url-pattern>/monitor</url-pattern>
+    </servlet-mapping>
+
+</web-app>
