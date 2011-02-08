@@ -31,7 +31,7 @@ public class ValidateUser extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String name = request.getParameter("username");
-        System.out.println(name);
+        System.out.println("username: " + name);
         UserService service = new UserService();
         boolean success = service.doesAccountExist(name);
         response.setStatus(success ? 422 : 200);

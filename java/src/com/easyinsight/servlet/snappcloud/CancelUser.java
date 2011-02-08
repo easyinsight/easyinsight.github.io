@@ -26,6 +26,7 @@ public class CancelUser extends HttpServlet {
         boolean success = true;
         try {
             String username = request.getParameter("username");
+            System.out.println("username: " + username);
             UserService service = new UserService();
             service.cancelPaidAccount(username);
         } catch(Exception e) {
