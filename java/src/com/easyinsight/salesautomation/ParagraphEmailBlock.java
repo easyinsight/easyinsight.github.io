@@ -9,9 +9,16 @@ public class ParagraphEmailBlock extends EmailBlock {
 
     private String paragraph;
     private String[] links;
+    private boolean lastParagraph = false;
 
     public ParagraphEmailBlock(String paragraph, String... links) {
         this.paragraph = paragraph;
+        this.links = links;
+    }
+
+    public ParagraphEmailBlock(String paragraph, boolean lastParagraph, String... links) {
+        this.paragraph = paragraph;
+        this.lastParagraph = lastParagraph;
         this.links = links;
     }
 
@@ -47,6 +54,7 @@ public class ParagraphEmailBlock extends EmailBlock {
             }
             i++;
         } while (index != -1);
-        return text;
+        if (lastParagraph) return text;
+        else return text + "\r\n\r\n";
     }
 }
