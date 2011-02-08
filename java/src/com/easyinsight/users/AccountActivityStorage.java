@@ -66,7 +66,7 @@ public class AccountActivityStorage {
             long scheduleID = rs.getLong(3);
             try {
                 SalesEmail.leadNurture(userID, targetNumber, conn);
-            } catch (MessagingException e) {
+            } catch (Exception e) {
                 LogClass.error(e);
             }
             updateStmt.setLong(1, scheduleID);
