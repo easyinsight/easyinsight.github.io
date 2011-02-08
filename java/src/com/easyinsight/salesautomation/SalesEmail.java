@@ -125,7 +125,7 @@ public class SalesEmail implements Runnable {
             for (EmailBlock emailBlock : emailBlocks) {
                 sb.append(emailBlock.toText());
             }
-            new SendGridEmail().sendEmail(email, subject, sb.toString(), "sales@easy-insight.com", false, "Easy Insight Marketing");
+            //new SendGridEmail().sendEmail(email, subject, sb.toString(), "sales@easy-insight.com", false, "Easy Insight Marketing");
         }
     }
 }
