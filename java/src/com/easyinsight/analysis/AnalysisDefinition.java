@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.core.Key;
 
@@ -379,7 +380,7 @@ public class AnalysisDefinition implements Cloneable {
                 cleanup(clonedItem, changingDataSource);
                 replacementMap.put(baseItem.getAnalysisItemID(), clonedItem);
             }
-            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, false);
+            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems, true, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
             for (AnalysisItem item : items) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();
@@ -392,7 +393,7 @@ public class AnalysisDefinition implements Cloneable {
         if (this.filterDefinitions != null) {
             for (FilterDefinition persistableFilterDefinition : this.filterDefinitions) {
                 filterDefinitions.add(persistableFilterDefinition.clone());
-                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true);
+                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, reportItems, true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
                 for (AnalysisItem item : filterItems) {
                     if (replacementMap.get(item.getAnalysisItemID()) == null) {
                         AnalysisItem clonedItem = item.clone();
@@ -410,7 +411,7 @@ public class AnalysisDefinition implements Cloneable {
                 AnalysisItem clonedItem = entry.getValue().clone();
                 replacementMap.put(entry.getValue().getAnalysisItemID(), clonedItem);
                 clonedStructure.put(entry.getKey(), clonedItem);
-                List<AnalysisItem> items = entry.getValue().getAnalysisItems(allFields, reportItems, false, true, false);
+                List<AnalysisItem> items = entry.getValue().getAnalysisItems(allFields, reportItems, false, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
                 for (AnalysisItem item : items) {
                     if (replacementMap.get(item.getAnalysisItemID()) == null) {
                         AnalysisItem clonedChildItem = item.clone();

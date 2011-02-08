@@ -40,7 +40,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         this.derivationCode = derivationCode;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
@@ -77,7 +77,7 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false, criteria));
             }
         }
 
@@ -128,14 +128,16 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
             }
             visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
             calculationTreeNode.accept(visitor);
+
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
+            calculationTreeNode.accept(rowVisitor);
+            return new StringValue(rowVisitor.getResult().toString());
         } catch (RecognitionException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } catch (FunctionException fe) {
+            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
         }
-
-        ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
-        calculationTreeNode.accept(rowVisitor);
-        return new StringValue(rowVisitor.getResult().toString());
     }
 
     public List<AnalysisItem> getDerivedItems() {

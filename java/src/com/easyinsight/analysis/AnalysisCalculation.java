@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Column;
 
+import com.easyinsight.pipeline.CleanupComponent;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -57,7 +58,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return super.getType() | AnalysisItemTypes.CALCULATION;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
@@ -76,7 +77,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
             e.printStackTrace();
             throw new RuntimeException(e);
         } catch (FunctionException fe) {
-            throw new ReportException(new AnalysisItemFault(fe.getMessage(), this));
+            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
         }
 
         VariableListVisitor variableVisitor = new VariableListVisitor();
@@ -90,6 +91,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
 
         if (!includeFilters && isApplyBeforeAggregation()) return analysisItemList;
 
+        if (!isApplyBeforeAggregation() && !hasCriteria(criteria, CleanupComponent.AGGREGATE_CALCULATIONS)) return analysisItemList;
+
         for (KeySpecification spec : specs) {
             AnalysisItem analysisItem;
             try {
@@ -101,7 +104,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 if (completelyShallow) {
                     analysisItemList.add(analysisItem);
                 } else {
-                    analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false));
+                    analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false, criteria));
                 }
             }
         }
@@ -153,22 +156,21 @@ public class AnalysisCalculation extends AnalysisMeasure {
             }
             visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
             calculationTreeNode.accept(visitor);
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
+            calculationTreeNode.accept(rowVisitor);
+            Value result = rowVisitor.getResult();
+            if (result.type() == Value.EMPTY) {
+                return result;
+            } else if (result.type() == Value.NUMBER) {
+                return result;
+            } else {
+                return new NumericValue(result.toDouble());
+            }
         } catch (RecognitionException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage(), this));
-        }
-
-        ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
-        calculationTreeNode.accept(rowVisitor);
-        Value result = rowVisitor.getResult();
-        if (result.type() == Value.EMPTY) {
-            return result;
-        } else if (result.type() == Value.NUMBER) {
-            return result;
-        } else {
-            return new NumericValue(result.toDouble());
         }
     }
 

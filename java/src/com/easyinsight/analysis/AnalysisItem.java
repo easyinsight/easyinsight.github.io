@@ -15,6 +15,7 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
 import com.easyinsight.calculations.Resolver;
+import com.easyinsight.etl.LookupTable;
 import com.easyinsight.pipeline.IComponent;
 import org.hibernate.Session;
 
@@ -240,6 +241,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return (getType() & type) == type;
     }
 
+    protected boolean hasCriteria(int criteria, int particular) {
+        return (criteria & particular) == particular;
+    }
+
     public boolean requiresDataEarly() {
         return false;
     }
@@ -333,16 +338,19 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
         if (includeFilters && getFilters().size() > 0) {
             for (FilterDefinition filterDefinition : getFilters()) {
-                items.addAll(filterDefinition.getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false));
+                items.addAll(filterDefinition.getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false, criteria));
             }
         }
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
-            items.add(new FeedService().getLookupTable(getLookupTableID()).getSourceField());
+            LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
+            if (lookupTable != null) {
+                items.add(lookupTable.getSourceField());
+            }
         }
         return items;
     }

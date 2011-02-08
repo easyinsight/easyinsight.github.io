@@ -7,6 +7,7 @@ import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.security.SecurityUtil;
 
 
@@ -177,7 +178,7 @@ public class Dashboard implements Cloneable {
 
         for (FilterDefinition persistableFilterDefinition : this.filters) {
             filterDefinitions.add(persistableFilterDefinition.clone());
-            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true);
+            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
             for (AnalysisItem item : filterItems) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();

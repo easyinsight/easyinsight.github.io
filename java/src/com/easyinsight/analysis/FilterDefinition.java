@@ -2,7 +2,6 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.pipeline.FilterComponent;
-import com.easyinsight.pipeline.FilterPipelineCleanupComponent;
 import com.easyinsight.pipeline.IComponent;
 import org.hibernate.Session;
 
@@ -82,8 +81,8 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         this.applyBeforeAggregation = applyBeforeAggregation;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters) {
-        return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, int criteria) {
+        return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false, criteria);
     }
 
     public abstract MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata);

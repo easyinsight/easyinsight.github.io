@@ -3,9 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
-import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.logging.LogClass;
 import org.antlr.runtime.ANTLRStringStream;
@@ -41,7 +39,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         this.derivationCode = derivationCode;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
@@ -78,7 +76,7 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
                 throw new RuntimeException(e);
             }
             if (analysisItem != null) {
-                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false));
+                analysisItemList.addAll(analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false, criteria));
             }
         }
 
@@ -129,14 +127,16 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             }
             visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
             calculationTreeNode.accept(visitor);
+
+            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
+            calculationTreeNode.accept(rowVisitor);
+            return rowVisitor.getResult();
         } catch (RecognitionException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } catch (FunctionException fe) {
+            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
         }
-
-        ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
-        calculationTreeNode.accept(rowVisitor);
-        return rowVisitor.getResult();        
     }
 
     public List<AnalysisItem> getDerivedItems() {

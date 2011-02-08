@@ -85,11 +85,14 @@ public class StandardReportPipeline extends Pipeline {
 
         // done with row level operations, clean everything up
 
-        components.add(new CleanupComponent());
+        components.add(new CleanupComponent(CleanupComponent.AGGREGATE_CALCULATIONS));
         components.add(new NormalizationComponent());
         components.add(new AggregationComponent());
 
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, false));
+
+        // need another cleanup component here...
+        components.add(new CleanupComponent(0));
 
         components.add(new AggregationComponent(AggregationTypes.RANK));
 
