@@ -45,12 +45,6 @@ public class DataTypeMutex {
             Semaphore semaphore = mutexMap.get(feedType);
             if (semaphore.tryAcquire()) {
             } else {
-                DataSourceRefreshEvent info = new DataSourceRefreshEvent();
-                info.setDataSourceID(dataSourceID);
-                info.setDataSourceName("The target system is having trouble with volume. It may take a minute or two for us to start synchronizing.");
-                info.setType(DataSourceRefreshEvent.BLOCKED);
-                info.setUserId(SecurityUtil.getUserID());
-                MessageUtils.sendMessage("generalNotifications", info);
                 try {
                     semaphore.acquire();
                 } catch (InterruptedException e) {
