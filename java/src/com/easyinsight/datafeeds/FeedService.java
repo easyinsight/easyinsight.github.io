@@ -523,8 +523,7 @@ public class FeedService {
                 }
                 lookupTable.setLookupPairs(pairs);
             } else {
-
-                throw new RuntimeException();
+                return null;
             }
             conn.commit();
         } catch (Exception e) {
