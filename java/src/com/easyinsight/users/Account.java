@@ -140,6 +140,9 @@ public class Account {
     @Column(name="opt_in_email")
     private boolean optInEmail;
 
+    @Column(name="snappcloud_id")
+    private String snappCloudId;
+
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double PLUS_BILLING_AMOUNT = 75.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
@@ -502,5 +505,13 @@ public class Account {
 
     public void setBillingMonthOfYear(Integer billingMonthOfYear) {
         this.billingMonthOfYear = billingMonthOfYear;
+    }
+
+    public String getSnappCloudId() {
+        return snappCloudId;
+    }
+
+    public void setSnappCloudId(String snappCloudId) {
+        this.snappCloudId = snappCloudId;
     }
 }

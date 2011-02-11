@@ -25,10 +25,10 @@ public class CancelUser extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         boolean success = true;
         try {
-            String username = request.getParameter("username");
-            System.out.println("username: " + username);
+            String snappCloudID = request.getParameter("snappcloudid");
+            System.out.println("snappcloudid: " + snappCloudID);
             UserService service = new UserService();
-            service.cancelPaidAccount(username);
+            service.cancelSnappCloudAccount(snappCloudID);
         } catch(Exception e) {
             success = false;
         }

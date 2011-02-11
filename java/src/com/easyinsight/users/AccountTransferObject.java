@@ -18,6 +18,16 @@ public class AccountTransferObject {
     private Date creationDate;
     private boolean optInEmail;
 
+    public String getSnappCloudId() {
+        return snappCloudId;
+    }
+
+    public void setSnappCloudId(String snappCloudId) {
+        this.snappCloudId = snappCloudId;
+    }
+
+    private String snappCloudId;
+
     public boolean isOptInEmail() {
         return optInEmail;
     }
@@ -101,6 +111,7 @@ public class AccountTransferObject {
         account.setName(name);
         account.setApiEnabled(apiEnabled);
         account.setCreationDate(creationDate);
+        account.setSnappCloudId(snappCloudId);
         return account;
     }
 }

@@ -331,6 +331,27 @@ public class UserService {
     public void cancelPaidAccount(long accountID, Session session) {
         session.getTransaction().begin();
         Account a = (Account) session.createQuery("from Account where accountID  = ?").setLong(0, accountID).list().get(0);
+        cancelAccount(session, a);
+        session.getTransaction().commit();
+    }
+
+    public void cancelSnappCloudAccount(String snappCloudId) {
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            Account a = (Account) session.createQuery("from Account where snappCloudID = ?").setString(0, snappCloudId).list().get(0);
+            cancelAccount(session, a);
+            session.getTransaction().commit();
+        } catch(Exception e) {
+            session.getTransaction().rollback();
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    private void cancelAccount(Session session, Account a) {
         a.setAccountState(Account.CLOSING);
         a.setBillingInformationGiven(false);
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
@@ -338,7 +359,6 @@ public class UserService {
         billingSystem.setPassword("password1");
         billingSystem.cancelPlan(a.getAccountID());
         session.save(a);
-        session.getTransaction().commit();
     }
 
     public void cancelFreeAccount() {
