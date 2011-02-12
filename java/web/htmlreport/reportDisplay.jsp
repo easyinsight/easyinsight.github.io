@@ -39,7 +39,8 @@
                     com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
                     if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
                         WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
-                        if (report.getReportType() == WSAnalysisDefinition.LIST) {
+                        if (report.getReportType() == WSAnalysisDefinition.LIST || report.getReportType() == WSAnalysisDefinition.TREE ||
+                                report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                             ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
                             out.println(ExportService.toTable(report, dataResults, conn));
                         } else {
