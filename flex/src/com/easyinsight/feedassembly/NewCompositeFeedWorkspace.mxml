@@ -101,11 +101,11 @@
 	</mx:RemoteObject>
     <mx:HBox paddingLeft="20">
         <mx:Button icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
-                   toolTip="Close"/>
+                   toolTip="Close" label="Close Editor" labelPlacement="right"/>
         <mx:Button icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                       toolTip="Save"/>
+                       toolTip="Save" label="Save" labelPlacement="right"/>
         <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="analyze()"
-                       toolTip="Analyze" enabled="{feedDefinition != null}"/>
+                       toolTip="Analyze" enabled="{feedDefinition != null}" label="Create a Report" labelPlacement="right"/>
     </mx:HBox>
     <feedassembly:CompositeWorkspace id="workspace" width="100%" height="100%" feeds="{_feedList}" feedChange="onFeedChange(event)"/>
 </mx:VBox>

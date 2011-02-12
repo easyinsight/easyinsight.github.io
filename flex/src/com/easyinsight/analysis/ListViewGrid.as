@@ -1,6 +1,7 @@
 package com.easyinsight.analysis {
 import flash.display.Sprite;
 
+import flash.events.MouseEvent;
 import flash.utils.Dictionary;
 
 import mx.collections.ArrayCollection;
@@ -21,6 +22,13 @@ public class ListViewGrid extends AdvancedDataGrid {
         itemRendererToFactoryMap = new Dictionary(false);
     }
 
+    override protected function mouseMoveHandler(event:MouseEvent):void {
+        try {
+            super.mouseMoveHandler(event);
+        } catch (e:Error) {
+            // ignore
+        }
+    }
 
     /**
      * A user-defined function that will return the correct color of the

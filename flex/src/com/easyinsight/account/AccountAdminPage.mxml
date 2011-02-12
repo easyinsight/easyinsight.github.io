@@ -13,6 +13,7 @@
                 <account:AccountState accountInfo="{accountInfo}"/>
                 <account:AccountTrialDate accountInfo="{accountInfo}"/>
             </mx:Form>
+            <mx:Button label="Upgrade Account..." click="upgrade()" styleName="grayButton" fontSize="14" width="220"/>
             <mx:Button label="View Invoices..." click="invoices()" styleName="grayButton" fontSize="14" width="220"/>
             <mx:Button label="Billing Configuration..." click="navigateToURL(new URLRequest('billing/billing.jsp'), '_self');" styleName="grayButton" fontSize="14" width="220"/>
             <mx:Button label="Cancel Account..." click="cancelPaidAccount()"
@@ -47,6 +48,17 @@
 
         [Bindable]
         private var showUpgrade:Boolean;
+
+        protected function upgrade():void {
+            var window:BasicUpgradeWindow = new BasicUpgradeWindow();
+            window.addEventListener(UpgradeEvent.UPGRADE_EVENT, onUpgrade, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onUpgrade(event:UpgradeEvent):void {
+            dispatchEvent(new Event("refreshAccount"));
+        }
 
         private function editAccountStyling():void {
             var applicationSkinWindow:ApplicationSkinWindow = new ApplicationSkinWindow();

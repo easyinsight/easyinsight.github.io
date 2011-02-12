@@ -126,7 +126,7 @@
                                                itemRenderer="com.easyinsight.schedule.DataSourceHealthIndicator" width="50"/>
                         <util:EIDataGridColumn dataField="activityDisplay" headerText="Activity"/>
                         <util:EIDataGridColumn dataField="interval" headerText="When" width="250"/>
-                        <util:EIDataGridColumn dataField="activityDisplay" headerText="" sortable="false"
+                        <util:EIDataGridColumn headerText="" sortable="false"
                                                itemRenderer="com.easyinsight.schedule.ActivityControls" width="100"/>
                     </scorecard:columns>
                 </scorecard:HackDataGrid>

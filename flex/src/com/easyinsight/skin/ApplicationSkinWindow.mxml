@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.CheckBoxReportFormItem;
         import com.easyinsight.analysis.ColorReportFormItem;
 
         import com.easyinsight.analysis.ComboBoxReportFormItem;
@@ -26,6 +27,13 @@
         public static const ACCOUNT_SKIN:int = 2;
 
         private var _skinMode:int;
+
+        [Bindable]
+        private var _initialIndex:int = 0;
+
+        public function set initialIndex(value:int):void {
+            _initialIndex = value;
+        }
 
         public function set skinMode(value:int):void {
             _skinMode = value;
@@ -72,6 +80,20 @@
             for each (var item:ReportFormItem in items) {
                 reportForm.addChild(item);
             }
+
+            var offset:int = items.length;
+            items.addItem(new CheckBoxReportFormItem("Name on My Data Tree", "myDataName", skin.myDataName, skin));
+            items.addItem(new CheckBoxReportFormItem("Size on My Data Tree", "myDataSize", skin.myDataSize, skin));
+            items.addItem(new CheckBoxReportFormItem("Last Data Time on My Data Tree", "myDataLastTime", skin.myDataLastTime, skin));
+            items.addItem(new CheckBoxReportFormItem("Combine Data Source", "myDataCombine", skin.myDataCombine, skin));
+            items.addItem(new CheckBoxReportFormItem("Create Scorecard", "myDataNewScorecard", skin.myDataNewScorecard, skin));
+            items.addItem(new CheckBoxReportFormItem("Create KPI Tree", "myDataNewKPITree", skin.myDataNewKPITree, skin));
+            items.addItem(new CheckBoxReportFormItem("Create Dashboard", "myDataNewDashboard", skin.myDataNewDashboard, skin));
+            items.addItem(new CheckBoxReportFormItem("Create Lookup Table", "myDataLookupTable", skin.myDataLookupTable, skin));
+
+            for (var i:int = offset; i < items.length; i++) {
+                myDataForm.addChild(DisplayObject(items.getItemAt(i)));
+            }
         }
 
         private function onDone(event:FlexEvent):void {
@@ -87,6 +109,7 @@
             }
             User.getInstance().applicationSkin = resultSkin;
             ApplicationSkin.instance().applyUserSettings(User.getInstance().applicationSkin);
+            dispatchEvent(new Event(Event.CHANGE));
             PopUpManager.removePopUp(this);
         }
 
@@ -114,9 +137,19 @@
         <mx:method name="saveAccountSkin" result="savedSettings()"/>
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Form id="reportForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+        <mx:TabNavigator resizeToContent="true" creationPolicy="all" selectedIndex="{_initialIndex}">
+            <mx:VBox label="Application Settings" width="600" horizontalAlign="center">
+                <mx:Form id="reportForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
 
-        </mx:Form>
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox label="My Data Settings" width="600" horizontalAlign="center">
+                <mx:Form id="myDataForm" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+
+                </mx:Form>
+            </mx:VBox>
+        </mx:TabNavigator>
+
         <mx:HBox width="100%" horizontalAlign="center">
             <util:SaveButton label="Save" click="save()"/>
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

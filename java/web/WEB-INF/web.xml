@@ -61,6 +61,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>HtmlImage</servlet-name>
+        <display-name>HtmlImage</display-name>
+        <servlet-class>com.easyinsight.export.HTMLImageServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>Excel</servlet-name>
         <display-name>Excel</display-name>
         <servlet-class>com.easyinsight.export.ExcelServlet</servlet-class>
@@ -236,6 +243,11 @@
      <servlet-mapping>
         <servlet-name>Image</servlet-name>
         <url-pattern>/image</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HtmlImage</servlet-name>
+        <url-pattern>/htmlimage</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

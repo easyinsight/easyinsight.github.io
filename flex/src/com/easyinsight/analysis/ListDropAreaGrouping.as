@@ -13,10 +13,11 @@ import mx.controls.Alert;
 import mx.core.UIComponent;
 import mx.events.FlexEvent;
 
+[Event(name="analysisItemUpdate", type="com.easyinsight.analysis.AnalysisItemUpdateEvent")]
 public class ListDropAreaGrouping extends FlowBox
 	{		
 		private var dropAreas:ArrayCollection = new ArrayCollection();
-		private var _dropAreaType:Class;
+		private var _dropAreaType:Class = ListDropArea;
 		
 		private var _unlimited:Boolean = false;
 		private var _maxElements:int = -1;

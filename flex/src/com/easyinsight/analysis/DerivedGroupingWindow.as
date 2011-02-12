@@ -18,6 +18,10 @@ public class DerivedGroupingWindow extends CalculationWindow {
             calcText = derivedGrouping.derivationCode;
             calcName = derivedGrouping.display;
         }
+        example1 = "namedbracketvalue([Deal Description], \"Channel\")";
+        example1Explanation = "";
+        example2 = "[First Name] + [Last Name]";
+        example2Explanation = "";
     }
 
     override protected function get calculationItem():AnalysisItem {

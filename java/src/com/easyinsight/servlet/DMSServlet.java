@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.api.APIManager;
 import com.easyinsight.datafeeds.migration.MigrationManager;
+import com.easyinsight.export.HtmlResultCache;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.logging.LogClass;
@@ -51,6 +52,7 @@ public class DMSServlet extends HttpServlet {
                 migrationManager.migrate();
                 FeedRegistry.initialize();
                 ReportCache.initialize();
+                HtmlResultCache.initialize();
                 new APIManager().start();
                 scheduler = Scheduler.instance();
                 EventDispatcher.instance().start();

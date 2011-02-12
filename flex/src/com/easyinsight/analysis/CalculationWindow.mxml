@@ -182,7 +182,7 @@
                 }
             }
             if (!functionOutput) {
-                var str:String = ":<>,.;/?\"\'{}-=+";
+                var str:String = ":<>,.;/?\"\'{}-=+$";
                 var foundSpecialChar:Boolean = false;
                 for (var i:int = 0; i < str.length; i++) {
                     if (outputStr.indexOf(str.charAt(i)) != -1)
@@ -193,6 +193,10 @@
                 }
             }
             calculationInput.insertTextAtCursor(outputStr);
+        }
+
+        private function appendSymbol(symbol:String):void {
+            calculationInput.insertTextAtCursor(symbol);
         }
 
         protected function get calculationItem():AnalysisItem {
@@ -278,7 +282,17 @@
             dispatchEvent(new Event("dateLevelChanged"));
         }
 
+        [Bindable]
+        protected var example1:String;
 
+        [Bindable]
+        protected var example1Explanation:String;
+
+        [Bindable]
+        protected var example2:String;
+
+        [Bindable]
+        protected var example2Explanation:String;
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
@@ -301,11 +315,35 @@
             <mx:FormItem label="Name: " direction="horizontal" width="100%">
                 <mx:TextInput id="nameInput" width="100%" text="{calcName}"/>
             </mx:FormItem>
+            <mx:FormItem label="" direction="vertical" fontFamily="Lucida Grande" fontWeight="normal">
+                <mx:TextArea text="You can build calculations using fields from the report editor list and the functions listed to the left. You can drag fields from the report editor list into the input below."
+                        width="400" height="50"/>
+                <mx:Label text="Here are examples of calculation syntax:"/>
+                <mx:Grid horizontalGap="0">
+                    <mx:GridRow>
+                        <mx:GridItem borderStyle="solid" borderThickness="1">
+                            <mx:Label text="{example1}"/>
+                        </mx:GridItem>
+                    </mx:GridRow>
+                    <mx:GridRow>
+                        <mx:GridItem borderStyle="solid" borderThickness="1">
+                            <mx:Label text="{example2}"/>
+                        </mx:GridItem>
+                    </mx:GridRow>
+                </mx:Grid>
+            </mx:FormItem>
             <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
                 <schedule:CursorTextArea id="calculationInput" dragEnter="dragEnterHandler(event)"
                                          dragDrop="dragDropHandler(event)"
-                                         width="400" height="200"
+                                         width="400" height="100"
                                          text="{calcText}" borderStyle="solid" borderThickness="1"/>
+            </mx:FormItem>
+            <mx:FormItem label="" direction="horizontal">
+                <mx:Button label="+" click="appendSymbol('+')" toolTip="Add"/>
+                <mx:Button label="-" click="appendSymbol('-')" toolTip="Subtract"/>
+                <mx:Button label="*" click="appendSymbol('*')" toolTip="Multiply"/>
+                <mx:Button label="/" click="appendSymbol('/')" toolTip="Divide"/>
+                <mx:Button label="^" click="appendSymbol('^')" toolTip="Exponent"/>
             </mx:FormItem>
             <mx:FormItem label="Formatting: " visible="{showMeasures}">
                 <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
                     xmlns:filters="com.easyinsight.filtering.*"
-        creationComplete="onCreation()">
+        creationComplete="onCreation()"  backgroundColor="#FFFFFF">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.commands.CommandEvent;

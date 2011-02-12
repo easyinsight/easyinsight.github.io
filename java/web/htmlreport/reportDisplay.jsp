@@ -12,44 +12,47 @@
 	<link rel="stylesheet" href="/css/jquery.mobile-1.0a1.min.css" />
 	<script src="/js/jquery-1.4.3.min.js"></script>
 	<script src="/js/jquery.mobile-1.0a1.min.js"></script>
+
 </head>
 <body>
 
-<div data-role="page">
+<div data-role="page" id="page-report-display">
 
 	<div data-role="header">
 		<h1>Easy Insight Mobile</h1>
 	</div><!-- /header -->
 
-	<div data-role="content">
+	<div data-role="content" id="blah">
         <%
+
             if (session == null) {
                 response.sendRedirect("index.jsp");
             } else if (session.getAttribute("accountID") == null) {
                 response.sendRedirect("index.jsp");
             } else {
+                com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
+                         (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
+
+                EIConnection conn = Database.instance().getConnection();
                 try {
-                    com.easyinsight.security.SecurityUtil.populateThreadLocal((String) session.getAttribute("userName"), (Long) session.getAttribute("userID"),
-                             (Long) session.getAttribute("accountID"), (Integer) session.getAttribute("accountType"), false, false, 1);
-                    try {
-                        EIConnection conn = Database.instance().getConnection();
-                        try {
-                            com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(Long.parseLong(request.getParameter("reportID")));
-                            if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
-                                WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
-                                ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
-                                out.println(ExportService.toTable(report, dataResults, conn));
-                            }
-                        } finally {
-                            Database.closeConnection(conn);
+                    long reportID = Long.parseLong(request.getParameter("reportID"));
+                    com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
+                    if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
+                        WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
+                        if (report.getReportType() == WSAnalysisDefinition.LIST) {
+                            ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
+                            out.println(ExportService.toTable(report, dataResults, conn));
+                        } else {
+                            session.setAttribute("report", report);
+                            out.println("<div id=\"reportImage\"/>");
+                            //out.println("<img src=\"/app/htmlimage\" alt=\"" + report.getName() + "\"/>");
                         }
-                    } finally {
-                        SecurityUtil.clearThreadLocal();
                     }
-                } catch (Exception e) {
-                    com.easyinsight.logging.LogClass.error(e);
+                } finally {
+                    Database.closeConnection(conn);
                 }
             }
+            SecurityUtil.clearThreadLocal();
         %>
 
 	</div><!-- /content -->

@@ -57,6 +57,7 @@ public class ExportService {
     public static final String GENERIC_STYLE = "generic";
     
     public void seleniumDraw(long requestID, byte[] bytes) {
+        System.out.println("received a selenium draw request of " + requestID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);

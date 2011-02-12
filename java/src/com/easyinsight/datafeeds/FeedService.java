@@ -3,6 +3,8 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.DashboardStorage;
+import com.easyinsight.datafeeds.constantcontact.CCContactSource;
+import com.easyinsight.datafeeds.highrise.HighRiseContactSource;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.etl.LookupTableUtil;
@@ -42,6 +44,111 @@ public class FeedService {
 
     public FeedService() {
         // this goes into a different data provider        
+    }
+
+    public DataSourceDescriptor autoCreateCompositeSource(DataSourceDescriptor source, DataSourceDescriptor target) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            CompositeFeedNode sourceNode = new CompositeFeedNode(source.getId(), 0, 0);
+            CompositeFeedNode targetNode = new CompositeFeedNode(target.getId(), 0, 0);
+            String dataSourceName;
+            FeedDefinition sourceObj = feedStorage.getFeedDefinitionData(source.getId(), conn);
+            FeedDefinition targetObj = feedStorage.getFeedDefinitionData(target.getId(), conn);
+            Key sourceKey;
+            Key targetKey;
+            if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.CONSTANT_CONTACT.getType()) {
+                sourceKey = sourceObj.findAnalysisItem(HighRiseContactSource.CONTACT_WORK_EMAIL).getKey();
+                targetKey = targetObj.findAnalysisItem(CCContactSource.CONTACT_EMAIL).getKey();
+                dataSourceName = "Combined Highrise and Constant Contact";
+            } else {
+                throw new RuntimeException();
+            }
+            CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(source.getId(), target.getId(), sourceKey, targetKey);
+            CompositeFeedDefinition dataSource = createCompositeFeed(Arrays.asList(sourceNode, targetNode), Arrays.asList(compositeFeedConnection), dataSourceName, conn);
+            conn.commit();
+            return new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(), dataSource.getFeedType().getType());
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<JoinSuggestion> suggestJoins(List<DataSourceDescriptor> scope) {
+        List<JoinSuggestion> suggestions = new ArrayList<JoinSuggestion>();
+        long userID = SecurityUtil.getUserID();
+        long accountID = SecurityUtil.getAccountID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, accountID, conn);
+            JoinSuggestion suggestion = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.CONSTANT_CONTACT, "Highrise", "Constant Contact", dataSources, conn);
+            if (suggestion != null) {
+                suggestions.add(suggestion);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return suggestions;
+    }
+
+    private JoinSuggestion analyze(FeedType type1, FeedType type2, String type1Name, String type2Name, List<DataSourceDescriptor> dataSources, EIConnection conn) throws SQLException {
+        List<DataSourceDescriptor> type1DataSources = getDataSources(dataSources, type1);
+        List<DataSourceDescriptor> type2DataSources = getDataSources(dataSources, type2);
+        if (!type1DataSources.isEmpty() && !type2DataSources.isEmpty()) {
+            Map<Long, DataSourceDescriptor> sourceMap = new HashMap<Long, DataSourceDescriptor>();
+            Map<Long, DataSourceDescriptor> targetMap = new HashMap<Long, DataSourceDescriptor>();
+            PreparedStatement nodeStmt = conn.prepareStatement("SELECT COMPOSITE_NODE.COMPOSITE_FEED_ID FROM COMPOSITE_NODE WHERE " +
+                    "DATA_FEED_ID = ?");
+            for (DataSourceDescriptor dataSource : type1DataSources) {
+                nodeStmt.setLong(1, dataSource.getId());
+                ResultSet rs = nodeStmt.executeQuery();
+                while (rs.next()) {
+                    long id = rs.getLong(1);
+                    sourceMap.put(id, dataSource);
+                }
+            }
+            for (DataSourceDescriptor dataSource : type2DataSources) {
+                nodeStmt.setLong(1, dataSource.getId());
+                ResultSet rs = nodeStmt.executeQuery();
+                while (rs.next()) {
+                    long id = rs.getLong(1);
+                    targetMap.put(id, dataSource);
+                }
+            }
+            for (Map.Entry<Long, DataSourceDescriptor> sourceEntry : sourceMap.entrySet()) {
+                DataSourceDescriptor target = targetMap.get(sourceEntry.getKey());
+                if (target != null) {
+                    type1DataSources.remove(sourceEntry.getValue());
+                    type2DataSources.remove(target);
+                }
+            }
+        }
+        if (!type1DataSources.isEmpty() && !type2DataSources.isEmpty()) {
+            JoinSuggestion joinSuggestion = new JoinSuggestion();
+            joinSuggestion.setSourceType(type1Name);
+            joinSuggestion.setTargetType(type2Name);
+            joinSuggestion.setPossibleSources(type1DataSources);
+            joinSuggestion.setPossibleTargets(type2DataSources);
+            return joinSuggestion;
+        }
+        return null;
+    }
+
+    private List<DataSourceDescriptor> getDataSources(List<DataSourceDescriptor> sources, FeedType feedType) {
+        List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
+        for (DataSourceDescriptor source : sources) {
+            if (source.getDataSourceType() == feedType.getType()) {
+                dataSources.add(source);
+            }
+        }
+        return dataSources;
     }
 
     public HomeState determineHomeState() {
@@ -286,30 +393,34 @@ public class FeedService {
         }
     }
 
+    public CompositeFeedDefinition createCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges,
+                                                       String feedName, EIConnection conn) throws Exception {
+        CompositeFeedDefinition feedDef = new CompositeFeedDefinition();
+        feedDef.setFeedName(feedName);
+        feedDef.setCompositeFeedNodes(compositeFeedNodes);
+        feedDef.setConnections(edges);
+        feedDef.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
+        /*final ContainedInfo containedInfo = new ContainedInfo();
+        new CompositeFeedNodeShallowVisitor() {
+
+            protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
+                SecurityUtil.authorizeFeed(compositeFeedNode.getDataFeedID(), Roles.SUBSCRIBER);
+                FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(compositeFeedNode.getDataFeedID(), conn);
+                containedInfo.feedItems.addAll(feedDefinition.getFields());
+            }
+        }.visit(feedDef);*/
+        feedDef.populateFields(conn);
+        feedDef.setApiKey(RandomTextGenerator.generateText(12));
+        long feedID = feedStorage.addFeedDefinitionData(feedDef, conn);
+        DataStorage.liveDataSource(feedID, conn);
+        return feedDef;
+    }
+
     public CompositeFeedDefinition createCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges, String feedName) {
-        long userID = SecurityUtil.getUserID();
         final EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            CompositeFeedDefinition feedDef = new CompositeFeedDefinition();
-            feedDef.setFeedName(feedName);
-            feedDef.setCompositeFeedNodes(compositeFeedNodes);
-            feedDef.setConnections(edges);
-            feedDef.setUploadPolicy(new UploadPolicy(userID, SecurityUtil.getAccountID()));
-            /*final ContainedInfo containedInfo = new ContainedInfo();
-            new CompositeFeedNodeShallowVisitor() {
-
-                protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
-                    SecurityUtil.authorizeFeed(compositeFeedNode.getDataFeedID(), Roles.SUBSCRIBER);
-                    FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(compositeFeedNode.getDataFeedID(), conn);
-                    containedInfo.feedItems.addAll(feedDefinition.getFields());
-                }
-            }.visit(feedDef);*/
-            feedDef.populateFields(conn);
-            feedDef.setApiKey(RandomTextGenerator.generateText(12));
-            long feedID = feedStorage.addFeedDefinitionData(feedDef, conn);
-            DataStorage.liveDataSource(feedID, conn);
-            //new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER, conn);
+            CompositeFeedDefinition feedDef = createCompositeFeed(compositeFeedNodes, edges, feedName, conn);
             conn.commit();
             return feedDef;
         } catch (Exception e) {

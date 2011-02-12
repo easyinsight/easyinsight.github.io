@@ -97,7 +97,48 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
                     row.addValue(CASE_ID, id);
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
                     row.addValue(CREATED_AT, new DateValue(createdAt));
-                    String closedAtString = queryField(companyNode, "created-at/text()");
+                    String closedAtString = queryField(companyNode, "closed-at/text()");
+                    if (closedAtString != null) {
+                        Date closedAt = deadlineFormat.parse(closedAtString);
+                        row.addValue(CLOSED_AT, new DateValue(closedAt));
+                    }
+                    String updatedAtString = queryField(companyNode, "updated-at/text()");
+                    if (updatedAtString != null) {
+                        Date updatedAt = deadlineFormat.parse(updatedAtString);
+                        row.addValue(UPDATED_AT, new DateValue(updatedAt));
+                    }
+                    row.addValue(COUNT, new NumericValue(1));
+                    String personId = queryField(companyNode, "owner-id/text()");
+                    row.addValue(OWNER, retrieveUserInfo(client, builder, peopleCache, personId, url, parentDefinition));
+                    String authorID = queryField(companyNode, "author-id/text()");
+                    row.addValue(AUTHOR, retrieveUserInfo(client, builder, peopleCache, authorID, url, parentDefinition));
+
+                    Document tags = runRestRequest("/kases/"+id+"/tags.xml", client, builder, url, true, false, parentDefinition);
+                    Nodes tagNodes = tags.query("/tags/tag");
+                    StringBuilder tagBuilder = new StringBuilder();
+                    for (int j = 0; j < tagNodes.size(); j++) {
+                        Node tagNode = tagNodes.get(j);
+                        String tagName = queryField(tagNode, "name/text()");
+                        tagBuilder.append(tagName).append(",");
+                    }
+                    if (tagBuilder.length() > 0) {
+                        String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
+                        row.addValue(TAGS, tagString);
+                    }
+                }
+                companies = runRestRequest("/kases/closed.xml", client, builder, url, true, false, parentDefinition);
+                companyNodes = companies.query("/kases/kase");
+                for (int i = 0; i < companyNodes.size(); i++) {
+                    IRow row = ds.createRow();
+                    Node companyNode = companyNodes.get(i);
+                    String name = queryField(companyNode, "name/text()");
+                    row.addValue(CASE_NAME, name);
+
+                    String id = queryField(companyNode, "id/text()");
+                    row.addValue(CASE_ID, id);
+                    Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
+                    row.addValue(CREATED_AT, new DateValue(createdAt));
+                    String closedAtString = queryField(companyNode, "closed-at/text()");
                     if (closedAtString != null) {
                         Date closedAt = deadlineFormat.parse(closedAtString);
                         row.addValue(CLOSED_AT, new DateValue(closedAt));

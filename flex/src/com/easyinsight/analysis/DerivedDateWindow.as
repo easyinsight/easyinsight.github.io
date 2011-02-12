@@ -21,6 +21,10 @@ public class DerivedDateWindow extends CalculationWindow {
         }
         detailIndex = 1;
         detailItemLabel = "Date Level:";
+        example1 = "namedbracketdate([Deal Description], \"Close Date\", \"yyyy-MM-dd\")";
+        example1Explanation = "";
+        example2 = "now() - [Due On]";
+        example2Explanation = "";
     }
 
     override protected function get calculationItem():AnalysisItem {

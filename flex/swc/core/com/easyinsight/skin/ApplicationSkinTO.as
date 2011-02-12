@@ -27,6 +27,16 @@ public class ApplicationSkinTO {
     public var reportBackgroundSize:String;
     public var reportBackgroundSizeEnabled:Boolean = false;
 
+    public var myDataName:Boolean;
+    public var myDataSize:Boolean;
+    public var myDataOwner:Boolean;
+    public var myDataCreationDate:Boolean;
+    public var myDataLastTime:Boolean;
+    public var myDataCombine:Boolean;
+    public var myDataNewScorecard:Boolean;
+    public var myDataNewKPITree:Boolean;
+    public var myDataNewDashboard:Boolean;
+    public var myDataLookupTable:Boolean;
 
     public function ApplicationSkinTO() {
     }

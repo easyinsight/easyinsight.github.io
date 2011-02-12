@@ -874,7 +874,7 @@
                     <mx:Canvas width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
                     <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center" verticalAlign="middle"
                             height="28">
-                        <mx:Label text="{fieldsLabel}" color="0xFFFFFF" fontWeight="bold"/>
+                        <mx:Label text="{fieldsLabel}" color="0xFFFFFF" fontWeight="bold" maxWidth="220"/>
                     </mx:Box>
                     <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
                                          id="fieldGrid" backgroundColor="#FFFFFF"

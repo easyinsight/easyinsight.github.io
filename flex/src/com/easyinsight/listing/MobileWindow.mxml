@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+        ]]></mx:Script>
+    <mx:VBox horizontalAlign="center">
+        <mx:TextArea text="Want to pull up Easy Insight reports and scorecards on your mobile device of choice? You can access the data shown below on Easy Insight Mobile at:"
+                width="400" height="60" editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
+        <mx:LinkButton textDecoration="underline" label="https://www.easy-insight.com/app/htmlreport" click="navigateToURL(new URLRequest('https://www.easy-insight.com/app/htmlreport'), '_blank')" fontSize="14"/>
+        <mx:LinkButton label="Close" click="PopUpManager.removePopUp(this)" textDecoration="underline" fontSize="14"/>
+    </mx:VBox>
+</util:EISlimWindow>

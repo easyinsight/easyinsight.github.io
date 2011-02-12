@@ -31,6 +31,16 @@ public class ApplicationSkin {
     private boolean reportBackgroundEnabled;
     private String reportBackgroundSize;
     private boolean reportBackgroundSizeEnabled;
+    private boolean myDataName;
+    private boolean myDataSize;
+    private boolean myDataOwner;
+    private boolean myDataCreationDate;
+    private boolean myDataLastTime;
+    private boolean myDataCombine;
+    private boolean myDataNewScorecard;
+    private boolean myDataNewKPITree;
+    private boolean myDataNewDashboard;
+    private boolean myDataLookupTable;
     private long id;
 
     public long getId() {
@@ -60,6 +70,16 @@ public class ApplicationSkin {
         properties.add(new ReportNumericProperty("centerCanvasBackgroundAlpha", centerCanvasBackgroundAlpha, centerCanvasBackgroundAlphaEnabled));
         properties.add(new ReportStringProperty("coreAppBackgroundSize", coreAppBackgroundSize, coreAppBackgroundSizeEnabled));
         properties.add(new ReportStringProperty("reportBackgroundSize", reportBackgroundSize, reportBackgroundSizeEnabled));
+        properties.add(new ReportBooleanProperty("myDataName", myDataName));
+        properties.add(new ReportBooleanProperty("myDataSize", myDataSize));
+        properties.add(new ReportBooleanProperty("myDataOwner", myDataOwner));
+        properties.add(new ReportBooleanProperty("myDataCreationDate", myDataCreationDate));
+        properties.add(new ReportBooleanProperty("myDataLastTime", myDataLastTime));
+        properties.add(new ReportBooleanProperty("myDataCombine", myDataCombine));
+        properties.add(new ReportBooleanProperty("myDataScorecard", myDataNewScorecard));
+        properties.add(new ReportBooleanProperty("myDataKPITree", myDataNewKPITree));
+        properties.add(new ReportBooleanProperty("myDataDashboard", myDataNewDashboard));
+        properties.add(new ReportBooleanProperty("myDataLookupTable", myDataLookupTable));
         settings.setSkinID(id);
         settings.setProperties(properties);
         return settings;
@@ -84,6 +104,16 @@ public class ApplicationSkin {
         reportBackgroundEnabled = propertyEnabled(properties, "reportBackground");
         reportBackgroundSize = findStringProperty(properties, "reportBackgroundSize", "100%");
         reportBackgroundSizeEnabled = propertyEnabled(properties, "reportBackgroundSize");
+        myDataName = findBooleanProperty(properties, "myDataName", true);
+        myDataSize = findBooleanProperty(properties, "myDataSize", true);
+        myDataOwner = findBooleanProperty(properties, "myDataOwner", false);
+        myDataCreationDate = findBooleanProperty(properties, "myDataCreationDate", false);
+        myDataLastTime = findBooleanProperty(properties, "myDataLastTime", true);
+        myDataCombine = findBooleanProperty(properties, "myDataCombine", true);
+        myDataNewScorecard = findBooleanProperty(properties, "myDataScorecard", true);
+        myDataNewKPITree = findBooleanProperty(properties, "myDataKPITree", true);
+        myDataNewDashboard = findBooleanProperty(properties, "myDataDashboard", true);
+        myDataLookupTable = findBooleanProperty(properties, "myDataLookupTable", true);
     }
 
     public ImageDescriptor getCoreAppBackgroundImage() {
@@ -244,6 +274,86 @@ public class ApplicationSkin {
 
     public void setReportBackgroundSizeEnabled(boolean reportBackgroundSizeEnabled) {
         this.reportBackgroundSizeEnabled = reportBackgroundSizeEnabled;
+    }
+
+    public boolean isMyDataName() {
+        return myDataName;
+    }
+
+    public void setMyDataName(boolean myDataName) {
+        this.myDataName = myDataName;
+    }
+
+    public boolean isMyDataSize() {
+        return myDataSize;
+    }
+
+    public void setMyDataSize(boolean myDataSize) {
+        this.myDataSize = myDataSize;
+    }
+
+    public boolean isMyDataOwner() {
+        return myDataOwner;
+    }
+
+    public void setMyDataOwner(boolean myDataOwner) {
+        this.myDataOwner = myDataOwner;
+    }
+
+    public boolean isMyDataCreationDate() {
+        return myDataCreationDate;
+    }
+
+    public void setMyDataCreationDate(boolean myDataCreationDate) {
+        this.myDataCreationDate = myDataCreationDate;
+    }
+
+    public boolean isMyDataLastTime() {
+        return myDataLastTime;
+    }
+
+    public void setMyDataLastTime(boolean myDataLastTime) {
+        this.myDataLastTime = myDataLastTime;
+    }
+
+    public boolean isMyDataCombine() {
+        return myDataCombine;
+    }
+
+    public void setMyDataCombine(boolean myDataCombine) {
+        this.myDataCombine = myDataCombine;
+    }
+
+    public boolean isMyDataNewScorecard() {
+        return myDataNewScorecard;
+    }
+
+    public void setMyDataNewScorecard(boolean myDataNewScorecard) {
+        this.myDataNewScorecard = myDataNewScorecard;
+    }
+
+    public boolean isMyDataNewKPITree() {
+        return myDataNewKPITree;
+    }
+
+    public void setMyDataNewKPITree(boolean myDataNewKPITree) {
+        this.myDataNewKPITree = myDataNewKPITree;
+    }
+
+    public boolean isMyDataNewDashboard() {
+        return myDataNewDashboard;
+    }
+
+    public void setMyDataNewDashboard(boolean myDataNewDashboard) {
+        this.myDataNewDashboard = myDataNewDashboard;
+    }
+
+    public boolean isMyDataLookupTable() {
+        return myDataLookupTable;
+    }
+
+    public void setMyDataLookupTable(boolean myDataLookupTable) {
+        this.myDataLookupTable = myDataLookupTable;
     }
 
     protected boolean propertyEnabled(List<ReportProperty> properties, String property) {

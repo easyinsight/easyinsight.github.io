@@ -17,6 +17,17 @@ public class ApplicationSkin extends EventDispatcher {
     private var _reportBackground:Object = defaultReportBackground;
     private var _reportBackgroundSize:String = "100%";
 
+    private var _myDataName:Boolean;
+    private var _myDataSize:Boolean;
+    private var _myDataOwner:Boolean;
+    private var _myDataCreationDate:Boolean;
+    private var _myDataLastTime:Boolean;
+    private var _myDataCombine:Boolean;
+    private var _myDataNewScorecard:Boolean;
+    private var _myDataNewKPITree:Boolean;
+    private var _myDataNewDashboard:Boolean;
+    private var _myDataLookupTable:Boolean;
+
     public function ApplicationSkin() {
         super();
     }
@@ -60,6 +71,16 @@ public class ApplicationSkin extends EventDispatcher {
             });
             headerBarLoader.load(appSkin.headerBarLogo.id);
         }
+        myDataName = appSkin.myDataName;
+        myDataSize = appSkin.myDataSize;
+        myDataOwner = appSkin.myDataOwner;
+        myDataCreationDate = appSkin.myDataCreationDate;
+        myDataLastTime = appSkin.myDataLastTime;
+        myDataCombine = appSkin.myDataCombine;
+        myDataNewScorecard = appSkin.myDataNewScorecard;
+        myDataNewKPITree = appSkin.myDataNewKPITree;
+        myDataNewDashboard = appSkin.myDataNewDashboard;
+        myDataLookupTable = appSkin.myDataLookupTable;
     }
 
     [Bindable(event="reportBackgroundChanged")]
@@ -170,6 +191,117 @@ public class ApplicationSkin extends EventDispatcher {
         if (_coreAppBackgroundColor == value) return;
         _coreAppBackgroundColor = value;
         dispatchEvent(new Event("coreAppBackgroundColorChanged"));
+    }
+
+
+    [Bindable(event="myDataNameChanged")]
+    public function get myDataName():Boolean {
+        return _myDataName;
+    }
+
+    public function set myDataName(value:Boolean):void {
+        if (_myDataName == value) return;
+        _myDataName = value;
+        dispatchEvent(new Event("myDataNameChanged"));
+    }
+
+    [Bindable(event="myDataSizeChanged")]
+    public function get myDataSize():Boolean {
+        return _myDataSize;
+    }
+
+    public function set myDataSize(value:Boolean):void {
+        if (_myDataSize == value) return;
+        _myDataSize = value;
+        dispatchEvent(new Event("myDataSizeChanged"));
+    }
+
+    [Bindable(event="myDataOwnerChanged")]
+    public function get myDataOwner():Boolean {
+        return _myDataOwner;
+    }
+
+    public function set myDataOwner(value:Boolean):void {
+        if (_myDataOwner == value) return;
+        _myDataOwner = value;
+        dispatchEvent(new Event("myDataOwnerChanged"));
+    }
+
+    [Bindable(event="myDataCreationDateChanged")]
+    public function get myDataCreationDate():Boolean {
+        return _myDataCreationDate;
+    }
+
+    public function set myDataCreationDate(value:Boolean):void {
+        if (_myDataCreationDate == value) return;
+        _myDataCreationDate = value;
+        dispatchEvent(new Event("myDataCreationDateChanged"));
+    }
+
+    [Bindable(event="myDataLastTimeChanged")]
+    public function get myDataLastTime():Boolean {
+        return _myDataLastTime;
+    }
+
+    public function set myDataLastTime(value:Boolean):void {
+        if (_myDataLastTime == value) return;
+        _myDataLastTime = value;
+        dispatchEvent(new Event("myDataLastTimeChanged"));
+    }
+
+    [Bindable(event="myDataCombineChanged")]
+    public function get myDataCombine():Boolean {
+        return _myDataCombine;
+    }
+
+    public function set myDataCombine(value:Boolean):void {
+        if (_myDataCombine == value) return;
+        _myDataCombine = value;
+        dispatchEvent(new Event("myDataCombineChanged"));
+    }
+
+    [Bindable(event="myDataNewScorecardChanged")]
+    public function get myDataNewScorecard():Boolean {
+        return _myDataNewScorecard;
+    }
+
+    public function set myDataNewScorecard(value:Boolean):void {
+        if (_myDataNewScorecard == value) return;
+        _myDataNewScorecard = value;
+        dispatchEvent(new Event("myDataNewScorecardChanged"));
+    }
+
+    [Bindable(event="myDataNewKPITreeChanged")]
+    public function get myDataNewKPITree():Boolean {
+        return _myDataNewKPITree;
+    }
+
+    public function set myDataNewKPITree(value:Boolean):void {
+        if (_myDataNewKPITree == value) return;
+        _myDataNewKPITree = value;
+        dispatchEvent(new Event("myDataNewKPITreeChanged"));
+    }
+
+    [Bindable(event="myDataNewDashboardChanged")]
+    public function get myDataNewDashboard():Boolean {
+        return _myDataNewDashboard;
+    }
+
+    public function set myDataNewDashboard(value:Boolean):void {
+        if (_myDataNewDashboard == value) return;
+        _myDataNewDashboard = value;
+        dispatchEvent(new Event("myDataNewDashboardChanged"));
+    }
+
+    [Bindable(event="myDataLookupTableChanged")]
+    public function get myDataLookupTable():Boolean {
+        return _myDataLookupTable;
+    }
+
+    public function set myDataLookupTable(value:Boolean):void {
+        if (_myDataLookupTable == value) return;
+        _myDataLookupTable = value;
+        dispatchEvent(new Event("myDataLookupTableChanged"));
     }
 }
 }

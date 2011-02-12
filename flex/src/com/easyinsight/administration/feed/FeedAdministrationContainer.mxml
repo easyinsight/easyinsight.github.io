@@ -209,9 +209,12 @@
     <mx:HBox width="100%" height="100%" horizontalAlign="center">
         <mx:VBox width="1000" height="100%" paddingLeft="5">
             <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" enabled="{controlsEnabled}">
-                <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
-                <mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
-                <mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="toReport()" toolTip="Jump to Report Editor"/>
+                <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"
+                        label="Close Editor" labelPlacement="right"/>
+                <mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"
+                        label="Save Data Source" labelPlacement="right"/>
+                <mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="toReport()" toolTip="Jump to Report Editor"
+                        label="Create a New Report" labelPlacement="right"/>
                 <mx:Label fontSize="14" color="#FFFFFF"/>
             </mx:HBox>
             <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"

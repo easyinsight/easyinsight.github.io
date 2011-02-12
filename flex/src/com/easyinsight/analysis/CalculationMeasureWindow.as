@@ -23,6 +23,10 @@ public class CalculationMeasureWindow extends CalculationWindow {
         }
         detailIndex = 2;
         detailItemLabel = "Aggregation:";
+        example1 = "[Revenue] / [Units]";
+        example1Explanation = "Produces Revenue Divided by Units";
+        example2 = "max([Units], 100)";
+        example2Explanation = "Produces the maximum value of Units or 100";
     }
 
     override protected function get calculationItem():AnalysisItem {

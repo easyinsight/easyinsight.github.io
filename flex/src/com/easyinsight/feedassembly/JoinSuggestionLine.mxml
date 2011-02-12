@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<mx:GridRow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var dataSource1:String;
+        [Bindable]
+        private var dataSource2:String;
+
+        private var _joinSuggestion:JoinSuggestion;
+
+        public function set joinSuggestion(value:JoinSuggestion):void {
+            _joinSuggestion = value;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            dataSource1 = _joinSuggestion.sourceType;
+            dataSource2 = _joinSuggestion.targetType;
+        }
+
+        private function joinDataSources():void {
+            if (_joinSuggestion.possibleSources.length > 1 ||
+                    _joinSuggestion.possibleTargets.length > 1) {
+                dispatchEvent(new JoinStartEvent(JoinStartEvent.NEED_CHOICE, _joinSuggestion));
+            } else {
+                dispatchEvent(new JoinStartEvent(JoinStartEvent.CREATE_SOURCE, _joinSuggestion));
+            }
+        }
+        ]]></mx:Script>
+    <mx:GridItem>
+        <mx:Label text="{dataSource1}" fontSize="14"/>
+    </mx:GridItem>
+    <mx:GridItem>
+        <mx:Label text="to"/>
+    </mx:GridItem>
+    <mx:GridItem>
+        <mx:Label text="{dataSource2}" fontSize="14"/>
+    </mx:GridItem>
+    <mx:GridItem>
+        <mx:Button label="Join These Data Sources" click="joinDataSources()" styleName="grayButton"/>
+    </mx:GridItem>
+</mx:GridRow>

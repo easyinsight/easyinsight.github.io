@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.CompositeFeedCreationSource;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _suggestions:ArrayCollection;
+
+        public function set suggestions(value:ArrayCollection):void {
+            _suggestions = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            for each (var suggestion:JoinSuggestion in _suggestions) {
+                var line:JoinSuggestionLine = suggestion.toComponent();
+                line.addEventListener(JoinStartEvent.CREATE_SOURCE, createSource);
+                line.addEventListener(JoinStartEvent.NEED_CHOICE, needChoice);
+                sourceGrid.addChild(line);
+            }
+        }
+
+        [Bindable]
+        private var sourceOptions:ArrayCollection;
+
+        [Bindable]
+        private var targetOptions:ArrayCollection;
+
+        private function createSource(event:JoinStartEvent):void {
+            useSources(DataSourceDescriptor(event.joinSuggestion.possibleSources.getItemAt(0)),
+                    DataSourceDescriptor(event.joinSuggestion.possibleTargets.getItemAt(0)));
+        }
+
+        private function useSources(source:DataSourceDescriptor, target:DataSourceDescriptor):void {
+            ProgressAlert.alert(this, "Joining the data sources...", null, feedService.autoCreateCompositeSource);
+            feedService.autoCreateCompositeSource.send(source, target);
+        }
+
+        private function needChoice(event:JoinStartEvent):void {
+            sourceOptions = event.joinSuggestion.possibleSources;
+            targetOptions = event.joinSuggestion.possibleTargets;
+            stackIndex = 1;
+        }
+
+        [Bindable]
+        private var stackIndex:int;
+
+        private function createdDataSource():void {
+            var dataSource:DataSourceDescriptor = feedService.autoCreateCompositeSource.lastResult as DataSourceDescriptor;
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSource.id)));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function newSource():void {
+            dispatchEvent(new AnalyzeEvent(new CompositeFeedCreationSource(new ArrayCollection())));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="autoCreateCompositeSource" result="createdDataSource()"/>
+    </mx:RemoteObject>
+    <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true" creationPolicy="all">
+        <mx:VBox horizontalAlign="center">
+            <mx:Label text="Easy Insight can automatically join the following data sources:" fontSize="14"/>
+            <mx:Grid id="sourceGrid"/>
+            <mx:HBox>
+                <mx:Label text="Just want to define your own joins?" fontSize="14"/>
+                <mx:Button label="Create a New Composite Data Source" click="newSource()" styleName="grayButton"/>
+            </mx:HBox>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:VBox>
+        <mx:VBox horizontalAlign="center">
+            <mx:TextArea text="It looks like you have multiple data sources of these types. Please choose which data sources you want to use:"
+                    editable="false" width="300" height="50" selectable="false" focusEnabled="false"/>
+            <mx:HBox>
+                <mx:ComboBox id="sourceBox" dataProvider="{sourceOptions}" labelField="name"/>
+                <mx:ComboBox id="targetBox" dataProvider="{targetOptions}" labelField="name"/>
+            </mx:HBox>
+            <mx:HBox>
+                <util:SaveButton label="Use These Data Sources" click="useSources(DataSourceDescriptor(sourceBox.selectedItem), DataSourceDescriptor(targetBox.selectedItem))"/>
+                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:ViewStack>
+
+</util:EISlimWindow>

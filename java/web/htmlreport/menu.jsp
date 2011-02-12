@@ -7,6 +7,22 @@
 	<link rel="stylesheet" href="/css/jquery.mobile-1.0a1.min.css" />
 	<script src="/js/jquery-1.4.3.min.js"></script>
 	<script src="/js/jquery.mobile-1.0a1.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("div[data-role*='page']").live('pageshow', function(event, ui) {
+
+                if (this.children[0].id == "page-report-display") {
+
+                    if ($("#reportImage").length > 0) {
+
+                        var image = new Image();
+                        image.src = "/app/htmlimage?width="+document.documentElement.clientWidth+"&height="+document.documentElement.clientHeight;
+                        $("#reportImage").append(image);
+                    }
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 

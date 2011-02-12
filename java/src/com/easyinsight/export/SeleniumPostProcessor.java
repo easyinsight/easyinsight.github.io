@@ -18,6 +18,16 @@ public abstract class SeleniumPostProcessor {
     public static final int EMAIL = 1;
     public static final int HTML = 2;
 
+    private long id;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public long save(EIConnection conn) throws SQLException {
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO selenium_processor (processor_type) values (?)",
                 Statement.RETURN_GENERATED_KEYS);
@@ -38,9 +48,12 @@ public abstract class SeleniumPostProcessor {
         SeleniumPostProcessor processor;
         if (type == EMAIL) {
             processor = EmailSeleniumPostProcessor.load(processorID, conn);
+        } else if (type == HTML) {
+            processor = HtmlSeleniumPostProcessor.load(processorID, conn);
         } else {
             throw new RuntimeException();
         }
+        processor.setId(processorID);
         return processor;
     }
 

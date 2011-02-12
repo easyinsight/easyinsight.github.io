@@ -175,6 +175,20 @@ public class UserUploadService {
                 }
             }
 
+            for (EIDescriptor descriptor : results) {
+                if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                    DataSourceDescriptor dataSourceDescriptor = (DataSourceDescriptor) descriptor;
+                    Collections.sort(dataSourceDescriptor.getChildren(), new Comparator<EIDescriptor>() {
+
+                        public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {
+                            String name1 = eiDescriptor.getName() != null ? eiDescriptor.getName() : "";
+                            String name2 = eiDescriptor1.getName() != null ? eiDescriptor1.getName() : "";
+                            return name1.compareTo(name2);
+                        }
+                    });
+                }
+            }
+
             Collections.sort(results, new Comparator<EIDescriptor>() {
 
                 public int compare(EIDescriptor eiDescriptor, EIDescriptor eiDescriptor1) {

@@ -3,6 +3,7 @@ package com.easyinsight.export;
 import com.easyinsight.database.EIConnection;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -27,13 +28,24 @@ public class HtmlSeleniumPostProcessor extends SeleniumPostProcessor {
         return id;
     }
 
+    public static SeleniumPostProcessor load(long processorID, EIConnection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT report_id FROM HTML_SELENIUM_PROCESSOR WHERE " +
+                "SELENIUM_PROCESSOR_ID = ?");
+        queryStmt.setLong(1, processorID);
+        ResultSet rs = queryStmt.executeQuery();
+        rs.next();
+        long reportID = rs.getLong(1);
+        return new HtmlSeleniumPostProcessor(reportID);
+    }
+
     @Override
     public int getProcessorType() {
-        return SeleniumPostProcessor.EMAIL;
+        return SeleniumPostProcessor.HTML;
     }
 
     @Override
     public void process(byte[] bytes, EIConnection conn, long accountID) {
-        
+        // have to pass the data around to the appropriate point...
+        HtmlResultCache.getInstance().addResults(bytes, getId());
     }
 }

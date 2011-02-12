@@ -19,6 +19,7 @@ import mx.controls.AdvancedDataGrid;
 import mx.controls.Button;
 import mx.controls.DataGrid;
 import mx.controls.Image;
+import mx.controls.List;
 import mx.core.DragSource;
 import mx.core.IUIComponent;
 import mx.core.UIComponent;
@@ -256,6 +257,15 @@ public class DropArea extends HBox
                 } else {
                     dispatchEvent(new CommandEvent(new DropAreaDragUpdateCommand(this, this.analysisItem, newAnalysisItem.analysisItem)));
                 }
+            }
+        } else if (event.dragInitiator is List) {
+            var list:List = event.dragInitiator as List;
+            var data:ArrayCollection = ArrayCollection(list.dataProvider);
+            var newListItem:AnalysisItem = event.dragSource.dataForFormat("items")[0];
+            if (this.analysisItem == null) {
+                dispatchEvent(new CommandEvent(new DropAreaAddedCommand(this, newListItem)));
+            } else {
+                dispatchEvent(new CommandEvent(new DropAreaDragUpdateCommand(this, this.analysisItem, newListItem)));
             }
         }
     }

@@ -11,6 +11,7 @@
         import com.easyinsight.etl.LookupTableDescriptor;
         import com.easyinsight.etl.LookupTableSource;
         import com.easyinsight.etl.NewLookupTableWindow;
+        import com.easyinsight.feedassembly.CompositeCreator;
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
@@ -18,9 +19,10 @@
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
         import com.easyinsight.goals.GoalTreeDescriptor;
-        import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.scorecard.ScorecardDescriptor;
+        import com.easyinsight.skin.ApplicationSkin;
+        import com.easyinsight.skin.ApplicationSkinWindow;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
@@ -52,6 +54,14 @@
         [Bindable]
         [Embed(source="../../../../assets/presentation_chart.png")]
         private var dashboardIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/preferences.png")]
+        private var configIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/mobilephone.png")]
+        private var mobileIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/arrow2_up_green.png")]
@@ -88,7 +98,6 @@
 
         private function initListeners():void {
             addEventListener(KeyboardEvent.KEY_UP, keyHit);
-            User.getEventNotifier().addEventListener("uiChange", uiChangeEvent);
             addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
             BindingUtils.bindProperty(this, "includeGroups", groupInclude, "selected");
@@ -138,7 +147,6 @@
         private function deleteItem(selectedItem:Object):void {
 
             if (selectedItem is DataSourceDescriptor) {
-                var descriptor:DataSourceDescriptor = uploadGrid.selectedItem as DataSourceDescriptor;
                 Alert.show("Are you sure you want to delete this data source? You will not be able to undo this operation.", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
             } else if (selectedItem is InsightDescriptor) {
@@ -261,6 +269,7 @@
         public static const MY_DATA:int = 3;
 
         public function gotFocus():void {
+            updateUI();
             var fragmentObject:Object = new Object();
             fragmentObject.page = "myData";
             BrowserManager.getInstance().setTitle("Easy Insight - My Data");
@@ -272,25 +281,12 @@
                 showLoading = true;
             }
 
-            uiChangeEvent(null);
             loadingIndex = 1;
             uploadService.getFeedAnalysisTree.send(includeGroups);
 
         }
 
-        private function uiChangeEvent(event:Event):void {
-            if (User.getInstance().uiConfiguration != null) {
-                var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
-                showComposite = uiConfig.getConfiguration(UIConfiguration.SHOW_COMBINE_SOURCES).selected;
-                showPackage = uiConfig.getConfiguration(UIConfiguration.SHOW_CREATE_PACKAGE).selected;
-                showConnections = uiConfig.getConfiguration(UIConfiguration.SHOW_CONNECTIONS).selected;
-                showLookupTable = uiConfig.getConfiguration(UIConfiguration.SHOW_LOOKUP_TABLE).selected;
-                addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.PRO && uiConfig.getConfiguration(UIConfiguration.SHOW_KPI_TREE_ADD).selected;
-            }
-        }
-
-        protected override function createChildren():void {
-            super.createChildren();
+        private function updateUI(event:Event = null):void {
             var columns:Array = [];
             var nameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
             nameColumn.dataField = "name";
@@ -307,7 +303,7 @@
             lastDataColumn.sortCompareFunction = customSort;
             lastDataColumn.itemRenderer = new ClassFactory(MyDataLastDataLabel);
             var controlsColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-            controlsColumn.dataField = "size";
+            //controlsColumn.dataField = "";
             controlsColumn.headerText = "";
             controlsColumn.width = 240;
             controlsColumn.sortable = false;
@@ -315,58 +311,51 @@
             controlsColumn.itemRenderer = factory;
             var showSize:Boolean = true;
             var showLastData:Boolean = true;
-            if (User.getInstance().uiConfiguration != null) {
-                var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
-                var showState:State = new State();
-                showState.name = "buttonConfig";
-                var ops:Array = [];
-                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_COMBINE_SOURCES).selected) {
-                    var removeComposite:RemoveChild = new RemoveChild();
-                    removeComposite.target = compositeFeedButton;
-                    ops.push(removeComposite);
-                }
-                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_LOOKUP_TABLE).selected) {
-                    var removeLookupTable:RemoveChild = new RemoveChild();
-                    removeLookupTable.target = lookupTableButton;
-                    ops.push(removeLookupTable);
-                }
-                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_KPI_TREE_ADD).selected || User.getInstance().getAccountType() < Account.PRO) {
-                    var removeKPITree:RemoveChild = new RemoveChild();
-                    removeKPITree.target = createKPITreeButton;
-                    ops.push(removeKPITree);
-                }
-                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CREATE_DASHBOARD).selected) {
-                    var removeDashboard:RemoveChild = new RemoveChild();
-                    removeDashboard.target = createDashboardButton;
-                    ops.push(removeDashboard);
-                }
-                if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CREATE_SCORECARD).selected) {
-                    var removeScorecard:RemoveChild = new RemoveChild();
-                    removeScorecard.target = createScorecardButton;
-                    ops.push(removeScorecard);
-                }
-                showState.overrides = ops;
-                states = [ showState ];
-                this.currentState = "buttonConfig";
-                showSize = uiConfig.getConfiguration(UIConfiguration.SHOW_SIZE_DATA).selected;
-                showLastData = uiConfig.getConfiguration(UIConfiguration.SHOW_TIME_DATA).selected;
-                var i:int = 1;
-                if (uiConfig.getConfiguration(UIConfiguration.SHOW_REFRESH_DATA).selected) i++;
-                if (uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected) i++;
-                if (uiConfig.getConfiguration(UIConfiguration.SHOW_DELETE_DATA).selected) i++;
-                factory.properties = {
-                    showAnalyze: true,
-                    showRefresh: uiConfig.getConfiguration(UIConfiguration.SHOW_REFRESH_DATA).selected,
-                    showAdmin: uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected,
-                    showDelete: uiConfig.getConfiguration(UIConfiguration.SHOW_DELETE_DATA).selected
-                };
-                controlsColumn.width = i * 45 + 10;
-            } else {
-                controlsColumn.width = 184;
+            currentState = "";
+            var showState:State = new State();
+            showState.name = "buttonConfig";
+            var ops:Array = [];
+            if (!ApplicationSkin.instance().myDataCombine) {
+                var removeComposite:RemoveChild = new RemoveChild();
+                removeComposite.target = compositeFeedButton;
+                ops.push(removeComposite);
             }
+            if (!ApplicationSkin.instance().myDataCombine) {
+                var removeLookupTable:RemoveChild = new RemoveChild();
+                removeLookupTable.target = lookupTableButton;
+                ops.push(removeLookupTable);
+            }
+            if (!ApplicationSkin.instance().myDataNewKPITree || User.getInstance().getAccountType() < Account.PRO) {
+                var removeKPITree:RemoveChild = new RemoveChild();
+                removeKPITree.target = createKPITreeButton;
+                ops.push(removeKPITree);
+            }
+            if (!ApplicationSkin.instance().myDataNewDashboard) {
+                var removeDashboard:RemoveChild = new RemoveChild();
+                removeDashboard.target = createDashboardButton;
+                ops.push(removeDashboard);
+            }
+            if (!ApplicationSkin.instance().myDataNewScorecard) {
+                var removeScorecard:RemoveChild = new RemoveChild();
+                removeScorecard.target = createScorecardButton;
+                ops.push(removeScorecard);
+            }
+            showState.overrides = ops;
+            states = [ showState ];
+            this.currentState = "buttonConfig";
+            showSize = true;
+            showLastData = true;
+            var i:int = 4;
+            factory.properties = {
+                showAnalyze: true,
+                showRefresh: true,
+                showAdmin: true,
+                showDelete: true
+            };
+            controlsColumn.width = i * 45 + 10;
             columns.push(nameColumn);
-            if (showSize) columns.push(sizeColumn);
-            if (showLastData) columns.push(lastDataColumn);
+            if (ApplicationSkin.instance().myDataSize) columns.push(sizeColumn);
+            if (ApplicationSkin.instance().myDataLastTime) columns.push(lastDataColumn);
             columns.push(controlsColumn);
             uploadGrid.columns = columns;
         }
@@ -457,7 +446,10 @@
                 }
 
             }
-            dispatchEvent(new AnalyzeEvent(new CompositeFeedCreationSource(descriptors)));
+            var creator:CompositeCreator = new CompositeCreator(this);
+            creator.dataSources = descriptors;
+            creator.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze, false, 0, true);
+            creator.start();
         }
 
         public function cleanup():void {
@@ -584,6 +576,21 @@
         [Bindable]
         private var loadingIndex:int = 0;
 
+        private function customizeMyData():void {
+            var applicationSkinWindow:ApplicationSkinWindow = new ApplicationSkinWindow();
+            applicationSkinWindow.skinMode = ApplicationSkinWindow.USER_SKIN;
+            applicationSkinWindow.addEventListener(Event.CHANGE, updateUI, false, 0, true);
+            applicationSkinWindow.initialIndex = 1;
+            PopUpManager.addPopUp(applicationSkinWindow, this, true);
+            PopUpUtil.centerPopUp(applicationSkinWindow);
+        }
+
+        private function mobile():void {
+            var window:MobileWindow = new MobileWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
 		]]>
 </mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
@@ -615,28 +622,38 @@
         </mx:Box>
         <skin:BackgroundImage width="100%" height="100%" id="centerCanvas" >
             <mx:Canvas>
-                <mx:HBox paddingLeft="10" paddingTop="10" paddingRight="10" id="buttonBox" width="100%">
-                    <mx:Button toolTip="Create composite data source..." click="createCompositeFeed()"
-                       id="compositeFeedButton" icon="{joinIcon}"
-                    label="Join Data Sources" labelPlacement="right" fontSize="12" styleName="grayButton"/>
-                    <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton"
-                               icon="{tablesAddIcon}"
-                            label="New Lookup Table" labelPlacement="right" fontSize="12" styleName="grayButton"/>
-                    <mx:Button toolTip="Add KPI Tree..." click="createGoalTree()" id="createKPITreeButton" icon="{addIcon}"
-                            label="New KPI Tree" labelPlacement="right" fontSize="12" styleName="grayButton"/>
-                    <mx:Button toolTip="Add Dashboard..." click="createDashboard()" icon="{dashboardIcon}"
-                               id="createDashboardButton"
-                            label="New Dashboard" labelPlacement="right" fontSize="12" styleName="grayButton"/>
-                    <mx:Button toolTip="Add Scorecard..." click="createScorecard()" icon="{scorecardIcon}"
-                               id="createScorecardButton"
-                            label="New Scorecard" labelPlacement="right" fontSize="12" styleName="grayButton"/>
-                    <mx:Spacer width="100%"/>
-                    <mx:CheckBox id="groupInclude" change="groupIncludeChanged()" selected="{includeGroups}"
-                                 label="Only Show My Data"/>
+                <mx:HBox paddingLeft="10" paddingTop="10" paddingRight="10" width="100%">
+                    <mx:VBox width="100%">
+                        <mx:HBox id="buttonBox">
+                            <mx:Button toolTip="Create composite data source..." click="createCompositeFeed()"
+                               id="compositeFeedButton" icon="{joinIcon}"
+                            label="Join Data Sources" labelPlacement="right" fontSize="12" styleName="grayButton"/>
+                            <mx:Button toolTip="Create lookup table..." click="createLookupTable()" id="lookupTableButton"
+                                       icon="{tablesAddIcon}"
+                                    label="New Lookup Table" labelPlacement="right" fontSize="12" styleName="grayButton"/>
+                            <mx:Button toolTip="Add KPI Tree..." click="createGoalTree()" id="createKPITreeButton" icon="{addIcon}"
+                                    label="New KPI Tree" labelPlacement="right" fontSize="12" styleName="grayButton"/>
+                            <mx:Button toolTip="Add Dashboard..." click="createDashboard()" icon="{dashboardIcon}"
+                                       id="createDashboardButton"
+                                    label="New Dashboard" labelPlacement="right" fontSize="12" styleName="grayButton"/>
+                            <mx:Button toolTip="Add Scorecard..." click="createScorecard()" icon="{scorecardIcon}"
+                                       id="createScorecardButton"
+                                    label="New Scorecard" labelPlacement="right" fontSize="12" styleName="grayButton"/>
+                        </mx:HBox>
+                        <mx:TextArea
+                            text="The tree below shows your data sources, scorecards, and reports. You can click on the arrow to the left of any data source to show reports associated with that data source. Use the icons on the right side of the table to create new reports, open existing reports, or perform administrative operations."
+                            width="770" editable="false" selectable="false" fontSize="14" backgroundAlpha="0"
+                                height="60"/>
+                    </mx:VBox>
+                    <mx:VBox>
+                        <mx:CheckBox id="groupInclude" change="groupIncludeChanged()" selected="{includeGroups}"
+                                     label="Only Show My Data"/>
+                        <mx:Button toolTip="Customize My Data..." click="customizeMyData()" icon="{configIcon}"
+                                    label="Customize Page..." labelPlacement="right" fontSize="12" styleName="grayButton"/>
+                        <mx:Button toolTip="View on Mobile..." click="mobile()" icon="{mobileIcon}"
+                                    label="View on Mobile..." labelPlacement="right" fontSize="12" styleName="grayButton"/>
+                    </mx:VBox>
                 </mx:HBox>
-            <mx:TextArea
-                    text="The tree below shows your data sources and reports. You can click on the arrow to the left of any data source to show reports associated with that data source. Use the icons on the right side of the table to create new reports, open existing reports, or take admin actions."
-                    width="980" editable="false" selectable="false" fontSize="14" x="10" y="63" backgroundAlpha="0"/>
                 <mx:Canvas width="980" height="100%" x="10" y="117">
                     <mx:AdvancedDataGrid width="980" height="100%" id="uploadGrid" allowMultipleSelection="true"
                                          fontSize="12"
