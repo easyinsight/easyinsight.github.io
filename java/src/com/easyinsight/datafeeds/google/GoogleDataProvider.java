@@ -386,6 +386,9 @@ public class GoogleDataProvider {
                         continue;
                         //throw new RuntimeException("Couldn't find " + connection.targetDatabaseFieldID + " on " + target.getFeedName());
                     }
+                    if (source.getDataFeedID() == target.getDataFeedID()) {
+                        continue;
+                    }
                     compositeFeedConnectionList.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceKey, targetKey));
                 }
             }

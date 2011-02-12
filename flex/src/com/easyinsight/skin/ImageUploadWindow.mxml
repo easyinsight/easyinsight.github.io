@@ -3,6 +3,8 @@
 	creationComplete="doCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
@@ -46,6 +48,7 @@
         private function doComplete(event:Event):void {
             try {
                 fileData = file.data;
+                ProgressAlert.alert(this, "Uploading image...", null, preferencesService.addImage);
                 preferencesService.addImage.send(fileName.text, fileData, publicImage);
             } catch(e:Error) {
                 Alert.show(e.message);

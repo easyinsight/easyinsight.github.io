@@ -85,7 +85,7 @@
     </mx:HBox>
     <mx:Form>
         <mx:FormItem label="Filter Pattern: ">
-            <mx:TextInput id="patternInput" text="{patternText}"/>
+            <mx:TextInput id="patternInput" text="{patternText}" width="400"/>
         </mx:FormItem>
         <mx:FormItem label="Case Sensitive: ">
             <mx:CheckBox id="caseSensitiveCheckbox" selected="{caseSensitive}"/>

@@ -317,7 +317,7 @@
             </mx:FormItem>
             <mx:FormItem label="" direction="vertical" fontFamily="Lucida Grande" fontWeight="normal">
                 <mx:TextArea text="You can build calculations using fields from the report editor list and the functions listed to the left. You can drag fields from the report editor list into the input below."
-                        width="400" height="50"/>
+                        width="400" height="50" editable="false" selectable="false" focusEnabled="false"/>
                 <mx:Label text="Here are examples of calculation syntax:"/>
                 <mx:Grid horizontalGap="0">
                     <mx:GridRow>

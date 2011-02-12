@@ -14,7 +14,7 @@
 
         import mx.utils.ObjectUtil;
 
-        private var _filterValueDefinition:FilterValueDefinition;
+        private var _filterValueDefinition:FilterDefinition;
 
         [Bindable]
         private var sourceValues:ArrayCollection;
@@ -38,7 +38,7 @@
         public function set filterValueDefinition(filterValueDefinition:FilterValueDefinition):void {
             this._filterValueDefinition = filterValueDefinition;
             if (_filterValueDefinition != null) {
-                includeFilter = _filterValueDefinition.inclusive;
+                includeFilter = filterValueDefinition.inclusive;
             }
         }
 
@@ -67,7 +67,7 @@
             var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
                     AnalysisDimensionResultMetadata;
             var filteredStrings:ArrayCollection = new ArrayCollection();
-            for each (var filterValue:Object in _filterValueDefinition.filteredValues) {
+            for each (var filterValue:Object in FilterValueDefinition(_filterValueDefinition).filteredValues) {
                 var filterString:String;
                 if (filterValue is Value) {
                     filterString = String(Value(filterValue).getValue());
@@ -149,21 +149,29 @@
         }
 
         public function makeUpdates():FilterDefinition {
-            _filterValueDefinition.filteredValues = targetList.dataProvider as ArrayCollection;
-            var index:int = _filterValueDefinition.filteredValues.getItemIndex("[ No Value ]");
+            var valueFilter:FilterValueDefinition = _filterValueDefinition as FilterValueDefinition;
+            valueFilter.filteredValues = targetList.dataProvider as ArrayCollection;
+            var index:int = valueFilter.filteredValues.getItemIndex("[ No Value ]");
             if (index != -1) {
-                _filterValueDefinition.filteredValues.removeItemAt(index);
-                _filterValueDefinition.filteredValues.addItem("");
+                valueFilter.filteredValues.removeItemAt(index);
+                valueFilter.filteredValues.addItem("");
             }
-            _filterValueDefinition.inclusive = includeCheckbox.selected;
-            _filterValueDefinition.singleValue = false;
+            valueFilter.inclusive = includeCheckbox.selected;
+            valueFilter.singleValue = false;
             return _filterValueDefinition;
         }
 
         public function set filterDefinition(filterDefinition:FilterDefinition):void {
-            _filterValueDefinition = filterDefinition as FilterValueDefinition;
+            _filterValueDefinition = filterDefinition;
             if (_filterValueDefinition != null) {
-                includeFilter = _filterValueDefinition.inclusive;
+                if (!(_filterValueDefinition is FilterValueDefinition)) {
+                    var valueFilter:FilterValueDefinition = new FilterValueDefinition();
+                    valueFilter = new FilterValueDefinition();
+                    valueFilter.applyBeforeAggregation = _filterValueDefinition.applyBeforeAggregation;
+                    valueFilter.field = _filterValueDefinition.field;
+                    _filterValueDefinition = valueFilter;
+                }
+                includeFilter = FilterValueDefinition(_filterValueDefinition).inclusive;
             }
         }
 

@@ -6,8 +6,18 @@
         private var _filterDefinition:FilterDefinition;
 
         public function makeUpdates():FilterDefinition {
-            FilterValueDefinition(_filterDefinition).singleValue = true;
-            FilterValueDefinition(_filterDefinition).autoComplete = false;
+            var filterValueDefinition:FilterValueDefinition;
+            if (!(_filterDefinition is FilterValueDefinition)) {
+                filterValueDefinition = new FilterValueDefinition();
+                filterValueDefinition.applyBeforeAggregation = _filterDefinition.applyBeforeAggregation;
+                filterValueDefinition.field = _filterDefinition.field;
+                filterValueDefinition.singleValue = true;
+                filterValueDefinition.autoComplete = false;
+                _filterDefinition = filterValueDefinition;
+            } else {
+                FilterValueDefinition(_filterDefinition).singleValue = true;
+                FilterValueDefinition(_filterDefinition).autoComplete = false;
+            }
             return _filterDefinition;
         }
 

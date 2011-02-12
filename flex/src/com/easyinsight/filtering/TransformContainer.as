@@ -323,7 +323,7 @@ public class TransformContainer extends HBox
             window.y = stageY - 35;
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem);
-            initializeFilter(sliderMeasureFilter);
+            initializeFilter(sliderMeasureFilter, true);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
             var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
             dimWindow.item = analysisItem;
@@ -356,7 +356,7 @@ public class TransformContainer extends HBox
     }
 
     private function onFilterSelection(event:FilterCreationEvent):void {
-        initializeFilter(event.filter);
+        initializeFilter(event.filter, true);
     }
 
     private function filterAdded(event:FilterUpdatedEvent):void {
@@ -378,7 +378,7 @@ public class TransformContainer extends HBox
                 filterTile.removeChild(existingFilter as DisplayObject);
             }
             var newFilter:IFilter = createFilter(event.filterDefinition);
-            initializeFilter(newFilter);
+            initializeFilter(newFilter, false);
         } else {
             dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
         }
@@ -400,19 +400,21 @@ public class TransformContainer extends HBox
         }
     }
 
-    public function commandFilterAdd2(filter:IFilter):void {
+    public function commandFilterAdd2(filter:IFilter, launchWindow:Boolean):void {
         commandFilterAdd(filter);
-        if (filter is SliderMeasureFilter) {
-            SliderMeasureFilter(filter).edit(null);
-        } else if (filter is PatternFilter) {
-            PatternFilter(filter).edit(null);
-        } else if (filter is MultiValueFilter) {
-            MultiValueFilter(filter).edit(null);
+        if (launchWindow) {
+            if (filter is SliderMeasureFilter) {
+                SliderMeasureFilter(filter).edit(null);
+            } else if (filter is PatternFilter) {
+                PatternFilter(filter).edit(null);
+            } else if (filter is MultiValueFilter) {
+                MultiValueFilter(filter).edit(null);
+            }
         }
     }
 
-    private function initializeFilter(filter:IFilter):void {
-        dispatchEvent(new CommandEvent(new FilterAddCommand(this, filter)));
+    private function initializeFilter(filter:IFilter, launchWindow:Boolean):void {
+        dispatchEvent(new CommandEvent(new FilterAddCommand(this, filter, launchWindow)));
     }
 
     private function addFilter(filter:IFilter):void {
@@ -514,7 +516,7 @@ public class TransformContainer extends HBox
                 }
                 filterMap[key.qualifiedName()] = filter;
                 filter.filterDefinition = filterDefinition;
-                initializeFilter(filter);
+                initializeFilter(filter, true);
             } else {
                 if (filter is MultiValueFilter) {
                     var multiValueFilter:MultiValueFilter = filter as MultiValueFilter;
