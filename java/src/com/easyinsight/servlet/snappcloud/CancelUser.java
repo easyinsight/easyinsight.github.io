@@ -30,6 +30,7 @@ public class CancelUser extends HttpServlet {
             UserService service = new UserService();
             service.cancelSnappCloudAccount(snappCloudID);
         } catch(Exception e) {
+            e.printStackTrace();
             success = false;
         }
         response.setStatus(success ? 422 : 200);
