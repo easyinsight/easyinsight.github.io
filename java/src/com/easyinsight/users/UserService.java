@@ -339,7 +339,7 @@ public class UserService {
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
-            Account a = (Account) session.createQuery("from Account where snappCloudID = ?").setString(0, snappCloudId).list().get(0);
+            Account a = (Account) session.createQuery("from Account where snappCloudId = ?").setString(0, snappCloudId).list().get(0);
             cancelAccount(session, a);
             session.getTransaction().commit();
         } catch(Exception e) {
