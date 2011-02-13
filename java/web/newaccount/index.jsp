@@ -33,12 +33,6 @@
             font-weight: bold;
         }
 
-        h3 {
-            color: #CC0033;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
         p {
             text-align: left;
             padding: 10px 30px;
@@ -51,6 +45,80 @@
         }
         ul li {
             padding: 3px 0px;
+        }
+
+        .optionsTable {
+            padding: 0;
+            margin: 0;
+            border-collapse: collapse;
+            color: #FFFFFF;
+            border: 1px solid #333;
+        }
+
+        .optionsTable a {
+            color: #FFFFFF;
+        }
+
+
+
+        .optionsTable td {
+            padding: 0.5em;
+            border: 1px solid #F00;
+        }
+
+        .featureTable {
+            padding: 0;
+            margin: 0;
+            border-collapse: collapse;
+            border: 1px solid #999;
+        }
+
+        .featureTable a {
+            color: #FFFFFF;
+        }
+
+        .featureTable td {
+            border: 1px solid #999;
+            padding: 0.5em;
+        }
+
+        .firstCell {
+            text-align:left;
+        }
+
+        .barrierRow {
+            background-color:#333333;
+            color:#FFFFFF;
+        }
+
+        .firstOptionCell {
+            background-color:#FF0000;
+            color: #FFFFFF;
+            border-left: 1px solid #DD0000;
+        }
+
+        .secondOptionCell {
+            background-color:#DD0000;
+            color: #FFFFFF;
+            border-left: 1px solid #DD0000;
+        }
+
+        .thirdOptionCell {
+            background-color:#BB0000;
+            color: #FFFFFF;
+            border-left: 1px solid #DD0000;
+        }
+
+        .fourthOptionCell {
+            background-color:#990000;
+            color: #FFFFFF;
+            border-left: 1px solid #DD0000;
+        }
+
+        .fifthOptionCell {
+            background-color:#770000;
+            color: #FFFFFF;
+            border-left: 1px solid #DD0000;
         }
     </style>
     <!-- InstanceEndEditable -->
@@ -87,74 +155,240 @@
     </div>
             <div id="contentHeaderStart"></div>
         <div id="midContent">
-            <div style="font-size:36px;font-weight:bold;padding-top:20px;padding-bottom:20px">
+            <div style="font-size:36px;font-weight:bold;padding-top:0px;padding-bottom:20px">
 30 Day Free Trial on All Accounts
             </div>
-            <div style="height:450px;padding-left:50px">
-                <div id="personal" class="pricingBox">
-                    <h2 style="font-size:20px">PERSONAL</h2>
+            <div style="height:1300px;padding-left:30px">
+                <table class="featureTable">
+                    <tr style="font-size:18px">
+                        <td class="firstOptionCell" style="width:300px;border: 1px solid #FF0000"></td>
+                        <td class="secondOptionCell" style="width:130px;border: 1px solid #DD0000">Basic</td>
+                        <td class="thirdOptionCell" style="width:130px;border: 1px solid #BB0000">Plus</td>
+                        <td class="fourthOptionCell" style="width:130px;border: 1px solid #990000">Professional</td>
+                        <td class="fifthOptionCell" style="width:130px;border: 1px solid #770000">Enterprise</td>
+                    </tr>
+                    <tr style="font-size:20px">
+                        <td class="firstOptionCell" style="width:300px;border: 1px solid #FF0000">
+                        </td>
+                        <td class="secondOptionCell" style="width:130px;border: 1px solid #DD0000">
+                            $25/month
+                        </td>
+                        <td class="thirdOptionCell" style="width:130px;border: 1px solid #BB0000">
+                            $75/month
+                        </td>
+                        <td class="fourthOptionCell" style="width:130px;border: 1px solid #990000">
+                            $200/month
+                        </td>
+                        <td class="fifthOptionCell" style="width:130px;border: 1px solid #770000">
+                            Contact Us
+                        </td>
+                    </tr>
+                    <tr style="font-size:20px">
+                        <td class="firstOptionCell" style="width:300px;border: 1px solid #FF0000"></td>
+                        <td class="secondOptionCell" style="width:130px;border: 1px solid #DD0000"><a href="accountsetup.jsp?tier=2">Sign Up</a></td>
+                        <td class="thirdOptionCell" style="width:130px;border: 1px solid #BB0000"><a href="accountsetup.jsp?tier=3">Sign Up</a></td>
+                        <td class="fourthOptionCell" style="width:130px;border: 1px solid #990000"><a href="accountsetup.jsp?tier=4">Sign Up</a></td>
+                        <td class="fifthOptionCell" style="width:130px;border: 1px solid #770000"><a href="mailto:sales@easy-insight.com">Contact Us</a></td>
+                    </tr>
 
-                    <p style="font-size:13px;padding-bottom:0">Enhance your spreadsheets or connect to free SaaS
-                        systems</p>
+                    <tr>
+                        <td class="firstCell"># of users in your account</td>
+                        <td style="font-weight:bold">5</td>
+                        <td style="font-weight:bold">Unlimited</td>
+                        <td style="font-weight:bold">Unlimited</td>
+                        <td style="font-weight:bold">Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Available Storage</td>
+                        <td style="font-weight:bold">35 MB</td>
+                        <td style="font-weight:bold">90 MB</td>
+                        <td style="font-weight:bold">250 MB</td>
+                        <td style="font-weight:bold">Contact Us</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="background-color:#CACACA;font-size:16px">General Features</td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Firewall protection, SSL Encryption</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Ad hoc report, dashboard, scorecard creation</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Combine and join disparate data sources</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Prebuilt reports produced by community</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Scheduled delivery of reports to users</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
 
-                    <h3 style="padding-top:0">Not a cent!</h3>
-                    <a href="accountsetup.jsp?tier=1">
-                        <img name="personal" src="/images/GetStartedSmaller2.png" border="0"></a>
-                    <hr width="90%" style="color:#DFDFDF"/>
-                    <ul>
-                        <li>Upload Excel spreadsheets, CSV files or import Google documents</li>
-                        <li>Connections to Google Analytics, LinkedIn, and Pivotal Tracker</li>
-                        <li>One user</li>
-                        <li>5 MB of storage</li>
-                    </ul>
-                </div>
-                <div id="basic" class="pricingBox">
-                    <h2 style="font-size:20px">BASIC</h2>
+                    <tr>
+                        <td class="firstCell">Customize application look and feel</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Standard REST and SOAP APIs</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Mobile report access</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
 
-                    <p style="font-size:13px;padding-bottom:0">Small organization reporting and analysis</p>
+                    <tr>
+                        <td class="firstCell">Scheduled delivery of reports to anyone</td>
+                        <td></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Data level security</td>
+                        <td></td>
+                        <td></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">KPI trees</td>
+                        <td></td>
+                        <td></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                    <td class="firstCell">Transactional API for large data sets</td>
+                        <td></td>
+                        <td></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="background-color:#CACACA;font-size:16px">Available Connections</td>
+                    </tr>
 
-                    <h3>$25/month</h3>
-                    <a href="accountsetup.jsp?tier=2">
-                        <img name="basic" src="/images/GetStartedSmaller2.png" border="0"></a>
-                    <hr width="90%" style="color:#DFDFDF"/>
-                    <ul>
-                        <li><b>Includes everything in PERSONAL, plus...</b></li>
-                        <li>Connect to Highrise, Basecamp, Constant Contact, Freshbooks, Sendgrid, MySQL, SQL Server, and Oracle</li>
-                        <li>5 users</li>
-                        <li>35 MB of storage</li>
-                    </ul>
-                </div>
-                <div id="plus" class="pricingBox">
-                    <h2 style="font-size:20px">PLUS</h2>
+                    <tr>
+                        <td class="firstCell">Basecamp</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Constant Contact</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Excel, CSV, Google Spreadsheet upload</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Freshbooks</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Google Analytics</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Highrise</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
 
-                    <p style="font-size:13px;padding-bottom:0">Complete reporting and analysis for any size team</p>
 
-                    <h3>$75/month</h3>
-                    <a href="accountsetup.jsp?tier=3">
-                        <img name="personal" src="/images/GetStartedSmaller2.png" border="0"></a>
-                    <hr width="90%" style="color:#DFDFDF"/>
-                    <ul>
-                        <li><b>Includes everything in BASIC, plus...</b></li>
-                        <li>Unlimited users</li>
-                        <li>90 MB of storage</li>
-                    </ul>
-                </div>
-                <div id="professional" class="pricingBox">
-                    <h2 style="font-size:20px">PROFESSIONAL</h2>
+                    <tr>
+                        <td class="firstCell">Pivotal Tracker</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">SendGrid</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Quickbase</td>
+                        <td></td>
+                        <td></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Salesforce</td>
+                        <td></td>
+                        <td></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
 
-                    <p style="font-size:13px;padding-bottom:0">Premier support tailors BI for your business</p>
-
-                    <h3>Starting at $200/month</h3>
-                    <a href="accountsetup.jsp?tier=4">
-                        <img name="personal" src="/images/GetStartedSmaller2.png" border="0"></a>
-                    <hr width="90%" style="color:#DFDFDF"/>
-                    <ul>
-                        <li><b>Includes everything in PLUS, plus...</b></li>
-                        <li>Unlimited users</li>
-                        <li>Starting at 250 MB of storage</li>
-                        <li>24x7 Premier Support</li>
-                    </ul>
-                </div>
+                    <tr>
+                        <td colspan="5" style="background-color:#CACACA;font-size:16px">Services</td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Customer Support Mon/Fri 9AM-6PM MST</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Additional services consulting available</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                </table>
             </div>
         </div>
     <div id="contentHeaderEnd"></div>

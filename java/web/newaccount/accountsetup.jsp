@@ -14,7 +14,7 @@
     } else {
         try {
             int tierNumber = Integer.parseInt(tier);
-            if (tierNumber < com.easyinsight.users.Account.PERSONAL || tierNumber > com.easyinsight.users.Account.PROFESSIONAL) {
+            if (tierNumber < com.easyinsight.users.Account.BASIC || tierNumber > com.easyinsight.users.Account.PROFESSIONAL) {
                 response.sendRedirect("index.jsp");
                 return;
             }
@@ -174,45 +174,45 @@
                 </div>
                 <div style="font-size:18px;font-family:Arial,serif;color:#333333;height:40px">
                     <div style="margin-top:0px;float:left;"><img src="/images/EI32.PNG" alt=""/></div>
-                    <div style="margin-top:5px;margin-left:20px;float:left;">Create your Easy Insight account</div>
+                    <div style="margin-top:5px;margin-left:20px;float:left;">First, your account information:</div>
                 </div>
                 <table style="padding-top:5px">
                     <tr>
-                        <td style="font-size:12px;color:#333333">First Name</td>
-                        <td><input style="font-size:14px;width:300px" id="firstName" type="text" value="" name="firstName"/></td>
+                        <td style="font-size:14px;color:#333333;width:120px;text-align:right">First Name:</td>
+                        <td><input style="font-size:14px;width:300px" id="firstName" type="text" value="<%=request.getParameter("firstName") == null ? "" : request.getParameter("firstName")%>" name="firstName"/></td>
                     </tr>
                     <tr>
-                        <td style="font-size:12px;color:#333333">Last Name</td>
-                        <td><input style="font-size:14px;width:300px" id="lastName" type="text" value="" name="lastName"/></td>
+                        <td style="font-size:14px;color:#333333;width:120px;text-align:right">Last Name:</td>
+                        <td><input style="font-size:14px;width:300px" id="lastName" type="text" value="<%=request.getParameter("lastName") == null ? "" : request.getParameter("lastName")%>" name="lastName"/></td>
                     </tr>
                     <tr>
-                        <td style="font-size:12px;color:#333333">Email</td>
-                        <td><input style="font-size:14px;width:300px" id="email" type="text" value="" name="email"/></td>
+                        <td style="font-size:14px;color:#333333;width:120px;text-align:right">Email:</td>
+                        <td><input style="font-size:14px;width:300px" id="email" type="text" value="<%=request.getParameter("email") == null ? "" : request.getParameter("email")%>" name="email"/></td>
                     </tr>
                     <tr>
-                        <td style="font-size:12px;color:#333333">Company</td>
-                        <td><input style="font-size:14px;width:300px" id="company" type="text" value="" name="company"/></td>
+                        <td style="font-size:14px;color:#333333;width:120px;text-align:right">Company:</td>
+                        <td><input style="font-size:14px;width:300px" id="company" type="text" value="<%=request.getParameter("company") == null ? "" : request.getParameter("company")%>" name="company"/></td>
                     </tr>
                 </table>
                 <div style="font-size:18px;padding-top:10px;font-family:Arial,serif;color:#333333;height:40px">
                     <div style="margin-top:0px;float:left;"><img src="/images/user3.png" alt=""/></div>
-                    <div style="margin-top:5px;margin-left:20px;float:left;">Now choose a username and password</div>
+                    <div style="margin-top:5px;margin-left:20px;float:left;">Now choose a username and password:</div>
                 </div>
                 <table style="padding-top:5px">
                     <tr>
-                        <td style="font-size:12px;color:#333333">Username</td>
-                        <td><input style="font-size:14px;width:300px" id="userName" type="text" value="" name="userName"/></td>
+                        <td style="font-size:14px;color:#333333;width:120px;text-align:right">Username:</td>
+                        <td><input style="font-size:14px;width:300px" id="userName" type="text" value="<%=request.getParameter("userName") == null ? "" : request.getParameter("userName")%>" name="userName"/></td>
                     </tr>
                     <tr>
-                        <td style="font-size:12px;color:#333333">Password</td>
-                        <td><input style="font-size:14px;width:300px" id="password" type="password" value="" name="password"/></td>
+                        <td style="font-size:14px;color:#333333;width:120px;text-align:right">Password:</td>
+                        <td><input style="font-size:14px;width:300px" id="password" type="password" value="<%=request.getParameter("password") == null ? "" : request.getParameter("password")%>" value="" name="password"/></td>
                     </tr>
                     <tr>
-                        <td style="font-size:12px;color:#333333">Confirm Password</td>
-                        <td><input style="font-size:14px;width:300px" id="confirmPassword" type="password" value="" name="confirmPassword"/></td>
+                        <td style="font-size:14px;color:#333333;width:120px;text-align:right">Confirm Password:</td>
+                        <td><input style="font-size:14px;width:300px" id="confirmPassword" type="password" value="<%=request.getParameter("confirmPassword") == null ? "" : request.getParameter("confirmPassword")%>" name="confirmPassword"/></td>
                     </tr>
                 </table>
-                <div style="fontSize:16px;font-family:Arial,serif;color:#333333;padding-top:15px">By clicking Get Started Now! you agree to the <a href="/terms.html" style="text-decoration:underline">Terms of Service</a> and <a href="/privacy.html" style="text-decoration:underline">Privacy</a> policies.</div>
+                <div style="fontSize:16px;font-family:Arial,serif;color:#333333;padding-top:15px">By clicking Get Started Now! you agree to the <a href="/terms.html" style="text-decoration:underline;color:#CC0033">Terms of Service</a> and <a href="/privacy.html" style="text-decoration:underline;color:#CC0033">Privacy</a> policies.</div>
                 <div style="padding-top:20px">
                     <input type="image" src="/images/GetStartedSmaller2.png" alt="Submit Form"/>
                 </div>
