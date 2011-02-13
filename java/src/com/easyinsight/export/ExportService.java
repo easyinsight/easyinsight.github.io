@@ -65,7 +65,6 @@ public class ExportService {
             updateStmt.setBytes(1, bytes);
             updateStmt.setLong(2, requestID);
             updateStmt.executeUpdate();
-            conn.commit();
             PreparedStatement queryStmt = conn.prepareStatement("SELECT SELENIUM_PROCESSOR_ID, ACCOUNT_ID FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST_ID = ?");
             queryStmt.setLong(1, requestID);
             ResultSet rs = queryStmt.executeQuery();
@@ -77,6 +76,7 @@ public class ExportService {
             clearStmt.setLong(1, requestID);
             clearStmt.executeUpdate();
             processor.process(bytes, conn, accountID);
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
