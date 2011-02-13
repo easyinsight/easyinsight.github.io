@@ -57,5 +57,5 @@ public abstract class SeleniumPostProcessor {
         return processor;
     }
 
-    public abstract void process(byte[] bytes, EIConnection conn, long accountID);
+    public abstract void process(byte[] bytes, EIConnection conn, long accountID, long requestID);
 }

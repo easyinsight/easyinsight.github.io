@@ -36,7 +36,7 @@ public class EmailSeleniumPostProcessor extends SeleniumPostProcessor {
     }
 
     @Override
-    public void process(byte[] bytes, EIConnection conn, long accountID) {
+    public void process(byte[] bytes, EIConnection conn, long accountID, long requestID) {
         try {
             ReportDelivery reportDelivery = (ReportDelivery) ScheduledActivity.createActivity(ScheduledActivity.REPORT_DELIVERY, accountActivityID, conn);
             if (reportDelivery.getReportFormat() == ReportDelivery.PNG) {

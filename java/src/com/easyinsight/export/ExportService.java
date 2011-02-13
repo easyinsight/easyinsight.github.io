@@ -13,7 +13,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.scorecard.Scorecard;
-import com.easyinsight.scorecard.ScorecardResults;
 import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.security.SecurityUtil;
@@ -75,7 +74,7 @@ public class ExportService {
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SELENIUM_REQUEST WHERE SELENIUM_REQUEST_ID = ?");
             clearStmt.setLong(1, requestID);
             clearStmt.executeUpdate();
-            processor.process(bytes, conn, accountID);
+            processor.process(bytes, conn, accountID, requestID);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
