@@ -33,7 +33,7 @@ public class CancelUser extends HttpServlet {
             e.printStackTrace();
             success = false;
         }
-        response.setStatus(success ? 422 : 200);
+        response.setStatus(success ? 200 : 422);
         response.getWriter().print(MessageFormat.format(RESPONSE_XML, success));
         response.flushBuffer();
     }
