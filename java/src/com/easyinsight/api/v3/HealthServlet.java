@@ -64,7 +64,7 @@ public class HealthServlet extends HttpServlet {
                 xmlBuilder.append("\t\t<message>");
                 xmlBuilder.append(status.getExtendedMessage());
                 xmlBuilder.append("</message>\r\n");
-                xmlBuilder.append("\t\t<time>\r\n");
+                xmlBuilder.append("\t\t<time>");
                 xmlBuilder.append(new Date(status.getTime()));
                 xmlBuilder.append("</time>\r\n");
                 xmlBuilder.append("\t</server>\r\n");
