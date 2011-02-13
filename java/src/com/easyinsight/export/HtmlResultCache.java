@@ -2,6 +2,7 @@ package com.easyinsight.export;
 
 import com.easyinsight.logging.LogClass;
 import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,21 +37,27 @@ public class HtmlResultCache {
     }
 
     public byte[] waitForResults(long id) throws InterruptedException {
-
+        System.out.println("waiting for id " + id);
         long time = System.currentTimeMillis() + 60000;
-        while (System.currentTimeMillis() < time) {
-            byte[] results = (byte[]) resultCache.get(id);
-            if (results != null) {
-                return results;
-            } else {
-                Thread.sleep(2500);
+        try {
+            while (System.currentTimeMillis() < time) {
+                byte[] results = (byte[]) resultCache.get(id);
+                if (results != null) {
+                    resultCache.remove(id);
+                    return results;
+                } else {
+                    Thread.sleep(2500);
+                }
             }
+        } catch (CacheException e) {
+            LogClass.error(e);
         }
         return null;
     }
 
     public void addResults(byte[] bytes, long id) {
         try {
+            System.out.println("adding result to id " + id);
             resultCache.put(id, bytes);
         } catch (Exception e) {
             LogClass.error(e);

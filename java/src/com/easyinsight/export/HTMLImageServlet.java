@@ -22,26 +22,30 @@ import java.sql.ResultSet;
 public class HTMLImageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("hrm");
-        int width = Integer.parseInt(req.getParameter("width"));
-        int height = Integer.parseInt(req.getParameter("height")) - 100;
-        WSAnalysisDefinition report = (WSAnalysisDefinition) req.getSession().getAttribute("report");
-        long reportID = report.getAnalysisID();
-        req.getSession().removeAttribute("imageID");
-        Long userID = (Long) req.getSession().getAttribute("userID");
-        Long accountID = (Long) req.getSession().getAttribute("accountID");
         EIConnection conn = Database.instance().getConnection();
         try {
+            int width = Integer.parseInt(req.getParameter("width"));
+            int height = Integer.parseInt(req.getParameter("height")) - 100;
+            WSAnalysisDefinition report = (WSAnalysisDefinition) req.getSession().getAttribute("report");
+            System.out.println("received request for " + report.getAnalysisID());
+            long reportID = report.getAnalysisID();
+            req.getSession().removeAttribute("imageID");
+            Long userID = (Long) req.getSession().getAttribute("userID");
+            Long accountID = (Long) req.getSession().getAttribute("accountID");
             long requestID = new SeleniumLauncher().requestSeleniumDrawForMobile(reportID,
                     userID, accountID, conn, width, height);
+            System.out.println("waiting for bytes");
             byte[] bytes = HtmlResultCache.getInstance().waitForResults(requestID);
             if (bytes != null) {
+                System.out.println("got back bytes");
                 resp.setContentType("application/x-download");
                 resp.setContentLength(bytes.length);
 
                 resp.setHeader("Content-disposition","inline; filename=" + report.getName()+".png" );
                 resp.getOutputStream().write(bytes);
                 resp.getOutputStream().flush();
+            } else {
+                System.out.println("timeout :(");
             }
         } catch (Exception e) {
             LogClass.error(e);
