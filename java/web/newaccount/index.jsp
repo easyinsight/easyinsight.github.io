@@ -199,7 +199,7 @@
                         <td style="font-weight:bold">Unlimited</td>
                     </tr>
                     <tr>
-                        <td class="firstCell">Available Storage</td>
+                        <td class="firstCell">Available storage</td>
                         <td style="font-weight:bold">35 MB</td>
                         <td style="font-weight:bold">90 MB</td>
                         <td style="font-weight:bold">250 MB</td>
@@ -209,7 +209,7 @@
                         <td colspan="5" style="background-color:#CACACA;font-size:16px">General Features</td>
                     </tr>
                     <tr>
-                        <td class="firstCell">Firewall protection, SSL Encryption</td>
+                        <td class="firstCell">Firewall protection, SSL encryption</td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
