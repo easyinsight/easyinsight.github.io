@@ -39,15 +39,15 @@
                     com.easyinsight.analysis.InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
                     if (insightResponse.getStatus() == com.easyinsight.analysis.InsightResponse.SUCCESS) {
                         WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
-                        if (report.getReportType() == WSAnalysisDefinition.LIST || report.getReportType() == WSAnalysisDefinition.TREE ||
-                                report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
+                        /*if (report.getReportType() == WSAnalysisDefinition.LIST || report.getReportType() == WSAnalysisDefinition.TREE ||
+                                report.getReportType() == WSAnalysisDefinition.CROSSTAB) {*/
                             ListDataResults dataResults = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
                             out.println(ExportService.toTable(report, dataResults, conn));
-                        } else {
+                        /*} else {
                             session.setAttribute("report", report);
                             out.println("<div id=\"reportImage\"/>");
                             //out.println("<img src=\"/app/htmlimage\" alt=\"" + report.getName() + "\"/>");
-                        }
+                        }*/
                     }
                 } finally {
                     Database.closeConnection(conn);
