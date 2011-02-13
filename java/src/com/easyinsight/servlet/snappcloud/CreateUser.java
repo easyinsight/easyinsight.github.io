@@ -59,6 +59,7 @@ public class CreateUser extends HttpServlet {
             System.out.println("snappcloudid: " + snappCloudId);
             System.out.println("realPassword: " + realPassword);
         } catch(Exception e) {
+            e.printStackTrace();
             success = false;
         }
         response.setStatus(success ? 200 : 422);
