@@ -4,6 +4,7 @@ import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
+import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.UserAudit;
 
 import flash.display.DisplayObject;
@@ -126,7 +127,7 @@ public class TransformContainer extends HBox
         for each (var filter:IFilter in filterMap) {
             if (filter.filterDefinition.field.qualifiedName() == item.qualifiedName()) {
                 filterTile.removeChild(filter as DisplayObject);
-                delete filterMap[filter.filterDefinition.field.qualifiedName()];
+                //delete filterMap[filter.filterDefinition.field.qualifiedName()];
                 var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
                 filterDefinitions.removeItemAt(index);
                 if (filterDefinitions.length == 0) {
@@ -137,24 +138,6 @@ public class TransformContainer extends HBox
             }
         }
         dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
-    }
-
-    public function invalidateItems(items:ArrayCollection):void {
-        for each (var itemID:int in items) {
-            for each (var filter:IFilter in filterMap) {
-                if (filter.filterDefinition.field.analysisItemID == itemID) {
-                    filterTile.removeChild(filter as DisplayObject);
-                    delete filterMap[filter.filterDefinition.field.qualifiedName()];
-                    var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
-                    filterDefinitions.removeItemAt(index);
-                    if (filterDefinitions.length == 0) {
-                        noFilters = true;
-                        //removeChild(filterTile);
-                        //addChild(dropHereBox);
-                    }
-                }
-            }
-        }
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
@@ -209,7 +192,7 @@ public class TransformContainer extends HBox
         }
     }
 
-    private var _loadingFromReport:Boolean = false;
+    protected var _loadingFromReport:Boolean = false;
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
@@ -264,11 +247,18 @@ public class TransformContainer extends HBox
             filter = new LastValueFilter(_feedID, filterDefinition.field, LastValueFilter.NULL_VALUE);
         } else if (filterDefinition.getType() == FilterDefinition.PATTERN) {
             filter = new PatternFilter(_feedID, filterDefinition.field);
+        } else if (filterDefinition.getType() == FilterDefinition.OR) {
+            filter = new OrFilterCanvas(_feedID);
+            filter.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, passThrough);
         }
         filter.filterEditable = _filterEditable;
         filter.showLabel = _showLabel;
         filter.filterDefinition = filterDefinition;
         return filter;
+    }
+
+    private function passThrough(event:TransformsUpdatedEvent):void {
+        dispatchEvent(new TransformsUpdatedEvent(this.filterDefinitions));
     }
 
     public function set feedID(feedID:int):void {
@@ -308,6 +298,23 @@ public class TransformContainer extends HBox
         showingFeedback = false;
     }
 
+    public function addNewFilter():void {
+        var window:NewFilterWindow = new NewFilterWindow();
+        window.availableFields = this._analysisItems;
+        window.addEventListener(NewFilterEvent.NEW_FILTER, onFilterCreation, false, 0, true);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+    }
+
+    private function onFilterCreation(event:NewFilterEvent):void {
+        if (event.filterType == NewFilterEvent.FIELD_FILTER) {
+            createNewFilter(event.analysisItem, 0, 0);
+        } else if (event.filterType == NewFilterEvent.OR_FILTER) {
+            var orFilter:OrFilter = new OrFilter();
+            addFilterDefinition(orFilter);
+        }
+    }
+
     public function createNewFilter(analysisItem:AnalysisItem, stageX:int, stageY:int):void {
         UserAudit.instance().audit(UserAudit.CREATED_FILTER);
         if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
@@ -317,10 +324,14 @@ public class TransformContainer extends HBox
             window.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             //Alert.show(event.localX + " - " + event.localY);
-            var x:int = stageX - 220;
-            x = Math.max(x, 30);
-            window.x = x;
-            window.y = stageY - 35;
+            if (stageX == 0 && stageY == 0) {
+                PopUpUtil.centerPopUp(window);
+            } else {
+                var x:int = stageX - 220;
+                x = Math.max(x, 30);
+                window.x = x;
+                window.y = stageY - 35;
+            }
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem);
             initializeFilter(sliderMeasureFilter, true);
@@ -330,13 +341,21 @@ public class TransformContainer extends HBox
             dimWindow.feedID = _feedID;
             dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection, false, 0, true);
             PopUpManager.addPopUp(dimWindow, this, true);
-            dimWindow.x = Math.max(stageX - 220, 30);
-            dimWindow.y = stageY - 35;
+            if (stageX == 0 && stageY == 0) {
+                PopUpUtil.centerPopUp(dimWindow);
+            } else {
+                dimWindow.x = Math.max(stageX - 220, 30);
+                dimWindow.y = stageY - 35;
+            }
         }
     }
 
+    protected function getBorderColor():uint {
+        return 0xFFFFFF;
+    }
+
     protected function dragDropHandler(event:DragEvent):void {
-        setStyle("borderColor", 0xFFFFFF);
+        setStyle("borderColor", getBorderColor());
         showingFeedback = false;
         var analysisItem:AnalysisItem;
         if (event.dragInitiator is DataGrid) {
@@ -417,8 +436,8 @@ public class TransformContainer extends HBox
         dispatchEvent(new CommandEvent(new FilterAddCommand(this, filter, launchWindow)));
     }
 
-    private function addFilter(filter:IFilter):void {
-        filterMap[filter.filterDefinition.field.qualifiedName()] = filter;
+    protected function addFilter(filter:IFilter):void {
+        //filterMap[filter.filterDefinition.field.qualifiedName()] = filter;
         filterDefinitions.addItem(filter.filterDefinition);
         filter.analysisItems = _analysisItems;
     }
@@ -429,7 +448,7 @@ public class TransformContainer extends HBox
 
     public function commandFilterDelete(filter:IFilter):void {
         filterTile.removeChild(filter as DisplayObject);
-        delete filterMap[filter.filterDefinition.field.qualifiedName()];
+        //delete filterMap[filter.filterDefinition.field.qualifiedName()];
         var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
         filterDefinitions.removeItemAt(index);
         if (filterDefinitions.length == 0) {
@@ -438,12 +457,6 @@ public class TransformContainer extends HBox
             //addChild(dropHereBox);
         }
         dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
-    }
-
-    public function removeAllFilters():void {
-        for each (var filter:IFilter in filterMap) {
-            commandFilterDelete(filter);
-        }
     }
 
     private function filterDeleted(event:FilterDeletionEvent):void {
@@ -469,8 +482,7 @@ public class TransformContainer extends HBox
                     uniqueValues.addItem(val);
                 }
             }
-            var filter:IFilter = filterMap[key.qualifiedName()];
-            if (filter == null) {
+            var filter:IFilter = null;
                 // doesn't exist yet, create it
                 var filterDefinition:FilterDefinition;
                 if (key.hasType(AnalysisItemTypes.DATE)) {
@@ -517,7 +529,7 @@ public class TransformContainer extends HBox
                 filterMap[key.qualifiedName()] = filter;
                 filter.filterDefinition = filterDefinition;
                 initializeFilter(filter, true);
-            } else {
+            /*} else {
                 if (filter is MultiValueFilter) {
                     var multiValueFilter:MultiValueFilter = filter as MultiValueFilter;
                     // update the filtered values
@@ -540,7 +552,7 @@ public class TransformContainer extends HBox
                 } else if (filter is SliderMeasureFilter) {
 
                 }
-            }
+            }*/
 
         }
     }

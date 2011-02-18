@@ -492,6 +492,7 @@ public class ExportService {
         EIConnection conn = Database.instance().getConnection();
         int dateFormat;
         try {
+            listDataResults.summarize();
             PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = dateFormatStmt.executeQuery();
@@ -596,6 +597,23 @@ public class ExportService {
                 cellIndex++;
             }
             i++;
+        }
+        if (listDefinition.getReportType() == WSAnalysisDefinition.LIST) {
+            WSListDefinition list = (WSListDefinition) listDefinition;
+            if (list.isSummaryTotal()) {
+                HSSFRow summaryRow = sheet.createRow(i);
+                for (int j = 0; j < listDataResults.getHeaders().length; j++) {
+                    AnalysisItem analysisItem = listDataResults.getHeaders()[j];
+                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        int headerPosition = positionMap.get(analysisItem);
+                        double summary = listDataResults.getSummaries()[j];
+                        HSSFCellStyle style = getStyle(styleMap, analysisItem, workbook, dateFormat);
+                        HSSFCell cell = summaryRow.createCell(headerPosition);
+                        cell.setCellStyle(style);
+                        cell.setCellValue(summary);
+                    }
+                }
+            }
         }
         return workbook;
     }
@@ -738,7 +756,28 @@ public class ExportService {
             }
             sb.append("</tr>");
         }
+        if (report.getReportType() == WSAnalysisDefinition.LIST) {
+            WSListDefinition list = (WSListDefinition) report;
+            if (list.isSummaryTotal()) {
+                sb.append("<tr>");
+                for (AnalysisItem analysisItem : items) {
+                    for (int j = 0; j < listDataResults.getHeaders().length; j++) {
+                        AnalysisItem headerItem = listDataResults.getHeaders()[j];
+                        if (headerItem == analysisItem) {
+                            sb.append("<td style=\"border-style:solid;border-width:1px\">");
+                            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                double summary = listDataResults.getSummaries()[j];
+                                sb.append(com.easyinsight.export.ExportService.createValue(dateFormat, headerItem, new NumericValue(summary)));
+                            }
+                            sb.append("</td>");
+                        }
+                    }
+                }
+                sb.append("</tr>");
+            }
+        }
         sb.append("</table>");
+        System.out.println(sb.toString());
         return sb.toString();
     }
 

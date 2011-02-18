@@ -467,7 +467,7 @@ public class SolutionService {
                     Date dateCreated = new Date(dashboardRS.getTimestamp(4).getTime());
                     String authorName = dashboardRS.getString(5);
                     String description = dashboardRS.getString(6);
-                    EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey, 0, Roles.NONE);
+                    EIDescriptor descriptor = new DashboardDescriptor(null, dashboardID, dashboardURLKey, 0, Roles.NONE, null);
                     blah = determineDataSourceForDashboard(dashboardID, conn);
                     PreparedStatement ratingStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM DASHBOARD_USER_RATING WHERE DASHBOARD_ID = ?");
                     ratingStmt.setLong(1, dashboardID);
@@ -679,7 +679,7 @@ public class SolutionService {
 
             dashboardStorage.saveDashboard(copiedDashboard, conn);
 
-            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE);
+            DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(copiedDashboard.getName(), copiedDashboard.getId(), copiedDashboard.getUrlKey(), 0, Roles.NONE, null);
 
             session.flush();
 
@@ -858,7 +858,7 @@ public class SolutionService {
 
                 double ratingAverage = ratingRS.getDouble(1);
                 int ratingCount = ratingRS.getInt(2);
-                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, Roles.NONE);
+                DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, Roles.NONE, null);
                 SolutionReportExchangeItem item = new SolutionReportExchangeItem(dashboardName, dashboardID, ratingAverage,
                         ratingCount, createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName);
                 reports.add(item);

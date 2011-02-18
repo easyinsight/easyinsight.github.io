@@ -6,26 +6,6 @@
     <!-- InstanceBeginEditable name="doctitle" -->
     <title>Plans, Pricing, and Free Trial</title>
     <style type="text/css">
-        .pricingBox {
-            width: 220px;
-            height: 440px;
-            padding: 0px;
-            margin: 0px;
-            border-style: solid;
-            border-radius: 5px;
-            border-width: 1px;
-            border-color: #B7BABC;
-            text-align:center;
-            float:left;
-            background-color: #FBFBFB;
-        }
-
-        #personal {
-
-        }
-
-        #professional {
-        }
 
         h2 {
             color: #000000;
@@ -136,6 +116,7 @@
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
 <div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
+<div style="position:absolute;height:185px;background-color:#444444;width:100%;margin-top:108px"></div>
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
@@ -153,31 +134,37 @@
         <a class="inactive" href="/partners.html">Partners</a>
         <a class="inactive" href="/company.html">Company</a>
     </div>
-            <div id="contentHeaderStart"></div>
-        <div id="midContent">
-            <div style="font-size:36px;font-weight:bold;padding-top:0px;padding-bottom:20px">
-30 Day Free Trial on All Accounts
+    <div id="coreContent" style="height:185px">
+            <div class="coreContentBlock">
+                <h2 class="coreContentHeader">30 Day Free Trial on All Accounts</h2>
+                <p class="coreContentParagraph">
+                    Start building reports and analyzing data now! No credit card is required for your 30 day free trial.
+                </p>
             </div>
+    </div>
+    <div id="contentHeaderStart">
+    </div>
+        <div id="midContent">
             <div style="height:1300px;padding-left:30px">
                 <table class="featureTable">
                     <tr style="font-size:18px">
                         <td class="firstOptionCell" style="width:300px;border: 1px solid #FF0000"></td>
-                        <td class="secondOptionCell" style="width:130px;border: 1px solid #DD0000">Basic</td>
-                        <td class="thirdOptionCell" style="width:130px;border: 1px solid #BB0000">Plus</td>
-                        <td class="fourthOptionCell" style="width:130px;border: 1px solid #990000">Professional</td>
+                        <td class="secondOptionCell" style="width:130px;border: 1px solid #DD0000"><a href="accountsetup.jsp?tier=2">Basic</a></td>
+                        <td class="thirdOptionCell" style="width:130px;border: 1px solid #BB0000"><a href="accountsetup.jsp?tier=3">Plus</a></td>
+                        <td class="fourthOptionCell" style="width:130px;border: 1px solid #990000"><a href="accountsetup.jsp?tier=4">Professional</a></td>
                         <td class="fifthOptionCell" style="width:130px;border: 1px solid #770000">Enterprise</td>
                     </tr>
                     <tr style="font-size:20px">
                         <td class="firstOptionCell" style="width:300px;border: 1px solid #FF0000">
                         </td>
                         <td class="secondOptionCell" style="width:130px;border: 1px solid #DD0000">
-                            $25/month
+                            <a href="accountsetup.jsp?tier=2">$25/month</a>
                         </td>
                         <td class="thirdOptionCell" style="width:130px;border: 1px solid #BB0000">
-                            $75/month
+                            <a href="accountsetup.jsp?tier=3">$75/month</a>
                         </td>
                         <td class="fourthOptionCell" style="width:130px;border: 1px solid #990000">
-                            $200/month
+                            <a href="accountsetup.jsp?tier=4">$200/month</a>
                         </td>
                         <td class="fifthOptionCell" style="width:130px;border: 1px solid #770000">
                             Contact Us

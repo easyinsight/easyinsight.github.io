@@ -1,5 +1,7 @@
 package com.easyinsight.users;
 
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
@@ -14,6 +16,8 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthProvider;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.commonshttp.CommonsHttpOAuthProvider;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
 import oauth.signpost.signature.PlainTextMessageSigner;
@@ -30,26 +34,16 @@ import java.util.ArrayList;
  */
 public class TokenService {
 
-    /*public void verifyOAuth(String pin) throws Exception {
-        try {
-            provider.retrieveAccessToken(consumer, pin);
-            System.out.println("token = " + consumer.getToken());
-            System.out.println("secret token token = " + consumer.getTokenSecret());
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }*/
+    public static final int CONNECTION_SETUP = 1;
+    public static final int NO_CONNECTION = 2;
 
-    public OAuthResponse getOAuthURL(int type, long connectionID) {
-        return getOAuthURL(type, connectionID, null);
-    }
-
-    public OAuthResponse getOAuthURL(int type, long connectionID, String extra) {
+    public OAuthResponse getOAuthURL(int type, boolean redirect, String host, FeedDefinition dataSource, int redirectType) {
         try {
 
             OAuthConsumer consumer;
             OAuthProvider provider;
+
+            new FeedStorage().updateDataFeedConfiguration(dataSource);
 
             if (type == FeedType.LINKEDIN.getType()) {
                 consumer = new DefaultOAuthConsumer("pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq",
@@ -64,12 +58,12 @@ public class TokenService {
                         "http://twitter.com/oauth/request_token", "http://twitter.com/oauth/access_token",
                         "http://twitter.com/oauth/authorize");
             } else if (type == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
-                consumer = new DefaultOAuthConsumer(FreshbooksCompositeSource.CONSUMER_KEY,
+                consumer = new CommonsHttpOAuthConsumer(FreshbooksCompositeSource.CONSUMER_KEY,
                         FreshbooksCompositeSource.CONSUMER_SECRET);
                 consumer.setMessageSigner(new PlainTextMessageSigner());
-                provider = new DefaultOAuthProvider(
-                        "https://"+extra+".freshbooks.com/oauth/oauth_request.php", "https://"+extra+".freshbooks.com/oauth/oauth_access.php",
-                        "https://"+extra+".freshbooks.com/oauth/oauth_authorize.php");
+                provider = new CommonsHttpOAuthProvider(
+                        "https://"+host+".freshbooks.com/oauth/oauth_request.php", "https://"+host+".freshbooks.com/oauth/oauth_access.php",
+                        "https://"+host+".freshbooks.com/oauth/oauth_authorize.php");
             } else if (type == FeedType.CONSTANT_CONTACT.getType()) {
                 consumer = new DefaultOAuthConsumer("cec7e39c-25fc-43e6-a423-bf02de492d87", "ee72ddd074804402966863aad91b9687");
                 provider = new DefaultOAuthProvider(
@@ -89,15 +83,29 @@ public class TokenService {
                 provider = new DefaultOAuthProvider(
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
+            } else if (type == FeedType.SALESFORCE.getType()) {
+                consumer = new DefaultOAuthConsumer("3MVG9VmVOCGHKYBQUAbz7d7kk6x2g29kEbyFhTBt7u..yutNvp7evoFyWTm2q4tZfWRdxekrK6fhhwf5BN4Tq",
+                        "5028271817562655674");
+                provider = new DefaultOAuthProvider(
+                        "https://login.salesforce.com" + "/_nc_external/system/security/oauth/RequestTokenHandler",
+                        "https://login.salesforce.com" + "/_nc_external/system/security/oauth/AccessTokenHandler",
+                        "https://login.salesforce.com" + "/setup/secur/RemoteAccessAuthorizationPage.apexp");
             } else {
                 throw new RuntimeException();
             }
             FlexContext.getHttpRequest().getSession().setAttribute("oauthConsumer", consumer);
             FlexContext.getHttpRequest().getSession().setAttribute("oauthProvider", provider);
 
-            //return provider.retrieveRequestToken(consumer, "http://www.easy-insight.com/solutions.html?sourceType=5&connectionID=" + connectionID);
-            String requestToken = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
-            System.out.println("request token = " + requestToken);
+            String requestToken;
+            if (redirect) {
+                if (ConfigLoader.instance().isProduction()) {
+                    requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                } else {
+                    requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                }
+            } else {
+                requestToken = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
+            }
             return new OAuthResponse(requestToken, true);
         } catch (OAuthCommunicationException oauthException) {
             if (oauthException.getMessage().indexOf("302") != -1) {

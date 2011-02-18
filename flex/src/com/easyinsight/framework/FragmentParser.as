@@ -93,6 +93,11 @@ public class FragmentParser {
                 delayedTemplate.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
                 delayedTemplate.execute();
             }),
+            new FragmentTester("connectionConfig", function(key:String, workspace:PrimaryWorkspace, o:Object):void {
+                var config:ConnectionConfig = new ConnectionConfig(key);
+                config.addEventListener(AnalyzeEvent.ANALYZE, workspace.internalAnalyze);
+                config.execute();
+            }),
             new FragmentTester("redirectID", function(key:String, workspace:PrimaryWorkspace, o:Object):void  {
                 if (User.getInstance().guestUser) return;
                 var redirectType:int = int(key);

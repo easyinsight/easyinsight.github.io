@@ -63,6 +63,7 @@
                 dataSourceCreation = new _dataSourceClass();
                 var uicomp:UIComponent = dataSourceCreation as UIComponent;
                 uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+                dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
                 coreContent.addChild(dataSourceCreation as DisplayObject);
             }
         }
@@ -76,6 +77,7 @@
             ready = true;
             var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
             dataSourceCreation = new configClass();
+            dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
             var dispObject:DisplayObject = dataSourceCreation as DisplayObject;
             dispObject.addEventListener(FlexEvent.CREATION_COMPLETE, onDataCreation, false, 0, true);
             coreContent.addChild(dispObject);

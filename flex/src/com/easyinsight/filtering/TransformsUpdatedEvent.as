@@ -7,7 +7,7 @@ package com.easyinsight.filtering
 	public class TransformsUpdatedEvent extends Event
 	{
 		public static const UPDATED_TRANSFORMS:String = "updatedTransforms";
-		[Bindable]
+
 		public var filterDefinitions:ArrayCollection;
 		
 		public function TransformsUpdatedEvent(filterDefinitions:ArrayCollection)
@@ -15,6 +15,10 @@ package com.easyinsight.filtering
 			super(UPDATED_TRANSFORMS);
 			this.filterDefinitions = filterDefinitions;
 		}
-		
-	}
+
+
+        override public function clone():Event {
+            return new TransformsUpdatedEvent(filterDefinitions);
+        }
+    }
 }

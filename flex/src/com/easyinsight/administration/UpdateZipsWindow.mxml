@@ -62,7 +62,7 @@
         }
 		]]>
 	</mx:Script>
-    <mx:RemoteObject destination="adminService" id="adminService">
+    <mx:RemoteObject destination="admin" id="adminService">
         <mx:method name="updateZips" result="Alert.show('Successful!')"/>
     </mx:RemoteObject>
 	<mx:VBox>

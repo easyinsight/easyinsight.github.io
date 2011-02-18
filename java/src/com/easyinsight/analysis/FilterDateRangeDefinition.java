@@ -25,14 +25,14 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     @Column(name="bounding_start_date")
     private Date boundingStartDate;
 
-    @OneToOne(fetch=FetchType.LAZY, cascade = CascadeType.MERGE)
+    @OneToOne(cascade = CascadeType.MERGE, fetch=FetchType.LAZY)
     @JoinColumn(name="start_dimension")
     private AnalysisDateDimension startDateDimension;
 
     @Column(name="bounding_end_date")
     private Date boundingEndDate;
 
-    @OneToOne(fetch=FetchType.LAZY, cascade = CascadeType.MERGE)
+    @OneToOne(cascade = CascadeType.MERGE, fetch=FetchType.LAZY)
     @JoinColumn(name="end_dimension")
     private AnalysisDateDimension endDateDimension;
 
@@ -51,8 +51,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             }
             if (startDateDimension.getAnalysisItemID() == 0) {
                 session.save(startDateDimension);
-            } else {
-                session.merge(startDateDimension);
             }
         }
         if (endDateDimension != null) {
@@ -62,8 +60,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             }
             if (endDateDimension.getAnalysisItemID() == 0) {
                 session.save(endDateDimension);
-            } else {
-                session.merge(endDateDimension);
             }
         }
     }

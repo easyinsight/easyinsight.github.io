@@ -16,7 +16,7 @@ public class ConstantContactDataSource extends CompositeServerDataSource {
     }
 
     override public function isLiveData():Boolean {
-        return true;
+        return false;
     }
 
     override public function getFeedType():int {

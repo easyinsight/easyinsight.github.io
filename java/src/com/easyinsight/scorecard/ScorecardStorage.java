@@ -41,27 +41,30 @@ public class ScorecardStorage {
         }
         if (scorecard.getScorecardID() == 0) {
             PreparedStatement insertScorecardStmt = conn.prepareStatement("INSERT INTO SCORECARD (SCORECARD_NAME, USER_ID, URL_KEY, ACCOUNT_VISIBLE," +
-                    "EXCHANGE_VISIBLE, DESCRIPTION) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "EXCHANGE_VISIBLE, DESCRIPTION, CREATION_DATE, UPDATE_DATE) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             insertScorecardStmt.setString(1, scorecard.getName());
             insertScorecardStmt.setLong(2, userID);
             insertScorecardStmt.setString(3, scorecard.getUrlKey());
             insertScorecardStmt.setBoolean(4, scorecard.isAccountVisible());
             insertScorecardStmt.setBoolean(5, scorecard.isExchangeVisible());
             insertScorecardStmt.setString(6, scorecard.getDescription());
+            insertScorecardStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            insertScorecardStmt.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
             insertScorecardStmt.execute();
             scorecard.setScorecardID(Database.instance().getAutoGenKey(insertScorecardStmt));
             insertScorecardStmt.close();
         } else {
             PreparedStatement updateScorecardStmt = conn.prepareStatement("UPDATE SCORECARD SET SCORECARD_NAME = ?," +
-                    "USER_ID = ?, URL_KEY = ?, ACCOUNT_VISIBLE = ?, EXCHANGE_VISIBLE = ?, DESCRIPTION = ? WHERE SCORECARD_ID = ?");
+                    "USER_ID = ?, URL_KEY = ?, ACCOUNT_VISIBLE = ?, EXCHANGE_VISIBLE = ?, DESCRIPTION = ?, UPDATE_DATE = ? WHERE SCORECARD_ID = ?");
             updateScorecardStmt.setString(1, scorecard.getName());
             updateScorecardStmt.setLong(2, userID);
             updateScorecardStmt.setString(3, scorecard.getUrlKey());
             updateScorecardStmt.setBoolean(4, scorecard.isAccountVisible());
             updateScorecardStmt.setBoolean(5, scorecard.isExchangeVisible());
             updateScorecardStmt.setString(6, scorecard.getDescription());
-            updateScorecardStmt.setLong(7, scorecard.getScorecardID());
+            updateScorecardStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            updateScorecardStmt.setLong(8, scorecard.getScorecardID());
             updateScorecardStmt.executeUpdate();
             updateScorecardStmt.close();
         }

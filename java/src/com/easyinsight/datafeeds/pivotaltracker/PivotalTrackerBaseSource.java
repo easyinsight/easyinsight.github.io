@@ -23,6 +23,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.sql.Connection;
 import java.text.DateFormat;
@@ -154,7 +155,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         return DataSourceInfo.STORED_PULL;
     }
 
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
         try {
             if (tokenObj == null && ptUserName != null && ptPassword != null) {

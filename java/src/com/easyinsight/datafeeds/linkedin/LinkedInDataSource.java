@@ -22,6 +22,7 @@ import oauth.signpost.OAuthProvider;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -105,11 +106,14 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         try {
+            if (externalPin != null) {
+                pin = externalPin;
+            }
             if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecret == null) {
-                OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
+                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
+                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
                 provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecret = consumer.getTokenSecret();

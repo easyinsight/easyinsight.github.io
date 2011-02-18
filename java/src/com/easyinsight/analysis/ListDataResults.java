@@ -1,24 +1,43 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Value;
+
 import java.util.Map;
 
 import java.io.Serializable;
 
 public class ListDataResults extends DataResults implements Serializable {
     private AnalysisItem[] headers;
-    private Map<String, String> groupings;
     private AnalysisItemResultMetadata[] headerMetadata;
     private ListRow[] rows;
     private boolean limitedResults;
     private int limitResults;
     private int maxResults;
+    private double[] summaries;
 
-    public Map<String, String> getGroupings() {
-        return groupings;
+    public void summarize() {
+        summaries = new double[headers.length];
+        for (int i = 0; i < headers.length; i++) {
+            AnalysisItem header = headers[i];
+            if (header.hasType(AnalysisItemTypes.MEASURE)) {
+                AnalysisMeasure analysisMeasure = (AnalysisMeasure) header;
+                AggregationFactory aggregationFactory = new AggregationFactory(analysisMeasure, false);
+                Aggregation aggregation = aggregationFactory.getAggregation();
+                for (ListRow row : rows) {
+                    Value value = row.getValues()[i];
+                    aggregation.addValue(value);
+                }
+                summaries[i] = aggregation.getValue().toDouble();
+            }
+        }
     }
 
-    public void setGroupings(Map<String, String> groupings) {
-        this.groupings = groupings;
+    public double[] getSummaries() {
+        return summaries;
+    }
+
+    public void setSummaries(double[] summaries) {
+        this.summaries = summaries;
     }
 
     public boolean isLimitedResults() {

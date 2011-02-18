@@ -9,6 +9,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UploadPolicy;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,7 @@ public interface IServerDataSourceDefinition {
 
     String getFeedName();
 
-    void exchangeTokens(EIConnection conn) throws Exception;
+    void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception;
 
     /**
      * The FeedType constant associated with this data source, used for loading purposes

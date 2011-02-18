@@ -25,6 +25,8 @@ import java.sql.SQLException;
 
 import org.hibernate.Session;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * User: James Boe
  * Date: Jun 16, 2009
@@ -45,7 +47,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return (IServerDataSourceDefinition) new DataSourceTypeRegistry().createDataSource(feedType);
     }
 
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
     }
 
     protected abstract Set<FeedType> getFeedTypes();

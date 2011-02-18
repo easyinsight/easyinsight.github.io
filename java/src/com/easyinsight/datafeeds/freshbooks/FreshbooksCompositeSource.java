@@ -16,6 +16,7 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import oauth.signpost.exception.OAuthCommunicationException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -77,6 +78,9 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     private String url;
 
     public String getUrl() {
+        if (url == null || "".equals(url)) {
+            return url;
+        }
         String freshbooksURL = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "https://") + url;
         if(freshbooksURL.endsWith("/")) {
             freshbooksURL = freshbooksURL.substring(0, freshbooksURL.length() - 1);
@@ -105,11 +109,14 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         try {
+            if (externalPin != null) {
+                pin = externalPin;
+            }
             if (pin != null && !"".equals(pin)) {
-                OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
+                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
+                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
                 provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecretKey = consumer.getTokenSecret();

@@ -858,6 +858,9 @@ public class DataStorage {
             }
         } else {
             String string = null;
+            if (keyMetadata.getType() == Value.TEXT) {
+                System.out.println("saving " + string + " as a text field");
+            }
             if (value.type() == Value.STRING || value.type() == Value.TEXT) {
                 StringValue stringValue = (StringValue) value;
                 string = stringValue.getValue();
@@ -871,7 +874,7 @@ public class DataStorage {
             if (string == null) {
                 insertStmt.setNull(i++, Types.VARCHAR);
             } else {
-                if (string.length() > 253) {
+                if (keyMetadata.getType() == Value.STRING && string.length() > 253) {
                     string = string.substring(0, 253);
                 }
                 insertStmt.setString(i++, string);

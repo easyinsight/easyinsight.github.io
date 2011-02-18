@@ -22,9 +22,9 @@
 
         protected override function commitProperties():void {
             super.commitProperties();
-            dsMessage = "You now have a data source connected to " + _solution.name + ". This\ndata source will be available to you under the My Data page.";
-            tryMessage = "Try Reports Built by Other Users Against " + _solution.name;
-            createMessage = "Create Your Own Reports Against " + _solution.name;
+            dsMessage = "You now have a data source connected to " + _dataSourceDescriptor.name + ". This\ndata source will be available to you under the My Data page.";
+            tryMessage = "Try Reports Built by Other Users Against " + _dataSourceDescriptor.name;
+            createMessage = "Create Your Own Reports Against " + _dataSourceDescriptor.name;
         }
 
         public function set dataSourceDescriptor(value:DataSourceDescriptor):void {

@@ -31,6 +31,7 @@
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -149,7 +150,7 @@
         private var loading:Boolean = false;
 
         public function onInvalidFields(event:InvalidFieldsEvent):void {
-            transformContainer.invalidateItems(event.invalidAnalysisItemIDs);
+            //transformContainer.invalidateItems(event.invalidAnalysisItemIDs);
             dataView.invalidateItems(event.invalidAnalysisItemIDs);
             availableFields = new ArrayCollection();
             for each (var feedNode:FeedNode in event.feedMetadata.fieldHierarchy) {
@@ -180,6 +181,8 @@
             if (dataView != null) {
                 dataView.removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 dataView.removeEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
+                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, loadingEvent);
+                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, loadingEvent);
                 dataControlVBox.removeChild(dataView);
                 viewWatcher.unwatch();
                 selectableWatcher.unwatch();
@@ -197,6 +200,8 @@
             dataView.dataSourceID = dataSourceID;
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             dataView.addEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
+            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, loadingEvent);
+            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, loadingEvent);
 
             viewWatcher = BindingUtils.bindProperty(dataViewFactory, "adHocMode", adHocButton, "adHoc");
             selectableWatcher = BindingUtils.bindProperty(this, "reportSelectable", dataViewFactory, "reportSelectable");
@@ -403,11 +408,12 @@
             this.analysisChanged = true;
         }
 
-        // tutorial ramifications...
-        // we need a good tooltip rendering
-        // we need to be able to selectively disable the various parts
-        // we have to be able to look for key events that will trigger the next stage of the tutorial
+        [Bindable]
+        private var loadingReport:Boolean = false;
 
+        private function loadingEvent(event:DataServiceLoadingEvent):void {
+            loadingReport = event.type == DataServiceLoadingEvent.LOADING_STARTED;
+        }
 
         public function initializeForWorksheet():void {
             try {
@@ -472,8 +478,8 @@
                         tabNavigator.removeChild(reportDataTab);
                     }
                     if (!uiConfig.getConfiguration(UIConfiguration.SHOW_FILTER_BUTTONS).selected) {
-                        transformContainer.removeChild(filterButton);
-                        transformContainer.removeChild(excludeButton);
+                        /*transformContainer.removeChild(filterButton);
+                        transformContainer.removeChild(excludeButton);*/
                     }
                     if (uiConfig.getConfiguration(UIConfiguration.SHOW_EXPORT).selected) {
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_PNG).selected) exportTab.removePNG();
@@ -812,10 +818,10 @@
                        toolTip="Close" labelPlacement="right" label="Close Editor"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
-                       toolTip="Save" enabled="{!_previewMode &amp;&amp; !guestMode}" label="Save"
+                       toolTip="Save" enabled="{!_previewMode &amp;&amp; !guestMode &amp;&amp; !loadingReport}" label="Save"
                     labelPlacement="right"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
-                       toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !guestMode}" label="Save As"
+                       toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !guestMode &amp;&amp; !loadingReport}" label="Save As"
                     labelPlacement="right"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="refreshButton" toolTip="Refresh Data"
@@ -847,14 +853,16 @@
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".9"
                                           feedID="{dataSourceID}"
                                           analysisItems="{wrappers}" minHeight="40">
-                <mx:Button id="selectionModeButton" icon="@Embed(source='../../../assets/funnel.png')"
+                <!--<mx:Button id="selectionModeButton" icon="@Embed(source='../../../assets/funnel.png')"
                            toolTip="{reportSelectableTooltip}" click="reportSelectionEnabled = !reportSelectionEnabled"
                            enabled="{reportSelectable}"/>
                 <mx:Button id="filterButton" icon="@Embed(source='../../../assets/funnel_new.png')"
                            toolTip="{includeFilterDataTooltip}" click="createFilter()"
                            enabled="{reportSelectionEnabled}"/>
                 <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"
-                           toolTip="{excludeFilterDataTooltip}" click="exclude()" enabled="{reportSelectionEnabled}"/>
+                           toolTip="{excludeFilterDataTooltip}" click="exclude()" enabled="{reportSelectionEnabled}"/>-->
+                <mx:Button icon="@Embed(source='../../../assets/funnel.png')"
+                           toolTip="{excludeFilterDataTooltip}" click="transformContainer.addNewFilter()" label="New Filter"/>
             </filtering:TransformContainer>
             <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
         </mx:TabNavigator>

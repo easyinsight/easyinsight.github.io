@@ -21,12 +21,6 @@
 
         private var _dataSourceDescriptor:DataSourceDescriptor;
 
-        private var _solution:Solution;
-
-        public function set solution(value:Solution):void {
-            _solution = value;
-        }
-
         public function set dataSourceDescriptor(value:DataSourceDescriptor):void {
             _dataSourceDescriptor = value;
             dsLabel = dsLabel + value.name;

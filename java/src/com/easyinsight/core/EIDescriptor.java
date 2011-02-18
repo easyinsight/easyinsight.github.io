@@ -2,6 +2,8 @@ package com.easyinsight.core;
 
 import com.easyinsight.security.Roles;
 
+import java.util.Date;
+
 /**
  * User: James Boe
  * Date: Mar 28, 2009
@@ -21,10 +23,28 @@ public abstract class EIDescriptor {
 
     private String name;
     private String urlKey;
+    private String author;
+    private Date creationDate;
     private long id;
     private int role = Roles.SUBSCRIBER;
 
     public abstract int getType();
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 
     public int getRole() {
         return role;

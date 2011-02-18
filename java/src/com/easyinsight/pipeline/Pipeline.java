@@ -82,6 +82,7 @@ public abstract class Pipeline {
 
     public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
+            //System.out.println(component.getClass().getName() + " - " + dataSet);
             dataSet = component.apply(dataSet, pipelineData);
         }
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()));

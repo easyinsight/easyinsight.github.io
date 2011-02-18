@@ -24,6 +24,8 @@ import java.io.Serializable;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * User: James Boe
  * Date: Jan 29, 2008
@@ -420,7 +422,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setFields(clones);
     }
 
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
     }
 
     public void customStorage(Connection conn) throws SQLException {

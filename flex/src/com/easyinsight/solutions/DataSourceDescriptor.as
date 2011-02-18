@@ -10,7 +10,6 @@ public class DataSourceDescriptor extends EIDescriptor{
     public var description:String;
     public var dataSourceType:int;
     public var size:int;
-    public var creationDate:Date;
     public var lastDataTime:Date;
     public var groupSourceID:int;
     public var children:ArrayCollection;

@@ -83,6 +83,8 @@
 
             var offset:int = items.length;
             items.addItem(new CheckBoxReportFormItem("Name on My Data Tree", "myDataName", skin.myDataName, skin));
+            items.addItem(new CheckBoxReportFormItem("Owner on My Data Tree", "myDataOwner", skin.myDataOwner, skin));
+            items.addItem(new CheckBoxReportFormItem("Creation Date on My Data Tree", "myDataCreationDate", skin.myDataCreationDate, skin));
             items.addItem(new CheckBoxReportFormItem("Size on My Data Tree", "myDataSize", skin.myDataSize, skin));
             items.addItem(new CheckBoxReportFormItem("Last Data Time on My Data Tree", "myDataLastTime", skin.myDataLastTime, skin));
             items.addItem(new CheckBoxReportFormItem("Combine Data Source", "myDataCombine", skin.myDataCombine, skin));

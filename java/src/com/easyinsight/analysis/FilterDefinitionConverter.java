@@ -14,7 +14,6 @@ public class FilterDefinitionConverter {
         if (persistableFilterDefinitions != null) {
             for (FilterDefinition persistableFilterDefinition : persistableFilterDefinitions) {
                 persistableFilterDefinition.afterLoad();
-                persistableFilterDefinition.getField().afterLoad();
                 filterDefinitions.add(persistableFilterDefinition);
             }
         }

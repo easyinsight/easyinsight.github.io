@@ -22,6 +22,8 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * User: James Boe
  * Date: Jun 11, 2009
@@ -231,11 +233,14 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         try {
+            if (externalPin != null) {
+                pin = externalPin;
+            }
             if (pin != null && !"".equals(pin)) {
-                OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
+                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
+                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
                 provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecret = consumer.getTokenSecret();

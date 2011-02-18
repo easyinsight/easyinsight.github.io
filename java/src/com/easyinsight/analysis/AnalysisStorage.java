@@ -226,42 +226,79 @@ public class AnalysisStorage {
 
     public RolePrioritySet<InsightDescriptor> getReports(long userID, long accountID, EIConnection conn) throws SQLException {
         RolePrioritySet<InsightDescriptor> descriptors = new RolePrioritySet<InsightDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ANALYSIS.update_date FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+        PreparedStatement ownerStmt = conn.prepareStatement("SELECT user.first_name, user.name from user, user_to_analysis where " +
+                "user.user_id = user_to_analysis.user_id and user_to_analysis.analysis_id = ? and user_to_analysis.relationship_type = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ANALYSIS.create_date FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? AND temporary_report = ?");
         queryStmt.setLong(1, userID);
         queryStmt.setBoolean(2, false);
 
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
-            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime()), Roles.OWNER));
+            ownerStmt.setLong(1, rs.getLong(1));
+            ownerStmt.setInt(2, Roles.OWNER);
+            ResultSet ownerRS = ownerStmt.executeQuery();
+            String name;
+            if (ownerRS.next()) {
+                String firstName = ownerRS.getString(1);
+                String lastName = ownerRS.getString(2);
+                name = firstName != null ? firstName + " " + lastName : lastName;
+            } else {
+                name = "";
+            }
+
+            descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getString(5), new Date(rs.getTimestamp(6).getTime()), name, Roles.OWNER));
         }
         queryStmt.close();
-        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+        PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
                 "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ?");
         queryAccountStmt.setLong(1, accountID);
         queryAccountStmt.setBoolean(2, true);
         queryAccountStmt.setBoolean(3, false);
         ResultSet accountRS = queryAccountStmt.executeQuery();
         while (accountRS.next()) {
-            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER));
+            ownerStmt.setLong(1, accountRS.getLong(1));
+            ownerStmt.setInt(2, Roles.OWNER);
+            ResultSet ownerRS = ownerStmt.executeQuery();
+            String name;
+            if (ownerRS.next()) {
+                String firstName = ownerRS.getString(1);
+                String lastName = ownerRS.getString(2);
+                name = firstName != null ? firstName + " " + lastName : lastName;
+            } else {
+                name = "";
+            }
+            descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), new Date(accountRS.getTimestamp(6).getTime()), name, Roles.SHARER));
         }
         queryAccountStmt.close();
-        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, group_to_user_join.binding_type FROM ANALYSIS, group_to_user_join," +
+        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, group_to_user_join.binding_type, create_date FROM ANALYSIS, group_to_user_join," +
                 "group_to_insight WHERE " +
                 "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and analysis.temporary_report = ?");
         userGroupStmt.setLong(1, userID);
         userGroupStmt.setBoolean(2, false);
         ResultSet groupRS = userGroupStmt.executeQuery();
         while (groupRS.next()) {
-            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), groupRS.getInt(6)));
+            ownerStmt.setLong(1, groupRS.getLong(1));
+            ownerStmt.setInt(2, Roles.OWNER);
+            ResultSet ownerRS = ownerStmt.executeQuery();
+            String name;
+            if (ownerRS.next()) {
+                String firstName = ownerRS.getString(1);
+                String lastName = ownerRS.getString(2);
+                name = firstName != null ? firstName + " " + lastName : lastName;
+            } else {
+                name = "";
+            }
+            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), new Date(groupRS.getTimestamp(7).getTime()), name, groupRS.getInt(6)));
         }
         userGroupStmt.close();
+        ownerStmt.close();
         return descriptors;
     }
 
     public RolePrioritySet<InsightDescriptor> getReportsForGroup(long groupID, EIConnection conn) throws SQLException {
         RolePrioritySet<InsightDescriptor> descriptors = new RolePrioritySet<InsightDescriptor>();
-        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS, " +
+        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, create_date FROM ANALYSIS, " +
                 "group_to_insight WHERE " +
                 "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = ?");
         userGroupStmt.setLong(1, groupID);

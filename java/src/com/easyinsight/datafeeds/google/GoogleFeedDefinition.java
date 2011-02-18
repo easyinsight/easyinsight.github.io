@@ -32,6 +32,8 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * User: James Boe
  * Date: May 14, 2008
@@ -95,7 +97,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         try {
             if (pin != null && !"".equals(pin)) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");

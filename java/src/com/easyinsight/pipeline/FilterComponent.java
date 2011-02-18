@@ -21,16 +21,7 @@ public class FilterComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         MaterializedFilterDefinition filter = filterDefinition.materialize(pipelineData.getInsightRequestMetadata());
-        DataSet resultDataSet = new DataSet();
-        for (IRow row : dataSet.getRows()) {
-            boolean rowValid = true;
-            Value value = row.getValue(filter.getKey());
-            if (!filter.allows(value)) {
-                rowValid = false;
-            }
-            filterProcessor.createRow(resultDataSet, row, filterDefinition, rowValid);
-        }
-        return resultDataSet;
+        return filter.processDataSet(dataSet, filterProcessor, filterDefinition);
     }
 
     public void decorate(DataResults listDataResults) {

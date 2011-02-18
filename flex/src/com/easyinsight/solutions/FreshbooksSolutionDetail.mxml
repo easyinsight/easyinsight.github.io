@@ -37,14 +37,14 @@
                 <mx:Spacer width="100%"/>
                 <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="620"
                              height="60"
-                             text="Want the ability to perform custom Freshbooks reporting? Whether it's simple reports on invoices or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks!"
+                             text="Want the ability to perform custom FreshBooks reporting? Whether it's simple reports on invoices or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks!"
                              fontSize="14"/>
                 <mx:Spacer width="100%"/>
 
             </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
-                <mx:Button label="Connect to Freshbooks" fontSize="20" click="installSolution()" styleName="grayButton"
+                <mx:Button label="Connect to FreshBooks" fontSize="20" click="installSolution()" styleName="grayButton"
                            id="installButton"/>
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
@@ -54,7 +54,7 @@
             </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="120"
-                         text="Take advantage of Easy Insight to extend your Freshbooks reporting capabilities to the next level of visibility and analysis. Keep a pulse on the health of your business's financial health through KPIs of your invoices and expenses. Easily apply custom filters to analyze data by vendor, category, dates, or any of the other fields in Freshbooks. View data as lists, charte, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."
+                         text="Take advantage of Easy Insight to extend your FreshBooks reporting capabilities to the next level of visibility and analysis. Keep a pulse on the health of your business's financial health through KPIs of your invoices and expenses. Easily apply custom filters to analyze data by vendor, category, dates, or any of the other fields in FreshBooks. View data as lists, charte, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."
                          fontSize="14"/>            
         </mx:VBox>
         <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="#000000"/>

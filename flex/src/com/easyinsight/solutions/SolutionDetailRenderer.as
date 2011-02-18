@@ -136,7 +136,7 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
             }
         }
         var dataSource:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;        
-        dispatchEvent(new AnalyzeEvent(new PostInstallSource(dataSource, _solution)));
+        dispatchEvent(new AnalyzeEvent(new PostInstallSource(dataSource)));
     }
 
     private function installedSolution(event:ResultEvent):void {

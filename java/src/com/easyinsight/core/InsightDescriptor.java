@@ -28,11 +28,12 @@ public class InsightDescriptor extends EIDescriptor {
         setRole(role);
     }
 
-    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, Date lastDataTime, int role) {
+    public InsightDescriptor(long id, String name, long dataFeedID, int reportType, String urlKey, Date creationDate, String ownerName, int role) {
         super(name, id, urlKey);
         this.dataFeedID = dataFeedID;
         this.reportType = reportType;
-        this.lastDataTime = lastDataTime;
+        setCreationDate(creationDate);
+        setAuthor(ownerName);
         setRole(role);
     }
 

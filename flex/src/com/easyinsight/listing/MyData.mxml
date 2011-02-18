@@ -19,6 +19,7 @@
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.goals.GoalTreeAdminAnalyzeSource;
         import com.easyinsight.goals.GoalTreeDescriptor;
+        import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.skin.ApplicationSkin;
@@ -291,17 +292,27 @@
             var nameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
             nameColumn.dataField = "name";
             nameColumn.headerText = "Name";
-            var sizeColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-            sizeColumn.dataField = "size";
-            sizeColumn.width = 110;
-            sizeColumn.headerText = "Size";
-            sizeColumn.itemRenderer = new ClassFactory(SizeRenderer);
             var lastDataColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
             lastDataColumn.dataField = "lastDataTime";
             lastDataColumn.width = 140;
             lastDataColumn.headerText = "Last Data Time";
             lastDataColumn.sortCompareFunction = customSort;
             lastDataColumn.itemRenderer = new ClassFactory(MyDataLastDataLabel);
+            var creationDateColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            creationDateColumn.dataField = "creationDate";
+            creationDateColumn.width = 140;
+            creationDateColumn.headerText = "Creation Date";
+            creationDateColumn.sortCompareFunction = customCreationSort;
+            creationDateColumn.itemRenderer = new ClassFactory(MyDataCreationDateDataLabel);
+            var sizeColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            sizeColumn.dataField = "size";
+            sizeColumn.width = 110;
+            sizeColumn.headerText = "Size";
+            sizeColumn.itemRenderer = new ClassFactory(SizeRenderer);
+            var ownerNameColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+            ownerNameColumn.dataField = "author";
+            ownerNameColumn.width = 140;
+            ownerNameColumn.headerText = "Owner Name";
             var controlsColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
             //controlsColumn.dataField = "";
             controlsColumn.headerText = "";
@@ -354,6 +365,8 @@
             };
             controlsColumn.width = i * 45 + 10;
             columns.push(nameColumn);
+            if (ApplicationSkin.instance().myDataOwner) columns.push(ownerNameColumn);
+            if (ApplicationSkin.instance().myDataCreationDate) columns.push(creationDateColumn);
             if (ApplicationSkin.instance().myDataSize) columns.push(sizeColumn);
             if (ApplicationSkin.instance().myDataLastTime) columns.push(lastDataColumn);
             columns.push(controlsColumn);
@@ -487,6 +500,26 @@
             }
             if (obj2 is DataSourceDescriptor) {
                 date2 = DataSourceDescriptor(obj2).lastDataTime;
+            }
+            if (date1 == null) {
+                date1 = new Date();
+                date1.setUTCFullYear(1970);
+            }
+            if (date2 == null) {
+                date2 = new Date();
+                date2.setUTCFullYear(1970);
+            }
+            return ObjectUtil.dateCompare(date1, date2);
+        }
+
+        private function customCreationSort(obj1:Object, obj2:Object):int {
+            var date1:Date = null;
+            var date2:Date = null;
+            if (obj1 is EIDescriptor) {
+                date1 = EIDescriptor(obj1).creationDate;
+            }
+            if (obj2 is EIDescriptor) {
+                date2 = EIDescriptor(obj2).creationDate;
             }
             if (date1 == null) {
                 date1 = new Date();

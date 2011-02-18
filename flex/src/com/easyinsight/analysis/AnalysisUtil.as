@@ -39,10 +39,12 @@ public class AnalysisUtil {
             for each (var filter:FilterDefinition in analysisDefinition.filterDefinitions) {
                 if (filter.filterID == 0) {
                     for each (var savedFilter:FilterDefinition in savedDef.filterDefinitions) {
-                        if (savedFilter.field.qualifiedName() == filter.field.qualifiedName() &&
-                                savedFilter.getType() == filter.getType()) {
-                            filter.filterID = savedFilter.filterID;
-                            filter.field.analysisItemID = savedFilter.field.analysisItemID;
+                        if (savedFilter.field != null) {
+                            if (savedFilter.field.qualifiedName() == filter.field.qualifiedName() &&
+                                    savedFilter.getType() == filter.getType()) {
+                                filter.filterID = savedFilter.filterID;
+                                filter.field.analysisItemID = savedFilter.field.analysisItemID;
+                            }
                         }
                     }
                 }

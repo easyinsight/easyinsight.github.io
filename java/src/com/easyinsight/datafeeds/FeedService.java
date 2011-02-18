@@ -3,7 +3,10 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.DashboardStorage;
+import com.easyinsight.datafeeds.basecamp.BaseCampCompanySource;
 import com.easyinsight.datafeeds.constantcontact.CCContactSource;
+import com.easyinsight.datafeeds.freshbooks.FreshbooksClientSource;
+import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
 import com.easyinsight.datafeeds.highrise.HighRiseContactSource;
 import com.easyinsight.etl.LookupPair;
 import com.easyinsight.etl.LookupTable;
@@ -61,6 +64,14 @@ public class FeedService {
                 sourceKey = sourceObj.findAnalysisItem(HighRiseContactSource.CONTACT_WORK_EMAIL).getKey();
                 targetKey = targetObj.findAnalysisItem(CCContactSource.CONTACT_EMAIL).getKey();
                 dataSourceName = "Combined Highrise and Constant Contact";
+            } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.BASECAMP_MASTER.getType()) {
+                sourceKey = sourceObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
+                targetKey = targetObj.findAnalysisItem(BaseCampCompanySource.COMPANY_NAME).getKey();
+                dataSourceName = "Combined Highrise and Basecamp";
+            } else if (source.getDataSourceType() == FeedType.HIGHRISE_COMPOSITE.getType() && target.getDataSourceType() == FeedType.FRESHBOOKS_COMPOSITE.getType()) {
+                sourceKey = sourceObj.findAnalysisItem(HighRiseCompanySource.COMPANY_NAME).getKey();
+                targetKey = targetObj.findAnalysisItem(FreshbooksClientSource.ORGANIZATION).getKey();
+                dataSourceName = "Combined Highrise and Freshbooks";
             } else {
                 throw new RuntimeException();
             }
@@ -85,9 +96,17 @@ public class FeedService {
         EIConnection conn = Database.instance().getConnection();
         try {
             List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, accountID, conn);
-            JoinSuggestion suggestion = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.CONSTANT_CONTACT, "Highrise", "Constant Contact", dataSources, conn);
-            if (suggestion != null) {
-                suggestions.add(suggestion);
+            JoinSuggestion suggestion1 = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.CONSTANT_CONTACT, "Highrise", "Constant Contact", dataSources, conn);
+            if (suggestion1 != null) {
+                suggestions.add(suggestion1);
+            }
+            JoinSuggestion suggestion2 = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.BASECAMP_MASTER, "Highrise", "Basecamp", dataSources, conn);
+            if (suggestion2 != null) {
+                suggestions.add(suggestion2);
+            }
+            JoinSuggestion suggestion3 = analyze(FeedType.HIGHRISE_COMPOSITE, FeedType.FRESHBOOKS_COMPOSITE, "Highrise", "Freshbooks", dataSources, conn);
+            if (suggestion3 != null) {
+                suggestions.add(suggestion3);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -129,6 +148,7 @@ public class FeedService {
                     type2DataSources.remove(target);
                 }
             }
+            nodeStmt.close();
         }
         if (!type1DataSources.isEmpty() && !type2DataSources.isEmpty()) {
             JoinSuggestion joinSuggestion = new JoinSuggestion();

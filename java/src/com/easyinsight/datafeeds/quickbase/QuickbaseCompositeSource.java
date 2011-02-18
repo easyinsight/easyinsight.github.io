@@ -17,6 +17,7 @@ import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -59,7 +60,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         if (qbUserName != null && qbPassword != null) {
             String requestBody = MessageFormat.format(AUTHENTICATE_XML, qbUserName, qbPassword);
             Document doc = executeRequest("www.quickbase.com", null, "API_Authenticate", requestBody);

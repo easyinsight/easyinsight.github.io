@@ -10,6 +10,8 @@ import com.easyinsight.security.SecurityUtil;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -31,8 +33,10 @@ public class ScorecardInternalService {
 
     public RolePrioritySet<ScorecardDescriptor> getScorecards(long userID, long accountID, EIConnection conn) throws SQLException {
         RolePrioritySet<ScorecardDescriptor> scorecards = new RolePrioritySet<ScorecardDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name from " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, SCORECARD.creation_date from " +
                 "scorecard where scorecard.user_id = ?");
+        PreparedStatement userStmt = conn.prepareStatement("SELECT USER.name, USER.first_name FROM USER, SCORECARD WHERE USER.USER_ID = SCORECARD.USER_ID AND " +
+                "SCORECARD.scorecard_id = ?");
         queryStmt.setLong(1, userID);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
@@ -42,9 +46,26 @@ public class ScorecardInternalService {
             scorecardDescriptor.setId(scorecardID);
             scorecardDescriptor.setName(scorecardName);
             scorecardDescriptor.setRole(Roles.OWNER);
+            userStmt.setLong(1, scorecardID);
+            ResultSet userRS = userStmt.executeQuery();
+            String name;
+            if (userRS.next()) {
+                String lastName = userRS.getString(1);
+                String firstName = userRS.getString(2);
+                name = firstName == null ? lastName : firstName + " " + lastName;
+            } else {
+                name = "";
+            }
+            scorecardDescriptor.setAuthor(name);
+            Timestamp creationTimestamp = rs.getTimestamp(3);
+            Date creationDate = null;
+            if (creationTimestamp != null) {
+                creationDate = new Date(creationTimestamp.getTime());
+            }
+            scorecardDescriptor.setCreationDate(creationDate);
             scorecards.add(scorecardDescriptor);
         }
-        PreparedStatement accountStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD.SCORECARD_NAME FROM " +
+        PreparedStatement accountStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD.SCORECARD_NAME, scorecard.creation_date FROM " +
                 "SCORECARD, USER WHERE SCORECARD.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? and SCORECARD.ACCOUNT_VISIBLE = ?");
         accountStmt.setLong(1, accountID);
         accountStmt.setBoolean(2, true);
@@ -56,10 +77,27 @@ public class ScorecardInternalService {
             scorecardDescriptor.setId(scorecardID);
             scorecardDescriptor.setName(scorecardName);
             scorecardDescriptor.setRole(Roles.SUBSCRIBER);
+            userStmt.setLong(1, scorecardID);
+            ResultSet userRS = userStmt.executeQuery();
+            String name;
+            if (userRS.next()) {
+                String lastName = userRS.getString(1);
+                String firstName = userRS.getString(2);
+                name = firstName == null ? lastName : firstName + " " + lastName;
+            } else {
+                name = "";
+            }
+            scorecardDescriptor.setAuthor(name);
+            Timestamp creationTimestamp = accountRS.getTimestamp(3);
+            Date creationDate = null;
+            if (creationTimestamp != null) {
+                creationDate = new Date(creationTimestamp.getTime());
+            }
+            scorecardDescriptor.setCreationDate(creationDate);
             scorecards.add(scorecardDescriptor);
         }
         PreparedStatement groupStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, scorecard.group_id, " +
-                "group_to_user_join.binding_type, COMMUNITY_GROUP.name from " +
+                "group_to_user_join.binding_type, COMMUNITY_GROUP.name, scorecard.creation_date from " +
                 "scorecard, group_to_user_join, community_group where scorecard.group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ? AND " +
                 "SCORECARD.group_id = COMMUNITY_GROUP.community_group_id");
         groupStmt.setLong(1, userID);
@@ -73,6 +111,23 @@ public class ScorecardInternalService {
             scorecardDescriptor.setId(scorecardID);
             scorecardDescriptor.setName(scorecardName);
             scorecardDescriptor.setRole(role);
+            userStmt.setLong(1, scorecardID);
+            ResultSet userRS = userStmt.executeQuery();
+            String name;
+            if (userRS.next()) {
+                String lastName = userRS.getString(1);
+                String firstName = userRS.getString(2);
+                name = firstName == null ? lastName : firstName + " " + lastName;
+            } else {
+                name = "";
+            }
+            scorecardDescriptor.setAuthor(name);
+            Timestamp creationTimestamp = userRS.getTimestamp(6);
+            Date creationDate = null;
+            if (creationTimestamp != null) {
+                creationDate = new Date(creationTimestamp.getTime());
+            }
+            scorecardDescriptor.setCreationDate(creationDate);
             scorecards.add(scorecardDescriptor);
         }
         return scorecards;

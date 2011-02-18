@@ -79,6 +79,7 @@
         <mapping class="com.easyinsight.analysis.LastValueFilter"/>
         <mapping class="com.easyinsight.analysis.FirstValueFilter"/>
         <mapping class="com.easyinsight.analysis.NullFilter"/>
+        <mapping class="com.easyinsight.analysis.OrFilter"/>
         <mapping class="com.easyinsight.analysis.OrderedFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.Link"/>
         <mapping class="com.easyinsight.analysis.URLLink"/>

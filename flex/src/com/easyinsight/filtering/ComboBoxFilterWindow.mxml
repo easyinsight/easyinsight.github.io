@@ -30,9 +30,9 @@
 
         private var _fields:ArrayCollection;
 
-    public function set fields(value:ArrayCollection):void {
-        _fields = value;
-    }
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
 
         private function onTypeChange():void {
             if (typeGroup.selectedValue == "multi") {

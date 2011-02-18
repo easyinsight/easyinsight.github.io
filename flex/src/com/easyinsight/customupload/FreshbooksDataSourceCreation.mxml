@@ -15,6 +15,8 @@
         [Bindable]
         private var url:String;
 
+        private var dataSource:FreshbooksDataSource;
+
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:FreshbooksDataSource = new FreshbooksDataSource();
             obj.url = urlInput.text;
@@ -23,7 +25,7 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
-            url = ds.url;
+            this.dataSource = ds;
         }
 
         public function get savesCredentials():Boolean {
@@ -33,7 +35,6 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:FreshbooksDataSource = feedDefinition as FreshbooksDataSource;
             ds.url = urlInput.text;
-            ds.pin = verifierInput.text;
         }
 
         private function install():void {
@@ -42,22 +43,24 @@
                 urlInput.setFocus();
                 urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             } else {
+                updateDataSource(dataSource);
                 ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
-                tokenService.getOAuthURL.send(49, 0, urlInput.text);
+                tokenService.getOAuthURL.send(49, true, urlInput.text, dataSource, dataSource.visible ? 2 : 1);
             }
         }
 
         private function gotURL():void {
+
             var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
             if (response.successful) {
                 stackIndex = 1;
                 var requestToken:String = response.requestToken;
-                navigateToURL(new URLRequest(requestToken));
+                navigateToURL(new URLRequest(requestToken), "_self");
             } else {
                 if (response.error == OAuthResponse.BAD_HOST) {
-                    Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight.");
+                    Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access FreshBooks by easyinsight.freshbooks.com, your account name would be easyinsight.");
                 } else {
-                    Alert.show("Freshbooks rejected the specified verifier token. Please try authorizing again.");
+                    Alert.show("FreshBooks rejected the specified verifier token. Please try authorizing again.");
                 }
             }
         }
@@ -68,27 +71,17 @@
         public function validate():Boolean {
             urlInput.errorString = null;
             installButton.errorString = null;
-            if (verifierInput != null) {
-                verifierInput.errorString = null;
-            }
             if (urlInput.text.length == 0) {
-                urlInput.errorString = "You need to specify the location of your Freshbooks account.";
+                urlInput.errorString = "You need to specify the location of your FreshBooks account.";
                 urlInput.setFocus();
                 urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                 return false;
             }
 
             if (stackIndex == 0) {
-                installButton.errorString = "You need to authorize Easy Insight to access your Freshbooks data.";
+                installButton.errorString = "You need to authorize Easy Insight to access your FreshBooks data.";
                 installButton.setFocus();
                 installButton.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
-                return false;
-            }
-
-            if (verifierInput.text.length == 0) {
-                verifierInput.errorString = "You need to enter your Verifier from Freshbooks here.";
-                verifierInput.setFocus();
-                verifierInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                 return false;
             }
             return true;
@@ -101,15 +94,8 @@
         <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="300"/>
     </mx:HBox>
     <mx:Label text="For example, if you access Freshbooks by https://easyinsight.freshbooks.com, your account name would be easyinsight."/>
-    <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your Freshbooks account. Upon granting access, you will receive a verification token. Copy that value, return to this tab or window, and paste that value below." borderStyle="none"
+    <mx:TextArea text="Clicking Authorize will navigate your browser to your FreshBooks account. Upon granting access, you will be redirected back to Easy Insight to finish the connection process." borderStyle="none"
             backgroundAlpha="0" editable="false" selectable="false" width="100%" height="50"/>
     <mx:Button label="Authorize Easy Insight Access" click="install()" id="installButton"/>
-    <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
-        <mx:Box/>
-        <mx:Box>
-            <mx:Label text="Verifier from Freshbooks:"/>
-        <mx:TextInput id="verifierInput" fontWeight="normal" fontFamily="Lucida Grande" width="500"/>
-        </mx:Box>
-    </mx:ViewStack>
     <mx:StringValidator minLength="1" source="{urlInput}" property="text" id="nameValidator"/>
 </mx:VBox>

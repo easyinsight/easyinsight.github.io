@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var availableFields:ArrayCollection;
+
+        private function newFieldFilter():void {
+            dispatchEvent(new NewFilterEvent(NewFilterEvent.FIELD_FILTER, AnalysisItemWrapper(fieldBox.selectedItem).analysisItem));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function newOrFilter():void {
+            dispatchEvent(new NewFilterEvent(NewFilterEvent.OR_FILTER));
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        private function updateStack():void {
+            if (typeGroup.selectedValue == "fieldFilter") {
+                stackIndex = 0;
+            } else {
+                stackIndex = 1;
+            }
+        }
+
+        ]]></mx:Script>
+    <mx:VBox>
+        <mx:RadioButtonGroup id="typeGroup" change="updateStack()" selectedValue="fieldFilter"/>
+        <mx:HBox>
+            <mx:RadioButton label="Create a Filter on a Field" groupName="typeGroup" value="fieldFilter"/>
+            <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
+        </mx:HBox>
+        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+            <mx:VBox>
+                <mx:Label text="Choose a field for the filter:"/>
+                <mx:ComboBox dataProvider="{availableFields}" id="fieldBox" labelField="displayName"/>
+                <mx:HBox>
+                    <util:SaveButton label="Create the Filter" click="newFieldFilter()"/>
+                    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                </mx:HBox>
+            </mx:VBox>
+            <mx:HBox>
+                <util:SaveButton label="Create a new Or Filter" click="newOrFilter()"/>
+                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:HBox>
+        </mx:ViewStack>
+    </mx:VBox>
+</util:EISlimWindow>

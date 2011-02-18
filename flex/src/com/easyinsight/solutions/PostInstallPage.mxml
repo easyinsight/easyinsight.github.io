@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:ViewStack xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+<mx:ViewStack xmlns:mx="http://www.adobe.com/2006/mxml"
                             xmlns:solutions="com.easyinsight.solutions.*"
                             creationComplete="onCreation()"
         width="100%" height="100%" implements="com.easyinsight.listing.IPerspective" selectedIndex="{coreStackIndex}">
@@ -38,20 +38,6 @@
             }
         }
 
-        private var _solution:Solution;
-
-
-        [Bindable(event="solutionChanged")]
-        public function get solution():Solution {
-            return _solution;
-        }
-
-        public function set solution(value:Solution):void {
-            if (_solution == value) return;
-            _solution = value;
-            dispatchEvent(new Event("solutionChanged"));
-        }
-
         [Bindable]
         private var kpis:ArrayCollection;
 
@@ -82,9 +68,5 @@
         <mx:ProgressBar label="Generating values for your key metrics..." indeterminate="true"/>
     </mx:Box>
     <solutions:SolutionKPIWindow kpis="{kpis}" connectionProgression="coreStackIndex = 2" width="100%" height="100%"
-            dataSourceDescriptor="{dataSourceDescriptor}" solution="{solution}"/>
-    <!--
-        we'll have post install window there for the moment, but fill that in later
-    -->
-    <solutions:PostInstallWindow dataSourceDescriptor="{dataSourceDescriptor}" solution="{solution}" width="100%" height="100%"/>
+            dataSourceDescriptor="{dataSourceDescriptor}"/>
 </mx:ViewStack>

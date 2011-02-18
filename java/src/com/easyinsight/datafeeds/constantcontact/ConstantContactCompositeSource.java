@@ -10,11 +10,11 @@ import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Account;
-import flex.messaging.FlexContext;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import oauth.signpost.exception.OAuthCommunicationException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -78,11 +78,14 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         try {
+            if (externalPin != null) {
+                pin = externalPin;
+            }
             if (pin != null && !"".equals(pin)) {
-                OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
+                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
+                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
                 provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecret = consumer.getTokenSecret();

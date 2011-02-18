@@ -14,6 +14,7 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -137,7 +138,7 @@ public class CampaignMonitorDataSource extends CompositeServerDataSource {
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn) throws Exception {
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         if (cmUserName != null && cmPassword != null) {
             HttpClient client = new HttpClient();
             client.getParams().setAuthenticationPreemptive(true);

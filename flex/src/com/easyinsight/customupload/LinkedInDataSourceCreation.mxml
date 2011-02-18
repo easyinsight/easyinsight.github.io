@@ -12,48 +12,33 @@
 
         import mx.controls.Alert;
 
+        private var def:LinkedInDataSource;
+
         public function get dataSourceDefinition():FeedDefinitionData {
-            var source:LinkedInDataSource = new LinkedInDataSource();
-            source.pin = pinInput.text;
-            return source;
+            return new LinkedInDataSource();
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
-            var ds:LinkedInDataSource = feedDefinition as LinkedInDataSource;
-
-        }
-
-        public function get savesCredentials():Boolean {
-            return false;
+            def = feedDefinition as LinkedInDataSource;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            var ds:LinkedInDataSource = feedDefinition as LinkedInDataSource;
-            ds.pin = pinInput.text;
         }
 
         private function install():void {
             ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
-            tokenService.getOAuthURL.send(39, 0);
+            tokenService.getOAuthURL.send(39, true, null, def, def.visible ? 2 : 1);
         }
 
         private function gotURL():void {
             var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
             if (response.successful) {
-                stackIndex = 1;
                 var requestToken:String = response.requestToken;
-                navigateToURL(new URLRequest(requestToken));
+                navigateToURL(new URLRequest(requestToken), "_self");
             } else {
-                if (response.error == OAuthResponse.BAD_HOST) {
-                    Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight.");
-                } else {
-                    Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight.");
-                }
+                Alert.show("We failed to connect to LinkedIn to perform authorization. Please wait a bit and try again. If this error continues, contact support@easy-insight.com");
             }
         }
-
-        [Bindable]
-        private var stackIndex:int = 0;
 
         public function validate():Boolean {
             return true;
@@ -61,14 +46,7 @@
     <mx:RemoteObject destination="tokenService" id="tokenService">
         <mx:method name="getOAuthURL" result="gotURL()"/>
     </mx:RemoteObject>
-    <mx:TextArea text="Clicking Authorize will open a new browser tab or window to your LinkedIn account. Upon granting access, you will receive a four digit pin. Copy that value, return to this tab or window, and paste that value below." borderStyle="none"
+    <mx:TextArea text="Clicking Authorize will navigate your browser to your LinkedIn account. Upon granting access, you will be redirected back to Easy Insight to finish the connection process." borderStyle="none"
             backgroundAlpha="0" editable="false" selectable="false" width="450" height="50"/>
     <mx:Button label="Authorize Easy Insight Access" click="install()"/>
-    <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
-        <mx:Box/>
-        <mx:Box>
-            <mx:Label text="PIN from LinkedIn:"/>
-            <mx:TextInput id="pinInput" fontWeight="normal" fontFamily="Lucida Grande" width="500"/>
-        </mx:Box>
-    </mx:ViewStack>
 </mx:VBox>

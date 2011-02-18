@@ -37,6 +37,10 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
     public FilterDefinition() {
     }
 
+    public boolean isSingleSource() {
+        return true;
+    }
+
     public FilterDefinition(AnalysisItem field) {
         this.field = field;
     }
