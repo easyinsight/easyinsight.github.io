@@ -144,6 +144,13 @@
         <load-on-startup>4</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>OAuth</servlet-name>
+        <display-name>OAuth</display-name>
+        <servlet-class>com.easyinsight.users.OAuthServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+
     <!-- MessageBroker Servlet -->
     <servlet>
         <servlet-name>MessageBrokerServlet</servlet-name>
@@ -272,6 +279,11 @@
     <servlet-mapping>
         <servlet-name>PDF</servlet-name>
         <url-pattern>/pdf</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OAuth</servlet-name>
+        <url-pattern>/oauth</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
