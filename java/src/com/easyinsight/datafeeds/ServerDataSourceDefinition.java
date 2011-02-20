@@ -3,7 +3,6 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.users.User;
 import com.easyinsight.dataset.DataSet;
@@ -25,6 +24,8 @@ import com.easyinsight.util.ServiceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.hibernate.Session;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * User: James Boe
  * Date: Mar 30, 2009
@@ -45,7 +46,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public void exchangeTokens(EIConnection conn) throws Exception {        
+    public void defineCustomFields() {
+
+    }
+
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
     }
 
     public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws Exception {
