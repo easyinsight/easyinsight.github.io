@@ -64,6 +64,7 @@ public class DelayedSync extends EISlimWindow {
         vbox.setStyle("horizontalAlign", "center");
         progressBar = new ProgressBar();
         progressBar.label = "";
+        progressBar.labelPlacement = "top";
         progressBar.width = 400;
         progressBar.indeterminate = true;
         vbox.addChild(progressBar);

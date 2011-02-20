@@ -268,6 +268,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     }
 
     public String getUrl() {
+        if (url == null || "".equals(url)) {
+            return url;
+        }
         String basecampUrl = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "http://") + url;
         if(basecampUrl.endsWith("/")) {
             basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
