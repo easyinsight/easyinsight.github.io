@@ -858,9 +858,6 @@ public class DataStorage {
             }
         } else {
             String string = null;
-            if (keyMetadata.getType() == Value.TEXT) {
-                System.out.println("saving " + string + " as a text field");
-            }
             if (value.type() == Value.STRING || value.type() == Value.TEXT) {
                 StringValue stringValue = (StringValue) value;
                 string = stringValue.getValue();
