@@ -41,23 +41,25 @@
     <mx:RemoteObject destination="google" id="quickbaseService">
         <mx:method name="createClearDBDataSource" result="createdDataSource()"/>
     </mx:RemoteObject>
-    <mx:VBox>
+    <mx:VBox horizontalAlign="center">
+        <mx:TextArea text="For Easy Insight to connect to ClearDB, you must grant READ permissions to the API key used below for your ClearDB database."
+                editable="false" selectable="false" focusEnabled="false" width="500" height="50" fontSize="12"/>
         <mx:Form>
-            <mx:FormItem label="ClearDB App ID" direction="horizontal" fontSize="14">
+            <mx:FormItem label="ClearDB App ID" direction="horizontal" fontSize="14" fontWeight="normal" fontFamily="Lucida Grande">
                 <mx:TextInput id="passwordInput" width="400"/>
                 <mx:Label text="Where can I find this?" fontSize="10" textDecoration="underline" toolTip="Your App ID is found in the ClearDB user interface under App Details."/>
             </mx:FormItem>
-            <mx:FormItem label="ClearDB API Key:" direction="horizontal" fontSize="14">
+            <mx:FormItem label="ClearDB API Key:" direction="horizontal" fontSize="14" fontWeight="normal" fontFamily="Lucida Grande">
                 <mx:TextInput id="userNameInput" width="400"/>
                 <mx:Label text="Where can I find this?" fontSize="10" textDecoration="underline" toolTip="You'll need to define an API key in the ClearDB user interface with adequate read rules for Easy Insight to perform SHOW TABLES, DESCRIBE, and SELECT operations."/>
             </mx:FormItem>
         </mx:Form>
         <mx:Form>
-            <mx:FormItem label="Do you want to share this report with other users in the account?" fontSize="14">
+            <mx:FormItem label="Do you want to share this report with other users in the account?" fontSize="14" fontWeight="normal" fontFamily="Lucida Grande">
                 <mx:CheckBox id="accountVisibleCheckbox" selected="true"/>
             </mx:FormItem>
         </mx:Form>
-        <mx:HBox width="100%" horizontalAlign="center">
+        <mx:HBox>
             <mx:Button label="Create" click="obtainTicket()" styleName="grayButton" fontSize="14"/>
             <mx:LinkButton label="Cancel" click="PopUpManager.removePopUp(this)" textDecoration="underline" fontSize="14"/>
         </mx:HBox>
