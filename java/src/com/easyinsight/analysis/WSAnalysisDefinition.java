@@ -302,35 +302,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public abstract Set<AnalysisItem> getAllAnalysisItems();
 
-    public List<Key> getColumnKeys(List<AnalysisItem> allItems) {
-        Set<Key> columnSet = new HashSet<Key>();
-        Set<AnalysisItem> analysisItems = getAllAnalysisItems();
-        analysisItems.remove(null);
-        for (AnalysisItem analysisItem : analysisItems) {
-            List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
-            for (AnalysisItem item : items) {
-                //if (item.getAnalysisItemID()) {
-                    columnSet.add(item.getKey());
-                //}
-            }
-        }
-        if (retrieveFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getAnalysisItems(allItems, analysisItems, false, true, CleanupComponent.AGGREGATE_CALCULATIONS);
-                for (AnalysisItem item : items) {
-                    //if (item.getAnalysisItemID() != 0) {
-                        columnSet.add(item.getKey());
-                    //}
-                }
-                //columnSet.add(filterDefinition.getField().getKey());
-            }
-        }
-        for (AnalysisItem analysisItem : getLimitFields()) {
-            columnSet.add(analysisItem.getKey());
-        }
-        return new ArrayList<Key>(columnSet);
-    }
-
     public List<FilterDefinition> retrieveFilterDefinitions() {
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         if (filterDefinitions != null) {

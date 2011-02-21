@@ -53,6 +53,9 @@
                     customLimitInput.text = String(existingLimits.number);
                 }
                 limitsBox.selectedItem = matchedEntry;
+                if (existingLimits.analysisItem != null) {
+                    selectedField = existingLimits.analysisItem.qualifiedName();
+                }
             }
             reportItems = new ArrayCollection();
             for each (var formItem:ReportFormItem in definition.createFormItems()) {
@@ -61,17 +64,20 @@
             }
         }
 
+        [Bindable]
+        private var selectedField:String;
+
         private var reportItems:ArrayCollection;
 
         public function set fields(fields:ArrayCollection):void {
-            availableFields = new ArrayCollection();
+            var fields:ArrayCollection = new ArrayCollection();
             for each (var wrapper:AnalysisItemWrapper in fields) {
                 if (wrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE) ||
                     wrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
-                    availableFields.addItem(wrapper.analysisItem);
+                    fields.addItem(wrapper.analysisItem);
                 }
             }
-            fieldSelectionBox.selectedItem = availableFields.getItemAt(0);
+            availableFields = fields;
         }
 
         public function save():void {
@@ -130,7 +136,8 @@
             <mx:CheckBox id="limitsEnabledCheckbox" click="limitsEnabledCheck()" selected="{limitsEnabled}"/>
         </mx:FormItem>
         <mx:FormItem direction="horizontal" label="What field should limits base on?" enabled="{limitsEnabled}">
-            <mx:ComboBox id="fieldSelectionBox" dataProvider="{availableFields}" labelField="display"/>
+            <util:SmartComboBox id="fieldSelectionBox" dataProvider="{availableFields}" labelField="display" selectedProperty="qualifiedName"
+                    selectedValue="{selectedField}"/>
         </mx:FormItem>
         <mx:FormItem label="Limit Threshold:" direction="horizontal">
             <mx:ComboBox id="limitsBox" enabled="{limitsEnabled}" close="limitValueChanged()" labelField="name">

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.util.List;
@@ -60,6 +61,10 @@ public class ListDefinitionState extends AnalysisDefinitionState {
 
     public void setShowRowNumbers(boolean showRowNumbers) {
         this.showRowNumbers = showRowNumbers;
+    }
+
+    public void beforeSave(Session session) {
+        listLimitsMetadata.beforeSave(session);
     }
 
     public WSAnalysisDefinition createWSDefinition() {

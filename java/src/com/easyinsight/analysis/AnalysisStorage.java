@@ -202,6 +202,7 @@ public class AnalysisStorage {
                 }
             }
         }
+        analysisDefinition.getAnalysisDefinitionState().beforeSave(session);
         if (analysisDefinition.getAnalysisID() == null)
             session.save(analysisDefinition);
         else

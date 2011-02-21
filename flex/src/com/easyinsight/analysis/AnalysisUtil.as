@@ -62,6 +62,7 @@ public class AnalysisUtil {
                 }
             }
         }
+        analysisDefinition.reportStateID = savedDef.reportStateID;
         analysisDefinition.analysisID = savedDef.analysisID;
     }
 }

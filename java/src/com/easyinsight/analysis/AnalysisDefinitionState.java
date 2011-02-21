@@ -48,6 +48,10 @@ public abstract class AnalysisDefinitionState implements Cloneable {
         return new ArrayList<AnalysisDefinition>();
     }
 
+    public void beforeSave(Session session) {
+
+    }
+
     public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
         
     }

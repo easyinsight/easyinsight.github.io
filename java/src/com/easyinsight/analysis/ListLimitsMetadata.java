@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
+import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -42,6 +43,13 @@ public class ListLimitsMetadata extends LimitsMetadata implements Serializable, 
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
         if (analysisItem != null) {
             analysisItem = replacementMap.get(analysisItem.getAnalysisItemID());
+        }
+    }
+
+    public void beforeSave(Session session) {
+        if (analysisItem != null) {
+            analysisItem.reportSave(session);
+            session.save(analysisItem);
         }
     }
 }
