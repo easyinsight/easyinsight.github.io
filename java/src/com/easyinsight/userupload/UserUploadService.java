@@ -603,7 +603,7 @@ public class UserUploadService {
     }
 
     public void updateData(long feedID, byte[] bytes, boolean update) {
-        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
+        SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);

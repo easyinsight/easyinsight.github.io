@@ -343,7 +343,16 @@
                         analysisDefinition.filterDefinitions = new ArrayCollection();
                     }
                     if (filterOverrides != null) {
-                        analysisDefinition.filterDefinitions = filterOverrides;
+                        var transformedFilters:ArrayCollection = new ArrayCollection();
+                        for each (var overrideFilter:FilterDefinition in filterOverrides) {
+                            for each (var reportFilter:FilterDefinition in analysisDefinition.filterDefinitions) {
+                                if (reportFilter.filterID == overrideFilter.filterID) {
+                                    overrideFilter.field = reportFilter.field;
+                                    transformedFilters.addItem(overrideFilter);
+                                }
+                            }
+                        }
+                        analysisDefinition.filterDefinitions = transformedFilters;
                     }
                     createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
 
