@@ -54,7 +54,8 @@ public class ExportService {
     public static final String CURRENCY_STYLE = "currency";
     public static final String TEXT_STYLE = "currency";
     public static final String GENERIC_STYLE = "generic";
-    
+    public static final String PERCENT_STYLE = "percentStyle";
+
     public void seleniumDraw(long requestID, byte[] bytes) {
         System.out.println("received a selenium draw request of " + requestID);
         EIConnection conn = Database.instance().getConnection();
@@ -556,7 +557,12 @@ public class ExportService {
         currencyStyle.setDataFormat(workbook.createDataFormat().getFormat("$##,##0.00"));
         styleMap.put(CURRENCY_STYLE, currencyStyle);
         HSSFCellStyle genericStyle = workbook.createCellStyle();
+        genericStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
         styleMap.put(GENERIC_STYLE, genericStyle);
+        HSSFCellStyle percentStyle = workbook.createCellStyle();
+        percentStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
+        styleMap.put(PERCENT_STYLE, percentStyle);
+
         HSSFSheet sheet = workbook.createSheet();
         workbook.setSheetName(0, "Data");
         HSSFRow headerRow = sheet.createRow(0);
@@ -575,11 +581,15 @@ public class ExportService {
         }
         for (AnalysisItem analysisItem : listDataResults.getHeaders()) {
             int headerPosition = positionMap.get(analysisItem);
+            int width;
             if (analysisItem.getWidth() > 0) {
-                sheet.setColumnWidth(headerPosition, (short) (analysisItem.getWidth() / 15 * 256));
+                width = Math.max((analysisItem.getWidth() / 15 * 256), 5000);
             } else {
-                sheet.setColumnWidth(headerPosition, 7000);
+                width = 5000;
             }
+
+            System.out.println("using width of " + width + " for " + analysisItem.toDisplay());
+            sheet.setColumnWidth(headerPosition, width);
             HSSFCell headerCell = headerRow.createCell(headerPosition);
             String displayName;
             if (analysisItem.getDisplayName() == null) {
@@ -603,7 +613,7 @@ public class ExportService {
             for (Value value : values) {
                 AnalysisItem analysisItem = listDataResults.getHeaders()[cellIndex];
                 short translatedIndex = positionMap.get(analysisItem);
-                HSSFCellStyle style = getStyle(styleMap, analysisItem, workbook, dateFormat);
+                HSSFCellStyle style = getStyle(styleMap, analysisItem, workbook, dateFormat, value);
                 populateCell(row, translatedIndex, value, style, analysisItem);
                 cellIndex++;
             }
@@ -618,7 +628,10 @@ public class ExportService {
                     if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                         int headerPosition = positionMap.get(analysisItem);
                         double summary = listDataResults.getSummaries()[j];
-                        HSSFCellStyle style = getStyle(styleMap, analysisItem, workbook, dateFormat);
+                        if (Double.isNaN(summary) || Double.isInfinite(summary)) {
+                            summary = 0;
+                        }
+                        HSSFCellStyle style = getStyle(styleMap, analysisItem, workbook, dateFormat, new NumericValue(summary));
                         HSSFCell cell = summaryRow.createCell(headerPosition);
                         cell.setCellStyle(style);
                         cell.setCellValue(summary);
@@ -629,7 +642,7 @@ public class ExportService {
         return workbook;
     }
 
-    private HSSFCellStyle getStyle(Map<String, HSSFCellStyle> styleMap, AnalysisItem analysisItem, HSSFWorkbook wb, int dateFormat) {
+    private HSSFCellStyle getStyle(Map<String, HSSFCellStyle> styleMap, AnalysisItem analysisItem, HSSFWorkbook wb, int dateFormat, Value value) {
         HSSFCellStyle style;
         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             FormattingConfiguration formattingConfiguration = analysisItem.getFormattingConfiguration();
@@ -637,8 +650,17 @@ public class ExportService {
                 case FormattingConfiguration.CURRENCY:
                     style = styleMap.get(CURRENCY_STYLE);
                     break;
-                default:
+                case FormattingConfiguration.MILLISECONDS:
                     style = styleMap.get(GENERIC_STYLE);
+                    break;
+                default:
+                    double doubleValue = value.toDouble();
+                    int castInt = (int) doubleValue;
+                    if (doubleValue - castInt < 0.0001) {
+                        style = styleMap.get(GENERIC_STYLE);
+                    } else {
+                        style = styleMap.get(PERCENT_STYLE);
+                    }
                     break;
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
@@ -714,7 +736,34 @@ public class ExportService {
             cell.setCellValue(richText);
         } else if (value.type() == Value.NUMBER) {
             NumericValue numericValue = (NumericValue) value;
-            cell.setCellValue(numericValue.toDouble());
+            double doubleValue = numericValue.toDouble();
+            if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+                doubleValue = 0;
+            }
+            if (analysisItem.getFormattingConfiguration().getFormattingType() == FormattingConfiguration.MILLISECONDS) {
+                String result;
+
+                if (doubleValue < 60000) {
+                    int seconds = (int) (doubleValue / 1000);
+                    int milliseconds = (int) (doubleValue % 1000);
+                    result = seconds + "s:" + milliseconds + "ms";
+                } else if (doubleValue < (60000 * 60)) {
+                    int minutes = (int) (doubleValue / 60000);
+                    int seconds = (int) (doubleValue / 1000) % 60;
+                    result = minutes + "m: " +seconds + "s";
+                } else if (doubleValue < (60000 * 60 * 24)) {
+                    int hours = (int) (doubleValue / (60000 * 60));
+                    int minutes = (int) (doubleValue % 24);
+                    result = hours + "h:" + minutes + "m";
+                } else {
+                    int days = (int) (doubleValue / (60000 * 60 * 24));
+                    int hours = (int) (doubleValue / (60000 * 60) % 24);
+                    result = days + "d:" + hours + "h";
+                }
+                cell.setCellValue(result);
+            } else {
+                cell.setCellValue(doubleValue);
+            }
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             cell.setCellValue(dateValue.getDate());
