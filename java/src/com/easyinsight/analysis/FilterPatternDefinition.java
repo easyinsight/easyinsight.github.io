@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import org.hibernate.Session;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -45,6 +47,14 @@ public class FilterPatternDefinition extends FilterDefinition {
     @Override
     public boolean validForQuery() {
         return super.validForQuery() && pattern != null && !regex;
+    }
+
+    @Override
+    public void beforeSave(Session session) {
+        super.beforeSave(session);
+        if (pattern == null) {
+            pattern = "";
+        }
     }
 
     @Override
