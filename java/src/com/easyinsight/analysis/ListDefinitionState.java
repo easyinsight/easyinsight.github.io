@@ -64,7 +64,9 @@ public class ListDefinitionState extends AnalysisDefinitionState {
     }
 
     public void beforeSave(Session session) {
-        listLimitsMetadata.beforeSave(session);
+        if (listLimitsMetadata != null) {
+            listLimitsMetadata.beforeSave(session);
+        }
     }
 
     public WSAnalysisDefinition createWSDefinition() {
