@@ -64,7 +64,7 @@
         }
 
         private function updateURL():void {
-            url = "<iframe width=\""+_reportWidth+"\" height=\"" + _reportHeight +"\" src=\"https://www.easy-insight.com/app/embed.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&analysisID=" + _urlKey + "&reportType=" + _reportType + "&reportName=" + escape(_reportName) + "&dataSourceID=" + _dataSourceID + "\"/>";             
+            url = "<iframe width=\""+_reportWidth+"\" height=\"" + _reportHeight +"\" src=\"https://www.easy-insight.com/app/embed.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&analysisID=" + _urlKey + "&reportType=" + _reportType + "&reportName=" + escape(_reportName) + "&dataSourceID=" + _dataSourceID + "\"></iframe>";
         }
 
         private function copyToClipboard():void {
