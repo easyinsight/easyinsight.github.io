@@ -122,7 +122,7 @@ public class ScorecardInternalService {
                 name = "";
             }
             scorecardDescriptor.setAuthor(name);
-            Timestamp creationTimestamp = userRS.getTimestamp(6);
+            Timestamp creationTimestamp = groupRS.getTimestamp(6);
             Date creationDate = null;
             if (creationTimestamp != null) {
                 creationDate = new Date(creationTimestamp.getTime());
