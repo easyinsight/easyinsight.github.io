@@ -34,7 +34,7 @@ public class DateTimeTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public static long createDefaultTestDataSource() throws SQLException {
+    public static long createDefaultTestDataSource() throws Exception {
         UserUploadService userUploadService = new UserUploadService();
 
         //IRow row3 = dataSet.createRow();
@@ -115,7 +115,7 @@ public class DateTimeTest extends TestCase {
         assertEquals(rowSize, listDataResults.getRows().length);
     }
 
-    public void testTimeUnits() throws SQLException {
+    public void testTimeUnits() throws Exception {
         TestUtil.getIndividualTestUser();
         long dataSourceID = createDefaultTestDataSource();
         DataService dataService = new DataService();
@@ -150,7 +150,7 @@ public class DateTimeTest extends TestCase {
         validateResults(minuteResults, 5);
     }
 
-    public void testRollingDate() throws SQLException {
+    public void testRollingDate() throws Exception {
         TestUtil.getIndividualTestUser();
         long dataSourceID = createDeltaTestDataSource();
         DataService dataService = new DataService();
@@ -172,7 +172,7 @@ public class DateTimeTest extends TestCase {
         }
     }
 
-    public void testTemporalAggregations() throws SQLException {
+    public void testTemporalAggregations() throws Exception {
         TestUtil.getIndividualTestUser();
         long dataSourceID = createDefaultTestDataSource();
         DataService dataService = new DataService();
@@ -227,7 +227,7 @@ public class DateTimeTest extends TestCase {
         }
     }
 
-    public static long createDeltaTestDataSource() throws SQLException {
+    public static long createDeltaTestDataSource() throws Exception {
         UserUploadService userUploadService = new UserUploadService();
 
         //IRow row3 = dataSet.createRow();

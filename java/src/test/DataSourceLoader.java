@@ -66,7 +66,7 @@ public class DataSourceLoader {
         }
     }
 
-    private static void addDataSet(FeedDefinition feedDefinition, int startPoint, Date day) throws SQLException, IOException {
+    private static void addDataSet(FeedDefinition feedDefinition, int startPoint, Date day) throws Exception {
         System.out.println(new Date());
         System.out.println(Runtime.getRuntime().freeMemory() + " / " + Runtime.getRuntime().totalMemory());
         DataSet dataSet = new DataSet();
