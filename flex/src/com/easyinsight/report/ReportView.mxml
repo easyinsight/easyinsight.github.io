@@ -805,7 +805,7 @@
                                               width="100%" paddingLeft="10"
                                               paddingTop="10" paddingBottom="10"
                                               paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
-                                              backgroundColor="#FFFFFF"/>
+                                              backgroundColor="#FFFFFF" reportView="true"/>
             </mx:VBox>
         </mx:ViewStack>
         <report:ReportCanvas id="reportCanvas" stackTrace="{stackTrace}" overlayIndex="{overlayIndex}"

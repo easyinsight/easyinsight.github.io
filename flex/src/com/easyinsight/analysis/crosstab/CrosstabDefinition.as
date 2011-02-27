@@ -16,6 +16,11 @@ import mx.collections.ArrayCollection;
 		{			
 		}
 
+        override public function fromSave(savedDef:AnalysisDefinition):void {
+            super.fromSave(savedDef);
+            this.crosstabDefinitionID = CrosstabDefinition(savedDef).crosstabDefinitionID;
+        }
+
         override public function get type():int {
             return AnalysisDefinition.CROSSTAB;
         }

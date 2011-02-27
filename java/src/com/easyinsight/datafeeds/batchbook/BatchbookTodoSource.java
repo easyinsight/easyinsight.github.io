@@ -74,7 +74,7 @@ public class BatchbookTodoSource extends BatchbookBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         DateFormat dueDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
         DateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");

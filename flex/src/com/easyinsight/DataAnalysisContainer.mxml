@@ -35,11 +35,12 @@
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.listing.ReportEditorAnalyzeSource;
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.DisplayListAnalysis;
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
@@ -83,6 +84,8 @@
         [Bindable]
         private var availableFields:ArrayCollection;
 
+        [Bindable]
+        public var selectedTabIndex:int;
 
         private var _dataSourceInfo:DataSourceInfo;
 
@@ -114,7 +117,7 @@
 
         public var filterOverrides:ArrayCollection = null;
 
-        private var feedMetadata:FeedMetadata;
+        public var feedMetadata:FeedMetadata;
 
         [Bindable]
         private var dataView:DataViewFactory;
@@ -146,6 +149,8 @@
 
         [Bindable]
         private var reportName:String;
+
+        public var openState:Object;
 
         private var loading:Boolean = false;
 
@@ -278,9 +283,15 @@
             }
         }
 
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.CAPS_LOCK) {
+                DisplayListAnalysis.traverse(this);
+            }
+        }
+
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             try {
-
+stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
                 dataSourceID = feedMetadata.dataFeedID;
                 this.feedMetadata = feedMetadata;
                 dataSourceInfo = feedMetadata.dataSourceInfo;
@@ -371,6 +382,14 @@
                     UserAudit.instance().audit(UserAudit.OPEN_REPORT_EDITOR);
                 }
                 dataView.availableFields = wrappers;
+                if (openState != null) {
+                    for each (var availableWrapper:AnalysisItemWrapper in availableFields) {
+                        var open:Boolean = openState[availableWrapper.displayName];
+                        if (open) {
+                            fieldGrid.expandItem(availableWrapper, true);
+                        }
+                    }
+                }
                 loading = false;
             } catch(e:Error) {
                 var errorWindow:ErrorReportView = new ErrorReportView();
@@ -378,6 +397,14 @@
                 PopUpManager.addPopUp(errorWindow, this, true);
                 PopUpUtil.centerPopUp(errorWindow);
             }
+        }
+
+        private function preserveOpenState():Object {
+            var openState:Object = new Object();
+            for each (var obj:AnalysisItemWrapper in availableFields) {
+                openState[obj.displayName] = fieldGrid.isItemOpen(obj);
+            }
+            return openState;
         }
 
         private function sortFields():void {
@@ -462,6 +489,9 @@
                 if (_reportID > 0) {
                     ProgressAlert.alert(this, "Retrieving the report...", null, analysisService.openAnalysisDefinition);
                     analysisService.openAnalysisDefinition.send(_reportID);
+                } else if (analysisDefinition != null) {
+                    _reportID = analysisDefinition.analysisID;
+                    onMetadataReceipt(feedMetadata);
                 } else {
                     initializeState();
                 }
@@ -477,9 +507,9 @@
             try {
                 if (User.getInstance().uiConfiguration != null) {
                     var uiConfig:UIConfiguration = User.getInstance().uiConfiguration;
-                    if (!uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected) {
+                    /*if (!uiConfig.getConfiguration(UIConfiguration.SHOW_ADMIN_DATA_SOURCES).selected) {
                         controlBar.removeChild(adminButton);
-                    }
+                    }*/
                     if (uiConfig.getConfiguration(UIConfiguration.SHOW_DATA_TAB).selected) {
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_CALCULATION).selected) reportDataTab.removeCalculationButton();
                         if (!uiConfig.getConfiguration(UIConfiguration.SHOW_HIERARCHY).selected) reportDataTab.removeHierarchy();
@@ -591,10 +621,9 @@
         }
 
         private function saved(event:SavedAnalysisEvent):void {
-            var savedDef:AnalysisDefinition = event["report"];
-            AnalysisUtil.updateReport(analysisDefinition, savedDef);
+            AnalysisUtil.updateReport(analysisDefinition, event.report);
             var feedFragmentObject:Object = new Object();
-            feedFragmentObject.analysisID = String(savedDef.urlKey);
+            feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             reportName = event.report.name;
@@ -614,22 +643,7 @@
         }
 
         private function saveAsReport(event:SavedAnalysisEvent):void {
-            //title = event.title;
-            /*this.analysisDefinition = event.report;
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.analysisID = String(event.report.urlKey);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
-            reportName = analysisDefinition.name;
-            aboutReportTab.invalidateProperties();
-            BrowserManager.getInstance().setTitle("Easy Insight - " + event.report.name);
-            this.analysisChanged = false;*/
-            var report:InsightDescriptor = new InsightDescriptor();
-            report.name = event.report.name;
-            report.id = event.report.analysisID;
-            report.dataFeedID = event.report.dataFeedID;
-            report.reportType = event.report.reportType;
-            dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(report)));
+            dispatchEvent(new AnalyzeEvent(new ReportEditorAnalyzeSource(event.report, tabNavigator.selectedIndex, feedMetadata, preserveOpenState())));
         }
 
         private function undo():void {
@@ -643,8 +657,6 @@
         public function cleanup():void {
             cleanupBindings();
             removeEventListener(CommandEvent.COMMAND, onCommand);
-            /*if (stage != null)
-             stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);*/
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
@@ -821,33 +833,36 @@
         <mx:method name="openAnalysisDefinition" result="gotReport()"/>
     </mx:RemoteObject>
     <analysis:AnalysisItemEventHandler id="fieldEventHandler" dataSourceID="{dataSourceID}" analysisItems="{wrappers}"/>
-    <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
-        <mx:HBox verticalAlign="middle" id="controlBar">
+    <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275" paddingLeft="10" paddingBottom="10"
+            paddingRight="10">
+        <mx:Canvas>
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
-                       toolTip="Close" labelPlacement="right" label="Close Editor"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16"/>
+                       toolTip="Close" labelPlacement="right" label="Close Editor" x="10" y="10"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16" x="126" y="13"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                        toolTip="Save" enabled="{!_previewMode &amp;&amp; !guestMode &amp;&amp; !loadingReport}" label="Save"
-                    labelPlacement="right"/>
+                    labelPlacement="right" x="136" y="10"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
                        toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !guestMode &amp;&amp; !loadingReport}" label="Save As"
-                    labelPlacement="right"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16"/>
+                    labelPlacement="right" x="212" y="10"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16" x="305" y="13"/>
             <mx:Button id="refreshButton" toolTip="Refresh Data"
                        icon="@Embed(source='../../../assets/refresh.png')"
-                       click="dataView.forceRetrieve()" label="Refresh" labelPlacement="right"/>
-            <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()" labelPlacement="right" label="Ad Hoc Mode"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16"/>
+                       click="dataView.forceRetrieve()" label="Refresh" labelPlacement="right" x="315" y="10"/>
+            <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()" labelPlacement="right" label="Ad Hoc Mode"
+                    x="408" y="10"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16" x="531" y="13"/>
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
-                       icon="@Embed(source='../../../assets/table.png')" click="newReport()" labelPlacement="right" label="New Report"/>
+                       icon="@Embed(source='../../../assets/table.png')" click="newReport()" labelPlacement="right" label="New Report"
+                    x="541" y="10"/>
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
-                       toolTip="View Report" label="Report View" labelPlacement="right"/>
+                       toolTip="View Report" label="Report View" labelPlacement="right" x="655" y="10"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
-                       toolTip="Adminster" visible="{admin}" label="Administer Data Source" labelPlacement="right"/>
-        </mx:HBox>
+                       toolTip="Adminster" visible="{admin}" label="Administer Data Source" labelPlacement="right" x="771" y="10"/>
+        </mx:Canvas>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"
-                         paddingLeft="0" paddingRight="0" resizeToContent="true">
+                         paddingLeft="0" paddingRight="0" resizeToContent="true" selectedIndex="{selectedTabIndex}">
             <analysis:ReportMetadataTab id="reportMetadataTab" dataSourceInfo="{dataSourceInfo}"
                                         dataView="{dataView}" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
             <analysis:AboutReportTab id="aboutReportTab" report="{analysisDefinition}"  backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
@@ -876,21 +891,18 @@
             <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
         </mx:TabNavigator>
 
+
         <mx:HDividedBox id="hbox1" height="100%" width="100%">
-            <mx:VBox height="100%" width="240" id="leftHandBox">
-                <mx:HBox>
-                    <mx:Label text="Report Type:" fontWeight="bold"/>
-                    <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)"
-                                                       id="analysisState"
-                                                       mode="all"/>
-                </mx:HBox>
-
-
-                <mx:VBox height="100%" width="100%" verticalGap="0" borderThickness="1" borderColor="#DCE2F8"
-                         borderStyle="solid" dropShadowEnabled="true">
+            <mx:Canvas height="100%" width="240">
+                <mx:Label text="Report Type:" fontWeight="bold"/>
+                <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)"
+                                                   id="analysisState"
+                                                   mode="all" x="91" y="0"/>
+                <mx:Canvas height="100%" width="100%" borderThickness="1" borderColor="#DCE2F8"
+                         borderStyle="solid" dropShadowEnabled="true" x="0" y="29">
                     <mx:Canvas width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
                     <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center" verticalAlign="middle"
-                            height="28">
+                            height="28" x="0" y="5">
                         <mx:Label text="{fieldsLabel}" color="0xFFFFFF" fontWeight="bold" maxWidth="220"/>
                     </mx:Box>
                     <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
@@ -898,7 +910,7 @@
                                          alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
                                          dragComplete="onDragComplete(event)" mouseDown="onDragStart()"
                                          mouseUp="onDragEnd()" showHeaders="false"
-                                         groupItemRenderer="{rendererFactory}">
+                                         groupItemRenderer="{rendererFactory}" x="0" y="33">
                         <mx:dataProvider>
                             <mx:HierarchicalData source="{availableFields}"/>
                         </mx:dataProvider>
@@ -906,8 +918,8 @@
                             <mx:AdvancedDataGridColumn headerText="" dataField="displayName"/>
                         </mx:columns>
                     </mx:AdvancedDataGrid>
-                </mx:VBox>
-            </mx:VBox>
+                </mx:Canvas>
+            </mx:Canvas>
             <mx:VBox width="100%" height="100%" id="dataControlVBox"/>
         </mx:HDividedBox>
     </mx:VBox>

@@ -52,7 +52,6 @@ import mx.collections.ArrayCollection;
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
 		public var tagCloud:ArrayCollection = new ArrayCollection();
         public var reportType:int;
-		public var genre:String;
 		public var policy:int = 2;
 		public var dateCreated:Date;
 		public var dateUpdated:Date;
@@ -158,6 +157,12 @@ import mx.collections.ArrayCollection;
 
         public function getCoreAnalysisItem(analysisItem:AnalysisItem):AnalysisItem {
             return analysisItem;
+        }
+
+        public function fromSave(savedDef:AnalysisDefinition):void {
+            reportStateID = savedDef.reportStateID;
+            analysisID = savedDef.analysisID;
+            urlKey = savedDef.urlKey;
         }
 	}
 }

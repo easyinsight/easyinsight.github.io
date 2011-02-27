@@ -48,7 +48,7 @@ public class MeetupDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet dataSet = new DataSet();
         try {
             HttpClient httpClient = new HttpClient();

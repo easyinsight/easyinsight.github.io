@@ -4,6 +4,8 @@ package com.easyinsight.analysis
 
 	import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
+import com.easyinsight.filtering.FilterDefinition;
+
 import mx.collections.ArrayCollection;
 
 import mx.formatters.Formatter;
@@ -38,6 +40,24 @@ import mx.formatters.Formatter;
 			}
 			return key.createString();			
 		}
+
+        public function matches(analysisItem:AnalysisItem):Boolean {
+            return qualifiedName() == analysisItem.qualifiedName() && getType() == analysisItem.getType();
+        }
+
+        public function updateFromSaved(analysisItem:AnalysisItem):void {
+            this.analysisItemID = analysisItem.analysisItemID;
+            if (filters != null && analysisItem.filters != null) {
+                for each (var itemFilter:FilterDefinition in this.filters) {
+                    for each (var savedItemFilter:FilterDefinition in analysisItem.filters) {
+                        if (savedItemFilter.field.qualifiedName() == itemFilter.field.qualifiedName() &&
+                                savedItemFilter.getType() == itemFilter.getType()) {
+                            itemFilter.updateFromSaved(savedItemFilter);
+                        }
+                    }
+                }
+            }
+        }
 		
 		public function qualifiedName():String {
 			return key.internalString() + getQualifiedSuffix();
@@ -58,15 +78,15 @@ import mx.formatters.Formatter;
 		public function hasType(type:int):Boolean {
 			return (getType() & type) == type;
 		}
-		
-		private static function iHateThis():void {
+
+        private static function iHateThis():void {
 			var namedKey:NamedKey;
 			var derivedKey:DerivedKey;
 			var numericValue:NumericValue;
 			var stringValue:StringValue;
 			var dateValue:DateValue;
 			var emptyValue:EmptyValue;
-            var analysisDimension:AnalysisDimension;            
+            var analysisDimension:AnalysisDimension;
 		}
 		
 		public function getFormatter():Formatter {

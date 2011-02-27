@@ -56,7 +56,7 @@ public class CCCampaignSource extends ConstantContactBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
             DataSet dataSet = new DataSet();

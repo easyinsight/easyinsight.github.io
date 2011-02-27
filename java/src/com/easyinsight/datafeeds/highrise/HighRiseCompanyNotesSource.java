@@ -66,7 +66,7 @@ public class HighRiseCompanyNotesSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_COMPANY_NOTES;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
 
         String url = highRiseCompositeSource.getUrl();

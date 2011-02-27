@@ -109,8 +109,6 @@ public class ComboBoxFilter extends HBox implements IFilter
 			    dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
                 dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, new Date().getTimezoneOffset());
             }
-
-			//
 		}
 
         private function onChange(event:Event):void {
@@ -282,6 +280,7 @@ public class ComboBoxFilter extends HBox implements IFilter
                 }
             } else {
                 loadingFromReport = false;
+                newFilter = false;
             }
 		}
 		

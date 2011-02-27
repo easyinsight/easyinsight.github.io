@@ -19,6 +19,11 @@ public class GaugeDefinition extends AnalysisDefinition {
         super();
     }
 
+    override public function fromSave(savedDef:AnalysisDefinition):void {
+        super.fromSave(savedDef);
+        this.gaugeDefinitionID = GaugeDefinition(savedDef).gaugeDefinitionID;
+    }
+
     override public function get type():int {
         return AnalysisDefinition.GAUGE;
     }

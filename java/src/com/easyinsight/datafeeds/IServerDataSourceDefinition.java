@@ -49,12 +49,14 @@ public interface IServerDataSourceDefinition {
     /**
      * Retrieves the actual data of the data source
      *
+     *
      * @param keys the keys defined earlier by the getKeys() call
      * @param now
      * @param callDataID
+     * @param lastRefreshDate
      * @return the data set
      */
-    DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition feedDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException;
+    DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition feedDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException;
 
     /**
      * Retrieves the analysis items for the data source, defining such traits as dimensions, measures, dates, and so on. Use
@@ -83,13 +85,13 @@ public interface IServerDataSourceDefinition {
 
     Map<String, Key> newDataSourceFields();
 
-    CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID);
+    CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime);
 
-    boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID) throws Exception;
+    boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception;
 
     Key getField(String sourceKey);
 
     List<AnalysisItem> getFields();
 
-    CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID);
+    CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID, Date lastRefreshTime);
 }

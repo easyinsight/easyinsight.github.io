@@ -113,11 +113,11 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         redirectDataSourceID = rs.getLong(1);
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) {
         throw new UnsupportedOperationException();
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
         throw new UnsupportedOperationException();
     }
 
@@ -149,7 +149,7 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         throw new UnsupportedOperationException();
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID, Date lastRefreshTime) {
         throw new UnsupportedOperationException();
     }
 }

@@ -20,7 +20,7 @@ import java.util.Map;
  * Time: 7:27:18 PM
  */
 public class WFCSVParse {
-    public DataSet createData(DataStorage dataStorage, Map<String, Key> keyMap, byte[] bytes) throws IOException, SQLException {
+    public DataSet createData(DataStorage dataStorage, Map<String, Key> keyMap, byte[] bytes) throws Exception {
         DataSet dataSet = new DataSet();
         System.out.println(bytes.length);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -41,19 +41,20 @@ public class WFCSVParse {
                 continue;
             }
             IRow row = dataSet.createRow();
-            row.addValue(keyMap.get(WholeFoodsSource.REGION), cleanup(r.get(0)));
-            row.addValue(keyMap.get(WholeFoodsSource.STORE), cleanup(r.get(1)));
-            row.addValue(keyMap.get(WholeFoodsSource.STORE_ID), cleanup(r.get(2)));
-            row.addValue(keyMap.get(WholeFoodsSource.ITEM_SKU), cleanup(r.get(3)));
-            row.addValue(keyMap.get(WholeFoodsSource.ITEM), cleanup(r.get(4)));
-            row.addValue(keyMap.get(WholeFoodsSource.QUANTITY), cleanup(r.get(5)));
-            row.addValue(keyMap.get(WholeFoodsSource.QUANTITY_UOM), cleanup(r.get(6)));
-            row.addValue(keyMap.get(WholeFoodsSource.DATE), convertDate(cleanup(r.get(7))));
-            row.addValue(keyMap.get(WholeFoodsSource.DOLLAR_SALES), NumericValue.produceDoubleValue(cleanup(r.get(9))));
-            row.addValue(keyMap.get(WholeFoodsSource.LAST_YEAR_SALES), NumericValue.produceDoubleValue(cleanup(r.get(10))));
-            row.addValue(keyMap.get(WholeFoodsSource.ARP), NumericValue.produceDoubleValue(cleanup(r.get(11))));
-            row.addValue(keyMap.get(WholeFoodsSource.UNITS), NumericValue.produceDoubleValue(cleanup(r.get(12))));
-            row.addValue(keyMap.get(WholeFoodsSource.LAST_YEAR_UNITS_SOLD), NumericValue.produceDoubleValue(cleanup(r.get(13))));
+            int j = 0;
+            row.addValue(keyMap.get(WholeFoodsSource.REGION), cleanup(r.get(j++)));
+            row.addValue(keyMap.get(WholeFoodsSource.STORE), cleanup(r.get(j++)));
+            row.addValue(keyMap.get(WholeFoodsSource.STORE_ID), cleanup(r.get(j++)));
+            row.addValue(keyMap.get(WholeFoodsSource.ITEM_SKU), cleanup(r.get(j++)));
+            row.addValue(keyMap.get(WholeFoodsSource.ITEM), cleanup(r.get(j++)));
+            row.addValue(keyMap.get(WholeFoodsSource.QUANTITY), cleanup(r.get(j++)));
+            row.addValue(keyMap.get(WholeFoodsSource.QUANTITY_UOM), cleanup(r.get(j++)));
+            row.addValue(keyMap.get(WholeFoodsSource.DATE), convertDate(cleanup(r.get(j++))));
+            row.addValue(keyMap.get(WholeFoodsSource.DOLLAR_SALES), NumericValue.produceDoubleValue(cleanup(r.get(j++))));
+            row.addValue(keyMap.get(WholeFoodsSource.LAST_YEAR_SALES), NumericValue.produceDoubleValue(cleanup(r.get(j++))));
+            row.addValue(keyMap.get(WholeFoodsSource.ARP), NumericValue.produceDoubleValue(cleanup(r.get(j++))));
+            row.addValue(keyMap.get(WholeFoodsSource.UNITS), NumericValue.produceDoubleValue(cleanup(r.get(j++))));
+            row.addValue(keyMap.get(WholeFoodsSource.LAST_YEAR_UNITS_SOLD), NumericValue.produceDoubleValue(cleanup(r.get(j))));
             i++;
 
             if (i % 250 == 0) {

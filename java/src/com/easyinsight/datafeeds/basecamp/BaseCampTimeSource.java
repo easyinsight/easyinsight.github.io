@@ -58,7 +58,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
     
 
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
         String url = baseCampCompositeSource.getUrl();
 
@@ -72,7 +72,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
         Builder builder = new Builder();
         try {
             BaseCampCache basecampCache = baseCampCompositeSource.getOrCreateCache(client);
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition, false);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
@@ -98,9 +98,9 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                         try {
                             Document todoLists;
                             if (info.currentPage == 1) {
-                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml", client, builder, url, info, false, parentDefinition);
+                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml", client, builder, url, info, false, parentDefinition, false);
                             } else {
-                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false, parentDefinition);
+                                todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info, false, parentDefinition, false);
                             }
 
                             Nodes todoListNodes = todoLists.query("/time-entries/time-entry");

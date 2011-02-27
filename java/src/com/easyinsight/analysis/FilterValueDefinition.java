@@ -4,6 +4,7 @@ import com.easyinsight.core.*;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.sql.Types;
 import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -170,7 +171,7 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        Set<Value> valueSet = new HashSet<Value>();
+        List<Value> valueSet = new ArrayList<Value>();
         for (Object valueObject : filteredValues) {
             Value value;
             if (valueObject instanceof Value) {
@@ -200,8 +201,12 @@ public class FilterValueDefinition extends FilterDefinition {
             }
         } else if (type == Value.DATE) {
             for (Value value : valueSet) {
-                DateValue dateValue = (DateValue) value;
-                preparedStatement.setTimestamp(start++, new java.sql.Timestamp(dateValue.getDate().getTime()));
+                if (value.type() == Value.DATE) {
+                    DateValue dateValue = (DateValue) value;
+                    preparedStatement.setTimestamp(start++, new java.sql.Timestamp(dateValue.getDate().getTime()));
+                } else {
+                    preparedStatement.setNull(start++, Types.TIMESTAMP);
+                }
             }
         } else if (type == Value.STRING) {
             for (Value value : valueSet) {

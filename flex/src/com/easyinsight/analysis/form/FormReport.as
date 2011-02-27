@@ -17,6 +17,11 @@ public class FormReport extends AnalysisDefinition {
         super();
     }
 
+    override public function fromSave(savedDef:AnalysisDefinition):void {
+        super.fromSave(savedDef);
+        this.formID = FormReport(savedDef).formID;
+    }
+
     override public function getFields():ArrayCollection {
         return columns;
     }

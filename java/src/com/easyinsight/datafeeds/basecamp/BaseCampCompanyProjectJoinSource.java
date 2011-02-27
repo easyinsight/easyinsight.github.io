@@ -41,7 +41,7 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_COMPANY_PROJECT_JOIN;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
 
@@ -53,9 +53,9 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
         try {
-            Document account = runRestRequest("/account.xml", client, builder, url, null, false, parentDefinition);
+            Document account = runRestRequest("/account.xml", client, builder, url, null, false, parentDefinition, false);
             String accountName = account.query("/account/name/text()").get(0).getValue();
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null, false, parentDefinition);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null, false, parentDefinition, false);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
@@ -72,7 +72,7 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
                 }
                 loadingProgress(i, projectNodes.size(), "Synchronizing with additional metadata of " + projectName + "...", callDataID);
                 String projectID = queryField(curProject, "id/text()");
-                Document companies = runRestRequest("/projects/" + projectID + "/companies.xml", client, builder, url, null, false, parentDefinition);
+                Document companies = runRestRequest("/projects/" + projectID + "/companies.xml", client, builder, url, null, false, parentDefinition, false);
                 Nodes companyNodes = companies.query("/companies/company");
                 int companyCount = 0;
                 String ourCompanyID = null;

@@ -1,8 +1,6 @@
 <?xml version="1.0" ?>
-<mx:HBox label="Data" icon="@Embed(source='../../../../assets/data_table.png')" paddingLeft="10"
-         paddingTop="10" paddingBottom="10"
-         paddingRight="10" width="100%" height="100%" xmlns:mx="http://www.adobe.com/2006/mxml"
-         xmlns:datasources="com.easyinsight.datasources.*" xmlns:analysis="com.easyinsight.analysis.*">
+<mx:Canvas label="Data" icon="@Embed(source='../../../../assets/data_table.png')" width="100%" xmlns:mx="http://www.adobe.com/2006/mxml"
+        height="43">
     <mx:Metadata>
         [Event(name="analysisItemEdit", type="com.easyinsight.analysis.AnalysisItemEditEvent")]
     </mx:Metadata>
@@ -197,13 +195,13 @@
         ]]></mx:Script>
     <mx:Button id="calculationButton" toolTip="Create Calculation"
                icon="@Embed(source='../../../../assets/text_formula.png')"
-               click="createCalculation()" labelPlacement="right" label="New Calculation"/>
+               click="createCalculation()" labelPlacement="right" label="New Calculation" y="10" x="10"/>
     <mx:Button id="derivedButton" toolTip="Create Derived Grouping"
                icon="@Embed(source='../../../../assets/code.png')"
-               click="createCalculatedGrouping()" labelPlacement="right" label="New Derived Grouping"/>
+               click="createCalculatedGrouping()" labelPlacement="right" label="New Derived Grouping" y="10" x="148"/>
     <mx:Button id="derivedDateButton" toolTip="Create Derived Date"
                icon="@Embed(source='../../../../assets/calendar.png')"
-               click="createCalculatedDate()" labelPlacement="right" label="New Derived Date"/>
+               click="createCalculatedDate()" labelPlacement="right" label="New Derived Date" y="10" x="320"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
-               toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton" labelPlacement="right" label="New Hierarchy"/>
-</mx:HBox>
+               toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton" labelPlacement="right" label="New Hierarchy" y="10" x="467"/>
+</mx:Canvas>

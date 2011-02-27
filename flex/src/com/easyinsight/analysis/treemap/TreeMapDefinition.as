@@ -17,18 +17,6 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.analysis.WSTreeMapDefinition")]
 public class TreeMapDefinition extends AnalysisDefinition{
 
-    public static const DEPTH:int = 1;
-    public static const DIV_RED_GREEN:int = 2;
-    public static const DIV_GREEN_RED:int = 4;
-    public static const QUALITATIVE:int = 3;
-    public static const SEQUENTIAL:int = 5;
-    public static const DIV_BLUE_YELLOW:int = 6;
-    public static const DIV_YELLOW_BLUE:int = 7;
-    public static const AVG_RED_GREEN:int = 8;
-    public static const AVG_GREEN_RED:int = 9;
-    public static const AVG_BLUE_YELLOW:int = 10;
-    public static const AVG_YELLOW_BLUE:int = 11;
-
     public function TreeMapDefinition() {
         super();
     }
@@ -48,6 +36,11 @@ public class TreeMapDefinition extends AnalysisDefinition{
 
     override public function getFields():ArrayCollection {
         return new ArrayCollection([ measure1, measure2, hierarchy ]);
+    }
+
+    override public function fromSave(savedDef:AnalysisDefinition):void {
+        super.fromSave(savedDef);
+        this.treeMapDefinitionID = TreeMapDefinition(savedDef).treeMapDefinitionID;
     }
 
     override public function createFormItems():ArrayCollection {

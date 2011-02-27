@@ -9,7 +9,6 @@ import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.scorecard.ScorecardInternalService;
-import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
@@ -564,11 +563,13 @@ public class UserUploadService {
                         public void run() {
                             SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
                             try {
-                                CredentialsResponse credentialsResponse = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null, callID);
+                                Date now = new Date();
+                                CredentialsResponse credentialsResponse = dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), null, callID, ((FeedDefinition) dataSource).getLastRefreshStart());
                                 if (credentialsResponse.isSuccessful() && !feedDefinition.isVisible()) {
                                     feedDefinition.setVisible(true);
-                                    feedStorage.updateDataFeedConfiguration(feedDefinition);
                                 }
+                                feedDefinition.setLastRefreshStart(now);
+                                feedStorage.updateDataFeedConfiguration(feedDefinition);
                                 if (credentialsResponse.isSuccessful()) {
                                     ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
                                 } else {

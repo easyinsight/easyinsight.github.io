@@ -58,12 +58,19 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean validatedAPIEnabled;
     private boolean validatedAPIUsingBasicAuth;
     private boolean inheritAccountAPISettings;
-    private long refreshDataInterval;
     private List<FeedFolder> folders = new ArrayList<FeedFolder>();
     private boolean visible = true;
     private long parentSourceID;
     private boolean adjustDates;
+    private Date lastRefreshStart;
 
+    public Date getLastRefreshStart() {
+        return lastRefreshStart;
+    }
+
+    public void setLastRefreshStart(Date lastRefreshStart) {
+        this.lastRefreshStart = lastRefreshStart;
+    }
 
     public boolean requiresConfiguration() {
         return true;
@@ -469,6 +476,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feedDefinition.setDataFeedID(0);
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
         feedDefinition.setAccountVisible(false);
+        feedDefinition.setLastRefreshStart(null);
         List<FeedFolder> clonedFolders = new ArrayList<FeedFolder>();
         for (FeedFolder feedFolder : getFolders()) {
             try {
@@ -507,7 +515,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return item;
     }
     
-     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
+     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         throw new UnsupportedOperationException();
     }
 

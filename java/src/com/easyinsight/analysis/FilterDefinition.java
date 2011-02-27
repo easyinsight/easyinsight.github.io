@@ -32,9 +32,19 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
     @Column(name="intrinsic")
     private boolean intrinsic;
     @Column(name="enabled")
-    private boolean enabled = true; 
+    private boolean enabled = true;
+    @Column(name="show_on_report_view")
+    private boolean showOnReportView = true;
 
     public FilterDefinition() {
+    }
+
+    public boolean isShowOnReportView() {
+        return showOnReportView;
+    }
+
+    public void setShowOnReportView(boolean showOnReportView) {
+        this.showOnReportView = showOnReportView;
     }
 
     public boolean isSingleSource() {

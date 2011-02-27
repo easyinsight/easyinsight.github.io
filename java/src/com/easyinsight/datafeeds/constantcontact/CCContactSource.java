@@ -8,10 +8,18 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.sql.Connection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -131,82 +139,178 @@ public class CCContactSource extends ConstantContactBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
-            DataSet dataSet = new DataSet();
-
-            boolean hasMoreData;
-
-            Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-
-            do {
-
-                hasMoreData = false;
-
-                Nodes nodes = doc.query("/feed/entry");
-
-                for (int i = 0; i < nodes.size(); i++) {
-                    IRow row = dataSet.createRow();
-                    Node node = nodes.get(i);
-                    String contactIDLink = queryField(node, "id/text()");
-                    contactIDLink = contactIDLink.replace("http:", "https:");
-                    String id = contactIDLink.split("/")[7];
-                    Document details = query(contactIDLink, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                    row.addValue(CONTACT_EMAIL, queryField(details, "/entry/content/Contact/EmailAddress/text()"));
-                    row.addValue(CONTACT_EMAIL_TYPE, queryField(details, "/entry/content/Contact/EmailType/text()"));
-                    row.addValue(CONTACT_ID, id);
-                    row.addValue(CONTACT_STATUS, queryField(details, "/entry/content/Contact/Status/text()"));
-                    row.addValue(CONTACT_NAME, queryField(details, "/entry/content/Contact/Name/text()"));
-                    row.addValue(CONTACT_FIRST_NAME, queryField(details, "/entry/content/Contact/FirstName/text()"));
-                    row.addValue(CONTACT_LAST_NAME, queryField(details, "/entry/content/Contact/LastName/text()"));
-                    row.addValue(CONTACT_COMPANY, queryField(details, "/entry/content/Contact/CompanyName/text()"));
-                    row.addValue(CONTACT_JOB_TITLE, queryField(details, "/entry/content/Contact/JobTitle/text()"));
-                    row.addValue(CONTACT_HOME_PHONE, queryField(details, "/entry/content/Contact/HomePhone/text()"));
-                    row.addValue(CONTACT_WORK_PHONE, queryField(details, "/entry/content/Contact/WorkPhone/text()"));
-                    row.addValue(CONTACT_CITY, queryField(details, "/entry/content/Contact/City/text()"));
-                    row.addValue(CONTACT_STATE, queryField(details, "/entry/content/Contact/StateName/text()"));
-                    row.addValue(CONTACT_COUNTRY, queryField(details, "/entry/content/Contact/CountryName/text()"));
-                    row.addValue(CONTACT_POSTAL, queryField(details, "/entry/content/Contact/PostalCode/text()"));
-                    row.addValue(CONTACT_NOTE, queryField(details, "/entry/content/Contact/Note/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD1, queryField(details, "/entry/content/Contact/CustomField1/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD2, queryField(details, "/entry/content/Contact/CustomField2/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD3, queryField(details, "/entry/content/Contact/CustomField3/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD4, queryField(details, "/entry/content/Contact/CustomField4/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD5, queryField(details, "/entry/content/Contact/CustomField5/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD6, queryField(details, "/entry/content/Contact/CustomField6/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD7, queryField(details, "/entry/content/Contact/CustomField7/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD8, queryField(details, "/entry/content/Contact/CustomField8/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD9, queryField(details, "/entry/content/Contact/CustomField9/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD10, queryField(details, "/entry/content/Contact/CustomField10/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD11, queryField(details, "/entry/content/Contact/CustomField11/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD12, queryField(details, "/entry/content/Contact/CustomField12/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD13, queryField(details, "/entry/content/Contact/CustomField13/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD14, queryField(details, "/entry/content/Contact/CustomField14/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD15, queryField(details, "/entry/content/Contact/CustomField15/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD16, queryField(details, "/entry/content/Contact/CustomField16/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD17, queryField(details, "/entry/content/Contact/CustomField17/text()"));
-                    row.addValue(CONTACT_CUSTOM_FIELD18, queryField(details, "/entry/content/Contact/CustomField18/text()"));
-                    row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/InsertTime/text()"))));
-                    row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/LastUpdateTime/text()"))));
-                    row.addValue(CONTACT_COUNT, 1);
-                }
-                Nodes links = doc.query("/feed/link");
-
-                for (int i = 0; i < links.size(); i++) {
-                    Element link = (Element) links.get(i);
-                    Attribute attribute = link.getAttribute("rel");
-                    if (attribute != null && "next".equals(attribute.getValue())) {
-                        String linkURL = link.getAttribute("href").getValue();
-                        hasMoreData = true;
-                        doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
-                        break;
-                    }
-                }
-            } while (hasMoreData);
+            DataSet dataSet;
+            System.out.println("last refresh date = " + lastRefreshDate);
+            if (lastRefreshDate == null) {
+                dataSet = cleanRetrieval(parentDefinition, ccSource);
+            } else {
+                dataSet = incrementalRetrieval(parentDefinition, ccSource, lastRefreshDate, dataStorage);
+            }
             return dataSet;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected boolean clearsData() {
+        return false;
+    }
+
+    private DataSet incrementalRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource, Date lastRefreshDate, DataStorage dataStorage) throws Exception {
+        DataSet dataSet = new DataSet();
+        boolean hasMoreData;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        String refreshString = simpleDateFormat.format(lastRefreshDate);
+        String url = "https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts?updatedsince=" + refreshString + "&listtype=active";
+        Key contactKey = parentDefinition.getField(CONTACT_ID).toBaseKey();
+        System.out.println(url);
+        Document doc = query(url,
+                ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
+
+        do {
+
+            hasMoreData = false;
+
+            Nodes nodes = doc.query("/feed/entry");
+
+            for (int i = 0; i < nodes.size(); i++) {
+                dataSet = new DataSet();
+                IRow row = dataSet.createRow();
+                Node node = nodes.get(i);
+                String contactIDLink = queryField(node, "id/text()");
+                contactIDLink = contactIDLink.replace("http:", "https:");
+                String id = contactIDLink.split("/")[7];
+                Document details = query(contactIDLink, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
+                row.addValue(CONTACT_EMAIL, queryField(details, "/entry/content/Contact/EmailAddress/text()"));
+                row.addValue(CONTACT_EMAIL_TYPE, queryField(details, "/entry/content/Contact/EmailType/text()"));
+                row.addValue(CONTACT_ID, id);
+                row.addValue(CONTACT_STATUS, queryField(details, "/entry/content/Contact/Status/text()"));
+                row.addValue(CONTACT_NAME, queryField(details, "/entry/content/Contact/Name/text()"));
+                row.addValue(CONTACT_FIRST_NAME, queryField(details, "/entry/content/Contact/FirstName/text()"));
+                row.addValue(CONTACT_LAST_NAME, queryField(details, "/entry/content/Contact/LastName/text()"));
+                row.addValue(CONTACT_COMPANY, queryField(details, "/entry/content/Contact/CompanyName/text()"));
+                row.addValue(CONTACT_JOB_TITLE, queryField(details, "/entry/content/Contact/JobTitle/text()"));
+                row.addValue(CONTACT_HOME_PHONE, queryField(details, "/entry/content/Contact/HomePhone/text()"));
+                row.addValue(CONTACT_WORK_PHONE, queryField(details, "/entry/content/Contact/WorkPhone/text()"));
+                row.addValue(CONTACT_CITY, queryField(details, "/entry/content/Contact/City/text()"));
+                row.addValue(CONTACT_STATE, queryField(details, "/entry/content/Contact/StateName/text()"));
+                row.addValue(CONTACT_COUNTRY, queryField(details, "/entry/content/Contact/CountryName/text()"));
+                row.addValue(CONTACT_POSTAL, queryField(details, "/entry/content/Contact/PostalCode/text()"));
+                row.addValue(CONTACT_NOTE, queryField(details, "/entry/content/Contact/Note/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD1, queryField(details, "/entry/content/Contact/CustomField1/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD2, queryField(details, "/entry/content/Contact/CustomField2/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD3, queryField(details, "/entry/content/Contact/CustomField3/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD4, queryField(details, "/entry/content/Contact/CustomField4/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD5, queryField(details, "/entry/content/Contact/CustomField5/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD6, queryField(details, "/entry/content/Contact/CustomField6/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD7, queryField(details, "/entry/content/Contact/CustomField7/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD8, queryField(details, "/entry/content/Contact/CustomField8/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD9, queryField(details, "/entry/content/Contact/CustomField9/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD10, queryField(details, "/entry/content/Contact/CustomField10/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD11, queryField(details, "/entry/content/Contact/CustomField11/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD12, queryField(details, "/entry/content/Contact/CustomField12/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD13, queryField(details, "/entry/content/Contact/CustomField13/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD14, queryField(details, "/entry/content/Contact/CustomField14/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD15, queryField(details, "/entry/content/Contact/CustomField15/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD16, queryField(details, "/entry/content/Contact/CustomField16/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD17, queryField(details, "/entry/content/Contact/CustomField17/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD18, queryField(details, "/entry/content/Contact/CustomField18/text()"));
+                row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/InsertTime/text()"))));
+                row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/LastUpdateTime/text()"))));
+                row.addValue(CONTACT_COUNT, 1);
+                StringWhere userWhere = new StringWhere(contactKey, id);
+                dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
+            }
+            Nodes links = doc.query("/feed/link");
+
+            for (int i = 0; i < links.size(); i++) {
+                Element link = (Element) links.get(i);
+                Attribute attribute = link.getAttribute("rel");
+                if (attribute != null && "next".equals(attribute.getValue())) {
+                    String linkURL = link.getAttribute("href").getValue();
+                    hasMoreData = true;
+                    doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
+                    break;
+                }
+            }
+        } while (hasMoreData);
+        return dataSet;
+    }
+
+    private DataSet cleanRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException, ParseException {
+        DataSet dataSet = new DataSet();
+
+        boolean hasMoreData;
+
+        Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
+
+        do {
+
+            hasMoreData = false;
+
+            Nodes nodes = doc.query("/feed/entry");
+
+            for (int i = 0; i < nodes.size(); i++) {
+                IRow row = dataSet.createRow();
+                Node node = nodes.get(i);
+                String contactIDLink = queryField(node, "id/text()");
+                contactIDLink = contactIDLink.replace("http:", "https:");
+                String id = contactIDLink.split("/")[7];
+                Document details = query(contactIDLink, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
+                row.addValue(CONTACT_EMAIL, queryField(details, "/entry/content/Contact/EmailAddress/text()"));
+                row.addValue(CONTACT_EMAIL_TYPE, queryField(details, "/entry/content/Contact/EmailType/text()"));
+                row.addValue(CONTACT_ID, id);
+                row.addValue(CONTACT_STATUS, queryField(details, "/entry/content/Contact/Status/text()"));
+                row.addValue(CONTACT_NAME, queryField(details, "/entry/content/Contact/Name/text()"));
+                row.addValue(CONTACT_FIRST_NAME, queryField(details, "/entry/content/Contact/FirstName/text()"));
+                row.addValue(CONTACT_LAST_NAME, queryField(details, "/entry/content/Contact/LastName/text()"));
+                row.addValue(CONTACT_COMPANY, queryField(details, "/entry/content/Contact/CompanyName/text()"));
+                row.addValue(CONTACT_JOB_TITLE, queryField(details, "/entry/content/Contact/JobTitle/text()"));
+                row.addValue(CONTACT_HOME_PHONE, queryField(details, "/entry/content/Contact/HomePhone/text()"));
+                row.addValue(CONTACT_WORK_PHONE, queryField(details, "/entry/content/Contact/WorkPhone/text()"));
+                row.addValue(CONTACT_CITY, queryField(details, "/entry/content/Contact/City/text()"));
+                row.addValue(CONTACT_STATE, queryField(details, "/entry/content/Contact/StateName/text()"));
+                row.addValue(CONTACT_COUNTRY, queryField(details, "/entry/content/Contact/CountryName/text()"));
+                row.addValue(CONTACT_POSTAL, queryField(details, "/entry/content/Contact/PostalCode/text()"));
+                row.addValue(CONTACT_NOTE, queryField(details, "/entry/content/Contact/Note/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD1, queryField(details, "/entry/content/Contact/CustomField1/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD2, queryField(details, "/entry/content/Contact/CustomField2/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD3, queryField(details, "/entry/content/Contact/CustomField3/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD4, queryField(details, "/entry/content/Contact/CustomField4/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD5, queryField(details, "/entry/content/Contact/CustomField5/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD6, queryField(details, "/entry/content/Contact/CustomField6/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD7, queryField(details, "/entry/content/Contact/CustomField7/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD8, queryField(details, "/entry/content/Contact/CustomField8/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD9, queryField(details, "/entry/content/Contact/CustomField9/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD10, queryField(details, "/entry/content/Contact/CustomField10/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD11, queryField(details, "/entry/content/Contact/CustomField11/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD12, queryField(details, "/entry/content/Contact/CustomField12/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD13, queryField(details, "/entry/content/Contact/CustomField13/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD14, queryField(details, "/entry/content/Contact/CustomField14/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD15, queryField(details, "/entry/content/Contact/CustomField15/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD16, queryField(details, "/entry/content/Contact/CustomField16/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD17, queryField(details, "/entry/content/Contact/CustomField17/text()"));
+                row.addValue(CONTACT_CUSTOM_FIELD18, queryField(details, "/entry/content/Contact/CustomField18/text()"));
+                row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/InsertTime/text()"))));
+                row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/LastUpdateTime/text()"))));
+                row.addValue(CONTACT_COUNT, 1);
+            }
+            Nodes links = doc.query("/feed/link");
+
+            for (int i = 0; i < links.size(); i++) {
+                Element link = (Element) links.get(i);
+                Attribute attribute = link.getAttribute("rel");
+                if (attribute != null && "next".equals(attribute.getValue())) {
+                    String linkURL = link.getAttribute("href").getValue();
+                    hasMoreData = true;
+                    doc = query("https://api.constantcontact.com" + linkURL, ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
+                    break;
+                }
+            }
+        } while (hasMoreData);
+        return dataSet;
     }
 }

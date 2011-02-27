@@ -71,7 +71,7 @@ public class BatchbookPeopleSource extends BatchbookBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         DateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
         BatchbookCompositeSource batchbookCompositeSource = (BatchbookCompositeSource) parentDefinition;

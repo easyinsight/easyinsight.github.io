@@ -15,8 +15,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -52,7 +50,7 @@ public class BatchbookUserSource extends BatchbookBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         BatchbookCompositeSource batchbookCompositeSource = (BatchbookCompositeSource) parentDefinition;
         HttpClient httpClient = getHttpClient(batchbookCompositeSource.getBbApiKey(), "");

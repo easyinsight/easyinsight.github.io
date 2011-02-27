@@ -37,7 +37,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null, false, parentDefinition);
+                    Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null, false, parentDefinition, false);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -58,7 +58,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError, FeedDefinition parentDefinition) throws BaseCampLoginException, ParsingException, ReportException {
+    protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError, FeedDefinition parentDefinition, boolean logRequest) throws BaseCampLoginException, ParsingException, ReportException {
         HttpMethod restMethod = new GetMethod(url + path);
         /*try {
             Thread.sleep(250);
@@ -73,6 +73,9 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
 
             try {
                 client.executeMethod(restMethod);
+                if (logRequest) {
+                    System.out.println(restMethod.getResponseBodyAsString());
+                }
                 doc = builder.build(restMethod.getResponseBodyAsStream());
                 String rootValue = doc.getRootElement().getValue();
                 if ("The API is not available to this account".equals(rootValue)) {

@@ -51,7 +51,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
         return null;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         //HealthInfo healthInfo = new AdminService().getHealthInfo();
         DataSet dataSet = new DataSet();
         /*IRow row = dataSet.createRow();
@@ -106,7 +106,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
     public void customLoad(Connection conn) throws SQLException {
     }
 
-    protected void addData(DataStorage dataStorage, DataSet dataSet) throws SQLException {
+    protected void addData(DataStorage dataStorage, DataSet dataSet) throws Exception {
         dataStorage.insertData(dataSet);
     }
 

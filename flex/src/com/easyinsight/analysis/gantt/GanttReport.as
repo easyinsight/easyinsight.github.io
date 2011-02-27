@@ -17,6 +17,11 @@ public class GanttReport extends AnalysisDefinition {
         super();
     }
 
+    override public function fromSave(savedDef:AnalysisDefinition):void {
+        super.fromSave(savedDef);
+        this.ganttDefinitionID = GanttReport(savedDef).ganttDefinitionID;
+    }
+
     override public function get type():int {
         return AnalysisDefinition.GANTT;
     }

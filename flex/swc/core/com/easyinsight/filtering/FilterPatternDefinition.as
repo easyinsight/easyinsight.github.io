@@ -24,6 +24,16 @@ public class FilterPatternDefinition extends FilterDefinition{
         dispatchEvent(new Event("patternChanged"));
     }
 
+    override public function matches(filterDefinition:FilterDefinition):Boolean {
+        var matches:Boolean = super.matches(filterDefinition);
+        if (matches) {
+            var pattern:FilterPatternDefinition = filterDefinition as FilterPatternDefinition;
+            matches = regex == pattern.regex && caseSensitive == pattern.caseSensitive && _pattern == pattern._pattern;
+            return matches;
+        }
+        return false;
+    }
+
     override public function getType():int {
         return FilterDefinition.PATTERN;
     }

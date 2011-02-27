@@ -20,5 +20,17 @@ public class OrFilter extends FilterDefinition {
     override public function getType():int {
         return FilterDefinition.OR;
     }
+
+    override public function updateFromSaved(savedItemFilter:FilterDefinition):void {
+        super.updateFromSaved(savedItemFilter);
+        var orFilter:OrFilter = savedItemFilter as OrFilter;
+        for each (var filter:FilterDefinition in filters) {
+            for each (var savedFilter:FilterDefinition in orFilter.filters) {
+                if (filter.matches(savedFilter)) {
+                    filter.updateFromSaved(savedFilter);
+                }
+            }
+        }
+    }
 }
 }

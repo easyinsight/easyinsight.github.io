@@ -17,7 +17,6 @@ import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import flex.messaging.FlexContext;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import org.jetbrains.annotations.NotNull;
@@ -228,7 +227,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return new GoogleAnalyticsFeed(tokenKey, tokenSecret);
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         return new DataSet();
     }
 

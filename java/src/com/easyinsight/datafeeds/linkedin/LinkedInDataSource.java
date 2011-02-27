@@ -12,7 +12,6 @@ import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
-import flex.messaging.FlexContext;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -162,7 +161,7 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet dataSet = new DataSet();
         try {
             Builder builder = new Builder();

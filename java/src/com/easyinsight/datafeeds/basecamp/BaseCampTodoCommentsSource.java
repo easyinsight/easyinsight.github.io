@@ -62,7 +62,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
         return analysisItems;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet ds = new DataSet();
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
@@ -78,7 +78,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
             Builder builder = new Builder();
             try {
                 BaseCampCache basecampCache = source.getOrCreateCache(client);
-                Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition);
+                Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition, false);
                 Nodes projectNodes = projects.query("/projects/project");
                 for (int i = 0; i < projectNodes.size(); i++) {
                     Node curProject = projectNodes.get(i);
@@ -92,7 +92,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                     if (!source.isIncludeInactive() && "inactive".equals(projectStatus)) {
                         continue;
                     }
-                    Document todoLists = runRestRequest("/projects/" + projectID + "/todo_lists.xml", client, builder, url, null, false, parentDefinition);
+                    Document todoLists = runRestRequest("/projects/" + projectID + "/todo_lists.xml", client, builder, url, null, false, parentDefinition, false);
                     Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");
                     if (todoListNodes.size() > 0) {
                         for (int j = 0; j < todoListNodes.size(); j++) {
@@ -100,7 +100,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                             String todoListId = queryField(todoListNode, "id/text()");
 
 
-                            Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null, false, parentDefinition);
+                            Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null, false, parentDefinition, false);
 
                             Nodes todoItemNodes = todoItems.query("/todo-items/todo-item");
                             if (todoItemNodes.size() > 0) {
@@ -109,7 +109,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                                     String todoID = queryField(todoItem, "id/text()");
                                     String completed = queryField(todoItem, "completed/text()").toLowerCase();
                                     if ("false".equals(completed)) {
-                                        Document comments = runRestRequest("/todo_items/" + todoID + "/comments.xml", client, builder, url, null, false, parentDefinition);
+                                        Document comments = runRestRequest("/todo_items/" + todoID + "/comments.xml", client, builder, url, null, false, parentDefinition, false);
                                         Nodes commentNodes = comments.query("/comments/comment");
                                         for (int l = 0; l < commentNodes.size(); l++) {
                                             Node commentNode = commentNodes.get(l);

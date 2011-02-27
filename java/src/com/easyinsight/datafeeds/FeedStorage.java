@@ -82,8 +82,8 @@ public class FeedStorage {
                 "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
                 "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
-                "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, ADJUST_DATES) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, ADJUST_DATES, last_refresh_start) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -120,7 +120,12 @@ public class FeedStorage {
         insertDataFeedStmt.setLong(i++, feedDefinition.getParentSourceID());
         insertDataFeedStmt.setInt(i++, feedDefinition.getVersion());
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isAccountVisible());
-        insertDataFeedStmt.setBoolean(i, feedDefinition.isAdjustDates());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isAdjustDates());
+        if (feedDefinition.getLastRefreshStart() == null) {
+            insertDataFeedStmt.setNull(i, Types.TIMESTAMP);
+        } else {
+            insertDataFeedStmt.setTimestamp(i, new Timestamp(feedDefinition.getLastRefreshStart().getTime()));
+        }
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -619,7 +624,7 @@ public class FeedStorage {
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
                 "FEED_SIZE = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
-                "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, ADJUST_DATES = ? WHERE DATA_FEED_ID = ?");
+                "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, ADJUST_DATES = ?, LAST_REFRESH_START = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
         updateDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -644,6 +649,11 @@ public class FeedStorage {
         updateDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getDateUpdated().getTime()));
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isAccountVisible());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isAdjustDates());
+        if (feedDefinition.getLastRefreshStart() == null) {
+            updateDataFeedStmt.setNull(i++, Types.TIMESTAMP);
+        } else {
+            updateDataFeedStmt.setTimestamp(i++, new Timestamp(feedDefinition.getLastRefreshStart().getTime()));
+        }
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -700,7 +710,7 @@ public class FeedStorage {
         PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, CREATE_DATE," +
                 "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE," +
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, validated_api_enabled," +
-                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, ADJUST_DATES " +
+                "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, ADJUST_DATES, LAST_REFRESH_START " +
                 "FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
@@ -746,7 +756,11 @@ public class FeedStorage {
                 feedDefinition.setParentSourceID(parentSourceID);
             }
             feedDefinition.setAccountVisible(rs.getBoolean(i++));
-            feedDefinition.setAdjustDates(rs.getBoolean(i));
+            feedDefinition.setAdjustDates(rs.getBoolean(i++));
+            Timestamp lastRefreshTime = rs.getTimestamp(i);
+            if (lastRefreshTime != null) {
+                feedDefinition.setLastRefreshStart(new Date(lastRefreshTime.getTime()));
+            }
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
             feedDefinition.customLoad(conn);

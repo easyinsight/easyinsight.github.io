@@ -8,11 +8,12 @@ import mx.collections.ArrayCollection;
 	public class AnalysisDefinitionAnalyzeSource extends PerspectiveInfo
 	{
 		
-		public function AnalysisDefinitionAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null) {
+		public function AnalysisDefinitionAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null, selectedTabIndex:int = 0) {
             super(PerspectiveInfo.REPORT_EDITOR, new Object());
 			properties.dataSourceID = insightDescriptor.dataFeedID;
             properties.filterOverrides = filters;
             properties.reportID = insightDescriptor.id;
+            properties.selectedTabIndex = selectedTabIndex;
 		}
 	}
 }

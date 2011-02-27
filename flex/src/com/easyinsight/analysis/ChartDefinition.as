@@ -28,6 +28,11 @@ public class ChartDefinition extends AnalysisDefinition {
         chartFamily = getChartFamily();
     }
 
+    override public function fromSave(savedDef:AnalysisDefinition):void {
+        super.fromSave(savedDef);
+        this.chartDefinitionID = ChartDefinition(savedDef).chartDefinitionID;
+    }
+
     public function getChartType():int {
         return 0;
     }

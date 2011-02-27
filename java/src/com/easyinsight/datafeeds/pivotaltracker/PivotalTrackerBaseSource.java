@@ -171,7 +171,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         Token tokenObj = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.PIVOTAL_TRACKER_TOKEN, getDataFeedID(), false, conn);
         String token = tokenObj.getTokenValue();
         try {
@@ -212,6 +212,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             Node curIteration = iterationNodes.get(j);
             String iterationID = queryField(curIteration, "id/text()");
             String iterationStartDateString = queryField(curIteration, "start/text()");
+            System.out.println("iteration start date = " + iterationStartDateString);
             Date iterationStartDate = null;
             if (iterationStartDateString != null) {
                 iterationStartDate = dateFormat.parse(iterationStartDateString);

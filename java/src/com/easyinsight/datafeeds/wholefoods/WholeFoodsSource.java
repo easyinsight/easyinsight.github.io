@@ -108,7 +108,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callID, Date lastRefreshDate) {
         DataSet dataSet = new DataSet();
         boolean firstRun = !initialized;
         try {

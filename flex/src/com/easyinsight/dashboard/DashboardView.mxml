@@ -317,7 +317,7 @@
                                                   width="100%" paddingLeft="10"
                                                   paddingTop="10" paddingBottom="10"
                                                   paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA"
-                                                  backgroundColor="#FFFFFF" backgroundAlpha=".8"/>
+                                                  backgroundColor="#FFFFFF" backgroundAlpha=".8" reportView="true"/>
                 </mx:VBox>
             </mx:ViewStack>
             <util:AntiScrollCanvas width="{dashboardWidth}" height="100%" id="dashboardCanvas" backgroundColor="#FFFFFF"

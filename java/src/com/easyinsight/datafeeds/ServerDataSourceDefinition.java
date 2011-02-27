@@ -57,7 +57,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         DataStorage metadata = null;
         try {
             Map<String, Key> keys = newDataSourceFields();
-            DataSet dataSet = getDataSet(keys, new Date(), null, null, conn, null);
+            DataSet dataSet = getDataSet(keys, new Date(), null, null, conn, null, null);
             if (externalAnalysisItems != null) {
                 /*for (AnalysisItem field : externalAnalysisItems) {
                     dataSet.refreshKey(field.getKey());
@@ -132,18 +132,18 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return keyMap;
     }
 
-    protected void addData(DataStorage dataStorage, DataSet dataSet) throws SQLException {
+    protected void addData(DataStorage dataStorage, DataSet dataSet) throws Exception {
 
         if (dataSet != null) {
             dataStorage.insertData(dataSet);
         }
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            refreshData(accountID, now, conn, parentDefinition, callDataID);
+            refreshData(accountID, now, conn, parentDefinition, callDataID, lastRefreshTime);
             conn.commit();
             ReportCache.instance().flushResults(getDataFeedID());
             return new CredentialsResponse(true, getDataFeedID());
@@ -159,9 +159,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID, Date lastRefreshTime) {
         try {
-            refreshData(accountID, now, conn, parentDefinition, callDataID);
+            refreshData(accountID, now, conn, parentDefinition, callDataID, lastRefreshTime);
             return new CredentialsResponse(true, getDataFeedID());
         } catch (ReportException re) {
             return new CredentialsResponse(false, re.getReportFault());
@@ -170,7 +170,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
         DataStorage dataStorage = null;
         try {
             Map<String, Key> keys = newDataSourceFields();
@@ -179,7 +179,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             if (clearsData()) {
                 dataStorage.truncate(); 
             }
-            DataSet dataSet = getDataSet(newDataSourceFields(), now, parentDefinition, dataStorage, conn, callDataID);
+            DataSet dataSet = getDataSet(newDataSourceFields(), now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
             //List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             //int version = dataStorage.getVersion();
             //int newVersion = dataStorage.migrate(getFields(), items);

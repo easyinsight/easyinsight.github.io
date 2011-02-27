@@ -28,6 +28,11 @@ import mx.collections.ArrayCollection;
 			super();
 		}
 
+        override public function fromSave(savedDef:AnalysisDefinition):void {
+            super.fromSave(savedDef);
+            this.mapDefinitionID = MapDefinition(savedDef).mapDefinitionID;
+        }
+
         override public function populate(fields:ArrayCollection):void {
             var measures:ArrayCollection = findItems(fields, AnalysisItemTypes.MEASURE);
             if (measures.length > 0) {

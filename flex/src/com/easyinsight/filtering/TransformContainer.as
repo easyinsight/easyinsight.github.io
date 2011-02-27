@@ -17,6 +17,7 @@ import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 
 import mx.controls.AdvancedDataGrid;
+import mx.controls.Alert;
 import mx.controls.DataGrid;
 import mx.controls.List;
 import mx.core.UIComponent;
@@ -52,6 +53,13 @@ public class TransformContainer extends HBox
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
         setStyle("borderThickness", 1);
         setStyle("borderStyle", "solid");
+    }
+
+    public function reset():void {
+        filterMap = new Dictionary();
+        filterDefinitions = new ArrayCollection();
+        _filterDefinitions = new ArrayCollection();
+        filterTile.removeAllChildren();
     }
 
     protected function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
@@ -196,6 +204,12 @@ public class TransformContainer extends HBox
 
     public function set loadingFromReport(value:Boolean):void {
         _loadingFromReport = value;
+    }
+
+    private var _reportView:Boolean = false;
+
+    public function set reportView(value:Boolean):void {
+        _reportView = value;
     }
 
     public function addFilterDefinition(filterDefinition:FilterDefinition):IFilter {
@@ -413,7 +427,9 @@ public class TransformContainer extends HBox
         filter.addEventListener(FilterUpdatedEvent.FILTER_ADDED, filterAdded);
         filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
         filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);
-        filterTile.addChild(filter as DisplayObject);
+        if (!_reportView || filter.filterDefinition.showOnReportView) {
+            filterTile.addChild(filter as DisplayObject);
+        }
         if (_loadingFromReport) {
             addFilter(filter);
         }

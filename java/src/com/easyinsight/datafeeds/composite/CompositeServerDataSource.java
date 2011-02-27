@@ -132,7 +132,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             Map<String, Key> keys = feedDefinition.newDataSourceFields();
             DataSet dataSet;
             if (SecurityUtil.getUserID(false) > 0) {
-                dataSet = feedDefinition.getDataSet(keys, new Date(), this, null, conn, callDataID);
+                dataSet = feedDefinition.getDataSet(keys, new Date(), this, null, conn, callDataID, null);
             } else {
                 dataSet = new DataSet();
             }
@@ -208,9 +208,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return sessionId;
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID, Date lastRefreshTime) {
         try {
-            refreshData(accountID, now, conn, null, callDataID);
+            refreshData(accountID, now, conn, null, callDataID, lastRefreshTime);
             return new CredentialsResponse(true, getDataFeedID());
         } catch (ReportException re) {
             return new CredentialsResponse(false, re.getReportFault());
@@ -219,11 +219,11 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         }
     }
 
-    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID) {
+    public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            refreshData(accountID, now, conn, null, callDataID);
+            refreshData(accountID, now, conn, null, callDataID, lastRefreshTime);
             conn.commit();
             ReportCache.instance().flushResults(getDataFeedID());
             return new CredentialsResponse(true, getDataFeedID());
@@ -239,7 +239,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         }
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID) throws Exception {
+    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO data_source_refresh_audit (account_id, data_source_id, " +
@@ -258,7 +258,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             List<AnalysisItem> allItems = new ArrayList<AnalysisItem>();
             List<IServerDataSourceDefinition> sources = obtainChildDataSources(conn);
             for (IServerDataSourceDefinition source : sources) {
-                source.refreshData(accountID, now, conn, this, callDataID);
+                source.refreshData(accountID, now, conn, this, callDataID, lastRefreshTime);
                 allItems.addAll(source.getFields());
             }
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE data_source_refresh_audit set end_time = ? where data_source_refresh_audit_id = ?");

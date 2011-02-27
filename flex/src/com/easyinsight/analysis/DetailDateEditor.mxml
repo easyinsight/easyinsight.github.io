@@ -5,6 +5,8 @@
         [Bindable]
         private var dateLevel:int;
 
+        private var dateFormat:String;
+
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
             return new AnalysisDateDimension();
         }
@@ -14,6 +16,7 @@
             if (val is AnalysisDateDimension) {
                 var date:AnalysisDateDimension = val as AnalysisDateDimension;
                 dateLevel = date.dateLevel;
+                dateFormat = date.customDateFormat;
             }
         }
 
@@ -21,6 +24,7 @@
             super.save(analysisItem);
             var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
             date.dateLevel = dateBox.selectedItem.data;
+            date.customDateFormat = dateFormat;
         }
         ]]></mx:Script>
     <mx:FormItem label="Date Level:" direction="horizontal">

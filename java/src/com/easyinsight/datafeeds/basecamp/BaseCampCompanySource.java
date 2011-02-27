@@ -43,7 +43,7 @@ public class BaseCampCompanySource extends BaseCampBaseSource {
         return FeedType.BASECAMP_COMPANY;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
 
@@ -53,7 +53,7 @@ public class BaseCampCompanySource extends BaseCampBaseSource {
         Builder builder = new Builder();
         try {
 
-            Document projects = runRestRequest("/companies.xml", client, builder, url, null, false, parentDefinition);
+            Document projects = runRestRequest("/companies.xml", client, builder, url, null, false, parentDefinition, false);
             Nodes projectNodes = projects.query("/companies/company");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node companyNode = projectNodes.get(i);

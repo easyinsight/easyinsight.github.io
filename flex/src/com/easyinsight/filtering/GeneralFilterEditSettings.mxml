@@ -22,6 +22,9 @@
         [Bindable]
         private var beforeAgg:Boolean;
 
+        [Bindable]
+        private var showOnReportView:Boolean;
+
         private var _detailClass:Class;
 
         private var filterDetailEditor:IFilterDetailEditor;
@@ -44,7 +47,7 @@
             _filterDefinition = filterDefinition;
             _analysisItem = _filterDefinition.field;
             beforeAgg = _filterDefinition.applyBeforeAggregation;
-
+            showOnReportView = _filterDefinition.showOnReportView;
         }
 
         private function onFilterEdit(event:FilterEditEvent):void {
@@ -91,6 +94,7 @@
                 _filterDefinition.field = editor.save(_feedID);
             }*/
             _filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
+            _filterDefinition.showOnReportView = reportViewCheckbox.selected;
 
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
             PopUpManager.removePopUp(this);
@@ -103,6 +107,7 @@
 	</mx:Script>
 	<mx:VBox id="coreBox">
 		<mx:CheckBox label="Row Level:" selected="{beforeAgg}" id="aggregationCheckbox"/>
+		<mx:CheckBox label="Show On Report View:" selected="{showOnReportView}" id="reportViewCheckbox"/>
         <mx:Box id="filterDetailBox"/>
 		<mx:HBox width="100%" horizontalAlign="center">
 			<util:SaveButton label="Save" click="save()"/>

@@ -106,6 +106,7 @@ public class AnalysisService {
     public WSAnalysisDefinition saveAs(WSAnalysisDefinition saveDefinition, String newName) {
         SecurityUtil.authorizeInsight(saveDefinition.getAnalysisID());
         EIConnection conn = Database.instance().getConnection();
+        long reportID;
         try {
             conn.setAutoCommit(false);
 
@@ -126,10 +127,9 @@ public class AnalysisService {
             session.close();
             session = Database.instance().createSession(conn);
             analysisStorage.saveAnalysis(clone, session);
-            WSAnalysisDefinition returnDef = clone.createBlazeDefinition();
             session.flush();
             session.close();
-            return returnDef;
+            reportID = clone.getAnalysisID();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -137,6 +137,20 @@ public class AnalysisService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            AnalysisDefinition savedReport = analysisStorage.getPersistableReport(reportID, session);
+            WSAnalysisDefinition result = savedReport.createBlazeDefinition();
+            session.getTransaction().commit();
+            return result;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
         }
     }
 
@@ -148,7 +162,8 @@ public class AnalysisService {
             updateStmt.setBoolean(1, false);
             updateStmt.setLong(2, reportID);
             updateStmt.executeUpdate();
-        } catch (SQLException e) {
+            updateStmt.close();
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
@@ -288,6 +303,7 @@ public class AnalysisService {
         } catch (CacheException e) {
             LogClass.error(e);
         }
+        long reportID;
         WSAnalysisDefinition report;
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
@@ -315,7 +331,7 @@ public class AnalysisService {
             analysisStorage.saveAnalysis(analysisDefinition, session);
             session.flush();
             conn.commit();
-            report = analysisDefinition.createBlazeDefinition();
+            reportID = analysisDefinition.getAnalysisID();
         } catch (Exception e) {
             LogClass.error(e);
             try {
@@ -333,7 +349,20 @@ public class AnalysisService {
             session.close();
             Database.closeConnection(conn);
         }
-        return report;
+        session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            AnalysisDefinition savedReport = analysisStorage.getPersistableReport(reportID, session);
+            WSAnalysisDefinition result = savedReport.createBlazeDefinition();
+            session.getTransaction().commit();
+            return result;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
     }
 
     public void deleteAnalysisDefinition(long reportID) {

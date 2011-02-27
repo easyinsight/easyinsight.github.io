@@ -62,7 +62,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
         return analysisItems;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet ds = new DataSet();
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
@@ -78,7 +78,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
         Builder builder = new Builder();
         try {
             BaseCampCache basecampCache = source.getOrCreateCache(client);
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition, false);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
@@ -93,13 +93,13 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
                 }
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
 
-                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false, parentDefinition);
+                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false, parentDefinition, false);
 
                 Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
                 for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
                     Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
                     String milestoneID = queryField(milestoneNode, "id/text()");
-                    Document comments = runRestRequest("/milestones/" + milestoneID + "/comments.xml", client, builder, url, null, false, parentDefinition);
+                    Document comments = runRestRequest("/milestones/" + milestoneID + "/comments.xml", client, builder, url, null, false, parentDefinition, false);
                     Nodes commentNodes = comments.query("/comments/comment");
                     for (int j = 0; j < commentNodes.size(); j++) {
                         Node commentNode = commentNodes.get(j);

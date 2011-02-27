@@ -95,7 +95,7 @@ public class MarketoDataSource extends ServerDataSourceDefinition {
           return result;
         }
     
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet dataSet = new DataSet();
         try {
             DatatypeFactory fac = DatatypeFactory.newInstance();

@@ -24,14 +24,24 @@ import flash.events.EventDispatcher;
         public var filterID:int;
         public var intrinsic:Boolean = false;
         public var enabled:Boolean = true;
+        public var showOnReportView:Boolean = true;
 		
 		public function FilterDefinition()
 			{
 			super();
 		}
 
+    public function matches(filterDefinition:FilterDefinition):Boolean {
+        return field != null && filterDefinition.field != null && field.matches(filterDefinition.field) && getType() == filterDefinition.getType();
+    }
+
 		public function getType():int {
 			return 0;
 		}
+
+        public function updateFromSaved(savedItemFilter:FilterDefinition):void {
+            filterID = savedItemFilter.filterID;
+            field.updateFromSaved(savedItemFilter.field);
+        }
 	}
 }

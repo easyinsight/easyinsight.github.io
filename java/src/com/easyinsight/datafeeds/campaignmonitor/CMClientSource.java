@@ -47,7 +47,7 @@ public class CMClientSource extends CampaignMonitorBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) throws ReportException {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             CampaignMonitorDataSource ccSource = (CampaignMonitorDataSource) parentDefinition;
             DataSet dataSet = new DataSet();

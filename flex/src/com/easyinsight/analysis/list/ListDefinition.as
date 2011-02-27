@@ -12,7 +12,7 @@ import mx.collections.ArrayCollection;
 		public var showLineNumbers:Boolean;
 		public var listLimitsMetadata:ListLimitsMetadata;
         public var summaryTotal:Boolean;
-		
+
 		public function ListDefinition()
 		{
 		}
@@ -30,6 +30,10 @@ import mx.collections.ArrayCollection;
             }            
         }
 
+        override public function createFormItems():ArrayCollection {
+            var items:ArrayCollection = super.createFormItems();
+            return items;
+        }
 
         override public function createDefaultLimits():void {
             if (this.listLimitsMetadata == null) {
@@ -45,6 +49,11 @@ import mx.collections.ArrayCollection;
 
         override public function get type():int {
             return AnalysisDefinition.LIST;
+        }
+
+        override public function fromSave(savedDef:AnalysisDefinition):void {
+            super.fromSave(savedDef);
+            this.listDefinitionID = ListDefinition(savedDef).listDefinitionID;
         }
     }
 }

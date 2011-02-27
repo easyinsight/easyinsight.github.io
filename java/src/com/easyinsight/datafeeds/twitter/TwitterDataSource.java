@@ -105,7 +105,7 @@ secret token token = QhfbN4AKz0Hb5HfllD5oWn7NGVdDoYh7xDOIUva0I
         this.searches = searches;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet ds = new DataSet();
         return ds;
     }

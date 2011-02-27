@@ -21,7 +21,7 @@ public class BaseCampCache extends BaseCampBaseSource {
 
     public void populateCaches(HttpClient client, String url, FeedDefinition parentDefinition) throws BaseCampLoginException, ParsingException, ReportException {
         Builder builder = new Builder();
-        Document projects = runRestRequest("/people.xml", client, builder, url, null, true, parentDefinition);
+        Document projects = runRestRequest("/people.xml", client, builder, url, null, true, parentDefinition, false);
         Nodes userNodes = projects.query("/people/person");
         for (int i = 0; i < userNodes.size(); i++) {
             Node userNode = userNodes.get(i);

@@ -33,6 +33,11 @@ public class HeatMapDefinition extends AnalysisDefinition {
         super();
     }
 
+    override public function fromSave(savedDef:AnalysisDefinition):void {
+        super.fromSave(savedDef);
+        this.heatMapID = HeatMapDefinition(savedDef).heatMapID;
+    }
+
     override public function get type():int {
         return AnalysisDefinition.HEATMAP;
     }
