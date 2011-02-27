@@ -142,14 +142,13 @@ public class CCContactSource extends ConstantContactBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
-            DataSet dataSet;
             System.out.println("last refresh date = " + lastRefreshDate);
             if (lastRefreshDate == null) {
-                dataSet = cleanRetrieval(parentDefinition, ccSource);
+                cleanRetrieval(parentDefinition, ccSource, dataStorage);
             } else {
-                dataSet = incrementalRetrieval(parentDefinition, ccSource, lastRefreshDate, dataStorage);
+                incrementalRetrieval(parentDefinition, ccSource, lastRefreshDate, dataStorage);
             }
-            return dataSet;
+            return null;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -240,13 +239,14 @@ public class CCContactSource extends ConstantContactBaseSource {
         return dataSet;
     }
 
-    private DataSet cleanRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException, ParseException {
+    private DataSet cleanRetrieval(FeedDefinition parentDefinition, ConstantContactCompositeSource ccSource, DataStorage dataStorage) throws Exception, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException, ParseException {
         DataSet dataSet = new DataSet();
 
         boolean hasMoreData;
 
         Document doc = query("https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts", ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
 
+        int size = 0;
         do {
 
             hasMoreData = false;
@@ -297,6 +297,11 @@ public class CCContactSource extends ConstantContactBaseSource {
                 row.addValue(CONTACT_CREATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/InsertTime/text()"))));
                 row.addValue(CONTACT_UPDATED_ON, new DateValue(DATE_FORMAT.parse(queryField(details, "/entry/content/Contact/LastUpdateTime/text()"))));
                 row.addValue(CONTACT_COUNT, 1);
+                size++;
+                if (size == 250) {
+                    dataStorage.insertData(dataSet);
+                    dataSet = new DataSet();
+                }
             }
             Nodes links = doc.query("/feed/link");
 
@@ -311,6 +316,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                 }
             }
         } while (hasMoreData);
+        dataStorage.insertData(dataSet);
         return dataSet;
     }
 }
