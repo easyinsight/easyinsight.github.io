@@ -2,10 +2,7 @@ package com.easyinsight.scheduler;
 
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.DataSourceMutex;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.FeedConsumer;
-import com.easyinsight.datafeeds.IServerDataSourceDefinition;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -75,11 +72,12 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     try {
                         if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
                             try {
-                                dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null);
+                                dataSource.refreshData(dataSourceUser.getAccountID(), now, conn, null, null, ((FeedDefinition) dataSource).getLastRefreshStart());
                             } finally {
                                 DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                             }
                         }
+                        feedStorage.updateDataFeedConfiguration((FeedDefinition) dataSource, conn);
                     } finally {
                         SecurityUtil.clearThreadLocal();
                     }
