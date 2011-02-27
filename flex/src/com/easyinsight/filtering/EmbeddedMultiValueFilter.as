@@ -75,6 +75,7 @@ import mx.rpc.events.ResultEvent;
         private function onEdit(event:MouseEvent):void {
             var window:EmbeddedMultiValueFilterWindow = new EmbeddedMultiValueFilterWindow();
             window.embeddedFilter = _filterDefinition;
+            window.dataSourceID = _feedID;
             window.addEventListener("updated", onUpdated, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
