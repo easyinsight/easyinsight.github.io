@@ -40,7 +40,6 @@
         import com.easyinsight.preferences.UIConfiguration;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.util.DisplayListAnalysis;
         import com.easyinsight.util.ErrorReportView;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.UserAudit;
@@ -283,15 +282,8 @@
             }
         }
 
-        private function onKey(event:KeyboardEvent):void {
-            if (event.keyCode == Keyboard.CAPS_LOCK) {
-                DisplayListAnalysis.traverse(this);
-            }
-        }
-
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             try {
-stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
                 dataSourceID = feedMetadata.dataFeedID;
                 this.feedMetadata = feedMetadata;
                 dataSourceInfo = feedMetadata.dataSourceInfo;
