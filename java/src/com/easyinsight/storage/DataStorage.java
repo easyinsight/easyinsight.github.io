@@ -1,6 +1,7 @@
 package com.easyinsight.storage;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
@@ -37,6 +38,7 @@ public class DataStorage {
     private Connection coreDBConn;
     private boolean committed = false;
     private FeedPersistenceMetadata metadata;
+    private int dataSourceType;
     private static DateDimCache dateDimCache = new DateDimCache();
 
     private JCS reportCache = Cache.getCache(Cache.EMBEDDED_REPORTS);
@@ -136,6 +138,7 @@ public class DataStorage {
             dataStorage.metadata = createDefaultMetadata(conn);
         }
         dataStorage.keys = keyMetadatas;
+        dataStorage.dataSourceType = feedDefinition.getFeedType().getType();
         dataStorage.feedID = feedDefinition.getDataFeedID();
         dataStorage.version = dataStorage.metadata.getVersion();
         dataStorage.coreDBConn = conn;
@@ -146,6 +149,10 @@ public class DataStorage {
         dataStorage.storageConn = dataStorage.database.getConnection();
         dataStorage.storageConn.setAutoCommit(false);
         return dataStorage;
+    }
+
+    public FeedPersistenceMetadata getMetadata() {
+        return metadata;
     }
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
@@ -222,6 +229,9 @@ public class DataStorage {
         if (countRS.next()) {
             long dataLength = countRS.getLong("Data_length");
             long indexLength = countRS.getLong("Index_length");
+            if (dataSourceType == FeedType.CONSTANT_CONTACT_CONTACTS.getType()) {
+                return dataLength;
+            }
             return dataLength + indexLength;
         } else {
             return 0;
@@ -512,7 +522,7 @@ public class DataStorage {
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
         ResultSet dataRS = queryStmt.executeQuery();
-        processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery);
+        processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isGmtData(), insightRequestMetadata.getUtcOffset());
         dataSet.setLastTime(metadata.getLastData());
         return dataSet;
     }
@@ -531,7 +541,7 @@ public class DataStorage {
     }
 
     private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS,
-                                     boolean aggregateQuery) throws SQLException {
+                                     boolean aggregateQuery, boolean gmtData, long timeOffset) throws SQLException {
         while (dataRS.next()) {
             IRow row = dataSet.createRow();
             int i = 1;
@@ -546,7 +556,11 @@ public class DataStorage {
                             if (dataRS.wasNull()) {
                                 row.addValue(aggregateKey, new EmptyValue());
                             } else {
-                                row.addValue(aggregateKey, new DateValue(new Date(time.getTime())));
+                                long milliseconds = time.getTime();
+                                /*if (gmtData) {
+                                    milliseconds = milliseconds - (timeOffset * 1000 * 60);
+                                }*/
+                                row.addValue(aggregateKey, new DateValue(new Date(milliseconds)));
                             }
                         } catch (SQLException e) {
                             row.addValue(aggregateKey, new EmptyValue());
@@ -726,7 +740,7 @@ public class DataStorage {
             }
             insertStmt.close();
         } catch (SQLException e) {
-            LogClass.error("Failure on persistence where SQL = " + insertSQL + ", database = " + database.getID());
+            LogClass.error("Failure on persistence where SQL = " + insertSQL + ", database = " + database.getID() + ", data set = " + dataSet);
             throw e;
         }
     }
@@ -916,7 +930,13 @@ public class DataStorage {
         sqlBuilder.append("),");
         int indexCount = 0;
         for (KeyMetadata keyMetadata : keys.values()) {
-            if (keyMetadata.getType() == Value.STRING || keyMetadata.getType() == Value.DATE) {
+            if (keyMetadata.getType() == Value.STRING) {
+                sqlBuilder.append("INDEX (");
+                String column = keyMetadata.getKey().toSQL();
+                sqlBuilder.append(column);
+                sqlBuilder.append(")");
+                sqlBuilder.append(",");
+            } else if (keyMetadata.getType() == Value.DATE) {
                 sqlBuilder.append("INDEX (");
                 String column = keyMetadata.getKey().toSQL();
                 sqlBuilder.append(column);
@@ -936,6 +956,7 @@ public class DataStorage {
             }
         }
         if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
+        //sqlBuilder.append(" ) CHARSET=utf8");
         sqlBuilder.append(" )");
         return sqlBuilder.toString();
     }
