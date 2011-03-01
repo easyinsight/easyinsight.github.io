@@ -36,6 +36,7 @@
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
         import mx.charts.ColumnChart;
+        import mx.charts.Legend;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
@@ -169,6 +170,10 @@
                 // create the data series
 
                 canvas.addChild(barChart);
+                var legend:Legend = new Legend();
+                legend.percentHeight = 100;
+                legend.dataProvider = barChart;
+                canvas.addChild(legend);
             } else {
                 barChart.visible = true;
             }
@@ -319,10 +324,10 @@
         ]]></mx:Script>
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
     <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
-    <mx:Canvas width="100%" height="100%" id="canvas" backgroundAlpha="1" backgroundColor="#FFFFFF">
+    <mx:Canvas width="100%" height="100%" backgroundAlpha="1" backgroundColor="#FFFFFF">
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
                       mouseEnabled="false">
-            <mx:Canvas width="100%" height="100%"/>
+            <mx:HBox width="100%" height="100%" id="canvas"/>
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
                     backgroundAlpha=".1">
                 <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
