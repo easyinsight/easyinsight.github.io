@@ -18,6 +18,15 @@ public class InsightRequestMetadata implements Serializable {
     private boolean noCache;
     private List<AnalysisItemOverride> hierarchyOverrides = new ArrayList<AnalysisItemOverride>();
     private boolean aggregateQuery = true;
+    private boolean gmtData;
+
+    public boolean isGmtData() {
+        return gmtData;
+    }
+
+    public void setGmtData(boolean gmtData) {
+        this.gmtData = gmtData;
+    }
 
     public boolean isAggregateQuery() {
         return aggregateQuery;
