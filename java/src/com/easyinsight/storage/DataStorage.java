@@ -229,7 +229,7 @@ public class DataStorage {
         if (countRS.next()) {
             long dataLength = countRS.getLong("Data_length");
             long indexLength = countRS.getLong("Index_length");
-            if (dataSourceType == FeedType.CONSTANT_CONTACT_CONTACTS.getType()) {
+            if (dataSourceType == FeedType.CONSTANT_CONTACT_CONTACTS.getType() || dataSourceType == FeedType.HIGHRISE_CONTACTS.getType()) {
                 return dataLength;
             }
             return dataLength + indexLength;
@@ -507,7 +507,7 @@ public class DataStorage {
         StringBuilder whereBuilder = new StringBuilder();
         StringBuilder groupByBuilder = new StringBuilder();
         Collection<Key> groupByItems = new HashSet<Key>();
-        boolean aggregateQuery = insightRequestMetadata.isAggregateQuery();        
+        boolean aggregateQuery = insightRequestMetadata.isAggregateQuery();
         createSelectClause(reportItems, selectBuilder, groupByItems, aggregateQuery);
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder);
@@ -598,7 +598,7 @@ public class DataStorage {
                         }
                     }
                 }
-            }            
+            }
         }
     }
 
