@@ -15,9 +15,13 @@
 
                     if ($("#reportImage").length > 0) {
 
-                        var image = new Image();
-                        image.src = "/app/htmlimage?width="+document.documentElement.clientWidth+"&height="+document.documentElement.clientHeight;
-                        $("#reportImage").append(image);
+                        var image = document.createElement("img");
+                        image.src = "/app/htmlimage?width="+(document.documentElement.clientWidth - 30) +"&height="+(document.documentElement.clientHeight - 30);
+                        $(image).load(function(event) {
+                            $("#waitingLogo").remove();
+                            $("#reportImage").append(event.target);
+                        });
+
                     }
                 }
             });
