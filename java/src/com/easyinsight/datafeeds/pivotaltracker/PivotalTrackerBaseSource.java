@@ -68,10 +68,6 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     private String ptUserName;
     private String ptPassword;
 
-    public boolean gmtTime() {
-        return true;
-    }
-
     public String getPtUserName() {
         return ptUserName;
     }
