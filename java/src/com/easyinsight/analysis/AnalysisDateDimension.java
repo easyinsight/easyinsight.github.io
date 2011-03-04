@@ -150,7 +150,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 string = "GMT";
             }
             TimeZone timeZone = TimeZone.getTimeZone(string);
-            System.out.println("using " + timeZone.getID());
+            System.out.println("using " + timeZone.getID() + " against start date of " + tempDate);
             calendar.setTimeZone(timeZone);
             calendar.setTime(tempDate);
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
@@ -202,7 +202,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
-                calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
+                //calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
                 finalDate = calendar.getTime();
                 resultValue = new DateValue(finalDate);
             } else {
