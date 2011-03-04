@@ -24,7 +24,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
     private List<CompositeFeedConnection> connections;
 
     public FallthroughConnection(Long sourceFeedID, Long targetFeedID, List<CompositeFeedConnection> connections) {
-        super(sourceFeedID, targetFeedID, null, null);
+        super(sourceFeedID, targetFeedID);
         List<Key> sourceKeys = new ArrayList<Key>();
         List<Key> targetKeys = new ArrayList<Key>();
         for (CompositeFeedConnection connection : connections) {

@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.feedassembly.CompositeFeedConnection;
+        import com.easyinsight.feedassembly.ConnectionDeleteEvent;
+        import com.easyinsight.feedassembly.DSPickJoinWindow;
+        import com.easyinsight.feedassembly.JoinSelectionEvent;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var connections:ArrayCollection;
+
+        private var dataSources:ArrayCollection;
+
+        public var dataSourceID:int;
+        public var fields:ArrayCollection;
+
+        public var startJoins:ArrayCollection;
+
+        private function onCreation():void {
+            addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
+            ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
+            analysisService.determineOverrides.send(dataSourceID, fields);
+            if (startJoins == null || startJoins.length == 0) {
+
+            } else {
+                connections = new ArrayCollection();
+                for each (var startJoin:JoinOverride in startJoins) {
+                    connections.addItem(startJoin.toConnection());
+                }
+            }
+        }
+
+        private function gotOverrides():void {
+            var results:ReportJoins = analysisService.determineOverrides.lastResult as ReportJoins;
+            dataSources = results.dataSources;
+            if (startJoins == null || startJoins.length == 0) {
+                var joins:ArrayCollection = results.joinOverrides;
+                connections = new ArrayCollection();
+                for each (var join:JoinOverride in joins) {
+                    connections.addItem(join.toConnection());
+                }
+            } else {
+                for each (var existingConn:CompositeFeedConnection in connections) {
+                    for each (var ds:DataSourceDescriptor in dataSources) {
+                        if (existingConn.sourceFeedID == ds.id) {
+                            existingConn.sourceFeedName = ds.name;
+                        }
+                        if (existingConn.targetFeedID == ds.id) {
+                            existingConn.targetFeedName = ds.name;
+                        }
+                    }
+                }
+            }
+        }
+
+        private function onConnectionDelete(event:ConnectionDeleteEvent):void {
+            connections.removeItemAt(connections.getItemIndex(event.connection));
+        }
+
+        private function joinsSelected(event:JoinSelectionEvent):void {
+            var edges:ArrayCollection = event.addedJoins;
+            for each (var compositeFeedConnection:CompositeFeedConnection in edges) {
+                connections.addItem(compositeFeedConnection);
+            }
+        }
+
+        private function revert():void {
+            ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
+            analysisService.determineOverrides.send(dataSourceID, fields);
+        }
+
+        private function save():void {
+            var joins:ArrayCollection = new ArrayCollection();
+            for each (var connection:CompositeFeedConnection in connections) {
+                var join:JoinOverride = new JoinOverride();
+                join.sourceItem = connection.sourceItem;
+                join.targetItem = connection.targetItem;
+                join.sourceName = connection.sourceFeedName;
+                join.targetName = connection.targetFeedName;
+                joins.addItem(join);
+            }
+            dispatchEvent(new JoinOverrideEvent(JoinOverrideEvent.JOIN_OVERRIDE_SET, joins));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addConnection():void {
+            var window:DSPickJoinWindow = new DSPickJoinWindow();
+            window.dataSources = dataSources;
+            window.metadataFields = fields;
+            window.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="determineOverrides" result="gotOverrides()"/>
+    </mx:RemoteObject>
+    <mx:Button label="Add Join..." click="addConnection()" styleName="grayButton"/>
+    <mx:DataGrid dataProvider="{connections}" width="600" rowHeight="28">
+        <mx:columns>
+            <util:EIDataGridColumn dataField="sourceFeedName" headerText="Source Data Source"/>
+            <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field"/>
+            <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field"/>
+            <util:EIDataGridColumn dataField="targetFeedName" headerText="Target Data Source"/>
+            <util:EIDataGridColumn headerText="" dataField="name" width="50" sortable="false" itemRenderer="com.easyinsight.feedassembly.ConnectionControls"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:SaveButton label="Revert to Data Source Default" click="revert()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

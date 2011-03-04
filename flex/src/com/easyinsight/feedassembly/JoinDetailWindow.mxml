@@ -3,9 +3,9 @@
 	<mx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;		
-			private var connection:ConnectionWithInfo;
+			private var connection:CompositeFeedConnection;
 			
-			public function set feedConnection(feedConnection:ConnectionWithInfo):void {
+			public function set feedConnection(feedConnection:CompositeFeedConnection):void {
 				this.connection = feedConnection;
 				var joinDetail:JoinDetail = new JoinDetail();
 				joinDetail.feedConnection = feedConnection;

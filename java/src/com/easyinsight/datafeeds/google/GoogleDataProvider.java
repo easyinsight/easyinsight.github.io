@@ -389,7 +389,8 @@ public class GoogleDataProvider {
                     if (source.getDataFeedID() == target.getDataFeedID()) {
                         continue;
                     }
-                    compositeFeedConnectionList.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceKey, targetKey));
+                    compositeFeedConnectionList.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceKey, targetKey, source.getFeedName(),
+                            target.getFeedName()));
                 }
             }
             quickbaseCompositeSource.setConnections(compositeFeedConnectionList);

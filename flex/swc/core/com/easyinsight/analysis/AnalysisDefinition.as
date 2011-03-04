@@ -74,6 +74,7 @@ import mx.collections.ArrayCollection;
         public var backgroundAlpha:Number = 1;
         public var fixedWidth:int = 0;
         public var accountVisible:Boolean;
+        public var joinOverrides:ArrayCollection;
 
 		public function AnalysisDefinition()
 		{

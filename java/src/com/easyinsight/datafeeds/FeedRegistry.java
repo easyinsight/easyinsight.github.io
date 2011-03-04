@@ -1,10 +1,8 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -56,54 +54,48 @@ public class FeedRegistry {
         if(cache != null)
             feed = (Feed) cache.get(identifier);
 
-        if (feed == null || !isLatestVersion(feed, identifier)) {
-            LogClass.debug("Cache miss for feed id: " + identifier);
-            FeedDefinition feedDefinition;
-            try {
-                feedDefinition = feedStorage.getFeedDefinitionData(identifier);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+        try {
+            if (feed == null || !isLatestVersion(feed, identifier, conn)) {
+                LogClass.debug("Cache miss for feed id: " + identifier);
+                FeedDefinition feedDefinition;
+                feedDefinition = feedStorage.getFeedDefinitionData(identifier, conn);
+                feed = feedDefinition.createFeed();
+                feed.setVersion(getLatestVersion(identifier, conn));
+                try {
+                    if(cache != null)
+                        cache.put(identifier, feed);
+                }
+                catch(CacheException e) {
+                    LogClass.error(e);
+                }
             }
-            feed = feedDefinition.createFeed();
-            feed.setVersion(getLatestVersion(identifier));
-            try {
-                if(cache != null)
-                    cache.put(identifier, feed);
-            }
-            catch(CacheException e) {
-                LogClass.error(e);
-            }
+            else
+                LogClass.debug("Cache hit for feed id: " + identifier);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        else
-            LogClass.debug("Cache hit for feed id: " + identifier);
         return feed;
     }
 
-    private boolean isLatestVersion(Feed feed, long identifier) {
+    private boolean isLatestVersion(Feed feed, long identifier, EIConnection conn) throws SQLException {
         if(feed == null)
             return false;
         LogClass.debug("Feed version: " + feed.getVersion());
-        int latestVersion = getLatestVersion(identifier);
+        int latestVersion = getLatestVersion(identifier, conn);
         LogClass.debug("Latest version: " + latestVersion);
         return feed.getVersion() == latestVersion;
     }
 
-    private int getLatestVersion(long identifier) {
+    private int getLatestVersion(long identifier, EIConnection conn) throws SQLException {
         int version = 0;
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT MAX(VERSION) FROM feed_persistence_metadata WHERE feed_id = ?");
-            stmt.setLong(1, identifier);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                version = rs.getInt(1);
-            }
-            stmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-        } finally {
-            Database.closeConnection(conn);
+
+        PreparedStatement stmt = conn.prepareStatement("SELECT MAX(VERSION) FROM feed_persistence_metadata WHERE feed_id = ?");
+        stmt.setLong(1, identifier);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            version = rs.getInt(1);
         }
+        stmt.close();
         return version;
     }
 }

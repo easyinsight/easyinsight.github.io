@@ -3,7 +3,6 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.database.Database;
@@ -96,7 +95,7 @@ public class DataSourceCopyUtils {
         return infos;
     }
 
-    public static void buildClonedDataStores(boolean copyData, FeedDefinition feedDefinition, FeedDefinition clonedFeedDefinition, Connection conn) throws SQLException {
+    public static void buildClonedDataStores(boolean copyData, FeedDefinition feedDefinition, FeedDefinition clonedFeedDefinition, Connection conn) throws Exception {
         if (copyData) {
             DataStorage sourceTable = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet;
@@ -116,7 +115,7 @@ public class DataSourceCopyUtils {
                 clonedTable.createTable();
                 clonedTable.insertData(dataSet);
                 clonedTable.commit();
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 clonedTable.rollback();
                 throw e;
             } finally {

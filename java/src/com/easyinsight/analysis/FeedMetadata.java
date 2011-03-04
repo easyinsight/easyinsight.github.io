@@ -24,6 +24,15 @@ public class FeedMetadata implements Serializable {
     private DataSourceInfo dataSourceInfo;
     private ReportFault reportFault;
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
+    private boolean customJoinsAllowed;
+
+    public boolean isCustomJoinsAllowed() {
+        return customJoinsAllowed;
+    }
+
+    public void setCustomJoinsAllowed(boolean customJoinsAllowed) {
+        this.customJoinsAllowed = customJoinsAllowed;
+    }
 
     public ReportFault getReportFault() {
         return reportFault;

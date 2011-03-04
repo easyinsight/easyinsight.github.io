@@ -44,7 +44,7 @@ public class FileProcessUpdateScheduledTask {
         return uploadID;
     }
 
-    public void updateData(long feedID, boolean update, Connection conn, byte[] bytes) throws SQLException {
+    public void updateData(long feedID, boolean update, Connection conn, byte[] bytes) throws Exception {
         DataStorage metadata = null;
         try {
             FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) UserUploadService.getFeedDefinition(feedID);
@@ -78,7 +78,7 @@ public class FileProcessUpdateScheduledTask {
             }
             metadata.commit();
         }
-        catch(SQLException se) {
+        catch(Exception se) {
             if (metadata != null) metadata.rollback();
             throw se;
         }

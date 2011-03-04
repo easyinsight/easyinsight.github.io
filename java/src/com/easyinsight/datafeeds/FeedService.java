@@ -75,7 +75,8 @@ public class FeedService {
             } else {
                 throw new RuntimeException();
             }
-            CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(source.getId(), target.getId(), sourceKey, targetKey);
+            CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(source.getId(), target.getId(), sourceKey, targetKey, sourceObj.getFeedName(),
+                    targetObj.getFeedName());
             CompositeFeedDefinition dataSource = createCompositeFeed(Arrays.asList(sourceNode, targetNode), Arrays.asList(compositeFeedConnection), dataSourceName, conn);
             conn.commit();
             return new DataSourceDescriptor(dataSource.getFeedName(), dataSource.getDataFeedID(), dataSource.getFeedType().getType());
@@ -337,53 +338,22 @@ public class FeedService {
         }
     }
 
-    public List<CompositeFeedConnection> initialDefine(List<CompositeFeedNode> nodes, List<DataSourceDescriptor> newFeeds) {
+    public CompositeResponse getMultipleFeeds(long firstID, long secondID) {
+        CompositeResponse compositeResponse = new CompositeResponse();
         try {
-            Set<Set<Long>> connectionMap = new HashSet<Set<Long>>();
-            List<CompositeFeedConnection> allNewEdges = new ArrayList<CompositeFeedConnection>();
-            JoinDiscovery joinDiscovery = new JoinDiscovery();
-            for (DataSourceDescriptor newFeed : newFeeds) {
-                for (CompositeFeedNode node : nodes) {
-                    Set<Long> ids = new HashSet<Long>();
-                    ids.add(newFeed.getId());
-                    ids.add(node.getDataFeedID());
-                    if (!connectionMap.contains(ids)) {
-                        connectionMap.add(ids);
-                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(node.getDataFeedID(), newFeed.getId());
-                        allNewEdges.addAll(potentialJoins);
-                    }
-                }
-                for (DataSourceDescriptor otherNewFeed : newFeeds) {
-                    if (otherNewFeed == newFeed) {
-                        continue;
-                    }
-                    Set<Long> ids = new HashSet<Long>();
-                    ids.add(newFeed.getId());
-                    ids.add(otherNewFeed.getId());
-                    if (!connectionMap.contains(ids)) {
-                        connectionMap.add(ids);
-                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(otherNewFeed.getId(), newFeed.getId());
-                        allNewEdges.addAll(potentialJoins);
-                    }
-                }
-            }
-            return allNewEdges;
+            FeedDefinition first = getFeedDefinition(firstID);
+            compositeResponse.setFirstFields(first.getFields());
+            compositeResponse.setFirstID(firstID);
+            compositeResponse.setFirstName(first.getFeedName());
+            FeedDefinition second = getFeedDefinition(secondID);
+            compositeResponse.setSecondFields(second.getFields());
+            compositeResponse.setSecondID(secondID);
+            compositeResponse.setSecondName(second.getFeedName());
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public List<FeedDefinition> getMultipleFeeds(long firstID, long secondID) {
-        List<FeedDefinition> feeds = new ArrayList<FeedDefinition>();
-        try {
-            feeds.add(getFeedDefinition(firstID));
-            feeds.add(getFeedDefinition(secondID));
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-        return feeds;
+        return compositeResponse;
     }
 
     public List<DataSourceDescriptor> searchForSubscribedFeeds() {

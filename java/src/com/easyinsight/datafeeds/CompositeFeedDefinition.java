@@ -57,6 +57,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return connections;
     }
 
+    public boolean customJoinsAllowed() {
+        return true;
+    }
+
     public void customStorage(Connection conn) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM COMPOSITE_FEED WHERE DATA_FEED_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
@@ -95,16 +99,37 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
             queryStmt.close();
             PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
-                    "SOURCE_JOIN, TARGET_JOIN FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
+                    "SOURCE_JOIN, TARGET_JOIN, SOURCE_ITEM_ID, TARGET_ITEM_ID FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
+            PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             queryConnStmt.setLong(1, compositeFeedID);
             List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
             ResultSet connectionRS = queryConnStmt.executeQuery();
             while (connectionRS.next()) {
                 long sourceID = connectionRS.getLong(1);
                 long targetID = connectionRS.getLong(2);
-                Key sourceKey = getKey(conn, connectionRS.getLong(3));
-                Key targetKey = getKey(conn, connectionRS.getLong(4));
-                edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey));
+
+                nameStmt.setLong(1, sourceID);
+                ResultSet nameRS = nameStmt.executeQuery();
+                nameRS.next();
+                String sourceName = nameRS.getString(1);
+
+                nameStmt.setLong(1, targetID);
+                nameRS = nameStmt.executeQuery();
+                nameRS.next();
+                String targetName = nameRS.getString(1);
+
+                long sourceKeyID = connectionRS.getLong(3);
+                if (connectionRS.wasNull()) {
+                    AnalysisItem sourceItem = getItem(conn, connectionRS.getLong(5));
+                    AnalysisItem targetItem = getItem(conn, connectionRS.getLong(6));
+
+                    edges.add(new CompositeFeedConnection(sourceID, targetID, sourceItem, targetItem, sourceName, targetName));
+                } else {
+                    Key sourceKey = getKey(conn, sourceKeyID);
+                    Key targetKey = getKey(conn, connectionRS.getLong(4));
+                    edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey, sourceName, targetName));
+                }
+
             }
             this.compositeFeedNodes = nodes;
             this.connections = edges;
@@ -130,6 +155,19 @@ public class CompositeFeedDefinition extends FeedDefinition {
             session.close();
         }
         return key;
+    }
+
+    private AnalysisItem getItem(Connection conn, long itemID) {
+        Session session = Database.instance().createSession(conn);
+        AnalysisItem analysisItem = null;
+        try {
+            List results = session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, itemID).list();
+            analysisItem = (AnalysisItem) results.get(0);
+            analysisItem.afterLoad();
+        } finally {
+            session.close();
+        }
+        return analysisItem;
     }
 
     public void populateFields(Connection conn) {

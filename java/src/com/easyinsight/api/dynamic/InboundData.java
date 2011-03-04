@@ -55,7 +55,7 @@ public class InboundData {
         try {
             metadata.insertData(dataSet);
             metadata.commit();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             metadata.rollback();
             throw new RuntimeException(e);
@@ -95,7 +95,7 @@ public class InboundData {
         try {
             metadata.insertData(dataSet);
             metadata.commit();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             metadata.rollback();
             throw new RuntimeException(e);
@@ -135,7 +135,7 @@ public class InboundData {
             metadata.truncate();
             metadata.insertData(dataSet);
             metadata.commit();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             metadata.rollback();
             throw new RuntimeException(e);
@@ -178,7 +178,7 @@ public class InboundData {
         try {
             metadata.updateData(dataSet, wheres);
             metadata.commit();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             metadata.rollback();
             throw new RuntimeException(e);

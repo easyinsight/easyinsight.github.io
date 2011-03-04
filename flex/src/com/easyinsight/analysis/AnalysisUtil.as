@@ -35,6 +35,15 @@ public class AnalysisUtil {
                 }
             }
         }
+        if (analysisDefinition.joinOverrides != null) {
+            for each (var join:JoinOverride in analysisDefinition.joinOverrides) {
+                for each (var savedJoin:JoinOverride in savedDef.joinOverrides) {
+                    if (join.matches(savedJoin)) {
+                        join.updateFromSaved(savedJoin);
+                    }
+                }
+            }
+        }
         analysisDefinition.fromSave(savedDef);
 
     }

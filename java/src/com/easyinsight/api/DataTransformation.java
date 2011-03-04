@@ -35,28 +35,26 @@ public class DataTransformation {
 
     public final DataSet toDataSet(Row row) {
         DataSet dataSet = new DataSet();
-        IRow convertedRow = toRow(row);
+        IRow convertedRow = toRow(row, dataSet);
         if (count != null) {
             convertedRow.addValue(count.getKey(), new NumericValue(1));
         }
-        dataSet.addRow(convertedRow);
         return dataSet;
     }
 
     public final DataSet toDataSet(List<Row> rows) {
         DataSet dataSet = new DataSet();
         for (Row row : rows) {
-            IRow convertedRow = toRow(row);
+            IRow convertedRow = toRow(row, dataSet);
             if (count != null) {
                 convertedRow.addValue(count.getKey(), new NumericValue(1));
             }
-            dataSet.addRow(convertedRow);
         }
         return dataSet;
     }
 
-    public IRow toRow(Row row) {
-        IRow transformedRow = new com.easyinsight.analysis.Row();
+    public IRow toRow(Row row, DataSet dataSet) {
+        IRow transformedRow = dataSet.createRow();
         StringPair[] stringPairs = row.getStringPairs();
         if (stringPairs != null) {
             for (StringPair stringPair : stringPairs) {

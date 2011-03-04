@@ -22,6 +22,7 @@ public class TagTransformComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         List<IRow> rows = new ArrayList<IRow>(dataSet.getRows());
+        DataSet resultSet = new DataSet();
         
         List<IRow> tempRows = new ArrayList<IRow>();
         for (IRow row : rows) {
@@ -31,7 +32,7 @@ public class TagTransformComponent implements IComponent {
             for (Value multipleVal : transformedValues) {
                 Map<Key, Value> newRowContents = new HashMap<Key, Value>(existingContents);
                 newRowContents.put(analysisItem.createAggregateKey(), multipleVal);
-                IRow tempRow = new Row();
+                IRow tempRow = resultSet.createRow();
                 tempRow.addValues(newRowContents);
                 tempRows.add(tempRow);
             }

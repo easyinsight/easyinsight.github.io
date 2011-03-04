@@ -247,7 +247,7 @@ public class CalculationIntegrationTest extends TestCase {
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();
-        Row r = new Row();
+        IRow r = dataSet.createRow();
         r.addValue("Revenue", new NumericValue(50));
         r.addValue("Cost Number", new NumericValue(25));
         dataSet.addRow(r);
@@ -283,7 +283,7 @@ public class CalculationIntegrationTest extends TestCase {
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();
-        Row r = new Row();
+        IRow r = dataSet.createRow();
         r.addValue("Revenue", new NumericValue(50));
         r.addValue("Cost Number", new NumericValue(25));
         dataSet.addRow(r);
@@ -318,7 +318,7 @@ public class CalculationIntegrationTest extends TestCase {
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();
-        Row r = new Row();
+        IRow r = dataSet.createRow();
         r.addValue("Revenue", new NumericValue(50));
         r.addValue("Cost Number", new NumericValue(25));
         dataSet.addRow(r);
@@ -353,7 +353,7 @@ public class CalculationIntegrationTest extends TestCase {
         /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
                 TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
         DataSet dataSet = new DataSet();
-        Row r = new Row();
+        IRow r = dataSet.createRow();
         r.addValue("Revenue", new NumericValue(50));
         r.addValue("Cost Number", new NumericValue(25));
         dataSet.addRow(r);

@@ -15,6 +15,8 @@ import java.util.Date;
 public interface IRow {
     Value getValue(Key rowName);
 
+    public DataSetKeys getDataSetKeys();
+
     Value getValue(AnalysisItem analysisItem);
 
     void addValue(Key tag, Value value);
@@ -33,7 +35,9 @@ public interface IRow {
 
     Collection<Key> getKeys();
 
-    void addValues(Map<Key, Value> valueMap);
+    void addValues(IRow row);
+
+    public void addValues(Map<Key, Value> valueMap);
 
     Map<Key, Value> getValues();
 

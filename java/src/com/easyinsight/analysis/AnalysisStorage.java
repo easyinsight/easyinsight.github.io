@@ -189,6 +189,11 @@ public class AnalysisStorage {
 
             }
         }
+        if (analysisDefinition.getJoinOverrides() != null) {
+            for (JoinOverride joinOverride : analysisDefinition.getJoinOverrides()) {
+                joinOverride.reportSave(session);
+            }
+        }
         if (analysisDefinition.getReportStructure() != null) {
             for (AnalysisItem analysisItem : analysisDefinition.getReportStructure().values()) {
                 analysisItem.reportSave(session);

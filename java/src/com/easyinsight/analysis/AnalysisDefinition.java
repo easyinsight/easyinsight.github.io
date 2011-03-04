@@ -63,6 +63,12 @@ public class AnalysisDefinition implements Cloneable {
     @JoinColumn(name = "report_state_id")
     private AnalysisDefinitionState analysisDefinitionState;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "analysis_to_join_override",
+            joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "join_override_id", nullable = false))
+    private List<JoinOverride> joinOverrides;
+
     @Column(name = "policy")
     private int analysisPolicy;
 
@@ -117,6 +123,14 @@ public class AnalysisDefinition implements Cloneable {
 
     @Column(name = "account_visible")
     private boolean accountVisible;
+
+    public List<JoinOverride> getJoinOverrides() {
+        return joinOverrides;
+    }
+
+    public void setJoinOverrides(List<JoinOverride> joinOverrides) {
+        this.joinOverrides = joinOverrides;
+    }
 
     public boolean isAccountVisible() {
         return accountVisible;
@@ -405,6 +419,24 @@ public class AnalysisDefinition implements Cloneable {
         }
         analysisDefinition.setFilterDefinitions(filterDefinitions);
 
+        if (getJoinOverrides() != null) {
+            List<JoinOverride> clones = new ArrayList<JoinOverride>();
+            for (JoinOverride joinOverride : joinOverrides) {
+                if (replacementMap.get(joinOverride.getSourceItem().getAnalysisItemID()) == null) {
+                    AnalysisItem clonedItem = joinOverride.getSourceItem().clone();
+                    cleanup(clonedItem, changingDataSource);
+                    replacementMap.put(joinOverride.getSourceItem().getAnalysisItemID(), clonedItem);
+                }
+                if (replacementMap.get(joinOverride.getTargetItem().getAnalysisItemID()) == null) {
+                    AnalysisItem clonedItem = joinOverride.getTargetItem().clone();
+                    cleanup(clonedItem, changingDataSource);
+                    replacementMap.put(joinOverride.getTargetItem().getAnalysisItemID(), clonedItem);
+                }
+                clones.add(joinOverride.clone());
+            }
+            analysisDefinition.setJoinOverrides(clones);
+        }
+
         Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
         for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {
             if (replacementMap.get(entry.getValue().getAnalysisItemID()) == null) {
@@ -441,6 +473,11 @@ public class AnalysisDefinition implements Cloneable {
         }
         for (FilterDefinition filter : filterDefinitions) {
             filter.updateIDs(replacementMap);
+        }
+        if (analysisDefinition.getJoinOverrides() != null) {
+            for (JoinOverride joinOverride : analysisDefinition.getJoinOverrides()) {
+                joinOverride.updateIDs(replacementMap);
+            }
         }
         analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap, keyMap);
         analysisDefinition.setReportStructure(clonedStructure);
@@ -506,6 +543,14 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setVisibleAtFeedLevel(visibleAtFeedLevel);
         analysisDefinition.setSolutionVisible(solutionVisible);
         analysisDefinition.setAccountVisible(accountVisible);
+        if (joinOverrides != null) {
+            List<JoinOverride> joins = new ArrayList<JoinOverride>();
+            for (JoinOverride joinOverride : joinOverrides) {
+                joinOverride.afterLoad();
+                joins.add(joinOverride);
+            }
+            analysisDefinition.setJoinOverrides(joins);
+        }
         return analysisDefinition;
     }
 

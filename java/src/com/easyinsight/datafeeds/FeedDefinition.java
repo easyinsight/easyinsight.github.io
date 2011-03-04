@@ -64,6 +64,14 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean adjustDates;
     private Date lastRefreshStart;
 
+    public boolean customJoinsAllowed() {
+        return false;
+    }
+
+    public boolean gmtTime() {
+        return true;
+    }
+
     public Date getLastRefreshStart() {
         return lastRefreshStart;
     }

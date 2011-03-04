@@ -655,7 +655,6 @@ public class SolutionService {
             
             List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
             for (AnalysisDefinition child : reports) {
-
                 AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, keyReplacementMap);
                 reportReplacementMap.put(child.getAnalysisID(), copyReport);
                 reportList.add(copyReport);
@@ -767,6 +766,33 @@ public class SolutionService {
             }
         }
         return keys;
+    }
+
+    private Map<Long, Long> createDataSourceReplacementMap(FeedDefinition localDefinition, FeedDefinition sourceDefinition, EIConnection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+        Map<Long, Long> map = new HashMap<Long, Long>();
+        Map<Integer, Long> typeMap = new HashMap<Integer, Long>();
+        if (localDefinition instanceof CompositeFeedDefinition) {
+            CompositeFeedDefinition localCompositeFeedDefinition = (CompositeFeedDefinition) localDefinition;
+            CompositeFeedDefinition sourceCompositeFeedDefinition = (CompositeFeedDefinition) sourceDefinition;
+            for (CompositeFeedNode node : localCompositeFeedDefinition.getCompositeFeedNodes()) {
+                queryStmt.setLong(1, node.getDataFeedID());
+                ResultSet rs = queryStmt.executeQuery();
+                rs.next();
+                int type = rs.getInt(1);
+                typeMap.put(type, node.getDataFeedID());
+            }
+            for (CompositeFeedNode node : sourceCompositeFeedDefinition.getCompositeFeedNodes()) {
+                queryStmt.setLong(1, node.getDataFeedID());
+                ResultSet rs = queryStmt.executeQuery();
+                rs.next();
+                int type = rs.getInt(1);
+                long id = typeMap.get(type);
+                map.put(id, node.getDataFeedID());
+            }
+        }
+        map.put(localDefinition.getDataFeedID(), sourceDefinition.getDataFeedID());
+        return map;
     }
 
     private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report,

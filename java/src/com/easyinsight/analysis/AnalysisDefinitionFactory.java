@@ -110,6 +110,7 @@ public class AnalysisDefinitionFactory {
             reportProperty.cleanup();
         }
         analysisDefinition.setUrlKey(wsAnalysisDefinition.getUrlKey());
+        analysisDefinition.setJoinOverrides(wsAnalysisDefinition.getJoinOverrides());
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
         analysisDefinition.setDescription(wsAnalysisDefinition.getDescription());
         analysisDefinition.setAuthorName(wsAnalysisDefinition.getAuthorName());

@@ -82,7 +82,7 @@ public class TimelineResultsBridge implements ResultsBridge {
             targetDataSet.addRow(row);
         }
 
-        if (timeline.getReport() instanceof WSXAxisDefinition) {
+        /*if (timeline.getReport() instanceof WSXAxisDefinition) {
             for (AnalysisDimension dimension : dimensions) {
                 for (DataSet childSet : dataSetMap.values()) {
                     List<IRow> placeHolderRows = new ArrayList<IRow>();
@@ -97,7 +97,7 @@ public class TimelineResultsBridge implements ResultsBridge {
                     childSet.getRows().addAll(placeHolderRows);
                 }
             }
-        }
+        }*/
 
 
         SeriesDataResults seriesDataResults = new SeriesDataResults();

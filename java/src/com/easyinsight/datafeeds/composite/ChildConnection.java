@@ -59,6 +59,6 @@ public class ChildConnection {
         Key sourceKey = sourceDef.getField(getSourceKey());
         Key targetKey = targetDef.getField(getTargetKey());
         return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                    sourceKey, targetKey);
+                    sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName());
     }
 }

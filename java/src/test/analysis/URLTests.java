@@ -22,14 +22,14 @@ public class URLTests extends TestCase {
     }
 
     public void testCorrectDynamicURL() {
-        Row row = new Row();
+        Row row = new Row(null);
         row.addValue("Feed ID", "1");
         String url = URLPattern.getURL("http://www.easy-insight.com/app#feedid=[Feed ID]", row, new HashMap<String, String>());
         Assert.assertEquals("http://www.easy-insight.com/app#feedid=1", url);
     }
 
     public void testTwoFields() {
-        Row row = new Row();
+        Row row = new Row(null);
         row.addValue("Location", "biz");
         row.addValue("Feed ID", "2");
         String url = URLPattern.getURL("http://www.easy-insight.[Location]/app#feedid=[Feed ID]", row, new HashMap<String, String>());
@@ -37,7 +37,7 @@ public class URLTests extends TestCase {
     }
 
     public void testInvalidField() {
-        Row row = new Row();
+        Row row = new Row(null);
         row.addValue("Location", "biz");
         row.addValue("Feed ID", "2");
         String url = URLPattern.getURL("http://www.[easy]-insight.[Location]/app#feedid=[Feed ID]", row, new HashMap<String, String>());
@@ -45,7 +45,7 @@ public class URLTests extends TestCase {
     }
 
     public void testURLOnly() {
-        Row row = new Row();
+        Row row = new Row(null);
         row.addValue("URL", "http://www.easy-insight.com/app");
         String url = URLPattern.getURL("[URL]", row, new HashMap<String, String>());
         Assert.assertEquals("http://www.easy-insight.com/app", url);

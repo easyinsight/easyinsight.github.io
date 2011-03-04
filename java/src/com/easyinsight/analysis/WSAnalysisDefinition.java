@@ -77,6 +77,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean temporaryReport;
     private int fixedWidth;
     private boolean accountVisible;
+    private List<JoinOverride> joinOverrides;
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
@@ -96,6 +97,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setAccountVisible(boolean accountVisible) {
         this.accountVisible = accountVisible;
+    }
+
+    public List<JoinOverride> getJoinOverrides() {
+        return joinOverrides;
+    }
+
+    public void setJoinOverrides(List<JoinOverride> joinOverrides) {
+        this.joinOverrides = joinOverrides;
     }
 
     public String getUrlKey() {

@@ -83,7 +83,7 @@ public abstract class EIV3API implements IEIV3API {
                 Key sourceKey = findKey(connection.getSourceDataSourceField(), sourceFeed);
                 Key targetKey = findKey(connection.getTargetDataSourceField(), targetFeed);
                 compositeConnections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(),
-                        sourceKey, targetKey));
+                        sourceKey, targetKey, sourceFeed.getFeedName(), targetFeed.getFeedName()));
             }
             compositeFeedDefinition.setCompositeFeedNodes(new ArrayList<CompositeFeedNode>(compositeNodes.values()));
             compositeFeedDefinition.setConnections(compositeConnections);
@@ -589,20 +589,20 @@ public abstract class EIV3API implements IEIV3API {
 
     protected final DataSet toDataSet(Row row) {
         DataSet dataSet = new DataSet();
-        dataSet.addRow(toRow(row));
+        toRow(row, dataSet);
         return dataSet;
     }
 
     protected final DataSet toDataSet(List<Row> rows) {
         DataSet dataSet = new DataSet();
         for (Row row : rows) {
-            dataSet.addRow(toRow(row));
+            toRow(row, dataSet);
         }
         return dataSet;
     }
 
-    private IRow toRow(Row row) {
-        IRow transformedRow = new com.easyinsight.analysis.Row();
+    private IRow toRow(Row row, DataSet dataSet) {
+        IRow transformedRow = dataSet.createRow();
         StringPair[] stringPairs = row.getStringPairs();
         if (stringPairs != null) {
             for (StringPair stringPair : stringPairs) {

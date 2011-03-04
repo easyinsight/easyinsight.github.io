@@ -110,7 +110,7 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 Key sourceKey = findKey(sourceDataSourceField, sourceFeed);
                 Key targetKey = findKey(targetDataSourceField, targetFeed);
                 compositeConnections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(),
-                        sourceKey, targetKey));
+                        sourceKey, targetKey, sourceFeed.getFeedName(), targetFeed.getFeedName()));
             }
 
             compositeFeedDefinition.setCompositeFeedNodes(new ArrayList<CompositeFeedNode>(compositeNodes.values()));

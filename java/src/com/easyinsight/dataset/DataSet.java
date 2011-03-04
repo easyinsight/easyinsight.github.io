@@ -3,7 +3,6 @@ package com.easyinsight.dataset;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.core.EmptyValue;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.storage.IWhere;
@@ -21,6 +20,7 @@ public class DataSet implements Serializable {
     private List<IRow> rows;
     private Date lastTime;
     private List<String> audits = new ArrayList<String>();
+    private DataSetKeys dataSetKeys = new DataSetKeys();
 
     public DataSet() {
         rows = new ArrayList<IRow>();
@@ -57,7 +57,7 @@ public class DataSet implements Serializable {
     }
 
     public IRow createRow() {
-        IRow row = new Row();
+        IRow row = new Row(dataSetKeys);
         rows.add(row);
         return row;
     }
@@ -67,7 +67,7 @@ public class DataSet implements Serializable {
     }
 
     public IRow createRow(int size) {
-        IRow row = new Row(size);
+        IRow row = new Row(size, dataSetKeys);
         rows.add(row);
         return row;
     }
@@ -110,7 +110,7 @@ public class DataSet implements Serializable {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
                     Value value = row.getValue(measure.createAggregateKey());
                     if (value != null) {
-                        listTransform.groupData(compositeDimensionKey, measure, value, row);
+                        listTransform.groupData(compositeDimensionKey, measure, value, row, paredDownColumns.size() - ourDimensions.size());
                     }
                 } else {
                     AnalysisDimension analysisDimension = (AnalysisDimension) column;
@@ -119,7 +119,7 @@ public class DataSet implements Serializable {
                         transformedValue = row.getValue(analysisDimension.createAggregateKey());
                     }
                     if (transformedValue != null) {
-                        listTransform.groupData(compositeDimensionKey, (AnalysisDimension) column, transformedValue);
+                        listTransform.groupData(compositeDimensionKey, (AnalysisDimension) column, transformedValue, ourDimensions.size());
                     }
                 }
             }

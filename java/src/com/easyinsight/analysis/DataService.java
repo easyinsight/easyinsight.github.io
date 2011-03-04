@@ -77,6 +77,7 @@ public class DataService {
             feedMetadata.setDataSourceInfo(feed.getDataSourceInfo());
             feedMetadata.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
+            feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed());
             return feedMetadata;
         } catch (Exception e) {
             LogClass.error(e);
@@ -146,6 +147,7 @@ public class DataService {
                     hierarchyOverride.apply(analysisDefinition.getAllAnalysisItems());
                 }
             }
+            insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
             if (analysisDefinition.getAddedItems() != null) {
                 allFields.addAll(analysisDefinition.getAddedItems());
@@ -342,6 +344,7 @@ public class DataService {
             if (insightRequestMetadata == null) {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
+            insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             DataResults results;
             
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());

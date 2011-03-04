@@ -25,6 +25,6 @@ public class FieldFilterProcessor implements IFilterProcessor {
                 row.getValues().clear();
             }
         }
-        newRow.addValues(row.getValues());
+        newRow.addValues(row);
     }
 }

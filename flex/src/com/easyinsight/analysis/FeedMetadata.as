@@ -20,6 +20,7 @@ import mx.collections.ArrayCollection;
         public var filterExampleMessage:String;
         public var dataSourceInfo:DataSourceInfo;
         public var originSolution:int;
+        public var customJoinsAllowed:Boolean;
 		
 		public function FeedMetadata()
 			{

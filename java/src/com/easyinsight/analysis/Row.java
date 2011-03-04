@@ -2,10 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import java.io.Serializable;
 
 /**
@@ -15,33 +12,38 @@ import java.io.Serializable;
  */
 public class Row implements IRow, Serializable {
 
-    private Map<Key, Value> valueMap;
+    private Value[] valueMap;
 
-    public Row() {
-        valueMap = new HashMap<Key, Value>();
+    private DataSetKeys dataSetKeys;
+
+    public Row(DataSetKeys dataSetKeys) {
+        valueMap = new Value[1];
+        this.dataSetKeys = dataSetKeys;
     }
 
-    public Row(int size) {
-        valueMap = new HashMap<Key, Value>(size);
+    public DataSetKeys getDataSetKeys() {
+        return dataSetKeys;
+    }
+
+    public Row(int size, DataSetKeys dataSetKeys) {
+        valueMap = new Value[size];
+        this.dataSetKeys = dataSetKeys;
     }
 
     public Value getValue(Key rowName) {
-        Value value = valueMap.get(rowName);
-        if (value == null) {
-            value = new EmptyValue();
+        int key = dataSetKeys.getKey(rowName);
+        if (key >= valueMap.length) {
+            return EmptyValue.EMPTY_VALUE;
         }
-        return value;
+        return valueMap[key];
     }
 
     public Value getValue(AnalysisItem analysisItem) {
-        Value value = valueMap.get(analysisItem.getKey());
-        if (value == null) {
-            value = valueMap.get(analysisItem.createAggregateKey());
+        int key = dataSetKeys.getKey(analysisItem);
+        if (key >= valueMap.length) {
+            return EmptyValue.EMPTY_VALUE;
         }
-        if (value == null) {
-            value = new EmptyValue();
-        }
-        return value;
+        return valueMap[key];
     }
 
     public void addValue(String tag, Value value) {
@@ -57,53 +59,90 @@ public class Row implements IRow, Serializable {
     }
 
     public void addValue(Key tag, Value value) {
-        valueMap.put(tag, value);
+        int key = dataSetKeys.getKey(tag);
+        if (key >= valueMap.length) {
+            Value[] newVals = new Value[key + 1];
+            System.arraycopy(valueMap, 0, newVals, 0, valueMap.length);
+            valueMap = newVals;
+        }
+        valueMap[key] = value;
     }
 
     public void addValue(String tag, String value) {
-        valueMap.put(new NamedKey(tag), new StringValue(value));
+        addValue(new NamedKey(tag), new StringValue(value));
     }
 
     public void addValue(Key tag, String value) {
         if (value == null) {
-            valueMap.put(tag, new EmptyValue());
+            addValue(tag, new EmptyValue());
         } else {
-            valueMap.put(tag, new StringValue(value));
+            addValue(tag, new StringValue(value));
         }
     }
 
     public Collection<Key> getKeys() {
-        return valueMap.keySet();
+        return dataSetKeys.getKeys();
     }
 
     public void addValues(Map<Key, Value> valueMap) {
-        this.valueMap.putAll(valueMap);
+        for (Map.Entry<Key, Value> entry : valueMap.entrySet()) {
+            addValue(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public void addValues(IRow row) {
+        for (Key key : row.getKeys()) {
+            Value value = row.getValue(key);
+            if (value != null) {
+                addValue(key, value);
+            }
+        }
     }
 
     public Map<Key, Value> getValues() {
-        return this.valueMap;
+        Map<Key, Value> values = new HashMap<Key, Value>();
+        for (Key key : dataSetKeys.getKeys()) {
+            Value value = getValue(key);
+            if (value != null) {
+                values.put(key, value);
+            }
+        }
+        return values;
     }
 
     public void replaceKey(Key existingKey, Key newKey) {
-        Value existing = valueMap.remove(existingKey);
+        Value existing = getValue(existingKey);
         if (existing != null) {
-            valueMap.put(newKey, existing);
+            addValue(newKey, existing);
         }
     }
 
     public void removeValue(Key key) {
-        valueMap.remove(key);
+        int position = dataSetKeys.getKey(key);
+        if (position < valueMap.length) {
+            valueMap[position] = null;
+        }
     }
 
     public void addValue(String s, Number value) {
-        valueMap.put(new NamedKey(s), new NumericValue(value));
+        addValue(new NamedKey(s), new NumericValue(value));
     }
 
     public IRow merge(IRow row) {
         Row otherRow = (Row) row;
-        Row mergedRow = new Row();
-        mergedRow.valueMap.putAll(valueMap);
-        mergedRow.valueMap.putAll(otherRow.valueMap);
+        Row mergedRow = new Row(dataSetKeys);
+        for (Key key : dataSetKeys.getKeys()) {
+            Value value = getValue(key);
+            if (value != null) {
+                mergedRow.addValue(key, value);
+            }
+        }
+        for (Key key : otherRow.dataSetKeys.getKeys()) {
+            Value value = otherRow.getValue(key);
+            if (value != null) {
+                mergedRow.addValue(key, value);
+            }
+        }
         return mergedRow;
     }
 

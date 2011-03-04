@@ -5,7 +5,7 @@ package com.easyinsight.feedassembly
 	
 	public class JoinDetail extends HBox 
 	{
-		private var connection:ConnectionWithInfo;
+		private var connection:CompositeFeedConnection;
 		private var sourceFeedLabel:Label;
 		private var sourceKeyLabel:Label;
 		private var targetKeyLabel:Label;
@@ -15,7 +15,7 @@ package com.easyinsight.feedassembly
 		{
 		}
 		
-		public function set feedConnection(feedConnection:ConnectionWithInfo):void {
+		public function set feedConnection(feedConnection:CompositeFeedConnection):void {
 			this.connection = feedConnection;
 		}
 
@@ -29,12 +29,12 @@ package com.easyinsight.feedassembly
 			addChild(sourceFeedLabel);
 			if (sourceKeyLabel == null) {
 				sourceKeyLabel = new Label();
-				sourceKeyLabel.text = connection.sourceJoin.createString();
+				sourceKeyLabel.text = connection.sourceDisplay;
 			}
 			addChild(sourceKeyLabel);
 			if (targetKeyLabel == null) {
 				targetKeyLabel = new Label();
-				targetKeyLabel.text = connection.targetJoin.createString();
+				targetKeyLabel.text = connection.targetDisplay;
 			}
 			addChild(targetKeyLabel);
 			if (targetFeedLabel == null) {

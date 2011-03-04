@@ -63,15 +63,33 @@ public class AnalysisMeasure extends AnalysisItem {
         this.rowCountField = rowCountField;
     }
 
+    private transient AggregateMeasureKey cachedMeasureKey;
+
     @Override
     public AggregateKey createAggregateKey() {
-        // in case of filters, how do we do this...        
-        return new AggregateMeasureKey(getKey(), getType(), aggregation, toDisplay(), getFilters());
+        // in case of filters, how do we do this...
+        if (cachedMeasureKey == null) {
+            cachedMeasureKey = new AggregateMeasureKey(getKey(), getType(), aggregation, toDisplay(), getFilters());
+        }
+        return cachedMeasureKey;
     }
+
+    @Override
+    public AnalysisItem clone() throws CloneNotSupportedException {
+        AnalysisMeasure measure = (AnalysisMeasure) super.clone();
+        measure.cachedAggregateKey = null;
+        measure.cachedMeasureKey = null;
+        return measure;
+    }
+
+    private transient AggregateKey cachedAggregateKey;
 
     public AggregateKey createAggregateKey(boolean measure) {
         if (measure) {
-            return new AggregateKey(getKey(), getType(), getFilters());
+            if (cachedAggregateKey == null) {
+                cachedAggregateKey = new AggregateKey(getKey(), getType(), getFilters());
+            }
+            return cachedAggregateKey;
         } else {
             return super.createAggregateKey();
         }

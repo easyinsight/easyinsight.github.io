@@ -89,6 +89,7 @@
         <mapping class="com.easyinsight.analysis.ReportNumericProperty"/>              
         <mapping class="com.easyinsight.analysis.ReportBooleanProperty"/>
         <mapping class="com.easyinsight.analysis.ReportImageProperty"/>
+        <mapping class="com.easyinsight.analysis.JoinOverride"/>
 
         <mapping class="com.easyinsight.preferences.ApplicationSkinSettings"/>
 

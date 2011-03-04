@@ -26,21 +26,61 @@ public class CompositeFeedConnection implements Serializable {
     private Long targetFeedID;
     private Key sourceJoin;
     private Key targetJoin;
-    private List<Key> sourceJoins;
-    private List<Key> targetJoins;
+    private AnalysisItem sourceItem;
+    private AnalysisItem targetItem;
+    private List<Key> sourceJoins = new ArrayList<Key>();
+    private List<Key> targetJoins = new ArrayList<Key>();
+    private List<AnalysisItem> sourceItems = new ArrayList<AnalysisItem>();
+    private List<AnalysisItem> targetItems = new ArrayList<AnalysisItem>();
     private boolean sourceOuterJoin;
     private boolean targetOuterJoin;
+    private String sourceFeedName;
+    private String targetFeedName;
 
     public CompositeFeedConnection() {
     }
 
-    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin) {
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID) {
+        this.sourceFeedID = sourceFeedID;
+        this.targetFeedID = targetFeedID;
+    }
+
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, Key sourceJoin, Key targetJoin, String sourceName, String targetName) {
         this.sourceFeedID = sourceFeedID;
         this.targetFeedID = targetFeedID;
         this.sourceJoin = sourceJoin;
         sourceJoins = Arrays.asList(sourceJoin);
         this.targetJoin = targetJoin;
         targetJoins = Arrays.asList(targetJoin);
+        this.sourceFeedName = sourceName;
+        this.targetFeedName = targetName;
+    }
+
+    public CompositeFeedConnection(Long sourceFeedID, Long targetFeedID, AnalysisItem sourceItem, AnalysisItem targetItem, String sourceName, String targetName) {
+        this.sourceFeedID = sourceFeedID;
+        this.targetFeedID = targetFeedID;
+        this.sourceItem = sourceItem;
+        sourceItems = Arrays.asList(sourceItem);
+        this.targetItem = targetItem;
+        targetItems = Arrays.asList(targetItem);
+        this.sourceFeedName = sourceName;
+        this.targetFeedName = targetName;
+    }
+
+    public List<AnalysisItem> getSourceItems() {
+        return sourceItems;
+    }
+
+    public void setSourceItems(List<AnalysisItem> sourceItems) {
+        this.sourceItems = sourceItems;
+    }
+
+    public List<AnalysisItem> getTargetItems() {
+        return targetItems;
+    }
+
+    public void setTargetItems(List<AnalysisItem> targetItems) {
+        this.targetItems = targetItems;
     }
 
     public boolean isSourceOuterJoin() {
@@ -57,6 +97,38 @@ public class CompositeFeedConnection implements Serializable {
 
     public void setTargetOuterJoin(boolean targetOuterJoin) {
         this.targetOuterJoin = targetOuterJoin;
+    }
+
+    public String getSourceFeedName() {
+        return sourceFeedName;
+    }
+
+    public void setSourceFeedName(String sourceFeedName) {
+        this.sourceFeedName = sourceFeedName;
+    }
+
+    public String getTargetFeedName() {
+        return targetFeedName;
+    }
+
+    public void setTargetFeedName(String targetFeedName) {
+        this.targetFeedName = targetFeedName;
+    }
+
+    public AnalysisItem getSourceItem() {
+        return sourceItem;
+    }
+
+    public void setSourceItem(AnalysisItem sourceItem) {
+        this.sourceItem = sourceItem;
+    }
+
+    public AnalysisItem getTargetItem() {
+        return targetItem;
+    }
+
+    public void setTargetItem(AnalysisItem targetItem) {
+        this.targetItem = targetItem;
     }
 
     public void setSourceJoins(List<Key> sourceJoins) {
@@ -110,30 +182,56 @@ public class CompositeFeedConnection implements Serializable {
     }
 
     public void store(Connection conn, long feedID) throws SQLException {
-        PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
-                "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID) VALUES (?, ?, ?, ?, ?)");
-        connInsertStmt.setLong(1, sourceFeedID);
-        connInsertStmt.setLong(2, targetFeedID);
-        connInsertStmt.setLong(3, sourceJoin.getKeyID());
-        connInsertStmt.setLong(4, targetJoin.getKeyID());
-        connInsertStmt.setLong(5, feedID);
-        connInsertStmt.execute();
-        connInsertStmt.close();
+        if (sourceItem != null && targetItem != null) {
+            PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
+                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, source_item_id, target_item_id, COMPOSITE_FEED_ID) VALUES (?, ?, ?, ?, ?)");
+            connInsertStmt.setLong(1, sourceFeedID);
+            connInsertStmt.setLong(2, targetFeedID);
+            connInsertStmt.setLong(3, sourceItem.getAnalysisItemID());
+            connInsertStmt.setLong(4, targetItem.getAnalysisItemID());
+            connInsertStmt.setLong(5, feedID);
+            connInsertStmt.execute();
+            connInsertStmt.close();
+        } else {
+            PreparedStatement connInsertStmt = conn.prepareStatement("INSERT INTO COMPOSITE_CONNECTION (" +
+                    "SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID, SOURCE_JOIN, TARGET_JOIN, COMPOSITE_FEED_ID) VALUES (?, ?, ?, ?, ?)");
+            connInsertStmt.setLong(1, sourceFeedID);
+            connInsertStmt.setLong(2, targetFeedID);
+            connInsertStmt.setLong(3, sourceJoin.getKeyID());
+            connInsertStmt.setLong(4, targetJoin.getKeyID());
+            connInsertStmt.setLong(5, feedID);
+            connInsertStmt.execute();
+            connInsertStmt.close();
+        }
     }
 
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
                             Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn) {
         Key myJoinDimension = null;
-        for (AnalysisItem item : sourceFields) {
-            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(getSourceJoin().toKeyString())) {
-                myJoinDimension = item.createAggregateKey();
+        if (sourceItem == null) {
+            for (AnalysisItem item : sourceFields) {
+                if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(getSourceJoin().toKeyString())) {
+                    myJoinDimension = item.createAggregateKey();
+                }
             }
+        } else {
+            myJoinDimension = sourceItem.createAggregateKey();
         }
         Key fromJoinDimension = null;
-        for (AnalysisItem item : targetFields) {
-            if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(getTargetJoin().toKeyString())) {
-                fromJoinDimension = item.createAggregateKey();
+        if (targetItem == null) {
+            for (AnalysisItem item : targetFields) {
+                if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(getTargetJoin().toKeyString())) {
+                    fromJoinDimension = item.createAggregateKey();
+                }
             }
+        } else {
+            fromJoinDimension = targetItem.createAggregateKey();
+        }
+        if (myJoinDimension == null) {
+            System.out.println("Couldn't find " + getSourceJoin().toKeyString() + " on " + sourceName);
+        }
+        if (fromJoinDimension == null) {
+            System.out.println("Couldn't find " + getTargetJoin().toKeyString() + " on " + targetName);
         }
         String mergeString = "Merging data set on " + sourceName + " : " + myJoinDimension.toKeyString() + " to " + targetName + " : " + fromJoinDimension.toKeyString();
 
@@ -146,7 +244,7 @@ public class CompositeFeedConnection implements Serializable {
             } else {
                 List<IRow> rows = index.get(joinDimensionValue);
                 if (rows == null){
-                    rows = new ArrayList<IRow>();
+                    rows = new ArrayList<IRow>(1);
                     index.put(joinDimensionValue, rows);
                 }
                 rows.add(row);
@@ -198,8 +296,8 @@ public class CompositeFeedConnection implements Serializable {
     }
 
     public IRow removeSourceValues(IRow row, Set<AnalysisItem> sourceFields) {
-        IRow outerRow = new Row();
-        outerRow.addValues(new HashMap<Key, Value>(row.getValues()));
+        IRow outerRow = new Row(row.getDataSetKeys());
+        outerRow.addValues(row);
         for (Key key : removeSourceKeys) {
             Key matchedKey = null;
             for (AnalysisItem item : sourceFields) {
@@ -213,8 +311,8 @@ public class CompositeFeedConnection implements Serializable {
     }
 
     public IRow removeTargetValues(IRow row, Set<AnalysisItem> targetFields) {
-        IRow outerRow = new Row();
-        outerRow.addValues(row.getValues());
+        IRow outerRow = new Row(row.getDataSetKeys());
+        outerRow.addValues(row);
         for (Key key : removeTargetKeys) {
             Key matchedKey = null;
             for (AnalysisItem item : targetFields) {

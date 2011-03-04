@@ -283,6 +283,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem clone() throws CloneNotSupportedException {
         AnalysisItem clonedItem = (AnalysisItem) super.clone();
+        clonedItem.cachedKey = null;
         clonedItem.setAnalysisItemID(0);
         clonedItem.setFormattingConfiguration(formattingConfiguration.clone());
         List<Link> clonedLinks = new ArrayList<Link>();
@@ -397,12 +398,17 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return new ArrayList<AnalysisItem>();
     }
 
+    private transient AggregateKey cachedKey;
+
     public AggregateKey createAggregateKey() {
-        return new AggregateKey(getKey(), getType(), getFilters());
+        if (cachedKey == null) {
+            cachedKey = new AggregateKey(getKey(), getType(), getFilters());
+        }
+        return cachedKey;
     }
 
     public AggregateKey createAggregateKey(boolean measure) {
-        return new AggregateKey(getKey(), getType(), getFilters());
+        return createAggregateKey();
     }
 
     public void beforeSave() {

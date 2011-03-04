@@ -184,6 +184,39 @@
             removeChild(hierarchyButton);
         }
 
+        public function joinControl():void {
+            var window:ReportJoinWindow = new ReportJoinWindow();
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _wrappers) {
+                items.addItem(wrapper.analysisItem);
+            }
+            window.fields = items;
+            window.dataSourceID = _dataSourceID;
+            window.startJoins = _analysisDefinition.joinOverrides;
+            window.addEventListener(JoinOverrideEvent.JOIN_OVERRIDE_SET, onJoinOverride, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onJoinOverride(event:JoinOverrideEvent):void {
+            _analysisDefinition.joinOverrides = event.joins;
+            _dataView.retrieveData();
+        }
+
+        private var _joinsCustomizable:Boolean;
+
+
+        [Bindable(event="joinsCustomizableChanged")]
+        public function get joinsCustomizable():Boolean {
+            return _joinsCustomizable;
+        }
+
+        public function set joinsCustomizable(value:Boolean):void {
+            if (_joinsCustomizable == value) return;
+            _joinsCustomizable = value;
+            dispatchEvent(new Event("joinsCustomizableChanged"));
+        }
+
         public function explainReport():void {
             if (reportAudit != null) {
                 var window:ReportExplanationWindow = new ReportExplanationWindow();
@@ -204,4 +237,7 @@
                click="createCalculatedDate()" labelPlacement="right" label="New Derived Date" y="10" x="320"/>
     <mx:Button icon="@Embed(source='../../../../assets/cubes_blue_add.png')"
                toolTip="Add Hierarchy..." click="createHierarchy()" id="hierarchyButton" labelPlacement="right" label="New Hierarchy" y="10" x="467"/>
+    <mx:Button icon="@Embed(source='../../../../assets/branchx16.png')"
+               toolTip="Customize Joins..." click="joinControl()" labelPlacement="right" label="Customize Joins" y="10" x="600"
+            visible="{joinsCustomizable}"/>
 </mx:Canvas>

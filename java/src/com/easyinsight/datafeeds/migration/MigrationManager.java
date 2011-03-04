@@ -6,6 +6,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.storage.DatabaseManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,6 +40,11 @@ public class MigrationManager {
 
     public void migrate() {
         if (obtainLock()) {
+            try {
+                migrateStorage();
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
             try {
                 EIConnection conn = Database.instance().getConnection();
                 try {
@@ -125,5 +131,32 @@ public class MigrationManager {
 
     public void setDataSourceTypeRegistry(DataSourceTypeRegistry dataSourceTypeRegistry) {
         this.dataSourceTypeRegistry = dataSourceTypeRegistry;
+    }
+
+    private void migrateStorage() throws Exception {
+        for (Database database : DatabaseManager.instance().getDbMap().values()) {
+            migrateDatabase(database);
+        }
+        migrateDatabase(Database.instance());
+    }
+
+    private void migrateDatabase(Database database) throws SQLException {
+        EIConnection conn = database.getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SHOW TABLE STATUS");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String tableName = rs.getString("Name");
+                String collation = rs.getString("Collation");
+                if (!collation.startsWith("utf8")) {
+                    System.out.println("Migrating " + tableName);
+                    PreparedStatement alterStmt = conn.prepareStatement("ALTER TABLE " + tableName + " CONVERT TO CHARACTER SET UTF8");
+                    alterStmt.execute();
+                    alterStmt.close();
+                }
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 }

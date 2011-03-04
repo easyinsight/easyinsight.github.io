@@ -13,7 +13,7 @@ package com.easyinsight.solutions
 		
 		public function FeedSelectionEvent(type:String, feedDescriptor:DataSourceDescriptor)
 		{
-			super(type);
+			super(type, true);
 			this.feedDescriptor = feedDescriptor;
 		}
 		

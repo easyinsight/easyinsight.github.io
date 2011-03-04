@@ -47,6 +47,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         limitDate = findStartDate(rollingFilterDefinition, now);
         endDate = findEndDate(rollingFilterDefinition, now);
         mode = rollingFilterDefinition.getCustomBeforeOrAfter();
+        System.out.println("start date = " + new Date(limitDate));
+        System.out.println("end date = " + new Date(endDate));
     }
 
     public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {

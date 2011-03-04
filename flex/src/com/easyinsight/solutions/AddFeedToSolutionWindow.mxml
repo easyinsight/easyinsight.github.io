@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
 	creationComplete="feedService.searchForSubscribedFeeds.send()">
 	<mx:Script>
 		<![CDATA[			
@@ -28,13 +28,12 @@
 	<mx:RemoteObject destination="feeds" id="feedService">
 		<mx:method name="searchForSubscribedFeeds" result="gotFeeds(event)"/>
 	</mx:RemoteObject>
-	<mx:Form styleName="TitleWindowContents">
-		<mx:FormItem label="Choose a Data Source:">
-			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>		
-		</mx:FormItem>
-		<mx:FormItem label="" direction="horizontal">
-			<mx:Button label="OK" click="chose()"/>
-			<mx:Button label="Cancel" click="cancel()"/>			
-		</mx:FormItem>
-	</mx:Form>
-</util:EITitleWindow>
+    <mx:HBox>
+        <mx:Label text="Choose a Data Source:"/>
+        <mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>
+    </mx:HBox>
+    <mx:HBox horizontalAlign="center" width="100%">
+        <util:SaveButton label="Use this Data Source" click="chose()"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
+    </mx:HBox>
+</util:EISlimWindow>

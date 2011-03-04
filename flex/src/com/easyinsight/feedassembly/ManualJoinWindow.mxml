@@ -9,13 +9,9 @@
         import mx.collections.SortField;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
-        import com.easyinsight.administration.feed.FeedDefinitionData;
 
         public var sourceFeedID:int;
         public var targetFeedID:int;
-
-        private var sourceDefinition:FeedDefinitionData;
-        private var targetDefinition:FeedDefinitionData;
 
         [Bindable]
         private var sourceFeedName:String;
@@ -26,20 +22,23 @@
         [Bindable]
         private var targetFields:ArrayCollection;
 
+        private var sourceID:int;
+        private var targetID:int;
+
         private function getDefinitions():void {
             feedService.getMultipleFeeds.send(sourceFeedID, targetFeedID);
         }
 
         private function gotFeeds():void {
-            var feeds:ArrayCollection = feedService.getMultipleFeeds.lastResult as ArrayCollection;
-            sourceDefinition = feeds.getItemAt(0) as FeedDefinitionData;
-            targetDefinition = feeds.getItemAt(1) as FeedDefinitionData;
-            sourceFeedName = sourceDefinition.feedName;
-            targetFeedName = targetDefinition.feedName;
+            var response:CompositeResponse = feedService.getMultipleFeeds.lastResult as CompositeResponse;
+            sourceFeedName = response.firstName;
+            targetFeedName = response.secondName;
+            sourceID = response.firstID;
+            targetID = response.secondID;
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("display", false) ];
             var groupingSourceFields:ArrayCollection = new ArrayCollection();
-            for each (var field:AnalysisItem in sourceDefinition.fields) {
+            for each (var field:AnalysisItem in response.firstFields) {
                 if (field.hasType(AnalysisItemTypes.DIMENSION) && !field.hasType(AnalysisItemTypes.DATE)) {
                     groupingSourceFields.addItem(field);
                 }
@@ -48,7 +47,7 @@
             sourceFields.sort = sort;
             sourceFields.refresh();
             var groupingTargetFields:ArrayCollection = new ArrayCollection();
-            for each (var targetField:AnalysisItem in targetDefinition.fields) {
+            for each (var targetField:AnalysisItem in response.secondFields) {
                 if (targetField.hasType(AnalysisItemTypes.DIMENSION) && !targetField.hasType(AnalysisItemTypes.DATE)) {
                     groupingTargetFields.addItem(targetField);
                 }
@@ -60,11 +59,13 @@
 
         private function create():void {
             var connects:ArrayCollection = new ArrayCollection();
-            var connect:ConnectionWithInfo = new ConnectionWithInfo();
-            connect.sourceFeedID = sourceDefinition.dataFeedID;
-            connect.targetFeedID = targetDefinition.dataFeedID;
-            connect.sourceJoin = sourceBox.selectedItem.key;
-            connect.targetJoin = targetBox.selectedItem.key;
+            var connect:CompositeFeedConnection = new CompositeFeedConnection();
+            connect.sourceFeedID = sourceID;
+            connect.targetFeedID = targetID;
+            connect.sourceItem = sourceBox.selectedItem as AnalysisItem;
+            connect.targetItem = targetBox.selectedItem as AnalysisItem;
+            connect.sourceFeedName = sourceFeedName;
+            connect.targetFeedName = targetFeedName;
             connects.addItem(connect);
             dispatchEvent(new JoinSelectionEvent(connects));
             PopUpManager.removePopUp(this);

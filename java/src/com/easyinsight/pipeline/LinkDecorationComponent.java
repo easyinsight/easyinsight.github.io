@@ -24,7 +24,7 @@ public class LinkDecorationComponent implements IComponent {
                         Value value = row.getValue(analysisItem.createAggregateKey());
                         Map<String, String> links = value.getLinks();
                         if (links == null) {
-                            links = new HashMap<String, String>();
+                            links = new HashMap<String, String>(1);
                             value.setLinks(links);
                         }
                         links.put(link.getLabel(), url);

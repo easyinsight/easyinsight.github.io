@@ -3,16 +3,17 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
+import com.easyinsight.core.DataSourceDescriptor;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.cache.Cache;
-import com.easyinsight.datafeeds.FeedRegistry;
-import com.easyinsight.datafeeds.Feed;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -38,6 +39,88 @@ import org.apache.jcs.access.exception.CacheException;
 public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
+
+    public ReportJoins determineOverrides(long dataSourceID, List<AnalysisItem> items) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        ReportJoins reportJoins = new ReportJoins();
+        try {
+            CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) new FeedStorage().getFeedDefinitionData(dataSourceID);
+            List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
+            for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
+                FeedDefinition source = new FeedStorage().getFeedDefinitionData(node.getDataFeedID());
+                dataSources.add(new DataSourceDescriptor(source.getFeedName(), source.getDataFeedID(), source.getDataSourceType()));
+            }
+            List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
+            for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
+                JoinOverride joinOverride = new JoinOverride();
+                FeedDefinition source = new FeedStorage().getFeedDefinitionData(connection.getSourceFeedID());
+                FeedDefinition target = new FeedStorage().getFeedDefinitionData(connection.getTargetFeedID());
+                joinOverride.setSourceItem(findSourceItem(connection, items));
+                joinOverride.setTargetItem(findTargetItem(connection, items));
+                joinOverride.setSourceName(source.getFeedName());
+                joinOverride.setTargetName(target.getFeedName());
+                joinOverrides.add(joinOverride);
+            }
+            reportJoins.setJoinOverrides(joinOverrides);
+            reportJoins.setDataSources(dataSources);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        return reportJoins;
+    }
+
+    private AnalysisItem findSourceItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
+        AnalysisItem analysisItem = null;
+        for (AnalysisItem item : items) {
+            Key key = item.getKey();
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                if (derivedKey.getFeedID() == connection.getSourceFeedID()) {
+                    if (connection.getSourceJoin() != null) {
+                        if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getSourceJoin().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    } else {
+
+                        if (connection.getSourceItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+        return analysisItem;
+    }
+
+    private AnalysisItem findTargetItem(CompositeFeedConnection connection, List<AnalysisItem> items) {
+        AnalysisItem analysisItem = null;
+        for (AnalysisItem item : items) {
+            Key key = item.getKey();
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                if (derivedKey.getFeedID() == connection.getTargetFeedID()) {
+                    if (connection.getTargetJoin() != null) {
+                        if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(connection.getTargetJoin().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    } else {
+
+                        if (connection.getTargetItem().getKey().toKeyString().equals(item.getKey().toKeyString())) {
+                            analysisItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+        return analysisItem;
+    }
 
     public List<Date> testFormat(String format, String value1, String value2, String value3) {
         try {

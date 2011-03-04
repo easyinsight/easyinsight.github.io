@@ -104,37 +104,11 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
         return calculationTreeNode;
     }
 
-    public Value calculate(IRow row, Collection<AnalysisItem> analysisItems) {
-        CalculationTreeNode calculationTreeNode;
-        ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(derivationCode));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        Resolver r = new Resolver();
-        for (Key key : row.getKeys()) {
-            r.addKey(key);
-        }
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
+    public Value calculate(IRow row, CalculationTreeNode calculationTreeNode) {
         try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            for (int i = 0; i < calculationTreeNode.getChildCount();i++) {
-                if (!(calculationTreeNode.getChild(i) instanceof CalculationTreeNode)) {
-                    calculationTreeNode.deleteChild(i);
-                    break;
-                }
-            }
-            visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
-            calculationTreeNode.accept(visitor);
-
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
             calculationTreeNode.accept(rowVisitor);
             return new StringValue(rowVisitor.getResult().toString());
-        } catch (RecognitionException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
         }

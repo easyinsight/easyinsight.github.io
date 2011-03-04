@@ -103,6 +103,9 @@
         [Bindable]
         private var selectedMode:int;
 
+        [Bindable]
+        private var joinsCustomizable:Boolean;
+
         private var _analysisDefinition:AnalysisDefinition;
 
         [Bindable]
@@ -290,7 +293,7 @@
                 this.originSolution = feedMetadata.originSolution;
                 this.admin = feedMetadata.dataSourceAdmin;
                 dataSourceName = this.feedMetadata.dataSourceName;
-
+                joinsCustomizable = this.feedMetadata.customJoinsAllowed;
 
                 fieldsLabel = this.feedMetadata.dataSourceName + " Fields";
                 availableFields = new ArrayCollection();
@@ -861,7 +864,7 @@
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}"
                                     dataService="{dataService}"
                                     wrappers="{wrappers}" availableFields="{availableFields}"
-                                    dataView="{dataView}" analysisItemEdit="sortFields()"
+                                    dataView="{dataView}" analysisItemEdit="sortFields()" joinsCustomizable="{joinsCustomizable}"
                                     dataSourceID="{dataSourceID}" reportAudit="{auditString}" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" label="Filters"

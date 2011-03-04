@@ -131,6 +131,21 @@ public class CompositeFeed extends Feed {
             return new DataSet();
         }
 
+        List<CompositeFeedNode> compositeFeedNodes = this.compositeFeedNodes;
+        List<CompositeFeedConnection> connections;
+
+        if (insightRequestMetadata.getJoinOverrides() != null && insightRequestMetadata.getJoinOverrides().size() > 0) {
+            connections = new ArrayList<CompositeFeedConnection>();
+            for (JoinOverride joinOverride : insightRequestMetadata.getJoinOverrides()) {
+                connections.add(new CompositeFeedConnection(((DerivedKey) joinOverride.getSourceItem().getKey()).getFeedID(),
+                        ((DerivedKey) joinOverride.getTargetItem().getKey()).getFeedID(), joinOverride.getSourceItem(),
+                        joinOverride.getTargetItem(), joinOverride.getSourceName(), joinOverride.getTargetName()));
+            }
+            insightRequestMetadata.setJoinOverrides(null);
+        } else {
+            connections = this.connections;
+        }
+
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
 
         UndirectedGraph<QueryStateNode, Edge> graph = new SimpleGraph<QueryStateNode, Edge>(Edge.class);
@@ -239,15 +254,27 @@ public class CompositeFeed extends Feed {
                         for (Key join : localEdge.connection.getSourceJoins()) {
                             queryStateNode.addKey(join);
                         }
+                        for (AnalysisItem sourceItem : localEdge.connection.getSourceItems()) {
+                            queryStateNode.addItem(sourceItem);
+                        }
                         for (Key join : localEdge.connection.getTargetJoins()) {
                             targetNode.addKey(join);
+                        }
+                        for (AnalysisItem sourceItem : localEdge.connection.getTargetItems()) {
+                            targetNode.addItem(sourceItem);
                         }
                     } else {
                         for (Key join : localEdge.connection.getTargetJoins()) {
                             queryStateNode.addKey(join);
                         }
+                        for (AnalysisItem sourceItem : localEdge.connection.getTargetItems()) {
+                            queryStateNode.addItem(sourceItem);
+                        }
                         for (Key join : localEdge.connection.getSourceJoins()) {
                             targetNode.addKey(join);
+                        }
+                        for (AnalysisItem sourceItem : localEdge.connection.getSourceItems()) {
+                            targetNode.addItem(sourceItem);
                         }
                     }
                 }

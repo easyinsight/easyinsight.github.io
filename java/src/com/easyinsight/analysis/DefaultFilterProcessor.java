@@ -11,7 +11,7 @@ public class DefaultFilterProcessor implements IFilterProcessor {
     public void createRow(DataSet resultDataSet, IRow row, FilterDefinition filterDefinition, boolean matched) {
         if (matched) {
             IRow newRow = resultDataSet.createRow();
-            newRow.addValues(row.getValues());
+            newRow.addValues(row);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.easyinsight.feedassembly
 {
-	import com.easyinsight.analysis.Key;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.Key;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.CompositeFeedConnection")]
@@ -10,11 +11,28 @@ package com.easyinsight.feedassembly
 		public var targetJoin:Key;
 		public var sourceFeedID:int;
 		public var targetFeedID:int;
-		
+        public var sourceItem:AnalysisItem;
+        public var targetItem:AnalysisItem;
+        public var sourceFeedName:String;
+		public var targetFeedName:String;
+
 		public function CompositeFeedConnection()
 			{
 			super();
 		}
 
+        public function get sourceDisplay():String {
+            if (sourceItem != null) {
+                return sourceItem.display;
+            }
+            return sourceJoin.createString();
+        }
+
+        public function get targetDisplay():String {
+            if (targetItem != null) {
+                return targetItem.display;
+            }
+            return targetJoin.createString();
+        }
 	}
 }

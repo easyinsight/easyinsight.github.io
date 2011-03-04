@@ -19,6 +19,15 @@ public class InsightRequestMetadata implements Serializable {
     private List<AnalysisItemOverride> hierarchyOverrides = new ArrayList<AnalysisItemOverride>();
     private boolean aggregateQuery = true;
     private boolean gmtData;
+    private List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
+
+    public List<JoinOverride> getJoinOverrides() {
+        return joinOverrides;
+    }
+
+    public void setJoinOverrides(List<JoinOverride> joinOverrides) {
+        this.joinOverrides = joinOverrides;
+    }
 
     public boolean isGmtData() {
         return gmtData;

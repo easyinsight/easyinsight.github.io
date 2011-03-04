@@ -13,6 +13,8 @@ public class EmptyValue extends Value {
 
     private String blah = "";
 
+    public static EmptyValue EMPTY_VALUE = new EmptyValue();
+
     public int type() {
         return Value.EMPTY;
     }

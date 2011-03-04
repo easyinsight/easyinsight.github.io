@@ -97,8 +97,10 @@ public class RollingFilterDefinition extends FilterDefinition {
             Date now = insightRequestMetadata.getNow();
             long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now);
             long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now);
-            long workingEndDate = endTime - insightRequestMetadata.getUtcOffset() * 1000 * 60;
-            long workingStartDate = startTime - insightRequestMetadata.getUtcOffset() * 1000 * 60;
+            long workingEndDate = endTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+            long workingStartDate = startTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+            System.out.println("db start time = " + new Date(workingStartDate));
+            System.out.println("db end time = " + new Date(workingEndDate));
             if (customBeforeOrAfter == RollingFilterDefinition.AFTER) {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate));
             } else if (customBeforeOrAfter == RollingFilterDefinition.BEFORE) {

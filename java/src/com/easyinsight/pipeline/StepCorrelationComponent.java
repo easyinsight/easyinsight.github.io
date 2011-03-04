@@ -33,7 +33,7 @@ public class StepCorrelationComponent implements IComponent {
         }
         List<IRow> rows = new ArrayList<IRow>();
         for (Correlation correlation : correlationMap.values()) {
-            rows.addAll(correlation.generateRows());
+            rows.addAll(correlation.generateRows().getRows());
         }
         return new DataSet(rows);
     }
@@ -67,10 +67,10 @@ public class StepCorrelationComponent implements IComponent {
             }
         }
 
-        public List<IRow> generateRows() {
+        public DataSet generateRows() {
             // loop from startDate to endDate, create entry for each field
             // create startDate, create endDate, create the interval between
-            List<IRow> rows = new ArrayList<IRow>();
+            DataSet dataSet = new DataSet();
             if (startDate != null) {
                 long startTime = startDate.getTime();
                 long endTime = endDate == null ? System.currentTimeMillis() : endDate.getTime();
@@ -78,13 +78,12 @@ public class StepCorrelationComponent implements IComponent {
                 cal.setTimeInMillis(startTime);
                 //long interval = 1000 * 60 * 60 * 24;
                 while (cal.getTimeInMillis() < endTime) {
-                    IRow row = new Row();
-                    row.addValues(this.row.getValues());
+                    IRow row = dataSet.createRow();
+                    row.addValues(this.row);
                     row.addValue(analysisStep.createAggregateKey(), new DateValue(cal.getTime()));
                     row.removeValue(start.createAggregateKey());
                     row.removeValue(end.createAggregateKey());
                     row.removeValue(analysisStep.getCorrelationDimension().createAggregateKey());
-                    rows.add(row);
                     if (analysisStep.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
                         cal.add(Calendar.DAY_OF_YEAR, 1);
                     } else if (analysisStep.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL) {
@@ -97,7 +96,7 @@ public class StepCorrelationComponent implements IComponent {
 
                 }
             }
-            return rows;
+            return dataSet;
         }
     }
 }

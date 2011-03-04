@@ -321,11 +321,11 @@ public class DataStorage {
         }
     }
 
-    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems) throws SQLException {
+    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems) throws Exception {
         return migrate(previousItems, newItems, true);
     }
 
-    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, final boolean migrateData) throws SQLException {
+    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, final boolean migrateData) throws Exception {
         // did any items change in a way that requires us to migrate...
         List<FieldMigration> fieldMigrations = new ArrayList<FieldMigration>();
         boolean newFieldsFound = false;
@@ -557,9 +557,9 @@ public class DataStorage {
                                 row.addValue(aggregateKey, new EmptyValue());
                             } else {
                                 long milliseconds = time.getTime();
-                                /*if (gmtData) {
+                                if (gmtData) {
                                     milliseconds = milliseconds - (timeOffset * 1000 * 60);
-                                }*/
+                                }
                                 row.addValue(aggregateKey, new DateValue(new Date(milliseconds)));
                             }
                         } catch (SQLException e) {
@@ -707,11 +707,11 @@ public class DataStorage {
         }
     }
 
-    public void insertData(DataSet dataSet) throws SQLException {
+    public void insertData(DataSet dataSet) throws Exception {
         insertData(dataSet, keys);
     }
 
-    public void insertData(DataSet dataSet, Map<Key, KeyMetadata> keys) throws SQLException {
+    public void insertData(DataSet dataSet, Map<Key, KeyMetadata> keys) throws Exception {
         StringBuilder columnBuilder = new StringBuilder();
         StringBuilder paramBuilder = new StringBuilder();
         Iterator<KeyMetadata> keyIter = keys.values().iterator();
@@ -739,13 +739,13 @@ public class DataStorage {
                 insertStmt.execute();
             }
             insertStmt.close();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error("Failure on persistence where SQL = " + insertSQL + ", database = " + database.getID() + ", data set = " + dataSet);
             throw e;
         }
     }
 
-    public void updateData(DataSet dataSet, List<IWhere> wheres) throws SQLException {
+    public void updateData(DataSet dataSet, List<IWhere> wheres) throws Exception {
         StringBuilder fieldBuilder = new StringBuilder();
         List<KeyMetadata> updateKeys = new ArrayList<KeyMetadata>();
         for (KeyMetadata keyMetadata : keys.values()) {
@@ -956,8 +956,7 @@ public class DataStorage {
             }
         }
         if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        //sqlBuilder.append(" ) CHARSET=utf8");
-        sqlBuilder.append(" )");
+        sqlBuilder.append(" ) CHARSET=utf8");
         return sqlBuilder.toString();
     }
 
