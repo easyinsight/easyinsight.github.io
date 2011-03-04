@@ -6,13 +6,13 @@
     try {
         java.util.List results = hibernateSession.createQuery("from User where userName = ? or email = ?").setString(0, userName).setString(1, userName).list();
         if(results.size() != 1) {
-            response.sendRedirect("jquerytest.jsp?error=true");
+            response.sendRedirect("index.jsp?error=true");
             return;
         } else {
             com.easyinsight.users.User user =(com.easyinsight.users.User) results.get(0);
             String encryptedPass = com.easyinsight.security.PasswordService.getInstance().encrypt(password, user.getHashSalt(), user.getHashType());
             if(!encryptedPass.equals(user.getPassword())) {
-                response.sendRedirect("jquerytest.jsp?error=true");
+                response.sendRedirect("index.jsp?error=true");
                 return;
             }
             com.easyinsight.users.Account account = user.getAccount();
