@@ -18,6 +18,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.ParseException;
 import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -31,6 +32,7 @@ import java.sql.Connection;
 public class BaseCampTodoSource extends BaseCampBaseSource {
     public static final String XMLDATEFORMAT = "yyyy-MM-dd";
     public static final String XMLDATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String ALTDATEFORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
 
     public static final String TODOLISTNAME = "To-do List";
     public static final String MILESTONENAME = "Milestone";
@@ -84,6 +86,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
+        DateFormat altFormat = new SimpleDateFormat(ALTDATEFORMAT);
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
@@ -125,7 +128,14 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     String id = queryField(milestoneNode, "id/text()");
                     String milestoneName = queryField(milestoneNode, "title/text()");
                     String milestoneDl = queryField(milestoneNode, "deadline/text()");
-                    Date milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                    System.out.println("deadline = " + milestoneDl);
+                    Date milestoneDeadline = null;
+                    try {
+                        milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                    } catch (ParseException e) {
+                        milestoneDeadline = altFormat.parse(milestoneDl);
+                        System.out.println("parsed into " + milestoneDeadline);
+                    }
                     String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
                     Date milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
                     String milestoneCompletedOnString = queryField(milestoneNode, "completed-on/text()");

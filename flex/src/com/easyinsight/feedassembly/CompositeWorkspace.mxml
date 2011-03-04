@@ -458,7 +458,7 @@
         <mx:method name="searchForHiddenChildren" result="gotHiddenChildren()"/>
         <mx:method name="testJoin" result="tested()"/>
     </mx:RemoteObject>
-    <mx:VBox width="100%" height="100%" backgroundColor="#E0E0E0">
+    <mx:VBox width="1000" height="100%" backgroundColor="#E0E0E0">
         <mx:HBox width="100%" paddingLeft="10" paddingRight="10">
             <mx:VBox width="40%">
                 <mx:HBox width="100%" horizontalAlign="center">
@@ -479,10 +479,10 @@
                 <mx:Button label="Add Join..." click="addConnection()" styleName="grayButton"/>
                 <mx:DataGrid dataProvider="{connections}" width="600" rowHeight="28">
                     <mx:columns>
-                        <util:EIDataGridColumn dataField="sourceFeedName" headerText="Source Data Source"/>
+                        <util:EIDataGridColumn dataField="sourceFeedName" headerText="Data Source"/>
                         <util:EIDataGridColumn dataField="sourceDisplay" headerText="Source Field"/>
                         <util:EIDataGridColumn dataField="targetDisplay" headerText="Target Field"/>
-                        <util:EIDataGridColumn dataField="targetFeedName" headerText="Target Data Source"/>
+                        <util:EIDataGridColumn dataField="targetFeedName" headerText="Data Source"/>
                         <util:EIDataGridColumn headerText="" dataField="name" width="50" sortable="false" itemRenderer="com.easyinsight.feedassembly.ConnectionControls"/>
                     </mx:columns>
                 </mx:DataGrid>

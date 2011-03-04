@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
-                xmlns:feedassembly="com.easyinsight.feedassembly.*"
-                paddingTop="10" paddingLeft="0" paddingRight="0" paddingBottom="0"
-        implements="com.easyinsight.listing.IPerspective">
+<skin:BackgroundImage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+                      xmlns:feedassembly="com.easyinsight.feedassembly.*"
+                      implements="com.easyinsight.listing.IPerspective" xmlns:skin="com.easyinsight.skin.*">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.feed.FeedChangeEvent;
@@ -99,13 +98,15 @@
     <mx:RemoteObject destination="feeds" id="feedService">
 		<mx:method name="updateFeedDefinition" result="updated()"/>
 	</mx:RemoteObject>
-    <mx:HBox paddingLeft="20">
-        <mx:Button icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
-                   toolTip="Close" label="Close Editor" labelPlacement="right"/>
-        <mx:Button icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                       toolTip="Save" label="Save" labelPlacement="right"/>
-        <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="analyze()"
-                       toolTip="Analyze" enabled="{feedDefinition != null}" label="Create a Report" labelPlacement="right"/>
-    </mx:HBox>
-    <feedassembly:CompositeWorkspace id="workspace" width="100%" height="100%" feeds="{_feedList}" feedChange="onFeedChange(event)"/>
-</mx:VBox>
+    <mx:VBox width="1000" height="100%">
+        <mx:HBox paddingLeft="20" paddingTop="10">
+            <mx:Button icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
+                       toolTip="Close" label="Close Editor" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+                           toolTip="Save" label="Save" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/media_play_green.png')" click="analyze()"
+                           toolTip="Analyze" enabled="{feedDefinition != null}" label="Create a Report" labelPlacement="right"/>
+        </mx:HBox>
+        <feedassembly:CompositeWorkspace id="workspace" width="100%" height="100%" feeds="{_feedList}" feedChange="onFeedChange(event)"/>
+    </mx:VBox>
+</skin:BackgroundImage>

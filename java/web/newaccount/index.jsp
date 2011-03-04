@@ -116,7 +116,7 @@
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
 <div style="position:absolute;height:38px;background-color:#848080;width:100%;margin-top:70px"></div>
-<div style="position:absolute;height:185px;background-color:#444444;width:100%;margin-top:108px"></div>
+<div style="position:absolute;height:160px;background-color:#444444;width:100%;margin-top:108px"></div>
 <div style="width:1000px;margin:0 auto;">
     <div id="topBar">
         <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
@@ -134,13 +134,18 @@
         <a class="inactive" href="/partners.html">Partners</a>
         <a class="inactive" href="/company.html">Company</a>
     </div>
-    <div id="coreContent" style="height:185px">
-            <div class="coreContentBlock">
-                <h2 class="coreContentHeader">30 Day Free Trial on All Accounts</h2>
-                <p class="coreContentParagraph">
-                    Start building reports and analyzing data now! No credit card is required for your 30 day free trial.
-                </p>
-            </div>
+    <div id="coreContent" style="height:160px;width:950px">
+        <div class="coreContentBlock" style="padding-top:0">
+            <h2 class="coreContentHeader">30 Day Free Trial on All Accounts</h2>
+            <p class="coreContentParagraph">
+                Hundreds of businesses are making better business decisions because of Easy Insight right now. Start building better reports and analyzing data yourself! No credit card is required for your 30 day free trial.
+            </p>
+        </div>
+        <div style="margin-top:50px;float:right;width:360px;background-color:#FFFFFF;-moz-border-radius:3px;-webkit-border-radius:3px;padding:5px">
+            <p style="font-size:16px">
+                Have questions? Reach us at 720-285-8652 or <a href="mailto:sales@easy-insight.com">sales@easy-insight.com</a>.
+            </p>
+        </div>
     </div>
     <div id="contentHeaderStart">
     </div>
@@ -261,13 +266,6 @@
                         <td><img src="/images/check.png"/></td>
                     </tr>
                     <tr>
-                        <td class="firstCell">Data level security</td>
-                        <td></td>
-                        <td></td>
-                        <td><img src="/images/check.png"/></td>
-                        <td><img src="/images/check.png"/></td>
-                    </tr>
-                    <tr>
                         <td class="firstCell">KPI trees</td>
                         <td></td>
                         <td></td>
@@ -374,6 +372,13 @@
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr style="font-size:20px">
+                        <td class="firstOptionCell" style="width:300px;border: 1px solid #FF0000"></td>
+                        <td class="secondOptionCell" style="width:130px;border: 1px solid #DD0000"><a href="accountsetup.jsp?tier=2">Sign Up</a></td>
+                        <td class="thirdOptionCell" style="width:130px;border: 1px solid #BB0000"><a href="accountsetup.jsp?tier=3">Sign Up</a></td>
+                        <td class="fourthOptionCell" style="width:130px;border: 1px solid #990000"><a href="accountsetup.jsp?tier=4">Sign Up</a></td>
+                        <td class="fifthOptionCell" style="width:130px;border: 1px solid #770000"><a href="mailto:sales@easy-insight.com">Contact Us</a></td>
                     </tr>
                 </table>
             </div>

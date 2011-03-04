@@ -55,6 +55,10 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         return basecampCache;
     }
 
+    public boolean customJoinsAllowed() {
+        return false;
+    }
+
     public String getToken() {
         return token;
     }
