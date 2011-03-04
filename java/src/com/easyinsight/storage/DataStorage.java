@@ -557,9 +557,9 @@ public class DataStorage {
                                 row.addValue(aggregateKey, new EmptyValue());
                             } else {
                                 long milliseconds = time.getTime();
-                                if (gmtData) {
+                                /*if (gmtData) {
                                     milliseconds = milliseconds - (timeOffset * 1000 * 60);
-                                }
+                                }*/
                                 row.addValue(aggregateKey, new DateValue(new Date(milliseconds)));
                             }
                         } catch (SQLException e) {
