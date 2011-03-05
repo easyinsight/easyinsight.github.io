@@ -18,7 +18,7 @@ public class DataSetKeys {
     public int getKey(Key key) {
         Short position = keyMap.get(key);
         if (position == null) {
-            position = (short) (max + 1);
+            position = max;
             keyMap.put(key, position);
             max++;
         }
@@ -31,7 +31,7 @@ public class DataSetKeys {
             position = keyMap.get(analysisItem.createAggregateKey());
         }
         if (position == null) {
-            position = (short) (max + 1);
+            position = max;
             keyMap.put(analysisItem.createAggregateKey(), position);
             max++;
         }

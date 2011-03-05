@@ -147,6 +147,10 @@ public class Row implements IRow, Serializable {
     }
 
     public String toString() {
-        return valueMap.toString();
+        Map<Key, Value> map = new HashMap<Key, Value>();
+        for (Key key : dataSetKeys.getKeys()) {
+            map.put(key, getValue(key));
+        }
+        return map.toString();
     }
 }
