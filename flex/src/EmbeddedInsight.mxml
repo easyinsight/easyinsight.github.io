@@ -109,6 +109,6 @@
         <framework:LoginComponent loginEvent2="stackIndex = 2"/>
         <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      prefix="https://localhost"/>
+                                      prefix="https://www.easy-insight.com"/>
     </mx:ViewStack>
 </mx:Application>
