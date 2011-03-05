@@ -32,16 +32,17 @@ public class Database {
     private String id;
     private boolean addHibernate;
 
-    private String urlTemplate = "jdbc:mysql://{0}:{1}/{2}?useUnicode=yes&characterEncoding=UTF-8";
+    private String urlTemplate1 = "jdbc:mysql://{0}:{1}/{2}?useUnicode=yes&characterEncoding=UTF-8";
+    private String urlTemplate2 = "jdbc:mysql://{0}:{1}/{2}";
 
     private Database(String host, String port, String databaseName, String userName, String password, boolean addHibernate, String id) {
-        dataSource = setupDataSource(host, port, databaseName, userName, password);
+        dataSource = setupDataSource(host, port, databaseName, userName, password, addHibernate ? urlTemplate2 : urlTemplate1);
         this.id = id;
         this.addHibernate = addHibernate;
         if (addHibernate) {
             try {
                 AnnotationConfiguration configuration = new AnnotationConfiguration().configure();
-                String url = MessageFormat.format(urlTemplate, host, port, databaseName);
+                String url = MessageFormat.format(urlTemplate2, host, port, databaseName);
                 configuration.setProperty("hibernate.connection.url", url);
                 configuration.setProperty("hibernate.connection.username", userName);
                 configuration.setProperty("hibernate.connection.password", password);
@@ -113,7 +114,7 @@ public class Database {
         }
     }
 
-    private ComboPooledDataSource setupDataSource(String host, String port, String databaseName, String userName, String password) {
+    private ComboPooledDataSource setupDataSource(String host, String port, String databaseName, String userName, String password, String urlTemplate) {
         /*connectionPool = new GenericObjectPool(null);
 
         connectionPool.setMinIdle(5);

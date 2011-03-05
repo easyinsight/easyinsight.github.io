@@ -40,11 +40,11 @@ public class MigrationManager {
 
     public void migrate() {
         if (obtainLock()) {
-            try {
+            /*try {
                 migrateStorage();
             } catch (Exception e) {
                 LogClass.error(e);
-            }
+            }*/
             try {
                 EIConnection conn = Database.instance().getConnection();
                 try {
@@ -134,9 +134,6 @@ public class MigrationManager {
     }
 
     private void migrateStorage() throws Exception {
-        for (Database database : DatabaseManager.instance().getDbMap().values()) {
-            migrateDatabase(database);
-        }
         migrateDatabase(Database.instance());
     }
 
