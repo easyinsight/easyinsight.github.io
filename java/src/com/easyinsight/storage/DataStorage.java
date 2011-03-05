@@ -956,7 +956,8 @@ public class DataStorage {
             }
         }
         if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" ) CHARSET=utf8");
+        sqlBuilder.append(" )");
+        //sqlBuilder.append(" ) CHARSET=utf8");
         return sqlBuilder.toString();
     }
 

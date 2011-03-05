@@ -32,7 +32,7 @@ public class Database {
     private String id;
     private boolean addHibernate;
 
-    private String urlTemplate1 = "jdbc:mysql://{0}:{1}/{2}?useUnicode=yes&characterEncoding=UTF-8";
+    private String urlTemplate1 = "jdbc:mysql://{0}:{1}/{2}";
     private String urlTemplate2 = "jdbc:mysql://{0}:{1}/{2}";
 
     private Database(String host, String port, String databaseName, String userName, String password, boolean addHibernate, String id) {
