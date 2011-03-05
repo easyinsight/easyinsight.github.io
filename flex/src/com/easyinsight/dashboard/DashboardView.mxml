@@ -28,11 +28,16 @@
         import mx.core.UIComponent;
         import mx.formatters.NumberFormatter;
         import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
 
         [Bindable]
         [Embed(source="../../../../assets/document_out.png")]
         private var closeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/table.png")]
+        private var exportIcon:Class;
 
         private var _dashboardID:int;
 
@@ -224,6 +229,14 @@
             filterIndex = filterIndex == 0 ? 1 : 0;
         }
 
+        private function exportDashboard():void {
+            var window:DashboardExportWindow = new DashboardExportWindow();
+            window.dashboard = dashboard;
+            PopUpManager.addPopUp(window, this, true);
+            window.x = exportButton.x - 20;
+            window.y = exportButton.y + exportButton.height + 10;
+        }
+
         [Bindable]
         private var dashboardWidth:int;
 
@@ -258,6 +271,9 @@
                                        id="fullScreenButton" toolTip="View full screen"/>
                             <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
                                        id="refreshButton" toolTip="Refresh this dashboard"/>
+                            <mx:Button icon="{exportIcon}" click="exportDashboard()"
+                                   labelPlacement="bottom"
+                                   id="exportButton" toolTip="Export the report..."/>
                             <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="bottom"
                                        id="filterButton"/>
                             <mx:Spacer width="100%"/>

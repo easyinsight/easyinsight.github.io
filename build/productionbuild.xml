@@ -389,7 +389,7 @@
     <target name="modules1" depends="report.area3dchart, report.areachart, report.bar3dchart, report.barchart, report.bubblechart"/>
     <target name="modules2" depends="report.column3dchart, report.columnchart, report.linechart, report.line3dchart, report.list"/>
     <target name="modules3" depends="report.pie3dchart, report.piechart, report.plotchart, report.stackedbarchart, report.stackedcolumnchart"/>
-    <target name="modules4" depends="report.gauge, report.crosstab, report.tree, report.treemap"/>
+    <target name="modules4" depends="report.gauge, report.crosstab, report.tree, report.treemap, app.embeddeddashboard"/>
     <target name="modules5" depends="report.worldmap, report.usmap, report.americasmap, report.asiamap, report.europemap, report.middleeastmap"/>
     <target name="modules6" depends="perspective.spreadsheetwizard, perspective.connectiondetail, perspective.kpitreeadmin"/>
     <target name="modules7" depends="perspective.kpiwindow, perspective.kpitreeview, perspective.datasourceadmin"/>
@@ -402,6 +402,10 @@
 
     <target name="app.embeddedreport">
         <buildSWF mainMXML="EmbeddedInsight.mxml" swfName="EmbeddedInsight" buildFile="embedded-insight.xml"/>
+    </target>
+
+    <target name="app.embeddeddashboard">
+        <buildSWF mainMXML="EmbeddedDashboard.mxml" swfName="EmbeddedDashboard" buildFile="embedded-dashboard.xml"/>
     </target>
 
     <target name="app.selenium">

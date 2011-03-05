@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var url:String;
+
+        private var _urlKey:String;
+
+        private var _reportWidth:uint = 600;
+
+        private var _reportHeight:uint = 500;
+
+        [Bindable(event="reportWidthChanged")]
+        public function get reportWidth():uint {
+            return _reportWidth;
+        }
+
+        public function set reportWidth(value:uint):void {
+            if (_reportWidth == value) return;
+            _reportWidth = value;
+            dispatchEvent(new Event("reportWidthChanged"));
+            updateURL();
+        }
+
+        [Bindable(event="reportHeightChanged")]
+        public function get reportHeight():uint {
+            return _reportHeight;
+        }
+
+        public function set reportHeight(value:uint):void {
+            if (_reportHeight == value) return;
+            _reportHeight = value;
+            dispatchEvent(new Event("reportHeightChanged"));
+            updateURL();
+        }
+
+        public function set urlKey(value:String):void {
+            _urlKey = value;
+            updateURL();
+        }
+
+        private function updateURL():void {
+            url = "<iframe width=\""+_reportWidth+"\" height=\"" + _reportHeight +"\" src=\"https://www.easy-insight.com/app/dashboard.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&id=" + _urlKey+"\"></iframe>";
+        }
+
+        private function copyToClipboard():void {
+            System.setClipboard(url);
+        }
+		]]>
+	</mx:Script>
+	<mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+            <mx:FormItem label="Dashboard Width:">
+                <mx:NumericStepper id="widthStepper" value="{reportWidth}" minimum="50" maximum="2400" change="reportWidth = widthStepper.value"/>
+            </mx:FormItem>
+            <mx:FormItem label="Dashboard Height:">
+                <mx:NumericStepper id="heightStepper" value="{reportHeight}" minimum="50" maximum="2400" change="reportHeight = heightStepper.value"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Label text="You can paste this HTML into any web page to embed the dashboard into the page." fontSize="14"/>
+		<mx:HBox id="quickBox" verticalAlign="middle">
+			<mx:TextArea editable="false" text="{url}" width="400" height="200" wordWrap="true" id="firstTextArea" borderStyle="solid" borderThickness="1"/>
+			<util:SaveButton label="Copy to Clipboard" click="copyToClipboard()"/>
+		</mx:HBox>
+		<util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
+	</mx:VBox>
+</util:EISlimWindow>

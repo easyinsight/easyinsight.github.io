@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.EmbedDashboardWindow;
+        import com.easyinsight.report.URLWindow;
+
+        import mx.managers.PopUpManager;
+
+        private var _reportType:int;
+        private var _dataSourceID:int;
+        private var _dashboardName:String;
+        private var _coreView:DisplayObject;
+
+        private var _dashboard:Dashboard;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            _dashboardName = _dashboard.name;
+        }
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+        }
+
+        private function url():void {
+            //var escapedName:String = _reportName.replace(/[ @\"&*#$%^~]/g, "-");
+            var url:String = "https://www.easy-insight.com/app/#dashboardID=" + _dashboard.urlKey;
+            var urlWindow:URLWindow = new URLWindow();
+            urlWindow.x = this.x;
+            urlWindow.y = this.y;
+            urlWindow.url = url;
+            PopUpManager.addPopUp(urlWindow, this, true);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function embed():void {
+            var embedReportWindow:EmbedDashboardWindow = new EmbedDashboardWindow();
+            embedReportWindow.urlKey = _dashboard.urlKey;
+            embedReportWindow.x = this.x;
+            embedReportWindow.y = this.y;
+            PopUpManager.addPopUp(embedReportWindow, this, true);
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:VBox paddingTop="10" paddingLeft="10" paddingBottom="10" paddingRight="10" horizontalAlign="center">
+        <mx:Label text="Click any of the options below to export the dashboard:" fontSize="14"/>
+        <mx:Grid>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/link.png')" label="Link by URL" click="url()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <util:SaveButton icon="@Embed(source='../../../../assets/plasma_tv.png')" label="Embed Dashboard into Website" click="embed()" labelPlacement="right" width="250"/>
+                </mx:GridItem>
+            </mx:GridRow>
+        </mx:Grid>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:CancelButton label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>
