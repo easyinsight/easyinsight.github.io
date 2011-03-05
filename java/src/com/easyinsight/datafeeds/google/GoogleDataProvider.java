@@ -175,7 +175,7 @@ public class GoogleDataProvider {
         return worksheets;
     }
 
-    private static final String AUTHENTICATE_XML = "<username>{0}</username><password>{1}</password><hours>24</hours>";
+    private static final String AUTHENTICATE_XML = "<username>{0}</username><password>{1}</password><hours>144</hours>";
     private static final String GET_APPLICATIONS_XML = "<ticket>{0}</ticket><withembeddedtables>0</withembeddedtables>";
     private static final String GET_DATABASES_XML = "<ticket>{0}</ticket><excludeparents>1</excludeparents>";
     private static final String GET_SCHEMA_XML = "<ticket>{0}</ticket><apptoken>{1}</apptoken>";
