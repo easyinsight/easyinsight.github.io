@@ -32,6 +32,7 @@
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
+        import com.easyinsight.report.EmbeddedReportExportWindow;
         import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.util.UserAudit;
 
@@ -266,7 +267,7 @@
         }
 
         private function exportData():void {
-            var window:ReportExportWindow = new ReportExportWindow();
+            var window:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
             window.report = dataViewFactory.report;
             window.coreView = dataViewFactory.getChildAt(0);
             PopUpManager.addPopUp(window, this);
@@ -305,7 +306,7 @@
         <mx:Button toolTip="Export Report" click="exportData()" icon="{exportIcon}" id="exportButton"/>
         <mx:Button toolTip="{filterTooltip}" click="toggleFilterIndex()" icon="{filterIcon}"/>
         <mx:Spacer width="100%"/>
-        <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{dataViewFactory}"/>
+        <!--<datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{dataViewFactory}"/>-->
     </mx:HBox>
     <mx:ViewStack width="100%" resizeToContent="true" creationPolicy="all" selectedIndex="{filterIndex}">
         <mx:Box/>

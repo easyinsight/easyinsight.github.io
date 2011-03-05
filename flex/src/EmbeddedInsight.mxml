@@ -23,8 +23,10 @@
         import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.framework.Constants;
         import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.util.UserAudit;
 
         [Bindable]
         private var urlKey:String;
@@ -40,6 +42,7 @@
 
         private function handleFlashVars():void {
             Constants.setup();
+            UserAudit.initialize();
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             this.urlKey = String(Application.application.parameters.analysisID);
             this.reportType = int(Application.application.parameters.reportType);
@@ -55,18 +58,7 @@
         }
 
         private function dependancies():void {
-            var analysisDate:AnalysisDateDimension;
-            var dim:AnalysisDimension;
-            var measure:AnalysisMeasure;
-            var complex:ComplexAnalysisMeasure;
-            var range:AnalysisRangeDimension;
-            var list:AnalysisList;
-            var hierarchy:AnalysisHierarchyItem;
-            var step:AnalysisStep;
-            var calculation:AnalysisCalculation;
-            var sigma:SixSigmaMeasure;
-            var latitude:AnalysisLatitude;
-            var longitude:AnalysisLongitude;
+             TORegistry.registerTypes();
         }
 
         [Bindable]

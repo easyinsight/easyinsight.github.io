@@ -20,7 +20,7 @@ import java.text.MessageFormat;
  */
 public class SeleniumLauncher {
 
-    public static final String OUTBOUND_QUEUE = "EISeleniumAlan";
+    public static final String OUTBOUND_QUEUE = "EISelenium";
 
     private static final String URL = "/app/selenium/selenium.jsp?userName={0}&password={1}&seleniumID={2}&dataSourceID={3}&reportID={4}&reportType={5}&width={6}&height={7}";
 
