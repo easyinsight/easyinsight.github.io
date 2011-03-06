@@ -1,8 +1,6 @@
 package com.easyinsight.admin;
 
-import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisStorage;
-import com.easyinsight.analysis.ZipGeocodeCache;
+import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.SendGridEmail;
@@ -53,6 +51,30 @@ public class AdminService {
             throw new RuntimeException(e);
         } finally {
             session.close();
+            Database.closeConnection(conn);
+        }
+    }
+
+    public String forceRun(String urlKey) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE URL_KEY = ?");
+            queryStmt.setString(1, urlKey);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long analysisID = rs.getLong(1);
+                WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(analysisID);
+                ListDataResults results = (ListDataResults) new DataService().list(report, new InsightRequestMetadata());
+                return "Ran Successfully with " + results.getRows().length + " rows";
+            } else {
+                throw new RuntimeException("Couldn't find report " + urlKey);
+            }
+
+        } catch (Exception e) {
+            LogClass.error(e);
+            return e.getMessage();
+        } finally {
             Database.closeConnection(conn);
         }
     }

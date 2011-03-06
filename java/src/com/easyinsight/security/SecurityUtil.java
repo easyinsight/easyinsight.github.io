@@ -814,6 +814,9 @@ public class SecurityUtil {
     }
 
     public static void authorizeFeedAccess(long dataFeed) {
+        if (getAccountTier() == Account.ADMINISTRATOR) {
+            return;
+        }
         // retrieve feed policy
         boolean publiclyVisible = false;
         boolean accountVisible = false;
