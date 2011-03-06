@@ -35,7 +35,11 @@ public class Row implements IRow, Serializable {
         if (key >= valueMap.length) {
             return EmptyValue.EMPTY_VALUE;
         }
-        return valueMap[key];
+        Value value = valueMap[key];
+        if (value == null) {
+            return EmptyValue.EMPTY_VALUE;
+        }
+        return value;
     }
 
     public Value getValue(AnalysisItem analysisItem) {
@@ -43,7 +47,11 @@ public class Row implements IRow, Serializable {
         if (key >= valueMap.length) {
             return EmptyValue.EMPTY_VALUE;
         }
-        return valueMap[key];
+        Value value = valueMap[key];
+        if (value == null) {
+            return EmptyValue.EMPTY_VALUE;
+        }
+        return value;
     }
 
     public void addValue(String tag, Value value) {
