@@ -10,7 +10,15 @@
     String dataSourceID = request.getParameter("dataSourceID");
     String reportType = request.getParameter("reportType");
     String reportName = request.getParameter("reportName");
+    String showToolbar = request.getParameter("showToolbar");
+        String showFilters = request.getParameter("showFilters");
     String flashVars = "analysisID=" + reportID + "&reportType=" + reportType + "&reportName=" + reportName + "&dataSourceID=" + dataSourceID;
+    if(showToolbar != null) {
+        flashVars = flashVars + "&showToolbar=" + showToolbar;
+    }
+        if(showFilters != null) {
+            flashVars = flashVars + "&showFilters=" + showFilters;
+        }
 %>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 

@@ -26,7 +26,10 @@
         import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.skin.ApplicationSkin;
         import com.easyinsight.util.UserAudit;
+        import mx.controls.Alert;
+
 
         [Bindable]
         private var urlKey:String;
@@ -40,6 +43,23 @@
         [Bindable]
         private var reportName:String;
 
+
+        private var _showToolbar:Boolean;
+
+        [Bindable("showToolbarChanged")]
+        public function get showToolbar():Boolean {
+            return _showToolbar;
+        }
+
+        public function set showToolbar(value:Boolean):void {
+            if(_showToolbar == value) return;
+            _showToolbar = value;
+            dispatchEvent(new Event("showToolbarChanged"));
+        }
+
+        [Bindable]
+        private var showFilters:Boolean;
+
         private function handleFlashVars():void {
             Constants.setup();
             UserAudit.initialize();
@@ -48,6 +68,38 @@
             this.reportType = int(Application.application.parameters.reportType);
             this.dataSourceID = int(Application.application.parameters.dataSourceID);
             this.reportName = String(Application.application.parameters.reportName);
+
+            if(Application.application.parameters.showToolbar is String) {
+                this.showToolbar = Boolean(Application.application.parameters.showToolbar == "true");
+            }  else {
+                this.showToolbar = true;
+            }
+            if(Application.application.parameters.showFilters is String) {
+                this.showFilters = Boolean(Application.application.parameters.showFilters == "true");
+            } else {
+                this.showFilters = true;
+            }
+
+
+            var showFiltersMenu:ContextMenuItem = new ContextMenuItem("Toggle Filters");
+            var showToolbarMenu:ContextMenuItem = new ContextMenuItem("Toggle Toolbar");
+
+            // yay binding closure hack
+            var s = this;
+
+            showFiltersMenu.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                s.showFilters = !s.showFilters;
+            });
+
+
+            showToolbarMenu.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
+                s.showToolbar = !s.showToolbar;
+            });
+
+            var menu:ContextMenu = new ContextMenu();
+            menu.hideBuiltInItems();
+            menu.customItems = [ showFiltersMenu, showToolbarMenu ];
+            this.contextMenu = menu;
             // session check
             userService.getBuildPath.send();
         }
@@ -109,6 +161,7 @@
         <framework:LoginComponent loginEvent2="stackIndex = 2"/>
         <dashboard:EmbeddedReportView id="panel" urlKey="{urlKey}" reportName="{reportName}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      prefix="https://www.easy-insight.com"/>
+                                      prefix="https://www.easy-insight.com" showToolbar="{showToolbar}"
+                                        showFilters="{showFilters}" />
     </mx:ViewStack>
 </mx:Application>
