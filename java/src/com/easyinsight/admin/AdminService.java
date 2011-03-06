@@ -64,17 +64,17 @@ public class AdminService {
             for (int i = startAccount; i < endAccount; i++) {
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE USER_TO_ANALYSIS.user_id = user.user_id AND " +
                         "USER_TO_ANALYSIS.ANALYSIS_ID = ANALYSIS.ANALYSIS_ID AND USER.ACCOUNT_ID = ?");
-                queryStmt.setLong(1, startAccount);
+                queryStmt.setLong(1, i);
                 ResultSet rs = queryStmt.executeQuery();
                 while (rs.next()) {
                     analysisID = rs.getLong(1);
-                    WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(analysisID);
                     try {
+                        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(analysisID);
                         new DataService().list(report, new InsightRequestMetadata());
-                    } catch (ReportException e) {
-                        System.out.println(e.getMessage() + " on " + analysisID);
+                        count++;
+                    } catch (Exception e) {
+                        LogClass.error(e.getMessage() + " on " + analysisID, e);
                     }
-                    count++;
                 }
             }
         } catch (Exception e) {
