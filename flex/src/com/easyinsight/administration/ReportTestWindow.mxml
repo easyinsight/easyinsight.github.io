@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private function test():void {
+            ProgressAlert.alert(this, "Running reports...", null, adminService.runAllReports);
+            adminService.runAllReports.send(int(start.text), int(end.text))
+        }
+
+        private function ranReports():void {
+            Alert.show(adminService.runAllReports.lastResult as String);
+        }
+]]></mx:Script>
+    <mx:RemoteObject id="adminService" destination="admin">
+        <mx:method name="runAllReports" result="ranReports()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:TextInput id="start"/>
+        <mx:TextInput id="end"/>
+        <mx:Button label="Test" click="test()"/>
+        <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+    </mx:VBox>
+</util:EISlimWindow>

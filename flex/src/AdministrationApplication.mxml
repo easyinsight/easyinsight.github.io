@@ -15,6 +15,7 @@
                         <mx:Button label="Update Zip Geocodes" click="updateZipCodes()"/>
                         <mx:Button label="Nuke Old Data" click="nukeOldData()"/>
                         <mx:Button label="Report Admin XML" click="reportAdminXML()"/>
+                        <mx:Button label="Report Test" click="reportTest()"/>
                         <mx:Button label="Global Skin" click="globalSkin()"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Solutions">
@@ -33,6 +34,7 @@
 		<![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.administration.ReportAdminXMLWindow;
+        import com.easyinsight.administration.ReportTestWindow;
         import com.easyinsight.administration.UpdateZipsWindow;
         import com.easyinsight.customupload.UploadExternalSource;
         import com.easyinsight.framework.User;
@@ -56,6 +58,12 @@
 
         private function reportAdminXML():void {
             var window:ReportAdminXMLWindow = new ReportAdminXMLWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function reportTest():void {
+            var window:ReportTestWindow = new ReportTestWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

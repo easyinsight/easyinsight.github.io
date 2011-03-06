@@ -55,6 +55,37 @@ public class AdminService {
         }
     }
 
+    public String runAllReports(int startAccount, int endAccount) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        int count = 0;
+        long analysisID = 0;
+        try {
+            for (int i = startAccount; i < endAccount; i++) {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE USER_TO_ANALYSIS.user_id = user.user_id AND " +
+                        "USER_TO_ANALYSIS.ANALYSIS_ID = ANALYSIS.ANALYSIS_ID AND USER.ACCOUNT_ID = ?");
+                queryStmt.setLong(1, startAccount);
+                ResultSet rs = queryStmt.executeQuery();
+                while (rs.next()) {
+                    analysisID = rs.getLong(1);
+                    WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(analysisID);
+                    try {
+                        new DataService().list(report, new InsightRequestMetadata());
+                    } catch (ReportException e) {
+                        System.out.println(e.getMessage() + " on " + analysisID);
+                    }
+                    count++;
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error("Running report " + analysisID, e);
+            return e.getMessage();
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return "Successfully ran " + count + " reports";
+    }
+
     public String forceRun(String urlKey) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();

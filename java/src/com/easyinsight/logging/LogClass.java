@@ -67,7 +67,7 @@ public class LogClass {
                 ex.printStackTrace();
             }
         }
-        log.error(message);
+        log.error(message, e);
     }
 
     public static void error(Throwable e) {

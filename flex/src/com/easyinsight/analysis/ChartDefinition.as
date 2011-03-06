@@ -12,7 +12,7 @@ public class ChartDefinition extends AnalysisDefinition {
     public var rotationAngle:Number;
     public var elevationAngle:Number;
 
-
+    public var showLegend:Boolean = true;
     public var chartDefinitionID:Number;
 
     public static const SORT_X_DESCENDING:String = "X-Axis Descending";
@@ -79,6 +79,12 @@ public class ChartDefinition extends AnalysisDefinition {
                 break;
         }
         return selected;
+    }
+
+    override public function createFormItems():ArrayCollection {
+        var items:ArrayCollection = super.createFormItems();
+        items.addItem(new CheckBoxReportFormItem("Show Legend", "showLegend", showLegend, this));
+        return items;
     }
 }
 }

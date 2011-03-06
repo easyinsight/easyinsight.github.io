@@ -20,9 +20,19 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     private double rotationAngle;
     private double elevationAngle;
 
+    private boolean showLegend;
+
     public abstract int getChartType();
 
     public abstract int getChartFamily();
+
+    public boolean isShowLegend() {
+        return showLegend;
+    }
+
+    public void setShowLegend(boolean showLegend) {
+        this.showLegend = showLegend;
+    }
 
     private long chartDefinitionID;
 
@@ -91,5 +101,18 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         List<IComponent> components = super.createComponents();
         components.add(new MinMaxComponent());
         return components;
+    }
+
+    @Override
+    public void populateProperties(List<ReportProperty> properties) {
+        super.populateProperties(properties);
+        showLegend = findBooleanProperty(properties, "showLegend", true);
+    }
+
+    @Override
+    public List<ReportProperty> createProperties() {
+        List<ReportProperty> properties = super.createProperties();
+        properties.add(new ReportBooleanProperty("showLegend", showLegend));
+        return properties;
     }
 }

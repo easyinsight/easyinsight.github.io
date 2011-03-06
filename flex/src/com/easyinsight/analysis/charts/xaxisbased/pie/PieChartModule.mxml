@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer"
         width="100%" height="100%" creationComplete="setupListeners()">
+    <mx:states>
+        <mx:State name="hideLegend">
+            <mx:RemoveChild target="{legend}"/>
+        </mx:State>
+    </mx:states>
     <mx:Style>
         PieSeries {
             fontSize: 10;
@@ -59,6 +64,11 @@
             graphData = dataSet;
             if (dataSet.length > 0) {
                 canvas.setStyle("backgroundAlpha", pieChartDef.backgroundAlpha);
+                if (pieChartDef.showLegend) {
+                    currentState = "";
+                } else {
+                    currentState = "hideLegend";
+                }
                 stackIndex = 0;
                 pieChart.visible = true;
                 legend.visible = true;
@@ -151,7 +161,7 @@
         ]]>
 	</mx:Script>
     <mx:Canvas width="100%" height="100%" id="canvas" backgroundAlpha="1" backgroundColor="#FFFFFF">
-        <mx:HBox width="100%" height="100%">
+        <mx:HBox width="100%" height="100%" id="hbox">
             <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="none" height="100%" width="100%"
                         paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="onClick(event)"
                     showDataTips="true" fontFamily="Tahoma" fontSize="14">
