@@ -391,7 +391,7 @@ public class DataService {
             embeddedDataResults.setReportFault(dae.getReportFault());            
             return embeddedDataResults;
         } catch (Throwable e) {
-            LogClass.error(e);
+            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
             ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));            
             return embeddedDataResults;
