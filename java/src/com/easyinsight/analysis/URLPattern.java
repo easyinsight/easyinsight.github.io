@@ -33,7 +33,9 @@ public class URLPattern {
     public static String getURL(String pattern, IRow row, Map<String, String> dataSourceProperties) {
         Map<String, Key> values = new HashMap<String, Key>();
         for(Key k : row.getKeys()) {
-            values.put(k.toKeyString(), k);
+            if (k != null) {
+                values.put(k.toKeyString(), k);
+            }
         }
         Matcher m = keyPattern.matcher(pattern);
         String[] fragments = pattern.split(patternStr);
