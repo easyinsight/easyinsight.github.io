@@ -13,8 +13,8 @@ import java.util.Date;
  */
 public class APIExample {
 
-    public static final String API_KEY = "jboe";
-    public static final String API_SECRET_KEY = "St0rmrising";
+    public static final String API_KEY = "";
+    public static final String API_SECRET_KEY = "";
 
     public static void main(String[] args) {
         try {
