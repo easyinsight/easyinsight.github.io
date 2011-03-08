@@ -44,7 +44,7 @@ public class TransactionTarget {
             xmlBuilder.append(replaceData ? "replace" : "add");
             xmlBuilder.append("</operation>");
             xmlBuilder.append("</beginTransaction>");
-            Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "defineDataSource");
+            Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "beginTransaction");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
             Map<String, String> results = new HashMap<String, String>();
             for (int i = 0; i < children.getLength(); i++) {
@@ -61,7 +61,7 @@ public class TransactionTarget {
             } else if ("400".equals(code)) {
                 throw new EasyInsightException(results.get("message"));
             }
-            transactionID = results.get("transactionID");
+            transactionID = results.get("tranactionID");
         } catch (EasyInsightException eie) {
             throw eie;
         } catch (Exception e) {
@@ -78,7 +78,7 @@ public class TransactionTarget {
             xmlBuilder.append(transactionID);
             xmlBuilder.append("</transactionID>");
             xmlBuilder.append("</commit>");
-            Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "defineDataSource");
+            Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "commit");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
             Map<String, String> results = new HashMap<String, String>();
             for (int i = 0; i < children.getLength(); i++) {
