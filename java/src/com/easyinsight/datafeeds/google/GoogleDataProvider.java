@@ -344,7 +344,10 @@ public class GoogleDataProvider {
                 if (dbName.indexOf(":") != 1) {
                     String appName = dbName.split(":")[0].trim();
                     if (appNames.contains(appName)) {
-                        QuickbaseDatabaseSource quickbaseDatabaseSource = createDataSource(sessionTicket, applicationToken, database, connections);
+                        QuickbaseDatabaseSource quickbaseDatabaseSource = createDataSource(sessionTicket, applicationToken, database, connections, host);
+                        if (quickbaseDatabaseSource == null) {
+                            continue;
+                        }
                         quickbaseDatabaseSource.setVisible(false);
                         map.put(quickbaseDatabaseSource.getDatabaseID(), quickbaseDatabaseSource);
                         quickbaseDatabaseSource.setParentSourceID(quickbaseCompositeSource.getDataFeedID());
@@ -412,7 +415,7 @@ public class GoogleDataProvider {
         }
     }
 
-    private QuickbaseDatabaseSource createDataSource(String sessionTicket, String applicationToken, Node database, List<Connection> connections) throws IOException, ParsingException {
+    private QuickbaseDatabaseSource createDataSource(String sessionTicket, String applicationToken, Node database, List<Connection> connections, String host) throws IOException, ParsingException {
         QuickbaseDatabaseSource quickbaseDatabaseSource = new QuickbaseDatabaseSource();
 
 
@@ -421,7 +424,10 @@ public class GoogleDataProvider {
 
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
 
-        String tableName = getSchema(sessionTicket, applicationToken, databaseID, items, connections);
+        String tableName = getSchema(sessionTicket, applicationToken, databaseID, items, connections, host);
+        if (tableName == null) {
+            return null;
+        }
         quickbaseDatabaseSource.setFeedName(tableName);
 
         quickbaseDatabaseSource.setFields(items);
@@ -429,10 +435,15 @@ public class GoogleDataProvider {
         return quickbaseDatabaseSource;
     }
 
-    private String getSchema(String sessionTicket, String applicationToken, String databaseID, List<AnalysisItem> items, List<Connection> connections) throws IOException, ParsingException {
+    private String getSchema(String sessionTicket, String applicationToken, String databaseID, List<AnalysisItem> items, List<Connection> connections, String host) throws IOException, ParsingException {
         String schemaRequest = MessageFormat.format(GET_SCHEMA_XML, sessionTicket, applicationToken);
-        Document schemaDoc = executeRequest("www.quickbase.com", databaseID, "API_GetSchema", schemaRequest);
-        String tableName = schemaDoc.query("/qdbapi/table/name/text()").get(0).getValue();
+        Document schemaDoc = executeRequest(host, databaseID, "API_GetSchema", schemaRequest);
+        Nodes tableNameNodes = schemaDoc.query("/qdbapi/table/name/text()");
+        if (tableNameNodes.size() == 0) {
+            System.out.println("Could not find anything for " + databaseID);
+            return null;
+        }
+        String tableName = tableNameNodes.get(0).getValue();
         Nodes fields = schemaDoc.query("/qdbapi/table/fields/field");
         // determine URLs
 
