@@ -176,11 +176,7 @@
 
         private function onDataReturn(event:DataServiceEvent):void {
             this.dataSourceInfo = event.dataSource;
-            auditString = event.reportAudit;
         }
-
-        [Bindable]
-        private var auditString:ArrayCollection;
 
         private function loadController(controller:IReportController, shareDataSourceSettings:Boolean = false):void {
             var dataViewFactory:DataViewFactory = controller.createDataView();
@@ -696,8 +692,6 @@
 
         private function onCopy(event:AnalysisItemCopyEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
-
-
             var wrapper:AnalysisItemWrapper;
             if (event.wrapper == null) {
                 var node:AnalysisItemNode = new AnalysisItemNode();
@@ -865,7 +859,7 @@
                                     dataService="{dataService}"
                                     wrappers="{wrappers}" availableFields="{availableFields}"
                                     dataView="{dataView}" analysisItemEdit="sortFields()" joinsCustomizable="{joinsCustomizable}"
-                                    dataSourceID="{dataSourceID}" reportAudit="{auditString}" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
+                                    dataSourceID="{dataSourceID}" backgroundColor="#FFFFFF" backgroundAlpha=".9"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" label="Filters"
                                           icon="@Embed(source='../../../assets/funnel.png')"

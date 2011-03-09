@@ -42,20 +42,15 @@ public class AnalysisItemEventHandler extends UIComponent {
 
     private function onCopy(event:ResultEvent):void {
         var copyItem:AnalysisItem = analysisService.cloneItem.lastResult as AnalysisItem;
-        var node:AnalysisItemNode = new AnalysisItemNode();
-        node.analysisItem = copyItem;
-        var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-        dispatchEvent(new AnalysisItemCopyEvent(AnalysisItemCopyEvent.ITEM_COPY, copyItem, wrapper));
-        edit(wrapper);
+        edit(copyItem, analysisItemCreated);
     }
 
     public function deleteField(event:ReportEditorFieldEvent):void {
         dispatchEvent(new AnalysisItemDeleteEvent(event.item));
     }
 
-    private function edit(analysisItemWrapper:AnalysisItemWrapper):void {
+    private function edit(analysisItem:AnalysisItem, handler:Function, analysisItemWrapper:AnalysisItemWrapper = null):void {
         var editor:Class;
-        var analysisItem:AnalysisItem = analysisItemWrapper.analysisItem;
         if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
             editor = HierarchyWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
@@ -68,17 +63,25 @@ public class AnalysisItemEventHandler extends UIComponent {
         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
         analysisItemEditor.editorClass = editor;
         analysisItemEditor.originalWrapper = analysisItemWrapper;
-        analysisItemEditor.analysisItem = analysisItemWrapper.analysisItem;
+        analysisItemEditor.analysisItem = analysisItem;
         analysisItemEditor.dataSourceID = _dataSourceID;
         analysisItemEditor.analysisItems = this._analysisItems;
-        analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, analysisItemEdited, false, 0, true);
+        analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, handler, false, 0, true);
         PopUpManager.addPopUp(analysisItemEditor, this.parent);
         PopUpUtil.centerPopUp(analysisItemEditor);
     }
 
+    private function analysisItemCreated(event:AnalysisItemEditEvent):void {
+        var copyItem:AnalysisItem = event.analysisItem;
+        var node:AnalysisItemNode = new AnalysisItemNode();
+        node.analysisItem = copyItem;
+        var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+        dispatchEvent(new AnalysisItemCopyEvent(AnalysisItemCopyEvent.ITEM_COPY, copyItem, wrapper));
+    }
+
     public function editField(event:ReportEditorFieldEvent):void {
         var analysisItemWrapper:AnalysisItemWrapper = event.item;
-        edit(analysisItemWrapper);
+        edit(event.item.analysisItem, analysisItemEdited, analysisItemWrapper);
     }
 
     private function analysisItemEdited(event:AnalysisItemEditEvent):void {

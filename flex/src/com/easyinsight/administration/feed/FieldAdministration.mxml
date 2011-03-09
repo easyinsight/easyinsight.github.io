@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
            xmlns:analysis="com.easyinsight.analysis.*"
            creationComplete="setupListeners()" height="100%" width="100%">
     <mx:Metadata>
@@ -22,6 +22,7 @@
 
         import com.easyinsight.analysis.AnalysisStep;
         import com.easyinsight.analysis.CalculationMeasureWindow;
+        import com.easyinsight.analysis.DerivedAnalysisDateDimension;
         import com.easyinsight.analysis.DerivedAnalysisDimension;
         import com.easyinsight.analysis.DerivedDateWindow;
         import com.easyinsight.analysis.DerivedGroupingWindow;
@@ -42,6 +43,7 @@
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.Alert;
+        import mx.events.CollectionEvent;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
 
@@ -57,7 +59,6 @@
             _dataSourceID = value;
         }
 
-        private var selectedWrapper:AnalysisItemWrapper;
         private var openEditor:IAnalysisItemEditor;
 
         [Bindable(event="allFieldsChanged")]
@@ -89,25 +90,29 @@
 
         private function onEdit(event:AnalysisItemCopyEvent):void {
             var wrapper:AnalysisItemWrapper = event.wrapper;
-            toFocus(wrapper);
+            toFocus(wrapper.analysisItem, itemEdited, wrapper);
         }
 
         private function itemEdited(event:AnalysisItemEditEvent):void {
-            selectedWrapper.analysisItem = event.analysisItem;
-            selectedWrapper.displayName = event.analysisItem.display;
-            selectedWrapper.invalidateItem();
+            event.previousItemWrapper.analysisItem = event.analysisItem;
+            event.previousItemWrapper.displayName = event.analysisItem.display;
+            event.previousItemWrapper.invalidateItem();
+            availableFields.removeItemAt(availableFields.getItemIndex(event.previousItemWrapper));
+            availableFields.addItem(event.previousItemWrapper);
+            dispatchEvent(new AnalysisChangedEvent());
+            allFields.dispatchEvent(new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
         }
 
-        private function toFocus(wrapper:AnalysisItemWrapper):void {
-            selectedWrapper = wrapper;
+        private function toFocus(analysisItem:AnalysisItem, handler:Function, wrapper:AnalysisItemWrapper = null):void {
             var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-            analysisItemEditor.editorClass = customEditor(wrapper.analysisItem);
+            analysisItemEditor.editorClass = customEditor(analysisItem);
             analysisItemEditor.dataSourceID = _dataSourceID;
+            analysisItemEditor.originalWrapper = wrapper;
             analysisItemEditor.analysisItems = this.allFields;
-            analysisItemEditor.analysisItem = wrapper.analysisItem;
+            analysisItemEditor.analysisItem = analysisItem;
             PopUpManager.addPopUp(analysisItemEditor, this, true);
             PopUpUtil.centerPopUp(analysisItemEditor);
-            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
+            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, handler, false, 0, true);
         }
 
         private function onCreation(event:FlexEvent):void {
@@ -271,60 +276,52 @@
             return key;
         }
 
-        private function addHierarchy():void {
-            var hierarchy:AnalysisHierarchyItem = new AnalysisHierarchyItem();
-            hierarchy.key = findName("Hierarchy");
+        private function itemAdded(event:AnalysisItemEditEvent):void {
+            if (event.analysisItem.key is NamedKey) {
+                var key:NamedKey = event.analysisItem.key as NamedKey;
+                key.name = event.analysisItem.display;
+            }
             var aNode:AnalysisItemNode = new AnalysisItemNode();
-            aNode.analysisItem = hierarchy;
+            aNode.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
             availableFields.addItem(wrapper);
             allFields.addItem(wrapper);
             dispatchEvent(new AnalysisChangedEvent());
-            toFocus(wrapper);
+        }
+
+        private function addHierarchy():void {
+            var hierarchy:AnalysisHierarchyItem = new AnalysisHierarchyItem();
+            hierarchy.key = findName("Hierarchy");
+            toFocus(hierarchy, itemAdded);
         }
 
         private function addCalculation():void {
             var calculation:AnalysisCalculation = new AnalysisCalculation();
             calculation.key = findName("Calculation");
-            var aNode:AnalysisItemNode = new AnalysisItemNode();
-            aNode.analysisItem = calculation;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            availableFields.addItem(wrapper);
-            dispatchEvent(new AnalysisChangedEvent());
-            toFocus(wrapper);
+            toFocus(calculation, itemAdded);
         }
 
         private function addDerivedGrouping():void {
             var calculation:DerivedAnalysisDimension = new DerivedAnalysisDimension();
             calculation.key = findName("Grouping");
-            var aNode:AnalysisItemNode = new AnalysisItemNode();
-            aNode.analysisItem = calculation;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            availableFields.addItem(wrapper);
-            dispatchEvent(new AnalysisChangedEvent());
-            toFocus(wrapper);
+            toFocus(calculation, itemAdded);
+        }
+
+        private function addDerivedDate():void {
+            var calculation:DerivedAnalysisDateDimension = new DerivedAnalysisDateDimension();
+            calculation.key = findName("Date");
+            toFocus(calculation, itemAdded);
         }
 
         private function addCycle():void {
             var cycle:AnalysisStep = new AnalysisStep();
             cycle.key = findName("Cycle");
-            var aNode:AnalysisItemNode = new AnalysisItemNode();
-            aNode.analysisItem = cycle;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            availableFields.addItem(wrapper);
-            dispatchEvent(new AnalysisChangedEvent());
-            toFocus(wrapper);
+            toFocus(cycle, itemAdded);
         }
 
         private function onCopy(event:AnalysisItemCopyEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
             event.analysisItem.concrete = false;
-            var node:AnalysisItemNode = new AnalysisItemNode();
-            node.analysisItem = event.analysisItem;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-            availableFields.addItem(wrapper);
-            dispatchEvent(new AnalysisChangedEvent());
-            toFocus(wrapper);
+            toFocus(event.analysisItem, itemAdded);
         }
 
         [Bindable]
@@ -337,7 +334,7 @@
 
         ]]></mx:Script>
     <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory"/>
-        <mx:VBox height="100%" width="100%" horizontalAlign="center">
+        <mx:VBox height="100%" width="100%" horizontalAlign="center" paddingTop="5">
             <mx:HBox paddingLeft="5">
                 <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
                            toolTip="Add Hierarchy..." click="addHierarchy()"/>
@@ -345,6 +342,8 @@
                            toolTip="Add Derived Grouping..." click="addDerivedGrouping()"/>
                 <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
                            toolTip="Add Calculation..." click="addCalculation()"/>
+                <mx:Button icon="@Embed(source='../../../../../assets/calendar.png')"
+                           toolTip="Add Derived Date..." click="addDerivedDate()"/>
                 <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"
                            toolTip="Add Cycle..." click="addCycle()()"/>
             </mx:HBox>

@@ -363,7 +363,7 @@
     </mx:ToggleButtonBar>
     <mx:Form id="coreForm">
         <mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
-            <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
+            <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}" width="250"/>
         </mx:FormItem>
         <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
             <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
