@@ -23,10 +23,10 @@
                 conn = ConnectionInfo.createConnectionInfo(request.getParameterMap());
             }
             connection = conn.createConnection(); %>
-            <span class="success">Success!</span>
+            <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
         <%
         } catch(Exception e) { %>
-            <span class="failure"><pre><%= e.getMessage() %></pre></span>
+            <script type="text/javascript">jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script>
         <% }  finally {
             dataSession.close();
             if(connection != null)

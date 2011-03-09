@@ -1,7 +1,6 @@
 package com.easyinsight.connections.database.data;
 
 import com.easyinsight.connections.database.DataConnection;
-import com.easyinsight.api.unchecked.*;
 
 import javax.persistence.*;
 import javax.xml.datatype.DatatypeFactory;
@@ -12,6 +11,7 @@ import java.util.*;
 import java.util.Date;
 import java.sql.*;
 
+import com.easyinsight.helper.*;
 import org.hibernate.Session;
 
 /**
@@ -181,13 +181,54 @@ public class Query {
     public void doUpload() throws SQLException, DatatypeConfigurationException {
         Connection conn = null;
         ResultSet rs = null;
+        TransactionTarget dataSourceTarget = null;
         try {
-            List<Row> rows = new LinkedList<Row>();
-
+            EIUser user = EIUser.instance();
+            if(user == null)
+                throw new RuntimeException("You need to enter your credentials first!");
             conn = this.getConnectionInfo().createConnection();
             rs = this.executeQuery(conn);
+            DataSourceFactory dataSourceFactory = APIUtil.defineDataSource(this.getDataSource(), user.getPublicKey(), user.getSecretKey());
+            for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
+                switch (rs.getMetaData().getColumnType(column)) {
+                    case Types.BIGINT:
+                        case Types.TINYINT:
+                        case Types.SMALLINT:
+                        case Types.INTEGER:
+                        case Types.NUMERIC:
+                        case Types.FLOAT:
+                        case Types.DOUBLE:
+                        case Types.DECIMAL:
+                        case Types.REAL:
+                            dataSourceFactory.addMeasure(rs.getMetaData().getColumnName(column));
+                            break;
+
+                        case Types.BOOLEAN:
+                        case Types.BIT:
+                        case Types.CHAR:
+                        case Types.NCHAR:
+                        case Types.NVARCHAR:
+                        case Types.VARCHAR:
+                            dataSourceFactory.addGrouping(rs.getMetaData().getColumnName(column));
+                            break;
+
+                        case Types.DATE:
+                        case Types.TIME:
+                        case Types.TIMESTAMP:
+                            dataSourceFactory.addDate(rs.getMetaData().getColumnName(column));
+                            break;
+                        default:
+                            throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight.");
+                }
+            }
+
+            DataSourceOperationFactory operationFactory = dataSourceFactory.defineDataSource();
+            dataSourceTarget = this.isAppend() ? operationFactory.addRowsTransaction() : operationFactory.replaceRowsTransaction();
+            dataSourceTarget.beginTransaction();
+            int i = 0;
             while(rs.next()) {
-                Row row = new Row();
+                System.out.println("row: " + i++);
+                DataRow row = dataSourceTarget.newRow();
                 for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
                     String key = rs.getMetaData().getColumnName(column);
                     switch (rs.getMetaData().getColumnType(column)) {
@@ -199,66 +240,39 @@ public class Query {
                         case Types.FLOAT:
                         case Types.DOUBLE:
                         case Types.DECIMAL:
-                        case Types.REAL:    
-                            NumberPair np = new NumberPair();
-                            np.setKey(key);
-                            np.setValue(rs.getDouble(column));
-                            row.getNumberPairs().add(np);
+                        case Types.REAL:
+                            row.addValue(key, rs.getDouble(column));
                             break;
 
                         case Types.BOOLEAN:
                         case Types.BIT:
-                            StringPair bp = new StringPair();
-                            bp.setKey(key);
-                            bp.setValue(String.valueOf(rs.getBoolean(column)));
-                            row.getStringPairs().add(bp);
+                            row.addValue(key,String.valueOf(rs.getBoolean(column)));
                             break;
 
                         case Types.CHAR:
                         case Types.NCHAR:
                         case Types.NVARCHAR:
                         case Types.VARCHAR:
-                            StringPair sp = new StringPair();
-                            sp.setKey(key);
-                            sp.setValue(rs.getString(column));
-                            row.getStringPairs().add(sp);
+                            row.addValue(key, rs.getString(column));
                             break;
 
                         case Types.DATE:
                         case Types.TIME:
                         case Types.TIMESTAMP:
                             Date date = rs.getTimestamp(column);
-                            DatePair dp = new DatePair();
-                            if(date != null) {
-                                GregorianCalendar cal = (GregorianCalendar) Calendar.getInstance();
-                                cal.setTime(date);
-                                XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-                                dp.setValue(xmlCal);
-                            } else {
-                                dp.setValue(null);
-                            }
-                            dp.setKey(key);
-                            row.getDatePairs().add(dp);
+                            row.addValue(key, date);
                             break;
                         default:
                             throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(column) + ") is not supported in Easy Insight.");
                     }
                 }
-                rows.add(row);
             }
-            BasicAuthUncheckedPublishServiceService service = new BasicAuthUncheckedPublishServiceService();
-            BasicAuthUncheckedPublish port = service.getBasicAuthUncheckedPublishServicePort();
-            EIUser user = EIUser.instance();
-            if(user == null)
-                throw new RuntimeException("You need to enter your credentials first!");
-            ((BindingProvider) port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, user.getPublicKey());
-            ((BindingProvider) port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, user.getSecretKey());
-            if(isAppend()) {
-                port.addRows(this.getDataSource(), rows);
-            } else {
-                port.replaceRows(this.getDataSource(), rows);
-            }
+            dataSourceTarget.commit();
 
+        } catch(SQLException e) {
+            if(dataSourceTarget != null)
+                dataSourceTarget.rollback();
+            throw e;
         } finally {
             if(rs != null)
                 rs.close();

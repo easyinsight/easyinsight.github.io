@@ -21,8 +21,10 @@
     <title>Easy Insight Database Connection</title>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/jNotify.jquery.js"></script>
     <script type="text/javascript" src="js/dbsolution.js"></script>
     <link rel="stylesheet" href="css/jquery-ui.css" media="screen" />
+    <link rel="stylesheet" href="css/jNotify.jquery.css" media="screen" />
     <style type="text/css">
 
         a img {
@@ -431,19 +433,23 @@
                       if(EIUser.instance() == null) {
                           user = new EIUser();
                   %>
-                    No API User yet! Input your data!
+                    No API User yet!
                   <%
                       }
                   %>
+                  Please enter either your username/password or your API key/secret key.  We recommend using a key/secret key
+                  combination, as this is easier to invalidate for security purposes at a later date, but to get started quickly, you can still use your username/password.
+
                 <form id="credentialsForm" action="validateCredentials.jsp" method="post" onsubmit="return false;">
-                    Public Key: <input name="publicKey" type="text" value="<%= user.getPublicKey() == null ? "" : user.getPublicKey() %>" /><br />
-                    Secret Key: <input name="secretKey" type="password" value="<%= user.getSecretKey() == null ? "" : user.getSecretKey() %>" /><br />
-                    <button onclick="validateCredentials('credentialsForm');">Validate</button>
+                    <p>Public Key/Username: <input name="publicKey" type="text" value="<%= user.getPublicKey() == null ? "" : user.getPublicKey() %>" /><br />
+                    Secret Key/Password: <input name="secretKey" type="password" value="<%= user.getSecretKey() == null ? "" : user.getSecretKey() %>" /><br /></p>
+                    <button onclick="validateCredentials('credentialsForm');">Save</button>
                 </form>
                 <div id="credentialsResults"></div>
             </div>
           </div>
         </div>
       </div>
+
   </body>
 </html>

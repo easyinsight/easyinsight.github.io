@@ -22,12 +22,11 @@
             dataSession.save(conn);
             trans.commit();
             %>
-            <span class="success">Success!</span><script type="text/javascript">refreshDataSources();</script>
+            <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
+            <script type="text/javascript">refreshDataSources();</script>
         <%} catch(Exception e) {
             trans.rollback(); %>
-            <span class="failure">An error occured in saving the data connection: <pre>
-                <%= e.getMessage() %>
-            </pre></span>
+            <script type="text/javascript">jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script>
         <%
         } finally {
             dataSession.close();

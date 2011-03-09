@@ -32,12 +32,14 @@
             newUser.createPassword(request.getParameter("newPassword"));
             s.persist(newUser);
             trans.commit(); %>
-            <span class="success">Success! You will need to use the new password next time you log in.</span>
+            <script type="text/javascript">jSuccess("Success! You will need to use the new password next time you log in.",{HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
         <%
         }
         catch(Exception e) {
             trans.rollback();
-            %><span class="failure">An error occured: <pre><%= e.getMessage() %></pre></span><%
+        %>
+            <script type="text/javascript">jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script>
+        <%
         }
         finally {
             s.close();

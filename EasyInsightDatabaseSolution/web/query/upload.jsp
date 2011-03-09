@@ -18,9 +18,9 @@
         dataSession = DataConnection.getSession();
         ((Query) dataSession.get(Query.class, Long.parseLong(request.getParameter("id")))).doUpload();
     %>
-        <span class="success">Success!</span>
+        <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
     <%} catch(Exception e) {
-        %><span class="failure">An error occured: <pre><%= e.getMessage() %></pre></span><%
+        %><script type="text/javascript">jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script><%
     } finally {
         if(dataSession != null)
             dataSession.close();

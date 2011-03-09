@@ -37,9 +37,9 @@
                 dataSession.close();
             }
 %>
-            <span class="success">Success!</span>
+            <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
 <%      } else { %>
-            <span class="failure">Failure!</span>    
+            <script type="text/javascript">jSuccess("Failure!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
 <%      }
 
     }

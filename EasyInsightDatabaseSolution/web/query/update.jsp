@@ -25,12 +25,11 @@
         dataSession.save(query);
         trans.commit();
         %>
-        <span class="success">Success!</span><script type="text/javascript">refreshQueries();$('#editQuery')[0].reset();$('#editQuery').hide();$('#newQueryButton').show();</script>
+        <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
+        <script type="text/javascript">refreshQueries();$('#editQuery')[0].reset();$('#editQuery').hide();$('#newQueryButton').show();</script>
     <%} catch(Exception e) {
         trans.rollback(); %>
-        <span class="failure">An error occured in updating the query: <pre>
-            <%= e.getMessage() %>
-        </pre></span>
+        <script type="text/javascript">jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script>
     <%
     } finally {
         dataSession.close();

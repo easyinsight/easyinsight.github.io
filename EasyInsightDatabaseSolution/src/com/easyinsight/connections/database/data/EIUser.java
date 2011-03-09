@@ -1,8 +1,6 @@
 package com.easyinsight.connections.database.data;
 
 import com.easyinsight.connections.database.DataConnection;
-import com.easyinsight.api.unchecked.BasicAuthUncheckedPublishServiceService;
-import com.easyinsight.api.unchecked.BasicAuthUncheckedPublish;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -56,12 +54,9 @@ public class EIUser {
     }
 
     public boolean validateCredentials() {
-        BasicAuthUncheckedPublishServiceService service = new BasicAuthUncheckedPublishServiceService();
-        BasicAuthUncheckedPublish port = service.getBasicAuthUncheckedPublishServicePort();
-        ((BindingProvider)port).getRequestContext().put(BindingProvider.USERNAME_PROPERTY, publicKey);
-        ((BindingProvider)port).getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, secretKey);
         try {
-            return port.validateCredentials();
+            // TODO: make an API call here
+            return true;
         }
         catch(Exception e) {
             return false;
