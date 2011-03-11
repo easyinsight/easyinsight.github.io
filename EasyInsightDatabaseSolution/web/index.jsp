@@ -273,6 +273,19 @@
         .ui-tabs .ui-tabs-nav li a {
             padding-bottom: 0.7em;
         }
+
+        #credentialsForm label, #editQuery label, #createQuery label, #editConnection label, #createConnection label,#updateCurrentUser label {
+            display: inline-block;
+            width: 250px;
+        }
+
+        #credentialsForm input, #editQuery input, #createQuery input, #editConnection input, #createConnection input, #updateCurrentUser input {
+            width: 250px;
+        }
+
+    :focus {
+        outline: 0;
+    }
         
     </style>
   </head>
@@ -295,10 +308,11 @@
                     </h2>
 			  </div>
               <div class="content">
+                  <p>This is where you change the Easy Insight Database Connection application password to prevent unauthorized access.</p>
                   <form id="updateCurrentUser" action="user/update.jsp" onsubmit="return false;">
-                      Current Password: <input type="password" name="currentPassword" /><br />
-                      New Password: <input type="password" name="newPassword" /><br />
-                      Confirm new password: <input type="password" name="confirmPassword" /><br />
+                      <label for="currentPassword">Current Password:</label> <input id="currentPassword" type="password" name="currentPassword" /><br />
+                      <label for="newPassword">New Password:</label> <input id="newPassword" type="password" name="newPassword" /><br />
+                      <label for="confirmPassword">Confirm new password:</label> <input id="confirmPassword" type="password" name="confirmPassword" /><br />
                       <button onclick="updateUser('#updateCurrentUser');">Submit</button>
                   </form>
                   <div id="updateUserResults"></div>
@@ -311,6 +325,8 @@
                     </h2>
 			  </div>
             <div class="content">
+                <p>Below is the list of queries you have selected to upload to Easy Insight. You can add a new query by clicking the "New Query" button.
+                When you edit a query, you can choose to schedule it to execute nightly at midnight. You can test the query by clicking the Test link next to the query to verify that the results match your intent.</p>
                 <button id="newQueryButton" onclick="showCreateQuery();">New Query...</button>
                 <div id="queryList">
                     <jsp:include page="query/show.jsp" />
@@ -318,27 +334,27 @@
                 <form id="editQuery" action="query/update.jsp" onsubmit="return false;">
                     <input type="hidden" name="edit" value="edit" />
                     <input type="hidden" name="id" value="" />
-                    <span class="queryParam">Query Name:</span> <input type="text" name="queryName" /><br />
-                    <span class="queryParam">Connection: </span> <select name="queryConnection"></select><br />
-                    <span class="queryParam">Data Source Name: </span> <input type="text" name="queryDataSource" /><br />
-                    <span class="queryParam">Schedule? </span><input type="checkbox" name="schedule" /><br />
+                    <label for="queryName" class="queryParam">Query Name:</label> <input id="queryName" type="text" name="queryName" /><br />
+                    <label for="queryConnection" class="queryParam">Connection: </label> <select id="queryConnection" name="queryConnection"></select><br />
+                    <label for="queryDataSource" class="queryParam">Data Source Name: </label> <input id="queryDataSource" type="text" name="queryDataSource" /><br />
+                    <label for="schedule" class="queryParam">Schedule? </label><input id="schedule" type="checkbox" name="schedule" /><br />
                     Replace or Append Existing Data?<br />
-                    <input name="uploadType" type="radio" value="replace" checked="checked" /> Replace<br />
-                    <input name="uploadType" type="radio" value="append" /> Append<br />
-                    Query:<br />
-                    <textarea name="queryValue" rows="6" cols="80"></textarea><br />
+                    <input id="uploadTypeReplace" name="uploadType" type="radio" value="replace" checked="checked" /> <label for="uploadTypeReplace">Replace</label><br />
+                    <input id="uploadTypeAppend" name="uploadType" type="radio" value="append" /> <label for="uploadTypeAppend">Append</label><br />
+                    <label for="queryValue">Query:</label><br />
+                    <textarea id="queryValue" name="queryValue" rows="6" cols="80"></textarea><br />
                     <button onclick="testQuery('#editQuery')">Test</button><button onclick="updateQuery('#editQuery')">Update</button><button onclick="resetQueryTab();">Cancel</button>
                 </form>
                 <form id="createQuery" action="query/create.jsp" onsubmit="return false;">
-                    <span class="queryParam">Query Name:</span> <input class="queryInput" type="text" name="queryName" /><br />
-                    <span class="queryParam">Connection:</span> <select class="queryInput" name="queryConnection"></select><br />
-                    <span class="queryParam">Data Source Name:</span> <input class="queryInput" type="text" name="queryDataSource" /><br />
-                    <span class="queryParam">Schedule?</span> <input type="checkbox" name="schedule" /><br />
+                    <label for="createQueryName" class="queryParam">Query Name:</label> <input id="createQueryName" class="queryInput" type="text" name="queryName" /><br />
+                    <label for="createQueryConnection" class="queryParam">Connection:</label> <select id="createQueryConnection" class="queryInput" name="queryConnection"></select><br />
+                    <label for="createQueryDataSource" class="queryParam">Data Source Name:</label> <input id="createQueryDataSource" class="queryInput" type="text" name="queryDataSource" /><br />
+                    <label for="createSchedule" class="queryParam">Schedule?</label> <input id="createSchedule" type="checkbox" name="schedule" /><br />
                     Replace or Append Existing Data?<br />
-                    <input name="uploadType" type="radio" value="replace" checked="checked" /> Replace<br />
-                    <input name="uploadType" type="radio" value="append" /> Append<br />
-                    Query: <br />
-                    <textarea name="queryValue" rows="6" cols="80"></textarea><br />
+                    <input id="createUploadTypeReplace" name="uploadType" type="radio" value="replace" checked="checked" /> <label for="createUploadTypeReplace">Replace</label><br />
+                    <input id="createUploadTypeAppend" name="uploadType" type="radio" value="append" /> <label for="createUploadTypeAppend">Append</label><br />
+                    <label for="createQueryValue">Query:</label> <br />
+                    <textarea id="createQueryValue" name="queryValue" rows="6" cols="80"></textarea><br />
                     <button onclick="testQuery('#createQuery')">Test</button><button onclick="createQuery('#createQuery')">Create</button><button onclick="resetQueryTab();">Cancel</button>
                 </form>
                 <div id="queryResults"></div>
@@ -351,6 +367,9 @@
                     </h2>
 			  </div>
             <div class="content">
+                <p>Below is a list of database connections you have created. You can change the connection info used to connect to a given database by clicking the Edit link next to the connection.
+                    After creating a database connection, go to the Queries tab and create a new Query to upload the data from that query to Easy Insight.
+                </p>
                 <button id="newConnectionButton" onclick="showCreateConnection();">New Connection...</button><br />
                 <div id="databaseList">
                     <jsp:include page="connection/show.jsp" />
@@ -359,34 +378,34 @@
                     <input type="hidden" name="id" value="" />
                     <input type="hidden" name="dbType" value="" />
                     <input type="hidden" name="edit" value="edit" />
-                    Connection Name: <input name="dbName" type="text" /><br />
+                    <label for="dbName">Connection Name:</label> <input id="dbName" name="dbName" type="text" /><br />
                     <div id="editConnectionInfo">
                         <div id="mssqlEditConnection">
-                            Host Name: <input name="mssqlHostName" type="text" /><br />
-                            Port: <input name="mssqlPort" type="text" /><br />
-                            Instance Name: <input name="mssqlInstanceName" type="text"><br />
+                            <label for="mssqlHostName">Host Name:</label> <input id="mssqlHostName" name="mssqlHostName" type="text" /><br />
+                            <label for="mssqlPort">Port:</label> <input id="mssqlPort" name="mssqlPort" type="text" /><br />
+                            <label for="mssqlInstanceName">Instance Name:</label> <input id="mssqlInstanceName" name="mssqlInstanceName" type="text"><br />
                         </div>
                         <div id="oracleEditConnection">
-                            Host Name: <input name="oracleHostName" type="text" /><br />
-                            Port: <input name="oraclePort" type="text" /><br />
-                            Schema Name: <input name="oracleSchema" type="text"><br />
+                            <label for="oracleHostName">Host Name:</label> <input id="oracleHostName" name="oracleHostName" type="text" /><br />
+                            <label for="oraclePort">Port:</label> <input id="oraclePort" name="oraclePort" type="text" /><br />
+                            <label for="oracleSchema">Schema Name:</label> <input id="oracleSchema" name="oracleSchema" type="text"><br />
                         </div>
                         <div id="mysqlEditConnection">
-                            Host Name: <input name="mysqlHostName" type="text" /><br />
-                            Port: <input name="mysqlPort" type="text" /><br />
-                            Database Name: <input name="mysqlDbName" type="text"><br />
+                            <label for="mysqlHostName">Host Name:</label> <input id="mysqlHostName" name="mysqlHostName" type="text" /><br />
+                            <label for="mysqlPort">Port:</label> <input id="mysqlPort" name="mysqlPort" type="text" /><br />
+                            <label for="mysqlDbName">Database Name:</label> <input id="mysqlDbName" name="mysqlDbName" type="text"><br />
                         </div>
                         <div id="jdbcEditConnection">
-                            Connection String: <input name="connectionString" type="text" /><br />
+                            <label for="connectionString">Connection String:</label> <input id="connectionString" name="connectionString" type="text" /><br />
                         </div>
                     </div>
-                    DB Username: <input name="dbUsername" type="text" /><br />
-                    DB Password: <input name="dbPassword" type="password" /><br />
+                    <label for="dbUsername">DB Username:</label> <input id="dbUsername" name="dbUsername" type="text" /><br />
+                    <label for="dbPassword">DB Password:</label> <input id="dbPassword" name="dbPassword" type="password" /><br />
                     <button onclick="testDbConnection('editConnection')">Test Connection</button><button onclick="updateDbConnection('editConnection')">Update</button><button onclick="resetConnectionTab();">Cancel</button>
                 </form>
                 <form id="createConnection" action="connection/create.jsp" method="post" onsubmit="return false;">
-                    Connection Name: <input name="dbName" type="text" /><br />
-                    Database Type: <select id="dbType" name="dbType" onchange="showConnectionDetails();">
+                    <label for="createDbName">Connection Name:</label> <input id="createDbName" name="dbName" type="text" /><br />
+                    <label for="dbType">Database Type:</label> <select id="dbType" name="dbType" onchange="showConnectionDetails();">
                         <option></option>
                         <option value="mysql">MySQL</option>
                         <option value="oracle">Oracle</option>
@@ -395,26 +414,26 @@
                     </select><br />
                     <div id="connectionDetails">
                         <div id="mssqlConnection">
-                            Host Name: <input name="mssqlHostName" type="text" /><br />
-                            Port: <input name="mssqlPort" type="text" /><br />
-                            Instance Name: <input name="mssqlInstanceName" type="text"><br />
+                            <label for="createMssqlHostName">Host Name:</label> <input id="createMssqlHostName" name="mssqlHostName" type="text" /><br />
+                            <label for="createMssqlPort">Port:</label> <input id="createMssqlPort" name="mssqlPort" type="text" /><br />
+                            <label for="createMssqlInstanceName">Instance Name:</label> <input id="createMssqlInstanceName" name="mssqlInstanceName" type="text"><br />
                         </div>
                         <div id="oracleConnection">
-                            Host Name: <input name="oracleHostName" type="text" /><br />
-                            Port: <input name="oraclePort" type="text" /><br />
-                            Schema Name: <input name="oracleSchema" type="text"><br />
+                            <label for="createOracleHostName">Host Name:</label> <input id="createOracleHostName" name="oracleHostName" type="text" /><br />
+                            <label for="createOraclePort">Port:</label> <input id="createOraclePort" name="oraclePort" type="text" /><br />
+                            <label for="createOracleSchema">Schema Name:</label> <input id="createOracleSchema" name="oracleSchema" type="text"><br />
                         </div>
                         <div id="mysqlConnection">
-                            Host Name: <input name="mysqlHostName" type="text" /><br />
-                            Port: <input name="mysqlPort" type="text" /><br />
-                            Database Name: <input name="mysqlDbName" type="text"><br />
+                            <label for="createMysqlHostName">Host Name:</label> <input id="createMysqlHostName" name="mysqlHostName" type="text" /><br />
+                            <label for="createMysqlPort">Port:</label> <input id="createMysqlPort" name="mysqlPort" type="text" /><br />
+                            <label for="createMysqlDbName">Database Name:</label> <input id="createMysqlDbName" name="mysqlDbName" type="text"><br />
                         </div>
                         <div id="jdbcConnection">
-                            Connection String: <input name="connectionString" type="text" /><br />
+                            <label for="createConnectionString">Connection String:</label> <input id="createConnectionString" name="connectionString" type="text" /><br />
                         </div>
                     </div>
-                    DB Username: <input name="dbUsername" type="text" /><br />
-                    DB Password: <input name="dbPassword" type="password" /><br />
+                    <label for="createDbUsername">DB Username:</label> <input id="createDbUsername" name="dbUsername" type="text" /><br />
+                    <label for="createDbPassword">DB Password:</label> <input id="createDbPassword" name="dbPassword" type="password" /><br />
 
                     <button onclick="testDbConnection('createConnection')">Test Connection</button><button onclick="createDbConnection('createConnection')">Create</button><button onclick="resetConnectionTab();">Cancel</button>
                 </form>
@@ -441,8 +460,8 @@
                   combination, as this is easier to invalidate for security purposes at a later date, but to get started quickly, you can still use your username/password.
 
                 <form id="credentialsForm" action="validateCredentials.jsp" method="post" onsubmit="return false;">
-                    <p>Public Key/Username: <input name="publicKey" type="text" value="<%= user.getPublicKey() == null ? "" : user.getPublicKey() %>" /><br />
-                    Secret Key/Password: <input name="secretKey" type="password" value="<%= user.getSecretKey() == null ? "" : user.getSecretKey() %>" /><br /></p>
+                    <p><label for="publicKey">Public Key/Username:</label> <input id="publicKey" name="publicKey" type="text" value="<%= user.getPublicKey() == null ? "" : user.getPublicKey() %>" /><br />
+                    <label for="secretKey">Secret Key/Password:</label> <input id="secretKey" name="secretKey" type="password" value="<%= user.getSecretKey() == null ? "" : user.getSecretKey() %>" /><br /></p>
                     <button onclick="validateCredentials('credentialsForm');">Save</button>
                 </form>
                 <div id="credentialsResults"></div>

@@ -77,6 +77,10 @@ public class Query {
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     private ConnectionInfo connectionInfo;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "query", cascade = CascadeType.ALL)
+    @OrderBy("startTime desc")
+    private List<UploadResult> uploadResults;
+
     public Query() {
     }
 
@@ -128,14 +132,8 @@ public class Query {
     }
 
 
-    public static List<Query> all() throws SQLException {
-        Session session = DataConnection.getSession();
-        try {
-            return session.createQuery("from Query").list();
-        }
-        finally {
-            session.close();
-        }
+    public static List<Query> all(Session session) throws SQLException {
+        return session.createQuery("from Query").list();
     }
 
     public boolean isSchedule() {
@@ -176,6 +174,14 @@ public class Query {
 
     public void setAppend(boolean append) {
         this.append = append;
+    }
+
+    public List<UploadResult> getUploadResults() {
+        return uploadResults;
+    }
+
+    public void setUploadResults(List<UploadResult> uploadResults) {
+        this.uploadResults = uploadResults;
     }
 
     public void doUpload() throws SQLException, DatatypeConfigurationException {
@@ -273,6 +279,10 @@ public class Query {
             if(dataSourceTarget != null)
                 dataSourceTarget.rollback();
             throw e;
+        } catch(RuntimeException e) {
+            if(dataSourceTarget != null)
+                dataSourceTarget.rollback();
+            throw e;
         } finally {
             if(rs != null)
                 rs.close();
@@ -281,4 +291,6 @@ public class Query {
         }
 
     }
+
+
 }

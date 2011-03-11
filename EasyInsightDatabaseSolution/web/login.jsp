@@ -42,14 +42,23 @@
           a {
               color:#CC0033;
           }
+
+          form label {
+              width: 100px;
+              display:inline-block;
+          }
+          form .textBox {
+              width: 250px;
+          }
+
       </style>
   </head>
   <body>
     <img src="images/logo.jpg" alt="Easy Insight Logo" /><h1>Database Connection</h1>
     <h3>Please log in.</h3>
     <form action="login.jsp" method="post">
-      Username: <input type="text" name="user" /><br />
-      Password: <input type="password" name="password" /><br />
+      <label for="user">Username:</label> <input id="user" class="textBox" type="text" name="user" /><br />
+      <label for="password">Password:</label> <input id="password" class="textBox" type="password" name="password" /><br />
       <input type="submit" value="Log In"/>
     </form>
     <h2>What is the Easy Insight Database Connection?</h2>

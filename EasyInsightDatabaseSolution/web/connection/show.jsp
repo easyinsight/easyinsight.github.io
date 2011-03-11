@@ -15,7 +15,7 @@
     } else {
     List<ConnectionInfo> connections = ConnectionInfo.all();
 if(connections.size() == 0) { %>
-    There are no connections yet. Make your first connection below!
+    There are no connections yet. Make your first connection by clicking on the button above.
 <% } else { %>
     <table>
         <thead>
