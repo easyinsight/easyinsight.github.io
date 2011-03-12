@@ -9,6 +9,8 @@
         import com.easyinsight.analysis.SavePromptWindow;
         import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
+        import com.easyinsight.feedassembly.FederatedDataSource;
+        import com.easyinsight.feedassembly.FederatedEditor;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
@@ -82,6 +84,14 @@
                 implBox.label = "Composite Details";
                 showImpl = true;
                 this.feedAdminDetail = compositeWorkspace;
+            } else if (feedType == DataSourceType.FEDERATED) {
+                var fed:FederatedDataSource = feedDefinition as FederatedDataSource;
+                var editor:FederatedEditor = new FederatedEditor();
+                editor.dataSources = fed.sources;
+                implBox.addChild(editor);
+                implBox.label = "Federated Details";
+                showImpl = true;
+                this.feedAdminDetail = editor;
             } else if (feedDefinition is IServerDataSourceDefinition && !feedDefinition.isLiveData()) {
                 var sds:IServerDataSourceDefinition = feedDefinition as IServerDataSourceDefinition;
                 var configClass:Class = sds.configClass();

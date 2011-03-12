@@ -350,7 +350,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
             LookupTable lookupTable = new FeedService().getLookupTable(getLookupTableID());
             if (lookupTable != null) {
-                items.add(lookupTable.getSourceField());
+                items.addAll(lookupTable.getSourceField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, completelyShallow, criteria));
             }
         }
         return items;
@@ -454,9 +454,6 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             session.save(getKey());
         } else {
             session.merge(getKey());
-        }
-        for (FilterDefinition filterDefinition : getFilters()) {
-            filterDefinition.getField().reportSave(session);
         }
         for (FilterDefinition filterDefinition : getFilters()) {
             filterDefinition.beforeSave(session);

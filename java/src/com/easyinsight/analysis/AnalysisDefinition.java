@@ -34,6 +34,14 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "report_type")
     private int reportType;
 
+    @Column(name="embed_username")
+    private String embedUserName;
+    @Column(name="embed_password")
+    private String embedPassword;
+
+    @Column(name="insecure_embed_enabled")
+    private boolean insecureEmbedEnabled;
+
     @Column(name = "temporary_report")
     private boolean temporaryReport;
 
@@ -148,6 +156,14 @@ public class AnalysisDefinition implements Cloneable {
         this.description = description;
     }
 
+    public boolean isInsecureEmbedEnabled() {
+        return insecureEmbedEnabled;
+    }
+
+    public void setInsecureEmbedEnabled(boolean insecureEmbedEnabled) {
+        this.insecureEmbedEnabled = insecureEmbedEnabled;
+    }
+
     public String getAuthorName() {
         return authorName;
     }
@@ -202,6 +218,22 @@ public class AnalysisDefinition implements Cloneable {
 
     public void setVisibleAtFeedLevel(boolean visibleAtFeedLevel) {
         this.visibleAtFeedLevel = visibleAtFeedLevel;
+    }
+
+    public String getEmbedUserName() {
+        return embedUserName;
+    }
+
+    public void setEmbedUserName(String embedUserName) {
+        this.embedUserName = embedUserName;
+    }
+
+    public String getEmbedPassword() {
+        return embedPassword;
+    }
+
+    public void setEmbedPassword(String embedPassword) {
+        this.embedPassword = embedPassword;
     }
 
     public boolean isRootDefinition() {
@@ -543,6 +575,9 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setVisibleAtFeedLevel(visibleAtFeedLevel);
         analysisDefinition.setSolutionVisible(solutionVisible);
         analysisDefinition.setAccountVisible(accountVisible);
+        analysisDefinition.setInsecureEmbedEnabled(insecureEmbedEnabled);
+        analysisDefinition.setEmbedPassword(embedPassword);
+        analysisDefinition.setEmbedUserName(embedUserName);
         if (joinOverrides != null) {
             List<JoinOverride> joins = new ArrayList<JoinOverride>();
             for (JoinOverride joinOverride : joinOverrides) {

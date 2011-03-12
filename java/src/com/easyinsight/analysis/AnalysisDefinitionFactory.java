@@ -130,6 +130,9 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setMarketplaceVisible(wsAnalysisDefinition.isMarketplaceVisible());
         analysisDefinition.setTemporaryReport(wsAnalysisDefinition.isTemporaryReport());
         analysisDefinition.setSolutionVisible(wsAnalysisDefinition.isSolutionVisible());
+        analysisDefinition.setInsecureEmbedEnabled(wsAnalysisDefinition.isInsecureEmbedEnabled());
+        analysisDefinition.setEmbedPassword(wsAnalysisDefinition.getEmbedPassword());
+        analysisDefinition.setEmbedUserName(wsAnalysisDefinition.getEmbedUserName());
         analysisDefinition.setVisibleAtFeedLevel(wsAnalysisDefinition.isVisibleAtFeedLevel());
         return analysisDefinition;
     }

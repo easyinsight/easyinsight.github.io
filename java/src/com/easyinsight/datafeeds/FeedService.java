@@ -4,6 +4,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.basecamp.BaseCampCompanySource;
+import com.easyinsight.datafeeds.composite.FederatedDataSource;
+import com.easyinsight.datafeeds.composite.FederationSource;
 import com.easyinsight.datafeeds.constantcontact.CCContactSource;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksClientSource;
 import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
@@ -380,6 +382,26 @@ public class FeedService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public FederatedDataSource createFederatedDataSource(List<FederationSource> sources, String name) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            FederatedDataSource federatedDataSource = new FederatedDataSource();
+            federatedDataSource.setFeedName(name);
+            federatedDataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
+            federatedDataSource.setSources(sources);
+            federatedDataSource.populateFields(conn);
+            federatedDataSource.setApiKey(RandomTextGenerator.generateText(12));
+            long feedID = feedStorage.addFeedDefinitionData(federatedDataSource, conn);
+            DataStorage.liveDataSource(feedID, conn);
+            return federatedDataSource;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 

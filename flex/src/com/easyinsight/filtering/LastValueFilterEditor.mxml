@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.filtering.IFilterDetailEditor">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private var lastValueFilter:LastValueFilterDefinition;
+
+        [Bindable]
+        private var absoluteFilter:Boolean;
+
+        [Bindable]
+        private var threshold:int;
+
+        public function makeUpdates():FilterDefinition {
+            lastValueFilter.absolute = absoluteCheckbox.selected;
+            lastValueFilter.threshold = thresholdStepper.value;
+            return lastValueFilter;
+        }
+
+        public function set filterDefinition(filterDefinition:FilterDefinition):void {
+            lastValueFilter = filterDefinition as LastValueFilterDefinition;
+            absoluteFilter = lastValueFilter.absolute;
+            threshold = lastValueFilter.threshold;
+        }
+
+        public function set feedID(feedID:int):void {
+        }
+
+        public function set fields(value:ArrayCollection):void {
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Apply to All Reports:">
+            <mx:CheckBox id="absoluteCheckbox" selected="{absoluteFilter}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Threshold:">
+            <mx:NumericStepper value="{threshold}" id="thresholdStepper"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

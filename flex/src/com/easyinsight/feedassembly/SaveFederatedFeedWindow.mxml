@@ -9,16 +9,16 @@
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
-        public var compositeFeedNodes:ArrayCollection;
-        public var compositeFeedConnections:ArrayCollection;
+
+        public var sources:ArrayCollection;
 
         private var validators:Array;
 
         private function save():void {
             var results:Array = Validator.validateAll(validators);
             if (results.length == 0) {
-                ProgressAlert.alert(this, "Saving...", "Saved!", feedService.createCompositeFeed);
-                feedService.createCompositeFeed(compositeFeedNodes, compositeFeedConnections, dataSourceName.text);
+                ProgressAlert.alert(this, "Saving...", "Saved!", feedService.createFederatedDataSource);
+                feedService.createFederatedDataSource(sources, dataSourceName.text);
             } else {
                 Alert.show("You must enter a name of at least three characters for the data source.");
             }
@@ -35,7 +35,7 @@
         }
 
         private function saved():void {
-            var feedDefinition:CompositeFeedDefinition = feedService.createCompositeFeed.lastResult as CompositeFeedDefinition;
+            var feedDefinition:FederatedDataSource = feedService.createFederatedDataSource.lastResult as FederatedDataSource;
             dispatchEvent(new CompositeFeedSaveEvent(feedDefinition));
             PopUpManager.removePopUp(this);
         }
@@ -46,12 +46,12 @@
             <mx:TextInput id="dataSourceName"/>
         </mx:FormItem>
         <mx:FormItem label="" direction="horizontal">
-            <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="cancel()"/>
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="cancel()"/>
         </mx:FormItem>
     </mx:Form>
 	<mx:StringValidator source="{dataSourceName}" property="text" minLength="3" id="nameValidator"/>
 	<mx:RemoteObject destination="feeds" id="feedService">
-		<mx:method name="createCompositeFeed" result="saved()"/>
+		<mx:method name="createFederatedDataSource" result="saved()"/>
 	</mx:RemoteObject>
 </util:EISlimWindow>

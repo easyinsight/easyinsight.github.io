@@ -12,7 +12,7 @@ import mx.collections.ArrayCollection;
 public class ReportAnalyzeSource extends PerspectiveInfo {
 
     public function ReportAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null, installOption:Boolean = false, origin:int = 0,
-            originalReportID:int = 0, originScore:Number = 0, templateUrlKey:String = null) {
+            originalReportID:int = 0, installs:int = 0, templateUrlKey:String = null) {
         super(PerspectiveInfo.REPORT_VIEW);
         var properties:Object = new Object();
         properties.reportID = insightDescriptor.id;
@@ -21,7 +21,7 @@ public class ReportAnalyzeSource extends PerspectiveInfo {
         properties.parameterFilters = filters;
         properties.showAddBar = installOption;
         properties.originReportID = originalReportID;
-        properties.originReportScore = originScore;
+        properties.installs = installs;
         properties.templateUrlKey = templateUrlKey;
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
         var controller:IEmbeddedReportController = new controllerClass();

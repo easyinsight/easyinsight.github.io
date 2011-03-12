@@ -65,8 +65,7 @@
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
-    <mx:VBox>
-        <mx:Label text="{prompt}" fontSize="14"/>
-        <mx:HBox id="box" horizontalAlign="center"/>
-    </mx:VBox>
+    <mx:TextArea text="{prompt}" fontSize="14" width="500" height="50" focusEnabled="false" editable="false" selectable="false"
+            textAlign="center"/>
+    <mx:HBox id="box" horizontalAlign="center" width="100%"/>
 </util:EISlimWindow>

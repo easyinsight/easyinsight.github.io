@@ -78,10 +78,37 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int fixedWidth;
     private boolean accountVisible;
     private List<JoinOverride> joinOverrides;
+    private String embedUserName;
+    private String embedPassword;
+    private boolean insecureEmbedEnabled;
 
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+
+    public boolean isInsecureEmbedEnabled() {
+        return insecureEmbedEnabled;
+    }
+
+    public void setInsecureEmbedEnabled(boolean insecureEmbedEnabled) {
+        this.insecureEmbedEnabled = insecureEmbedEnabled;
+    }
+
+    public String getEmbedUserName() {
+        return embedUserName;
+    }
+
+    public void setEmbedUserName(String embedUserName) {
+        this.embedUserName = embedUserName;
+    }
+
+    public String getEmbedPassword() {
+        return embedPassword;
+    }
+
+    public void setEmbedPassword(String embedPassword) {
+        this.embedPassword = embedPassword;
+    }
 
     public double getBackgroundAlpha() {
         return backgroundAlpha;

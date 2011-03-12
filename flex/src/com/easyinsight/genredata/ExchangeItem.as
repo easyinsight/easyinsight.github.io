@@ -8,8 +8,7 @@ public class ExchangeItem {
     public var name:String;
     public var id:int;
     public var attribution:String;
-    public var ratingAverage:Number;
-    public var ratingCount:int;
+    public var installs:int;
     public var dateAdded:Date;
     public var tags:ArrayCollection;
     public var description:String;

@@ -15,6 +15,11 @@ public class DataSetKeys {
     private Map<Key, Short> keyMap = new HashMap<Key, Short>();
     private short max;
 
+    public void replaceKey(Key source, Key target) {
+        short position = keyMap.get(source);
+        keyMap.put(target, position);
+    }
+
     public int getKey(Key key) {
         Short position = keyMap.get(key);
         if (position == null) {
@@ -39,6 +44,7 @@ public class DataSetKeys {
     }
 
     public Collection<Key> getKeys() {
+        keyMap.remove(null);
         return keyMap.keySet();
     }
 }

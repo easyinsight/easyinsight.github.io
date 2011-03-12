@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private function join():void {
+            dispatchEvent(new Event("joinSources"));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function federate():void {
+            dispatchEvent(new Event("federateSources"));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+             backgroundColor="#FFFFFF" height="175"
+             width="320" cornerRadius="8" buttonMode="true" id="openReportBox3"
+             rollOver="openReportBox3.setStyle('backgroundColor', 0xDDDDDD)"
+             rollOut="openReportBox3.setStyle('backgroundColor', 0xFFFFFF)"
+             click="join()"
+             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+        <mx:Text text="Join Different Sources" fontSize="24" selectable="false"/>
+        <mx:TextArea
+                text="Do you want to join multiple different data sources? For example, if you want to combine Basecamp data with Highrise data or Freshbooks data with spreadsheet data, you would use this option."
+                fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="120"
+                width="280" textAlign="center"/>
+    </mx:VBox>
+    <mx:Spacer width="100"/>
+    <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
+             backgroundColor="#FFFFFF" height="175"
+             width="320" cornerRadius="8" buttonMode="true" id="findReportsBox"
+             rollOver="findReportsBox.setStyle('backgroundColor', 0xDDDDDD)"
+             rollOut="findReportsBox.setStyle('backgroundColor', 0xFFFFFF)"
+             click="federate()"
+             mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
+        <mx:Text text="Federate Similar Sources" fontSize="24" selectable="false"/>
+        <mx:TextArea text="Do you want to federate multiple data sources of the same type? For example, if you want to combine multiple Quickbase instances into a single consolidated source, you would use this option."
+                     fontSize="14" backgroundAlpha="0" editable="false" selectable="false"
+                     height="120" width="280" textAlign="center"/>
+    </mx:VBox>
+    </mx:HBox>
+</util:EISlimWindow>

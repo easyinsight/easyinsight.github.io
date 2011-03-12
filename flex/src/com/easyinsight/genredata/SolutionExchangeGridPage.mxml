@@ -12,8 +12,6 @@
                 <mx:DataGridColumn headerText="Description" dataField="description" itemRenderer="com.easyinsight.genredata.ExchangeDescriptionRenderer"
                         width="300" fontSize="14" sortable="false"/>
                 <mx:DataGridColumn headerText="Connection" dataField="solutionName" width="120" fontSize="14"/>
-                <mx:DataGridColumn headerText="Rating" dataField="ratingAverage"
-                                   itemRenderer="com.easyinsight.genredata.ExchangeRatingRenderer" width="60" fontSize="14"/>
                 <mx:DataGridColumn headerText="" sortable="false"
                                    itemRenderer="com.easyinsight.genredata.SolutionGridActionRenderer" width="50"/>
             </mx:columns>

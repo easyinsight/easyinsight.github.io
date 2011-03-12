@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+
+        import mx.managers.PopUpManager;
+
+        private var _dashboard:Dashboard;
+
+        public function set dashboard(value:Dashboard):void {
+            _dashboard = value;
+        }
+
+        private function shareReport():void {
+            shareButton.enabled = false;
+            dashboardService.shareDashboard.send(_dashboard.id);
+        }
+
+        private function sharedReport():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var saveIndex:int;
+        ]]></mx:Script>
+    <mx:RemoteObject id="dashboardService" destination="dashboardService">
+        <mx:method name="shareDashboard" result="sharedReport()"/>
+    </mx:RemoteObject>
+    <mx:VBox width="750" horizontalAlign="center" height="300" backgroundColor="#FFFFFF" paddingBottom="10"
+             paddingLeft="10" paddingRight="10" paddingTop="10" verticalAlign="middle">
+        <mx:Label text="Do you want to share this dashboard with other users in the account?" fontSize="14"/>
+        <mx:HBox>
+            <util:SaveButton label="Yes" click="shareReport()" id="shareButton" fontSize="14"/>
+            <util:CancelButton label="No" click="PopUpManager.removePopUp(this);" fontSize="14"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

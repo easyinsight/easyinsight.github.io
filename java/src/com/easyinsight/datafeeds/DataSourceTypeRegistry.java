@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.campaignmonitor.CampaignMonitorDataSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
+import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.constantcontact.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
@@ -113,6 +114,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.BATCHBOOK_USERS, BatchbookUserSource.class);
         registerType(FeedType.CAMPAIGN_MONITOR_COMPOSITE, CampaignMonitorDataSource.class);
         registerType(FeedType.CAMPAIGN_MONITOR_CLIENTS, CMClientSource.class);
+        registerType(FeedType.FEDERATED, FederatedDataSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

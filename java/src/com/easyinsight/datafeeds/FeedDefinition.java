@@ -386,6 +386,7 @@ public class FeedDefinition implements Cloneable, Serializable {
             try {
                 AnalysisItem clone = field.clone();
                 clones.add(clone);
+                clone.setConcrete(true);
                 replacementMap.put(field.getAnalysisItemID(), clone);
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);

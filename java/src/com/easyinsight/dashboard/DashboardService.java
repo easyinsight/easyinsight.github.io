@@ -12,10 +12,9 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -34,7 +33,7 @@ public class DashboardService {
         }
     }
 
-    public void keepDashboard(long dashboardID) {
+    public void keepDashboard(long dashboardID, long sourceDashboardID) {
         SecurityUtil.authorizeDashboard(dashboardID);
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
@@ -61,6 +60,24 @@ public class DashboardService {
             updateStmt.setBoolean(1, false);
             updateStmt.setLong(2, dashboardID);
             updateStmt.executeUpdate();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_DASHBOARD_INSTALL_ID FROM EXCHANGE_DASHBOARD_INSTALL WHERE USER_ID = ? AND " +
+                    "dashboard_id = ?");
+            queryStmt.setLong(1, SecurityUtil.getUserID());
+            queryStmt.setLong(2, dashboardID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long id = rs.getLong(1);
+                PreparedStatement updateTimeStmt = conn.prepareStatement("UPDATE EXCHANGE_DASHBOARD_INSTALL SET install_date = ? WHERE EXCHANGE_DASHBOARD_INSTALL_ID = ?");
+                updateTimeStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                updateTimeStmt.setLong(2, id);
+                updateTimeStmt.executeUpdate();
+            } else {
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCHANGE_DASHBOARD_INSTALL (USER_ID, DASHBOARD_ID, INSTALL_DATE) VALUES (?, ?, ?)");
+                insertStmt.setLong(1, SecurityUtil.getUserID());
+                insertStmt.setLong(2, sourceDashboardID);
+                insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                insertStmt.execute();
+            }
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -94,6 +111,22 @@ public class DashboardService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public void shareDashboard(long dashboardID) {
+        SecurityUtil.authorizeDashboard(dashboardID);
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET ACCOUNT_VISIBLE = ? WHERE DASHBOARD_ID = ?");
+            updateStmt.setBoolean(1, false);
+            updateStmt.setLong(2, dashboardID);
+            updateStmt.executeUpdate();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
         }
     }
 

@@ -75,6 +75,9 @@ import mx.collections.ArrayCollection;
         public var fixedWidth:int = 0;
         public var accountVisible:Boolean;
         public var joinOverrides:ArrayCollection;
+        public var embedUserName:String;
+        public var embedPassword:String;
+        public var insecureEmbedEnabled:Boolean;
 
 		public function AnalysisDefinition()
 		{

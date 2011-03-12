@@ -21,10 +21,10 @@
             var sort:Sort = new Sort();
             var sortField:SortField = new SortField();
             if (index == 0) {
-                sortField.name = "ratingAverage";
+                sortField.name = "installs";
                 sortField.descending = true;
             } else if (index == 1) {
-                sortField.name = "ratingAverage";
+                sortField.name = "installs";
                 sortField.descending = false;
             } else if (index == 2) {
                 sortField.name = "dateAdded";

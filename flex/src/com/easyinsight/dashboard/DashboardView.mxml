@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
                       xmlns:filtering="com.easyinsight.filtering.*" xmlns:util="com.easyinsight.util.*"
-                      xmlns:analysis="com.easyinsight.analysis.*"
-                      applyCenterScreenLogic="false" creationComplete="onCreation()" implements="com.easyinsight.listing.IPerspective">
+                      xmlns:datasources="com.easyinsight.datasources.*"
+                      applyCenterScreenLogic="false" creationComplete="onCreation()"
+                      implements="com.easyinsight.listing.IPerspective">
     <skin:states>
         <mx:State name="fullScreen">
             <mx:RemoveChild target="{topDisplay}"/>
@@ -11,7 +12,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
-        import com.easyinsight.analysis.ReportRatingEvent;
+        import com.easyinsight.analysis.IRetrievable;
         import com.easyinsight.commands.CommandEvent;
 
         import com.easyinsight.commands.CommandProcessor;
@@ -23,10 +24,11 @@
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.report.ReportNavigationEvent;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
+        import mx.controls.TextArea;
         import mx.core.UIComponent;
-        import mx.formatters.NumberFormatter;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
@@ -117,16 +119,6 @@
             _connectionID = value;
         }
 
-        public function set dashboardRating(value:Number):void {
-            _dashboardRating = value;
-            var nf:NumberFormatter = new NumberFormatter();
-            nf.precision = 2;
-            averageScore = nf.format(value);
-        }
-
-        [Bindable]
-        private var myRatingNumber:String;
-
         public function set dashboardURLKey(value:String):void {
             _dashboardURLKey = value;
         }
@@ -144,6 +136,7 @@
                 dashboardCanvas.setStyle("backgroundColor", grid.backgroundColor);
             }
             dashboardName = dashboard.name;
+            description = dashboard.description;
             dataSourceID = dashboard.dataSourceID;
             filterDefinitions = dashboard.filters;
             var feedFragmentObject:Object = new Object();
@@ -160,10 +153,74 @@
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             rootView = dashboard.rootElement.createViewComponent() as IDashboardViewComponent;
             dashboardCanvas.addChild(rootView as UIComponent);
-            if (_connectionID > 0) {
-                exchangeIndex = 1;
+            generateState();
+        }
+
+        private function generateState():void {
+            var ops:Array = [];
+            var textAreas:Array = [];
+            var remainingSections:Array = [];
+            if (description == null || description.length == 0) {
+                var removeDescription:RemoveChild = new RemoveChild();
+                removeDescription.target = descriptionBox;
+                ops.push(removeDescription);
+                var removeRule1:RemoveChild = new RemoveChild();
+                removeRule1.target = rule1;
+                ops.push(removeRule1);
+            } else {
+                textAreas.push(descriptionArea);
+                remainingSections.push(descriptionBox);
+            }
+            if (_connectionID == 0) {
+                var removeExchange:RemoveChild = new RemoveChild();
+                removeExchange.target = exchangeBox;
+                ops.push(removeExchange);
+            } else {
+                textAreas.push(exchangeArea);
+                remainingSections.push(exchangeBox);
+            }
+
+            if (_connectionID != 0) {
+                var removeData:RemoveChild = new RemoveChild();
+                removeData.target = dataSourceDisplay;
+                ops.push(removeData);
+            } else {
+                textAreas.push(dataSourceDisplay.sourceLabel);
+                remainingSections.push(dataSourceDisplay);
+            }
+            if (ops.length > 0) {
+                var len:int = Math.max(2, textAreas.length);
+                for each (var area:TextArea in textAreas) {
+                    area.width = 900 / len;
+                }
+                for each (var comp:UIComponent in remainingSections) {
+                    comp.width = 950 / len;
+                }
+                var state:State = new State();
+                var name:String = "report" + stateIndex++;
+                state.name = name;
+                state.overrides = ops;
+                var states:Array = [];
+                states.push(state);
+                if (lastState != null) {
+                    states.push(lastState);
+                }
+                this.states = states;
+                lastState = state;
+                currentState = name;
+            } else {
+                currentState = "";
             }
         }
+
+        private var _installs:int;
+
+        public function set installs(value:int):void {
+            _installs = value;
+        }
+
+        private var stateIndex:int;
+        private var lastState:State;
 
         private function transformsUpdated(event:Event):void {
             rootView.refresh(transformContainer.getFilterDefinitions());
@@ -201,18 +258,16 @@
         }
 
         private function keptDashboard():void {
-            Alert.show("This report will now be available to you under the My Data page.");
-            exchangeIndex = 0;
+            _connectionID = 0;
+            generateState();
+            var window:DashboardAddedWindow = new DashboardAddedWindow();
+            window.dashboard = dashboard;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function saveReport(event:Event):void {
-            dashboardService.keepDashboard.send(dashboard.id);
-        }
-
-        private function updateRating(event:ReportRatingEvent):void {
-            var nf:NumberFormatter = new NumberFormatter();
-            nf.precision = 2;
-            averageScore = nf.format(event.newRating);
+            dashboardService.keepDashboard.send(dashboard.id, _originDashboardID);
         }
 
         [Bindable]
@@ -223,7 +278,7 @@
         }
 
         [Bindable]
-        private var averageScore:String;
+        private var viewFactory:IRetrievable;
 
         private function toggleFilters():void {
             filterIndex = filterIndex == 0 ? 1 : 0;
@@ -259,67 +314,43 @@
              direction="vertical">
         <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay"
                  backgroundColor="#FFFFFF">
-            <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5"
-                     paddingTop="5">
-                <mx:HBox width="1000" id="highBox">
-                    <mx:VBox>
-                        <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
-                            <mx:Button click="close()" icon="{closeIcon}" labelPlacement="bottom"
-                                       id="backButton"
-                                       toolTip="Close the report view"/>
-                            <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
-                                       id="fullScreenButton" toolTip="View full screen"/>
-                            <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
-                                       id="refreshButton" toolTip="Refresh this dashboard"/>
-                            <mx:Button icon="{exportIcon}" click="exportDashboard()"
-                                   labelPlacement="bottom"
-                                   id="exportButton" toolTip="Export the report..."/>
-                            <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="bottom"
-                                       id="filterButton"/>
-                            <mx:Spacer width="100%"/>
-                            <mx:Label text="{dashboardName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="350"
-                                      fontSize="14"/>
-                            <mx:Spacer width="100%"/>
-                        </mx:HBox>
-                        <util:AutoSizeTextArea text="{description}" visible="true" fontSize="12" width="720"
-                                               editable="false" backgroundAlpha="0"/>
-                    </mx:VBox>
-                    <mx:Spacer width="100%"/>
-                    <mx:ViewStack selectedIndex="{exchangeIndex}" resizeToContent="true">
-                        <mx:Box/>
-                        <mx:VBox verticalGap="3" horizontalAlign="center">
-                            <mx:HBox verticalAlign="middle">
-                                <mx:VBox verticalGap="0">
-                                    <mx:Label text="Created by:" color="#555555" fontSize="10" fontStyle="italic"/>
-                                    <mx:Label text="{ratingText}" color="#2525D4"/>
-                                    <!--<mx:Label text="{whenCreated}" fontSize="10"/>-->
-                                </mx:VBox>
-                                <mx:VBox backgroundColor="#2525D4" borderColor="#2525D4" verticalGap="0"
-                                         borderStyle="solid"
-                                         borderThickness="1" cornerRadius="5" horizontalAlign="center">
-                                    <mx:Label text="{averageScore}" fontSize="16" color="#FFFFFF"/>
-                                    <mx:Label text="Average Score" fontSize="10" color="#FFFFFF"/>
-                                </mx:VBox>
-                            </mx:HBox>
-                            <analysis:DashboardRating rateable="true" reportID="{originDashboardID}"
-                                                   reportRating="updateRating(event)"/>
-                            <mx:Label text="Rate it yourself!" fontSize="8"/>
+                <mx:VBox width="1000" id="highBox" paddingLeft="10" paddingRight="10">
+                    <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
+                        <mx:Button click="close()" icon="{closeIcon}" labelPlacement="right"
+                                   id="backButton"
+                                   toolTip="Close the report view" label="Close Dashboard"/>
+                        <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="right"
+                                   id="fullScreenButton" toolTip="View full screen" label="Full Screen"/>
+                        <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="right"
+                                   id="refreshButton" toolTip="Refresh this dashboard" label="Refresh"/>
+                        <mx:Button icon="{exportIcon}" click="exportDashboard()"
+                               labelPlacement="right"
+                               id="exportButton" toolTip="Export the report..." label="Export"/>
+                        <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="right"
+                                   id="filterButton" label="Toggle Filters"/>
+                        <mx:Spacer width="100%"/>
+                        <mx:Label text="{dashboardName}" maxWidth="350"
+                                  fontSize="14"/>
+                        <mx:Spacer width="100%"/>
+                    </mx:HBox>
+                    <mx:HBox width="100%" verticalAlign="middle">
+                        <mx:VBox id="descriptionBox">
+                            <util:AutoSizeTextArea text="{description}" width="250" id="descriptionArea"
+                                    focusEnabled="false" editable="false" selectable="false"/>
                         </mx:VBox>
-                    </mx:ViewStack>
-                </mx:HBox>
-            </mx:HBox>
-
-            <mx:ViewStack resizeToContent="true" selectedIndex="{exchangeIndex}" width="100%">
-                <mx:Box/>
-                <mx:HBox paddingTop="15" verticalAlign="middle" width="100%" horizontalAlign="center">
-                    <mx:TextArea
-                            text="Want to save this dashboard to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
-                            editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0"
-                            fontSize="12"/>
-                    <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton"
-                               click="saveReport(event)"/>
-                </mx:HBox>
-            </mx:ViewStack>
+                        <mx:VRule height="30" id="rule1"/>
+                        <mx:VBox verticalAlign="middle" horizontalAlign="center" id="exchangeBox">
+                            <util:AutoSizeTextArea
+                                    text="Want to save this dashboard to your account? You can alter the dashboard after saving."
+                                    editable="false" selectable="false" width="250" backgroundAlpha="0"
+                                    focusEnabled="false" id="exchangeArea"/>
+                            <mx:Button label="Save to my Account" fontSize="12" styleName="grayButton"
+                                       click="saveReport(event)"/>
+                        </mx:VBox>
+                        <datasources:DataSourceDisplay dataSource="{dataSource}" dataView="{viewFactory}"
+                                                   id="dataSourceDisplay"/>
+                    </mx:HBox>
+                </mx:VBox>
             <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
         </mx:VBox>
         <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0" horizontalAlign="center" verticalGap="0">

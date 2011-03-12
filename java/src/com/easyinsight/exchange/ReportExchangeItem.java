@@ -16,10 +16,9 @@ public class ReportExchangeItem extends ExchangeItem {
     public ReportExchangeItem() {
     }
 
-    public ReportExchangeItem(String name, long id, double ratingAverage,
-                              double ratingCount, Date dateAdded, String description, String author,
+    public ReportExchangeItem(String name, long id, int installs, Date dateAdded, String description, String author,
                               EIDescriptor descriptor) {
-        super(name, id, ratingAverage, ratingCount, dateAdded, description, author);
+        super(name, id, installs, dateAdded, description, author);
         this.descriptor = descriptor;
     }
 

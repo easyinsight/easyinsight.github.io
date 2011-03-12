@@ -27,7 +27,7 @@
 
         private function createdFeed(event:CompositeFeedSaveEvent):void {
             saveNeeded = false;
-            feedDefinition = event.feedDefinition;
+            feedDefinition = event.feedDefinition as CompositeFeedDefinition;
         }
 
         private function cancel():void {
@@ -52,8 +52,8 @@
         private function save():void {
             var compositeFeedNodes:ArrayCollection = workspace.createNodes();
             var compositeFeedConnections:ArrayCollection = workspace.createEdges();
-            var saveWindow:SaveCompositeFeedWindow = new SaveCompositeFeedWindow();
             if (workspace.compositeFeedID == 0) {
+                var saveWindow:SaveCompositeFeedWindow = new SaveCompositeFeedWindow();
                 saveWindow.compositeFeedNodes = compositeFeedNodes;
                 saveWindow.compositeFeedConnections = compositeFeedConnections;
                 saveWindow.addEventListener(CompositeFeedSaveEvent.COMPOSITE_FEED_SAVE, createdFeed, false, 0, true);

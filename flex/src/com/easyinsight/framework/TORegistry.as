@@ -56,6 +56,8 @@ import com.easyinsight.datasources.SendGridDataSource;
 import com.easyinsight.datasources.WholeFoodsDataSource;
 import com.easyinsight.feedassembly.CompositeFeedConnection;
 import com.easyinsight.feedassembly.CompositeFeedNode;
+import com.easyinsight.feedassembly.FederatedDataSource;
+import com.easyinsight.feedassembly.FederationSource;
 import com.easyinsight.filtering.FilterDateRangeDefinition;
 import com.easyinsight.filtering.FilterPatternDefinition;
 import com.easyinsight.filtering.FilterRangeDefinition;
@@ -167,6 +169,8 @@ public class TORegistry {
         var clearDBSource:ClearDBCompositeSource;
         var clearDBDataSource:ClearDBDataSource;
         var connection:CompositeFeedConnection;
+        var fed:FederatedDataSource;
+        var fedSource:FederationSource;
         var node:CompositeFeedNode;
         var wf:WholeFoodsDataSource;
         var fault:DataSourceConnectivityReportFault;

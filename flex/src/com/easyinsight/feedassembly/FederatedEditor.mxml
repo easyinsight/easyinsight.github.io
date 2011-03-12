@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         implements="com.easyinsight.administration.feed.IFeedAdminDetail"
+        creationComplete="setupListeners()" width="100%" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.solutions.AddFeedToSolutionWindow;
+        import com.easyinsight.solutions.FeedSelectionEvent;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private function setupListeners():void {
+            addEventListener(DeleteFederatedEvent.DELETE_FEDERATED, onDelete);
+        }
+
+        private function onDelete(event:DeleteFederatedEvent):void {
+            dataSources.removeItemAt(dataSources.getItemIndex(event.source));
+        }
+
+        private var _dataSources:ArrayCollection = new ArrayCollection();
+
+        [Bindable(event="dataSourcesChanged")]
+        public function get dataSources():ArrayCollection {
+            return _dataSources;
+        }
+
+        public function set dataSources(value:ArrayCollection):void {
+            if (_dataSources == value) return;
+            _dataSources = value;
+            dispatchEvent(new Event("dataSourcesChanged"));
+        }
+
+        private function addDataSource():void {
+            var window:AddFeedToSolutionWindow = new AddFeedToSolutionWindow();
+            window.addEventListener(FeedSelectionEvent.FEED_SELECTED, onDataSource, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onDataSource(event:FeedSelectionEvent):void {
+            var source:FederationSource = new FederationSource();
+            source.dataSourceID = event.feedDescriptor.id;
+            source.name = event.feedDescriptor.name;
+            dataSources.addItem(source);
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            FederatedDataSource(feedDefinition).sources = dataSources;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+
+    <mx:Button label="Add Data Source..." click="addDataSource()" styleName="grayButton"/>
+    <mx:DataGrid dataProvider="{dataSources}" rowHeight="28">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Data Source" dataField="name" width="400"/>
+            <util:EIDataGridColumn width="50" sortable="false" dataField="name" headerText="" itemRenderer="com.easyinsight.feedassembly.FederatedControls"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

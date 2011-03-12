@@ -2,20 +2,11 @@
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
                       xmlns:filtering="com.easyinsight.filtering.*"
                       xmlns:datasources="com.easyinsight.datasources.*"
-                      xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*"
-                      xmlns:report="com.easyinsight.report.*"
+                      xmlns:report="com.easyinsight.report.*" xmlns:util="com.easyinsight.util.*"
                       width="100%" height="100%"
-                      creationComplete="onCreation()" 
+                      creationComplete="onCreation()"
                       implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
                       xmlns:skin="com.easyinsight.skin.*" applyCenterScreenLogic="false">
-    <skin:states>
-        <mx:State name="FullScreen">
-            <mx:RemoveChild target="{topDisplay}"/>
-            <mx:AddChild relativeTo="{topLevelVBox}" position="0">
-                <mx:Button label="Close Full Screen" click="currentState=''"/>
-            </mx:AddChild>
-        </mx:State>
-    </skin:states>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
@@ -24,7 +15,6 @@
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
-        import com.easyinsight.analysis.ReportRatingEvent;
         import com.easyinsight.analysis.service.ReportRetrievalFault;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
@@ -44,12 +34,15 @@
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
-        import mx.core.Application;
+        import mx.controls.TextArea;
         import mx.core.Container;
+        import mx.core.UIComponent;
         import mx.formatters.DateFormatter;
         import mx.formatters.NumberFormatter;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
+        import mx.states.RemoveChild;
+        import mx.states.State;
         import mx.utils.URLUtil;
 
         [Bindable]
@@ -61,11 +54,11 @@
         }
 
         private function confirmedKeep():void {
-            exchangeIndex = 0;
-            leftButtonBar.addChildAt(editReportButton, 4);
+            _showAddBar = false;
+            generateState();
             var window:ReportAddedWindow = new ReportAddedWindow();
             window.report = report;
-            window.addEventListener("editReport", onEdit);
+            window.addEventListener("editReport", onEdit, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -171,14 +164,6 @@
         private var exportToExcelIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/star2_grey.png")]
-        private var noRatingIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/star2_green.png")]
-        private var ratedIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/document_out.png")]
         private var closeIcon:Class;
         [Bindable]
@@ -191,15 +176,8 @@
         [Embed(source="../../../../assets/funnel.png")]
         private var filterIcon:Class;
         [Bindable]
-        [Embed(source="../../../../assets/bookmark_blue.png")]
-        private var bookmarkIcon:Class;
-        [Bindable]
         [Embed(source="../../../../assets/refresh.png")]
         private var refreshIcon:Class;
-        
-        [Bindable]
-        [Embed(source="../../../../assets/logo2.PNG")]
-        private var logo:Class;
 
         [Bindable]
         private var dataSource:DataSourceInfo;
@@ -209,15 +187,6 @@
 
         [Bindable]
         private var ownerName:String;
-
-        [Bindable]
-        private var attribution:String;
-
-        [Bindable]
-        private var reportRating:String;
-
-        [Bindable]
-        private var reportRatingCount:String;
 
         [Bindable]
         private var reportViews:String;
@@ -255,12 +224,11 @@
             dispatchEvent(new Event("originReportIDChanged"));
         }
 
-        private var _originReportScore:Number;
+        private var _installs:int;
 
-        public function set originReportScore(value:Number):void {
-            _originReportScore = value;
+        public function set installs(value:int):void {
+            _installs = value;
         }
-
 
         [Bindable(event="parameterFiltersChanged")]
         public function get parameterFilters():ArrayCollection {
@@ -369,17 +337,12 @@
                 var nf:NumberFormatter = new NumberFormatter();
                 nf.precision = 2;
                 if (_originReportID > 0) {
-                    _score = _originReportScore;
                     _placeHolderID = _originReportID;
-                    if (ratingText == "") {
-                        analysisService.getReportMetrics.send(_originReportID);
-                    }
                 } else {
                     _score = event.ratingsAverage;
                     _placeHolderID = _dataSourceID;
                 }
                 description = report.description;
-                attribution = event.attribution;
                 tags = "";
                 if (report.tagCloud != null && report.tagCloud.length > 0) {
                     for each (var tag:Tag in report.tagCloud) {
@@ -447,6 +410,7 @@
                 receivedData = true;
                 dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
                 retrievedDataOnce = true;
+                generateState();
             }
         }
 
@@ -552,11 +516,10 @@
         }
 
         private function saveReport(event:MouseEvent):void {
-            analysisService.keepReport.send(_reportID);
+            analysisService.keepReport.send(_reportID, _originReportID);
         }
 
         private function toExchange(event:MouseEvent):void {
-            var props:Object = new Object();
             dispatchEvent(new AnalysisCloseEvent());
         }
 
@@ -567,33 +530,15 @@
         override protected function createChildren():void {
             super.createChildren();
             try {
-                if (!_showBack) {
-                    leftButtonBar.removeChild(backButton);
-                }
-                if (!_showFullScreen) {
-                    leftButtonBar.removeChild(fullScreenButton);
-                }
-                if (!_showExport) {
-                    leftButtonBar.removeChild(exportButton);
-                }
-                if (!_showReportEditor || _showAddBar || User.getInstance().guestUser) {
-                    leftButtonBar.removeChild(editReportButton);
-                }
-                if (!_showRefresh) {
-                    leftButtonBar.removeChild(refreshButton);
-                }
 
-                if (_showAddBar) {
+
+                /*if (_showAddBar) {
                     if (!User.getInstance().guestUser) {
                         exchangeIndex = 1;
                     }
-                }
+                }*/
 
-                if (User.getInstance().guestUser) {
-                    highBox.removeChild(dataSourceDisplay);
-                } else {
-                    dataSourceDisplay.visible = true;
-                }
+                //generateState();
 
                 viewFactory.reportID = _reportID;
                 viewFactory.prefix = _prefix;
@@ -657,6 +602,83 @@
             //reportBox.removeChild(viewFactory);
         }
 
+        private function generateState():void {
+            var ops:Array = [];
+            var textAreas:Array = [];
+            var remainingSections:Array = [];
+            if (!_showExport) {
+                var removeExportButton:RemoveChild = new RemoveChild();
+                removeExportButton.target = exportButton;
+                ops.push(removeExportButton);
+            }
+            if (!_showReportEditor || _showAddBar || User.getInstance().guestUser) {
+                var removeEditButton:RemoveChild = new RemoveChild();
+                removeEditButton.target = editReportButton;
+                ops.push(removeEditButton);
+            }
+            if (!_showRefresh) {
+                var removeRefreshButton:RemoveChild = new RemoveChild();
+                removeRefreshButton.target = refreshButton;
+                ops.push(removeRefreshButton);
+            }
+            if (description == null || description.length == 0) {
+                var removeDescription:RemoveChild = new RemoveChild();
+                removeDescription.target = descriptionBox;
+                ops.push(removeDescription);
+                var removeRule1:RemoveChild = new RemoveChild();
+                removeRule1.target = rule1;
+                ops.push(removeRule1);
+            } else {
+                textAreas.push(descriptionArea);
+                remainingSections.push(descriptionBox);
+            }
+            if (!_showAddBar) {
+                var removeExchange:RemoveChild = new RemoveChild();
+                removeExchange.target = exchangeBox;
+                ops.push(removeExchange);
+            } else {
+                textAreas.push(exchangeArea);
+                remainingSections.push(exchangeBox);
+            }
+
+            if (_showAddBar) {
+                var removeData:RemoveChild = new RemoveChild();
+                removeData.target = dataSourceDisplay;
+                ops.push(removeData);
+            } else {
+                textAreas.push(dataSourceDisplay.sourceLabel);
+                remainingSections.push(dataSourceDisplay);
+            }
+            if (ops.length > 0) {
+                var len:int = Math.max(2, textAreas.length);
+                for each (var area:TextArea in textAreas) {
+                    area.width = 900 / len;
+                }
+                for each (var comp:UIComponent in remainingSections) {
+                    comp.width = 950 / len;
+                }
+                var state:State = new State();
+                var name:String = "report" + stateIndex++;
+                state.name = name;
+                state.overrides = ops;
+                var states:Array = [];
+                states.push(state);
+                if (lastState != null) {
+                    states.push(lastState);
+                }
+                this.states = states;
+                lastState = state;
+                currentState = name;
+            } else {
+                currentState = "";
+            }
+            hbox.visible = true;
+        }
+
+        private var stateIndex:int = 1;
+
+        private var lastState:State;
+
         [Bindable]
         private var stackTrace:String;
 
@@ -667,12 +689,6 @@
         private var showingFilters:Boolean = false;
 
         [Bindable]
-        private var ratingText:String = "";
-
-        [Bindable]
-        private var myRatingNumber:int;
-
-        [Bindable]
         [Embed(source="../../../../assets/arrow_left_blue.png")]
         private var previousReportArrow:Class;
 
@@ -680,23 +696,8 @@
         [Embed(source="../../../../assets/arrow_right_blue.png")]
         private var nextReportArrow:Class;
 
-        [Bindable]
-        private var whenCreated:String = "5 months ago";
-
-        [Bindable]
-        private var currentRating:String = "5.00";
-
         private function toPreviousReport():void {
 
-        }
-
-        private function gotMetrics():void {
-            var metrics:ReportMetrics = analysisService.getReportMetrics.lastResult as ReportMetrics;
-            var nf:NumberFormatter = new NumberFormatter();
-            nf.precision = 2;
-            currentRating = nf.format(metrics.average);
-            ratingText = report.authorName;
-            myRatingNumber = metrics.myRating;
         }
 
         private function toNextReport():void {
@@ -705,94 +706,50 @@
 
         public function gotFocus():void {
         }
-
-        private function updateRating(event:ReportRatingEvent):void {
-            var nf:NumberFormatter = new NumberFormatter();
-            nf.precision = 2;
-            currentRating = nf.format(event.newRating);
-        }
-
         ]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
                       direction="vertical" id="topLevelVBox">
-    <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF">
-        <mx:HBox width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5">
-            <mx:ViewStack resizeToContent="true">
-                <mx:Box/>
-                <mx:HBox>
-                    <mx:Button icon="{previousReportArrow}" toolTip="Previous Report" click="toPreviousReport()"/>
-                    <mx:VRule height="50"/>
-                </mx:HBox>
-            </mx:ViewStack>
-            <mx:HBox width="1000" id="highBox">
-                <mx:VBox>
-                    <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
-                        <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="bottom" id="backButton"
-                                   toolTip="Close the report view"/>
-                        <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
-                                   id="fullScreenButton" toolTip="View full screen"/>
-                        <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
-                                   id="refreshButton" toolTip="Refresh this report"/>
-                        <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
-                                   labelPlacement="bottom"
-                                   id="exportButton" toolTip="Export the report..."/>
-                        <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="bottom"
-                                   id="filterButton" toolTip="{filterTooltip}"/>
-                        <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
-                                   labelPlacement="bottom" id="editReportButton"
-                                   toolTip="Open this report in the report editor..."/>
-                        <mx:Spacer width="100%"/>
-                        <mx:Label text="{reportName}" fontFamily="Tahoma" fontWeight="bold" maxWidth="450"
-                                  fontSize="14"/>
-                        <mx:Spacer width="100%"/>
-                    </mx:HBox>
-                    <util:AutoSizeTextArea text="{description}" visible="true" fontSize="12" width="720"
-                                           editable="false" backgroundAlpha="0"/>
-                </mx:VBox>
-                <mx:Spacer width="100%"/>
-                <mx:ViewStack selectedIndex="{exchangeIndex}" resizeToContent="true">
-                    <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"
-                                                   id="dataSourceDisplay"
-                                                   visible="false"/>
-                    <mx:VBox verticalGap="3" horizontalAlign="center">
-                        <mx:HBox verticalAlign="middle">
-                            <mx:VBox verticalGap="0">
-                                <mx:Label text="Created by:" color="#555555" fontSize="10" fontStyle="italic"/>
-                                <mx:Label text="{ratingText}" color="#2525D4"/>
-                                <!--<mx:Label text="{whenCreated}" fontSize="10"/>-->
-                            </mx:VBox>
-                            <mx:VBox backgroundColor="#2525D4" borderColor="#2525D4" verticalGap="0" borderStyle="solid"
-                                     borderThickness="1" cornerRadius="5" horizontalAlign="center">
-                                <mx:Label text="{currentRating}" fontSize="16" color="#FFFFFF"/>
-                                <mx:Label text="Average Score" fontSize="10" color="#FFFFFF"/>
-                            </mx:VBox>
-                        </mx:HBox>
-                        <analysis:ReportRating score="{myRatingNumber}" rateable="true" reportID="{originReportID}"
-                                               reportRating="updateRating(event)"/>
-                        <mx:Label text="Rate it yourself!" fontSize="8"/>
-                    </mx:VBox>
-                </mx:ViewStack>
-            </mx:HBox>
-            <mx:ViewStack resizeToContent="true">
-                <mx:Box/>
-                <mx:HBox>
-                    <mx:VRule height="50"/>
-                    <mx:Button icon="{nextReportArrow}" toolTip="Next Report" click="toNextReport()"/>
-                </mx:HBox>
-            </mx:ViewStack>
-        </mx:HBox>
+    <mx:VBox borderStyle="solid" borderThickness="1" borderColor="#DDDDDD" id="topDisplay" backgroundColor="#FFFFFF"
+            horizontalAlign="center">
 
-        <mx:ViewStack resizeToContent="true" selectedIndex="{exchangeIndex}" width="100%">
-            <mx:Box/>
-            <mx:HBox paddingTop="15" verticalAlign="middle" width="100%" horizontalAlign="center">
-                <mx:TextArea
-                        text="Want to save this report to your account? You can use the report as it stands or just use it as a starting point and change fields, add filters, update styling, or anything else!"
-                        editable="false" selectable="false" width="620" borderStyle="none" backgroundAlpha="0"
-                        fontSize="12"/>
-                <mx:Button label="Save to my Account" fontSize="14" styleName="blueButton"
-                           click="saveReport(event)"/>
+        <mx:VBox width="1000" id="highBox" paddingLeft="10" paddingRight="10">
+            <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
+                <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="right" id="backButton"
+                           toolTip="Close the report" label="Close Report"/>
+                <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="right"
+                           id="fullScreenButton" toolTip="View full screen" label="Full Screen"/>
+                <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="right"
+                           id="refreshButton" toolTip="Refresh this report" label="Refresh"/>
+                <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
+                           labelPlacement="right"
+                           id="exportButton" toolTip="Export the report..." label="Export"/>
+                <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="right"
+                           id="filterButton" toolTip="{filterTooltip}" label="Toggle Filters"/>
+                <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
+                           labelPlacement="right" id="editReportButton"
+                           toolTip="Open this report in the report editor..." label="Edit Report"/>
+                <mx:Spacer width="100%"/>
+                <mx:Label text="{reportName}" fontSize="14" maxWidth="350"/>
+                <mx:Spacer width="100%"/>
             </mx:HBox>
-        </mx:ViewStack>
+            <mx:HBox width="100%" verticalAlign="middle" id="hbox" visible="false">
+                <mx:VBox id="descriptionBox">
+                    <util:AutoSizeTextArea text="{description}" width="250" id="descriptionArea"
+                            focusEnabled="false" editable="false" selectable="false"/>
+                </mx:VBox>
+                <mx:VRule height="30" id="rule1"/>
+                <mx:VBox verticalAlign="middle" horizontalAlign="center" id="exchangeBox">
+                    <util:AutoSizeTextArea
+                            text="Want to save this report to your account? You can alter the report after saving."
+                            editable="false" selectable="false" width="250" backgroundAlpha="0"
+                            focusEnabled="false" id="exchangeArea"/>
+                    <mx:Button label="Save to my Account" fontSize="12" styleName="grayButton"
+                               click="saveReport(event)"/>
+                </mx:VBox>
+                <datasources:DataSourceDisplay dataSource="{dataSource}" dataView="{viewFactory}"
+                                           id="dataSourceDisplay"/>
+            </mx:HBox>
+        </mx:VBox>
         <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
     </mx:VBox>
     <mx:VBox width="100%" height="100%" paddingLeft="0" paddingRight="0">
@@ -814,6 +771,5 @@
     </mx:VBox>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="keepReport" result="confirmedKeep()"/>
-        <mx:method name="getReportMetrics" result="gotMetrics()"/>
     </mx:RemoteObject>
 </skin:BackgroundImage>

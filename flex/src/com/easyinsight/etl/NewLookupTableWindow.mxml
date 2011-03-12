@@ -105,7 +105,8 @@
             var fields:ArrayCollection = feedMetadata.fields;
             var availableFields:ArrayCollection = new ArrayCollection();
             for each (var item:AnalysisItem in fields) {
-                if (item.getType() == AnalysisItemTypes.DIMENSION) {
+                if (item.getType() == AnalysisItemTypes.DIMENSION || item.hasType(AnalysisItemTypes.LIST) ||
+                        item.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
                     availableFields.addItem(item);
                 }
             }

@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.feedassembly {
+import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.CompositeFeedCreationSource;
 
@@ -35,11 +36,23 @@ public class CompositeCreator extends EventDispatcher {
     }
 
     public function start():void {
+        var window:JoinChoiceWindow = new JoinChoiceWindow();
+        window.addEventListener("joinSources", onJoin);
+        window.addEventListener("federateSources", onFederate);
+        PopUpManager.addPopUp(window, parent, true);
+        PopUpUtil.centerPopUp(window);
+    }
+
+    private function onJoin(event:Event):void {
         feedService = new RemoteObject();
         feedService.destination = "feeds";
         feedService.suggestJoins.addEventListener(ResultEvent.RESULT, onJoins);
         ProgressAlert.alert(parent, "Analyzing...", null, feedService.suggestJoins);
         feedService.suggestJoins.send(dataSources);
+    }
+
+    private function onFederate(event:Event):void {
+        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.FEDERATED_EDITOR)));
     }
 
     private function onJoins(event:ResultEvent):void {

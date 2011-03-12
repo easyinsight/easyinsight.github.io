@@ -3,12 +3,15 @@ package com.easyinsight.solutions {
 import com.easyinsight.account.Account;
 import com.easyinsight.account.BasicUpgradeWindow;
 import com.easyinsight.account.UpgradeEvent;
+import com.easyinsight.analysis.PromptEvent;
+import com.easyinsight.analysis.SavePromptWindow;
 import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.IPerspective;
+import com.easyinsight.listing.DescriptorAnalyzeSource;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.skin.BackgroundImage;
 import com.easyinsight.util.PopUpUtil;
@@ -177,18 +180,24 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     private function checkedValidity(event:ResultEvent):void {
-        var alreadyHasConnection:Boolean = solutionService.alreadyHasConnection.lastResult as Boolean;
-        if (alreadyHasConnection) {
-            Alert.show("It looks like you already have a data source for this connection under your My Data page. Are you sure you want to install a new data source?",
-                    "Before we go ahead...", Alert.OK | Alert.CANCEL, this, goAheadAndInstall, null, Alert.CANCEL);
+        var existingConnectionID:int = solutionService.alreadyHasConnection.lastResult as int;
+        var renderer:SolutionDetailRenderer = this;
+        if (existingConnectionID > 0) {
+            var window:SavePromptWindow = new SavePromptWindow();
+            window.defineOption("Open the Existing Connection", PromptEvent.PROMPT_SAVE);
+            window.defineOption("Create New Connection", PromptEvent.PROMPT_DISCARD);
+            window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+            window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(existingConnectionID)));
+            }, false, 0, true);
+            window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
+                ProgressAlert.alert(renderer, "Installing connection...", null, solutionService.installSolution);
+                solutionService.installSolution.send(_solution.solutionID);
+            }, false, 0, true);
+            window.prompt = "It looks like you already have a data source for this connection under your My Data page. Are you sure you want to install a new data source?";
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         } else {
-            ProgressAlert.alert(this, "Installing connection...", null, solutionService.installSolution);
-            solutionService.installSolution.send(_solution.solutionID);
-        }
-    }
-
-    private function goAheadAndInstall(event:CloseEvent):void {
-        if (event.detail == Alert.OK) {
             ProgressAlert.alert(this, "Installing connection...", null, solutionService.installSolution);
             solutionService.installSolution.send(_solution.solutionID);
         }

@@ -36,6 +36,14 @@ public class AggregateKey extends NamedKey {
         return key;
     }
 
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public Key getKey() {
+        return key;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

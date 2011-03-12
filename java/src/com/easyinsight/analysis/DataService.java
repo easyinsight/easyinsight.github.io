@@ -112,6 +112,7 @@ public class DataService {
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
         SecurityUtil.authorizeInsight(reportID);
+
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);

@@ -123,7 +123,7 @@ public class ExchangeController extends EventDispatcher {
         if (dataProvider2.sort == null) {
             var sort:Sort = new Sort();
             var sortField:SortField = new SortField();
-            sortField.name = "ratingAverage";
+            sortField.name = "installs";
             sortField.descending = true;
             sort.fields = [ sortField ];
             data.sort = sort;

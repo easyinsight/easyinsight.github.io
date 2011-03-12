@@ -36,6 +36,7 @@ public class DataSourceType {
     public static const CLEARDB:int = 80;
     public static const BATCHBOOK:int = 82;
     public static const CAMPAIGN_MONITOR:int = 75;
+    public static const FEDERATED:int = 89;
 
     public static const OWNER:int = 1;
     public static const EDITOR:int = 2;

@@ -21,7 +21,7 @@ import mx.managers.PopUpManager;
 public class DataSourceDisplay extends VBox {
 
     private var _dataSource:DataSourceInfo;
-    private var sourceLabel:TextArea;
+    public var sourceLabel:TextArea;
 
     private var _labelText:String;
     public function DataSourceDisplay() {
@@ -143,7 +143,7 @@ public class DataSourceDisplay extends VBox {
         outOfDateBox.setStyle("horizontalAlign", "center");
         var button:Button = new Button();
         button.label = "Refresh the data source";
-        button.styleName = "blueButton";
+        button.styleName = "grayButton";
         button.addEventListener(MouseEvent.CLICK, onClick);
         outOfDateBox.addChild(button);
 

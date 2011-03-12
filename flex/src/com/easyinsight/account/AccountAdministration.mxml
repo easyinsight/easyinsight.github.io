@@ -5,31 +5,27 @@
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
 
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
         [Bindable]
         private var accounts:ArrayCollection;
 
-        private function newAccount():void {
-            var window:NewAccountWindow = new NewAccountWindow();
-            window.addEventListener(RefreshAccountsListEvent.REFRESH_ACCOUNTS_LIST, refreshData, false, 0, true);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
         private function gotAccounts():void {
             this.accounts = userService.getAccounts.lastResult as ArrayCollection;
         }
 
-        private function refreshData(event:RefreshAccountsListEvent):void {
+        private function refreshData():void {
+            ProgressAlert.alert(this, "Refreshing data...", null, userService.getAccounts);
             userService.getAccounts.send();
         }
 ]]></mx:Script>
     <mx:RemoteObject destination="eiAdmin" id="userService">
         <mx:method name="getAccounts" result="gotAccounts()"/>
     </mx:RemoteObject>
-    <mx:Button label="New Account" click="newAccount()"/>
+    <mx:Button label="Refresh Accounts" click="refreshData()"/>
     <mx:DataGrid dataProvider="{accounts}" width="1200" height="100%">
         <mx:columns>
             <mx:DataGridColumn dataField="name" headerText="Name"/>

@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
+                      xmlns:skin="com.easyinsight.skin.*" xmlns:feedassembly="com.easyinsight.feedassembly.*"
+                      implements="com.easyinsight.listing.IPerspective">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+
+
+        public function gotFocus():void {
+        }
+
+        public function cleanup():void {
+        }
+
+        private var source:FederatedDataSource;
+
+        private function save():void {
+            if (source == null) {
+                var saveWindow:SaveFederatedFeedWindow = new SaveFederatedFeedWindow();
+                saveWindow.sources = editor.dataSources;
+                saveWindow.addEventListener(CompositeFeedSaveEvent.COMPOSITE_FEED_SAVE, createdFeed, false, 0, true);
+                PopUpManager.addPopUp(saveWindow, this, true);
+                PopUpUtil.centerPopUp(saveWindow);
+            } else {
+                source.sources = editor.dataSources;
+                ProgressAlert.alert(this, "Updating...", "Updated data source.", feedService.updateFeedDefinition);
+                feedService.updateFeedDefinition.send(source);
+            }
+        }
+
+        private function createdFeed(event:CompositeFeedSaveEvent):void {
+            source = event.feedDefinition as FederatedDataSource;
+        }
+
+        private function cancel():void {
+            dispatchEvent(new AnalysisCloseEvent());
+        }
+
+        private function saved():void {
+
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="createFederatedDataSource" result="saved()"/>
+        <mx:method name="updateFeedDefinition" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:VBox width="1000" height="100%">
+        <mx:HBox paddingLeft="20" paddingTop="10">
+            <mx:Button icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
+                       toolTip="Close" label="Close Editor" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
+                           toolTip="Save" label="Save" labelPlacement="right"/>
+        </mx:HBox>
+        <feedassembly:FederatedEditor id="editor"/>
+    </mx:VBox>
+</skin:BackgroundImage>

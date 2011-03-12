@@ -94,6 +94,7 @@ public class FeedType {
     public static final FeedType BATCHBOOK_COMMUNICATIONS = new FeedType(86);
     public static final FeedType BATCHBOOK_USERS = new FeedType(87);
     public static final FeedType BATCHBOOK_TODOS = new FeedType(88);
+    public static final FeedType FEDERATED = new FeedType(89);
 
     private int type;
 

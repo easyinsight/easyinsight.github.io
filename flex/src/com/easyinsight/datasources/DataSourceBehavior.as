@@ -46,6 +46,7 @@ public class DataSourceBehavior {
                     text = "( Live )";
                     break;
                 case DataSourceType.COMPOSITE:
+                case DataSourceType.FEDERATED:
                     text = "( Composite )";
                     break;
                 default:

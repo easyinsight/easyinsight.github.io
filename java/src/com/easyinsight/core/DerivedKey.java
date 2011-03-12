@@ -92,4 +92,9 @@ public class DerivedKey extends Key {
         DerivedKey derivedKey = (DerivedKey) super.clone();
         return derivedKey;
     }
+
+    @Override
+    public String toString() {
+        return internalString();
+    }
 }

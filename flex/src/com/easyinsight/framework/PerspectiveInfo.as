@@ -32,6 +32,7 @@ public class PerspectiveInfo {
     public static const SCHEDULING:int = 30;
     public static const SCORECARD_EDITOR:int = 31;
     public static const SCORECARD_VIEW:int = 32;
+    public static const FEDERATED_EDITOR:int = 33;
 
     public var perspectiveType:int;
     public var properties:Object = null;

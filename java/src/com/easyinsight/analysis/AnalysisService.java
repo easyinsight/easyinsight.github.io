@@ -15,14 +15,12 @@ import com.easyinsight.database.Database;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.cache.Cache;
 
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Date;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -237,7 +235,7 @@ public class AnalysisService {
         }
     }
 
-    public void keepReport(long reportID) {
+    public void keepReport(long reportID, long sourceReportID) {
         SecurityUtil.authorizeInsight(reportID);
         Connection conn = Database.instance().getConnection();
         try {
@@ -246,6 +244,24 @@ public class AnalysisService {
             updateStmt.setLong(2, reportID);
             updateStmt.executeUpdate();
             updateStmt.close();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_REPORT_INSTALL_ID FROM EXCHANGE_REPORT_INSTALL WHERE USER_ID = ? AND " +
+                    "REPORT_ID = ?");
+            queryStmt.setLong(1, SecurityUtil.getUserID());
+            queryStmt.setLong(2, sourceReportID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long id = rs.getLong(1);
+                PreparedStatement updateTimeStmt = conn.prepareStatement("UPDATE EXCHANGE_REPORT_INSTALL SET install_date = ? WHERE EXCHANGE_REPORT_INSTALL_ID = ?");
+                updateTimeStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                updateTimeStmt.setLong(2, id);
+                updateTimeStmt.executeUpdate();
+            } else {
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCHANGE_REPORT_INSTALL (USER_ID, REPORT_ID, INSTALL_DATE) VALUES (?, ?, ?)");
+                insertStmt.setLong(1, SecurityUtil.getUserID());
+                insertStmt.setLong(2, sourceReportID);
+                insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                insertStmt.execute();
+            }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

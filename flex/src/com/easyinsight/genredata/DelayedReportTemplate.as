@@ -71,11 +71,11 @@ public class DelayedReportTemplate extends EventDispatcher {
         var descriptor:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
         if (descriptor is InsightDescriptor) {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, info.exchangeData.id, info.exchangeData.ratingAverage,
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, info.exchangeData.id, info.exchangeData.installs,
                     info.exchangeData.descriptor.urlKey)));
         } else if (descriptor is DashboardDescriptor ){
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, connectionID: info.exchangeData.id,
-                dashboardRating: info.exchangeData.ratingAverage, dashboardURLKey: info.exchangeData.descriptor.urlKey, originDashboardID: info.exchangeData.descriptor.id})));
+                installs: info.exchangeData.installs, dashboardURLKey: info.exchangeData.descriptor.urlKey, originDashboardID: info.exchangeData.descriptor.id})));
         }
     }
 }

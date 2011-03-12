@@ -16,9 +16,9 @@ public class SolutionReportExchangeItem extends ReportExchangeItem {
     public SolutionReportExchangeItem() {
     }
 
-    public SolutionReportExchangeItem(String name, long id, double ratingAverage, double ratingCount,
+    public SolutionReportExchangeItem(String name, long id, int installs,
                                       Date dateAdded, String description, String author, EIDescriptor descriptor, long solutionID, String solutionName) {
-        super(name, id, ratingAverage, ratingCount, dateAdded, description, author, descriptor);
+        super(name, id, installs, dateAdded, description, author, descriptor);
         this.solutionID = solutionID;
         this.solutionName = solutionName;
     }
