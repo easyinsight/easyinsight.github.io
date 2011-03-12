@@ -61,6 +61,6 @@ public class BeginTransactionServlet extends APIServlet {
         insertTxnStmt.setBoolean(7, false);
         insertTxnStmt.execute();
         conn.commit();
-        return new ResponseInfo(ResponseInfo.ALL_GOOD, "<tranactionID>"+txnString+"</tranactionID>");
+        return new ResponseInfo(ResponseInfo.ALL_GOOD, "<transactionID>"+txnString+"</transactionID>");
     }
 }

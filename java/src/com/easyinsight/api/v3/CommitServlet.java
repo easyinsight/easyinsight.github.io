@@ -29,12 +29,12 @@ public class CommitServlet extends APIServlet {
     protected ResponseInfo processXML(Document document, EIConnection conn) throws Exception {
         DataStorage dataStorage = null;
         try {
-            Nodes tranactionIDNodes = document.query("/commit/transactionID/text()");
+            Nodes transactionIDNodes = document.query("/commit/transactionID/text()");
             String transactionID;
-            if (tranactionIDNodes.size() == 0) {
+            if (transactionIDNodes.size() == 0) {
                 return new ResponseInfo(ResponseInfo.BAD_REQUEST, "<message>You need to specify a transaction ID.</message>");
             } else {
-                transactionID = tranactionIDNodes.get(0).getValue();
+                transactionID = transactionIDNodes.get(0).getValue();
             }
             PreparedStatement txnQueryStmt = conn.prepareStatement("SELECT data_transaction_id, data_source_name, replace_data, change_data_source_to_match " +
                         "FROM data_transaction where external_txn_id = ? AND user_id = ?");
