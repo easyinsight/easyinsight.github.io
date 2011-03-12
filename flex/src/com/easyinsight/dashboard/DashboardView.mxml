@@ -319,8 +319,8 @@
                         <mx:Button click="close()" icon="{closeIcon}" labelPlacement="right"
                                    id="backButton"
                                    toolTip="Close the report view" label="Close Dashboard"/>
-                        <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="right"
-                                   id="fullScreenButton" toolTip="View full screen" label="Full Screen"/>
+                        <!--<mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="right"
+                                   id="fullScreenButton" toolTip="View full screen" label="Full Screen"/>-->
                         <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="right"
                                    id="refreshButton" toolTip="Refresh this dashboard" label="Refresh"/>
                         <mx:Button icon="{exportIcon}" click="exportDashboard()"

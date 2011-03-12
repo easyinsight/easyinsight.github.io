@@ -13,7 +13,7 @@
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
-    <mx:HBox>
+    <mx:HBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
              backgroundColor="#FFFFFF" height="175"
              width="320" cornerRadius="8" buttonMode="true" id="openReportBox3"

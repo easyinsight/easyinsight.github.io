@@ -716,8 +716,8 @@
             <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10" width="100%">
                 <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="right" id="backButton"
                            toolTip="Close the report" label="Close Report"/>
-                <mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="right"
-                           id="fullScreenButton" toolTip="View full screen" label="Full Screen"/>
+                <!--<mx:Button click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="right"
+                           id="fullScreenButton" toolTip="View full screen" label="Full Screen"/>-->
                 <mx:Button click="refreshData()" icon="{refreshIcon}" labelPlacement="right"
                            id="refreshButton" toolTip="Refresh this report" label="Refresh"/>
                 <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
