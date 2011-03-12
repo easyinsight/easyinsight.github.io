@@ -190,8 +190,7 @@ public class ExportService {
                 try {
                     activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
                 } catch (SQLException e) {
-                    LogClass.error(e.getMessage() + " on loading activity " + activityID);
-                    LogClass.error(e);
+                    LogClass.error(e.getMessage() + " on loading activity " + activityID, e);
                 }
             }
             conn.commit();
@@ -306,6 +305,7 @@ public class ExportService {
     }
 
     public byte[] toListPDF(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults, EIConnection conn) throws SQLException, DocumentException {
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT FROM ACCOUNT WHERE ACCOUNT_ID = ?");
         dateFormatStmt.setLong(1, SecurityUtil.getAccountID());
@@ -339,18 +339,31 @@ public class ExportService {
         }
         table.setHeaderRows(1);
 
-        for (ListRow listRow : listDataResults.getRows()) {
-            //PdfPCell[] cells = new PdfPCell[listDataResults.getHeaders().length];
+        if (listDataResults.getRows() == null || listDataResults.getRows().length == 0) {
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < listDataResults.getHeaders().length; i++) {
                     AnalysisItem headerItem = listDataResults.getHeaders()[i];
                     if (headerItem == analysisItem) {
-                        Value value = listRow.getValues()[i];
-                        String valueString = createValue(dateFormat, headerItem, value);
-                        PdfPCell valueCell = new PdfPCell(new Phrase(valueString));
+                        PdfPCell valueCell = new PdfPCell(new Phrase(""));
                         valueCell.setFixedHeight(20f);
                         table.addCell(valueCell);
-                        //cells[j] = valueCell;
+                    }
+                }
+            }
+        } else {
+            for (ListRow listRow : listDataResults.getRows()) {
+                //PdfPCell[] cells = new PdfPCell[listDataResults.getHeaders().length];
+                for (AnalysisItem analysisItem : items) {
+                    for (int i = 0; i < listDataResults.getHeaders().length; i++) {
+                        AnalysisItem headerItem = listDataResults.getHeaders()[i];
+                        if (headerItem == analysisItem) {
+                            Value value = listRow.getValues()[i];
+                            String valueString = createValue(dateFormat, headerItem, value);
+                            PdfPCell valueCell = new PdfPCell(new Phrase(valueString));
+                            valueCell.setFixedHeight(20f);
+                            table.addCell(valueCell);
+                            //cells[j] = valueCell;
+                        }
                     }
                 }
             }
