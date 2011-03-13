@@ -418,11 +418,15 @@ public class CompositeFeed extends Feed {
 
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
-            Pipeline pipeline = new CompositeReportPipeline();
-            WSListDefinition analysisDefinition = new WSListDefinition();
-            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
-            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-            myDataSet = pipeline.toDataSet(dataSet);
+            if (getDataFeedType().getType() == FeedType.BASECAMP.getType()) {
+                Pipeline pipeline = new CompositeReportPipeline();
+                WSListDefinition analysisDefinition = new WSListDefinition();
+                analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
+                pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+                myDataSet = pipeline.toDataSet(dataSet);
+            } else {
+                myDataSet = dataSet;
+            }
         }
 
         public void addFilter(FilterDefinition filterDefinition) {
