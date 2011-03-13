@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.composite;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedRegistry;
@@ -30,31 +31,24 @@ public class FederatedFeed extends Feed {
             for (FederationSource source : sources) {
                 Feed feed = FeedRegistry.instance().getFeed(source.getDataSourceID(), conn);
 
-                System.out.println("Feed " + feed.getName());
+                Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
+                Set<AnalysisItem> childAnalysisItems = new HashSet<AnalysisItem>();
+                for (AnalysisItem analysisItem : analysisItems) {
+                    for (AnalysisItem field : feed.getDataSource().getFields()) {
+                        if (field.toDisplay().equals(analysisItem.toDisplay())) {
+                            childAnalysisItems.add(field);
+                            map.put(field, analysisItem);
+                        }
+                    }
+                }
+                DataSet childSet = feed.getAggregateDataSet(childAnalysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
 
-                Map<Key, Key> map = new HashMap<Key, Key>();
-                for (AnalysisItem analysisItem : analysisItems) {
-                    Key key = feed.getDataSource().getField(analysisItem.getKey().toKeyString());
-                    map.put(key, analysisItem.getKey());
-                    System.out.println("Temporarily replacing " + analysisItem.getKey() + " with " + key);
-                    analysisItem.setKey(key);
-                }
-                DataSet childSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
-                System.out.println(childSet);
-                /*DataSetKeys keys = childSet.getDataSetKeys();
-                for (Key key : keys.getKeys()) {
-                    AggregateKey aggregateKey = (AggregateKey) key;
-                    Key existingKey = aggregateKey.getKey();
-                    Key swapKey = map.get(existingKey);
-                    System.out.println("swapping " + swapKey + " in for " + existingKey);
-                    aggregateKey.setKey(swapKey);
-                }*/
-                for (AnalysisItem analysisItem : analysisItems) {
-                    analysisItem.setKey(map.get(analysisItem.getKey()));
-                }
                 for (IRow row : childSet.getRows()) {
                     IRow newRow = dataSet.createRow();
-                    newRow.addValues(row);
+                    for (Map.Entry<AnalysisItem, AnalysisItem> entry : map.entrySet()) {
+                        Value value = row.getValue(entry.getKey());
+                        newRow.addValue(entry.getValue().createAggregateKey(), value);
+                    }
                 }
             }
             return dataSet;

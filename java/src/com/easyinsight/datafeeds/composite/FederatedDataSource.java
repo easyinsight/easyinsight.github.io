@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.composite;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -109,6 +110,8 @@ public class FederatedDataSource extends FeedDefinition {
         for (AnalysisItem analysisItem : child.getFields()) {
             AnalysisItem clonedItem = analysisItem.clone();
             clonedItem.setAnalysisItemID(0);
+            Key clonedKey = clonedItem.getKey().clone();
+            clonedItem.setKey(clonedKey);
             newFields.add(clonedItem);
             replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
         }
