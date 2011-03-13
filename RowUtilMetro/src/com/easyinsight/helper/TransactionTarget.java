@@ -61,7 +61,7 @@ public class TransactionTarget {
             } else if ("400".equals(code)) {
                 throw new EasyInsightException(results.get("message"));
             }
-            transactionID = results.get("tranactionID");
+            transactionID = results.get("transactionID");
         } catch (EasyInsightException eie) {
             throw eie;
         } catch (Exception e) {
