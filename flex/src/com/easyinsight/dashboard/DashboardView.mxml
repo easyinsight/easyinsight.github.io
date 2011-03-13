@@ -224,7 +224,7 @@
         }
 
         private function keptDashboard():void {
-            _showAddBar = false;
+            exchangeItem = null;
             generateState();
             var window:DashboardAddedWindow = new DashboardAddedWindow();
             window.dashboard = dashboard;
