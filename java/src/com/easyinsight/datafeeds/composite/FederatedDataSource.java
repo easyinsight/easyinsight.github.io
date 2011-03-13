@@ -86,7 +86,7 @@ public class FederatedDataSource extends FeedDefinition {
         List<FederationSource> sources = new ArrayList<FederationSource>();
         if (rs.next()) {
             long id = rs.getLong(1);
-            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, FEED_NAME FROM FEDERATED_DATA_SOURCE_TO_DATA_SOURCE, DATA_FEED WHERE FEDERATED_DATA_SOURCE_ID = ? AND " +
+            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, FEED_NAME, FEED_TYPE FROM FEDERATED_DATA_SOURCE_TO_DATA_SOURCE, DATA_FEED WHERE FEDERATED_DATA_SOURCE_ID = ? AND " +
                     "DATA_SOURCE_ID = DATA_FEED_ID");
             stmt.setLong(1, id);
             ResultSet fedRS = stmt.executeQuery();
@@ -94,6 +94,7 @@ public class FederatedDataSource extends FeedDefinition {
                 FederationSource federationSource = new FederationSource();
                 federationSource.setDataSourceID(fedRS.getLong(1));
                 federationSource.setName(fedRS.getString(2));
+                federationSource.setDataSourceType(fedRS.getInt(3));
                 sources.add(federationSource);
             }
         }

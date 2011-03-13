@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" headerHeight="0"
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
     <mx:Script><![CDATA[
         import com.easyinsight.listing.ListingChangeEvent;
@@ -26,7 +26,7 @@
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center">
         <mx:Label text="We couldn't find any installs of this connection in your account." fontSize="14"/>
-        <mx:Button label="Install this Connection" styleName="blueButton" fontSize="14" click="toSolution()"/>
-        <mx:LinkButton textDecoration="underline" label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+        <util:SaveButton label="Install this Connection" styleName="blueButton" fontSize="14" click="toSolution()"/>
+        <util:CancelButton textDecoration="underline" label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
     </mx:VBox>
-</util:EITitleWindow>
+</util:EISlimWindow>

@@ -9,9 +9,16 @@
 			import mx.collections.ArrayCollection;
 			[Bindable]
 			private var descriptors:ArrayCollection;
+
+            public var filterFunction:Function;
 		
 			private function gotFeeds(event:ResultEvent):void {
-				descriptors = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+				var descs:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+                if (filterFunction != null) {
+                    descs.filterFunction = filterFunction;
+                    descs.refresh();
+                }
+                this.descriptors = descs;
 			}
 			
 			private function chose():void {

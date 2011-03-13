@@ -9,6 +9,15 @@ public class FederationSource {
     private long dataSourceID;
     private String value;
     private String name;
+    private int dataSourceType;
+
+    public int getDataSourceType() {
+        return dataSourceType;
+    }
+
+    public void setDataSourceType(int dataSourceType) {
+        this.dataSourceType = dataSourceType;
+    }
 
     public String getName() {
         return name;

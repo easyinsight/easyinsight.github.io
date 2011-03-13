@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" title="Choose a Data Source">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
         import com.easyinsight.solutions.DataSourceDescriptor;
 
@@ -40,8 +40,8 @@
                 fontSize="14"/>
         <mx:RadioButtonGroup id="dataSourceGroup"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Use this Data Source" click="useDataSource()"/>
-            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <util:SaveButton label="Use this Data Source" click="useDataSource()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
-</util:EITitleWindow>
+</util:EISlimWindow>

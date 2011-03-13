@@ -13,6 +13,7 @@ public class FederationSource {
     public var dataSourceID:int;
     public var value:String;
     public var name:String;
+    public var dataSourceType:int;
 
     public function FederationSource() {
     }

@@ -21,16 +21,18 @@
         private var source:FederatedDataSource;
 
         private function save():void {
-            if (source == null) {
-                var saveWindow:SaveFederatedFeedWindow = new SaveFederatedFeedWindow();
-                saveWindow.sources = editor.dataSources;
-                saveWindow.addEventListener(CompositeFeedSaveEvent.COMPOSITE_FEED_SAVE, createdFeed, false, 0, true);
-                PopUpManager.addPopUp(saveWindow, this, true);
-                PopUpUtil.centerPopUp(saveWindow);
-            } else {
-                source.sources = editor.dataSources;
-                ProgressAlert.alert(this, "Updating...", "Updated data source.", feedService.updateFeedDefinition);
-                feedService.updateFeedDefinition.send(source);
+            if (editor.validate()) {
+                if (source == null) {
+                    var saveWindow:SaveFederatedFeedWindow = new SaveFederatedFeedWindow();
+                    saveWindow.sources = editor.dataSources;
+                    saveWindow.addEventListener(CompositeFeedSaveEvent.COMPOSITE_FEED_SAVE, createdFeed, false, 0, true);
+                    PopUpManager.addPopUp(saveWindow, this, true);
+                    PopUpUtil.centerPopUp(saveWindow);
+                } else {
+                    source.sources = editor.dataSources;
+                    ProgressAlert.alert(this, "Updating...", "Updated data source.", feedService.updateFeedDefinition);
+                    feedService.updateFeedDefinition.send(source);
+                }
             }
         }
 

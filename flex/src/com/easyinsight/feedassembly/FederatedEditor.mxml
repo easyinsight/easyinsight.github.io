@@ -5,6 +5,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.solutions.AddFeedToSolutionWindow;
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.FeedSelectionEvent;
         import com.easyinsight.util.PopUpUtil;
 
@@ -14,10 +15,16 @@
 
         private function setupListeners():void {
             addEventListener(DeleteFederatedEvent.DELETE_FEDERATED, onDelete);
+            if (dataSources.length > 0) {
+                dataSourceType = FederationSource(dataSources.getItemAt(0)).dataSourceType;
+            }
         }
 
         private function onDelete(event:DeleteFederatedEvent):void {
             dataSources.removeItemAt(dataSources.getItemIndex(event.source));
+            if (dataSources.length == 0) {
+                dataSourceType = 0;
+            }
         }
 
         private var _dataSources:ArrayCollection = new ArrayCollection();
@@ -33,17 +40,37 @@
             dispatchEvent(new Event("dataSourcesChanged"));
         }
 
+        private var dataSourceType:int;
+
         private function addDataSource():void {
             var window:AddFeedToSolutionWindow = new AddFeedToSolutionWindow();
             window.addEventListener(FeedSelectionEvent.FEED_SELECTED, onDataSource, false, 0, true);
+            window.filterFunction = filterDataSources;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        private function filterDataSources(item:Object):Boolean {
+            var ds:DataSourceDescriptor = item as DataSourceDescriptor;
+            for each (var existing:FederationSource in dataSources) {
+                if (existing.dataSourceID == ds.id) {
+                    return false;
+                }
+            }
+            if (dataSourceType != 0) {
+                if (ds.dataSourceType != dataSourceType) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private function onDataSource(event:FeedSelectionEvent):void {
             var source:FederationSource = new FederationSource();
             source.dataSourceID = event.feedDescriptor.id;
             source.name = event.feedDescriptor.name;
+            source.dataSourceType = event.feedDescriptor.dataSourceType;
+            dataSourceType = event.feedDescriptor.dataSourceType;
             dataSources.addItem(source);
         }
 
@@ -52,10 +79,13 @@
         }
 
         public function validate():Boolean {
+            if (dataSources.length == 0) {
+                Alert.show("You must include at least one data source.");
+                return false;
+            }
             return true;
         }
         ]]></mx:Script>
-
     <mx:Button label="Add Data Source..." click="addDataSource()" styleName="grayButton"/>
     <mx:DataGrid dataProvider="{dataSources}" rowHeight="28">
         <mx:columns>
