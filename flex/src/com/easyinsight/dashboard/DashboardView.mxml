@@ -143,7 +143,7 @@
                 textAreas.push(descriptionArea);
                 remainingSections.push(descriptionBox);
             }
-            if (_showAddBar) {
+            if (exchangeItem == null) {
                 var removeExchange:RemoveChild = new RemoveChild();
                 removeExchange.target = exchangeBox;
                 ops.push(removeExchange);
@@ -152,7 +152,7 @@
                 remainingSections.push(exchangeBox);
             }
 
-            if (!_showAddBar) {
+            if (exchangeItem != null) {
                 var removeData:RemoveChild = new RemoveChild();
                 removeData.target = dataSourceDisplay;
                 ops.push(removeData);
