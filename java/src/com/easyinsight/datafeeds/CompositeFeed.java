@@ -416,8 +416,13 @@ public class CompositeFeed extends Feed {
 
             Feed feed = FeedRegistry.instance().getFeed(feedID, conn);
 
-            // The set of items passed into getAggregateDataSet() needs to resolve down to certain keys
-            myDataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
+            DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
+
+            Pipeline pipeline = new CompositeReportPipeline();
+            WSListDefinition analysisDefinition = new WSListDefinition();
+            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+            myDataSet = pipeline.toDataSet(dataSet);
         }
 
         public void addFilter(FilterDefinition filterDefinition) {
