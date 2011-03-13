@@ -116,6 +116,9 @@ public class OrFilter extends FilterDefinition {
     @Override
     public boolean validForQuery() {
         boolean valid = true;
+        if (filters == null || filters.size() == 0) {
+            return false;
+        }
         for (FilterDefinition filter : filters) {
             if (!filter.validForQuery()) {
                 valid = false;
