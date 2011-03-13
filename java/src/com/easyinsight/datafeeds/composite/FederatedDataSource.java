@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.composite;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -20,6 +21,11 @@ import java.util.Map;
 public class FederatedDataSource extends FeedDefinition {
     private List<FederationSource> sources = new ArrayList<FederationSource>();
     private AnalysisItem analysisItem;
+
+    @Override
+    public int getDataSourceType() {
+        return DataSourceInfo.COMPOSITE;
+    }
 
     public List<FederationSource> getSources() {
         return sources;
