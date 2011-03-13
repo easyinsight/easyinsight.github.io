@@ -1,14 +1,13 @@
 <?xml version="1.0" ?>
-<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml"
+<report:DataViewPage xmlns:mx="http://www.adobe.com/2006/mxml"
                       xmlns:filtering="com.easyinsight.filtering.*"
                       xmlns:datasources="com.easyinsight.datasources.*"
                       xmlns:report="com.easyinsight.report.*" xmlns:util="com.easyinsight.util.*"
                       width="100%" height="100%"
                       creationComplete="onCreation()"
                       implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.listing.IPerspective"
-                      xmlns:skin="com.easyinsight.skin.*" applyCenterScreenLogic="false">
+                      applyCenterScreenLogic="false">
     <mx:Script><![CDATA[
-        import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItemOverrideEvent;
@@ -25,6 +24,7 @@
         import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
+
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.EIErrorEvent;
@@ -37,8 +37,6 @@
         import mx.controls.TextArea;
         import mx.core.Container;
         import mx.core.UIComponent;
-        import mx.formatters.DateFormatter;
-        import mx.formatters.NumberFormatter;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.states.RemoveChild;
@@ -84,21 +82,7 @@
             window.y = exportButton.y + exportButton.height + 10;
         }
 
-        [Bindable]
-        private var _embedded:Boolean;
-
-        public function set embedded(value:Boolean):void {
-            _embedded = value;
-        }
-
-        private var _origin:int;
-
-        public function set origin(value:int):void {
-            _origin = value;
-        }
-
         private var _prefix:String = "";
-
 
         public function set prefix(value:String):void {
             _prefix = value;
@@ -156,9 +140,6 @@
             dispatchEvent(new Event("filterDefinitionsChanged"));
         }
 
-        /*[Bindable]
-         private var lastDataTime:String;*/
-
         [Bindable]
         [Embed(source='../../../../assets/table.png')]
         private var exportToExcelIcon:Class;
@@ -186,49 +167,11 @@
         private var reportName:String;
 
         [Bindable]
-        private var ownerName:String;
-
-        [Bindable]
-        private var reportViews:String;
-
-        [Bindable]
         private var description:String;
-
-        [Bindable]
-        private var tags:String;
-
-        [Bindable]
-        private var reportDate:String;
-
-        [Bindable]
-        private var _placeHolderID:int;
 
         private var commandProcessor:CommandProcessor;
 
-        [Bindable]
-        private var rateReportText:String;
-
         private var _parameterFilters:ArrayCollection;
-
-        private var _originReportID:int;
-
-
-        [Bindable(event="originReportIDChanged")]
-        public function get originReportID():int {
-            return _originReportID;
-        }
-
-        public function set originReportID(value:int):void {
-            if (_originReportID == value) return;
-            _originReportID = value;
-            dispatchEvent(new Event("originReportIDChanged"));
-        }
-
-        private var _installs:int;
-
-        public function set installs(value:int):void {
-            _installs = value;
-        }
 
         [Bindable(event="parameterFiltersChanged")]
         public function get parameterFilters():ArrayCollection {
@@ -243,14 +186,9 @@
         }
 
         [Bindable]
-        private var _score:Number;
-
-        [Bindable]
         private var _reportID:int;
 
         private var _reportType:int;
-
-        private var reportChanged:Boolean;
 
 
         private var _dataSourceID:int;
@@ -294,7 +232,6 @@
         public function set reportID(value:int):void {
             if (_reportID != value) {
                 _reportID = value;
-                reportChanged = true;
             }
         }
 
@@ -304,6 +241,7 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
+
             if (retrievedDataOnce) {
                 viewFactory.retrieveData();
             }
@@ -334,23 +272,7 @@
                 report = event.analysisDefinition;
                 dataSource = event.dataSourceInfo;
                 reportName = report.name;
-                var nf:NumberFormatter = new NumberFormatter();
-                nf.precision = 2;
-                if (_originReportID > 0) {
-                    _placeHolderID = _originReportID;
-                } else {
-                    _score = event.ratingsAverage;
-                    _placeHolderID = _dataSourceID;
-                }
                 description = report.description;
-                tags = "";
-                if (report.tagCloud != null && report.tagCloud.length > 0) {
-                    for each (var tag:Tag in report.tagCloud) {
-                        tags += tag.tagName;
-                        tags += ",";
-                    }
-                    tags = tags.substring(0, tags.length - 1);
-                }
                 admin = event.dataSourceAccessible;
 
                 if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
@@ -371,36 +293,16 @@
                     }
                     showReportEditor = false;
                 }
-                ownerName = report.authorName;
-                var dateFormatter:DateFormatter = new DateFormatter();
-                switch (User.getInstance().dateFormat) {
-                    case 0:
-                        dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-                        break;
-                    case 1:
-                        dateFormatter.formatString = "YYYY-MM-DD HH:NN";
-                        break;
-                    case 2:
-                        dateFormatter.formatString = "DD-MM-YYYY HH:NN";
-                        break;
-                    case 3:
-                        dateFormatter.formatString = "DD/MM/YYYY HH:NN";
-                        break;
-                    case 4:
-                        dateFormatter.formatString = "DD.MM.YYYY HH:NN";
-                        break;
-                }
-                reportDate = dateFormatter.format(report.dateCreated);
                 // lastDataTime = dateFormatter.format(event.lastDataTime);
-                if (!_embedded && _updateURL && !_showAddBar) {
+                if (!_showAddBar) {
                     var feedFragmentObject:Object = new Object();
                     feedFragmentObject.reportID = report.urlKey;
                     var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                     BrowserManager.getInstance().setFragment(feedFragmentString);
                     BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                } else if (_showAddBar) {
+                } else {
                     var templateFragmentObject:Object = new Object();
-                    templateFragmentObject.reportTemplateID = _templateUrlKey;
+                    templateFragmentObject.reportTemplateID = exchangeItem.descriptor.urlKey;
                     var templateFragmentString:String = URLUtil.objectToString(templateFragmentObject);
                     BrowserManager.getInstance().setFragment(templateFragmentString);
                     BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
@@ -414,9 +316,6 @@
             }
         }
 
-        [Bindable]
-        private var reportRatingNumber:int;
-
         private function toggleFilters():void {
             if (filterIndex == 1) {
                 filterIndex = 0;
@@ -429,14 +328,6 @@
 
         [Bindable]
         private var filterTooltip:String = "Hide Filters";
-
-        private var _templateUrlKey:String;
-
-
-        public function set templateUrlKey(value:String):void {
-            _templateUrlKey = value;
-        }
-
         private function close():void {
             dispatchEvent(new AnalysisCloseEvent());
         }
@@ -516,7 +407,7 @@
         }
 
         private function saveReport(event:MouseEvent):void {
-            analysisService.keepReport.send(_reportID, _originReportID);
+            analysisService.keepReport.send(_reportID, exchangeItem.id);
         }
 
         private function toExchange(event:MouseEvent):void {
@@ -531,15 +422,6 @@
             super.createChildren();
             try {
 
-
-                /*if (_showAddBar) {
-                    if (!User.getInstance().guestUser) {
-                        exchangeIndex = 1;
-                    }
-                }*/
-
-                //generateState();
-
                 viewFactory.reportID = _reportID;
                 viewFactory.prefix = _prefix;
                 viewFactory.dataSourceID = _dataSourceID;
@@ -553,9 +435,7 @@
                 viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
                 viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
 
-                if (!_embedded) {
-                    loading = true;
-                }
+                loading = true;
 
                 // if filters were passed in
                 overlayIndex = 1;
@@ -570,10 +450,6 @@
             overlayIndex = 3;
         }
 
-        private var _previousReport:ReportHandle;
-
-        private var _nextReport:ReportHandle;
-
         [Bindable]
         private var overlayIndex:int;
 
@@ -585,24 +461,12 @@
             overlayIndex = 2;
         }
 
-        private var _showAddBar:Boolean = false;
-
-        public function set showAddBar(value:Boolean):void {
-            _showAddBar = value;
-        }
-
-        private var _updateURL:Boolean = true;
-
-        public function set updateURL(value:Boolean):void {
-            _updateURL = value;
-        }
-
         public function cleanup():void {
             cleanupBindings();
-            //reportBox.removeChild(viewFactory);
         }
 
-        private function generateState():void {
+        override protected function generateState():void {
+            super.generateState();
             var ops:Array = [];
             var textAreas:Array = [];
             var remainingSections:Array = [];
@@ -652,10 +516,10 @@
             if (ops.length > 0) {
                 var len:int = Math.max(2, textAreas.length);
                 for each (var area:TextArea in textAreas) {
-                    area.width = 900 / len;
+                    area.width = 780 / len;
                 }
                 for each (var comp:UIComponent in remainingSections) {
-                    comp.width = 950 / len;
+                    comp.width = 830 / len;
                 }
                 var state:State = new State();
                 var name:String = "report" + stateIndex++;
@@ -683,29 +547,9 @@
         private var stackTrace:String;
 
         [Bindable]
-        private var exchangeIndex:int;
-
-        [Bindable]
         private var showingFilters:Boolean = false;
 
-        [Bindable]
-        [Embed(source="../../../../assets/arrow_left_blue.png")]
-        private var previousReportArrow:Class;
 
-        [Bindable]
-        [Embed(source="../../../../assets/arrow_right_blue.png")]
-        private var nextReportArrow:Class;
-
-        private function toPreviousReport():void {
-
-        }
-
-        private function toNextReport():void {
-
-        }
-
-        public function gotFocus():void {
-        }
         ]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0" horizontalAlign="center"
                       direction="vertical" id="topLevelVBox">
@@ -733,6 +577,8 @@
                 <mx:Spacer width="100%"/>
             </mx:HBox>
             <mx:HBox width="100%" verticalAlign="middle" id="hbox" visible="false">
+                <mx:Button icon="{previousReportArrow}" labelPlacement="bottom" toolTip="{previousReportLabel}"
+                        click="toPreviousReport()" id="previousReportButton" visible="{previousReportAvailable}"/>
                 <mx:VBox id="descriptionBox">
                     <util:AutoSizeTextArea text="{description}" width="250" id="descriptionArea"
                             focusEnabled="false" editable="false" selectable="false"/>
@@ -748,6 +594,9 @@
                 </mx:VBox>
                 <datasources:DataSourceDisplay dataSource="{dataSource}" dataView="{viewFactory}"
                                            id="dataSourceDisplay"/>
+                <mx:Spacer width="100%"/>
+                <mx:Button icon="{nextReportArrow}" labelPlacement="bottom" toolTip="{nextReportLabel}"
+                        click="toNextReport()" id="nextReportButton" visible="{nextReportAvailable}"/>
             </mx:HBox>
         </mx:VBox>
         <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
@@ -772,4 +621,4 @@
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="keepReport" result="confirmedKeep()"/>
     </mx:RemoteObject>
-</skin:BackgroundImage>
+</report:DataViewPage>

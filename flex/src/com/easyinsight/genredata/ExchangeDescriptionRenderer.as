@@ -3,7 +3,7 @@ import mx.controls.Text;
 
 public class ExchangeDescriptionRenderer extends Text {
 
-    private var reportExchangeItem:ReportExchangeItem;
+    private var reportExchangeItem:ExchangeItem;
 
     public function ExchangeDescriptionRenderer() {
         super();
@@ -12,7 +12,7 @@ public class ExchangeDescriptionRenderer extends Text {
     }
 
     override public function set data(val:Object):void {
-        reportExchangeItem = val as ReportExchangeItem;
+        reportExchangeItem = val as ExchangeItem;
         this.text = reportExchangeItem.description;
     }
 

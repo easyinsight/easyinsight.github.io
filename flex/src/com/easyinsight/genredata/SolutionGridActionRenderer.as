@@ -24,7 +24,7 @@ public class SolutionGridActionRenderer extends HBox{
     [Embed(source="../../../../assets/media_play_green.png")]
     private var playIcon:Class;
 
-    private var exchangeItem:SolutionReportExchangeItem;
+    private var exchangeItem:ExchangeItem;
 
     private var runButton:Button;
 
@@ -35,6 +35,7 @@ public class SolutionGridActionRenderer extends HBox{
         percentWidth = 100;
         runButton = new Button();
         runButton.setStyle("icon", playIcon);
+        runButton.labelPlacement = "right";
         runButton.addEventListener(MouseEvent.CLICK, viewReport);
         solutionService = new RemoteObject();
         solutionService.destination = "solutionService";
@@ -48,14 +49,12 @@ public class SolutionGridActionRenderer extends HBox{
     }
 
     private function installedReport(event:ResultEvent):void {
-        UserAudit.instance().audit(UserAudit.USED_REPORT_IN_EXCHANGE);
         var descriptor:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
         if (descriptor is InsightDescriptor) {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, exchangeItem.id, exchangeItem.installs, exchangeItem.descriptor.urlKey)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, exchangeItem)));
         } else if (descriptor is DashboardDescriptor ){
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, connectionID: exchangeItem.id,
-                installs: exchangeItem.installs, dashboardURLKey: exchangeItem.descriptor.urlKey, originDashboardID: exchangeItem.descriptor.id})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: descriptor.id, exchangeItem: exchangeItem})));
         }
     }
 
@@ -95,7 +94,7 @@ public class SolutionGridActionRenderer extends HBox{
     }
 
     override public function set data(val:Object):void {
-        exchangeItem = val as SolutionReportExchangeItem;
+        exchangeItem = val as ExchangeItem;
     }
 
     override public function get data():Object {

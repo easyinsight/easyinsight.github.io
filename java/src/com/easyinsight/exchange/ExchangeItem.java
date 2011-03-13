@@ -1,7 +1,8 @@
 package com.easyinsight.exchange;
 
+import com.easyinsight.core.EIDescriptor;
+
 import java.util.Date;
-import java.util.List;
 
 /**
  * User: jamesboe
@@ -14,20 +15,49 @@ public class ExchangeItem {
     private int installs;
     private Date dateAdded;
     private String description;
-    private List<String> tags;
     private String author;
+    private com.easyinsight.core.EIDescriptor descriptor;
+    private long solutionID;
+    private String solutionName;
 
     public ExchangeItem() {
     }
 
-    public ExchangeItem(String name, long id, int installs, Date dateAdded,
-                        String description, String author) {
+    public ExchangeItem(String name, long id, int installs, Date dateAdded, String description,
+                        String author, EIDescriptor descriptor, long solutionID, String solutionName) {
         this.name = name;
         this.id = id;
         this.installs = installs;
         this.dateAdded = dateAdded;
         this.description = description;
         this.author = author;
+        this.descriptor = descriptor;
+        this.solutionID = solutionID;
+        this.solutionName = solutionName;
+    }
+
+    public EIDescriptor getDescriptor() {
+        return descriptor;
+    }
+
+    public void setDescriptor(EIDescriptor descriptor) {
+        this.descriptor = descriptor;
+    }
+
+    public long getSolutionID() {
+        return solutionID;
+    }
+
+    public void setSolutionID(long solutionID) {
+        this.solutionID = solutionID;
+    }
+
+    public String getSolutionName() {
+        return solutionName;
+    }
+
+    public void setSolutionName(String solutionName) {
+        this.solutionName = solutionName;
     }
 
     public String getAuthor() {
@@ -76,13 +106,5 @@ public class ExchangeItem {
 
     public void setDateAdded(Date dateAdded) {
         this.dateAdded = dateAdded;
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
     }
 }

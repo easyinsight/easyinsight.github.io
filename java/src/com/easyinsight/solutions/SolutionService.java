@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.exchange.ExchangeItem;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
@@ -19,7 +20,6 @@ import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.users.Account;
-import com.easyinsight.exchange.SolutionReportExchangeItem;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -433,7 +433,7 @@ public class SolutionService {
         EIConnection conn = Database.instance().getConnection();
         try {
             ReportTemplateInfo reportTemplateInfo = new ReportTemplateInfo();
-            SolutionReportExchangeItem srei;
+            ExchangeItem srei;
             PreparedStatement reportQueryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, DATA_FEED_ID, TITLE, CREATE_DATE, AUTHOR_NAME, DESCRIPTION " +
                     "FROM ANALYSIS WHERE ANALYSIS.solution_visible = ? AND ANALYSIS.url_key = ?");
             reportQueryStmt.setBoolean(1, true);
@@ -455,7 +455,7 @@ public class SolutionService {
                 ratingRS.next();
                 int installs = ratingRS.getInt(1);
                 blah = determineDataSourceForReport(reportID, conn);
-                srei = new SolutionReportExchangeItem(reportName, reportID, installs, dateCreated, description,
+                srei = new ExchangeItem(reportName, reportID, installs, dateCreated, description,
                         authorName, descriptor, blah.connectionID, blah.connectionName);
             } else {
                 PreparedStatement dashboardQueryStmt = conn.prepareStatement("SELECT DASHBOARD_ID, URL_KEY, DASHBOARD_NAME, CREATION_DATE," +
@@ -478,7 +478,7 @@ public class SolutionService {
                     ResultSet ratingRS = ratingStmt.executeQuery();
                     ratingRS.next();
                     int installs = ratingRS.getInt(1);
-                    srei = new SolutionReportExchangeItem(dashboardName, dashboardID, installs, dateCreated, description,
+                    srei = new ExchangeItem(dashboardName, dashboardID, installs, dateCreated, description,
                             authorName, descriptor, blah.connectionID, blah.connectionName);
                 } else {
                     return null;
@@ -812,8 +812,8 @@ public class SolutionService {
         return clonedReport;
     }
 
-    public List<SolutionReportExchangeItem> getSolutionReports() {
-        List<SolutionReportExchangeItem> reports = new ArrayList<SolutionReportExchangeItem>();
+    public List<ExchangeItem> getSolutionReports() {
+        List<ExchangeItem> reports = new ArrayList<ExchangeItem>();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE, " +
@@ -853,7 +853,7 @@ public class SolutionService {
                 ratingRS.next();
                 int installs = ratingRS.getInt(1);
                 InsightDescriptor insightDescriptor = new InsightDescriptor(analysisID, title, dataSourceID, reportType, urlKey, Roles.NONE);
-                SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID,
+                ExchangeItem item = new ExchangeItem(title, analysisID,
                         installs, created, description, authorName, insightDescriptor, connectionID, connectionName);
                 reports.add(item);
             }
@@ -886,13 +886,13 @@ public class SolutionService {
 
                 int installs = ratingRS.getInt(1);
                 DashboardDescriptor dashboardDescriptor = new DashboardDescriptor(dashboardName, dashboardID, urlKey, 0, Roles.NONE, null);
-                SolutionReportExchangeItem item = new SolutionReportExchangeItem(dashboardName, dashboardID, installs,
+                ExchangeItem item = new ExchangeItem(dashboardName, dashboardID, installs,
                         createdDate, description, authorName, dashboardDescriptor, connectionID, connectionName);
                 reports.add(item);
             }
-            Collections.sort(reports, new Comparator<SolutionReportExchangeItem>() {
+            Collections.sort(reports, new Comparator<ExchangeItem>() {
 
-                public int compare(SolutionReportExchangeItem solutionReportExchangeItem, SolutionReportExchangeItem solutionReportExchangeItem1) {
+                public int compare(ExchangeItem solutionReportExchangeItem, ExchangeItem solutionReportExchangeItem1) {
                     return ((Integer)solutionReportExchangeItem1.getInstalls()).compareTo(solutionReportExchangeItem.getInstalls());
                 }
             });

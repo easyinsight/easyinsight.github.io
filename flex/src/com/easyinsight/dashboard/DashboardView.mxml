@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
-<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
-                      xmlns:filtering="com.easyinsight.filtering.*" xmlns:util="com.easyinsight.util.*"
-                      xmlns:datasources="com.easyinsight.datasources.*"
-                      applyCenterScreenLogic="false" creationComplete="onCreation()"
-                      implements="com.easyinsight.listing.IPerspective">
-    <skin:states>
-        <mx:State name="fullScreen">
-            <mx:RemoveChild target="{topDisplay}"/>
-        </mx:State>
-    </skin:states>
+<report:DataViewPage xmlns:mx="http://www.adobe.com/2006/mxml"
+                     xmlns:filtering="com.easyinsight.filtering.*" xmlns:util="com.easyinsight.util.*"
+                     xmlns:datasources="com.easyinsight.datasources.*"
+                     applyCenterScreenLogic="false" creationComplete="onCreation()"
+                     implements="com.easyinsight.listing.IPerspective" xmlns:report="com.easyinsight.report.*">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -31,6 +26,8 @@
         import mx.core.UIComponent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
+        import mx.states.RemoveChild;
+        import mx.states.State;
         import mx.utils.URLUtil;
 
         [Bindable]
@@ -96,33 +93,6 @@
             dashboardService.getDashboard.send(_dashboardID);
         }
 
-        private var _connectionID:int;
-
-        private var _dashboardRating:Number;
-
-        private var _dashboardURLKey:String;
-
-        private var _originDashboardID:int;
-
-        [Bindable(event="originDashboardIDChanged")]
-        public function get originDashboardID():int {
-            return _originDashboardID;
-        }
-
-        public function set originDashboardID(value:int):void {
-            if (_originDashboardID == value) return;
-            _originDashboardID = value;
-            dispatchEvent(new Event("originDashboardIDChanged"));
-        }
-
-        public function set connectionID(value:int):void {
-            _connectionID = value;
-        }
-
-        public function set dashboardURLKey(value:String):void {
-            _dashboardURLKey = value;
-        }
-
         private function gotDashboard():void {
             dashboard = dashboardService.getDashboard.lastResult as Dashboard;
             var grid:DashboardGrid = dashboard.rootElement as DashboardGrid;
@@ -140,13 +110,14 @@
             dataSourceID = dashboard.dataSourceID;
             filterDefinitions = dashboard.filters;
             var feedFragmentObject:Object = new Object();
-            if (_dashboardURLKey == null) {
+            if (exchangeItem == null) {
                 feedFragmentObject.dashboardID = String(dashboard.urlKey);
             } else {
-                feedFragmentObject.reportTemplateID = String(_dashboardURLKey);
+                feedFragmentObject.reportTemplateID = String(dashboard.urlKey);
             }
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + dashboardName);
             if (dashboard.filters.length > 0) {
                 filterIndex = 1;
             }
@@ -156,7 +127,8 @@
             generateState();
         }
 
-        private function generateState():void {
+        override protected function generateState():void {
+            super.generateState();
             var ops:Array = [];
             var textAreas:Array = [];
             var remainingSections:Array = [];
@@ -171,7 +143,7 @@
                 textAreas.push(descriptionArea);
                 remainingSections.push(descriptionBox);
             }
-            if (_connectionID == 0) {
+            if (_showAddBar) {
                 var removeExchange:RemoveChild = new RemoveChild();
                 removeExchange.target = exchangeBox;
                 ops.push(removeExchange);
@@ -180,7 +152,7 @@
                 remainingSections.push(exchangeBox);
             }
 
-            if (_connectionID != 0) {
+            if (!_showAddBar) {
                 var removeData:RemoveChild = new RemoveChild();
                 removeData.target = dataSourceDisplay;
                 ops.push(removeData);
@@ -191,10 +163,10 @@
             if (ops.length > 0) {
                 var len:int = Math.max(2, textAreas.length);
                 for each (var area:TextArea in textAreas) {
-                    area.width = 900 / len;
+                    area.width = 780 / len;
                 }
                 for each (var comp:UIComponent in remainingSections) {
-                    comp.width = 950 / len;
+                    comp.width = 830 / len;
                 }
                 var state:State = new State();
                 var name:String = "report" + stateIndex++;
@@ -211,12 +183,6 @@
             } else {
                 currentState = "";
             }
-        }
-
-        private var _installs:int;
-
-        public function set installs(value:int):void {
-            _installs = value;
         }
 
         private var stateIndex:int;
@@ -258,7 +224,7 @@
         }
 
         private function keptDashboard():void {
-            _connectionID = 0;
+            _showAddBar = false;
             generateState();
             var window:DashboardAddedWindow = new DashboardAddedWindow();
             window.dashboard = dashboard;
@@ -267,7 +233,7 @@
         }
 
         private function saveReport(event:Event):void {
-            dashboardService.keepDashboard.send(dashboard.id, _originDashboardID);
+            dashboardService.keepDashboard.send(dashboard.id, exchangeItem.id);
         }
 
         [Bindable]
@@ -297,9 +263,6 @@
 
         [Bindable]
         private var dataSource:DataSourceInfo;
-
-        public function gotFocus():void {
-        }
 
         public function cleanup():void {
             cleanupBindings();
@@ -334,6 +297,8 @@
                         <mx:Spacer width="100%"/>
                     </mx:HBox>
                     <mx:HBox width="100%" verticalAlign="middle">
+                        <mx:Button icon="{previousReportArrow}" labelPlacement="bottom" toolTip="{previousReportLabel}"
+                            click="toPreviousReport()" id="previousReportButton" visible="{previousReportAvailable}"/>
                         <mx:VBox id="descriptionBox">
                             <util:AutoSizeTextArea text="{description}" width="250" id="descriptionArea"
                                     focusEnabled="false" editable="false" selectable="false"/>
@@ -349,6 +314,8 @@
                         </mx:VBox>
                         <datasources:DataSourceDisplay dataSource="{dataSource}" dataView="{viewFactory}"
                                                    id="dataSourceDisplay"/>
+                        <mx:Button icon="{nextReportArrow}" labelPlacement="bottom" toolTip="{nextReportLabel}"
+                            click="toNextReport()" id="nextReportButton" visible="{nextReportAvailable}"/>
                     </mx:HBox>
                 </mx:VBox>
             <mx:Box width="100%" backgroundImage="{backImage}" backgroundSize="100%" height="18"/>
@@ -371,4 +338,4 @@
                        backgroundAlpha=".8"/>
         </mx:VBox>
     </mx:VBox>
-</skin:BackgroundImage>
+</report:DataViewPage>

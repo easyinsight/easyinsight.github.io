@@ -1,5 +1,4 @@
 package com.easyinsight.genredata {
-import com.easyinsight.quicksearch.EIDescriptor;
 
 import mx.collections.ArrayCollection;
 
@@ -7,7 +6,7 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.solutions.ReportTemplateInfo")]
 public class ReportTemplateInfo {
 
-    public var exchangeData:SolutionReportExchangeItem;
+    public var exchangeData:ExchangeItem;
     public var dataSources:ArrayCollection;
 
     public function ReportTemplateInfo() {

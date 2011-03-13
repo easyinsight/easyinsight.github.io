@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.genredata.DataSourceChoiceWindow;
+        import com.easyinsight.genredata.DataSourceSelectionEvent;
+        import com.easyinsight.genredata.ExchangeItem;
+
+        import com.easyinsight.genredata.NoSolutionInstalledWindow;
+        import com.easyinsight.listing.ListingChangeEvent;
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow_left_blue.png")]
+        protected var previousReportArrow:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow_right_blue.png")]
+        protected var nextReportArrow:Class;
+
+        private var _reportList:ArrayCollection;
+
+        private var _reportIndex:int;
+
+        public function set reportList(value:ArrayCollection):void {
+            _reportList = value;
+        }
+
+        public function set reportIndex(value:int):void {
+            _reportIndex = value;
+        }
+
+        public function gotFocus():void {
+        }
+
+        [Bindable]
+        protected var previousReportAvailable:Boolean;
+
+        [Bindable]
+        protected var nextReportAvailable:Boolean;
+
+        [Bindable]
+        protected var previousReportLabel:String;
+
+        [Bindable]
+        protected var nextReportLabel:String;
+
+        protected var _originID:int;
+
+        protected var _showAddBar:Boolean;
+
+        public var exchangeItem:ExchangeItem;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (exchangeItem != null) {
+                _showAddBar = true;
+                _originID = exchangeItem.id;
+            }
+        }
+
+        protected function generateState():void {
+            if (_reportList != null) {
+                if (_reportIndex > 0) {
+                    previousReportAvailable = true;
+                    previousReportLabel = ExchangeItem(_reportList.getItemAt(_reportIndex - 1)).name;
+                } else {
+                    previousReportAvailable = false;
+                }
+                if (_reportIndex < (_reportList.length - 1)) {
+                    nextReportAvailable = true;
+                    nextReportLabel = ExchangeItem(_reportList.getItemAt(_reportIndex + 1)).name;
+                } else {
+                    nextReportAvailable = false;
+                }
+            }
+        }
+
+        private var targetItem:ExchangeItem;
+
+        protected function toPreviousReport():void {
+            targetItem = _reportList.getItemAt(_reportIndex - 1) as ExchangeItem;
+            solutionService.determineDataSourceForEntity.send(targetItem.descriptor);
+        }
+
+        private function determined():void {
+            var dataSources:ArrayCollection = solutionService.determineDataSourceForEntity.lastResult as ArrayCollection;
+            if (dataSources.length == 0) {
+                var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+                window.solution = targetItem.solutionID;
+                window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else if (dataSources.length == 1) {
+                ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
+                solutionService.installEntity.send(targetItem.descriptor, dataSources.getItemAt(0).id);
+            } else {
+                var dsWindow:DataSourceChoiceWindow = new DataSourceChoiceWindow();
+                dsWindow.sources = dataSources;
+                dsWindow.addEventListener(DataSourceSelectionEvent.DATA_SOURCE_SELECTION, dataSourceChoice, false, 0, true);
+                PopUpManager.addPopUp(dsWindow, this, true);
+                PopUpUtil.centerPopUp(dsWindow);
+            }
+        }
+
+        private function onListingEvent(event:ListingChangeEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function dataSourceChoice(event:DataSourceSelectionEvent):void {
+            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installEntity);
+            solutionService.installEntity.send(targetItem.descriptor, event.dataSource.id);
+        }
+
+        protected function toNextReport():void {
+            targetItem = _reportList.getItemAt(_reportIndex + 1) as ExchangeItem;
+            solutionService.determineDataSourceForEntity.send(targetItem.descriptor);
+        }
+
+        private function installed():void {
+
+            var desc:EIDescriptor = solutionService.installEntity.lastResult as EIDescriptor;
+            var source:PerspectiveInfo;
+            if (desc is InsightDescriptor) {
+                source = new ReportAnalyzeSource(InsightDescriptor(desc),
+                        null, targetItem);
+            } else {
+                source = new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: desc.id, exchangeItem: exchangeItem});
+            }
+            source.properties.reportList = _reportList;
+            source.properties.reportIndex = _reportList.getItemIndex(targetItem);
+            dispatchEvent(new AnalyzeEvent(source));
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="solutionService" destination="solutionService">
+        <mx:method name="installEntity" result="installed()"/>
+        <mx:method name="determineDataSourceForEntity" result="determined()"/>
+    </mx:RemoteObject>
+</skin:BackgroundImage>

@@ -4,8 +4,6 @@ import com.easyinsight.solutions.Solution;
 import flash.events.Event;
 
 import mx.collections.ArrayCollection;
-import mx.core.ClassFactory;
-import mx.core.IFactory;
 
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -83,7 +81,7 @@ public class SolutionExchangeController extends ExchangeController{
     }
 
     override protected function filterData(object:Object):Boolean {
-        var reportExchangeItem:SolutionReportExchangeItem = object as SolutionReportExchangeItem;
+        var reportExchangeItem:ExchangeItem = object as ExchangeItem;
         if (solution == null) {
             return false;
         }
@@ -92,9 +90,6 @@ public class SolutionExchangeController extends ExchangeController{
             matched = reportExchangeItem.solutionID == solution.solutionID;
         } else if (solution.name == "[ My Connections ]") {
             matched = installedConnections[String(reportExchangeItem.solutionID)] != null;
-        }
-        if (selectedTag != null) {
-            matched = reportExchangeItem.tags.getItemIndex(selectedTag) != -1;
         }
         if (matched) {
             if (keyword != null && keyword.length > 0) {
