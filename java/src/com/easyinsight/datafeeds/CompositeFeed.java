@@ -12,6 +12,7 @@ import com.easyinsight.analysis.*;
 
 import java.util.*;
 
+import com.easyinsight.pipeline.AltCompositeReportPipeline;
 import com.easyinsight.pipeline.CompositeReportPipeline;
 import com.easyinsight.pipeline.Pipeline;
 import org.jgrapht.UndirectedGraph;
@@ -418,15 +419,16 @@ public class CompositeFeed extends Feed {
 
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
-            if (getDataFeedType().getType() == FeedType.BASECAMP.getType()) {
-                Pipeline pipeline = new CompositeReportPipeline();
-                WSListDefinition analysisDefinition = new WSListDefinition();
-                analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
-                pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-                myDataSet = pipeline.toDataSet(dataSet);
+            Pipeline pipeline;
+            if (getDataFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
+                pipeline = new CompositeReportPipeline();
             } else {
-                myDataSet = dataSet;
+                pipeline = new AltCompositeReportPipeline();
             }
+            WSListDefinition analysisDefinition = new WSListDefinition();
+            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+            myDataSet = pipeline.toDataSet(dataSet);
         }
 
         public void addFilter(FilterDefinition filterDefinition) {
