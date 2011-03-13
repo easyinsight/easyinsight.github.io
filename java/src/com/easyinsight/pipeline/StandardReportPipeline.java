@@ -18,23 +18,19 @@ public class StandardReportPipeline extends Pipeline {
 
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems) {
 
-        // current problematic scenarios
-        // a measure filter on a calculation
-        // a calculation on a calculation
-        // a tag filter?
-        //
-
-        // there's still a fundamental challenge here...
-
-        // ordering of the pipeline operations
-
         List<IComponent> components = new ArrayList<IComponent>();
-
-
 
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
+                if (lookupTable.getSourceField().hasType(AnalysisItemTypes.LISTING)) {
+                    AnalysisList analysisList = (AnalysisList) lookupTable.getSourceField();
+                    if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
+                } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                    Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
+                    analysisItems.add(lookupTable.getSourceField());
+                    components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, true));
+                }
                 components.add(new LookupTableComponent(lookupTable));
             }
         }
