@@ -36,11 +36,16 @@ public class CompositeCreator extends EventDispatcher {
     }
 
     public function start():void {
-        var window:JoinChoiceWindow = new JoinChoiceWindow();
+        /*var window:JoinChoiceWindow = new JoinChoiceWindow();
         window.addEventListener("joinSources", onJoin);
         window.addEventListener("federateSources", onFederate);
         PopUpManager.addPopUp(window, parent, true);
-        PopUpUtil.centerPopUp(window);
+        PopUpUtil.centerPopUp(window);*/
+        feedService = new RemoteObject();
+        feedService.destination = "feeds";
+        feedService.suggestJoins.addEventListener(ResultEvent.RESULT, onJoins);
+        ProgressAlert.alert(parent, "Analyzing...", null, feedService.suggestJoins);
+        feedService.suggestJoins.send(dataSources);
     }
 
     private function onJoin(event:Event):void {
