@@ -106,10 +106,11 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
                         String commentID = queryField(commentNode, "id/text()");
                         String authorName = basecampCache.getUserName(queryField(commentNode, "author-id"));
                         String body = queryField(commentNode, "body/text()");
-                        String createdDateString = queryField(commentNode, "created-on/text()");
+                        String createdDateString = queryField(commentNode, "created-at/text()");
                         Date createdDate = null;
-                        if(createdDateString != null )
+                        if(createdDateString != null ) {
                             createdDate = df.parse(createdDateString);
+                        }
                         IRow row = ds.createRow();
                         row.addValue(keys.get(COMMENT_ID), commentID);
                         row.addValue(keys.get(MILESTONE_ID), milestoneID);
