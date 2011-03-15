@@ -82,9 +82,9 @@
             border-color: #DDDDDD;
         }
 
-        #mainTabs ul {
-            background-image: url(images/Banner3.jpg);
-            background-position: bottom;
+        ul {
+            background-image: url(images/Banner3.jpg) !important;
+            background-position: bottom !important;
         }
 
         body > div {

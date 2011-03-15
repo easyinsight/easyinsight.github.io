@@ -14,7 +14,7 @@ function createAjaxFunction(action, resultDiv) {
 
 function prepDialogs() {
     $(".errorDialog").each(function(i, curElement) {
-        $(".statusImage", curElement.parentElement.parentElement).click(function() {
+        $(".statusImage", $(curElement).parent().parent()).click(function() {
            $(curElement).dialog("open");
         });
         $(curElement).dialog({autoOpen: false, resizable: false, modal: true, width: $(curElement).width(), title: "Error!" })
