@@ -26,6 +26,26 @@
     <link rel="stylesheet" href="css/jquery-ui.css" media="screen" />
     <link rel="stylesheet" href="css/jNotify.jquery.css" media="screen" />
     <style type="text/css">
+        #loadingDiv {
+            width: 100%;
+            height: 100%;
+            text-align:center;
+            position:fixed;
+            top:0;
+            left:0;
+            display:none;
+            margin-top: 300px;
+        }
+
+        #loadingDiv .background {
+            width:100%;
+            height:100%;
+            position:fixed;
+            top:0;
+            left:0;
+            opacity: .5;
+            background-color: #AAAAAA;
+        }
 
         a img {
             border: none;
@@ -493,6 +513,10 @@
           </div>
         </div>
       </div>
+        <div id="loadingDiv">
+            <div class="background"></div>
+            <img alt="Loading..." src="images/ajax-loader.gif" />
+        </div>
 
   </body>
 </html>

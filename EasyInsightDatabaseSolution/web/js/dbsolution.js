@@ -220,6 +220,12 @@ function showCreateConnection() {
 }
 
 $(document).ready(function() {
+    $("#loadingDiv").ajaxStart(function() {
+        $(this).show();
+    });
+    $("#loadingDiv").ajaxStop(function() {
+        $(this).hide();
+    })
     $("#connectionDetails div").hide();
     $("#editConnectionInfo div").hide();
     $("#createConnection").hide();
