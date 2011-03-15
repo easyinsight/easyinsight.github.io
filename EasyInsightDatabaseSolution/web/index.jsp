@@ -76,6 +76,10 @@
             position:relative;
         }
 
+        .statusImage {
+            cursor: pointer;
+        }
+
         span.success {
             color: #44FF44;
         }
@@ -153,57 +157,56 @@
             width: 15em;
         }
 
-        .ui-widget-content {
-            background-color: transparent;
-            background-image:inherit;
-        }
-
-        .ui-widget-content {
+        #mainTabs.ui-widget-content, #mainTabs .ui-widget-content {
             background-color: transparent;
             background-image: none;
         }
 
-        .ui-widget-header {
+        .ui-widget-overlay {
+            background-image: none;
+        }
+
+        #mainTabs .ui-widget-header {
             background-color: transparent;
             background-image: none;
             border:none;
         }
-        .ui-state-active, .ui-widget-content ui-state-active {
+        #mainTabs .ui-state-active, #mainTabs .ui-widget-content ui-state-active {
             border:none;
         }
 
-        .ui-state-highlight {
+        #mainTabs .ui-state-highlight {
             background-color:transparent;
             background-image:none;
         }
-        .ui-state-highlight a {
+        #mainTabs .ui-state-highlight a {
             background-color:transparent;
             background-image:none;
             color: #EA003A;
         }
 
-        .ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
+        #mainTabs .ui-state-default a, #mainTabs .ui-state-default a:link, #mainTabs .ui-state-default a:visited {
             color: #000000;
             font-weight: normal;
             font-size: 16px;
         }
 
-        .ui-state-hover {
+        #mainTabs .ui-state-hover {
             border:none;
             background-color:transparent;
             background-image:none;
         }
 
-        .ui-state-hover a, .ui-state-hover a:hover {
+        #mainTabs .ui-state-hover a, .ui-state-hover a:hover {
             color: #EA003A;
             font-weight: normal;
         }
 
-        .ui-widget {
+        #mainTabs.ui-widget {
             font-family: Verdana, Helvetica, Arial, FreeSans, sans-serif;
         }
 
-        .ui-state-active, .ui-widget-content .ui-state-active {
+        #mainTabs .ui-state-active, #mainTabs .ui-widget-content .ui-state-active {
             border:none;
         }
 
@@ -224,7 +227,7 @@
             width: 70px;
         }
 
-        .ui-tabs .ui-tabs-nav {
+        #mainTabs.ui-tabs .ui-tabs-nav {
             width:100%;
             border-left-width: 1px;
             border-left-style: solid;
@@ -236,41 +239,41 @@
             padding: 0px;
         }
 
-        .ui-tabs .ui-tabs-nav li {
+        #mainTabs.ui-tabs .ui-tabs-nav li {
             float: right;
         }
 
-        .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus {
+        #mainTabs .ui-state-hover, #mainTabs .ui-widget-content .ui-state-hover, #mainTabs .ui-state-focus, #mainTabs .ui-widget-content .ui-state-focus {
             background-image: none;
             background-color: transparent;
             border:none;
         }
 
-        .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus {
+        #mainTabs .ui-state-hover, #mainTabs .ui-widget-content .ui-state-hover, #mainTabs .ui-state-focus, #mainTabs .ui-widget-content .ui-state-focus {
             background-image:none;
             background-color: transparent;
             border:none;
         }
 
-        .ui-state-default, .ui-widget-content .ui-state-default {
+        #mainTabs .ui-state-default, #mainTabs .ui-widget-content .ui-state-default {
             background-image:none;
             background-color: transparent;
             border:none;
         }
 
-        .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+        #mainTabs .ui-state-active a, #mainTabs .ui-state-active a:link, #mainTabs .ui-state-active a:visited {
             color: #EA003A;
         }
 
-        .ui-tabs .ui-tabs-panel {
+        #mainTabs.ui-tabs .ui-tabs-panel {
             padding: 0px;
         }
 
-        .ui-tabs .ui-tabs-panel .content {
+        #mainTabs.ui-tabs .ui-tabs-panel .content {
             padding: 1em 1.4em;
         }
 
-        .ui-tabs .ui-tabs-nav li a {
+        #mainTabs.ui-tabs .ui-tabs-nav li a {
             padding-bottom: 0.7em;
         }
 
@@ -281,6 +284,27 @@
 
         #credentialsForm input, #editQuery input, #createQuery input, #editConnection input, #createConnection input, #updateCurrentUser input {
             width: 250px;
+        }
+
+        .errorDialog {
+            display:none;
+            width: 800px;
+        }
+
+        .ui-dialog .ui-widget-header {
+            border-color: #B4B4B4;
+            background: #BEBEBE url(css/images/ui-bg_gloss-wave_35_888888_500x100.png);
+        }
+
+        .ui-dialog .ui-state-hover, .ui-dialog .ui-widget-content .ui-state-hover, .ui-dialog .ui-state-focus, .ui-dialog .ui-widget-content .ui-state-focus {
+            border: 1px solid #B4B4B4;
+            background: #E8E8E8 url(css/images/ui-bg_gloss-wave_35_888888_500x100.png) 50% 50% repeat-x;
+            font-weight: bold;
+            color: #AAAAAA;
+        }
+
+        .ui-dialog .ui-state-hover .ui-icon, .ui-dialog .ui-state-focus .ui-icon {
+            background-image: url(css/images/ui-icons_ffffff_256x240.png);
         }
 
     :focus {

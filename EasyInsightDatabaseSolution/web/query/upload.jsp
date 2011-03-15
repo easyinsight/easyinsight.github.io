@@ -19,30 +19,15 @@
         %><jsp:include page="../error.jsp" /><%
     } else {
     Session dataSession = null;
-    UploadResult result = new UploadResult();
     try {
         dataSession = DataConnection.getSession();
-        Query q = ((Query) dataSession.get(Query.class, Long.parseLong(request.getParameter("id"))));
-        result.setQuery(q);
+
         Transaction t = dataSession.beginTransaction();
         try {
-            result.setStartTime(new Date());
-            q.doUpload();
-            result.setEndTime(new Date());
-            result.setSuccess(true);
-            dataSession.save(result);
+            Query q = ((Query) dataSession.get(Query.class, Long.parseLong(request.getParameter("id"))));
+            q.doUpload(dataSession);
+        } finally {
             t.commit();
-        } catch(Exception e) {
-            e.printStackTrace();
-            result.setEndTime(new Date());
-            result.setSuccess(false);
-            result.setMessage(e.getMessage().substring(0, Math.min(4096, e.getMessage().length())));
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            result.setStackTrace(sw.toString().substring(0, Math.min(4096, sw.toString().length())));
-            dataSession.save(result);
-            t.commit();
-            throw e;
         }
 
     %>

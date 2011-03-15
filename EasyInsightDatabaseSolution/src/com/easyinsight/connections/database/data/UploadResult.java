@@ -19,13 +19,13 @@ public class UploadResult {
     private Date startTime;
     private Date endTime;
     private boolean success;
-    @Column(length = 4096, precision = 4096)
+    @Column(length = 4096, precision = 4096, columnDefinition = "LONG VARCHAR")
     private String message;
 
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     private Query query;
 
-    @Column(length = 4096, precision = 4096)
+    @Column(length = 4096, precision = 4096, columnDefinition = "LONG VARCHAR")
     private String stackTrace;
 
     public long getId() {

@@ -7,12 +7,15 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingProvider;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
 
 import com.easyinsight.helper.*;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,8 +50,13 @@ public class Query {
                     List<Query> queries = s.createQuery("from Query where schedule = true").list();
                     for(Query query : queries) {
                          try {
-                            query.doUpload();
-                        } catch (DatatypeConfigurationException e) {
+                             Transaction t = s.beginTransaction();
+                             try {
+                                 query.doUpload(s);
+                             } finally {
+                                 t.commit();
+                             }
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -184,10 +192,13 @@ public class Query {
         this.uploadResults = uploadResults;
     }
 
-    public void doUpload() throws SQLException, DatatypeConfigurationException {
+    public void doUpload(Session session) throws SQLException, DatatypeConfigurationException {
         Connection conn = null;
         ResultSet rs = null;
         TransactionTarget dataSourceTarget = null;
+        UploadResult result = new UploadResult();
+        result.setStartTime(new Date());
+        result.setQuery(this);
         try {
             EIUser user = EIUser.instance();
             if(user == null)
@@ -274,12 +285,29 @@ public class Query {
                 }
             }
             dataSourceTarget.commit();
+            result.setEndTime(new Date());
+            result.setSuccess(true);
+            session.save(result);
 
         } catch(SQLException e) {
+            result.setEndTime(new Date());
+            result.setSuccess(false);
+            result.setMessage(e.getMessage().substring(0, Math.min(4096, e.getMessage().length())));
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            result.setStackTrace(sw.toString().substring(0, Math.min(4096, sw.toString().length())));
+            session.save(result);
             if(dataSourceTarget != null)
                 dataSourceTarget.rollback();
             throw e;
         } catch(RuntimeException e) {
+            result.setEndTime(new Date());
+            result.setSuccess(false);
+            result.setMessage(e.getMessage().substring(0, Math.min(1024*1024, e.getMessage().length())));
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            result.setStackTrace(sw.toString().substring(0, Math.min(1024*1024, sw.toString().length())));
+            session.save(result);
             if(dataSourceTarget != null)
                 dataSourceTarget.rollback();
             throw e;

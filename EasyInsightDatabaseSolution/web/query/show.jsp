@@ -36,14 +36,15 @@ if(queries.size() == 0) { %>
             }
     %>
         <tr>
-            <td><img src="images/<%= result == null ? "bullet_square_grey.png" : (result.isSuccess() ? "bullet_ball_green.png" : "bullet_square_glass_red.png") %>" /></td>
+            <td><img class="statusImage" src="images/<%= result == null ? "bullet_square_grey.png" : (result.isSuccess() ? "bullet_ball_green.png" : "bullet_square_glass_red.png") %>" /></td>
             <td><%= query.getConnectionInfo().getName()%></td><td><%= query.getName() %></td><td><%= query.getDataSource() %></td><td class="query"><%= query.getQuery() %></td><td class="scheduled"><%= query.isSchedule() ? "yes" : "no" %></td><td class="append"><%= query.isAppend() ? "append" : "replace" %></td>
             <td><%= result != null ? format.format(result.getStartTime()) : "Never" %></td>
-            <td class="controls"><a href="query/upload.jsp" onclick="uploadQuery('<%= query.getId() %>');return false">Upload</a> <a href="query/edit.jsp" onclick="editQuery('<%= query.getId() %>');return false;">Edit</a><br /><a href="query/test.jsp" onclick="testIdQuery('<%= query.getId() %>');return false;">Test</a> <a href="query/delete.jsp" onclick="deleteQueryWithConfirm('<%= query.getId() %>');return false;">Delete</a></td>
+            <td class="controls"><a href="query/upload.jsp" onclick="uploadQuery('<%= query.getId() %>');return false">Upload</a> <a href="query/edit.jsp" onclick="editQuery('<%= query.getId() %>');return false;">Edit</a><br /><a href="query/test.jsp" onclick="testIdQuery('<%= query.getId() %>');return false;">Test</a> <a href="query/delete.jsp" onclick="deleteQueryWithConfirm('<%= query.getId() %>');return false;">Delete</a><% if(result != null && !result.isSuccess()) { %><div class="errorDialog"><%= result.getMessage() %><br /><pre><%= result.getStackTrace() %></pre></div><% } %></td>
         </tr>
     <% } %>
         </tbody>
     </table>
+    <script type="text/javascript">prepDialogs();</script>
 <% }
 }
 finally {

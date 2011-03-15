@@ -12,6 +12,15 @@ function createAjaxFunction(action, resultDiv) {
     }
 }
 
+function prepDialogs() {
+    $(".errorDialog").each(function(i, curElement) {
+        $(".statusImage", curElement.parentElement.parentElement).click(function() {
+           $(curElement).dialog("open");
+        });
+        $(curElement).dialog({autoOpen: false, resizable: false, modal: true, width: $(curElement).width(), title: "Error!" })
+    });
+}
+
 function loadResults(resultDiv) {
     return function(request) {
         $(resultDiv).html(request);
@@ -72,6 +81,8 @@ function refreshDataSources() {
 }
 
 function refreshQueries() {
+    $(".errorDialog").dialog("destroy");
+    $(".errorDialog").remove();
     $.ajax({
         url: 'query/show.jsp',
         type: 'get',

@@ -23,7 +23,7 @@
             trans.commit();
             %>
             <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
-            <script type="text/javascript">refreshDataSources();</script>
+            <script type="text/javascript">refreshDataSources();resetConnectionTab();</script>
         <%} catch(Exception e) {
             trans.rollback(); %>
             <script type="text/javascript">jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script>
