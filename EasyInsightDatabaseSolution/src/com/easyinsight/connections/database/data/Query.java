@@ -244,7 +244,6 @@ public class Query {
             dataSourceTarget.beginTransaction();
             int i = 0;
             while(rs.next()) {
-                System.out.println("row: " + i++);
                 DataRow row = dataSourceTarget.newRow();
                 for(int column = 1;column <= rs.getMetaData().getColumnCount();column++) {
                     String key = rs.getMetaData().getColumnName(column);
@@ -276,7 +275,13 @@ public class Query {
                         case Types.DATE:
                         case Types.TIME:
                         case Types.TIMESTAMP:
-                            Date date = rs.getTimestamp(column);
+                            Date date;
+                            try {
+                                date = rs.getTimestamp(column);
+                            } catch(SQLException e) {
+                                // catching bad dates
+                                date = null;
+                            }
                             row.addValue(key, date);
                             break;
                         default:
