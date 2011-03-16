@@ -3,10 +3,8 @@ package com.easyinsight.helper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -14,7 +12,7 @@ import java.util.Map;
  * Time: 12:57 PM
  */
 public class TransactionTarget {
-    private List<DataRow> rows = new ArrayList<DataRow>();
+    private List<DataRow> rows = new LinkedList<DataRow>();
     private int bufferSize;
 
     private String dataSourceKey;
@@ -37,13 +35,14 @@ public class TransactionTarget {
         try {
             StringBuilder xmlBuilder = new StringBuilder();
             xmlBuilder.append("<beginTransaction>");
-            xmlBuilder.append("<dataSourceName>");
+            xmlBuilder.append("<dataSourceName><![CDATA[");
             xmlBuilder.append(dataSourceKey);
-            xmlBuilder.append("</dataSourceName>");
+            xmlBuilder.append("]]></dataSourceName>");
             xmlBuilder.append("<operation>");
             xmlBuilder.append(replaceData ? "replace" : "add");
             xmlBuilder.append("</operation>");
             xmlBuilder.append("</beginTransaction>");
+            System.out.println(xmlBuilder.toString());
             Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "beginTransaction");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
             Map<String, String> results = new HashMap<String, String>();
@@ -116,7 +115,7 @@ public class TransactionTarget {
                 xmlBuilder.append(row.toXML());
             }
             xmlBuilder.append("</rows>");
-
+            System.out.println(xmlBuilder.toString());
             Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "loadRows");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
             Map<String, String> results = new HashMap<String, String>();
@@ -132,6 +131,7 @@ public class TransactionTarget {
             } else if ("400".equals(code)) {
                 throw new EasyInsightException(results.get("message"));
             }
+            rows = new LinkedList<DataRow>();
         } catch (EasyInsightException eie) {
             throw eie;
         } catch (Exception e) {

@@ -36,11 +36,11 @@ public class DataRow {
         for (Map.Entry<String, String> entry : stringValues.entrySet()) {
             xmlBuilder.append("<");
             xmlBuilder.append(entry.getKey());
-            xmlBuilder.append(">");
+            xmlBuilder.append("><![CDATA[");
 
             xmlBuilder.append(entry.getValue());
 
-            xmlBuilder.append("</");
+            xmlBuilder.append("]]></");
             xmlBuilder.append(entry.getKey());
             xmlBuilder.append(">");
         }
@@ -61,8 +61,8 @@ public class DataRow {
             xmlBuilder.append("<");
             xmlBuilder.append(entry.getKey());
             xmlBuilder.append(">");
-
-            xmlBuilder.append(dateFormat.format(entry.getValue()));
+            if(entry.getValue() != null)
+                xmlBuilder.append(dateFormat.format(entry.getValue()));
 
             xmlBuilder.append("</");
             xmlBuilder.append(entry.getKey());

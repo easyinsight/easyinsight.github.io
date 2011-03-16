@@ -44,7 +44,7 @@
             top:0;
             left:0;
             opacity: .5;
-            background-color: #AAAAAA;
+            background-color: #CCCCCC;
         }
 
         a img {
@@ -515,7 +515,7 @@
       </div>
         <div id="loadingDiv">
             <div class="background"></div>
-            <img alt="Loading..." src="images/ajax-loader.gif" />
+            <img alt="Loading..." src="images/ajax-loader.gif" /> Please wait, loading...
         </div>
 
   </body>

@@ -119,9 +119,9 @@ public class DataSourceFactory {
         try {
             StringBuilder xmlBuilder = new StringBuilder();
             xmlBuilder.append("<defineDataSource>");
-            xmlBuilder.append("<dataSourceName>");
+            xmlBuilder.append("<dataSourceName><![CDATA[");
             xmlBuilder.append(dataSourceKey);
-            xmlBuilder.append("</dataSourceName>");
+            xmlBuilder.append("]]></dataSourceName>");
             xmlBuilder.append("<fields>");
             for (FieldDefinition fieldDefinition : fieldDefinitions) {
                 xmlBuilder.append("<field dataType=\"");
@@ -149,17 +149,18 @@ public class DataSourceFactory {
                         break;
                 }
                 xmlBuilder.append("\">");
-                xmlBuilder.append("<key>");
+                xmlBuilder.append("<key><![CDATA[");
                 xmlBuilder.append(fieldDefinition.getInternalName());
-                xmlBuilder.append("</key>");
-                xmlBuilder.append("<name>");
+                xmlBuilder.append("]]></key>");
+                xmlBuilder.append("<name><![CDATA[");
                 xmlBuilder.append(fieldDefinition.getDisplayName());
-                xmlBuilder.append("</name>");
+                xmlBuilder.append("]]></name>");
                 xmlBuilder.append("</field>");
             }
             xmlBuilder.append("</fields>");
             xmlBuilder.append("</defineDataSource>");
             String xml = xmlBuilder.toString();
+            System.out.println(xml);
             Document document = InternalUtil.sendXML(xml, key, secretKey, "defineDataSource");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
             Map<String, String> results = new HashMap<String, String>();
