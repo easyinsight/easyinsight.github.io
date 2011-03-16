@@ -130,6 +130,6 @@
         <mx:Box/>
         <dashboard:SeleniumReport id="panel" urlKey="{urlKey}" reportName="{reportName}" seleniumID="{requestID}"
                                       dataSourceID="{dataSourceID}" reportType="{reportType}"
-                                      prefix="https://staging.easy-insight.com"/>
+                                      prefix="https://www.easy-insight.com"/>
     </mx:ViewStack>
 </mx:Application>
