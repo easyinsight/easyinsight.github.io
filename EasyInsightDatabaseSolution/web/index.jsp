@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <%@ page import="com.easyinsight.connections.database.DataConnection" %>
 <%@ page import="com.easyinsight.connections.database.data.EIUser" %>
 <%@ page import="java.sql.SQLException" %>
@@ -80,7 +81,6 @@
             display: inline;
         }
         body {
-            width:100%;
             text-align:center;
             margin: 0px auto;
         }
@@ -528,7 +528,7 @@
           </div>
         </div>
       </div>
-        <div id="loadingDiv">
+        <div id="loadingDiv" class="ie9hack">
             <div class="background"></div>
             <span id="loadingBlock"><img alt="Loading..." src="images/ajax-loader.gif" /> <span id="loadingText">Please wait, loading...</span></span>
         </div>
