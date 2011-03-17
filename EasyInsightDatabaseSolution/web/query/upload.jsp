@@ -31,10 +31,10 @@
         }
 
     %>
-        <script type="text/javascript">jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
+        <script type="text/javascript">refreshQueries();jSuccess("Success!", {HorizontalPosition : 'center', VerticalPosition : 'center'}); </script>
     <%} catch(Exception e) {
 
-        %><script type="text/javascript">jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script><%
+        %><script type="text/javascript">refreshQueries();jError("An error occured: <pre><%= e.getMessage() %></pre>", {HorizontalPosition : 'center', VerticalPosition : 'center'});</script><%
     } finally {
         if(dataSession != null)
             dataSession.close();

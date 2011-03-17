@@ -34,7 +34,21 @@
             top:0;
             left:0;
             display:none;
+            z-index: 1;
             margin-top: 300px;
+        }
+
+        #loadingBlock {
+            background-color: #FFFFFF;
+            background-image: none;
+            border-color: #000000;
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 3px;
+            padding: 5px;
+            opacity: 1;
+            z-index: 1;
+            position: relative;
         }
 
         #loadingDiv .background {
@@ -45,6 +59,7 @@
             left:0;
             opacity: .5;
             background-color: #CCCCCC;
+            z-index: 0;
         }
 
         a img {
@@ -515,7 +530,7 @@
       </div>
         <div id="loadingDiv">
             <div class="background"></div>
-            <img alt="Loading..." src="images/ajax-loader.gif" /> Please wait, loading...
+            <span id="loadingBlock"><img alt="Loading..." src="images/ajax-loader.gif" /> <span id="loadingText">Please wait, loading...</span></span>
         </div>
 
   </body>
