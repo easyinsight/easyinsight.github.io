@@ -665,17 +665,15 @@ public class UserUploadService {
     }
 
 
-    public long newExternalDataSource(FeedDefinition dataSource) {
-        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+    public long newExternalDataSource(FeedDefinition feedDefinition) {
+        if (SecurityUtil.getAccountTier() < feedDefinition.getRequiredAccountTier()) {
+            throw new RuntimeException("You are not allowed to create data sources of this type with your account.");
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            dataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
-            feedStorage.addFeedDefinitionData(dataSource, conn);
-
-            IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) dataSource;
+            IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) feedDefinition;
             long id = serverDataSourceDefinition.create(conn, null);
-
             conn.commit();
             return id;
         } catch (Throwable e) {

@@ -35,7 +35,9 @@
 
         private function validate():void {
             progressBar.visible = true;
+            dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
             dataSourceCreation.updateDataSource(dataSourceDefinition);
+
             uploadService.validateCredentials.send(dataSourceDefinition);
         }
 
