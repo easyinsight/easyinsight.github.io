@@ -1,128 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
-                creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*"
-                title="Connect to External Data Source" width="800" height="600">
-    <util:states>
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+                creationComplete="initHandlers()">
 
-        <mx:State name="Administration">
-            <mx:AddChild relativeTo="{coreContent}">
-                <mx:VBox height="100%" horizontalAlign="center" width="200">
-                    <mx:Label text="Available Data Sources" fontFamily="Tahoma" fontSize="14" fontWeight="bold"/>
-                    <mx:List height="100%" width="100%" itemClick="onItemClick(event)">
-                        <mx:dataProvider>
-                            <mx:ArrayCollection>
-                                <mx:Array>
-                                    <mx:String>Google Analytics</mx:String>
-                                    <mx:String>BaseCamp</mx:String>                                    
-                                    <mx:String>Salesforce</mx:String>
-                                    <mx:String>Admin Server Stats</mx:String>
-                                    <mx:String>Cloud Watch</mx:String>
-                                    <mx:String>Highrise</mx:String>
-                                    <mx:String>Custom</mx:String>
-                                    <mx:String>Twitter</mx:String>
-                                    <mx:String>Pivotal Tracker</mx:String>
-                                    <mx:String>SendGrid</mx:String>
-                                    <mx:String>Meetup</mx:String>
-                                    <mx:String>LinkedIn</mx:String>
-                                    <mx:String>Freshbooks</mx:String>
-                                    <mx:String>Redirect</mx:String>
-                                    <mx:String>Whole Foods</mx:String>
-                                    <mx:String>Constant Contact</mx:String>
-                                    <mx:String>Batchbook</mx:String>
-                                    <mx:String>Campaign Monitor</mx:String>
-                                </mx:Array>
-                            </mx:ArrayCollection>
-                        </mx:dataProvider>
-                    </mx:List>
-                </mx:VBox>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{coreContent}">
-                <mx:VBox width="100%" height="100%">
-                    <mx:ViewStack id="adminStack" width="100%" height="100%">
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.GoogleAnalyticsSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.BaseCampDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.SalesforceDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
-                        <customupload:NoCredentialsDataSourceCreation userConfigComplete="onFeedCreation(event)"
-                                                                      userConfigCancel="cancel(event)"
-                                                                      dataSourceClass="com.easyinsight.administration.feed.AdminStatsDataSource"/>
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.datasources.CloudWatchDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.HighRiseDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.CustomDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.TwitterDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.PivotalTrackerDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.datasources.SendGridDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.MeetupDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.LinkedInDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.FreshbooksDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.RedirectDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.WholeFoodsDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.ConstantContactDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.BatchbookDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                        <customupload:ExternalDataSourceCreation
-                                dataSourceClass="com.easyinsight.customupload.CampaignMonitorDataSourceCreation"
-                                userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)" />
-                    </mx:ViewStack>
-                </mx:VBox>
-            </mx:AddChild>
-            <mx:SetProperty target="{this}" name="viewStack" value="{adminStack}"/>
-        </mx:State>
-    </util:states>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
+        import com.easyinsight.framework.TORegistry;
         import com.easyinsight.framework.User;
+
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
         import mx.containers.ViewStack;
+        import mx.controls.Alert;
         import mx.events.ListEvent;
         import mx.managers.PopUpManager;
 
@@ -147,25 +37,48 @@
         }
 
         private function initHandlers():void {
-            if (User.getInstance().getAccountType() == Account.ADMINISTRATOR) {
-                currentState = "Administration";
-            } else {
-                currentState = "Free";
-            }
+            TORegistry.registerTypes();
         }
 
         private function onFeedCreation(event:UploadConfigEvent):void {
             PopUpManager.removePopUp(this);
         }
 
-        private function cancel(event:UploadConfigEvent):void {
+        private function cancel():void {
             PopUpManager.removePopUp(this);
         }
 
-        private function onItemClick(event:ListEvent):void {
-            viewStack.selectedIndex = event.rowIndex;
-        }        
+        private function create():void {
+            var className:String = box.selectedItem as String;
+            var dataSourceClass:Class = getDefinitionByName(className) as Class;
+            var dataSource:Object = new dataSourceClass();
+            ProgressAlert.alert(this, "Sending data source...", null, uploadService.newExternalDataSource);
+            uploadService.newExternalDataSource.send(dataSource);
+        }
+
+        private function created():void {
+
+        }
 		]]>
     </mx:Script>
-    <mx:HBox width="100%" height="100%" styleName="TitleWindowContents" backgroundSize="100%" id="coreContent"/>
-</util:EITitleWindow>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="newExternalDataSource" result="created()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:ComboBox id="box">
+            <mx:dataProvider>
+                <mx:ArrayCollection>
+                    <mx:Array>
+                        <mx:String>com.easyinsight.salesforce.SalesforceFeedDefinition</mx:String>
+                        <mx:String>com.easyinsight.datasources.ConstantContactDataSource</mx:String>
+                        <mx:String>com.easyinsight.datasources.FreshbooksDataSource</mx:String>
+                    </mx:Array>
+                </mx:ArrayCollection>
+            </mx:dataProvider>
+        </mx:ComboBox>
+        <mx:HBox>
+            <util:SaveButton label="Create Data Source" click="create()"/>
+            <util:CancelButton label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

@@ -130,12 +130,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             FeedDefinition feedDefinition = (FeedDefinition) definition;
             feedDefinition.setVisible(false);
             Map<String, Key> keys = feedDefinition.newDataSourceFields();
-            DataSet dataSet;
-            if (SecurityUtil.getUserID(false) > 0) {
-                dataSet = feedDefinition.getDataSet(keys, new Date(), this, null, conn, callDataID, null);
-            } else {
-                dataSet = new DataSet();
-            }
+            DataSet dataSet = new DataSet();
             List<AnalysisItem> fields = feedDefinition.createAnalysisItems(keys, dataSet, conn);
             feedDefinition.setFields(fields);
             for (AnalysisItem field : fields) {
