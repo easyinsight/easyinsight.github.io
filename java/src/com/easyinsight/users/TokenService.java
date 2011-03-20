@@ -43,7 +43,9 @@ public class TokenService {
             OAuthConsumer consumer;
             OAuthProvider provider;
 
-            new FeedStorage().updateDataFeedConfiguration(dataSource);
+            if (dataSource != null) {
+                new FeedStorage().updateDataFeedConfiguration(dataSource);
+            }
 
             if (type == FeedType.LINKEDIN.getType()) {
                 consumer = new DefaultOAuthConsumer("pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq",
