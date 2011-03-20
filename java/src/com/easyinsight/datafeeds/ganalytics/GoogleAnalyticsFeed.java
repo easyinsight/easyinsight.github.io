@@ -209,13 +209,13 @@ public class GoogleAnalyticsFeed extends Feed {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
                         endDate = insightRequestMetadata.getNow();
                         startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, endDate));
-                    } else if (filterDefinition instanceof FilterValueDefinition) {
-                        if (filterDefinition.getField().getKey().toKeyString().equals(GoogleAnalyticsDataSource.TITLE)) {
-                            FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
-                            List<Object> values = filterValueDefinition.getFilteredValues();
-                            for (Object value : values) {
-                                titleFilters.add(value.toString());
-                            }
+                    }
+                } else if (filterDefinition instanceof FilterValueDefinition) {
+                    if (filterDefinition.getField().getKey().toKeyString().equals(GoogleAnalyticsDataSource.TITLE)) {
+                        FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
+                        List<Object> values = filterValueDefinition.getFilteredValues();
+                        for (Object value : values) {
+                            titleFilters.add(value.toString());
                         }
                     }
                 }
@@ -229,7 +229,7 @@ public class GoogleAnalyticsFeed extends Feed {
             for (AccountEntry accountEntry : accountFeed.getEntries()) {
                 String title = accountEntry.getTitle().getPlainText();
                 if (!titleFilters.isEmpty() && !titleFilters.contains(title)) {
-                    break;
+                    continue;
                 }
                 String ids = accountEntry.getTableId().getValue();
                 StringBuilder urlBuilder = new StringBuilder("https://www.google.com/analytics/feeds/data?ids=");
