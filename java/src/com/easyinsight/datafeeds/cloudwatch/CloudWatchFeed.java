@@ -7,6 +7,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.logging.LogClass;
 
+import java.security.SignatureException;
 import java.util.*;
 
 /**
@@ -51,19 +52,16 @@ public class CloudWatchFeed extends Feed {
     }
 
     public List<FilterDefinition> getIntrinsicFilters(EIConnection conn) {
-        FilterDateRangeDefinition rollingFilterDefinition = new FilterDateRangeDefinition();
+        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         AnalysisItem dateField = null;
         for (AnalysisItem analysisItem : getFields()) {
             if (analysisItem.getKey().toKeyString().equals(CloudWatchDataSource.DATE)) {
                 dateField = analysisItem;
             }
         }
+        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.WEEK);
         rollingFilterDefinition.setField(dateField);
         rollingFilterDefinition.setIntrinsic(true);
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        rollingFilterDefinition.setStartDate(cal.getTime());
-        rollingFilterDefinition.setEndDate(new Date());
         rollingFilterDefinition.setApplyBeforeAggregation(true);
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
@@ -153,13 +151,11 @@ public class CloudWatchFeed extends Feed {
                 }
             }
             return dataSet;
+        } catch (SignatureException se) {
+            throw new ReportException(new DataSourceConnectivityReportFault("Please enter your key/secret key again.", getDataSource()));
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }
