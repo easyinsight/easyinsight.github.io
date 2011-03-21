@@ -47,7 +47,7 @@ public class CCCampaignResultsSource extends ConstantContactBaseSource {
                 BOUNCE_COUNT, FORWARD_COUNT, OPT_OUT_COUNT, SPAM_REPORT_COUNT, EVENT_DATE, OPEN_RATE, CLICK_RATE, FORWARD_RATE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CONTACT_ID), true));
         items.add(new AnalysisDimension(keys.get(CAMPAIGN_ID), true));

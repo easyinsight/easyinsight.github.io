@@ -346,7 +346,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 MILESTONE_CREATED_ON, MILESTONE_OWNER, MILESTONE_OWNER, ANNOUNCEMENT, PROJECT_CREATION_DATE, MILESTONE_ID);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension itemDim = new AnalysisDimension(keys.get(ITEMID), true);
         analysisItems.add(itemDim);

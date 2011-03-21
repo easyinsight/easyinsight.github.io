@@ -25,7 +25,13 @@ public class FeedCreation {
     private FeedStorage feedStorage = new FeedStorage();
 
     public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, UploadPolicy uploadPolicy) throws Exception {
-        long feedID = feedStorage.addFeedDefinitionData(feedDefinition, conn);
+        long feedID;
+        if (feedDefinition.getDataFeedID() == 0) {
+            feedID = feedStorage.addFeedDefinitionData(feedDefinition, conn);
+        } else {
+            feedID = feedDefinition.getDataFeedID();
+            feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
+        }
         long accountID = 0;
         for (FeedConsumer feedConsumer : uploadPolicy.getOwners()) {
             if (feedConsumer.type() == FeedConsumer.USER) {

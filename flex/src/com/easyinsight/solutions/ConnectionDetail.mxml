@@ -2,9 +2,8 @@
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
         borderStyle="none" borderThickness="0">
     <mx:Script><![CDATA[
+        import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.listing.IPerspective;
-
-        import mx.core.UIComponent;
 
         private var _solution:Solution;
         private var _auth:Boolean;
@@ -19,32 +18,63 @@
 
         protected override function createChildren():void {
             super.createChildren();
-            if (page == null) {
-                var className:String = _solution.detailPageClass;
-                var clazz:Class = getDefinitionByName(className) as Class;
-                var page:UIComponent = new clazz();
-                page["newAuth"] = _auth;
-                page["solution"] = _solution;
-            }
-            addChild(page);
+            var solutionDetailRenderer:SolutionDetailRenderer = getDetailPage(_solution.dataSourceType);
+            solutionDetailRenderer.solution = _solution;
+            addChild(solutionDetailRenderer);
         }
 
-        private function blah():void {
-            var a:GoogleAnalyticsSolutionDetail;
-            var b:BasecampSolutionDetail;
-            var c:HighriseSolutionDetail;
-            var d:FileUploadSolutionDetail;
-            var e:GoogleSpreadsheetSolutionDetail;
-            var f:LinkedInSolutionDetail;
-            var g:PivotalTrackerSolutionDetail;
-            var h:SendGridSolutionDetail;
-            var i:MySQLSolutionDetail;
-            var j:FreshbooksSolutionDetail;
-            var k:CrunchbaseSolutionDetail;
-            var l:ConstantContactSolutionDetail;
-            var m:QuickbaseSolutionDetail;
-            var n:ClearDBSolutionDetail;
-            var o:BatchbookSolutionDetail;
+        private function getDetailPage(type:int):SolutionDetailRenderer {
+            var result:SolutionDetailRenderer;
+            switch (type) {
+                case DataSourceType.GOOGLE_ANALYTICS:
+                    result = new GoogleAnalyticsSolutionDetail();
+                    break;
+                case DataSourceType.BASECAMP:
+                    result = new BasecampSolutionDetail();
+                    break;
+                case DataSourceType.HIGHRISE:
+                    result = new HighriseSolutionDetail();
+                    break;
+                case DataSourceType.STATIC:
+                    result = new FileUploadSolutionDetail();
+                    break;
+                case DataSourceType.GOOGLE:
+                    result = new GoogleSpreadsheetSolutionDetail();
+                    break;
+                case DataSourceType.LINKEDIN:
+                    result = new LinkedInSolutionDetail();
+                    break;
+                case DataSourceType.PIVOTAL_TRACKER:
+                    result = new PivotalTrackerSolutionDetail();
+                    break;
+                case DataSourceType.SENDGRID:
+                    result = new SendGridSolutionDetail();
+                    break;
+                case DataSourceType.MYSQL:
+                case DataSourceType.ORACLE:
+                case DataSourceType.SQL_SERVER:
+                    result = new MySQLSolutionDetail();
+                    break;
+                case DataSourceType.FRESHBOOKS:
+                    result = new FreshbooksSolutionDetail();
+                    break;
+                case DataSourceType.CONSTANT_CONTACT:
+                    result = new ConstantContactSolutionDetail();
+                    break;
+                case DataSourceType.QUICKBASE:
+                    result = new QuickbaseSolutionDetail();
+                    break;
+                case DataSourceType.CLEARDB:
+                    result = new ClearDBSolutionDetail();
+                    break;
+                case DataSourceType.BATCHBOOK:
+                    result = new BatchbookSolutionDetail();
+                    break;
+                case DataSourceType.CLOUD_WATCH:
+                    result = new CloudWatchSolutionDetail();
+                    break;
+            }
+            return result;
         }
 
         public function gotFocus():void {

@@ -44,7 +44,7 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
         return FeedType.FRESHBOOKS_TIME_ENTRIES;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet,
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys,
                                                   Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksTimeEntrySource.TIME_ENTRY_ID), true));

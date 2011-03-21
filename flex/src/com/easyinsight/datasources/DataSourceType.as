@@ -37,6 +37,9 @@ public class DataSourceType {
     public static const BATCHBOOK:int = 82;
     public static const CAMPAIGN_MONITOR:int = 75;
     public static const FEDERATED:int = 89;
+    public static const MYSQL:int = 90;
+    public static const SQL_SERVER:int = 91;
+    public static const ORACLE:int = 92;
 
     public static const OWNER:int = 1;
     public static const EDITOR:int = 2;

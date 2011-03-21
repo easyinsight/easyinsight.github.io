@@ -38,7 +38,7 @@ import nu.xom.Builder;
  */
 public class BaseCampCompositeSource extends CompositeServerDataSource {
 
-    private String url;
+    private String url = "";
     private boolean includeArchived;
     private boolean includeInactive;
     private boolean includeMilestoneComments;
@@ -46,6 +46,10 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     private String token;
 
     private transient BaseCampCache basecampCache;
+
+    public BaseCampCompositeSource() {
+        setFeedName("Basecamp");
+    }
 
     public BaseCampCache getOrCreateCache(HttpClient httpClient) throws ParsingException, BaseCampLoginException, ReportException {
         if (basecampCache == null) {

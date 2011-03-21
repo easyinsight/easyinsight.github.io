@@ -62,7 +62,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                 CONTACT_STREET, CONTACT_CITY, CONTACT_STATE, CONTACT_COUNTRY);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_NAME), true));
         analysisItems.add(new AnalysisZipCode(keys.get(ZIP_CODE), true));

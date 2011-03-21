@@ -190,7 +190,7 @@ public class MarketoDataSource extends ServerDataSourceDefinition {
                 FIRST_NAME, LAST_NAME, POSTAL_CODE, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(LEAD_EMAIL), true));
         items.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.COUNT));

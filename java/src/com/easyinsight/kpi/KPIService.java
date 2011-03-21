@@ -89,7 +89,8 @@ public class KPIService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            List<KPI> kpis = new FeedStorage().getFeedDefinitionData(targetDataSourceID).createKPIs();
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(targetDataSourceID);
+            List<KPI> kpis = dataSource.createKPIs();
 
             for (KPI kpi : kpis) {
                 kpi.setTemporary(true);

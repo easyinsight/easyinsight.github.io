@@ -50,7 +50,7 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
         return Arrays.asList(CASE_NAME, CASE_ID, OWNER, CREATED_AT, COUNT, AUTHOR, CLOSED_AT, TAGS, UPDATED_AT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();        
         analysisItems.add(new AnalysisDimension(keys.get(CASE_NAME), true));
         analysisItems.add(new AnalysisList(keys.get(CASE_ID), false, ","));

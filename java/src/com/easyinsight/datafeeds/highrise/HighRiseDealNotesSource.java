@@ -47,7 +47,7 @@ public class HighRiseDealNotesSource extends HighRiseBaseSource {
         return Arrays.asList(BODY, NOTE_ID, NOTE_CREATED_AT, NOTE_UPDATED_AT, NOTE_AUTHOR, NOTE_DEAL_ID, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(BODY), true));
         analysisItems.add(new AnalysisDimension(keys.get(NOTE_ID), true));

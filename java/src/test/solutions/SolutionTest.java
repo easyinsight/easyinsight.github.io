@@ -98,24 +98,9 @@ public class SolutionTest extends TestCase {
         solution.setName("Blah");
         solution.setCopyData(true);
         SolutionService solutionService = new SolutionService();
-        long solutionID = solutionService.addSolution(solution, Arrays.asList( (int) dataSourceID ));
+        long solutionID = solutionService.addSolution(solution);
         TestUtil.getIndividualTestUser();
-        List<SolutionInstallInfo> infos = solutionService.installSolution(solutionID);
-        for (SolutionInstallInfo info : infos) {
-            if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE) {
-                FeedDefinition newDataSource = new FeedStorage().getFeedDefinitionData(info.getDescriptor().getId());
-                WSListDefinition defaultQuery = new WSListDefinition();
-                defaultQuery.setDataFeedID(info.getDescriptor().getId());
-                defaultQuery.setColumns(Arrays.asList(getItem("customer", newDataSource), getItem("amount", newDataSource)));
-                ListDataResults results = (ListDataResults) new DataService().list(defaultQuery, new InsightRequestMetadata());
-                assertEquals(1, results.getRows().length);
-            } else if (info.getDescriptor().getType() == EIDescriptor.REPORT) {
-                WSAnalysisDefinition def = new AnalysisService().openAnalysisDefinition(info.getDescriptor().getId());
-                ListDataResults results = (ListDataResults) new DataService().list(def, new InsightRequestMetadata());
-                assertEquals(1, results.getRows().length);
-            }
-        }
-        List<Solution> solutions = solutionService.getSolutions();
+
     }
 
     public void testDynamicSources() throws SQLException {
@@ -162,30 +147,10 @@ public class SolutionTest extends TestCase {
         solution.setName("Blah");
         solution.setCopyData(false);
         SolutionService solutionService = new SolutionService();
-        long solutionID = solutionService.addSolution(solution, Arrays.asList( (int) sourceId ));
+        long solutionID = solutionService.addSolution(solution);
         TestUtil.getIndividualTestUser();
         long newSourceID = 0;
-        List<SolutionInstallInfo> infos = solutionService.installSolution(solutionID);
-        for (SolutionInstallInfo info : infos) {
-            if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE) {
-                newSourceID = info.getDescriptor().getId();
-                FeedDefinition newDataSource = new FeedStorage().getFeedDefinitionData(newSourceID);
-                new DataService().getFeedMetadata(newSourceID);
-                WSListDefinition defaultQuery = new WSListDefinition();
-                defaultQuery.setDataFeedID(info.getDescriptor().getId());
-                defaultQuery.setColumns(Arrays.asList(getItem(BaseCampTodoSource.CREATORNAME, newDataSource)));
-                ListDataResults results = (ListDataResults) new DataService().list(defaultQuery, new InsightRequestMetadata());
-                assertEquals(0, results.getRows().length);
-            }
-        }
-        ds = (BaseCampCompositeSource) new FeedService().getFeedDefinition(newSourceID);
-        ds.setUrl("easyinsight.basecamphq.com");
-        ds.refreshData(SecurityUtil.getAccountID(), new Date(), null, null, null);
-        WSListDefinition defaultQuery = new WSListDefinition();
-        defaultQuery.setDataFeedID(newSourceID);
-        defaultQuery.setColumns(Arrays.asList(getItem(BaseCampTodoSource.CREATORNAME, ds)));
-        ListDataResults results = (ListDataResults) new DataService().list(defaultQuery, new InsightRequestMetadata());
-        assertTrue(results.getRows().length > 0);
+
     }
 
     private AnalysisItem getItem(String name, FeedDefinition feedDefinition) {

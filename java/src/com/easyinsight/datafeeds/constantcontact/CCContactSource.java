@@ -12,7 +12,6 @@ import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
 import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import org.jetbrains.annotations.NotNull;
 
@@ -88,7 +87,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                 CONTACT_CUSTOM_FIELD17, CONTACT_CUSTOM_FIELD18, CONTACT_CREATED_ON);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CONTACT_NAME), true));
         items.add(new AnalysisDimension(keys.get(CONTACT_STATUS), true));

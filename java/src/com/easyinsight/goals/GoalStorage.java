@@ -136,11 +136,9 @@ public class GoalStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            InstallationSystem installationSystem = new InstallationSystem(conn);
-            installationSystem.installUserTree(goalTree, new ArrayList<Integer>());
             addGoalTree(goalTree, conn);
             conn.commit();
-            return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
+            return new GoalSaveInfo(goalTree);
         } catch (Exception e) {
             conn.rollback();
             throw e;
@@ -185,7 +183,7 @@ public class GoalStorage {
             conn.setAutoCommit(false);
             updateGoalTree(goalTree, conn);
             conn.commit();
-            return new GoalSaveInfo(goalTree, null);
+            return new GoalSaveInfo(goalTree);
         } catch (Exception e) {
             conn.rollback();
             throw new RuntimeException(e);
@@ -197,8 +195,6 @@ public class GoalStorage {
 
     public GoalSaveInfo updateGoalTree(GoalTree goalTree, EIConnection conn) throws Exception {
 
-            InstallationSystem installationSystem = new InstallationSystem(conn);
-            installationSystem.installUserTree(goalTree, new ArrayList<Integer>());
             long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
             // deleteOldNodes(goalTree.getRootNode(), conn);
             PreparedStatement updateTreeStmt = conn.prepareStatement("UPDATE GOAL_TREE SET NAME = ?, DESCRIPTION = ?, ROOT_NODE = ?, GOAL_TREE_ICON = ?," +
@@ -215,7 +211,7 @@ public class GoalStorage {
             saveUsers(goalTree.getGoalTreeID(), goalTree.getAdministrators(), Roles.OWNER, conn);
             //goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
             updateTreeStmt.close();
-            return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
+            return new GoalSaveInfo(goalTree);
     }
 
     public void deleteGoalTree(long goalTreeID) {

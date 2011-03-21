@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSTimeline;
-import com.easyinsight.core.Key;
 import com.easyinsight.sequence.Sequence;
 import org.hibernate.Session;
 
@@ -67,8 +66,8 @@ public class TimelineDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
-        TimelineDefinitionState timelineDefinitionState = (TimelineDefinitionState) super.clone(keyMap, allFields);
+    public AnalysisDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        TimelineDefinitionState timelineDefinitionState = (TimelineDefinitionState) super.clone(allFields);
         timelineDefinitionState.setDefinitionID(0);
         timelineDefinitionState.setFilter(filter.clone());
         //timelineDefinitionState.setContainedReport(containedReport.clone(keyMap, allFields));
@@ -76,9 +75,9 @@ public class TimelineDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap, Map<Key, Key> keyMap) throws CloneNotSupportedException {
-        super.updateIDs(replacementMap, keyMap);
-        filter.updateIDs(replacementMap, keyMap);
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) throws CloneNotSupportedException {
+        super.updateIDs(replacementMap);
+        filter.updateIDs(replacementMap);
     }
 
     @Override

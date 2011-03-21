@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Key;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -79,8 +78,8 @@ public class ListDefinitionState extends AnalysisDefinitionState {
         return listDefinition;
     }
 
-    public ListDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
-        ListDefinitionState listDefinition = (ListDefinitionState) super.clone(keyMap, allFields);
+    public ListDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        ListDefinitionState listDefinition = (ListDefinitionState) super.clone(allFields);
         listDefinition.setDefinitionID(0);
         if (listLimitsMetadata != null) {
             listDefinition.listLimitsMetadata = listLimitsMetadata.clone();
@@ -88,7 +87,7 @@ public class ListDefinitionState extends AnalysisDefinitionState {
         return listDefinition;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap, Map<Key, Key> keyMap) {
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
         if (listLimitsMetadata != null) {
             listLimitsMetadata.updateIDs(replacementMap);
         }

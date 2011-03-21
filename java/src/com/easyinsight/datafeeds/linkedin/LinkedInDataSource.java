@@ -70,7 +70,7 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         URLLink nameLink = new URLLink();
         nameLink.setUrl("[Public Profile URL]");

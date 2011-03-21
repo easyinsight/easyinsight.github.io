@@ -116,7 +116,7 @@ secret token token = QhfbN4AKz0Hb5HfllD5oWn7NGVdDoYh7xDOIUva0I
                 LANGUAGE, AUTHOR_NAME, AUTHOR_URL, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(TWEET_ID), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(PUBLISHED), true, AnalysisDateDimension.MINUTE_LEVEL));

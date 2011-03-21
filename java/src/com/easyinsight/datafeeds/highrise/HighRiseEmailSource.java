@@ -43,7 +43,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
         return Arrays.asList(EMAIL_AUTHOR, EMAIL_CONTACT_ID, SENT_AT, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL_AUTHOR), true));
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL_CONTACT_ID), true));        

@@ -55,18 +55,11 @@ public class ConnectionConfig extends EventDispatcher {
     private function gotDataSource(event:ResultEvent):void {
         var dataSource:FeedDefinitionData = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
         if (dataSource != null) {
-            if (dataSource.isLiveData()) {
-                var desc:DataSourceDescriptor = new DataSourceDescriptor();
-                desc.name = dataSource.feedName;
-                desc.id = dataSource.dataFeedID;
-                dispatchEvent(new AnalyzeEvent(new PostInstallSource(desc)));
-            } else {
-                var delayedSync:DelayedSync = new DelayedSync();
-                delayedSync.dataSourceDefinition = dataSource;
-                delayedSync.addEventListener(AnalyzeEvent.ANALYZE, passThrough, false, 0, true);
-                PopUpManager.addPopUp(delayedSync, DisplayObject(Application.application), true);
-                PopUpUtil.centerPopUp(delayedSync);
-            }
+            var delayedSync:DelayedSync = new DelayedSync();
+            delayedSync.dataSourceDefinition = dataSource;
+            delayedSync.addEventListener(AnalyzeEvent.ANALYZE, passThrough, false, 0, true);
+            PopUpManager.addPopUp(delayedSync, DisplayObject(Application.application), true);
+            PopUpUtil.centerPopUp(delayedSync);
         }
     }
 

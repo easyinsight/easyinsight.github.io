@@ -39,7 +39,7 @@ public class CCCampaignSource extends ConstantContactBaseSource {
                 CAMPAIGN_URL);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CAMPAIGN_NAME), true));
         items.add(new AnalysisDimension(keys.get(CAMPAIGN_ID), true));

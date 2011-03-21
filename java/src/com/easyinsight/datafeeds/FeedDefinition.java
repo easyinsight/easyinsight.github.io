@@ -504,7 +504,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return new ArrayList<KPI>();
     }
 
-    protected AnalysisItem findAnalysisItem(String key) {
+    public AnalysisItem findAnalysisItem(String key) {
         AnalysisItem item = null;
         for (AnalysisItem field : getFields()) {
             if (field.getKey().toKeyString().equals(key)) {
@@ -514,7 +514,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return item;
     }
 
-    protected AnalysisItem findAnalysisItemByDisplayName(String key) {
+    public AnalysisItem findAnalysisItemByDisplayName(String key) {
         AnalysisItem item = null;
         for (AnalysisItem field : getFields()) {
             if (field.toDisplay().equals(key)) {
@@ -553,7 +553,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return null;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         throw new UnsupportedOperationException();
     }
 

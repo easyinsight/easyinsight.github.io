@@ -201,9 +201,6 @@
         [Bindable]
         private var exchangeIndex:int;
 
-        [Bindable]
-        private var ratingText:String;
-
         private var dashboard:Dashboard;
 
         private function close():void {

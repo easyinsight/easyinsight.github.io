@@ -38,8 +38,7 @@ public class BaseCamp1To2 extends DataSourceMigration {
             projectDimension.setLinks(Arrays.asList((Link) projectLink));
             migrateAnalysisItemByDisplay("Todo - " + BaseCampTodoSource.PROJECTNAME, projectDimension);
         }
-        /*AnalysisDimension contentDimension = new AnalysisDimension("Todo Item", true);
-        migrateAnalysisItem(BaseCampDataSource.CONTENT, contentDimension);*/
+
     }
 
     public int fromVersion() {

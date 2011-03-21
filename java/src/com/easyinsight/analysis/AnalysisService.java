@@ -190,16 +190,10 @@ public class AnalysisService {
         long reportID;
         try {
             conn.setAutoCommit(false);
-
-            Map<Key, Key> keyReplacementMap = new HashMap<Key, Key>();
-
             Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition, session);
             Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID(), conn);
-            for (AnalysisItem item : feed.getFields()) {
-                keyReplacementMap.put(item.getKey(), item.getKey());
-            }
-            AnalysisDefinition clone = analysisDefinition.clone(keyReplacementMap, feed.getFields(), false);
+            AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields(), false);
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
@@ -403,7 +397,6 @@ public class AnalysisService {
             LogClass.error(e);
         }
         long reportID;
-        WSAnalysisDefinition report;
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {

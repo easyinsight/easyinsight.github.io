@@ -38,7 +38,7 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
         return FeedType.TEST_BETA;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet dataSet = new DataSet();
         IRow row1 = dataSet.createRow();
         row1.addValue(keys.get(DIM), "Beta Row 1");
@@ -53,7 +53,7 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
         return dataSet;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DIM), true));
         analysisItems.add(new AnalysisDimension(keys.get(TODO_DIM), true));

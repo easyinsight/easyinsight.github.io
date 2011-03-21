@@ -26,7 +26,7 @@ public abstract class AnalysisDefinitionState implements Cloneable {
 
     public abstract WSAnalysisDefinition createWSDefinition();
 
-    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
+    public AnalysisDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
         AnalysisDefinitionState state = (AnalysisDefinitionState) super.clone();
         state.setId(0);
         return state;
@@ -40,7 +40,7 @@ public abstract class AnalysisDefinitionState implements Cloneable {
         this.id = id;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap, Map<Key, Key> keyMap) throws CloneNotSupportedException {
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) throws CloneNotSupportedException {
 
     }
 

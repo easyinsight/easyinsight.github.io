@@ -38,7 +38,7 @@ public class TestAlphaDataSource extends ServerDataSourceDefinition {
         return FeedType.TEST_ALPHA;
     }
 
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID) {
+    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet dataSet = new DataSet();
         IRow row1 = dataSet.createRow();
         row1.addValue(keys.get(DIM), "Alpha Row 1");
@@ -57,7 +57,7 @@ public class TestAlphaDataSource extends ServerDataSourceDefinition {
         return dataSet;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DIM), true));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_DIM), true));

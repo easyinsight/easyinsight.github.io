@@ -1,3 +1,24 @@
+drop table if exists federated_data_source;
+create table federated_data_source (
+  federated_data_source_id bigint(20) auto_increment not null,
+  data_source_id bigint(20) not null,
+  analysis_item_id bigint(20) default null,
+  primary key (federated_data_source_id),
+  constraint federated_data_source_ibfk1 foreign key (data_source_id) references data_feed (data_feed_id) on delete cascade,
+  constraint federated_data_source_ibfk2 foreign key (analysis_item_id) references analysis_item (analysis_item_id) on delete cascade
+);
+
+drop table if exists federated_data_source_to_data_source;
+create table federated_data_source_to_data_source (
+  federated_data_source_to_data_source_id bigint(20) auto_increment not null,
+  federated_data_source_id bigint(20) not null,
+  data_source_id bigint(20) not null,
+  analysis_item_value varchar(255) default null,
+  primary key (federated_data_source_to_data_source_id),
+  constraint federated_data_source_to_data_source_ibfk1 foreign key (federated_data_source_id) references federated_data_source (federated_data_source_id) on delete cascade,
+  constraint federated_data_source_to_data_source_ibfk2 foreign key (data_source_id) references data_feed (data_feed_id) on delete cascade
+);
+
 drop table if exists exchange_report_install;
 create table exchange_report_install (
   exchange_report_install_id bigint(20) auto_increment not null,

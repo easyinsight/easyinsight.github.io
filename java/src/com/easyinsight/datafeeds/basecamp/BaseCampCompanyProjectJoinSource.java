@@ -108,7 +108,7 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
         return Arrays.asList(COMPANY_ID, PROJECT_ID);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension companyID = new AnalysisDimension(keys.get(COMPANY_ID), true);
         companyID.setHidden(true);

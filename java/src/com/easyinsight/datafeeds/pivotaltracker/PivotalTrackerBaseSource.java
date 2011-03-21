@@ -286,7 +286,7 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
                 STORY_UPDATED_AT, STORY_ACCEPTED_AT, STORY_URL, STORY_COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_ID), true));
         analysisItems.add(new AnalysisMeasure(keys.get(PROJECT_INITIAL_VELOCITY), AggregationTypes.AVERAGE));

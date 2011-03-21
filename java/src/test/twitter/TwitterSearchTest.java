@@ -2,7 +2,6 @@ package test.twitter;
 
 import junit.framework.TestCase;
 import com.easyinsight.datafeeds.twitter.TwitterDataSource;
-import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
@@ -39,7 +38,7 @@ public class TwitterSearchTest extends TestCase {
         tds.setSearches(new ArrayList(Arrays.asList("ty lawson")));
 //        Feed feed = tds.createFeedObject();
         List<AnalysisItem> items;
-        items = tds.createAnalysisItems(keys, new DataSet(), conn);
+        items = tds.createAnalysisItems(keys, conn);
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>(items);
 //        DataSet ds = feed.getAggregateDataSet(itemSet, null, null, items, false);
 

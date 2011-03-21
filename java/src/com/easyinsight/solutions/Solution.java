@@ -9,46 +9,26 @@ import java.util.List;
  */
 public class Solution {
 
-    public static final int APPLICATION = 1;
-    public static final int JAVA_JAR = 2;
-    public static final int RUBY_GEM = 3;
-    public static final int NET_LIB = 4;
-    public static final int ESB_PACKAGE = 5;
-
     private long solutionID;
+    private int dataSourceType;
     private String name;
-    private String description;
-    private String author = "Easy Insight";
     private String industry;
     private String solutionArchiveName;
-    private String detailPageClass;
     private boolean installable;
     private boolean copyData;
-    private long goalTreeID;
     private int solutionTier;
     private List<String> tags;
-    private String footerText;
     private String logoLink;
     private byte[] image;
     private boolean accessible;
     private int category;
-    private String screencastName;
-    private String screencastDirectory;
 
-    public String getDetailPageClass() {
-        return detailPageClass;
+    public int getDataSourceType() {
+        return dataSourceType;
     }
 
-    public void setDetailPageClass(String detailPageClass) {
-        this.detailPageClass = detailPageClass;
-    }
-
-    public String getFooterText() {
-        return footerText;
-    }
-
-    public void setFooterText(String footerText) {
-        this.footerText = footerText;
+    public void setDataSourceType(int dataSourceType) {
+        this.dataSourceType = dataSourceType;
     }
 
     public String getLogoLink() {
@@ -57,22 +37,6 @@ public class Solution {
 
     public void setLogoLink(String logoLink) {
         this.logoLink = logoLink;
-    }
-
-    public String getScreencastName() {
-        return screencastName;
-    }
-
-    public void setScreencastName(String screencastName) {
-        this.screencastName = screencastName;
-    }
-
-    public String getScreencastDirectory() {
-        return screencastDirectory;
-    }
-
-    public void setScreencastDirectory(String screencastDirectory) {
-        this.screencastDirectory = screencastDirectory;
     }
 
     public int getCategory() {
@@ -123,14 +87,6 @@ public class Solution {
         this.tags = tags;
     }
 
-    public long getGoalTreeID() {
-        return goalTreeID;
-    }
-
-    public void setGoalTreeID(long goalTreeID) {
-        this.goalTreeID = goalTreeID;
-    }
-
     public String getSolutionArchiveName() {
         return solutionArchiveName;
     }
@@ -153,22 +109,6 @@ public class Solution {
 
     public void setIndustry(String industry) {
         this.industry = industry;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public long getSolutionID() {

@@ -458,9 +458,14 @@ public class GoogleDataProvider {
             if (attributeMode != null && "lookup".equals(attributeMode.getValue())) {
                 continue;
             }
+            Nodes uniqueNodes = field.query("unique/text()");
+            boolean unique = false;
+            if (uniqueNodes.size() > 0) {
+                unique = uniqueNodes.get(0).getValue().equals("1");
+            }
             String label = field.query("label/text()").get(0).getValue();
             Nodes mastagNodes = field.query("mastag/text()");
-            if (mastagNodes.size() > 0 || "text".equals(fieldType) || "checkbox".equals(fieldType) || "phone".equals(fieldType) ||
+            if (unique || mastagNodes.size() > 0 || "text".equals(fieldType) || "checkbox".equals(fieldType) || "phone".equals(fieldType) ||
                     "userid".equals(fieldType)) {
                 items.add(new AnalysisDimension(namedKey, label));
             } else if ("recordid".equals(fieldType)) {

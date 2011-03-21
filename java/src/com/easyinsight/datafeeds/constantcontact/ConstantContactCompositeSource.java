@@ -36,6 +36,10 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
     private String pin;
     private String ccUserName;
 
+    public ConstantContactCompositeSource() {
+        setFeedName("Constant Contact");
+    }
+
     public String getCcUserName() {
         return ccUserName;
     }

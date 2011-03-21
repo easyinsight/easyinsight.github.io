@@ -35,6 +35,10 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
     public static final String CONSUMER_KEY = "easyinsight";
     public static final String CONSUMER_SECRET = "3gKm7ivgkPCeQZChh7ig9CDMBGratLg6yS";
 
+    public FreshbooksCompositeSource() {
+        setFeedName("FreshBooks");
+    }
+
     private String pin;
 
     public String getPin() {
@@ -75,7 +79,7 @@ public class FreshbooksCompositeSource extends CompositeServerDataSource {
         return result;
     }
 
-    private String url;
+    private String url = "";
 
     public String getUrl() {
         if (url == null || "".equals(url)) {

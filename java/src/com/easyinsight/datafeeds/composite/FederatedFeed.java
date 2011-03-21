@@ -41,6 +41,13 @@ public class FederatedFeed extends Feed {
                         }
                     }
                 }
+                for (FilterDefinition filter : filters) {
+                    for (AnalysisItem field : feed.getDataSource().getFields()) {
+                        if (field.toDisplay().equals(filter.getField().toDisplay())) {
+                            filter.setField(field);
+                        }
+                    }
+                }
                 DataSet childSet = feed.getAggregateDataSet(childAnalysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
 
                 for (IRow row : childSet.getRows()) {

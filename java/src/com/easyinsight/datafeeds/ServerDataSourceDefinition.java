@@ -57,19 +57,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         DataStorage metadata = null;
         try {
             Map<String, Key> keys = newDataSourceFields();
-            DataSet dataSet = getDataSet(keys, new Date(), null, null, conn, null, null);
-            if (externalAnalysisItems != null) {
-                /*for (AnalysisItem field : externalAnalysisItems) {
-                    dataSet.refreshKey(field.getKey());
-                }*/
-                setFields(externalAnalysisItems);
-            } else {
-                setFields(createAnalysisItems(keys, dataSet, conn));
-            }
+            setFields(createAnalysisItems(keys, conn));
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
             setUploadPolicy(uploadPolicy);
-            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, dataSet, uploadPolicy);
+            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, new DataSet(), uploadPolicy);
             metadata = feedCreationResult.getTableDefinitionMetadata();
             if (metadata != null) metadata.commit();
             return feedCreationResult.getFeedID();
@@ -119,7 +111,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     public Map<String, Key> newDataSourceFields() {
         Map<String, Key> keyMap = new HashMap<String, Key>();
-        if (getDataFeedID() == 0) {
+        if (getFields().size() == 0) {
             List<String> keys = getKeys();
             for (String key : keys) {
                 keyMap.put(key, new NamedKey(key));

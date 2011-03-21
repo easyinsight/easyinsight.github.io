@@ -1,11 +1,9 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSGanttChartDefinition;
-import com.easyinsight.core.Key;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -36,8 +34,8 @@ public class GanttChartDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
-        GanttChartDefinitionState ganttChartDefinitionState = (GanttChartDefinitionState) super.clone(keyMap, allFields);
+    public AnalysisDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        GanttChartDefinitionState ganttChartDefinitionState = (GanttChartDefinitionState) super.clone(allFields);
         ganttChartDefinitionState.setGanttDefinitionID(0);
         return ganttChartDefinitionState;
     }

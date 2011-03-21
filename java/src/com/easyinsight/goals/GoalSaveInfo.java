@@ -1,10 +1,5 @@
 package com.easyinsight.goals;
 
-import com.easyinsight.solutions.SolutionInstallInfo;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * User: James Boe
  * Date: Jul 2, 2009
@@ -12,14 +7,12 @@ import java.util.List;
  */
 public class GoalSaveInfo {
     private GoalTree goalTree;
-    private List<SolutionInstallInfo> installInfos = new ArrayList<SolutionInstallInfo>();
 
     public GoalSaveInfo() {
     }
 
-    public GoalSaveInfo(GoalTree goalTree, List<SolutionInstallInfo> installInfos) {
+    public GoalSaveInfo(GoalTree goalTree) {
         this.goalTree = goalTree;
-        this.installInfos = installInfos;
     }
 
     public GoalTree getGoalTree() {
@@ -28,13 +21,5 @@ public class GoalSaveInfo {
 
     public void setGoalTree(GoalTree goalTree) {
         this.goalTree = goalTree;
-    }
-
-    public List<SolutionInstallInfo> getInstallInfos() {
-        return installInfos;
-    }
-
-    public void setInstallInfos(List<SolutionInstallInfo> installInfos) {
-        this.installInfos = installInfos;
     }
 }

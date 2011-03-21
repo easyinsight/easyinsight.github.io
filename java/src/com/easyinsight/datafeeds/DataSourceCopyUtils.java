@@ -11,7 +11,6 @@ import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.security.Roles;
-import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.DataSourceDescriptor;
 
 import java.sql.Connection;
@@ -30,10 +29,9 @@ import org.hibernate.Session;
 public class DataSourceCopyUtils {
 
     public static List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID,
-                                                        FeedDefinition feedDefinition, boolean includeChildren, String newDataSourceName,
+                                                        FeedDefinition feedDefinition, String newDataSourceName,
                                                         long solutionID, long accountID, String userName) throws Exception {
         FeedStorage feedStorage = new FeedStorage();
-        AnalysisStorage analysisStorage = new AnalysisStorage();
         List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
 
         // result here needs to have the core keys
@@ -57,27 +55,6 @@ public class DataSourceCopyUtils {
             DataStorage.liveDataSource(result.getFeedDefinition().getDataFeedID(), conn);
         }
         clonedFeedDefinition.postClone(conn);
-        if (includeChildren) {
-            List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
-            for (AnalysisDefinition insight : insights) {
-                if (insight.isRootDefinition()) {
-                    continue;
-                }
-                AnalysisDefinition clonedInsight = insight.clone(result.getKeyReplacementMap(), clonedFeedDefinition.getFields(), false);
-                // need to update keys on the analysis items at this point
-                clonedInsight.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
-                clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
-                clonedInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
-                analysisStorage.saveAnalysis(clonedInsight, conn);
-                InsightDescriptor insightDescriptor = new InsightDescriptor(clonedInsight.getAnalysisID(), clonedInsight.getTitle(),
-                        clonedInsight.getDataFeedID(), clonedInsight.getReportType(), clonedInsight.getUrlKey(), Roles.OWNER);
-                infos.add(new SolutionInstallInfo(insight.getAnalysisID(), insightDescriptor, null, false));
-                List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
-                for (FeedDefinition insightFeed : insightFeeds) {
-                    infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed, true, null, solutionID, accountID, userName));
-                }
-            }
-        }
 
         boolean requiresConfig = solutionID > 0 && feedDefinition.requiresConfiguration();
 

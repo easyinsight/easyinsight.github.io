@@ -43,7 +43,7 @@ public class FreshbooksEstimateSource extends FreshbooksBaseSource {
         return FeedType.FRESHBOOKS_ESTIMATES;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.ESTIMATE_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.NUMBER), true));

@@ -31,6 +31,10 @@ public class BatchbookCompositeSource extends CompositeServerDataSource {
     private String url;
     private String bbApiKey;
 
+    public BatchbookCompositeSource() {
+        setFeedName("Batchbook");
+    }
+
     public void setUrl(String url) {
         this.url = url;
     }

@@ -1,11 +1,9 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSHeatMap;
-import com.easyinsight.core.Key;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -96,8 +94,8 @@ public class HeatMapDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
-        HeatMapDefinitionState heatMapDefinitionState = (HeatMapDefinitionState) super.clone(keyMap, allFields);
+    public AnalysisDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        HeatMapDefinitionState heatMapDefinitionState = (HeatMapDefinitionState) super.clone(allFields);
         heatMapDefinitionState.setHeatMapDefinitionID(0);
         return heatMapDefinitionState;
     }

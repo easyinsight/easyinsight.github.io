@@ -41,7 +41,6 @@
         import mx.containers.Canvas;
         import mx.containers.HBox;
         import mx.messaging.config.ServerConfig;
-        import mx.modules.IModuleInfo;
         import mx.rpc.AsyncResponder;
         import mx.rpc.AsyncToken;
         import mx.rpc.events.FaultEvent;

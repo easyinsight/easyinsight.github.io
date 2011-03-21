@@ -50,7 +50,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_COMMENTS;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(COMMENT_AUTHOR), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMMENT_ID), true));

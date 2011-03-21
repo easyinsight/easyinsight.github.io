@@ -4,11 +4,9 @@ import com.easyinsight.analysis.AnalysisDefinitionState;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.WSGaugeDefinition;
-import com.easyinsight.core.Key;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: James Boe
@@ -62,8 +60,8 @@ public class GaugeDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
-        GaugeDefinitionState state = (GaugeDefinitionState) super.clone(keyMap, allFields);
+    public AnalysisDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        GaugeDefinitionState state = (GaugeDefinitionState) super.clone(allFields);
         state.setGaugeDefinitionID(0);
         return state;
     }

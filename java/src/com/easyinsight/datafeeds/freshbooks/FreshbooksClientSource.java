@@ -51,7 +51,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
         return FeedType.FRESHBOOKS_CLIENTS;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.FIRST_NAME), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.EMAIL), true));

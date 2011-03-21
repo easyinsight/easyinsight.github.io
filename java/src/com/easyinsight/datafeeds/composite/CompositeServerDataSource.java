@@ -78,7 +78,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         if (newSource) {
             for (FeedType feedType : feedTypes) {
                 IServerDataSourceDefinition definition = createForFeedType(feedType);
-                newDefinition(definition, conn, "", getUploadPolicy(), null);
+                newDefinition(definition, conn, "", getUploadPolicy());
                 dataSources.add(definition);
                 CompositeFeedNode node = new CompositeFeedNode();
                 node.setDataFeedID(definition.getDataFeedID());
@@ -124,19 +124,14 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return connections;
     }
 
-    public void newDefinition(IServerDataSourceDefinition definition, EIConnection conn, String userName, UploadPolicy uploadPolicy, String callDataID) throws Exception {
+    public void newDefinition(IServerDataSourceDefinition definition, EIConnection conn, String userName, UploadPolicy uploadPolicy) throws Exception {
         DataStorage metadata = null;
         try {
             FeedDefinition feedDefinition = (FeedDefinition) definition;
             feedDefinition.setVisible(false);
             Map<String, Key> keys = feedDefinition.newDataSourceFields();
-            DataSet dataSet;
-            if (SecurityUtil.getUserID(false) > 0) {
-                dataSet = feedDefinition.getDataSet(keys, new Date(), this, null, conn, callDataID, null);
-            } else {
-                dataSet = new DataSet();
-            }
-            List<AnalysisItem> fields = feedDefinition.createAnalysisItems(keys, dataSet, conn);
+            DataSet dataSet = new DataSet();
+            List<AnalysisItem> fields = feedDefinition.createAnalysisItems(keys, conn);
             feedDefinition.setFields(fields);
             for (AnalysisItem field : fields) {
                 if (field.getFolder() != null) {
@@ -146,7 +141,6 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             }
             feedDefinition.setOwnerName(userName);
             feedDefinition.setParentSourceID(getDataFeedID());
-            //UploadPolicy uploadPolicy = new UploadPolicy(userID);
             feedDefinition.setUploadPolicy(uploadPolicy);
             FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, uploadPolicy);
             metadata = feedCreationResult.getTableDefinitionMetadata();

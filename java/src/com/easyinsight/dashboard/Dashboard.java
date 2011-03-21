@@ -6,6 +6,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.security.SecurityUtil;
@@ -164,8 +165,7 @@ public class Dashboard implements Cloneable {
         }
     }
 
-    public Dashboard cloneDashboard(Map<Long, AnalysisDefinition> reportReplacementMap, boolean changingDataSource, List<AnalysisItem> allFields,
-                                    Map<Key, Key> keyMap) throws CloneNotSupportedException {
+    public Dashboard cloneDashboard(Map<Long, AnalysisDefinition> reportReplacementMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource) throws CloneNotSupportedException {
         Dashboard dashboard = this.clone();
         dashboard.setTemporary(true);
         dashboard.setAuthorName(SecurityUtil.getUserName());
@@ -188,23 +188,13 @@ public class Dashboard implements Cloneable {
             }
         }
 
-        Map<String, Key> backupKeyMap = new HashMap<String, Key>();
-        for (Map.Entry<Key, Key> entry :  keyMap.entrySet()) {
-            backupKeyMap.put(entry.getKey().toDisplayName(), entry.getValue());
-        }
-
         for (AnalysisItem analysisItem : replacementMap.values()) {
-            Key key = keyMap.get(analysisItem.getKey());
+            Key key = dataSource.getField(analysisItem.getKey().toDisplayName());
             if (key != null) {
                 analysisItem.setKey(key);
             } else {
-                key = backupKeyMap.get(analysisItem.getKey().toDisplayName());
-                if (key == null) {
-                    Key clonedKey = analysisItem.getKey().clone();
-                    analysisItem.setKey(clonedKey);
-                } else {
-                    analysisItem.setKey(key);
-                }
+                Key clonedKey = analysisItem.getKey().clone();
+                analysisItem.setKey(clonedKey);
             }
             analysisItem.updateIDs(replacementMap);
         }

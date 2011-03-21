@@ -50,7 +50,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         return Arrays.asList(COMPANY_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, ZIP_CODE, BACKGROUND, UPDATED_AT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_NAME), true));
         analysisItems.add(new AnalysisZipCode(keys.get(ZIP_CODE), true));

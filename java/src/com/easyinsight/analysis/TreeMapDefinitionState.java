@@ -1,10 +1,7 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Key;
-
 import javax.persistence.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: James Boe
@@ -39,8 +36,8 @@ public class TreeMapDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
-        TreeMapDefinitionState treeMap = (TreeMapDefinitionState) super.clone(keyMap, allFields);
+    public AnalysisDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        TreeMapDefinitionState treeMap = (TreeMapDefinitionState) super.clone(allFields);
         treeMap.setDefinitionID(0);
         return treeMap;
     }

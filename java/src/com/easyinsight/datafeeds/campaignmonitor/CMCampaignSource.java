@@ -36,7 +36,7 @@ public class CMCampaignSource extends CampaignMonitorBaseSource {
         return Arrays.asList(CAMPAIGN_NAME, CAMPAIGN_SUBJECT, CAMPAIGN_ID, CAMPAIGN_SENT_DATE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CAMPAIGN_NAME), true));
         items.add(new AnalysisDimension(keys.get(CAMPAIGN_SUBJECT), true));

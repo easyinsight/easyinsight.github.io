@@ -192,6 +192,10 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return compiledMap.get(dimension);
     }
 
+    public GoogleAnalyticsDataSource() {
+        setFeedName("Google Analytics");
+    }
+
     @Override
     public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
         GoogleAnalyticsDataSource googleAnalyticsDataSource = (GoogleAnalyticsDataSource) super.clone(conn);
@@ -270,7 +274,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 TOTAL_EVENTS, EVENT_VALUE, UNIQUE_EVENTS);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> standardItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> adItems = new ArrayList<AnalysisItem>();

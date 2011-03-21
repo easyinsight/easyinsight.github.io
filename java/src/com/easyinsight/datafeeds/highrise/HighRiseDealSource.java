@@ -58,7 +58,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON, RESPONSIBLE_PARTY, DEAL_ID, CONTACT_ID, DESCRIPTION);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION), true));

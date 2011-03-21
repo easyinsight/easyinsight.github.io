@@ -1,13 +1,12 @@
 package com.easyinsight.solutions {
 
-import com.easyinsight.account.Account;
 import com.easyinsight.account.BasicUpgradeWindow;
 import com.easyinsight.account.UpgradeEvent;
+import com.easyinsight.administration.feed.FeedDefinitionData;
 import com.easyinsight.analysis.PromptEvent;
 import com.easyinsight.analysis.SavePromptWindow;
 import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.DataSourceConfiguredEvent;
-import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.IPerspective;
@@ -27,7 +26,6 @@ import flash.net.URLRequest;
 import flash.net.navigateToURL;
 import flash.utils.ByteArray;
 
-import mx.collections.ArrayCollection;
 import mx.controls.Alert;
 import mx.events.CloseEvent;
 import mx.events.FlexEvent;
@@ -44,8 +42,7 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
 
     private var _solution:Solution;
     private var solutionService:RemoteObject;
-    private var installResult:ArrayCollection;
-    private var _newAuth:Boolean;
+    private var installResult:FeedDefinitionData;
 
     private var _logo:Bitmap;
 
@@ -55,7 +52,7 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
         solutionService.destination = "solutionService";
         solutionService.installSolution.addEventListener(ResultEvent.RESULT, installedSolution);
         solutionService.getSolutionArchive.addEventListener(ResultEvent.RESULT, gotSolutionArchive);
-        solutionService.alreadyHasConnection.addEventListener(ResultEvent.RESULT, checkedValidity);
+        solutionService.connectionInstalled.addEventListener(ResultEvent.RESULT, checkedValidity);
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
         setStyle("borderStyle", "none");
         setStyle("borderThickness", 0);
@@ -92,14 +89,6 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
         determineInitialState();
     }
 
-    public function get newAuth():Boolean {
-        return _newAuth;
-    }
-
-    public function set newAuth(value:Boolean):void {
-        _newAuth = value;
-    }
-
     protected function customInitialState():void {
 
     }
@@ -118,69 +107,34 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
 
     private function postInstall():void {
         UserAudit.instance().audit(UserAudit.CONNECTED_TO_DATA);
-        var dataSources:int = 0;
-        var goalTrees:int = 0;
-        var reports:int = 0;
-        var items:ArrayCollection = new ArrayCollection();
-        var dataSourceItems:ArrayCollection = new ArrayCollection();
-        
-        for each (var solInstall:SolutionInstallInfo in installResult) {
-            if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE) {
-                dataSources++;
-                dataSourceItems.addItem(solInstall.descriptor);
-            } else if (solInstall.descriptor.getType() == EIDescriptor.GOAL_TREE) {
-                if (User.getInstance().getAccountType() >= Account.PRO) {
-                    goalTrees++;
-                    items.addItem(solInstall.descriptor);
-                }
-            } else if (solInstall.descriptor.getType() == EIDescriptor.REPORT) {
-                reports++;
-                items.addItem(solInstall.descriptor);
-            }
-        }
-        var dataSource:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;        
-        dispatchEvent(new AnalyzeEvent(new PostInstallSource(dataSource)));
+        var desc:DataSourceDescriptor = new DataSourceDescriptor();
+        desc.id = installResult.dataFeedID;
+        desc.name = installResult.feedName;
+        desc.dataSourceType = installResult.getFeedType();
+        dispatchEvent(new AnalyzeEvent(new PostInstallSource(desc)));
     }
 
     private function installedSolution(event:ResultEvent):void {
-        this.installResult = solutionService.installSolution.lastResult as ArrayCollection;
+        this.installResult = solutionService.installSolution.lastResult as FeedDefinitionData;
         var configuredSources:int = 0;
         for each (var solInstall:SolutionInstallInfo in installResult) {
             if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE && solInstall.requiresConfiguration) {
                 configuredSources++;
             }
         }
-        var immediate:Boolean = true;
-        for each (var solutionInstallInfo:SolutionInstallInfo in installResult) {
-            if (solutionInstallInfo.descriptor.getType() == EIDescriptor.DATA_SOURCE && solutionInstallInfo.requiresConfiguration) {
-                immediate = false;
-                var configWindow:ConfigureDataSource = new ConfigureDataSource();
-                configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
-                configWindow.onlyDataSource = configuredSources == 1;
-                configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
-                PopUpManager.addPopUp(configWindow, this, true);
-                PopUpUtil.centerPopUp(configWindow);
-            }
-        }
-        if (immediate) {
+        var configWindow:ConfigureDataSource = new ConfigureDataSource();
+        configWindow.dataSourceDefinition = installResult;
+        configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured, false, 0, true);
+        PopUpManager.addPopUp(configWindow, this, true);
+        PopUpUtil.centerPopUp(configWindow);
+        /*if (immediate) {
             postInstall();
-        }
+        }*/
         dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
     }
 
-    protected function createAccount():void {
-        var urlObject:Object = new Object();
-        urlObject.solutionID = _solution.solutionID;
-        var url:String = URLUtil.objectToString(urlObject);
-        var props:Object = new Object();
-        props["destinationURL"] = url;
-        props["requiredTier"] = _solution.solutionTier;
-        props["connectionName"] = _solution.name;
-        User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS, null, props));
-    }
-
     private function checkedValidity(event:ResultEvent):void {
-        var existingConnectionID:int = solutionService.alreadyHasConnection.lastResult as int;
+        var existingConnectionID:int = solutionService.connectionInstalled.lastResult as int;
         var renderer:SolutionDetailRenderer = this;
         if (existingConnectionID > 0) {
             var window:SavePromptWindow = new SavePromptWindow();
@@ -204,8 +158,8 @@ public class SolutionDetailRenderer extends BackgroundImage implements IPerspect
     }
 
     protected function installSolution():void {
-        ProgressAlert.alert(this, "Installing connection...", null, solutionService.alreadyHasConnection);
-        solutionService.alreadyHasConnection.send(_solution.solutionID);
+        ProgressAlert.alert(this, "Installing connection...", null, solutionService.connectionInstalled);
+        solutionService.connectionInstalled.send(_solution.solutionID);
     }
 
     public function get solution():Solution {

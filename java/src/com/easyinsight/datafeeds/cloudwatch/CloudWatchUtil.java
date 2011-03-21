@@ -5,6 +5,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.NumericValue;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.io.InputStream;
 import java.io.IOException;
@@ -40,6 +41,20 @@ public class CloudWatchUtil {
         result = result.substring(0, result.length()-2)
         + ":" + result.substring(result.length()-2);
         return result;
+    }
+
+    public static void blah(String key, String secretKey) throws InvalidKeyException, NoSuchAlgorithmException, IOException {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("Action", "ListMetrics");
+        params.put("Namespace", "AWS/EC2");
+        params.put("SignatureMethod", "HmacSHA256");
+        params.put("SignatureVersion", "2");
+        params.put("Version", "2009-05-15");
+        String url = new SignedRequestsHelper(key, secretKey).sign(params);
+        HttpClient httpClient = new HttpClient();
+        HttpMethod method = new GetMethod(url);
+        int statusCode = httpClient.executeMethod(method);
+        System.out.println(method.getResponseBodyAsString());
     }
 
     public static DataSet getDataSet(String key, String secretKey, EC2Info ec2Info, AnalysisMeasure analysisMeasure, Collection<AnalysisDimension> dimensions,
@@ -154,5 +169,9 @@ public class CloudWatchUtil {
             }
         }
         return null;
+    }
+
+    public static void main(String[] args) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+        blah("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
     }
 }

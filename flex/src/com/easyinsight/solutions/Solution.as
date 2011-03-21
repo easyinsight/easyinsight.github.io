@@ -16,24 +16,18 @@ import mx.collections.ArrayCollection;
 
 		public var solutionID:int;
 		public var name:String;
-		public var description:String;
-		public var author:String = "Easy Insight";
 		public var industry:String;
 		public var copyData:Boolean;
 		public var solutionArchiveName:String;
-        public var goalTreeID:int;
         public var installable:Boolean;
         public var solutionTier:int;
         public var image:ByteArray;
         public var accessible:Boolean;
         public var tags:ArrayCollection;
         public var category:int;
-        public var screencastName:String;
-        public var screencastDirectory:String;
-        public var footerText:String;
         public var logoLink:String;
-        public var detailPageClass:String;
-		
+        public var dataSourceType:int;
+
 		public function Solution()
 		{
 		}

@@ -51,7 +51,7 @@ public class DelayedSync extends EISlimWindow {
     public function DelayedSync() {
         uploadService = new RemoteObject();
         uploadService.destination = "userUpload";
-        uploadService.refreshData.addEventListener(ResultEvent.RESULT, refreshed);
+        uploadService.completeInstallation.addEventListener(ResultEvent.RESULT, refreshed);
         asyncService = new RemoteObject();
         asyncService.destination = "asyncService";
         asyncService.getCallData.addEventListener(ResultEvent.RESULT, gotCallData);
@@ -60,25 +60,8 @@ public class DelayedSync extends EISlimWindow {
 
     override protected function createChildren():void {
         super.createChildren();
-        var vbox:VBox = new VBox();
-        vbox.setStyle("horizontalAlign", "center");
-        progressBar = new ProgressBar();
-        progressBar.label = "";
-        progressBar.labelPlacement = "top";
-        progressBar.width = 400;
-        progressBar.indeterminate = true;
-        vbox.addChild(progressBar);
-        asyncLabel = new Label();
-        asyncLabel.maxWidth = 500;
-        asyncLabel.text = "Retrieving data from " + _dataSourceDefinition.feedName + ", this may take a few minutes...";
-        vbox.addChild(asyncLabel);
-        var button:CancelButton = new CancelButton();
-        button.label = "Cancel";
-        button.addEventListener(MouseEvent.CLICK, onCancel);
-        vbox.addChild(button);
-        addChild(vbox);
-        ProgressAlert.alert(this, "Starting to synchronize data...", null, uploadService.refreshData);
-        uploadService.refreshData.send(_dataSourceDefinition.dataFeedID);
+        ProgressAlert.alert(this, "Determining synchronization requirements...", null, uploadService.completeInstallation);
+        uploadService.completeInstallation.send(_dataSourceDefinition);
     }
 
     private function onCancel(event:MouseEvent):void {
@@ -95,9 +78,26 @@ public class DelayedSync extends EISlimWindow {
     }
 
     private function refreshed(event:ResultEvent):void {
-        var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+        var response:CredentialsResponse = uploadService.completeInstallation.lastResult as CredentialsResponse;
         if (response.successful) {
             if (response.callDataID != null) {
+                var vbox:VBox = new VBox();
+                vbox.setStyle("horizontalAlign", "center");
+                progressBar = new ProgressBar();
+                progressBar.label = "";
+                progressBar.labelPlacement = "top";
+                progressBar.width = 400;
+                progressBar.indeterminate = true;
+                vbox.addChild(progressBar);
+                asyncLabel = new Label();
+                asyncLabel.maxWidth = 500;
+                asyncLabel.text = "Retrieving data from " + _dataSourceDefinition.feedName + ", this may take a few minutes...";
+                vbox.addChild(asyncLabel);
+                var button:CancelButton = new CancelButton();
+                button.label = "Cancel";
+                button.addEventListener(MouseEvent.CLICK, onCancel);
+                vbox.addChild(button);
+                addChild(vbox);
                 callDataID = response.callDataID;
                 timer = new Timer(5000, 0);
                 timer.addEventListener(TimerEvent.TIMER, onTimer);

@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.pipeline.CleanupComponent;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.core.Key;
@@ -387,17 +388,13 @@ public class AnalysisDefinition implements Cloneable {
         }
     }
 
-    public AnalysisDefinition clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields, boolean changingDataSource) throws CloneNotSupportedException {
+    public AnalysisDefinition clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
-        analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(keyMap, allFields));
+
+        analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(allFields));
         analysisDefinition.setUrlKey(null);
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
-
-        Map<String, Key> backupKeyMap = new HashMap<String, Key>();
-        for (Map.Entry<Key, Key> entry :  keyMap.entrySet()) {
-            backupKeyMap.put(entry.getKey().toDisplayName(), entry.getValue());
-        }
 
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
 
@@ -489,17 +486,18 @@ public class AnalysisDefinition implements Cloneable {
         }
 
         for (AnalysisItem analysisItem : replacementMap.values()) {
-            Key key = keyMap.get(analysisItem.getKey());
+            Key key = null;
+            if (target != null) {
+                AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getKey().toDisplayName());
+                if (dataSourceItem != null) {
+                    key = dataSourceItem.getKey();
+                }
+            }
             if (key != null) {
                 analysisItem.setKey(key);
             } else {
-                key = backupKeyMap.get(analysisItem.getKey().toDisplayName());
-                if (key == null) {
-                    Key clonedKey = analysisItem.getKey().clone();
-                    analysisItem.setKey(clonedKey);
-                } else {
-                    analysisItem.setKey(key);
-                }
+                Key clonedKey = analysisItem.getKey().clone();
+                analysisItem.setKey(clonedKey);
             }
             analysisItem.updateIDs(replacementMap);
         }
@@ -511,7 +509,7 @@ public class AnalysisDefinition implements Cloneable {
                 joinOverride.updateIDs(replacementMap);
             }
         }
-        analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap, keyMap);
+        analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap);
         analysisDefinition.setReportStructure(clonedStructure);
         analysisDefinition.setAddedItems(addedItems);
         analysisDefinition.setUserBindings(new ArrayList<UserToAnalysisBinding>());

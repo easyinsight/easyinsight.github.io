@@ -160,7 +160,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         /*Folder base = getPort(credentials).getFields();
         return recurseItems(keys, base);*/
         throw new UnsupportedOperationException();

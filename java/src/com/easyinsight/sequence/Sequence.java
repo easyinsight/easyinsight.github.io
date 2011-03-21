@@ -47,7 +47,7 @@ public abstract class Sequence implements Cloneable {
         return sequence;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap, Map<Key, Key> keyMap) throws CloneNotSupportedException {
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) throws CloneNotSupportedException {
         setAnalysisItem(replacementMap.get(analysisItem.getAnalysisItemID()));
     }
 

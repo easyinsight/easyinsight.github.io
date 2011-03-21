@@ -43,7 +43,7 @@ public class FreshbooksPaymentSource extends FreshbooksBaseSource {
         return FeedType.FRESHBOOKS_PAYMENTS;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksPaymentSource.INVOICE_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksPaymentSource.PAYMENT_ID), true));

@@ -121,34 +121,6 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         throw new UnsupportedOperationException();
     }
 
-    public String getUsername() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setUsername(String username) {
-        throw new UnsupportedOperationException();
-    }
-
-    public String retrievePassword() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getPassword() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setPassword(String password) {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getSessionId() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setSessionId(String sessionId) {
-        throw new UnsupportedOperationException();
-    }
-
     public CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, EIConnection conn, String callDataID, Date lastRefreshTime) {
         throw new UnsupportedOperationException();
     }

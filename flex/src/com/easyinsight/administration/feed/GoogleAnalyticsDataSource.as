@@ -6,6 +6,8 @@ import com.easyinsight.customupload.GoogleAnalyticsSourceCreation;
 public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition{
 
     public var pin:String;
+    public var tokenKey:String;
+    public var tokenSecret:String;
 
     public function GoogleAnalyticsDataSource() {
         super();

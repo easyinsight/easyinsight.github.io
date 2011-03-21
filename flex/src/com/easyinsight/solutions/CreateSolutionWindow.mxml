@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="addEventListener(DataSourceSolutionEvent.DELETE_DATA_SOURCE, onDelete)">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
 
@@ -8,11 +8,8 @@
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
-        import mx.collections.ArrayCollection;
 
-        private function onDelete(event:DataSourceSolutionEvent):void {
-            includedFeeds.removeItemAt(includedFeeds.getItemIndex(event.descriptor));
-        }
+
 
         private function updateImage():void {
             if (_solution == null) {
@@ -36,9 +33,6 @@
             }
         }
 
-        [Bindable]
-        private var includedFeeds:ArrayCollection = new ArrayCollection();
-
         private var _solution:Solution;
 
         [Bindable]
@@ -49,31 +43,17 @@
         [Bindable]
         private var logoLink:String;
         [Bindable]
-        private var descriptionText:String;
-        [Bindable]
-        private var footerText:String;
-        [Bindable]
         private var includeData:Boolean;
-        [Bindable]
-        private var author:String;
         [Bindable]
         private var industry:String;
         [Bindable]
         private var tags:String;
-        [Bindable]
-        private var goalTrees:ArrayCollection;
         [Bindable]
         private var solutionTier:int;
         [Bindable]
         private var archiveName:String;
         [Bindable]
         private var solutionImage:Bitmap;
-        [Bindable]
-        private var screencastName:String;
-        [Bindable]
-        private var screencastDirectory:String;
-        [Bindable]
-        private var detailClass:String;
 
         private function onComplete(event:Event):void {
             var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
@@ -84,27 +64,22 @@
         public function set solution(solution:Solution):void {
             this._solution = solution;
             nameText = this._solution.name;
-            descriptionText = this._solution.description;
-            author = this._solution.author;
             industry = this._solution.industry;
             includeData = this._solution.copyData;
             solutionTier = this._solution.solutionTier - 1;
             logoLink = this._solution.logoLink;
             solutionCategory = this._solution.category - 1;
             archiveName = _solution.solutionArchiveName;
-            screencastName = _solution.screencastName;
-            screencastDirectory = _solution.screencastDirectory;
-            footerText = _solution.footerText;
-            detailClass = _solution.detailPageClass;
-            if (solution.solutionID > 0) {
-                solutionService.getDescriptorsForSolution.send(solution.solutionID);
-            }
+            dataSourceType = String(_solution.dataSourceType);
             if (solution.image != null) {
                 var loader:Loader = new Loader();
                 loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
                 loader.loadBytes(solution.image);
             }
         }
+
+        [Bindable]
+        private var dataSourceType:String;
 
         private function save():void {
             if (_solution == null) {
@@ -117,17 +92,12 @@
             _solution.copyData = includeDataCheckbox.selected;
             _solution.solutionTier = accountTierBox.selectedIndex + 1;
             _solution.category = solutionCategoryBox.selectedIndex + 1;
-            _solution.detailPageClass = detailClassComboBox.selectedItem as String;
-            _solution.screencastDirectory = screencastDirectoryInput.text;
-            _solution.screencastName = screencastNameInput.text;
-            var feedIDs:ArrayCollection = new ArrayCollection();
-            for each (var feedDescriptor:DataSourceDescriptor in includedFeeds) {
-                feedIDs.addItem(feedDescriptor.id);
-            }
+            _solution.dataSourceType = int(typeInput.text);
+
             if (_solution.solutionID == 0) {
-                solutionService.addSolution.send(_solution, feedIDs);
+                solutionService.addSolution.send(_solution);
             } else {
-                solutionService.updateSolution.send(_solution, feedIDs);
+                solutionService.updateSolution.send(_solution);
             }
         }
 
@@ -135,28 +105,13 @@
             PopUpManager.removePopUp(this);
         }
 
-        private function gotDescriptors():void {
-            this.includedFeeds = solutionService.getDescriptorsForSolution.lastResult as ArrayCollection;
-        }
-
         private function saveCompleted():void {
             dispatchEvent(new SolutionAdminEvent());
             PopUpManager.removePopUp(this);
         }
-
-        private function addFeed():void {
-            var window:AddFeedToSolutionWindow = AddFeedToSolutionWindow(PopUpManager.createPopUp(this, AddFeedToSolutionWindow, true));
-            window.addEventListener(FeedSelectionEvent.FEED_SELECTED, feedSelected);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function feedSelected(event:FeedSelectionEvent):void {
-            this.includedFeeds.addItem(event.feedDescriptor);
-        }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject destination="solutionService" id="solutionService">
-		<mx:method name="getDescriptorsForSolution" result="gotDescriptors()"/>
 		<mx:method name="addSolution" result="saveCompleted()"/>
 		<mx:method name="updateSolution" result="saveCompleted()"/>
 	</mx:RemoteObject>
@@ -210,48 +165,8 @@
             <mx:FormItem label="Image Link: ">
                 <mx:TextInput text="{logoLink}" id="logoLinkInput"/>
             </mx:FormItem>
-            <mx:FormItem label="Screencast Directory: ">
-                <mx:TextInput id="screencastDirectoryInput" text="{screencastDirectory}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Screencast Name: ">
-                <mx:TextInput id="screencastNameInput" text="{screencastName}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Data Sources: ">
-                <mx:VBox>
-                    <mx:Button label="Add Data Source..." click="addFeed()"/>
-                    <mx:DataGrid dataProvider="{includedFeeds}">
-                        <mx:columns>
-                            <mx:DataGridColumn headerText="Data Source Name" dataField="name"/>
-                            <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.solutions.SolutionFeedIcons"/>
-                        </mx:columns>
-                    </mx:DataGrid>
-                </mx:VBox>
-            </mx:FormItem>
-            <mx:FormItem label="Solution Detail Class: ">
-                <mx:ComboBox id="detailClassComboBox" selectedItem="{detailClass}">
-                    <mx:dataProvider>
-                        <mx:ArrayCollection>
-                            <mx:Array>
-                                <mx:String>com.easyinsight.solutions.RevisedSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.GoogleAnalyticsSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.BasecampSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.HighriseSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.FileUploadSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.GoogleSpreadsheetSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.LinkedInSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.PivotalTrackerSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.SendGridSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.MySQLSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.FreshbooksSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.CrunchbaseSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.ConstantContactSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.QuickbaseSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.ClearDBSolutionDetail</mx:String>
-                                <mx:String>com.easyinsight.solutions.BatchbookSolutionDetail</mx:String>
-                            </mx:Array>
-                        </mx:ArrayCollection>
-                    </mx:dataProvider>
-                </mx:ComboBox>
+            <mx:FormItem label="Data Source Type:">
+                <mx:TextInput id="typeInput" text="{dataSourceType}"/>
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">
                 <mx:Button label="Save" click="save()"/>

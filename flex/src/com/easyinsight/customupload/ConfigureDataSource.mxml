@@ -36,43 +36,23 @@
         private var _dataSourceID:int;
         private var _dataSourceDefinition:FeedDefinitionData;
 
-        private var _onlyDataSource:Boolean;
-
         [Bindable]
         private var ready:Boolean;
 
-        public function set onlyDataSource(value:Boolean):void {
-            _onlyDataSource = value;
-        }
-
         override protected function createChildren():void {
             super.createChildren();
-            if (_dataSourceDefinition == null) {
-                feedService.getFeedDefinition.send(_dataSourceID);
-            } else {
-                ready = true;
-                dataSourceCreation = new _dataSourceClass();
-                dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
-                var uicomp:UIComponent = dataSourceCreation as UIComponent;
-                uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
-                coreContent.addChild(dataSourceCreation as DisplayObject);
-            }
+            ready = true;
+            _dataSourceClass = IServerDataSourceDefinition(dataSourceDefinition).configClass();
+            _dataSourceID = dataSourceDefinition.dataFeedID;
+            dataSourceCreation = new _dataSourceClass();
+            dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
+            var uicomp:UIComponent = dataSourceCreation as UIComponent;
+            uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+            coreContent.addChild(dataSourceCreation as DisplayObject);
         }
 
         private function onCreation(event:FlexEvent):void {
             PopUpUtil.centerPopUp(this);
-        }
-
-        private function gotDataSource():void {
-            dataSourceDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
-            ready = true;
-            var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
-            dataSourceCreation = new configClass();
-            dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
-            var dispObject:DisplayObject = dataSourceCreation as DisplayObject;
-            dispObject.addEventListener(FlexEvent.CREATION_COMPLETE, onDataCreation, false, 0, true);
-            coreContent.addChild(dispObject);
-
         }
 
         private function onDataCreation(event:FlexEvent):void {
@@ -103,21 +83,11 @@
         private function validated():void {
             var validation:CredentialsResponse = uploadService.validateCredentials.lastResult as CredentialsResponse;
             if (validation.successful) {                
-                feedService.updateFeedDefinition.send(dataSourceDefinition);
+                uploadService.completeInstallation.send(dataSourceDefinition);
             } else {
                 ready = true;
                 progressBar.visible = false;
                 Alert.show(validation.failureMessage);
-            }
-        }
-
-        private function created():void {
-            var string:String = feedService.updateFeedDefinition.lastResult as String;
-            if (string == null) uploadService.refreshData.send(dataSourceDefinition.dataFeedID);
-            else {
-                Alert.show(string);
-                ready = true;
-                progressBar.visible = false;
             }
         }
 
@@ -167,11 +137,11 @@
         }
 
         private function onProblem(event:ProblemDataEvent):void {
-            uploadService.refreshData.send(_dataSourceID);
+            uploadService.completeInstallation.send(dataSourceDefinition);
         }
 
         private function refreshed():void {
-            var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+            var response:CredentialsResponse = uploadService.completeInstallation.lastResult as CredentialsResponse;
             if (response.successful) {
                 if (response.callDataID != null) {
                     callDataID = response.callDataID;
@@ -207,11 +177,7 @@
         ]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="validateCredentials" result="validated()"/>
-        <mx:method name="refreshData" result="refreshed()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject destination="feeds" id="feedService">
-        <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)" />
-        <mx:method name="getFeedDefinition" result="gotDataSource()"/>
+        <mx:method name="completeInstallation" result="refreshed()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="asyncService" id="asyncService">
         <mx:method name="getCallData" result="gotCallData()"/>

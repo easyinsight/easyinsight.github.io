@@ -63,10 +63,9 @@ public interface IServerDataSourceDefinition {
      * the keys parameter to retrieve keys by their constants defined in getKeys() to associate with given analysis items.
      * For example, analysisItem.setKey(keys.get(CONSTANT));
      * @param keys the keys defined in the earlier getKeys() call
-     * @param dataSet the data set retrieved by getDataSet()
      * @return the analysis items for the data source
      */
-    List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn);
+    List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn);
 
     /**
      * Any custom logic for storage of the data source. Will execute in the transactional scope of saving the data source, on

@@ -268,22 +268,23 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             allowed = true;
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
+            System.out.println("comparing " + dateValue.getDate() + " against " + endDate);
             if (mode == RollingFilterDefinition.AFTER) {
-                allowed = limitDate < dateValue.getDate().getTime();
+                allowed = limitDate <= dateValue.getDate().getTime();
             } else if (mode == RollingFilterDefinition.BEFORE) {
                 allowed = dateValue.getDate().getTime() <= endDate;
             } else {
-                allowed = limitDate < dateValue.getDate().getTime() && dateValue.getDate().getTime() <= endDate;
+                allowed = limitDate <= dateValue.getDate().getTime() && dateValue.getDate().getTime() <= endDate;
             }
         } else {
             DateValue originalValue = (DateValue) value.getOriginalValue();
             if (originalValue != null) {
                 if (mode == RollingFilterDefinition.AFTER) {
-                    allowed = limitDate < originalValue.getDate().getTime();
+                    allowed = limitDate <= originalValue.getDate().getTime();
                 } else if (mode == RollingFilterDefinition.BEFORE) {
                     allowed = originalValue.getDate().getTime() <= endDate;
                 } else {
-                    allowed = limitDate < originalValue.getDate().getTime() && originalValue.getDate().getTime() <= endDate;    
+                    allowed = limitDate <= originalValue.getDate().getTime() && originalValue.getDate().getTime() <= endDate;
                 }
             }
         }

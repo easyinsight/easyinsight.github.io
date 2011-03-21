@@ -54,7 +54,7 @@ public class UserUploadService {
         try {
             conn.setAutoCommit(false);
             FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-            List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, includeChildren, newName, 0,
+            List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, newName, 0,
                     SecurityUtil.getAccountID(), SecurityUtil.getUserName());
             conn.commit();
             return results;
@@ -737,5 +737,80 @@ public class UserUploadService {
             throw new MalformedCredentialsException();
         c.setPassword(s.substring(0, i));
         return c;
+    }
+
+    public CredentialsResponse completeInstallation(final FeedDefinition dataSource) {
+        SecurityUtil.authorizeFeed(dataSource.getDataFeedID(), Roles.OWNER);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            final IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) dataSource;
+            serverDataSourceDefinition.create(conn, null);
+            CredentialsResponse credentialsResponse = null;
+            if (SecurityUtil.getAccountTier() < dataSource.getRequiredAccountTier()) {
+                return new CredentialsResponse(false, "Your account level is no longer valid for this data source connection.", dataSource.getDataFeedID());
+            }
+            if ((dataSource.getDataSourceType() != DataSourceInfo.LIVE)) {
+                if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
+
+                } else {
+                    credentialsResponse = new CredentialsResponse(true, dataSource.getDataFeedID());
+                }
+            } else {
+                dataSource.setVisible(true);
+                feedStorage.updateDataFeedConfiguration(dataSource, conn);
+                credentialsResponse = new CredentialsResponse(true, dataSource.getDataFeedID());
+            }
+            conn.commit();
+            if (credentialsResponse == null) {
+                final String callID = ServiceUtil.instance().longRunningCall(dataSource.getDataFeedID());
+                credentialsResponse = new CredentialsResponse(true, dataSource.getDataFeedID());
+                credentialsResponse.setCallDataID(callID);
+                final String userName = SecurityUtil.getUserName();
+                final long userID = SecurityUtil.getUserID();
+                final long accountID = SecurityUtil.getAccountID();
+                final int accountType = SecurityUtil.getAccountTier();
+                final boolean accountAdmin = SecurityUtil.isAccountAdmin();
+                final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+                new Thread(new Runnable() {
+
+                    public void run() {
+                        SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, false, firstDayOfWeek);
+                        try {
+                            Date now = new Date();
+                            CredentialsResponse credentialsResponse = serverDataSourceDefinition.refreshData(SecurityUtil.getAccountID(), new Date(), null, callID, dataSource.getLastRefreshStart());
+                            if (credentialsResponse.isSuccessful() && !dataSource.isVisible()) {
+                                dataSource.setVisible(true);
+                            }
+                            dataSource.setLastRefreshStart(now);
+                            feedStorage.updateDataFeedConfiguration(dataSource);
+                            if (credentialsResponse.isSuccessful()) {
+                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE);
+                            } else {
+                                if (credentialsResponse.getReportFault() == null) {
+                                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, credentialsResponse.getFailureMessage());
+                                } else {
+                                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, credentialsResponse.getReportFault());
+                                }
+                            }
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
+                        } finally {
+                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
+                            SecurityUtil.clearThreadLocal();
+                        }
+                    }
+                }).start();
+            }
+            return credentialsResponse;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
     }
 }

@@ -37,7 +37,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
  */
 public class HighRiseCompositeSource extends CompositeServerDataSource {
 
-    private String url;
+    private String url = "";
     private boolean includeEmails;
     private boolean joinDealsToContacts;
     private boolean includeContactNotes;
@@ -46,7 +46,11 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private boolean includeCaseNotes;
     private boolean joinTasksToContacts;
     private String token;
-    private List<HighriseAdditionalToken> additionalTokens;
+    private List<HighriseAdditionalToken> additionalTokens = new ArrayList<HighriseAdditionalToken>();
+
+    public HighRiseCompositeSource() {
+        setFeedName("Highrise");
+    }
 
     public List<HighriseAdditionalToken> getAdditionalTokens() {
         return additionalTokens;
@@ -245,9 +249,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HIGHRISE_COMPANY, FeedType.HIGHRISE_TASKS, HighRiseCompanySource.COMPANY_ID,
                     HighRiseTaskSource.COMPANY_ID),
                 new ChildConnection(FeedType.HIGHRISE_CASES, FeedType.HIGHRISE_CONTACTS, HighRiseCaseSource.OWNER,
-                        HighRiseContactSource.OWNER),
+                        HighRiseContactSource.CONTACT_ID),
                 new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CONTACTS, HighRiseTaskSource.OWNER,
-                        HighRiseContactSource.OWNER),
+                        HighRiseContactSource.CONTACT_ID),
                 new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_CASES, HighRiseTaskSource.CASE_ID,
                         HighRiseCaseSource.CASE_ID),
                 new ChildConnection(FeedType.HIGHRISE_TASKS, FeedType.HIGHRISE_DEAL, HighRiseTaskSource.DEAL_ID,

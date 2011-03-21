@@ -45,6 +45,10 @@ public class SendGridDataSource extends ServerDataSourceDefinition {
     public static final String REPEAT_UNSUBSCRIBES = "Repeat Unsubscribes";
     public static final String INVALID_EMAILS = "Invalid Emails";
 
+    public SendGridDataSource() {
+        setFeedName("SendGrid");
+    }
+
     private String sgUserName;
     private String sgPassword;
 
@@ -80,7 +84,7 @@ public class SendGridDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CATEGORY), true));
         items.add(new AnalysisDateDimension(keys.get(DATE), true, AnalysisDateDimension.DAY_LEVEL));

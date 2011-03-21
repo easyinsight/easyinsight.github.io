@@ -1,9 +1,6 @@
 package com.easyinsight.datafeeds.quickbase;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DateValue;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.StringValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedStorage;
@@ -28,7 +25,11 @@ import java.util.*;
  */
 public class QuickbaseFeed extends Feed {
 
-    private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt></qdbapi>";
+    private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-20000</options></qdbapi>";
+    private static final String REQUEST_2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-20000.skp-{3}</options></qdbapi>";
+
+    private static final String REQUEST_Q = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><query>{2}</query><clist>{3}</clist><fmt>structured</fmt><options>num-20000</options></qdbapi>";
+    private static final String REQUEST_Q2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><query>{2}</query><clist>{3}</clist><fmt>structured</fmt><options>num-20000.skp-{4}</options></qdbapi>";
 
     private String databaseID;
 
@@ -56,45 +57,105 @@ public class QuickbaseFeed extends Feed {
                 map.put(fieldID, analysisItem);
                 columnBuilder.append(fieldID).append(".");
             }
-            columnBuilder.deleteCharAt(columnBuilder.length() - 1);
-            String requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, columnBuilder.toString());
-            byte[] contentBytes = requestBody.getBytes();
-            entity.setContent(new ByteArrayInputStream(contentBytes));
-            entity.setContentLength(contentBytes.length);
-            httpRequest.setEntity(entity);
-            HttpClient client = new DefaultHttpClient();
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
-
-            String string = client.execute(httpRequest, responseHandler);
-            Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
-            DataSet dataSet = new DataSet();
-            Nodes errors = doc.query("/qdbapi/errcode/text()");
-            if (errors.size() > 0) {
-                Node error = errors.get(0);
-                if (!"0".equals(error.getValue())) {
-                    String errorDetail = doc.query("/qdbapi/errdetail/text()").get(0).getValue();
-                    throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, getParentSource(conn)));
-                }
-            }
-            Nodes records = doc.query("/qdbapi/table/records/record");
-            for (int i = 0; i < records.size(); i++) {
-                Element record = (Element) records.get(i);
-                IRow row = dataSet.createRow();
-                Elements childElements = record.getChildElements();
-                for (int j = 0; j < childElements.size(); j++) {
-                    Element childElement = childElements.get(j);
-                    if (childElement.getLocalName().equals("f")) {
-                        String fieldID = childElement.getAttribute("id").getValue();
-                        AnalysisItem analysisItem = map.get(fieldID);
-                        String value = childElement.getValue();
-                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                            row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
-                        } else {
-                            row.addValue(analysisItem.createAggregateKey(), value);
-                        }
+            StringBuilder queryBuilder = new StringBuilder();
+            String query = null;
+            for (FilterDefinition filter : filters) {
+                String key = filter.getField().getKey().toBaseKey().toKeyString().split("\\.")[1];
+                if (filter instanceof FilterValueDefinition) {
+                    FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                    String value = filterValueDefinition.getFilteredValues().get(0).toString();
+                    queryBuilder.append("{'" + key + "'.CT.'" + value + "'}");
+                } else if (filter instanceof FilterDateRangeDefinition) {
+                    FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
+                    long startTime = filterDateRangeDefinition.getStartDate().getTime();
+                    long endTime = filterDateRangeDefinition.getEndDate().getTime();
+                    queryBuilder.append("{'" + key + "'.OAF.'" + startTime + "'} AND {'" + key + "'.BF.'" + endTime + "'");
+                    queryBuilder.append(" AND ");
+                } else if (filter instanceof RollingFilterDefinition) {
+                    RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
+                    Date now = insightRequestMetadata.getNow();
+                    long startTime = MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, now);
+                    long endTime = MaterializedRollingFilterDefinition.findEndDate(rollingFilterDefinition, now);
+                    long workingEndDate = endTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+                    long workingStartDate = startTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+                    if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
+                        queryBuilder.append("{'" + key + "'.BF.'" + workingEndDate + "'");
+                        queryBuilder.append(" AND ");
+                    } else if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.BEFORE) {
+                        queryBuilder.append("{'" + key + "'.OAF.'" + workingStartDate + "'}");
+                        queryBuilder.append(" AND ");
+                    } else {
+                        queryBuilder.append("{'" + key + "'.OAF.'" + workingStartDate + "'} AND {'" + key + "'.BF.'" + workingEndDate + "'");
+                        queryBuilder.append(" AND ");
                     }
                 }
             }
+            if (queryBuilder.length() > 0) {
+                query = queryBuilder.toString();
+                query = query.substring(0, query.length() - 5);
+            }
+            columnBuilder.deleteCharAt(columnBuilder.length() - 1);
+            int masterCount = 0;
+            int count;
+            DataSet dataSet = new DataSet();
+            do {
+                count = 0;
+                String requestBody;
+                if (query == null) {
+                    if (masterCount == 0) {
+                        requestBody = MessageFormat.format(REQUEST, sessionTicket, applicationToken, columnBuilder.toString());
+                    } else {
+                        requestBody = MessageFormat.format(REQUEST_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount));
+                    }
+                } else {
+                    if (masterCount == 0) {
+                        requestBody = MessageFormat.format(REQUEST_Q, sessionTicket, applicationToken, query, columnBuilder.toString());
+                    } else {
+                        requestBody = MessageFormat.format(REQUEST_Q2, sessionTicket, applicationToken, query, columnBuilder.toString(), String.valueOf(masterCount));
+                    }
+                }
+                System.out.println(requestBody);
+                byte[] contentBytes = requestBody.getBytes();
+                entity.setContent(new ByteArrayInputStream(contentBytes));
+                entity.setContentLength(contentBytes.length);
+                httpRequest.setEntity(entity);
+                HttpClient client = new DefaultHttpClient();
+                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+                String string = client.execute(httpRequest, responseHandler);
+                Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+
+                Nodes errors = doc.query("/qdbapi/errcode/text()");
+                if (errors.size() > 0) {
+                    Node error = errors.get(0);
+                    if (!"0".equals(error.getValue())) {
+                        String errorDetail = doc.query("/qdbapi/errdetail/text()").get(0).getValue();
+                        throw new ReportException(new DataSourceConnectivityReportFault(errorDetail, getParentSource(conn)));
+                    }
+                }
+
+                Nodes records = doc.query("/qdbapi/table/records/record");
+                for (int i = 0; i < records.size(); i++) {
+                    Element record = (Element) records.get(i);
+                    IRow row = dataSet.createRow();
+                    count++;
+                    masterCount++;
+                    Elements childElements = record.getChildElements();
+                    for (int j = 0; j < childElements.size(); j++) {
+                        Element childElement = childElements.get(j);
+                        if (childElement.getLocalName().equals("f")) {
+                            String fieldID = childElement.getAttribute("id").getValue();
+                            AnalysisItem analysisItem = map.get(fieldID);
+                            String value = childElement.getValue();
+                            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
+                                row.addValue(analysisItem.createAggregateKey(), new Date(Long.parseLong(value)));
+                            } else {
+                                row.addValue(analysisItem.createAggregateKey(), value);
+                            }
+                        }
+                    }
+                }
+            } while (count == 20000);
 
             return dataSet;
         } catch (ReportException re) {
@@ -103,5 +164,9 @@ public class QuickbaseFeed extends Feed {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new Date(1298937600000L));
     }
 }

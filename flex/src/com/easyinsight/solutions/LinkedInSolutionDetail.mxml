@@ -10,19 +10,7 @@
         override protected function toAccountBelowRequiredState():void {
             currentState = "AccountBelowRequired";
         }
-
-        private function install():void {
-            tokenService.getOAuthURL.send(39, solution.solutionID);
-        }
-
-        private function gotURL():void {
-            var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
-            navigateToURL(new URLRequest(response.requestToken));
-        }
         ]]></mx:Script>
-    <mx:RemoteObject destination="tokenService" id="tokenService">
-        <mx:method name="getOAuthURL" result="gotURL()"/>
-    </mx:RemoteObject>
     <mx:HBox width="1000" height="100%" backgroundColor="#FFFFFF" paddingLeft="20"
              paddingRight="20" paddingTop="20" paddingBottom="20" horizontalAlign="center">
             <mx:VBox width="900" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
