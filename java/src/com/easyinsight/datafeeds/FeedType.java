@@ -95,6 +95,13 @@ public class FeedType {
     public static final FeedType BATCHBOOK_USERS = new FeedType(87);
     public static final FeedType BATCHBOOK_TODOS = new FeedType(88);
     public static final FeedType FEDERATED = new FeedType(89);
+    public static final FeedType MYSQL = new FeedType(90);
+    public static final FeedType SQL_SERVER = new FeedType(91);
+    public static final FeedType ORACLE = new FeedType(92);
+    public static final FeedType HARVEST_COMPOSITE = new FeedType(93);
+    public static final FeedType HARVEST_CLIENT = new FeedType(94);
+    public static final FeedType HARVEST_PROJECT = new FeedType(95);
+    public static final FeedType HARVEST_TIME = new FeedType(96);
 
     private int type;
 

@@ -14,6 +14,10 @@ import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
+import com.easyinsight.datafeeds.harvest.HarvestClientSource;
+import com.easyinsight.datafeeds.harvest.HarvestCompositeSource;
+import com.easyinsight.datafeeds.harvest.HarvestProjectSource;
+import com.easyinsight.datafeeds.harvest.HarvestTimeSource;
 import com.easyinsight.datafeeds.highrise.*;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.marketo.MarketoDataSource;
@@ -115,6 +119,10 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.CAMPAIGN_MONITOR_COMPOSITE, CampaignMonitorDataSource.class);
         registerType(FeedType.CAMPAIGN_MONITOR_CLIENTS, CMClientSource.class);
         registerType(FeedType.FEDERATED, FederatedDataSource.class);
+        registerType(FeedType.HARVEST_COMPOSITE, HarvestCompositeSource.class);
+        registerType(FeedType.HARVEST_CLIENT, HarvestClientSource.class);
+        registerType(FeedType.HARVEST_PROJECT, HarvestProjectSource.class);
+        registerType(FeedType.HARVEST_TIME, HarvestTimeSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
