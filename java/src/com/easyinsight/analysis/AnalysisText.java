@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.core.Key;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,6 +27,14 @@ public class AnalysisText extends AnalysisDimension {
 
     public AnalysisText(String key, boolean group) {
         super(key, group);
+    }
+
+    public AnalysisText(Key key) {
+        super(key, true);
+    }
+
+    public AnalysisText(Key key, String displayName) {
+        super(key, displayName);
     }
 
     public boolean isHtml() {
