@@ -673,7 +673,7 @@ public class UserUploadService {
         try {
             conn.setAutoCommit(false);
             IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) feedDefinition;
-            long id = serverDataSourceDefinition.create(conn, null);
+            long id = serverDataSourceDefinition.create(conn, null, null);
             conn.commit();
             return id;
         } catch (Throwable e) {
@@ -745,7 +745,7 @@ public class UserUploadService {
         try {
             conn.setAutoCommit(false);
             final IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) dataSource;
-            serverDataSourceDefinition.create(conn, null);
+            serverDataSourceDefinition.create(conn, null, null);
             CredentialsResponse credentialsResponse = null;
             if (SecurityUtil.getAccountTier() < dataSource.getRequiredAccountTier()) {
                 return new CredentialsResponse(false, "Your account level is no longer valid for this data source connection.", dataSource.getDataFeedID());

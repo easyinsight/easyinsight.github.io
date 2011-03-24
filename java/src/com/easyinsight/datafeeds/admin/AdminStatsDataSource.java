@@ -74,13 +74,13 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(MAX_MEMORY, TOTAL_MEMORY, FREE_UNALLOCATED, FREE_MEMORY, CURRENT_MEMORY, THREAD_COUNT,
                 SYSTEM_LOAD, COMPILATION_TIME, MINOR_COLLECTION_COUNT, MINOR_COLLECTION_TIME, MAJOR_COLLECTION_COUNT,
                 MAJOR_COLLECTION_TIME, CLIENT_COUNT, SERVER, DATE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(SERVER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(DATE), true, AnalysisDateDimension.DAY_LEVEL));

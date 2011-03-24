@@ -42,7 +42,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(COUNT, COMMENT_AUTHOR, MILESTONE_ID, COMMENT_BODY, COMMENT_ID, COMMENT_CREATED_ON);
     }
 
@@ -50,7 +50,7 @@ public class BaseCampCommentsSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_COMMENTS;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(COMMENT_AUTHOR), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMMENT_ID), true));

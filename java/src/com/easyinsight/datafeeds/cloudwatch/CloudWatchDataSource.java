@@ -98,7 +98,7 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CPU_UTILIZATION, NETWORK_IN, NETWORK_OUT, DISK_WRITE_BYTES, DISK_WRITE_OPS, DISK_READ_BYTES, DISK_READ_OPS,
                 IMAGE_ID, INSTANCE_ID, GROUP_NAME, HOST_NAME, DATE);
     }
@@ -108,7 +108,7 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
         return Account.BASIC;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> standardItems = new ArrayList<AnalysisItem>();
 
         standardItems.add(new AnalysisDimension(keys.get(IMAGE_ID), "Image ID"));

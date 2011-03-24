@@ -210,7 +210,7 @@ public class CompositeFeedConnection implements Serializable {
         Key myJoinDimension = null;
         if (sourceItem == null) {
             for (AnalysisItem item : sourceFields) {
-                if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(getSourceJoin().toKeyString())) {
+                if (item.getKey().toKeyString().equals(getSourceJoin().toKeyString())) {
                     myJoinDimension = item.createAggregateKey();
                 }
             }
@@ -220,7 +220,7 @@ public class CompositeFeedConnection implements Serializable {
         Key fromJoinDimension = null;
         if (targetItem == null) {
             for (AnalysisItem item : targetFields) {
-                if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(getTargetJoin().toKeyString())) {
+                if (item.getKey().toKeyString().equals(getTargetJoin().toKeyString())) {
                     fromJoinDimension = item.createAggregateKey();
                 }
             }

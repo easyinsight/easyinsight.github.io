@@ -34,6 +34,10 @@ public class DataSet implements Serializable {
         this.rows = rows;
     }
 
+    public DataSetKeys getDataSetKeys() {
+        return dataSetKeys;
+    }
+
     public List<String> getAudits() {
         return audits;
     }

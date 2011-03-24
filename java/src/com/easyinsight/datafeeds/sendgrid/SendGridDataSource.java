@@ -78,13 +78,13 @@ public class SendGridDataSource extends ServerDataSourceDefinition {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CATEGORY, DATE, REQUESTS, BOUNCES, CLICKS, OPENS, SPAM_REPORTS, DELIVERED, UNSUBSCRIBES, INVALID_EMAILS,
                 REPEAT_BOUNCES, REPEAT_SPAM_REPORTS, REPEAT_UNSUBSCRIBES);
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CATEGORY), true));
         items.add(new AnalysisDateDimension(keys.get(DATE), true, AnalysisDateDimension.DAY_LEVEL));

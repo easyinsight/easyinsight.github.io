@@ -256,7 +256,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(BROWSER, BROWSER_VERSION, CITY, CONNECTION_SPEED, CONTINENT, COUNT_OF_VISITS, COUNTRY,
                 DATE, DAYS_SINCE_LAST_VISIT, HOSTNAME, HOUR, JAVA_ENABLED, FLASH_VERSION, LANGUAGE, LONGITUDE,
                 LATITUDE, NETWORK_DOMAIN, NETWORK_LOCATION, OPERATING_SYSTEM, OPERATING_SYSTEM_VERSION,
@@ -274,7 +274,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 TOTAL_EVENTS, EVENT_VALUE, UNIQUE_EVENTS);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> standardItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> adItems = new ArrayList<AnalysisItem>();

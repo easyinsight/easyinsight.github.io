@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.harvest;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,13 +27,13 @@ public class HarvestProjectSource extends HarvestBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         // TODO: implement
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         // TODO: implement
         throw new UnsupportedOperationException();
     }

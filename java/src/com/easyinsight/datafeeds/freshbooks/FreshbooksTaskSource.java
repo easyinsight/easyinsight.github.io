@@ -33,7 +33,7 @@ public class FreshbooksTaskSource extends FreshbooksBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(TASK_ID, NAME, DESCRIPTION, BILLABLE, RATE, COUNT);
     }
 
@@ -42,7 +42,7 @@ public class FreshbooksTaskSource extends FreshbooksBaseSource {
         return FeedType.FRESHBOOKS_TASKS;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksTaskSource.TASK_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksTaskSource.NAME), true));

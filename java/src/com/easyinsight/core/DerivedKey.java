@@ -59,6 +59,11 @@ public class DerivedKey extends Key {
         return toBaseKey().toDisplayName();
     }
 
+    @Override
+    public boolean indexed() {
+        return toBaseKey().indexed();
+    }
+
     public String toKeyString() {
         return toBaseKey().toKeyString();
     }

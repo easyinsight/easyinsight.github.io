@@ -50,13 +50,13 @@ public class BatchbookTodoSource extends BatchbookBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(TODO_ID, TODO_TITLE, TODO_DESCRIPTION, DUE_DATE, CREATED_AT, UPDATED_AT, FLAGGED, COMPLETE, ASSIGNED_BY,
                 ASSIGNED_TO, TAGS, TODO_COUNT);
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(TODO_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(TODO_TITLE), true));

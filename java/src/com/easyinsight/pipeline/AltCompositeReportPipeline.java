@@ -16,7 +16,7 @@ public class AltCompositeReportPipeline extends Pipeline {
     @Override
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems) {
         List<IComponent> components = new ArrayList<IComponent>();
-        /*for (AnalysisItem analysisItem : allNeededAnalysisItems) {
+        for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
                 if (lookupTable.getSourceField().hasType(AnalysisItemTypes.LISTING)) {
@@ -40,7 +40,7 @@ public class AltCompositeReportPipeline extends Pipeline {
         }
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
 
-        components.add(new TypeTransformComponent());*/
+        components.add(new TypeTransformComponent());
 
         return components;
     }

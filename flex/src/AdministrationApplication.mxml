@@ -11,14 +11,13 @@
                     <mx:VBox width="100%" height="100%" label="System Health">
                         <system:HealthInfoDisplay/>
                         <mx:Button label="Thread Dump" click="dumpThreads()"/>
-                        <mx:Button label="Create Data Source" click="externalSources()"/>
                         <mx:Button label="Update Zip Geocodes" click="updateZipCodes()"/>
-                        <mx:Button label="Nuke Old Data" click="nukeOldData()"/>
                         <mx:Button label="Report Admin XML" click="reportAdminXML()"/>
                         <mx:Button label="Report Test" click="reportTest()"/>
                         <mx:Button label="Global Skin" click="globalSkin()"/>
+                        <mx:Button label="Special Offer Update" click="specialOffer()"/>
                     </mx:VBox>
-                    <mx:VBox width="100%" height="100%" label="Solutions">
+                    <mx:VBox width="100%" height="100%" label="Connections">
                         <solutions:SolutionAdministration width="100%" height="100%"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Accounts">
@@ -144,10 +143,19 @@
             adminService.clearOrphanData.send();
         }
 
+        private function specialOffer():void {
+            ProgressAlert.alert(this, "Updating...", null, authAdminService.specialOffer);
+            authAdminService.specialOffer.send();
+        }
+
         private function globalSkin():void {
             var window:GlobalSkinWindow = new GlobalSkinWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
+        }
+
+        private function offered():void {
+
         }
 		]]>
     </mx:Script>
@@ -159,6 +167,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="authAdminService" destination="eiAdmin">
         <mx:method name="authenticateAdmin" result="handleAuthentication()"/>
+        <mx:method name="specialOffer" result="offered()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="threadDump"/>

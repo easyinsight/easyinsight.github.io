@@ -185,12 +185,12 @@ public class MarketoDataSource extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(LEAD_EMAIL, COUNT, LEAD_SCORE, TITLE, COMPANY, INDUSTRY, ANNUAL_REVENUE, LEAD_STATUS, LEAD_TYPE,
                 FIRST_NAME, LAST_NAME, POSTAL_CODE, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(LEAD_EMAIL), true));
         items.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.COUNT));

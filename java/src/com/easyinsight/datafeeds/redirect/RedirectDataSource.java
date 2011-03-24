@@ -52,7 +52,7 @@ public class RedirectDataSource extends FeedDefinition implements IServerDataSou
         return DataSourceInfo.LIVE;
     }
 
-    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws Exception {
+    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems, FeedDefinition parentDefinition) throws Exception {
         setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
         UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         setUploadPolicy(uploadPolicy);

@@ -5,7 +5,8 @@ import mx.events.FlexEvent;
 	[RemoteClass(alias="com.easyinsight.core.NamedKey")]
 	public class NamedKey extends Key
 	{
-		public var name:String;	
+		public var name:String;
+        public var indexed:Boolean;
 		
 		public function NamedKey()
 		{

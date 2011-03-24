@@ -56,13 +56,13 @@ public class HighRiseContactSource extends HighRiseBaseSource {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CONTACT_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, TITLE, CONTACT_ID, ZIP_CODE, BACKGROUND,
                 CONTACT_WORK_EMAIL, CONTACT_MOBILE_PHONE, CONTACT_OFFICE_PHONE, CONTACT_HOME_PHONE, CONTACT_FAX_PHONE, CONTACT_HOME_EMAIL,
                 CONTACT_STREET, CONTACT_CITY, CONTACT_STATE, CONTACT_COUNTRY);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_NAME), true));
         analysisItems.add(new AnalysisZipCode(keys.get(ZIP_CODE), true));

@@ -86,7 +86,7 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
         googleFeedDefinition.setWorksheetURL(worksheetURL);
         googleFeedDefinition.setTokenKey(tokenKey);
         googleFeedDefinition.setTokenSecret(tokenSecret);
-        return googleFeedDefinition.create(conn, analysisItems);
+        return googleFeedDefinition.create(conn, analysisItems, null);
     }
 
     @Override

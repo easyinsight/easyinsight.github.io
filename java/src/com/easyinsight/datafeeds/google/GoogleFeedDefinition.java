@@ -145,17 +145,17 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         return populateFields(createDataSet(keys));
     }
 
     @Override
-    public Map<String, Key> newDataSourceFields() {
+    public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
         Map<String, Key> keyMap = new HashMap<String, Key>();
         if (getDataFeedID() == 0) {
         } else {

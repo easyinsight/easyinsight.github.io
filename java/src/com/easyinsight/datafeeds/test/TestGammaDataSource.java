@@ -30,7 +30,7 @@ public class TestGammaDataSource extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(DIM, PROJECT_DIM, PROJECT_NAME, MEASURE);
     }
 
@@ -53,7 +53,7 @@ public class TestGammaDataSource extends ServerDataSourceDefinition {
         return dataSet;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DIM), true));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_DIM), true));

@@ -338,7 +338,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(ITEMID, CREATORNAME, CREATORID, RESPONSIBLEPARTYNAME,
                 RESPONSIBLEPARTYID, CONTENT, COMPLETED, CREATEDDATE, COMPLETEDDATE,
                 TODOLISTNAME, MILESTONENAME, DEADLINE, PROJECTNAME, PROJECTSTATUS, MILESTONE_COMPLETED_ON,
@@ -346,7 +346,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 MILESTONE_CREATED_ON, MILESTONE_OWNER, MILESTONE_OWNER, ANNOUNCEMENT, PROJECT_CREATION_DATE, MILESTONE_ID);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension itemDim = new AnalysisDimension(keys.get(ITEMID), true);
         analysisItems.add(itemDim);

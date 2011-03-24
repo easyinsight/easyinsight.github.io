@@ -198,7 +198,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             while (iter.hasNext()) {
                 AnalysisItem analysisItem = iter.next();
                 Key key = analysisItem.getKey();
-                if (key instanceof DerivedKey) {
+                if (analysisItem.isConcrete()) {
                     iter.remove();
                 }
             }
@@ -208,7 +208,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
             Map<String, List<AnalysisItem>> duplicateNameMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : analysisItemVisitor.fields) {
-                String displayName = analysisItem.getDisplayName() != null ? analysisItem.getDisplayName() : analysisItem.getKey().toKeyString();
+                String displayName = analysisItem.toDisplay();
                 AnalysisItem existing = keyMap.get(displayName);
                 if (existing == null) {
                     keyMap.put(displayName, analysisItem);

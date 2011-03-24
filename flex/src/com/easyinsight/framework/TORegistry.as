@@ -54,6 +54,7 @@ import com.easyinsight.datasources.MeetupDataSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.SendGridDataSource;
 import com.easyinsight.datasources.WholeFoodsDataSource;
+import com.easyinsight.datasources.ZendeskDataSource;
 import com.easyinsight.feedassembly.CompositeFeedConnection;
 import com.easyinsight.feedassembly.CompositeFeedNode;
 import com.easyinsight.feedassembly.FederatedDataSource;
@@ -171,6 +172,7 @@ public class TORegistry {
         var connection:CompositeFeedConnection;
         var fed:FederatedDataSource;
         var fedSource:FederationSource;
+        var zenSource:ZendeskDataSource;
         var node:CompositeFeedNode;
         var wf:WholeFoodsDataSource;
         var fault:DataSourceConnectivityReportFault;

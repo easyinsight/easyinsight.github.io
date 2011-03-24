@@ -29,11 +29,11 @@ public class CMClientSource extends CampaignMonitorBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CLIENT_NAME, CLIENT_ID, CLIENT_COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CLIENT_NAME), true));
         items.add(new AnalysisDimension(keys.get(CLIENT_ID), true));

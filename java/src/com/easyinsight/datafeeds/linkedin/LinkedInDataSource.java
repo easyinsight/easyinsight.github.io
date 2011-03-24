@@ -64,13 +64,13 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(NAME, HEADLINE, INDUSTRY, PUBLIC_PROFILE_URL, COUNT, NUMBER_CONNECTIONS, CURRENT_TITLE,
                 CURRENT_COMPANY, START_DATE);
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         URLLink nameLink = new URLLink();
         nameLink.setUrl("[Public Profile URL]");

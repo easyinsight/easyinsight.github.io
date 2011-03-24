@@ -73,6 +73,9 @@
                 case DataSourceType.CLOUD_WATCH:
                     result = new CloudWatchSolutionDetail();
                     break;
+                case DataSourceType.ZENDESK:
+                    result = new ZendeskSolutionDetail();
+                    break;
             }
             return result;
         }

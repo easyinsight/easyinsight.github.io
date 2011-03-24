@@ -553,11 +553,11 @@ public class FeedDefinition implements Cloneable, Serializable {
         return null;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         throw new UnsupportedOperationException();
     }
 
-    public Map<String, Key> newDataSourceFields() {
+    public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
         throw new UnsupportedOperationException();
     }
 

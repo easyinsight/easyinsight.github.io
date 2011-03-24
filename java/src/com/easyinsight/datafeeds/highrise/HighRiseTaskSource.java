@@ -48,11 +48,11 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(BODY, CATEGORY, DUE_AT, DONE_AT, CREATED_AT, COUNT, OWNER, AUTHOR, CASE_ID, COMPANY_ID, TASK_ID, DEAL_ID);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(BODY), true));
         analysisItems.add(new AnalysisDimension(keys.get(TASK_ID), true));

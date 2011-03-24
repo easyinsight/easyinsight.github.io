@@ -1,13 +1,10 @@
 package com.easyinsight.datafeeds.campaignmonitor;
 
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.dataset.DataSet;
 import nu.xom.Document;
 import nu.xom.Nodes;
-import nu.xom.ParsingException;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -34,7 +31,7 @@ public class CMListSource extends CampaignMonitorBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

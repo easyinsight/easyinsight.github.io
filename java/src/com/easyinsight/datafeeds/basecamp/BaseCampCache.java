@@ -46,7 +46,7 @@ public class BaseCampCache extends BaseCampBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         throw new UnsupportedOperationException();
     }
 }

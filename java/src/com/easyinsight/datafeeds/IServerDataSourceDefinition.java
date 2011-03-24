@@ -28,7 +28,7 @@ public interface IServerDataSourceDefinition {
      */
     int getRequiredAccountTier();
 
-    long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws Exception;
+    long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems, FeedDefinition parentDefinition) throws Exception;
 
     UploadPolicy getUploadPolicy();
 
@@ -65,7 +65,7 @@ public interface IServerDataSourceDefinition {
      * @param keys the keys defined in the earlier getKeys() call
      * @return the analysis items for the data source
      */
-    List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn);
+    List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition);
 
     /**
      * Any custom logic for storage of the data source. Will execute in the transactional scope of saving the data source, on
@@ -82,7 +82,7 @@ public interface IServerDataSourceDefinition {
      */
     void customLoad(Connection conn) throws SQLException;
 
-    Map<String, Key> newDataSourceFields();
+    Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition);
 
     CredentialsResponse refreshData(long accountID, Date now, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime);
 

@@ -75,7 +75,7 @@ public class CCContactSource extends ConstantContactBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CONTACT_NAME, CONTACT_STATUS, CONTACT_EMAIL, CONTACT_FIRST_NAME, CONTACT_LAST_NAME,
                 CONTACT_JOB_TITLE, CONTACT_COMPANY, CONTACT_HOME_PHONE, CONTACT_WORK_PHONE, CONTACT_CITY,
                 CONTACT_STATE, CONTACT_COUNTRY, CONTACT_POSTAL, CONTACT_NOTE, CONTACT_COUNT, CONTACT_URL,
@@ -87,7 +87,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                 CONTACT_CUSTOM_FIELD17, CONTACT_CUSTOM_FIELD18, CONTACT_CREATED_ON);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CONTACT_NAME), true));
         items.add(new AnalysisDimension(keys.get(CONTACT_STATUS), true));

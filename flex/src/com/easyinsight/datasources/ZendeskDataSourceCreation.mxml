@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var usernameInputText:String;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new ZendeskDataSource();
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
+            usernameInputText = ds.zdUserName;
+            url = ds.url;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:ZendeskDataSource = feedDefinition as ZendeskDataSource;
+            ds.zdUserName = userNameInput.text;
+            ds.zdPassword = passwordInput.text;
+            ds.url = urlInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Zendesk Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+		</mx:FormItem>
+        <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.zendesk.com&quot;" fontSize="10"/>
+		<mx:FormItem label="Zendesk Email: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Zendesk Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:VBox>

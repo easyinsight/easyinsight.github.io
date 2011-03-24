@@ -30,7 +30,7 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(DIM, TODO_DIM, PROJECT_DIM, MEASURE);
     }
 
@@ -53,7 +53,7 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
         return dataSet;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DIM), true));
         analysisItems.add(new AnalysisDimension(keys.get(TODO_DIM), true));

@@ -279,14 +279,14 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(PROJECT_ID, PROJECT_NAME, PROJECT_INITIAL_VELOCITY, PROJECT_CURRENT_VELOCITY, PROJECT_LABELS,
                 ITERATION_ID, ITERATION_START_DATE, ITERATION_FINISH_DATE, ITERATION_NUMBER, ITERATION_STATE, STORY_NAME,
                 STORY_REQUESTED_BY, STORY_OWNED_BY, STORY_STATE, STORY_ESTIMATE, STORY_LABELS, STORY_CREATED_AT, STORY_TYPE,
                 STORY_UPDATED_AT, STORY_ACCEPTED_AT, STORY_URL, STORY_COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_ID), true));
         analysisItems.add(new AnalysisMeasure(keys.get(PROJECT_INITIAL_VELOCITY), AggregationTypes.AVERAGE));

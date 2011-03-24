@@ -46,11 +46,11 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CASE_NAME, CASE_ID, OWNER, CREATED_AT, COUNT, AUTHOR, CLOSED_AT, TAGS, UPDATED_AT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();        
         analysisItems.add(new AnalysisDimension(keys.get(CASE_NAME), true));
         analysisItems.add(new AnalysisList(keys.get(CASE_ID), false, ","));

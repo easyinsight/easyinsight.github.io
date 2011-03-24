@@ -53,11 +53,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
     }
 
-    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws Exception {
+    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems, FeedDefinition parentDefinition) throws Exception {
         DataStorage metadata = null;
         try {
-            Map<String, Key> keys = newDataSourceFields();
-            setFields(createAnalysisItems(keys, conn));
+            Map<String, Key> keys = newDataSourceFields(parentDefinition);
+            setFields(createAnalysisItems(keys, conn, parentDefinition));
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
             setUploadPolicy(uploadPolicy);
@@ -105,14 +105,15 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     /**
      * The names of the fields used in this data source
      * @return the key names
+     * @param parentDefinition
      */
     @NotNull
-    protected abstract List<String> getKeys();
+    protected abstract List<String> getKeys(FeedDefinition parentDefinition);
 
-    public Map<String, Key> newDataSourceFields() {
+    public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
         Map<String, Key> keyMap = new HashMap<String, Key>();
         if (getFields().size() == 0) {
-            List<String> keys = getKeys();
+            List<String> keys = getKeys(parentDefinition);
             for (String key : keys) {
                 keyMap.put(key, new NamedKey(key));
             }
@@ -165,13 +166,13 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime) throws Exception {
         DataStorage dataStorage = null;
         try {
-            Map<String, Key> keys = newDataSourceFields();
+            Map<String, Key> keys = newDataSourceFields(parentDefinition);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
             if (clearsData()) {
                 dataStorage.truncate(); 
             }
-            DataSet dataSet = getDataSet(newDataSourceFields(), now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
+            DataSet dataSet = getDataSet(newDataSourceFields(parentDefinition), now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
             //List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             //int version = dataStorage.getVersion();
             //int newVersion = dataStorage.migrate(getFields(), items);

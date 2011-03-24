@@ -42,7 +42,7 @@ public class BaseCampTimeTest extends TestCase {
 
         EIConnection conn = Database.instance().getConnection();
         try {
-            DataSet dataSet = ds.getDataSet(ds.newDataSourceFields(), new Date(), comp, null, conn, null, null);
+            DataSet dataSet = ds.getDataSet(ds.newDataSourceFields(null), new Date(), comp, null, conn, null, null);
             dataSet.toString();
         } catch (ReportException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

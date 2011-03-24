@@ -44,12 +44,12 @@ public class BatchbookCompanySource extends BatchbookBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(COMPANY_ID, NAME, TAGS, COMPANY_CREATED_AT, COMPANY_UPDATED_AT, COMPANY_COUNT);
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(NAME), true));

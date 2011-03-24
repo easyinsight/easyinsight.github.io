@@ -35,7 +35,7 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(TIME_ENTRY_ID, STAFF_ID, PROJECT_ID, TASK_ID, HOURS, DATE, NOTES, COUNT);
     }
 
@@ -45,7 +45,7 @@ public class FreshbooksTimeEntrySource extends FreshbooksBaseSource {
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys,
-                                                  Connection conn) {
+                                                  Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksTimeEntrySource.TIME_ENTRY_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksTimeEntrySource.STAFF_ID), true));

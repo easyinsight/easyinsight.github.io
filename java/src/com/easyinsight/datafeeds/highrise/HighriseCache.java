@@ -44,7 +44,7 @@ public class HighriseCache extends HighRiseBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

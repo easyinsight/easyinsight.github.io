@@ -39,7 +39,7 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     protected Soap service;
 
     @Override
-    public Map<String, Key> newDataSourceFields() {
+    public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
         /*try {
             Map<String, Key> keys = new HashMap<String, Key>();
             if(service == null || sessionHeader == null)
@@ -88,7 +88,7 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         /*try {
             if(sessionHeader == null)
                 login(credentials);
@@ -194,7 +194,7 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return new ArrayList<String>();
     }
 

@@ -123,7 +123,7 @@ public class MeetupDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(STATE), true));
         items.add(new AnalysisDimension(keys.get(NAME), true));
@@ -149,7 +149,7 @@ public class MeetupDataSource extends ServerDataSourceDefinition {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(STATE, JOINED, LATITUDE, LONGITUDE, NAME, ID, VISITED, CITY, LINK, COUNT);
     }
 }

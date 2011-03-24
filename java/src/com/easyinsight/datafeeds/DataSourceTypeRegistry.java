@@ -32,6 +32,7 @@ import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
 import com.easyinsight.datafeeds.wholefoods.WholeFoodsSource;
+import com.easyinsight.datafeeds.zendesk.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,6 +124,12 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HARVEST_CLIENT, HarvestClientSource.class);
         registerType(FeedType.HARVEST_PROJECT, HarvestProjectSource.class);
         registerType(FeedType.HARVEST_TIME, HarvestTimeSource.class);
+        registerType(FeedType.ZENDESK_COMPOSITE, ZendeskCompositeSource.class);
+        registerType(FeedType.ZENDESK_GROUP, ZendeskGroupSource.class);
+        registerType(FeedType.ZENDESK_USER, ZendeskUserSource.class);
+        registerType(FeedType.ZENDESK_ORGANIZATION, ZendeskOrganizationSource.class);
+        registerType(FeedType.ZENDESK_TICKET, ZendeskTicketSource.class);
+        registerType(FeedType.ZENDESK_GROUP_TO_USER, ZendeskGroupToUserJoinSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

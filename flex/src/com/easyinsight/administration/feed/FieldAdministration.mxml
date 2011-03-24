@@ -81,7 +81,7 @@
                 return DerivedGroupingWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                 return HierarchyWindow;
-            }  else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                 return DerivedDateWindow;
             } else {
                 return null;
@@ -97,10 +97,15 @@
             event.previousItemWrapper.analysisItem = event.analysisItem;
             event.previousItemWrapper.displayName = event.analysisItem.display;
             event.previousItemWrapper.invalidateItem();
-            availableFields.removeItemAt(availableFields.getItemIndex(event.previousItemWrapper));
-            availableFields.addItem(event.previousItemWrapper);
+            var index:int = fieldHierarchy.getItemIndex(event.previousItemWrapper);
+            if (index != -1) {
+                fieldHierarchy.removeItemAt(index);
+                fieldHierarchy.addItem(event.previousItemWrapper);
+            }
+
             dispatchEvent(new AnalysisChangedEvent());
             allFields.dispatchEvent(new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
+            fieldHierarchy.dispatchEvent(new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
         }
 
         private function toFocus(analysisItem:AnalysisItem, handler:Function, wrapper:AnalysisItemWrapper = null):void {
@@ -126,7 +131,7 @@
         }
 
         private function onDelete(event:AnalysisItemDeleteEvent):void {
-            removeFieldFromTree(event.analysisItem, availableFields);
+            removeFieldFromTree(event.analysisItem, fieldHierarchy);
             allFields.removeItemAt(allFields.getItemIndex(event.analysisItem));
         }
 
@@ -173,7 +178,7 @@
 
         public function getFolders(fields:ArrayCollection):ArrayCollection {
             var folders:ArrayCollection = new ArrayCollection();
-            for each (var wrapper:AnalysisItemWrapper in availableFields) {
+            for each (var wrapper:AnalysisItemWrapper in fieldHierarchy) {
                 var node:FeedNode = wrapper.feedNode;
                 var folder:FeedFolder = convertNode(node, fields);
                 if (folder != null) {
@@ -211,24 +216,25 @@
             super.commitProperties();
             try {
                 if (_feedDefinition != null) {
-                    availableFields = new ArrayCollection();
+                    var hierarchy:ArrayCollection = new ArrayCollection();
                     allFields = new ArrayCollection();
                     var masterItemList:ArrayCollection = new ArrayCollection(_feedDefinition.fields.toArray());
                     for each (var folder:FeedFolder in _feedDefinition.folders) {
                         var folderNode:FeedNode = convertFolder(folder, masterItemList);
                         var folderWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(folderNode);
-                        availableFields.addItem(folderWrapper);
+                        hierarchy.addItem(folderWrapper);
                     }
                     for each (var item:AnalysisItem in masterItemList) {
                         var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(convertAnalysisItem(item, null));
-                        availableFields.addItem(analysisWrapper);
+                        hierarchy.addItem(analysisWrapper);
                     }
                     var sort:Sort = new Sort();
                     sort.fields = [ new SortField("sortType"), new SortField("displayName") ];
-                    availableFields.sort = sort;
-                    availableFields.refresh();
+                    hierarchy.sort = sort;
+                    hierarchy.refresh();
+                    fieldHierarchy = hierarchy;
                     //availableFields.sort = null;
-                    populateAllFields(availableFields, allFields);
+                    populateAllFields(fieldHierarchy, allFields);
                     loaded = true;
                 }
             } catch(e:Error) {
@@ -244,14 +250,6 @@
                     populateAllFields(wrapper.children, toPopulate);
                 }
             }
-        }
-
-        public function createFields():ArrayCollection {
-            var fields:ArrayCollection = new ArrayCollection();
-            for each (var wrapper:AnalysisItemWrapper in allFields) {
-                fields.addItem(wrapper.analysisItem);
-            }
-            return fields;
         }
 
         private function findName(baseName:String):Key {
@@ -284,7 +282,7 @@
             var aNode:AnalysisItemNode = new AnalysisItemNode();
             aNode.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-            availableFields.addItem(wrapper);
+            fieldHierarchy.addItem(wrapper);
             allFields.addItem(wrapper);
             dispatchEvent(new AnalysisChangedEvent());
         }
@@ -325,13 +323,12 @@
         }
 
         [Bindable]
-        private var availableFields:ArrayCollection;
+        private var fieldHierarchy:ArrayCollection;
 
         private function iconFunction(item:Object):Class {
             var wrapper:AnalysisItemWrapper = item as AnalysisItemWrapper;
             return AnalysisItemTypeRenderer.getImageClass(wrapper);
         }
-
         ]]></mx:Script>
     <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory"/>
         <mx:VBox height="100%" width="100%" horizontalAlign="center" paddingTop="5">
@@ -352,7 +349,7 @@
                          alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
                          showHeaders="false">
                 <mx:dataProvider>
-                    <mx:HierarchicalData source="{availableFields}"/>
+                    <mx:HierarchicalData source="{fieldHierarchy}"/>
                 </mx:dataProvider>
                 <mx:columns>
                     <mx:AdvancedDataGridColumn headerText="" dataField="displayName" width="500"/>

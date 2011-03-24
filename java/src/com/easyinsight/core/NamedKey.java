@@ -17,6 +17,9 @@ public class NamedKey extends Key {
     @Column(name="name")
     private String name;
 
+    @Column(name="indexed")
+    private boolean indexed;
+
     public NamedKey() {
     }
 
@@ -26,6 +29,14 @@ public class NamedKey extends Key {
 
     public boolean hasDataSource(long dataSourceID) {
         return false;
+    }
+
+    public boolean isIndexed() {
+        return indexed;
+    }
+
+    public void setIndexed(boolean indexed) {
+        this.indexed = indexed;
     }
 
     public String getName() {
@@ -48,6 +59,11 @@ public class NamedKey extends Key {
 
     public String toDisplayName() {
         return name;
+    }
+
+    @Override
+    public boolean indexed() {
+        return indexed;
     }
 
     public String toKeyString() {

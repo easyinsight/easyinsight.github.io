@@ -58,7 +58,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return getChildConnections();
     }
 
-    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems) throws Exception {
+    public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems, FeedDefinition parentDefinition) throws Exception {
         setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
         UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         setUploadPolicy(uploadPolicy);
@@ -129,9 +129,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         try {
             FeedDefinition feedDefinition = (FeedDefinition) definition;
             feedDefinition.setVisible(false);
-            Map<String, Key> keys = feedDefinition.newDataSourceFields();
+            Map<String, Key> keys = feedDefinition.newDataSourceFields(this);
             DataSet dataSet = new DataSet();
-            List<AnalysisItem> fields = feedDefinition.createAnalysisItems(keys, conn);
+            List<AnalysisItem> fields = feedDefinition.createAnalysisItems(keys, conn, this);
             feedDefinition.setFields(fields);
             for (AnalysisItem field : fields) {
                 if (field.getFolder() != null) {

@@ -41,7 +41,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(FIRST_NAME, LAST_NAME, NAME, USERNAME, PRIMARY_STREET1, PRIMARY_STREET2, CITY,
                 STATE, POSTAL, COUNTRY, ORGANIZATION, WORK_PHONE, COUNT, CLIENT_ID, EMAIL);
     }
@@ -51,7 +51,7 @@ public class FreshbooksClientSource extends FreshbooksBaseSource {
         return FeedType.FRESHBOOKS_CLIENTS;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.FIRST_NAME), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksClientSource.EMAIL), true));

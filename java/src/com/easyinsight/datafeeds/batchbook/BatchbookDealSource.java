@@ -49,13 +49,13 @@ public class BatchbookDealSource extends BatchbookBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(DEAL_ID, DEAL_TITLE, STATUS, ASSIGNED_TO, AMOUNT, TAGS, DEAL_CREATED_AT, DEAL_UPDATED_AT, DEAL_COUNT, DEAL_WITH_ID,
                 DEAL_DESCRIPTION);
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_ID), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEAL_TITLE), true));

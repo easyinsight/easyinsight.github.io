@@ -41,14 +41,23 @@ public class FederatedFeed extends Feed {
                         }
                     }
                 }
+                Map<FilterDefinition, AnalysisItem> backMap = new HashMap<FilterDefinition, AnalysisItem>();
                 for (FilterDefinition filter : filters) {
                     for (AnalysisItem field : feed.getDataSource().getFields()) {
                         if (field.toDisplay().equals(filter.getField().toDisplay())) {
+                            backMap.put(filter, filter.getField());
                             filter.setField(field);
                         }
                     }
                 }
                 DataSet childSet = feed.getAggregateDataSet(childAnalysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
+
+                for (FilterDefinition filter : filters) {
+                    AnalysisItem field = backMap.get(filter);
+                    if (field != null) {
+                        filter.setField(field);
+                    }
+                }
 
                 for (IRow row : childSet.getRows()) {
                     IRow newRow = dataSet.createRow();

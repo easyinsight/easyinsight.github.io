@@ -72,11 +72,11 @@ public class BaseCampCompanySource extends BaseCampBaseSource {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(COMPANY_ID, COMPANY_NAME);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension companyID = new AnalysisDimension(keys.get(COMPANY_ID), true);
         analysisItems.add(companyID);

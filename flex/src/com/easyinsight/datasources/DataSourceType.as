@@ -40,6 +40,7 @@ public class DataSourceType {
     public static const MYSQL:int = 90;
     public static const SQL_SERVER:int = 91;
     public static const ORACLE:int = 92;
+    public static const ZENDESK:int = 97;
 
     public static const OWNER:int = 1;
     public static const EDITOR:int = 2;

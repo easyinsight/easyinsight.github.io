@@ -34,7 +34,7 @@ public class FreshbooksEstimateSource extends FreshbooksBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(ESTIMATE_ID, CLIENT_ID, AMOUNT, NUMBER, TERMS, NOTES, COUNT);
     }
 
@@ -43,7 +43,7 @@ public class FreshbooksEstimateSource extends FreshbooksBaseSource {
         return FeedType.FRESHBOOKS_ESTIMATES;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.ESTIMATE_ID), true));
         items.add(new AnalysisDimension(keys.get(FreshbooksEstimateSource.NUMBER), true));

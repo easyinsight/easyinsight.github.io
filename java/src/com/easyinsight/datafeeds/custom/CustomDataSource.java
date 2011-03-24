@@ -111,12 +111,12 @@ public class CustomDataSource extends ServerDataSourceDefinition {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return new ArrayList<String>();
     }
 
     @Override
-    public Map<String, Key> newDataSourceFields() {
+    public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
         /*Map<String, Key> fieldMap = new HashMap<String, Key>();
         Folder folder = getPort(credentials).getFields();
         List<String> keys = recurseFields(folder);
@@ -160,7 +160,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         /*Folder base = getPort(credentials).getFields();
         return recurseItems(keys, base);*/
         throw new UnsupportedOperationException();

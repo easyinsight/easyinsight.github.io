@@ -34,12 +34,12 @@ public class CCCampaignSource extends ConstantContactBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CAMPAIGN_NAME, CAMPAIGN_ID, CAMPAIGN_STATUS, CAMPAIGN_DATE, CAMPAIGN_COUNT,
                 CAMPAIGN_URL);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CAMPAIGN_NAME), true));
         items.add(new AnalysisDimension(keys.get(CAMPAIGN_ID), true));

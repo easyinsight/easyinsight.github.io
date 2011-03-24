@@ -63,7 +63,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         if (qbUserName != null && qbPassword != null) {
             String requestBody = MessageFormat.format(AUTHENTICATE_XML, qbUserName, qbPassword);
-            Document doc = executeRequest("www.quickbase.com", null, "API_Authenticate", requestBody);
+            Document doc = executeRequest(host, null, "API_Authenticate", requestBody);
             String errorCode = doc.query("/qdbapi/errcode/text()").get(0).getValue();
             if ("0".equals(errorCode)) {
                 sessionTicket = doc.query("/qdbapi/ticket/text()").get(0).getValue();
@@ -105,7 +105,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
     public String validateCredentials() {
         try {
             String requestBody = MessageFormat.format(AUTHENTICATE_XML, qbUserName, qbPassword);
-            Document doc = executeRequest("www.quickbase.com", null, "API_Authenticate", requestBody);
+            Document doc = executeRequest(host, null, "API_Authenticate", requestBody);
             String errorCode = doc.query("/qdbapi/errcode/text()").get(0).getValue();
             if ("0".equals(errorCode)) {
                 return null;
@@ -152,8 +152,9 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         return FeedType.QUICKBASE_COMPOSITE;
     }
 
+    @Override
     public int getDataSourceType() {
-        return DataSourceInfo.LIVE;
+        return DataSourceInfo.COMPOSITE_PULL;
     }
 
     @Override

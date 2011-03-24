@@ -166,11 +166,11 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
     }
 
     @NotNull
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTNAME, PROJECTID, COUNT, TODOID, DATE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension projectDim = new AnalysisDimension(keys.get(PROJECTID), true);
         projectDim.setHidden(true);

@@ -49,7 +49,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList( STORE, DATE, REGION, DOLLAR_SALES, STORE_ID, LAST_YEAR_SALES, UNITS,
                 LAST_YEAR_UNITS_SOLD, ITEM, ITEM_SKU, ARP, QUANTITY, QUANTITY_UOM );
     }
@@ -75,7 +75,7 @@ public class WholeFoodsSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         
         items.add(new AnalysisDimension(keys.get(STORE), true));

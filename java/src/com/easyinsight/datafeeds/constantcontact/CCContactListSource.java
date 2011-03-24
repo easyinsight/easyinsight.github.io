@@ -33,12 +33,12 @@ public class CCContactListSource extends ConstantContactBaseSource {
 
     @NotNull
     @Override
-    protected List<String> getKeys() {
+    protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CONTACT_LIST_NAME, CONTACT_LIST_SHORT_NAME, CONTACT_LIST_URL, CONTACT_LIST_COUNT, CONTACT_LIST_ID,
                 CONTACT_LIST_UPDATED_ON);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisDimension(keys.get(CONTACT_LIST_NAME), true));
         items.add(new AnalysisDimension(keys.get(CONTACT_LIST_SHORT_NAME), true));
