@@ -108,8 +108,6 @@ public class FeedType {
     public static final FeedType ZENDESK_TICKET = new FeedType(100);
     public static final FeedType ZENDESK_GROUP = new FeedType(101);
     public static final FeedType ZENDESK_GROUP_TO_USER = new FeedType(102);
-    public static final FeedType QUICKBASE_INDEX_COMPOSITE = new FeedType(103);
-    public static final FeedType QUICKBASE_INDEX = new FeedType(104);
 
     private int type;
 
