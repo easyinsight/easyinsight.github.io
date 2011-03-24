@@ -467,7 +467,7 @@ public class GoogleDataProvider {
             }
             String label = field.query("label/text()").get(0).getValue();
             Nodes mastagNodes = field.query("mastag/text()");
-            if (unique || mastagNodes.size() > 0 || "text".equals(fieldType) || "checkbox".equals(fieldType) || "phone".equals(fieldType) ||
+            if ("MO Store".equals(label) || unique || mastagNodes.size() > 0 || "text".equals(fieldType) || "checkbox".equals(fieldType) || "phone".equals(fieldType) ||
                     "userid".equals(fieldType)) {
                 items.add(new AnalysisDimension(namedKey, label));
             } else if ("recordid".equals(fieldType)) {
