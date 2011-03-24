@@ -18,7 +18,7 @@ public class ZendeskTest {
     public static void main(String[] args) throws Exception {
         HttpClient client = new HttpClient();
         client.getParams().setAuthenticationPreemptive(true);
-        Credentials defaultcreds = new UsernamePasswordCredentials("jboe@easy-insight.com", "e1ernity");
+        Credentials defaultcreds = new UsernamePasswordCredentials("jboe@easy-insight.com", "");
         client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
         //HttpMethod restMethod = new GetMethod("http://easyinsight.zendesk.com/search.xml?query=\"type:ticket updated>2011-02-01\"");
         /*String queryString = URLEncoder.encode("\"type:ticket updated>2011-02-01\"", "UTF-8");
