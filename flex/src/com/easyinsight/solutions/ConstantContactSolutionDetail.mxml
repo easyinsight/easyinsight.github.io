@@ -51,7 +51,7 @@
             </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="120"
-                         text="Take advantage of Easy Insight to extend your Constant Contact reporting capabilities to the next level of visibility and analysis. Keep a pulse on the health of your marketing campaigns through KPIs of contact acquisitions and conversion rates. Easily apply custom filters to analyze data by campaign, geography, custom fields, or any of the other fields in Constant Contact. View data as lists, charte, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."
+                         text="Take advantage of Easy Insight to extend your Constant Contact reporting capabilities to the next level of visibility and analysis. Keep a pulse on the health of your marketing campaigns through KPIs of contact acquisitions and conversion rates. Easily apply custom filters to analyze data by campaign, geography, custom fields, or any of the other fields in Constant Contact. View data as lists, charts, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."
                          fontSize="14"/>
 
         </mx:VBox>
