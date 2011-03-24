@@ -177,6 +177,8 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         }
                     }
                 }
+                dataStorage.insertData(dataSet);
+                dataSet = new DataSet();
             } while (count == 20000);
 
             System.out.println("our set size = " + dataSet.getRows().size());
@@ -189,7 +191,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 dataSet.getDataSetKeys().replaceKey(analysisItem.createAggregateKey(), analysisItem.getKey());
             }
             System.out.println("after aggregation, size = " + dataSet.getRows().size());
-            return dataSet;
+            return null;
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
