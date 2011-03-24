@@ -177,20 +177,19 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         }
                     }
                 }
+                System.out.println("our set size = " + dataSet.getRows().size());
+                Pipeline pipeline = new CompositeReportPipeline();
+                WSListDefinition analysisDefinition = new WSListDefinition();
+                analysisDefinition.setColumns(new ArrayList<AnalysisItem>(map.values()));
+                pipeline.setup(analysisDefinition, FeedRegistry.instance().getFeed(getDataFeedID(), conn), new InsightRequestMetadata());
+                dataSet = pipeline.toDataSet(dataSet);
+                System.out.println("after aggregation, size = " + dataSet.getRows().size());
+                for (AnalysisItem analysisItem : map.values()) {
+                    dataSet.getDataSetKeys().replaceKey(analysisItem.createAggregateKey(), analysisItem.getKey());
+                }
                 dataStorage.insertData(dataSet);
                 dataSet = new DataSet();
             } while (count == 20000);
-
-            System.out.println("our set size = " + dataSet.getRows().size());
-            Pipeline pipeline = new CompositeReportPipeline();
-            WSListDefinition analysisDefinition = new WSListDefinition();
-            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(map.values()));
-            pipeline.setup(analysisDefinition, FeedRegistry.instance().getFeed(getDataFeedID(), conn), new InsightRequestMetadata());
-            dataSet = pipeline.toDataSet(dataSet);
-            for (AnalysisItem analysisItem : map.values()) {
-                dataSet.getDataSetKeys().replaceKey(analysisItem.createAggregateKey(), analysisItem.getKey());
-            }
-            System.out.println("after aggregation, size = " + dataSet.getRows().size());
             return null;
         } catch (ReportException re) {
             throw re;
