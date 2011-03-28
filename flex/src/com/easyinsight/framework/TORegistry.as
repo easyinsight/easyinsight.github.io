@@ -47,6 +47,7 @@ import com.easyinsight.datasources.BatchbookDataSource;
 import com.easyinsight.datasources.CloudWatchDataSource;
 import com.easyinsight.datasources.ConstantContactDataSource;
 import com.easyinsight.datasources.FreshbooksDataSource;
+import com.easyinsight.datasources.HarvestDataSource;
 import com.easyinsight.datasources.HighRiseDataSource;
 import com.easyinsight.datasources.HighriseAdditionalToken;
 import com.easyinsight.datasources.LinkedInDataSource;
@@ -193,6 +194,7 @@ public class TORegistry {
         var dsd:DataSourceDescriptor;
         var sKPIData:SolutionKPIData;
         var qb:QuickbaseResponse;
+        var harvestDS:HarvestDataSource;
     }
 }
 }

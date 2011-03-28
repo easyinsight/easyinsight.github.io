@@ -160,7 +160,6 @@ public class DataSourceFactory {
             xmlBuilder.append("</fields>");
             xmlBuilder.append("</defineDataSource>");
             String xml = xmlBuilder.toString();
-            System.out.println(xml);
             Document document = InternalUtil.sendXML(xml, key, secretKey, "defineDataSource");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
             Map<String, String> results = new HashMap<String, String>();

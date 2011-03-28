@@ -108,8 +108,14 @@ public class FeedType {
     public static final FeedType ZENDESK_TICKET = new FeedType(100);
     public static final FeedType ZENDESK_GROUP = new FeedType(101);
     public static final FeedType ZENDESK_GROUP_TO_USER = new FeedType(102);
+    public static final FeedType HARVEST_CONTACTS = new FeedType(103);
+    public static final FeedType HARVEST_TASKS = new FeedType(104);
+    public static final FeedType HARVEST_TASK_ASSIGNMENTS = new FeedType(105);
+    public static final FeedType HARVEST_USERS = new FeedType(106);
 
     private int type;
+
+
 
     public FeedType() {
     }

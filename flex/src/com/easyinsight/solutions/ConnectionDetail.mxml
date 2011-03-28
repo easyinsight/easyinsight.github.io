@@ -73,11 +73,15 @@
                 case DataSourceType.CLOUD_WATCH:
                     result = new CloudWatchSolutionDetail();
                     break;
+                case DataSourceType.HARVEST_COMPOSITE:
+                    result = new HarvestSolutionDetail();
+                    break;
                 case DataSourceType.ZENDESK:
                     result = new ZendeskSolutionDetail();
                     break;
             }
             return result;
+            var p:SalesforceSolutionDetail;
         }
 
         public function gotFocus():void {

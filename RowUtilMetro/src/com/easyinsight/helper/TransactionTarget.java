@@ -42,7 +42,6 @@ public class TransactionTarget {
             xmlBuilder.append(replaceData ? "replace" : "add");
             xmlBuilder.append("</operation>");
             xmlBuilder.append("</beginTransaction>");
-            System.out.println(xmlBuilder.toString());
             Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "beginTransaction");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
             Map<String, String> results = new HashMap<String, String>();
@@ -115,7 +114,6 @@ public class TransactionTarget {
                 xmlBuilder.append(row.toXML());
             }
             xmlBuilder.append("</rows>");
-            System.out.println(xmlBuilder.toString());
             Document document = InternalUtil.sendXML(xmlBuilder.toString(), apiKey, apiSecretKey, "loadRows");
             NodeList children = document.getChildNodes().item(0).getChildNodes();
             Map<String, String> results = new HashMap<String, String>();

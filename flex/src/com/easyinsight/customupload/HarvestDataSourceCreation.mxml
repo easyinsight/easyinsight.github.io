@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.BaseCampDataSource;
+        import com.easyinsight.datasources.HarvestDataSource;
+
+        [Bindable]
+        private var url:String;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:HarvestDataSource = new HarvestDataSource();
+            obj.url = urlInput.text;
+            return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:HarvestDataSource = feedDefinition as HarvestDataSource;
+            url = ds.url;
+        }
+
+        public function get savesCredentials():Boolean {
+            return true;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:HarvestDataSource = feedDefinition as HarvestDataSource;
+            ds.url = urlInput.text;
+            ds.username = userNameInput.text;
+            ds.password = passwordInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Harvest Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+		</mx:FormItem>
+        <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.harvestapp.com&quot;" fontSize="10"/>
+		<mx:FormItem label="Username: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
+		</mx:FormItem>
+        <mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+            <mx:TextInput id="passwordInput" fontWeight="normal" fontFamily="Lucida Grande"
+                          width="350" displayAsPassword="true" />
+        </mx:FormItem>
+        <mx:FormItem label="You can find the token on your Basecamp page under My Info - API Token." fontSize="10"/>
+
+	</mx:Form>
+</mx:HBox>
