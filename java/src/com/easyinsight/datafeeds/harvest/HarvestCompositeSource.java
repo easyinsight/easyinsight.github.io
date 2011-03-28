@@ -153,7 +153,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement statement = conn. ("select url, username, password from HARVEST where data_feed_id = ?");
+        PreparedStatement statement = conn.prepareStatement("select url, username, password from HARVEST where data_feed_id = ?");
         statement.setLong(1, getDataFeedID());
         ResultSet rs = statement.executeQuery();
         if(rs.next()) {
