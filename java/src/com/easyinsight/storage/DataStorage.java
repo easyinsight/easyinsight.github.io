@@ -792,21 +792,9 @@ public class DataStorage {
             i = where.setValue(updateStmt, i);
         }
         updateStmt.executeUpdate();
+        updateStmt.close();
         dataSet.mergeWheres(wheres);
         insertData(dataSet);
-        for (IRow row : dataSet.getRows()) {
-            /*int i = 1;
-            for (KeyMetadata keyMetadata : updateKeys) {
-                i = setValue(updateStmt, row, i, keyMetadata);
-            }
-            for (IWhere where : wheres) {
-                i = where.setValue(updateStmt, i);
-            }
-
-            int rows = updateStmt.executeUpdate();
-            if (rows == 0) {*/
-            //}
-        }
     }
 
     private int setValue(PreparedStatement insertStmt, IRow row, int i, KeyMetadata keyMetadata) throws SQLException {

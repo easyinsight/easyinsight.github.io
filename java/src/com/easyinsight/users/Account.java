@@ -126,6 +126,10 @@ public class Account {
     @Column(name="date_format")
     private int dateFormat;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="external_login_id")
+    private ExternalLogin externalLogin;
+
     @Column(name="currency_symbol")
     private String currencySymbol = "$";
 
@@ -161,6 +165,14 @@ public class Account {
 
     public void setCurrencySymbol(String currencySymbol) {
         this.currencySymbol = currencySymbol;
+    }
+
+    public ExternalLogin getExternalLogin() {
+        return externalLogin;
+    }
+
+    public void setExternalLogin(ExternalLogin externalLogin) {
+        this.externalLogin = externalLogin;
     }
 
     public boolean isManualInvoicing() {

@@ -10,18 +10,14 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -70,12 +66,12 @@ public class HighRiseContactNotesSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_CONTACT_NOTES;
     }
 
+    protected boolean clearsData() {
+        return false;
+    }
+
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
-
-        String url = highRiseCompositeSource.getUrl();
-
-        DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 
         DataSet ds = new DataSet();
         if (!highRiseCompositeSource.isIncludeContactNotes()) {
@@ -83,84 +79,53 @@ public class HighRiseContactNotesSource extends HighRiseBaseSource {
         }
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         HttpClient client = getHttpClient(token.getTokenValue(), "");
-        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
-        Builder builder = new Builder();
+
         try {
-            HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
-            int offset = 0;
-            int contactCount;
-            do {
-                Document companies;
-                if (offset == 0) {
-                    companies = runRestRequest("/people.xml?", client, builder, url, true, false, parentDefinition);
-                } else {
-                    companies = runRestRequest("/people.xml?n=" + offset, client, builder, url, true, false, parentDefinition);
-                }
-                Nodes companyNodes = companies.query("/people/person");
-                loadingProgress(0, 1, "Synchronizing with contact notes...", callDataID);
-                contactCount = 0;
-                for (int i = 0; i < companyNodes.size(); i++) {
-                    Node companyNode = companyNodes.get(i);
-                    String id = queryField(companyNode, "id/text()");
+            Date date;
+            if (lastRefreshDate == null) {
+                date = new Date(0);
+            } else {
+                date = lastRefreshDate;
+            }
+            HighriseRecordingsCache highriseRecordingsCache = highRiseCompositeSource.getOrCreateRecordingsCache(client, date);
 
-                    int notesOffset = 0;
-                    int notesCount;
-                    do {
-                        Document notes;
-                        if (notesOffset == 0) {
-                            notes = runRestRequest("/people/" + id + "/notes.xml", client, builder, highRiseCompositeSource.getUrl(), false, false, parentDefinition);
-                        } else {
-                            notes = runRestRequest("/people/" + id + "/notes.xml?n=" + notesOffset, client, builder, highRiseCompositeSource.getUrl(), false, false, parentDefinition);
-                        }
-                        Nodes noteNodes = notes.query("/notes/note");
-                        notesCount = 0;
-                        for (int j = 0; j < noteNodes.size(); j++) {
-                            Node noteNode = noteNodes.get(j);
-                            String noteID = queryField(noteNode, "id/text()");
-                            String body = queryField(noteNode, "body/text()");
-                            String authorID = queryField(noteNode, "author-id/text()");
-                            String createdAtString = queryField(noteNode, "created-at");
-                            String updatedAtString = queryField(noteNode, "updated-at");
-                            Date createdAt = deadlineFormat.parse(createdAtString);
-                            Date updatedAt = null;
-                            if (updatedAtString != null) {
-                                updatedAt = deadlineFormat.parse(updatedAtString);
-                            }
-                            IRow row = ds.createRow();
-                            row.addValue(BODY, body);
-                            row.addValue(NOTE_ID, noteID);
-                            row.addValue(NOTE_AUTHOR, highriseCache.getUserName(authorID));
-                            row.addValue(NOTE_CREATED_AT, new DateValue(createdAt));
-                            row.addValue(NOTE_UPDATED_AT, new DateValue(updatedAt));
-                            row.addValue(NOTE_CONTACT_ID, id);
-                            row.addValue(COUNT, 1);
+            List<Recording> recordings = highriseRecordingsCache.getContactNotes();
 
-                            notesCount++;
-                        }
-                        notesOffset += 25;
-                    } while (notesCount == 25);
-                    contactCount++;
+            Key noteKey = parentDefinition.getField(NOTE_ID).toBaseKey();
+
+            if (lastRefreshDate == null) {
+                for (Recording recording : recordings) {
+                    IRow row = ds.createRow();
+                    recordingToRow(recording, row);
                 }
-                offset += 500;
-                if (writeDuring) {
-                    dataStorage.insertData(ds);
+            } else {
+                for (Recording recording : recordings) {
                     ds = new DataSet();
+                    IRow row = ds.createRow();
+                    recordingToRow(recording, row);
+                    StringWhere userWhere = new StringWhere(noteKey, recording.getId());
+                    dataStorage.updateData(ds, Arrays.asList((IWhere) userWhere));
+                    ds = null;
                 }
-            } while(contactCount == 500);
+            }
+
 
         } catch (ReportException re) {
             throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        if (!writeDuring) {
-            if (parentDefinition.isAdjustDates()) {
-                ds = adjustDates(ds);
-            }
-            return ds;
-        } else {
-            return null;
-        }
+        return ds;
+    }
+
+    private void recordingToRow(Recording recording, IRow row) {
+        row.addValue(BODY, recording.getBody());
+        row.addValue(NOTE_ID, recording.getId());
+        row.addValue(NOTE_AUTHOR, recording.getAuthor());
+        row.addValue(NOTE_CREATED_AT, new DateValue(recording.getCreatedAt()));
+        row.addValue(NOTE_UPDATED_AT, new DateValue(recording.getUpdatedAt()));
+        row.addValue(NOTE_CONTACT_ID, recording.getSubjectID());
+        row.addValue(COUNT, 1);
     }
 
     @Override

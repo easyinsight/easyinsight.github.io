@@ -12,6 +12,8 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -19,6 +21,7 @@ import nu.xom.Nodes;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -51,6 +54,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     public static final String SUBMITTER = "Submitter";
     public static final String SUBJECT = "Subject";
     public static final String TICKET_TYPE = "Request Type";
+    public static final String TICKET_ID = "Ticket ID";
     public static final String UPDATED_AT = "Ticket Updated At";
     public static final String VIA = "Ticket Submitted Via";
     public static final String SCORE = "Score";
@@ -70,7 +74,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         List<String> baseKeys = new ArrayList<String>(Arrays.asList(ASSIGNED_AT, ASSIGNEE, BASE_SCORE, CREATED_AT, TAGS, DESCRIPTION,
                 DUE_DATE, GROUP_ID, INITIALLY_ASSIGNED_AT, ORGANIZATION_ID, PRIORITY, REQUESTER, RESOLUTION_TIME,
-                SOLVED_AT, STATUS, STATUS_UPDATED_AT, SUBMITTER, SUBJECT, TICKET_TYPE, UPDATED_AT, SCORE, VIA, COUNT));
+                SOLVED_AT, STATUS, STATUS_UPDATED_AT, SUBMITTER, SUBJECT, TICKET_TYPE, UPDATED_AT, SCORE, VIA, COUNT, TICKET_ID));
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             Document fields = runRestRequest(zendeskCompositeSource, getHttpClient(zendeskCompositeSource.getZdUserName(),
@@ -101,6 +105,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         items.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         items.add(new AnalysisDimension(keys.get(ASSIGNEE), true));
         items.add(new AnalysisText(keys.get(DESCRIPTION)));
+        items.add(new AnalysisList(keys.get(TAGS), true, ","));
         items.add(new AnalysisDimension(keys.get(GROUP_ID), true));
         items.add(new AnalysisDimension(keys.get(VIA), true));
         items.add(new AnalysisDimension(keys.get(ORGANIZATION_ID), true));
@@ -110,6 +115,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         items.add(new AnalysisDimension(keys.get(SUBMITTER), true));
         items.add(new AnalysisDimension(keys.get(SUBJECT), true));
         items.add(new AnalysisDimension(keys.get(TICKET_TYPE), true));
+        items.add(new AnalysisDimension(keys.get(TICKET_ID), true));
         items.add(new AnalysisMeasure(keys.get(BASE_SCORE), AggregationTypes.SUM));
         items.add(new AnalysisMeasure(keys.get(SCORE), AggregationTypes.SUM));
         items.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
@@ -148,7 +154,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             if (lastRefreshDate == null) {
                 return getAllTickets(keys, (ZendeskCompositeSource) parentDefinition);
             } else {
-                return getAllTickets(keys, (ZendeskCompositeSource) parentDefinition);
+                getUpdatedTickets(keys, (ZendeskCompositeSource) parentDefinition, lastRefreshDate, dataStorage);
+                return null;
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -171,6 +178,46 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return userName;
     }
 
+    @Override
+    protected boolean clearsData() {
+        return false;
+    }
+
+    private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, DataStorage dataStorage) throws Exception {
+
+        HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
+        Builder builder = new Builder();
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
+        DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(lastUpdateDate);
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        String updateDate = updateFormat.format(cal.getTime());
+        Map<String, String> userCache = new HashMap<String, String>();
+        Key noteKey = zendeskCompositeSource.getField(TICKET_ID).toBaseKey();
+        boolean moreData;
+        int page = 1;
+        do {
+            String path = "/search.xml?query=" + URLEncoder.encode("\"type:ticket updated>"+updateDate+"\"", "UTF-8");
+            if (page > 1) {
+                path += "&page=" + page;
+            }
+            Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
+            Nodes ticketNodes = doc.query("/records/record");
+            moreData = ticketNodes.size() == 15;
+            for (int i = 0; i < ticketNodes.size(); i++) {
+                DataSet dataSet = new DataSet();
+                IRow row = dataSet.createRow();
+                Node ticketNode = ticketNodes.get(i);
+                String id = parseTicket(keys, zendeskCompositeSource, httpClient, dateFormat, userCache, row, ticketNode);
+                StringWhere userWhere = new StringWhere(noteKey, id);
+                dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
+            }
+            page++;
+        } while (moreData);
+    }
+
     private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource) throws InterruptedException, ParseException {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(zendeskCompositeSource.getZdUserName(), zendeskCompositeSource.getZdPassword());
@@ -185,6 +232,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             if (page > 1) {
                 path += "&page=" + page;
             }
+
             Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
             Nodes ticketNodes = doc.query("/records/record");
             moreData = ticketNodes.size() == 15;
@@ -198,23 +246,35 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return dataSet;
     }
 
-    private void parseTicket(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, HttpClient httpClient, DateFormat dateFormat, Map<String, String> userCache, IRow row, Node ticketNode) throws ParseException, InterruptedException {
-        row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned-at/text()", dateFormat));
+    private String parseTicket(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, HttpClient httpClient, DateFormat dateFormat, Map<String, String> userCache, IRow row, Node ticketNode) throws ParseException, InterruptedException {
+        row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned-at/text()"));
         row.addValue(keys.get(ASSIGNEE), queryUser(ticketNode, "assignee-id/text()", userCache, zendeskCompositeSource, httpClient));
         row.addValue(keys.get(BASE_SCORE), queryField(ticketNode, "base-score/text()"));
         row.addValue(keys.get(SCORE), queryField(ticketNode, "score/text()"));
         row.addValue(keys.get(COUNT), 1);
-        row.addValue(keys.get(CREATED_AT), queryDate(ticketNode, "created-at/text()", dateFormat));
+        row.addValue(keys.get(CREATED_AT), queryDate(ticketNode, "created-at/text()"));
         row.addValue(keys.get(DESCRIPTION), queryField(ticketNode, "description/text()"));
-        row.addValue(keys.get(DUE_DATE), queryDate(ticketNode, "due-date/text()", dateFormat));
-        row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution-time/text()", dateFormat));
-        row.addValue(keys.get(SOLVED_AT), queryDate(ticketNode, "solved-at/text()", dateFormat));
-        row.addValue(keys.get(UPDATED_AT), queryDate(ticketNode, "updated-at/text()", dateFormat));
+        row.addValue(keys.get(DUE_DATE), queryDate(ticketNode, "due-date/text()"));
+        row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution-time/text()"));
+        row.addValue(keys.get(SOLVED_AT), queryDate(ticketNode, "solved-at/text()"));
+        row.addValue(keys.get(UPDATED_AT), queryDate(ticketNode, "updated-at/text()"));
         row.addValue(keys.get(GROUP_ID), queryField(ticketNode, "group-id/text()"));
         row.addValue(keys.get(SUBJECT), queryField(ticketNode, "subject/text()"));
         row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization-id/text()"));
+        String id = queryField(ticketNode, "nice-id/text()");
+        row.addValue(keys.get(TICKET_ID), id);
         row.addValue(keys.get(REQUESTER), queryUser(ticketNode, "requester-id/text()", userCache, zendeskCompositeSource, httpClient));
         row.addValue(keys.get(SUBMITTER), queryUser(ticketNode, "submitter-id/text()", userCache, zendeskCompositeSource, httpClient));
+        String tags = queryField(ticketNode, "current-tags/text()");
+        if (tags != null) {
+            String[] tagElements = tags.split(" ");
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String tag : tagElements) {
+                stringBuilder.append(tag).append(",");
+            }
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            row.addValue(keys.get(TAGS), stringBuilder.toString());
+        }
 
         Nodes customFieldEntries = ticketNode.query("ticket-field-entries/ticket-field-entry");
         for (int i = 0; i < customFieldEntries.size(); i++) {
@@ -296,6 +356,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         } else if (viaID == 30) {
             row.addValue(keys.get(VIA), "Twitter public message");
         }
+
+        return id;
     }
 
     protected Value queryUser(Node node, String target, Map<String, String> userCache, ZendeskCompositeSource zendeskCompositeSource, HttpClient client) throws InterruptedException {
@@ -306,7 +368,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return new EmptyValue();
     }
 
-    protected Value queryDate(Node node, String target, DateFormat dateFormat) throws ParseException {
+    protected Value queryDate(Node node, String target) throws ParseException {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
             return new DateValue(javax.xml.bind.DatatypeConverter.parseDateTime(value).getTime());

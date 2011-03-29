@@ -12,6 +12,7 @@ import com.easyinsight.security.SecurityUtil;
 
 import com.easyinsight.users.Account;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -47,6 +48,26 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private boolean joinTasksToContacts;
     private String token;
     private List<HighriseAdditionalToken> additionalTokens = new ArrayList<HighriseAdditionalToken>();
+
+    @Override
+    public void beforeSave(EIConnection conn) throws SQLException {
+        super.beforeSave(conn);
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT INCLUDE_CASE_NOTES, INCLUDE_COMPANY_NOTES, INCLUDE_CONTACT_NOTES," +
+                "INCLUDE_DEAL_NOTES, INCLUDE_EMAILS FROM HIGHRISE WHERE FEED_ID = ?");
+        queryStmt.setLong(1, getDataFeedID());
+        ResultSet rs = queryStmt.executeQuery();
+        if (rs.next()) {
+            boolean cases = rs.getBoolean(1);
+            boolean companies = rs.getBoolean(2);
+            boolean contacts = rs.getBoolean(3);
+            boolean deals = rs.getBoolean(4);
+            boolean emails = rs.getBoolean(5);
+            if (cases != includeCaseNotes || companies != includeCompanyNotes || deals != includeDealNotes ||
+                    contacts != includeContactNotes || emails != includeEmails) {
+                setLastRefreshStart(null);
+            }
+        }
+    }
 
     public HighRiseCompositeSource() {
         setFeedName("Highrise");
@@ -117,6 +138,8 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     }
 
     private transient HighriseCache highriseCache;
+    private transient HighriseRecordingsCache highriseRecordingsCache;
+    private transient HighriseCompanyCache highriseCompanyCache;
 
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
@@ -128,6 +151,22 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             highriseCache.populateCaches(httpClient, getUrl(), this);
         }
         return highriseCache;
+    }
+
+    public HighriseRecordingsCache getOrCreateRecordingsCache(HttpClient httpClient, Date date) throws HighRiseLoginException, ParsingException, ParseException {
+        if (highriseRecordingsCache == null) {
+            highriseRecordingsCache = new HighriseRecordingsCache();
+            highriseRecordingsCache.populateCaches(httpClient, getUrl(), this, date, getOrCreateCache(httpClient), getOrCreateCompanyCache(httpClient, date).getCompanyIDs());
+        }
+        return highriseRecordingsCache;
+    }
+
+    public HighriseCompanyCache getOrCreateCompanyCache(HttpClient httpClient, Date date) throws HighRiseLoginException, ParsingException, ParseException {
+        if (highriseCompanyCache == null) {
+            highriseCompanyCache = new HighriseCompanyCache();
+            highriseCompanyCache.populateCaches(httpClient, getUrl(), this, date, getOrCreateCache(httpClient));
+        }
+        return highriseCompanyCache;
     }
 
     @Override
@@ -504,4 +543,6 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         }
         return false;
     }
+
+
 }

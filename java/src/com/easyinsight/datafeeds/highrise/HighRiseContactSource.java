@@ -121,7 +121,14 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     Node companyNode = companyNodes.get(i);
                     String firstName = queryField(companyNode, "first-name/text()");
                     String lastName = queryField(companyNode, "last-name/text()");
-                    String name = firstName + " " + lastName;
+                    String name;
+                    if (firstName == null) {
+                        name = lastName;
+                    } else if (lastName == null) {
+                        name = firstName;
+                    } else {
+                        name = firstName + " " + lastName;
+                    }
                     String title = queryField(companyNode, "title/text()");
 
                     row.addValue(TITLE, title);

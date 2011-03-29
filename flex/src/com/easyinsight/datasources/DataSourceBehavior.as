@@ -22,6 +22,7 @@ public class DataSourceBehavior {
             case DataSourceType.CONSTANT_CONTACT:
             case DataSourceType.BATCHBOOK:
             case DataSourceType.CAMPAIGN_MONITOR:
+            case DataSourceType.ZENDESK:
                 return true;
         }
         return false;

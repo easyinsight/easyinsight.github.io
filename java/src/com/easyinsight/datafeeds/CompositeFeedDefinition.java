@@ -49,7 +49,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return FeedType.COMPOSITE;
     }
 
-    public void beforeSave(EIConnection conn) {
+    public void beforeSave(EIConnection conn) throws SQLException {
         populateFields(conn);    
     }
 

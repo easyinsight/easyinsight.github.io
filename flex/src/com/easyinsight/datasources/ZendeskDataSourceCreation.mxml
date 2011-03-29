@@ -38,10 +38,10 @@
 		</mx:FormItem>
         <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.zendesk.com&quot;" fontSize="10"/>
 		<mx:FormItem label="Zendesk Email: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>
 		</mx:FormItem>
 		<mx:FormItem label="Zendesk Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
+			<mx:TextInput id="passwordInput" displayAsPassword="true" width="350"/>
 		</mx:FormItem>
 	</mx:Form>
 </mx:VBox>

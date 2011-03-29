@@ -652,7 +652,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return false;
     }
 
-    public void beforeSave(EIConnection conn) {
+    public void beforeSave(EIConnection conn) throws SQLException {
 
     }
 

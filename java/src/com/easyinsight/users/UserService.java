@@ -1063,7 +1063,7 @@ public class UserService {
             results = session.createQuery("from User where userName = ?").setString(0, userName).list();
             if (results.size() > 0) {
                 User user = (User) results.get(0);
-                userServiceResponse = getUser(password, session, user, conn);
+                userServiceResponse = getUser(password, session, user, conn, userName);
                 if (rememberMe) {
                     String sessionCookie = RandomTextGenerator.generateText(30);
                     PreparedStatement saveCookieStmt = conn.prepareStatement("INSERT INTO USER_SESSION (USER_ID, SESSION_NUMBER," +
@@ -1080,7 +1080,7 @@ public class UserService {
                 results = session.createQuery("from User where email = ?").setString(0, userName).list();
                 if (results.size() > 0) {
                     User user = (User) results.get(0);
-                    userServiceResponse = getUser(password, session, user, conn);
+                    userServiceResponse = getUser(password, session, user, conn, userName);
                     if (rememberMe) {
                         String sessionCookie = RandomTextGenerator.generateText(30);
                         //user.setSessionCookie(sessionCookie);
@@ -1105,14 +1105,66 @@ public class UserService {
         return userServiceResponse;
     }
 
-    private UserServiceResponse getUser(String password, Session session, User user, EIConnection conn) throws SQLException {
+    public ExternalLogin determineSSO() {
+        SecurityUtil.authorizeAccountAdmin();
+        ExternalLogin externalLogin;
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            externalLogin = account.getExternalLogin();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return externalLogin;
+    }
+
+    public void establishSSO(ExternalLogin externalLogin) {
+        SecurityUtil.authorizeAccountAdmin();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            account.setExternalLogin(externalLogin);
+            session.update(account);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    private UserServiceResponse getUser(String password, Session session, User user, EIConnection conn, String userName) throws SQLException {
         UserServiceResponse userServiceResponse;
         String actualPassword = user.getPassword();
         String encryptedPassword = PasswordService.getInstance().encrypt(password, user.getHashSalt(), user.getHashType());
+        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+        Account account = (Account) accountResults.get(0);
         if (encryptedPassword.equals(actualPassword)) {
-            List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-            Account account = (Account) accountResults.get(0);
-
+            if (user.getPersonaID() != null) {
+                user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
+            }
+            userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
+                    (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()),
+                    user.getAccount().getAccountState(), user.getUiSettings(), user.getFirstName(),
+                    !account.isUpgraded(), !user.isInitialSetupDone(), user.getLastLoginDate(), account.getName(),
+                    user.getPersonaID(), account.getDateFormat(), account.isDefaultReportSharing(), true, user.isGuestUser(), account.getCurrencySymbol(),
+                    ApplicationSkinSettings.retrieveSkin(user.getUserID(), session, user.getAccount().getAccountID()), account.getFirstDayOfWeek(),
+                    user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
+            user.setLastLoginDate(new Date());
+            session.update(user);
+        } else if (account.getExternalLogin() != null) {
+            String result = account.getExternalLogin().login(userName, password);
+            if (result == null) {
                 if (user.getPersonaID() != null) {
                     user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                 }
@@ -1126,8 +1178,9 @@ public class UserService {
                         user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail());
                 user.setLastLoginDate(new Date());
                 session.update(user);
-
-            // FlexContext.getFlexSession().getRemoteCredentials();
+            } else {
+                userServiceResponse = new UserServiceResponse(false, result);
+            }
         } else {
             userServiceResponse = new UserServiceResponse(false, "We didn't recognize the username or password you entered.");
         }

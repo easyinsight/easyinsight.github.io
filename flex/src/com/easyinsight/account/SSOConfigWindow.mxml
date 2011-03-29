@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="userService.determineSSO.send()">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private function addLogin():void {
+            var login:ExternalLogin = null;
+            if (index == 1) {
+                login = new QuickbaseExternalLogin();
+                QuickbaseExternalLogin(login).hostName = hostNameInput.text;
+            }
+            userService.establishSSO.send(login);
+        }
+
+        private function addedLogin():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onChange(event:Event):void {
+            index = int(typeGroup.selectedValue);
+        }
+
+        [Bindable]
+        private var hostName:String = "www.quickbase.com";
+
+        private function determinedSSO():void {
+            var login:ExternalLogin = userService.determineSSO.lastResult as ExternalLogin;
+            if (login is QuickbaseExternalLogin) {
+                var qbLogin:QuickbaseExternalLogin = login as QuickbaseExternalLogin;
+                hostName = qbLogin.hostName;
+                index = 1;
+                value = "1";
+            }
+        }
+
+        [Bindable]
+        private var value:String = "0";
+
+        [Bindable]
+        private var index:int;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+        <mx:method name="establishSSO" result="addedLogin()"/>
+        <mx:method name="determineSSO" result="determinedSSO()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:HBox>
+            <mx:RadioButtonGroup id="typeGroup" change="onChange(event)" selectedValue="{value}"/>
+            <mx:RadioButton groupName="typeGroup" label="None" value="0"/>
+            <mx:RadioButton groupName="typeGroup" label="Quickbase" value="1"/>
+        </mx:HBox>
+        <mx:ViewStack resizeToContent="true" selectedIndex="{index}">
+            <mx:VBox>
+            </mx:VBox>
+            <mx:VBox>
+                <mx:Form>
+                    <mx:FormItem label="Host Name:">
+                        <mx:TextInput id="hostNameInput" text="{hostName}" width="300"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+        </mx:ViewStack>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Save" click="addLogin()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>

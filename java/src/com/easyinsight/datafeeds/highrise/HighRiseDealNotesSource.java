@@ -10,6 +10,8 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.Builder;
@@ -66,74 +68,66 @@ public class HighRiseDealNotesSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_DEAL_NOTES;
     }
 
+    protected boolean clearsData() {
+        return false;
+    }
+
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
 
-        String url = highRiseCompositeSource.getUrl();
-
-        DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
-
         DataSet ds = new DataSet();
-        if (!highRiseCompositeSource.isIncludeDealNotes()) {
+        if (!highRiseCompositeSource.isIncludeContactNotes()) {
             return ds;
         }
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         HttpClient client = getHttpClient(token.getTokenValue(), "");
-        Builder builder = new Builder();
-        try {
-            HighriseCache highriseCache = highRiseCompositeSource.getOrCreateCache(client);
-            Document companies = runRestRequest("/deals.xml", client, builder, url, true, false, parentDefinition);
-            Nodes caseNodes = companies.query("/deals/deal");
-            loadingProgress(0, 1, "Synchronizing with deal notes...", callDataID);
-            for (int i = 0; i < caseNodes.size(); i++) {
-                Node caseNode = caseNodes.get(i);
-                String id = queryField(caseNode, "id/text()");
-                int notesOffset = 0;
-                int notesCount;
-                do {
-                    Document notes;
-                    if (notesOffset == 0) {
-                        notes = runRestRequest("/deals/" + id + "/notes.xml", client, builder, highRiseCompositeSource.getUrl(), false, false, parentDefinition);
-                    } else {
-                        notes = runRestRequest("/deals/" + id + "/notes.xml?n=" + notesOffset, client, builder, highRiseCompositeSource.getUrl(), false, false, parentDefinition);
-                    }
-                    Nodes noteNodes = notes.query("/notes/note");
-                    notesCount = 0;
-                    for (int j = 0; j < noteNodes.size(); j++) {
-                        Node noteNode = noteNodes.get(j);
-                        String noteID = queryField(noteNode, "id/text()");
-                        String body = queryField(noteNode, "body/text()");
-                        String authorID = queryField(noteNode, "author-id/text()");
-                        String createdAtString = queryField(noteNode, "created-at");
-                        String updatedAtString = queryField(noteNode, "updated-at");
-                        Date createdAt = deadlineFormat.parse(createdAtString);
-                        Date updatedAt = null;
-                        if (updatedAtString != null) {
-                            updatedAt = deadlineFormat.parse(updatedAtString);
-                        }
-                        IRow row = ds.createRow();
-                        row.addValue(BODY, body);
-                        row.addValue(NOTE_ID, noteID);
-                        row.addValue(NOTE_AUTHOR, highriseCache.getUserName(authorID));
-                        row.addValue(NOTE_CREATED_AT, new DateValue(createdAt));
-                        row.addValue(NOTE_UPDATED_AT, new DateValue(updatedAt));
-                        row.addValue(NOTE_DEAL_ID, id);
-                        row.addValue(COUNT, 1);
 
-                        notesCount++;
-                    }
-                    notesOffset += 25;
-                } while (notesCount == 25);
+        try {
+            Date date;
+            if (lastRefreshDate == null) {
+                date = new Date(0);
+            } else {
+                date = lastRefreshDate;
             }
+            HighriseRecordingsCache highriseRecordingsCache = highRiseCompositeSource.getOrCreateRecordingsCache(client, date);
+
+            List<Recording> recordings = highriseRecordingsCache.getDealNotes();
+
+            Key noteKey = parentDefinition.getField(NOTE_ID).toBaseKey();
+
+            if (lastRefreshDate == null) {
+                for (Recording recording : recordings) {
+                    IRow row = ds.createRow();
+                    recordingToRow(recording, row);
+                }
+            } else {
+                for (Recording recording : recordings) {
+                    ds = new DataSet();
+                    IRow row = ds.createRow();
+                    recordingToRow(recording, row);
+                    StringWhere userWhere = new StringWhere(noteKey, recording.getId());
+                    dataStorage.updateData(ds, Arrays.asList((IWhere) userWhere));
+                    ds = null;
+                }
+            }
+
+
         } catch (ReportException re) {
             throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        if (parentDefinition.isAdjustDates()) {
-            ds = adjustDates(ds);
-        }
         return ds;
+    }
+
+    private void recordingToRow(Recording recording, IRow row) {
+        row.addValue(BODY, recording.getBody());
+        row.addValue(NOTE_ID, recording.getId());
+        row.addValue(NOTE_AUTHOR, recording.getAuthor());
+        row.addValue(NOTE_CREATED_AT, new DateValue(recording.getCreatedAt()));
+        row.addValue(NOTE_UPDATED_AT, new DateValue(recording.getUpdatedAt()));
+        row.addValue(NOTE_DEAL_ID, recording.getSubjectID());
+        row.addValue(COUNT, 1);
     }
 
     @Override
