@@ -134,22 +134,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
         return _controlBar;
     }
 
-    private var _obfuscate:Boolean;
-
-
-    [Bindable(event="obfuscateChanged")]
-    public function get obfuscate():Boolean {
-        return _obfuscate;
-    }
-
-    public function set obfuscate(value:Boolean):void {
-        if (_obfuscate == value) return;
-        _obfuscate = value;
-        dispatchEvent(new Event("obfuscateChanged"));
-    }
-
-    private var firstSize:Boolean = true;
-
     private var _controlBarWidth:int;
 
 
@@ -164,14 +148,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
         dispatchEvent(new Event("controlBarWidthChanged"));
     }
 
-    protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
-        super.updateDisplayList(unscaledWidth, unscaledHeight);
-        /*if (firstSize) {
-            DisplayObject(_controlBar).width = unscaledWidth;
-            firstSize = false;
-        }*/
-    }
-
     override protected function createChildren():void {
         super.createChildren();
 
@@ -179,7 +155,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent, false, 0, true);
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent, false, 0, true);
         _dataService.addEventListener(DataServiceEvent.DATA_RETURNED, gotData);
-        BindingUtils.bindProperty(_dataService, "obfuscate", this, "obfuscate");
 
         _controlBar = createReportControlBar();
         _controlBar["id"] = "_controlBar";
@@ -361,7 +336,6 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
             _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, itemChange, false, 0, true);
             if (_reportRenderer is ISelectableReportRenderer) {
-                var selectableReportRenderer:ISelectableReportRenderer = _reportRenderer as ISelectableReportRenderer;
                 reportSelectable = true;
                 reportWatcher = BindingUtils.bindProperty(_reportRenderer, "selectionEnabled", this, "reportSelectionEnabled");
             } else {

@@ -76,7 +76,7 @@
 
             var groupingSourceFields:ArrayCollection = new ArrayCollection();
             for each (var field:AnalysisItem in response.firstFields) {
-                if (field.hasType(AnalysisItemTypes.DIMENSION) && !field.hasType(AnalysisItemTypes.DATE)) {
+                if (field.hasType(AnalysisItemTypes.DIMENSION)) {
                     groupingSourceFields.addItem(field);
                 }
             }
@@ -85,7 +85,7 @@
             sourceFields.refresh();
             var groupingTargetFields:ArrayCollection = new ArrayCollection();
             for each (var targetField:AnalysisItem in response.secondFields) {
-                if (targetField.hasType(AnalysisItemTypes.DIMENSION) && !targetField.hasType(AnalysisItemTypes.DATE)) {
+                if (targetField.hasType(AnalysisItemTypes.DIMENSION)) {
                     groupingTargetFields.addItem(targetField);
                 }
             }

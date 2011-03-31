@@ -33,16 +33,6 @@ public class TimelineDataService extends EventDispatcher implements IReportDataS
         _preserveValues = value;
     }
 
-    private var _obfuscate:Boolean;
-
-    public function get obfuscate():Boolean {
-        return _obfuscate;
-    }
-
-    public function set obfuscate(value:Boolean):void {
-        _obfuscate = value;
-    }
-
     private function processListData(event:ResultEvent):void {
 
         var seriesData:SeriesDataResults = dataRemoteSource.list.lastResult as SeriesDataResults;

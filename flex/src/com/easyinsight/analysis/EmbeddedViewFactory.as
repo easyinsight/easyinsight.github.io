@@ -6,15 +6,21 @@ import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.framework.Constants;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.report.AbstractViewFactory;
+import com.easyinsight.report.ReportCanvas;
 import com.easyinsight.report.ReportEventProcessor;
 import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.util.EIErrorEvent;
 
 import flash.display.DisplayObject;
+import flash.events.Event;
 import flash.system.ApplicationDomain;
 
+import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
+import mx.containers.Box;
+import mx.containers.Canvas;
 import mx.controls.Alert;
+import mx.controls.ProgressBar;
 import mx.events.ModuleEvent;
 import mx.modules.IModuleInfo;
 import mx.modules.ModuleManager;
@@ -25,7 +31,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
     //private var _newDefinition:Class;
     private var _reportDataService:Class = EmbeddedDataService;
 
-
+    private var _loadingDisplay:LoadingModuleDisplay;
 
     private var _prefix:String = "";
 
@@ -68,7 +74,28 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         return _dataService;
     }
 
-    
+    private var canvas:Canvas;
+
+    private var reportCanvas:ReportCanvas;
+
+    private var _showLoading:Boolean = false;
+
+
+    [Bindable(event="showLoadingChanged")]
+    public function get showLoading():Boolean {
+        return _showLoading;
+    }
+
+    public function set showLoading(value:Boolean):void {
+        if (_showLoading == value) return;
+        _showLoading = value;
+        dispatchEvent(new Event("showLoadingChanged"));
+    }
+
+    private function onError(event:EIErrorEvent):void {
+        stackTrace = event.error.getStackTrace();
+        overlayIndex = 3;
+    }
 
     override protected function createChildren():void {
         super.createChildren();
@@ -78,14 +105,48 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
         _dataService.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
         _dataService.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, retrievalFault);
+        _dataService.addEventListener(EIErrorEvent.ERROR, onError);
+        canvas = new Canvas();
+        canvas.percentHeight = 100;
+        canvas.percentWidth = 100;
+        var box:Box = new Box();
+        BindingUtils.bindProperty(box, "visible", this, "showLoading");
+        box.percentWidth = 100;
+        box.percentHeight = 100;
+        box.setStyle("horizontalAlign", "center");
+        box.setStyle("verticalAlign", "middle");
+        var screen:Canvas = new Canvas();
+        screen.percentHeight = 100;
+        screen.percentWidth = 100;
+        screen.setStyle("backgroundColor", 0x000000);
+        screen.setStyle("backgroundAlpha", .1);
+        BindingUtils.bindProperty(screen, "visible", this, "showLoading");
+        reportCanvas = new ReportCanvas();
+        BindingUtils.bindProperty(reportCanvas, "loading", this, "loading");
+        BindingUtils.bindProperty(reportCanvas, "overlayIndex", this, "overlayIndex");
+        BindingUtils.bindProperty(reportCanvas, "stackTrace", this, "overlayIndex");
+        reportCanvas.percentHeight = 100;
+        reportCanvas.percentWidth = 100;
+        var progressBar:ProgressBar = new ProgressBar();
+        BindingUtils.bindProperty(progressBar, "indeterminate", this, "showLoading");
+        progressBar.label = "Loading the report...";
+        progressBar.setStyle("fontSize", 18);
+        box.addChild(progressBar);
+        canvas.addChild(reportCanvas);
+        canvas.addChild(screen);
+        canvas.addChild(box);
+        addChild(canvas);
         loadReportRenderer();
     }
 
     private function retrievalFault(event:ReportRetrievalFault):void {
+        overlayIndex = 2;
         dispatchEvent(event);
     }
 
     private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
+        if (event.type == DataServiceLoadingEvent.LOADING_STARTED) overlayIndex = 1;
+        loading = event.type == DataServiceLoadingEvent.LOADING_STARTED;
         dispatchEvent(event);
     }
 
@@ -143,6 +204,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
             } catch(e:Error) {
                 dispatchEvent(new EIErrorEvent(e));
             }
+            overlayIndex = 0;
         }
 
     }
@@ -151,8 +213,52 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         moduleInfo = ModuleManager.getModule(_prefix + "/app/"+Constants.instance().buildPath+"/" + _reportRendererModule);
         moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
+        _loadingDisplay = new LoadingModuleDisplay();
+        _loadingDisplay.moduleInfo = moduleInfo;
+        reportCanvas.addChild(_loadingDisplay);
         moduleInfo.load(ApplicationDomain.currentDomain);
     }
+
+    private var _stackTrace:String;
+
+    private var _overlayIndex:int;
+
+    private var _loading:Boolean;
+
+    [Bindable(event="stackTraceChanged")]
+    public function get stackTrace():String {
+        return _stackTrace;
+    }
+
+    public function set stackTrace(value:String):void {
+        if (_stackTrace == value) return;
+        _stackTrace = value;
+        dispatchEvent(new Event("stackTraceChanged"));
+    }
+
+    [Bindable(event="overlayIndexChanged")]
+    public function get overlayIndex():int {
+        return _overlayIndex;
+    }
+
+    public function set overlayIndex(value:int):void {
+        if (_overlayIndex == value) return;
+        _overlayIndex = value;
+        dispatchEvent(new Event("overlayIndexChanged"));
+    }
+
+    [Bindable(event="loadingChanged")]
+    public function get loading():Boolean {
+        return _loading;
+    }
+
+    public function set loading(value:Boolean):void {
+        if (_loading == value) return;
+        _loading = value;
+        dispatchEvent(new Event("loadingChanged"));
+    }
+
+// stackTrace="{stackTrace}" overlayIndex="{overlayIndex}" loading="{loading}"
 
     private function reportLoadHandler(event:ModuleEvent):void {
         _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
@@ -163,7 +269,12 @@ public class EmbeddedViewFactory extends AbstractViewFactory implements IRetriev
         _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
         _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, onItemChange, false, 0, true);
         _dataService.preserveValues = _reportRenderer.preserveValues();
-        addChild(_reportRenderer as DisplayObject);
+        if (_loadingDisplay != null) {
+            reportCanvas.removeChild(_loadingDisplay);
+            _loadingDisplay.moduleInfo = null;
+            _loadingDisplay = null;
+        }
+        reportCanvas.reportBox.addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
             retrieveData(false);

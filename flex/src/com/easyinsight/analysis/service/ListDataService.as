@@ -31,16 +31,6 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         dataRemoteSource.list.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
-    private var _obfuscate:Boolean;
-
-    public function get obfuscate():Boolean {
-        return _obfuscate;
-    }
-
-    public function set obfuscate(value:Boolean):void {
-        _obfuscate = value;
-    }
-
     private var _preserveValues:Boolean = true;
 
     public function set preserveValues(value:Boolean):void {

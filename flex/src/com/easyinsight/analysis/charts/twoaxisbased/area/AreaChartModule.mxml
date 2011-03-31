@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer"
         width="100%" height="100%">
+    <mx:states>
+        <mx:State name="hideLegend">
+            <mx:RemoveChild target="{legend}"/>
+        </mx:State>
+    </mx:states>
     <mx:Style>
         .axisTitles {
             fontSize: 14;
@@ -51,6 +56,7 @@
         private var yAxisItem:AnalysisItem;
         private var measureItem:AnalysisItem;
 
+        [Bindable]
         private var legend:Legend;
 
         private var def:AreaChartDefinition;
@@ -132,6 +138,12 @@
             areaChart.verticalAxis = verticalAxis;
 
             if (dataSet.length > 0) {
+
+                if (areaChartDef.showLegend) {
+                    currentState = "";
+                } else {
+                    currentState = "hideLegend";
+                }
 
                 this.def = areaChartDef;
                 var xAxisDimension:AnalysisItem = areaChartDef.xaxis;

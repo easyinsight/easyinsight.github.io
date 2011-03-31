@@ -1,5 +1,5 @@
 package com.easyinsight.dashboard {
-
+import com.easyinsight.analysis.AnalysisDefinition;
 
 import flash.events.MouseEvent;
 
@@ -102,6 +102,10 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
             if (report is DashboardReport) {
                 topButton.label = DashboardReport(report).report.name;
+                if (DashboardReport(report).report.reportType == AnalysisDefinition.HEATMAP) {
+                    leftEffect = null;
+                    rightEffect = null;
+                }
             } else {
                 topButton.label = String(i);
             }

@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer"
         width="100%" height="100%" creationComplete="onCreation()">
+    <mx:states>
+        <mx:State name="hideLegend">
+            <mx:RemoveChild target="{legend}"/>
+        </mx:State>
+    </mx:states>
     <mx:Style>
         .axisTitles {
             fontSize: 14;
@@ -54,6 +59,7 @@
 
         private var areaChartDef:Area3DChartDefinition;
 
+        [Bindable]
         private var legend:Legend;
 
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
@@ -127,6 +133,12 @@
                 if (areaChartDef.elevationAngle > 0) {
                     visuals.elevationAngle = areaChartDef.elevationAngle;
                     visuals.rotationAngle = areaChartDef.rotationAngle;
+                }
+
+                if (areaChartDef.showLegend) {
+                    currentState = "";
+                } else {
+                    currentState = "hideLegend";
                 }
 
 

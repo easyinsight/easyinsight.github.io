@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.ISelectableReportRenderer"
            width="100%" height="100%">
+    <mx:states>
+        <mx:State name="hideLegend">
+            <mx:RemoveChild target="{legend}"/>
+        </mx:State>
+    </mx:states>
     <mx:Style>
         .axisTitles {
             fontSize: 14;
@@ -58,6 +63,7 @@
 
         private var def:LineChartDefinition;
 
+        [Bindable]
         private var legend:Legend;
 
         override protected function createChildren():void {
@@ -112,6 +118,12 @@
             var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
 
             if (dataSet.length > 0) {
+
+                if (lineChartDef.showLegend) {
+                    currentState = "";
+                } else {
+                    currentState = "hideLegend";
+                }
 
                 coreBox.setStyle("backgroundAlpha", lineChartDef.backgroundAlpha);
 
