@@ -39,11 +39,6 @@ public class ScorecardContextWindow {
             var copyItem:ContextMenuItem = new ContextMenuItem("Analyze the KPI...");
             copyItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, analyzeKPI);
             items.push(copyItem);
-            if (kpi.connectionID > 0) {
-                var exchangeItem:ContextMenuItem = new ContextMenuItem("Find reports for this KPI...");
-                exchangeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, findReports);
-                items.push(exchangeItem);
-            }
             if (kpi.reports != null && kpi.reports.length > 0) {
 
                 for each (var report:InsightDescriptor in kpi.reports) {
@@ -74,9 +69,9 @@ public class ScorecardContextWindow {
         };
     }
 
-    private function findReports(event:ContextMenuEvent):void {
+    /*private function findReports(event:ContextMenuEvent):void {
         passthroughFunction.call(passthroughObject, new NavigationEvent("Exchange", null, {viewMode: 1, displayMode: 0, subTopicID: kpi.connectionID}));
-    }
+    }*/
 
     private function analyzeKPI(event:ContextMenuEvent):void {
         var report:ListDefinition = new ListDefinition();

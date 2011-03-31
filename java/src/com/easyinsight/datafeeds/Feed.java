@@ -28,7 +28,7 @@ public abstract class Feed implements Serializable {
     private boolean visible;
     private String filterExampleMessage;
     private int type;
-    private long originSolution;
+    private boolean exchangeSave;
     private String urlKey;
     private Map<String, String> properties;
 
@@ -68,12 +68,12 @@ public abstract class Feed implements Serializable {
         this.properties = properties;
     }
 
-    public long getOriginSolution() {
-        return originSolution;
+    public boolean isExchangeSave() {
+        return exchangeSave;
     }
 
-    public void setOriginSolution(long originSolution) {
-        this.originSolution = originSolution;
+    public void setExchangeSave(boolean exchangeSave) {
+        this.exchangeSave = exchangeSave;
     }
 
     public int getType() {
@@ -90,7 +90,6 @@ public abstract class Feed implements Serializable {
         dataSourceInfo.setDataSourceID(feedID);
         dataSourceInfo.setDataSourceName(name);
         dataSourceInfo.setLiveDataSource(getDataSource().getDataSourceType() == DataSourceInfo.LIVE);
-        dataSourceInfo.setOriginSolution(originSolution);
         return dataSourceInfo;
     }
 

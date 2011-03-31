@@ -212,7 +212,6 @@ public class GoogleDataProvider {
                 clearDBDataSource.setParentSourceID(clearDBCompositeSource.getDataFeedID());
                 clearDBDataSource.setTableName(table);
                 String command = "DESCRIBE " + table;
-                System.out.println(command);
                 JSONObject description = client.query(command);
                 List<AnalysisItem> fieldList = new ArrayList<AnalysisItem>();
                 JSONArray fields = description.getJSONArray("response");
@@ -230,7 +229,6 @@ public class GoogleDataProvider {
                     }
                 }
                 clearDBDataSource.setFields(fieldList);
-                System.out.println(description.toString());
                 UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
                 clearDBDataSource.setUploadPolicy(childPolicy);
                 new FeedCreation().createFeed(clearDBDataSource, conn, new DataSet(), childPolicy);
@@ -442,7 +440,6 @@ public class GoogleDataProvider {
         Document schemaDoc = executeRequest(host, databaseID, "API_GetSchema", schemaRequest);
         Nodes tableNameNodes = schemaDoc.query("/qdbapi/table/name/text()");
         if (tableNameNodes.size() == 0) {
-            System.out.println("Could not find anything for " + databaseID);
             return null;
         }
         String tableName = tableNameNodes.get(0).getValue();
@@ -539,7 +536,6 @@ public class GoogleDataProvider {
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
         String string = client.execute(httpRequest, responseHandler);
-        System.out.println(string);
         return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
     }
 

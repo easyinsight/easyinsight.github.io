@@ -9,6 +9,7 @@ import com.csvreader.CsvReader;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -65,10 +66,18 @@ public class CsvFileUploadFormat extends UploadFormat {
         GridData gridData = new GridData();
         CharsetDetector charsetDetector = new CharsetDetector();
         charsetDetector.setText(data);
-        CharsetMatch charsetMatch = charsetDetector.detect();
-        String charsetName = charsetMatch.getName();
-        ByteArrayInputStream stream = new ByteArrayInputStream(data);
-        CsvReader r= new CsvReader(stream, Charset.forName(charsetName));
+        CharsetMatch[] charsetMatches = charsetDetector.detectAll();
+        CsvReader r = null;
+        for (CharsetMatch charsetMatch : charsetMatches) {
+            try {
+                String charsetName = charsetMatch.getName();
+                ByteArrayInputStream stream = new ByteArrayInputStream(data);
+                r = new CsvReader(stream, Charset.forName(charsetName));
+                break;
+            } catch (UnsupportedCharsetException e) {
+                // continue
+            }
+        }
         List<Value[]> grid = new ArrayList<Value[]>();
         String[] headerColumns = null;
         try {

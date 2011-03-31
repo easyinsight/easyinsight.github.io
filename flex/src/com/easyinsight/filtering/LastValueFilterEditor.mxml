@@ -30,7 +30,7 @@
         }
         ]]></mx:Script>
     <mx:Form>
-        <mx:FormItem label="Apply to All Reports:">
+        <mx:FormItem label="Apply to Full Report:">
             <mx:CheckBox id="absoluteCheckbox" selected="{absoluteFilter}"/>
         </mx:FormItem>
         <mx:FormItem label="Threshold:">

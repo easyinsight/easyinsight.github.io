@@ -52,9 +52,7 @@ public class JoinOverride implements Cloneable, Serializable {
     }
 
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
-        System.out.println("updating " + sourceItem.toDisplay() + " from " + replacementMap.get(sourceItem.getAnalysisItemID()).toDisplay());
         sourceItem = replacementMap.get(sourceItem.getAnalysisItemID());
-        System.out.println("updating " + targetItem.toDisplay() + " from " + replacementMap.get(targetItem.getAnalysisItemID()).toDisplay());
         targetItem = replacementMap.get(targetItem.getAnalysisItemID());
     }
 

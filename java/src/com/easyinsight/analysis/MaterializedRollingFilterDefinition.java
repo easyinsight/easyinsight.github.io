@@ -47,8 +47,6 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         limitDate = findStartDate(rollingFilterDefinition, now);
         endDate = findEndDate(rollingFilterDefinition, now);
         mode = rollingFilterDefinition.getCustomBeforeOrAfter();
-        System.out.println("start date = " + new Date(limitDate));
-        System.out.println("end date = " + new Date(endDate));
     }
 
     public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
@@ -268,7 +266,6 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             allowed = true;
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
-            System.out.println("comparing " + dateValue.getDate() + " against " + endDate);
             if (mode == RollingFilterDefinition.AFTER) {
                 allowed = limitDate <= dateValue.getDate().getTime();
             } else if (mode == RollingFilterDefinition.BEFORE) {

@@ -66,6 +66,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         ResultSet rs = queryStmt.executeQuery();
         rs.next();
         databaseID = rs.getString(1);
+        queryStmt.close();
     }
 
     public String getDatabaseID() {
@@ -111,9 +112,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
         BasicHttpEntity entity = new BasicHttpEntity();
         StringBuilder columnBuilder = new StringBuilder();
         Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
-        System.out.println("Data source " + getFeedName());
         for (AnalysisItem analysisItem : getFields()) {
-            System.out.println("\tChecking " + analysisItem.toDisplay() + " with named key " + analysisItem.getKey().toBaseKey().getKeyID());
             if (analysisItem.getKey().indexed()) {
                 String fieldID = analysisItem.getKey().toBaseKey().toKeyString().split("\\.")[1];
                 map.put(fieldID, analysisItem);
@@ -136,7 +135,6 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 } else {
                     requestBody = MessageFormat.format(REQUEST_2, sessionTicket, applicationToken, columnBuilder.toString(), String.valueOf(masterCount));
                 }
-                System.out.println(requestBody);
                 byte[] contentBytes = requestBody.getBytes();
                 entity.setContent(new ByteArrayInputStream(contentBytes));
                 entity.setContentLength(contentBytes.length);
@@ -177,13 +175,11 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                         }
                     }
                 }
-                System.out.println("our set size = " + dataSet.getRows().size());
                 Pipeline pipeline = new CompositeReportPipeline();
                 WSListDefinition analysisDefinition = new WSListDefinition();
                 analysisDefinition.setColumns(new ArrayList<AnalysisItem>(map.values()));
                 pipeline.setup(analysisDefinition, FeedRegistry.instance().getFeed(getDataFeedID(), conn), new InsightRequestMetadata());
                 dataSet = pipeline.toDataSet(dataSet);
-                System.out.println("after aggregation, size = " + dataSet.getRows().size());
                 for (AnalysisItem analysisItem : map.values()) {
                     dataSet.getDataSetKeys().replaceKey(analysisItem.createAggregateKey(), analysisItem.getKey());
                 }

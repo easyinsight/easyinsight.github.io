@@ -140,71 +140,71 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 String categoryID = queryField(categoryNode, "id/text()");
                 categoryCache.put(categoryID, categoryName);
             }
-                Document deals = runRestRequest("/deals.xml", client, builder, url, true, false, parentDefinition);
-                loadingProgress(0, 1, "Synchronizing with deals...", callDataID);
-                Nodes dealNodes = deals.query("/deals/deal");
-                for(int i = 0;i < dealNodes.size();i++) {
-                    try {
-                        IRow row = ds.createRow();
-                        Node currDeal = dealNodes.get(i);
-                        String dealName = queryField(currDeal, "name/text()");
-                        row.addValue(DEAL_NAME, dealName);
-                        String dealID = queryField(currDeal, "id/text()");
-                        row.addValue(DEAL_ID, dealID);
-                        String price = queryField(currDeal, "price/text()");
-                        row.addValue(PRICE, price);
-                        String status = queryField(currDeal, "status/text()");
-                        row.addValue(STATUS, status);
-                        String priceType = queryField(currDeal, "price-type/text()");
-                        row.addValue(PRICE_TYPE, priceType);
-                        String description = queryField(currDeal, "background/text()");
-                        row.addValue(DESCRIPTION, description);
-                        double totalDealValue;
-                        if ("fixed".equals(priceType)) {
-                            try {
-                                totalDealValue = Double.parseDouble(price);
-                            } catch (Exception e) {
-                                totalDealValue = 0;
-                            }
-                        } else {
-                            String durationString = queryField(currDeal, "duration/text()");
-                            int duration;
-                            try {
-                                duration = Integer.parseInt(durationString);
-                            } catch (Exception e) {
-                                duration = 0;
-                            }
-                            try {
-                                totalDealValue = Double.parseDouble(price) * duration;
-                            } catch (Exception e) {
-                                totalDealValue = 0;
-                            }
-                            row.addValue(DURATION, new NumericValue(duration));
-
+            Document deals = runRestRequest("/deals.xml", client, builder, url, true, false, parentDefinition);
+            loadingProgress(0, 1, "Synchronizing with deals...", callDataID);
+            Nodes dealNodes = deals.query("/deals/deal");
+            for(int i = 0;i < dealNodes.size();i++) {
+                try {
+                    IRow row = ds.createRow();
+                    Node currDeal = dealNodes.get(i);
+                    String dealName = queryField(currDeal, "name/text()");
+                    row.addValue(DEAL_NAME, dealName);
+                    String dealID = queryField(currDeal, "id/text()");
+                    row.addValue(DEAL_ID, dealID);
+                    String price = queryField(currDeal, "price/text()");
+                    row.addValue(PRICE, price);
+                    String status = queryField(currDeal, "status/text()");
+                    row.addValue(STATUS, status);
+                    String priceType = queryField(currDeal, "price-type/text()");
+                    row.addValue(PRICE_TYPE, priceType);
+                    String description = queryField(currDeal, "background/text()");
+                    row.addValue(DESCRIPTION, description);
+                    double totalDealValue;
+                    if ("fixed".equals(priceType)) {
+                        try {
+                            totalDealValue = Double.parseDouble(price);
+                        } catch (Exception e) {
+                            totalDealValue = 0;
                         }
-                        row.addValue(TOTAL_DEAL_VALUE, new NumericValue(totalDealValue));
-
-                        String personID = queryField(currDeal, "owner-id/text()");
-                        row.addValue(DEAL_OWNER, highriseCache.getUserName(personID));
-                        String responsibleParty = queryField(currDeal, "responsible-party-id/text()");
-                        row.addValue(RESPONSIBLE_PARTY, highriseCache.getUserName(responsibleParty));
-                        String categoryID = queryField(currDeal, "category-id/text()");
-                        row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url, parentDefinition));
-                        row.addValue(COUNT, new NumericValue(1));
-
-                        String partyID = queryField(currDeal, "party-id/text()");
-                        row.addValue(COMPANY_ID, partyID);
-                        row.addValue(CONTACT_ID, partyID);
-                        String createdAt = queryField(currDeal, "created-at/text()");
-                        row.addValue(CREATED_AT, new DateValue(deadlineFormat.parse(createdAt)));
-                        String statusChangedOn = queryField(currDeal, "status-changed-on/text()");
-                        if (statusChangedOn != null) {
-                            row.addValue(STATUS_CHANGED_ON, new DateValue(deadlineFormat.parse(statusChangedOn)));
+                    } else {
+                        String durationString = queryField(currDeal, "duration/text()");
+                        int duration;
+                        try {
+                            duration = Integer.parseInt(durationString);
+                        } catch (Exception e) {
+                            duration = 0;
                         }
-                    } catch (Exception e) {
-                        LogClass.error(e);
+                        try {
+                            totalDealValue = Double.parseDouble(price) * duration;
+                        } catch (Exception e) {
+                            totalDealValue = 0;
+                        }
+                        row.addValue(DURATION, new NumericValue(duration));
+
                     }
+                    row.addValue(TOTAL_DEAL_VALUE, new NumericValue(totalDealValue));
+
+                    String personID = queryField(currDeal, "owner-id/text()");
+                    row.addValue(DEAL_OWNER, highriseCache.getUserName(personID));
+                    String responsibleParty = queryField(currDeal, "responsible-party-id/text()");
+                    row.addValue(RESPONSIBLE_PARTY, highriseCache.getUserName(responsibleParty));
+                    String categoryID = queryField(currDeal, "category-id/text()");
+                    row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url, parentDefinition));
+                    row.addValue(COUNT, new NumericValue(1));
+
+                    String partyID = queryField(currDeal, "party-id/text()");
+                    row.addValue(COMPANY_ID, partyID);
+                    row.addValue(CONTACT_ID, partyID);
+                    String createdAt = queryField(currDeal, "created-at/text()");
+                    row.addValue(CREATED_AT, new DateValue(deadlineFormat.parse(createdAt)));
+                    String statusChangedOn = queryField(currDeal, "status-changed-on/text()");
+                    if (statusChangedOn != null) {
+                        row.addValue(STATUS_CHANGED_ON, new DateValue(deadlineFormat.parse(statusChangedOn)));
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
                 }
+            }
             //} while(info.currentPage++ < info.MaxPages);
 
         } catch (ReportException re) {

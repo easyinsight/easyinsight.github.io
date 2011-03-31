@@ -91,6 +91,7 @@ public class DashboardReport extends DashboardElement {
             dashboardReport.setLabelPlacement(rs.getInt(6));
             dashboardReport.setShowLabel(rs.getBoolean(7));
         }
+        queryStmt.close();
         return dashboardReport;
     }
 }

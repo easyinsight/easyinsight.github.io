@@ -66,7 +66,9 @@ public class FileBasedFeedDefinition extends FeedDefinition {
             } else {
                 throw new RuntimeException("Could not match feed to an upload format");
             }
+            delimitedFormatStmt.close();
         }
+        excelFormatStmt.close();
         this.uploadFormat = uploadFormat;
     }
 }

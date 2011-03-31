@@ -64,6 +64,8 @@ public class User {
     @Column(name="opt_in_email")
     private boolean optInEmail;
 
+
+
     @ManyToOne
     @JoinColumn (name="account_id")
     private Account account;
@@ -90,6 +92,8 @@ public class User {
         userTransferObject.setPersonaID(personaID != null ? personaID : 0);
         return userTransferObject;
     }
+
+
 
     public String getHashType() {
         return hashType;

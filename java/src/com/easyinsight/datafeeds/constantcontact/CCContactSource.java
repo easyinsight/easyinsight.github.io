@@ -141,7 +141,6 @@ public class CCContactSource extends ConstantContactBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             ConstantContactCompositeSource ccSource = (ConstantContactCompositeSource) parentDefinition;
-            System.out.println("last refresh date = " + lastRefreshDate);
             if (lastRefreshDate == null) {
                 cleanRetrieval(parentDefinition, ccSource, dataStorage);
             } else {
@@ -164,7 +163,6 @@ public class CCContactSource extends ConstantContactBaseSource {
         String refreshString = simpleDateFormat.format(lastRefreshDate);
         String url = "https://api.constantcontact.com/ws/customers/"+ccSource.getCcUserName()+"/contacts?updatedsince=" + refreshString + "&listtype=active";
         Key contactKey = parentDefinition.getField(CONTACT_ID).toBaseKey();
-        System.out.println(url);
         Document doc = query(url,
                 ccSource.getTokenKey(), ccSource.getTokenSecret(), parentDefinition);
 

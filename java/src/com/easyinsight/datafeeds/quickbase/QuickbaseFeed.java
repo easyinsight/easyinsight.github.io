@@ -142,7 +142,6 @@ public class QuickbaseFeed extends Feed {
                             requestBody = MessageFormat.format(REQUEST_Q2, sessionTicket, applicationToken, query, columnBuilder.toString(), String.valueOf(masterCount));
                         }
                     }
-                    System.out.println(requestBody);
                     byte[] contentBytes = requestBody.getBytes();
                     entity.setContent(new ByteArrayInputStream(contentBytes));
                     entity.setContentLength(contentBytes.length);
@@ -184,8 +183,6 @@ public class QuickbaseFeed extends Feed {
                         }
                     }
                 } while (count == 20000);
-
-                System.out.println("our set size = " + dataSet.getRows().size());
             }
             return dataSet;
         } catch (ReportException re) {
@@ -194,9 +191,5 @@ public class QuickbaseFeed extends Feed {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new Date(1298937600000L));
     }
 }

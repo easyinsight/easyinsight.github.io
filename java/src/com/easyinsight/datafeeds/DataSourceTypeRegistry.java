@@ -32,7 +32,9 @@ import com.easyinsight.datafeeds.wholefoods.WholeFoodsSource;
 import com.easyinsight.datafeeds.zendesk.*;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jamesboe
@@ -42,9 +44,31 @@ import java.util.Map;
 public class DataSourceTypeRegistry {
 
     private Map<FeedType, Class> dataSourceMap = new HashMap<FeedType, Class>();
+    private Set<Integer> exchangeTypes = new HashSet<Integer>();
 
     public DataSourceTypeRegistry() {
         registerTypes();
+        registerExchangeTypes();
+    }
+
+    public boolean isExchangeType(int type) {
+        return exchangeTypes.contains(type);
+    }
+
+    private void registerExchangeTypes() {
+        exchangeTypes.add(FeedType.SALESFORCE.getType());
+        exchangeTypes.add(FeedType.BASECAMP_MASTER.getType());
+        exchangeTypes.add(FeedType.GOOGLE_ANALYTICS.getType());
+        exchangeTypes.add(FeedType.CLOUD_WATCH.getType());
+        exchangeTypes.add(FeedType.HIGHRISE_COMPOSITE.getType());
+        exchangeTypes.add(FeedType.PIVOTAL_TRACKER.getType());
+        exchangeTypes.add(FeedType.SENDGRID.getType());
+        exchangeTypes.add(FeedType.LINKEDIN.getType());
+        exchangeTypes.add(FeedType.FRESHBOOKS_COMPOSITE.getType());
+        exchangeTypes.add(FeedType.CONSTANT_CONTACT.getType());
+        exchangeTypes.add(FeedType.BATCHBOOK_COMPOSITE.getType());
+        exchangeTypes.add(FeedType.ZENDESK_COMPOSITE.getType());
+        exchangeTypes.add(FeedType.HARVEST_COMPOSITE.getType());
     }
 
     private void registerTypes() {

@@ -72,7 +72,7 @@ public class DataService {
             feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters(conn));
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
-            feedMetadata.setOriginSolution(feed.getOriginSolution());
+            feedMetadata.setExchangeSave(feed.isExchangeSave());
             feedMetadata.setUrlKey(feed.getUrlKey());
             feedMetadata.setDataSourceInfo(feed.getDataSourceInfo());
             feedMetadata.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());

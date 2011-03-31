@@ -37,7 +37,6 @@ public class HtmlResultCache {
     }
 
     public byte[] waitForResults(long id) throws InterruptedException {
-        System.out.println("waiting for id " + id);
         long time = System.currentTimeMillis() + 60000;
         try {
             while (System.currentTimeMillis() < time) {
@@ -57,7 +56,6 @@ public class HtmlResultCache {
 
     public void addResults(byte[] bytes, long id) {
         try {
-            System.out.println("adding result to id " + id);
             resultCache.put(id, bytes);
         } catch (Exception e) {
             LogClass.error(e);

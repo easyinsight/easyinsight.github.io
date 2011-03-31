@@ -62,13 +62,6 @@ public class DataSourceCopyUtils {
                 clonedFeedDefinition.getFeedType().getType());
         infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, clonedFeedDefinition.getFeedName(), requiresConfig));
 
-        if (solutionID > 0) {
-            PreparedStatement installStmt = conn.prepareStatement("INSERT INTO SOLUTION_INSTALL (SOLUTION_ID, installed_data_source_id, original_data_source_id) VALUES (?, ?, ?)");
-            installStmt.setLong(1, solutionID);
-            installStmt.setLong(2, clonedFeedDefinition.getDataFeedID());
-            installStmt.setLong(3, feedDefinition.getDataFeedID());
-            installStmt.execute();
-        }
         return infos;
     }
 

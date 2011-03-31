@@ -81,7 +81,6 @@
                     break;
             }
             return result;
-            var p:SalesforceSolutionDetail;
         }
 
         public function gotFocus():void {

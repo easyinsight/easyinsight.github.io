@@ -78,7 +78,6 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                 Node curProject = projectNodes.get(i);
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
                 String projectName = queryField(curProject, "name/text()");
-                System.out.println("\tTime Project: " + projectName);
                 loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
                 if ("template".equals(projectStatus)) {

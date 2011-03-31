@@ -19,7 +19,7 @@ import java.util.*;
 @Entity
 @Table(name="filter")
 @Inheritance(strategy= InheritanceType.JOINED)
-public abstract class FilterDefinition implements Serializable, Cloneable {
+public class FilterDefinition implements Serializable, Cloneable {
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem field;
@@ -99,11 +99,17 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         return getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false, criteria);
     }
 
-    public abstract MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata);
+    public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
+        throw new UnsupportedOperationException();
+    }
 
-    public abstract String toQuerySQL(String tableName);
+    public String toQuerySQL(String tableName) {
+        throw new UnsupportedOperationException();
+    }
 
-    public abstract int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException;
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
 
     public boolean validForQuery() {
         if (getField() != null) {
@@ -161,5 +167,7 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
         return components;
     }
 
-    public abstract String toXML();
+    public String toXML() {
+        throw new UnsupportedOperationException();
+    }
 }

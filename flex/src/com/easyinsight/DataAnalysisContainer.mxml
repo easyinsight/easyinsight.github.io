@@ -147,7 +147,7 @@
         private var _reportID:int;
 
         [Bindable]
-        private var originSolution:int;
+        private var exchangeSave:Boolean;
 
         [Bindable]
         private var reportName:String;
@@ -286,7 +286,7 @@
                 dataSourceID = feedMetadata.dataFeedID;
                 this.feedMetadata = feedMetadata;
                 dataSourceInfo = feedMetadata.dataSourceInfo;
-                this.originSolution = feedMetadata.originSolution;
+                this.exchangeSave = feedMetadata.exchangeSave;
                 this.admin = feedMetadata.dataSourceAdmin;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
@@ -606,7 +606,7 @@
             window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saveHandler, false, 0, true);
             window.coreView = dataView.getCoreView();
             window.report = analysisDefinition;
-            window.originConnection = originSolution;
+            window.exchangeSave = exchangeSave;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

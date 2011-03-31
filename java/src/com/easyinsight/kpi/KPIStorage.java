@@ -194,13 +194,6 @@ public class KPIStorage {
         kpi.setDateDimension(date);
         kpi.setKpiUsers(getKPIUsers(kpiID, conn));
         kpi.setCoreFeedUrlKey(urlString);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_ID FROM SOLUTION_INSTALL WHERE INSTALLED_DATA_SOURCE_ID = ?");
-        queryStmt.setLong(1, dataFeedID);
-        ResultSet solutionRS = queryStmt.executeQuery();
-        if (solutionRS.next()) {
-            kpi.setConnectionID(solutionRS.getLong(1));
-        }
-        queryStmt.close();
         return kpi;
     }
 

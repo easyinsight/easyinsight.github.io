@@ -45,6 +45,7 @@ public abstract class DashboardElement implements Cloneable {
         insertStmt.setInt(1, getType());
         insertStmt.execute();
         setElementID(Database.instance().getAutoGenKey(insertStmt));
+        insertStmt.close();
         return elementID;
     }
 

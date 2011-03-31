@@ -63,7 +63,7 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
             } else {
                 target = "/recordings.xml?since=" + dateString + "&n=" + (25 * page);
             }
-            Document recordingsDoc = runRestRequest(target, client, builder, url, true, true, parentDefinition);
+            Document recordingsDoc = runRestRequest(target, client, builder, url, true, false, parentDefinition);
             Nodes recordingNodes = recordingsDoc.query("/recordings/recording");
             count = recordingNodes.size();
             for (int i = 0; i < recordingNodes.size(); i++) {

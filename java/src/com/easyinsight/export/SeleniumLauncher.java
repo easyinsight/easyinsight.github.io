@@ -49,7 +49,7 @@ public class SeleniumLauncher {
         String reportType = String.valueOf(rs.getInt(3));
         String urlKey = rs.getString(4);
         String url = MessageFormat.format(URL, userName, password, seleniumID, dataSourceID, urlKey, reportType, "1000", "800");
-        System.out.println(url);
+        queryStmt.close();
         launchRequest(url);
     }
 
@@ -78,7 +78,7 @@ public class SeleniumLauncher {
         String reportType = String.valueOf(rs.getInt(3));
         String urlKey = rs.getString(4);
         String url = MessageFormat.format(URL, userName, password, seleniumID, dataSourceID, urlKey, reportType, String.valueOf(width), String.valueOf(height));
-        System.out.println(url);
+        queryStmt.close();
         launchRequest(url);
         return requestID;
     }

@@ -26,7 +26,7 @@
             reportTags = TagCloud.toString(_report.tagCloud);
             reportDescription = _report.description;
             accountVisible = _report.accountVisible;
-            showConnectionSave = _originConnection > 0;
+            showConnectionSave = _exchangeSave;
             if (User.getInstance().getAccountType() > Account.PERSONAL) {
                 firstNextButton = "Next";
             } else {
@@ -70,10 +70,11 @@
 
         private var _report:AnalysisDefinition;
 
-        private var _originConnection:int;
+        private var _exchangeSave:Boolean;
 
-        public function set originConnection(value:int):void {
-            _originConnection = value;
+
+        public function set exchangeSave(value:Boolean):void {
+            _exchangeSave = value;
         }
 
         [Bindable]

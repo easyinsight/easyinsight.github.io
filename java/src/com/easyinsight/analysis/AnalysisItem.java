@@ -146,7 +146,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public void setLinks(List<Link> links) {
         this.links = links;
     }
-    
+
     public List<FilterDefinition> getFilters() {
         return filters;
     }

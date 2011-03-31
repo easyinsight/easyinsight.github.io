@@ -212,7 +212,6 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
             Node curIteration = iterationNodes.get(j);
             String iterationID = queryField(curIteration, "id/text()");
             String iterationStartDateString = queryField(curIteration, "start/text()");
-            System.out.println("iteration start date = " + iterationStartDateString);
             Date iterationStartDate = null;
             if (iterationStartDateString != null) {
                 iterationStartDate = dateFormat.parse(iterationStartDateString);

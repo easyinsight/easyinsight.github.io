@@ -87,7 +87,6 @@ public class QuickbaseExternalLogin extends ExternalLogin {
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
         String string = client.execute(httpRequest, responseHandler);
-        System.out.println(string);
         return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
     }
 }

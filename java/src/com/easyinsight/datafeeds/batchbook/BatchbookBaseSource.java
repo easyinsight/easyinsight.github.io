@@ -40,7 +40,6 @@ public abstract class BatchbookBaseSource extends ServerDataSourceDefinition {
 
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, String url, FeedDefinition parentDefinition) throws ParsingException, ReportException {
         HttpMethod restMethod = new GetMethod(url + path);
-        System.out.println("making request to " + url + path);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
         Document doc;

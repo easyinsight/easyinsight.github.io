@@ -16,7 +16,6 @@ public class NamedBracketValueFunction extends Function {
             throw new FunctionException("namedbracketvalue() requires two parameters, such as namedbracketvalue(Deal Name, \"Type\").");
         }
         Value stringValue = params.get(0);
-        System.out.println("value = " + stringValue);
         String pairValue = minusQuotes(1);
         String string = stringValue.toString();
         boolean found = false;

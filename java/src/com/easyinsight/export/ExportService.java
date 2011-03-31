@@ -57,7 +57,6 @@ public class ExportService {
     public static final String PERCENT_STYLE = "percentStyle";
 
     public void seleniumDraw(long requestID, byte[] bytes) {
-        System.out.println("received a selenium draw request of " + requestID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -601,7 +600,6 @@ public class ExportService {
                 width = 5000;
             }
 
-            System.out.println("using width of " + width + " for " + analysisItem.toDisplay());
             sheet.setColumnWidth(headerPosition, width);
             HSSFCell headerCell = headerRow.createCell(headerPosition);
             String displayName;

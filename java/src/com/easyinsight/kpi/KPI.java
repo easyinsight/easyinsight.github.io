@@ -42,11 +42,7 @@ public class KPI implements Cloneable {
     private String description;
     private String iconImage;
 
-    private boolean connectionVisible;
-
     private boolean temporary;
-
-    private long connectionID;
 
     private KPIOutcome kpiOutcome;
 
@@ -61,14 +57,6 @@ public class KPI implements Cloneable {
 
     public void setKpiUsers(List<KPIUser> kpiUsers) {
         this.kpiUsers = kpiUsers;
-    }
-
-    public long getConnectionID() {
-        return connectionID;
-    }
-
-    public void setConnectionID(long connectionID) {
-        this.connectionID = connectionID;
     }
 
     public List<InsightDescriptor> getReports() {
@@ -141,14 +129,6 @@ public class KPI implements Cloneable {
 
     public void setGoalValue(double goalValue) {
         this.goalValue = goalValue;
-    }
-
-    public boolean isConnectionVisible() {
-        return connectionVisible;
-    }
-
-    public void setConnectionVisible(boolean connectionVisible) {
-        this.connectionVisible = connectionVisible;
     }
 
     public boolean isTemporary() {

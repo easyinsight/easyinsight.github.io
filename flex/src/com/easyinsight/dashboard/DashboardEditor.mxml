@@ -158,7 +158,7 @@
                 _dashboard.filters = transformContainer.getFilterDefinitions();
                 var window:DashboardSaveWindow = new DashboardSaveWindow();
                 window.addEventListener(DashboardSaveEvent.DASHBOARD_SAVE, onSave, false, 0, true);
-                window.originConnection = connectionID;
+                window.exchangeSave = exchangeSave;
                 window.dashboard = _dashboard;
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
@@ -201,11 +201,11 @@
 
         private var dashboardFilters:ArrayCollection = new ArrayCollection();
 
-        private var connectionID:int;
+        private var exchangeSave:Boolean;
 
         private function gotFeedMetadata():void {
             var feedMetadata:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
-            connectionID = feedMetadata.originSolution;
+            exchangeSave = feedMetadata.exchangeSave;
             allFields = new ArrayCollection();
             var dimensions:ArrayCollection = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedMetadata.fields) {

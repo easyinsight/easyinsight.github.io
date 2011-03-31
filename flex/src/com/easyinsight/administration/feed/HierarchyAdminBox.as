@@ -55,7 +55,7 @@ public class HierarchyAdminBox extends VBox {
     private function onKey(event:KeyboardEvent):void {
         if (event.keyCode == Keyboard.DELETE || event.keyCode == Keyboard.BACKSPACE) {
             if (list.selectedItem != null) {
-                levels.removeItemAt(levels.getItemIndex(list.selectedItem));
+                list.dataProvider.removeItemAt(list.dataProvider.getItemIndex(list.selectedItem));
             }
         }
     }

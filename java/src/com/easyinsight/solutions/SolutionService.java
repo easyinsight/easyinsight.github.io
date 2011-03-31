@@ -401,22 +401,10 @@ public class SolutionService {
         return new Blah(descriptors, connectionID, connectionName);
     }
 
-    private static class ExtraDataSourceInfo {
-        private Date creationDate;
-        private int feedType;
-
-        private ExtraDataSourceInfo(Date creationDate, int feedType) {
-            this.creationDate = creationDate;
-            this.feedType = feedType;
-        }
-    }
-
     private void describe(List<DataSourceDescriptor> descriptors, EIConnection conn) throws SQLException {
         PreparedStatement queryReportCountStmt = conn.prepareStatement("SELECT COUNT(ANALYSIS_ID) FROM ANALYSIS WHERE " +
                 "ANALYSIS.data_feed_id = ? AND ANALYSIS.temporary_report = ?");
-        for (int i = 0; i < descriptors.size(); i++) {
-            DataSourceDescriptor descriptor = descriptors.get(i); 
-
+        for (DataSourceDescriptor descriptor : descriptors) {
             String description;
             queryReportCountStmt.setLong(1, descriptor.getId());
             queryReportCountStmt.setBoolean(2, false);

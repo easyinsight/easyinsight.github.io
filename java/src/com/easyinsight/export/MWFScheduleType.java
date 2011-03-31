@@ -26,7 +26,6 @@ public class MWFScheduleType extends ScheduleType {
         cal.setTimeInMillis(cal.getTimeInMillis() + (getTimeOffset() * 60 * 1000));
         if (dayOfWeek == Calendar.MONDAY || dayOfWeek == Calendar.WEDNESDAY || dayOfWeek == Calendar.FRIDAY) {
             if (cal.getTime().getTime() > lastTime.getTime() && cal.getTime().getTime() < now.getTime()) {
-                System.out.println("last time = " + lastTime + ", new time = " + cal.getTime() + ", now = " + now);
                 return cal.getTime();
             } else {
                 return null;

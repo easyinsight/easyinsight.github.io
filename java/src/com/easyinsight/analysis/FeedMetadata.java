@@ -19,12 +19,20 @@ public class FeedMetadata implements Serializable {
     private String dataSourceName;
     private int version;
     private boolean dataSourceAdmin;
-    private long originSolution;
+    private boolean exchangeSave;
     private String filterExampleMessage;
     private DataSourceInfo dataSourceInfo;
     private ReportFault reportFault;
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
     private boolean customJoinsAllowed;
+
+    public boolean isExchangeSave() {
+        return exchangeSave;
+    }
+
+    public void setExchangeSave(boolean exchangeSave) {
+        this.exchangeSave = exchangeSave;
+    }
 
     public boolean isCustomJoinsAllowed() {
         return customJoinsAllowed;
@@ -64,14 +72,6 @@ public class FeedMetadata implements Serializable {
 
     public void setFilterExampleMessage(String filterExampleMessage) {
         this.filterExampleMessage = filterExampleMessage;
-    }
-
-    public long getOriginSolution() {
-        return originSolution;
-    }
-
-    public void setOriginSolution(long originSolution) {
-        this.originSolution = originSolution;
     }
 
     public List<FeedNode> getFieldHierarchy() {

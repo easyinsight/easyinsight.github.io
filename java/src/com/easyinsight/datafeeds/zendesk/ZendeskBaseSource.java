@@ -48,7 +48,6 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
         do {
             try {
                 client.executeMethod(restMethod);
-                System.out.println(restMethod.getResponseBodyAsString());
                 doc = builder.build(restMethod.getResponseBodyAsStream());
                 successful = true;
             } catch (Exception e) {
