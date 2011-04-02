@@ -49,6 +49,9 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
     public void populateCaches(HttpClient client, String url, FeedDefinition parentDefinition, Date lastTime, HighriseCache highriseCache, Set<String> companyIDs) throws HighRiseLoginException, ParsingException, ParseException {
 
         Builder builder = new Builder();
+        if (lastTime == null) {
+            lastTime = new Date(1);
+        }
         //public static final String ALTDATEFORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
