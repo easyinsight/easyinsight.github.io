@@ -18,3 +18,5 @@ create table zendesk (
 );
 
 alter table named_item_key add indexed tinyint(4) not null default 0;
+
+create index data_feed_idx6 on data_feed (feed_type);
