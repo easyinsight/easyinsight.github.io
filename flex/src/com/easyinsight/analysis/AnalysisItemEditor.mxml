@@ -205,7 +205,6 @@
             super.createChildren();
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
-            super.createChildren();
             measureObjects = getMeasureOptions();
             var option:String = OptionFactory.getAnalysisItemOption(startingAnalysisItem);
             var index:int = indexOfType(option);
@@ -216,7 +215,7 @@
         }
 
         private function initStuff():void {
-            focusManager.setFocus(fieldNameInput);
+            //focusManager.setFocus(fieldNameInput);
             addEventListener(KeyboardEvent.KEY_UP, keyedComplete);
         }
 
@@ -324,6 +323,8 @@
                     currentState = "Text";
                     break;
             }
+            invalidateDisplayList();
+            validateNow();
         }
 
         private var aggregationBox:ComboBox;
