@@ -491,6 +491,11 @@ public class AnalysisDefinition implements Cloneable {
                 AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
                 if (dataSourceItem != null) {
                     key = dataSourceItem.getKey();
+                } else {
+                    dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                    if (dataSourceItem != null) {
+                        key = dataSourceItem.getKey();
+                    }
                 }
             }
             if (key != null) {

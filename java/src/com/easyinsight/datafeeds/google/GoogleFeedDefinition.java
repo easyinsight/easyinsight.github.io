@@ -119,6 +119,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
         try {
             clearStmt.setLong(1, getDataFeedID());
             clearStmt.executeUpdate();
+            clearStmt.close();
             insertGoogleStmt.setLong(1, getDataFeedID());
             insertGoogleStmt.setString(2, worksheetURL);
             insertGoogleStmt.setString(3, tokenKey);
