@@ -35,8 +35,8 @@ public class OrTransformContainer extends TransformContainer {
     }
 
     override public function commandFilterDelete(filter:IFilter):void {
-        super.commandFilterDelete(filter);
         orFilter.filters.removeItemAt(orFilter.filters.getItemIndex(filter.filterDefinition));
+        super.commandFilterDelete(filter);
     }
 
     override protected function getBorderColor():uint {
