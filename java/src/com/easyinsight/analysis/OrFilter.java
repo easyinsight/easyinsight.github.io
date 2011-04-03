@@ -83,7 +83,9 @@ public class OrFilter extends FilterDefinition {
         MaterializedOrFilter materializedOrFilter = new MaterializedOrFilter(getField());
         List<MaterializedFilterDefinition> materializedFilters = new ArrayList<MaterializedFilterDefinition>();
         for (FilterDefinition filter : filters) {
-            materializedFilters.add(filter.materialize(insightRequestMetadata));
+            if (filter.isEnabled()) {
+                materializedFilters.add(filter.materialize(insightRequestMetadata));
+            }
         }
         materializedOrFilter.setFilters(materializedFilters);
         return materializedOrFilter;
@@ -93,8 +95,10 @@ public class OrFilter extends FilterDefinition {
     public String toQuerySQL(String tableName) {
         StringBuilder sb = new StringBuilder();
         for (FilterDefinition filter : filters) {
-            sb.append(filter.toQuerySQL(tableName));
-            sb.append(" OR ");
+            if (filter.isEnabled()) {
+                sb.append(filter.toQuerySQL(tableName));
+                sb.append(" OR ");
+            }
         }
         sb.delete(sb.length() - 5, 4);
         return sb.toString();
@@ -119,12 +123,16 @@ public class OrFilter extends FilterDefinition {
         if (filters == null || filters.size() == 0) {
             return false;
         }
+        int count = 0;
         for (FilterDefinition filter : filters) {
-            if (!filter.validForQuery()) {
-                valid = false;
+            if (filter.isEnabled()) {
+                count++;
+                if (!filter.validForQuery()) {
+                    valid = false;
+                }
             }
         }
-        return valid;
+        return valid && count > 0;
     }
 
     @Override
