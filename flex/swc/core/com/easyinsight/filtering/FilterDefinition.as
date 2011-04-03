@@ -43,5 +43,9 @@ import flash.events.EventDispatcher;
             filterID = savedItemFilter.filterID;
             field.updateFromSaved(savedItemFilter.field);
         }
+
+        public function updateFromReportView(filter:FilterDefinition):void {
+            field = filter.field;
+        }
 	}
 }

@@ -336,7 +336,7 @@
                     saveAsEnabled = !_previewMode;
                     var controllerClass:Class = ControllerLookup.controllerForType(analysisDefinition.type);
                     var controller:IReportController = new controllerClass();
-                    loadController(controller);
+
 
                     analysisState.selectedLabel = analysisDefinition.type;
 
@@ -349,7 +349,9 @@
                         for each (var overrideFilter:FilterDefinition in filterOverrides) {
                             for each (var reportFilter:FilterDefinition in analysisDefinition.filterDefinitions) {
                                 if (reportFilter.filterID == overrideFilter.filterID) {
-                                    overrideFilter.field = reportFilter.field;
+                                    //overrideFilter.field = reportFilter.field;
+                                    overrideFilter.updateFromReportView(reportFilter);
+                                    //overrideFilter.updateFromSaved(reportFilter);
                                     transformedFilters.addItem(overrideFilter);
                                 }
                             }
@@ -357,6 +359,8 @@
                         analysisDefinition.filterDefinitions = transformedFilters;
                     }
                     createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
+
+                    loadController(controller);
 
                     // add the fields which are specifically added in the context of the report, such as
                     // calculations and hierarchies
