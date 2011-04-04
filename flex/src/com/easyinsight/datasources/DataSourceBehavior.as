@@ -23,6 +23,7 @@ public class DataSourceBehavior {
             case DataSourceType.BATCHBOOK:
             case DataSourceType.CAMPAIGN_MONITOR:
             case DataSourceType.ZENDESK:
+            case DataSourceType.HARVEST_COMPOSITE:
                 return true;
         }
         return false;

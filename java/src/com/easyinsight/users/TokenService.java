@@ -37,9 +37,10 @@ public class TokenService {
     public static final int CONNECTION_SETUP = 1;
     public static final int NO_CONNECTION = 2;
 
+    public static final String SALESFORCE_CONSUMER_KEY = "3MVG9VmVOCGHKYBQUAbz7d7kk6x2g29kEbyFhTBt7u..yutNvp7evoFyWTm2q4tZfWRdxekrK6fhhwf5BN4Tq";
+
     public OAuthResponse getOAuthURL(int type, boolean redirect, String host, FeedDefinition dataSource, int redirectType) {
         try {
-
             OAuthConsumer consumer;
             OAuthProvider provider;
 
@@ -86,7 +87,7 @@ public class TokenService {
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else if (type == FeedType.SALESFORCE.getType()) {
-                consumer = new DefaultOAuthConsumer("3MVG9VmVOCGHKYBQUAbz7d7kk6x2g29kEbyFhTBt7u..yutNvp7evoFyWTm2q4tZfWRdxekrK6fhhwf5BN4Tq",
+                consumer = new DefaultOAuthConsumer(SALESFORCE_CONSUMER_KEY,
                         "5028271817562655674");
                 provider = new DefaultOAuthProvider(
                         "https://login.salesforce.com" + "/_nc_external/system/security/oauth/RequestTokenHandler",
@@ -101,12 +102,19 @@ public class TokenService {
             String requestToken;
             if (redirect) {
                 if (ConfigLoader.instance().isProduction()) {
-                    requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    //requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
                 } else {
-                    requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    //requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
                 }
             } else {
                 requestToken = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
+            }
+
+            // Salesforce requires that the request passes along your oauth_consumer_key
+            if (type == FeedType.SALESFORCE.getType()) {
+                requestToken = requestToken + "&oauth_consumer_key=" + SALESFORCE_CONSUMER_KEY;
             }
             return new OAuthResponse(requestToken, true);
         } catch (OAuthCommunicationException oauthException) {

@@ -79,6 +79,9 @@
                 case DataSourceType.ZENDESK:
                     result = new ZendeskSolutionDetail();
                     break;
+                case DataSourceType.SALESFORCE:
+                    result = new SalesforceSolutionDetail();
+                    break;
             }
             return result;
         }

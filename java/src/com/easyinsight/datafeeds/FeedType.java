@@ -112,6 +112,8 @@ public class FeedType {
     public static final FeedType HARVEST_TASKS = new FeedType(104);
     public static final FeedType HARVEST_TASK_ASSIGNMENTS = new FeedType(105);
     public static final FeedType HARVEST_USERS = new FeedType(106);
+    public static final FeedType HARVEST_EXPENSES = new FeedType(109);
+    public static final FeedType HARVEST_EXPENSE_CATEGORIES = new FeedType(110);
 
     private int type;
 

@@ -11,6 +11,8 @@
 
         import mx.controls.Alert;
 
+        private var def:SalesforceFeedDefinition;
+
         public function get dataSourceDefinition():FeedDefinitionData {
             var source:SalesforceFeedDefinition = new SalesforceFeedDefinition();
             source.pin = pinInput.text;
@@ -19,7 +21,7 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:SalesforceFeedDefinition = feedDefinition as SalesforceFeedDefinition;
-
+            this.def = ds;
         }
 
         public function get savesCredentials():Boolean {
@@ -33,7 +35,7 @@
 
         private function install():void {
             ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
-            tokenService.getOAuthURL.send(4, 0);
+            tokenService.getOAuthURL.send(4, true, null, def, def.visible ? 2 : 1);
         }
 
         private function gotURL():void {
@@ -41,7 +43,7 @@
             if (response.successful) {
                 stackIndex = 1;
                 var requestToken:String = response.requestToken;
-                navigateToURL(new URLRequest(requestToken));
+                navigateToURL(new URLRequest(requestToken), "_self");
             } else {
 
                 Alert.show("We had a problem with the account name you specified. Please double check the value you entered. For example, if you access Freshbooks by easyinsight.freshbooks.com, your account name would be easyinsight.");

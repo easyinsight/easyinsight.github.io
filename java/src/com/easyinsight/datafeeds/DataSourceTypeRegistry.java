@@ -149,6 +149,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HARVEST_TASKS, HarvestTaskSource.class);
         registerType(FeedType.HARVEST_TASK_ASSIGNMENTS, HarvestTaskAssignmentSource.class);
         registerType(FeedType.HARVEST_USERS, HarvestUserSource.class);
+        registerType(FeedType.HARVEST_EXPENSES, HarvestExpenseSource.class);
         registerType(FeedType.ZENDESK_COMPOSITE, ZendeskCompositeSource.class);
         registerType(FeedType.ZENDESK_GROUP, ZendeskGroupSource.class);
         registerType(FeedType.ZENDESK_USER, ZendeskUserSource.class);

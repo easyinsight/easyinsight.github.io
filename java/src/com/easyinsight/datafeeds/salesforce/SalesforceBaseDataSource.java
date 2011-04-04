@@ -2,7 +2,12 @@ package com.easyinsight.datafeeds.salesforce;
 
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.composite.ChildConnection;
+import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.datafeeds.constantcontact.ConstantContactCompositeSource;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
@@ -10,11 +15,37 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.users.TokenStorage;
 import com.sforce.soap.partner.*;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.ParsingException;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.OAuthProvider;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
+import oauth.signpost.signature.HmacSha1MessageSigner;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Transient;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.BindingProvider;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.SQLException;
 import java.util.*;
 import java.sql.Connection;
 
@@ -23,7 +54,7 @@ import java.sql.Connection;
  * Date: Jul 8, 2009
  * Time: 10:10:17 AM
  */
-public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
+public class SalesforceBaseDataSource extends CompositeServerDataSource {
 
     public static final String OPPORTUNITY = "Opportunity";
     public static final String ACCOUNT = "Account";
@@ -33,6 +64,13 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     public static final String CASE = "Case";
 
     @Transient
+    private String tokenKey;
+    @Transient
+    private String tokenSecret;
+    @Transient
+    private String pin;
+
+    @Transient
     protected SessionHeader sessionHeader;
 
     @Transient
@@ -40,29 +78,73 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
 
     @Override
     public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
-        /*try {
+        try {
             Map<String, Key> keys = new HashMap<String, Key>();
-            if(service == null || sessionHeader == null)
+            /*if(service == null || sessionHeader == null)
                 login(credentials);
             keys.putAll(getKeysForObject(OPPORTUNITY));
             keys.putAll(getKeysForObject(ACCOUNT));
             keys.putAll(getKeysForObject(LEAD));
             keys.putAll(getKeysForObject(CAMPAIGN));
             keys.putAll(getKeysForObject(CONTACT));
-            keys.putAll(getKeysForObject(CASE));
+            keys.putAll(getKeysForObject(CASE));*/
             return keys;
         }
         catch(Exception e) {
             throw new RuntimeException(e);
-        }*/
-        throw new UnsupportedOperationException();
+        }
+        //throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
+        try {
+            if (externalPin != null) {
+                pin = externalPin;
+            }
+            if (pin != null && !"".equals(pin)) {
+                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
+                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
+                provider.retrieveAccessToken(consumer, pin.trim());
+                tokenKey = consumer.getToken();
+                tokenSecret = consumer.getTokenSecret();
+                pin = null;
+                URL url = new URL("https://na5.salesforce.com/services/data/v20.0/query/?q=SELECT+name+from+Account");
+                HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+                consumer.sign(httpConn);
+                httpConn.connect();
+                byte[] b = new byte[1024];
+                String out = "";
+                while(httpConn.getInputStream().read(b) > 0) {
+                    String s = new String(b);
+                    out = out + s;
+                }
+
+                System.out.println(out);
+
+            }
+        } catch (OAuthCommunicationException oe) {
+            throw new UserMessageException(oe, "The specified verifier token was rejected. Please try to authorize access again.");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public int getRequiredAccountTier() {
         return Account.PROFESSIONAL;
     }
-    
+
+    @Override
+    protected Set<FeedType> getFeedTypes() {
+        return new HashSet<FeedType>();
+    }
+
+    @Override
+    protected Collection<ChildConnection> getChildConnections() {
+        return new ArrayList<ChildConnection>();
+    }
+
     public boolean isConfigured() {
         return true;
     }
@@ -89,12 +171,12 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
 
     @Override
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        /*try {
-            if(sessionHeader == null)
-                login(credentials);
+        try {
+            /*if(sessionHeader == null)
+                login(credentials);*/
 
             List<AnalysisItem> items = new LinkedList<AnalysisItem>();
-            List<AnalysisItem> opportunityItems = getAnalysisItemsForObject(OPPORTUNITY, keys);
+            /*List<AnalysisItem> opportunityItems = getAnalysisItemsForObject(OPPORTUNITY, keys);
             List<AnalysisItem> accountItems = getAnalysisItemsForObject(ACCOUNT, keys);
             List<AnalysisItem> leadItems = getAnalysisItemsForObject(LEAD, keys);
             List<AnalysisItem> campaignItems = getAnalysisItemsForObject(CAMPAIGN, keys);
@@ -111,13 +193,13 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
             items.addAll(leadItems);
             items.addAll(campaignItems);
             items.addAll(caseItems);
-            items.addAll(contactItems);
+            items.addAll(contactItems);*/
             return items;
         }
         catch(Exception e) {
             throw new RuntimeException(e);
-        }*/
-        throw new UnsupportedOperationException();
+        }
+        //throw new UnsupportedOperationException();
     }
 
     public int getDataSourceType() {
@@ -203,5 +285,38 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
         List<KPI> kpis = new ArrayList<KPI>();
         
         return kpis;
+    }
+
+    public SalesforceBaseDataSource() {
+        setFeedName("Salesforce");
+    }
+
+    protected Document query(String queryString, String tokenKey, String tokenSecretKey, FeedDefinition parentSource) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException {
+        try {
+            Builder builder = new Builder();
+            OAuthConsumer consumer = new CommonsHttpOAuthConsumer(ConstantContactCompositeSource.CONSUMER_KEY, ConstantContactCompositeSource.CONSUMER_SECRET);
+            consumer.setMessageSigner(new HmacSha1MessageSigner());
+            consumer.setTokenWithSecret(tokenKey, tokenSecretKey);
+            HttpGet httpRequest = new HttpGet(queryString);
+            httpRequest.setHeader("Accept", "application/xml");
+            httpRequest.setHeader("Content-Type", "application/xml");
+
+
+            org.apache.http.client.HttpClient client = new DefaultHttpClient();
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+            String string = client.execute(httpRequest, responseHandler);
+            string = string.replace("xmlns=\"http://www.w3.org/2005/Atom\"", "");
+            string = string.replace("xmlns=\"http://ws.constantcontact.com/ns/1.0/\"", "");
+            string = string.replace("xmlns=\"http://www.w3.org/2007/app\"", "");
+            //System.out.println(string);
+            return builder.build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+        } catch (HttpResponseException e) {
+            if ("Unauthorized".equals(e.getMessage())) {
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Constant Contact data.", parentSource));
+            } else {
+                throw e;
+            }
+        }
     }
 }
