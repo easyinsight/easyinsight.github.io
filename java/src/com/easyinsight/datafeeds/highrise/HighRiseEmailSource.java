@@ -63,6 +63,11 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_EMAILS;
     }
 
+    @Override
+    protected boolean clearsData() {
+        return false;
+    }
+
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
 
@@ -72,19 +77,21 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
         }
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         HttpClient client = getHttpClient(token.getTokenValue(), "");
-        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         try {
             HighriseRecordingsCache cache = highRiseCompositeSource.getOrCreateRecordingsCache(client, lastRefreshDate);
 
             Key emailKey = parentDefinition.getField(EMAIL_ID).toBaseKey();
 
+            System.out.println("...");
             if (lastRefreshDate == null) {
                 for (HighriseEmail email : cache.getEmails()) {
+                    System.out.println("email insert");
                     IRow row = ds.createRow();
                     recordingToRow(email, row);
                 }
             } else {
                 for (HighriseEmail email : cache.getEmails()) {
+                    System.out.println("email update");
                     ds = new DataSet();
                     IRow row = ds.createRow();
                     recordingToRow(email, row);
@@ -98,14 +105,7 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        if (!writeDuring) {
-            if (parentDefinition.isAdjustDates()) {
-                ds = adjustDates(ds);
-            }
-            return ds;
-        } else {
-            return null;
-        }
+        return ds;
     }
 
     private void recordingToRow(HighriseEmail recording, IRow row) {
