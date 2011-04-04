@@ -119,6 +119,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.HARVEST_TASKS);
         types.add(FeedType.HARVEST_TASK_ASSIGNMENTS);
         types.add(FeedType.HARVEST_USERS);
+        types.add(FeedType.HARVEST_EXPENSES);
         return types;
     }
 
