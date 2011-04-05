@@ -18,7 +18,9 @@ public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDef
     public MaterializedFilterDateRangeDefinition(AnalysisItem key, Date lowValue, Date highValue, boolean sliding) {
         super(key);
         this.lowValue = lowValue;
-        this.highValue = highValue;       
+        this.highValue = highValue;
+        System.out.println("pipeline start date = " + lowValue);
+        System.out.println("pipeline end date = " + highValue);
     }
 
     public boolean allows(Value value) {
