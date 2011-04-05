@@ -86,7 +86,6 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();
-        Alert.show("offset = " + metadata.utcOffset);
         metadata.refreshAllSources = refreshAllSources;
         dataRemoteSource.list.send(definition, metadata);
     }
