@@ -55,8 +55,10 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
         return FeedType.BASECAMP_TIME;
     }
 
-    
-
+    @Override
+    public boolean gmtTime() {
+        return true;
+    }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
