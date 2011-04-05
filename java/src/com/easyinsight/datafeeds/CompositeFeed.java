@@ -421,8 +421,10 @@ public class CompositeFeed extends Feed {
 
             Pipeline pipeline;
             if (getDataFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
+                System.out.println("using comp report pipeline");
                 pipeline = new CompositeReportPipeline();
             } else {
+                System.out.println("using alt report pipeline");
                 pipeline = new AltCompositeReportPipeline();
             }
             WSListDefinition analysisDefinition = new WSListDefinition();
