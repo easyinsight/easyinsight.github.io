@@ -1,10 +1,8 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.DataResults;
+import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Value;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.AnalysisItem;
 
 /**
  * User: James Boe
@@ -20,7 +18,11 @@ public class TypeTransformComponent implements IComponent {
                 Value value = row.getValue(analysisItem.createAggregateKey());
                 // TODO: why was this here?
                 //Value preFilterValue = analysisItem.renameMeLater(value);
-                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), true);
+                boolean shift = false;
+                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    shift = pipelineData.isDateTime((AnalysisDateDimension) analysisItem);
+                }
+                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift);
 
                 targetRow.addValue(analysisItem.createAggregateKey(), transformedValue);
             }

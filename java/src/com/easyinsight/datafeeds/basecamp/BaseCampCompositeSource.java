@@ -358,4 +358,12 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         }
         return false;
     }
+
+    @Override
+    public boolean checkDateTime(String name) {
+        if (BaseCampTimeSource.DATE.equals(name)) {
+            return false;
+        }
+        return true;
+    }
 }

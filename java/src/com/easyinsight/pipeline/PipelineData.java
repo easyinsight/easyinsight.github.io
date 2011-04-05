@@ -1,13 +1,11 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.InsightRequestMetadata;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -21,15 +19,18 @@ public class PipelineData {
     private InsightRequestMetadata insightRequestMetadata;
     private Map<String, String> dataSourceProperties;
     private Set<AnalysisItem> allRequestedItems;
+    private Set<AnalysisDateDimension> dateTimeSet;
 
     public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
-                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems) {
+                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems,
+                        Set<AnalysisDateDimension> dateTimeSet) {
         this.report = report;
         this.reportItems = reportItems;
         this.insightRequestMetadata = insightRequestMetadata;
         this.allItems = allItems;
         this.dataSourceProperties = dataSourceProperties;
         this.allRequestedItems = allRequestedItems;
+        this.dateTimeSet = dateTimeSet;
     }
 
     public void setAllRequestedItems(Set<AnalysisItem> allRequestedItems) {
@@ -70,5 +71,9 @@ public class PipelineData {
 
     public void setInsightRequestMetadata(InsightRequestMetadata insightRequestMetadata) {
         this.insightRequestMetadata = insightRequestMetadata;
+    }
+
+    public boolean isDateTime(AnalysisDateDimension dateDimension) {
+        return dateTimeSet.contains(dateDimension);
     }
 }

@@ -16,6 +16,7 @@ public abstract class Pipeline {
     private List<IComponent> components = new ArrayList<IComponent>();
     private PipelineData pipelineData;
     private ResultsBridge resultsBridge = new ListResultsBridge();
+    private Set<AnalysisDateDimension> dateTimeSet = new HashSet<AnalysisDateDimension>();
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
@@ -55,11 +56,17 @@ public abstract class Pipeline {
                 if (item.isVirtual()) {
                     allNeededAnalysisItems.add(item);
                 }
+                if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    boolean dateTime = dataSource.getDataSource().checkDateTime(item.toDisplay());
+                    if (dateTime) {
+                        dateTimeSet.add((AnalysisDateDimension) item);
+                    }
+                }
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());                
 
-        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties(), allRequestedAnalysisItems);
+        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, allFields, dataSource.getProperties(), allRequestedAnalysisItems, dateTimeSet);
         return allNeededAnalysisItems;
     }
 
