@@ -558,9 +558,9 @@ public class DataStorage {
                             } else {
                                 long milliseconds = time.getTime();
                                 System.out.println("pre gmt data = " + new Date(milliseconds));
-                                if (gmtData) {
+                                /*if (gmtData) {
                                     milliseconds = milliseconds - (timeOffset * 1000 * 60);
-                                }
+                                }*/
                                 System.out.println("post gmt data = " + new Date(milliseconds));
                                 row.addValue(aggregateKey, new DateValue(new Date(milliseconds)));
                             }
