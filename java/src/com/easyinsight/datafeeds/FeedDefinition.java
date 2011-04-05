@@ -68,7 +68,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public boolean gmtTime() {
-        return true;
+        return false;
     }
 
     public Date getLastRefreshStart() {
