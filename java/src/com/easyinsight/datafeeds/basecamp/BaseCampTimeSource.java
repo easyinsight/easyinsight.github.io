@@ -113,7 +113,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                                 String todoItemID = queryField(todoListNode, "todo-item-id/text()");
                                 String personName = basecampCache.getUserName(personID);
                                 Date date = deadlineFormat.parse(queryField(todoListNode, "date/text()"));
-
+                                System.out.println(timeDescription + " - " + date);
                                 IRow row = ds.createRow();
                                 row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
                                 row.addValue(keys.get(PROJECTNAME), projectName);
