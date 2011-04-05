@@ -20,7 +20,7 @@ public class TypeTransformComponent implements IComponent {
                 Value value = row.getValue(analysisItem.createAggregateKey());
                 // TODO: why was this here?
                 //Value preFilterValue = analysisItem.renameMeLater(value);
-                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata());
+                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), false);
 
                 targetRow.addValue(analysisItem.createAggregateKey(), transformedValue);
             }

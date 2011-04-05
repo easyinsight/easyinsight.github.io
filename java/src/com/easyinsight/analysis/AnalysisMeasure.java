@@ -100,7 +100,7 @@ public class AnalysisMeasure extends AnalysisItem {
         return getType() + ":" + aggregation + ":" + toDisplay();
     }
 
-    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {
+    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift) {
         Value result;
         if (value == null) {
             result = new EmptyValue();

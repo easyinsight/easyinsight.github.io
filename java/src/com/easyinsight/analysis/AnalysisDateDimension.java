@@ -112,7 +112,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             return new EmptyValue();
     }
 
-    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {
+    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift) {
         if (cachedDateFormat == null) {
             if (customDateFormat == null) {
                 cachedDateFormat = defaultDateFormat;
@@ -189,7 +189,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
-                calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
+                if (timezoneShift) {
+                    calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
+                }
                 finalDate = calendar.getTime();
                 resultValue = new DateValue(finalDate);
             } else {

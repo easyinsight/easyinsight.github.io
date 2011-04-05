@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
-import com.easyinsight.analysis.AnalysisItem;
 
 /**
  * User: James Boe
@@ -29,7 +28,7 @@ public class AnalysisMeasureResultMetadata extends AnalysisItemResultMetadata {
     }
 
    public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
-        Double doubleValue = analysisItem.transformValue(value, insightRequestMetadata).toDouble();
+        Double doubleValue = analysisItem.transformValue(value, insightRequestMetadata, false).toDouble();
         if (doubleValue != null) {
             if (lowestValue == null) {
                 lowestValue = doubleValue;
