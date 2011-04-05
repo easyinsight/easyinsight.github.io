@@ -50,7 +50,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private List<HighriseAdditionalToken> additionalTokens = new ArrayList<HighriseAdditionalToken>();
 
     @Override
-    public void beforeSave(EIConnection conn) throws SQLException {
+    public void beforeSave(EIConnection conn) throws Exception {
         super.beforeSave(conn);
         PreparedStatement queryStmt = conn.prepareStatement("SELECT INCLUDE_CASE_NOTES, INCLUDE_COMPANY_NOTES, INCLUDE_CONTACT_NOTES," +
                 "INCLUDE_DEAL_NOTES, INCLUDE_EMAILS FROM HIGHRISE WHERE FEED_ID = ?");
