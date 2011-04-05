@@ -12,6 +12,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * User: James Boe
@@ -142,7 +143,18 @@ public class AnalysisDateDimension extends AnalysisDimension {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(tempDate);
             if (timezoneShift) {
-                calendar.add(Calendar.MILLISECOND, -(insightRequestMetadata.getUtcOffset() * 60 * 1000));
+                int time = insightRequestMetadata.getUtcOffset() / 60;
+                String string;
+                if (time > 0) {
+                    string = "GMT-"+time;
+                } else if (time < 0) {
+                    string = "GMT+"+time;
+                } else {
+                    string = "GMT";
+                }
+                TimeZone timeZone = TimeZone.getTimeZone(string);
+                System.out.println("using " + timeZone.getID() + " against start date of " + tempDate);
+                calendar.setTimeZone(timeZone);
             }
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
                 switch (dateLevel) {
