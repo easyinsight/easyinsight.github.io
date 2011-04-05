@@ -11,7 +11,7 @@ package com.easyinsight.analysis
         public var hour:int;
         public var minute:int;
 
-        private var cachedDate:Date;
+        public var cachedDate:Date;
 				
 		public function DateValue()
 		{

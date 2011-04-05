@@ -22,7 +22,7 @@ public class SortFunctionFactory {
                     StringValue(value1).value = valueObj1 as String;
                 } else if (valueObj1 is Date) {
                     value1 = new DateValue();
-                    DateValue(value1).date = valueObj1 as Date;
+                    DateValue(value1).cachedDate = valueObj1 as Date;
                 }
                 if (valueObj2 is Value) {
                     value2 = valueObj2 as Value;
@@ -34,7 +34,7 @@ public class SortFunctionFactory {
                     StringValue(value2).value = valueObj2 as String;
                 } else if (valueObj2 is Date) {
                     value2 = new DateValue();
-                    DateValue(value2).date = valueObj2 as Date;
+                    DateValue(value2).cachedDate = valueObj2 as Date;
                 }
 
                 if (value1 == null) {
