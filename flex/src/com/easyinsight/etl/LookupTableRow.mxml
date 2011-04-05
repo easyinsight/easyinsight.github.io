@@ -64,7 +64,7 @@
                 _pair.targetValue = targetValue;
             } else if (_mode == "date") {
                 var dateValue:DateValue = new DateValue();
-                dateValue.date = dateField.selectedDate;
+                //dateValue.date = dateField.selectedDate;
                 _pair.targetValue = dateValue;
             } else if (_mode == "measure") {
                 var numValue:NumericValue = new NumericValue();
@@ -81,7 +81,7 @@
                 if (_pair.targetValue is StringValue) {
                     targetText = StringValue(_pair.targetValue).value;
                 } else if (_pair.targetValue is DateValue) {
-                    targetDate = DateValue(_pair.targetValue).date;
+                    //targetDate = DateValue(_pair.targetValue).date;
                 } else if (_pair.targetValue is NumericValue) {
                     targetNumber = String(NumericValue(_pair.targetValue).value);
                 }
