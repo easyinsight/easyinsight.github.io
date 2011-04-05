@@ -194,6 +194,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
                 }
                 finalDate = calendar.getTime();
+                System.out.println("end date was " + finalDate);
                 resultValue = new DateValue(finalDate);
             } else {
                 switch (dateLevel) {
