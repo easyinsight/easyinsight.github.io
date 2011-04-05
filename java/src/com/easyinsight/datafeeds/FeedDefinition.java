@@ -68,7 +68,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public boolean gmtTime() {
-        return false;
+        return true;
     }
 
     public Date getLastRefreshStart() {
@@ -638,7 +638,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return false;
     }
 
-    public void beforeSave(EIConnection conn) throws SQLException {
+    public void beforeSave(EIConnection conn) throws Exception {
 
     }
 
