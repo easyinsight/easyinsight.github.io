@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -13,10 +14,33 @@ import java.util.Date;
  */
 public class DateValue extends Value implements Serializable {
     private Date date;
+    private int year;
+    private int month;
+    private int day;
+    private int hour;
+    private int minute;
+    /*
+    public var year:int;
+        public var month:int;
+        public var day:int;
+        public var hour:int;
+        public var minute:int;
+     */
     private String format;
     private static final long serialVersionUID = 8170674055682369820L;
 
     public DateValue() {
+    }
+
+    public void calculate(Calendar cal) {
+        if (date != null) {
+            cal.setTime(date);
+            year = cal.get(Calendar.YEAR);
+            month = cal.get(Calendar.MONTH);
+            day = cal.get(Calendar.DAY_OF_MONTH);
+            hour = cal.get(Calendar.HOUR_OF_DAY);
+            minute = cal.get(Calendar.MINUTE);
+        }
     }
 
     public String getFormat() {
@@ -72,5 +96,45 @@ public class DateValue extends Value implements Serializable {
 
     public int hashCode() {
         return date.hashCode();
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public int getHour() {
+        return hour;
+    }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
+
+    public int getMinute() {
+        return minute;
+    }
+
+    public void setMinute(int minute) {
+        this.minute = minute;
     }
 }

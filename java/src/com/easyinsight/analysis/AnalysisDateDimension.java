@@ -190,9 +190,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
-                if (timezoneShift) {
+                /*if (timezoneShift) {
                     calendar.add(Calendar.MILLISECOND, (insightRequestMetadata.getUtcOffset() * 60 * 1000));
-                }
+                }*/
                 finalDate = calendar.getTime();
                 System.out.println("end date was " + finalDate);
                 resultValue = new DateValue(finalDate);

@@ -101,6 +101,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new LimitsComponent());
         components.addAll(report.createComponents());        
         components.add(new SortComponent());
+        components.add(new DateHackComponent());
         return components;
     }
 }

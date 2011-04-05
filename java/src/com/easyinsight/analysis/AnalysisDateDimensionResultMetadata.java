@@ -33,7 +33,7 @@ public class AnalysisDateDimensionResultMetadata extends AnalysisItemResultMetad
     public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
         AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
         dateDim.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
-        value = analysisItem.transformValue(value, insightRequestMetadata, false);
+        value = analysisItem.transformValue(value, insightRequestMetadata, true);
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             Date date = dateValue.getDate();

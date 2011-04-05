@@ -5,27 +5,40 @@ package com.easyinsight.analysis
 	
 	public class DateValue extends Value
 	{
-		public var date:Date;
+		public var year:int;
+        public var month:int;
+        public var day:int;
+        public var hour:int;
+        public var minute:int;
+
+        private var cachedDate:Date;
 				
 		public function DateValue()
 		{
 			super();
 		}
 
+        private function getDate():Date {
+            if (cachedDate == null) {
+                cachedDate = new Date(Date.UTC(year, month, day, hour, minute));
+            }
+            return cachedDate;
+        }
+
         override public function type():int {
             return Value.DATE;
         }
 
         override public function toString():String {
-            return String(date);
+            return String(getDate());
         }
 
         override public function toDate():Date {
-            return date;
+            return getDate();
         }
 		
 		override public function getValue():Object {
-			return date;
+			return getDate();
 		}
 	}
 }
