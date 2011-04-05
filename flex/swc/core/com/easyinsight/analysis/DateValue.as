@@ -20,7 +20,7 @@ package com.easyinsight.analysis
 
         private function getDate():Date {
             if (cachedDate == null) {
-                cachedDate = new Date(Date.UTC(year, month, day, hour, minute));
+                cachedDate = new Date(year, month, day, hour, minute);
             }
             return cachedDate;
         }
