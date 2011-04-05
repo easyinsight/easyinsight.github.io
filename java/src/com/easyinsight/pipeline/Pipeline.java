@@ -56,12 +56,6 @@ public abstract class Pipeline {
                 if (item.isVirtual()) {
                     allNeededAnalysisItems.add(item);
                 }
-                if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                    boolean dateTime = dataSource.getDataSource().checkDateTime(item.toDisplay());
-                    if (dateTime) {
-                        dateTimeSet.add((AnalysisDateDimension) item);
-                    }
-                }
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());                

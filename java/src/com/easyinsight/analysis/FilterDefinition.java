@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.pipeline.FilterComponent;
 import com.easyinsight.pipeline.IComponent;
 import org.hibernate.Session;
@@ -169,5 +170,17 @@ public class FilterDefinition implements Serializable, Cloneable {
 
     public String toXML() {
         throw new UnsupportedOperationException();
+    }
+
+    public void timeshift(Feed dataSource) {
+        if (getField() != null) {
+            if (getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                boolean dateTime = dataSource.getDataSource().checkDateTime(getField().toDisplay());
+                if (dateTime) {
+                    AnalysisDateDimension dateDim = (AnalysisDateDimension) getField();
+                    dateDim.setTimeshift(false);
+                }
+            }
+        }
     }
 }

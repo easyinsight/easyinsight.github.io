@@ -37,6 +37,7 @@ public class DataService {
                 return null;
             }
             Feed feed = feedRegistry.getFeed(feedID, conn);
+            timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(utfOffset);
             return feed.getMetadata(analysisItem, insightRequestMetadata, conn);
@@ -336,6 +337,21 @@ public class DataService {
         }
     }
 
+    private void timeshift(Collection<AnalysisItem> items, Collection<FilterDefinition> filters, Feed dataSource) {
+        for (AnalysisItem item : items) {
+            if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                boolean dateTime = dataSource.getDataSource().checkDateTime(item.toDisplay());
+                if (dateTime) {
+                    AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
+                    dateDim.setTimeshift(false);
+                }
+            }
+        }
+        for (FilterDefinition filter : filters) {
+            filter.timeshift(dataSource);
+        }
+    }
+
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
@@ -369,6 +385,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+            timeshift(validQueryItems, filters, feed);
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
             List<String> auditMessages = dataSet.getAudits();
             auditMessages.add("At raw data source level, had " + dataSet.getRows().size() + " rows of data");

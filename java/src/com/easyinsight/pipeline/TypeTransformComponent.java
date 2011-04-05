@@ -20,7 +20,7 @@ public class TypeTransformComponent implements IComponent {
                 //Value preFilterValue = analysisItem.renameMeLater(value);
                 boolean shift = false;
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                    shift = pipelineData.isDateTime((AnalysisDateDimension) analysisItem);
+                    shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
                 }
                 Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift);
 

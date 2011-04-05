@@ -28,6 +28,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
     @Column(name="custom_date_format")
     private String customDateFormat = "yyyy-MM-dd";
     private transient DateFormat cachedDateFormat;
+
+    private transient boolean timeshift = true;
+
     private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     
     public static final int YEAR_LEVEL = 1;
@@ -65,6 +68,14 @@ public class AnalysisDateDimension extends AnalysisDimension {
     }
 
     public AnalysisDateDimension() {
+    }
+
+    public boolean isTimeshift() {
+        return timeshift;
+    }
+
+    public void setTimeshift(boolean timeshift) {
+        this.timeshift = timeshift;
     }
 
     public String getCustomDateFormat() {
