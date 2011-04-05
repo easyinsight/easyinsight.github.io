@@ -420,6 +420,7 @@ public class CompositeFeed extends Feed {
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
             Pipeline pipeline;
+            System.out.println("feed type = " + getDataFeedType().getType());
             if (getDataFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
                 System.out.println("using comp report pipeline");
                 pipeline = new CompositeReportPipeline();
