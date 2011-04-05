@@ -50,7 +50,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return FeedType.COMPOSITE;
     }
 
-    public void beforeSave(EIConnection conn) throws SQLException {
+    public void beforeSave(EIConnection conn) throws Exception {
         for (AnalysisItem analysisItem : getFields()) {
             Key key = analysisItem.getKey();
             if (key.toBaseKey().indexed()) {
