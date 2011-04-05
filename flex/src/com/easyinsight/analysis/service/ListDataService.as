@@ -13,6 +13,7 @@ import com.easyinsight.framework.InvalidFieldsEvent;
 
 import flash.events.EventDispatcher;
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -85,6 +86,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();
+        Alert.show("offset = " + metadata.utcOffset);
         metadata.refreshAllSources = refreshAllSources;
         dataRemoteSource.list.send(definition, metadata);
     }
