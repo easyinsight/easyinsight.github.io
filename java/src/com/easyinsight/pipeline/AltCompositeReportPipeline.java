@@ -40,8 +40,6 @@ public class AltCompositeReportPipeline extends Pipeline {
         }
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
 
-        components.add(new TypeTransformComponent());
-
         return components;
     }
 }

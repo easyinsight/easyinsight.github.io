@@ -1,13 +1,11 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.core.EmptyValue;
-import com.easyinsight.core.Value;
+
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
-import com.easyinsight.etl.LookupPair;
-import com.easyinsight.etl.LookupTable;
+
 import com.easyinsight.analysis.*;
 
 import java.util.*;
@@ -29,13 +27,15 @@ public class CompositeFeed extends Feed {
 
     private List<CompositeFeedNode> compositeFeedNodes;
     private List<CompositeFeedConnection> connections;
+    private FeedDefinition parent;
 
     public CompositeFeed() {
     }
 
-    public CompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections) {
+    public CompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections, FeedDefinition parent) {
         this.compositeFeedNodes = compositeFeedNodes;
         this.connections = connections;
+        this.parent = parent;
     }
 
     public List<Long> getDataSourceIDs() {
@@ -44,10 +44,6 @@ public class CompositeFeed extends Feed {
             ids.add(node.getDataFeedID());
         }
         return ids;
-    }
-
-    public FeedType getDataFeedType() {
-        return FeedType.COMPOSITE;
     }
 
     @Override
@@ -420,8 +416,8 @@ public class CompositeFeed extends Feed {
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
             Pipeline pipeline;
-            System.out.println("feed type = " + getDataFeedType().getType());
-            if (getDataFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
+            System.out.println("feed type = " + parent.getFeedType().getType());
+            if (parent.getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
                 System.out.println("using comp report pipeline");
                 pipeline = new CompositeReportPipeline();
             } else {

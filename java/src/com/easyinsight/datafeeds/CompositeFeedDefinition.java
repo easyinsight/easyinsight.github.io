@@ -4,6 +4,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
@@ -49,7 +50,21 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return FeedType.COMPOSITE;
     }
 
-    public void beforeSave(EIConnection conn) throws SQLException {
+    public void beforeSave(EIConnection conn) throws Exception {
+        for (AnalysisItem analysisItem : getFields()) {
+            Key key = analysisItem.getKey();
+            if (key.toBaseKey().indexed()) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                FeedDefinition child = new FeedStorage().getFeedDefinitionData(derivedKey.getFeedID(), conn);
+                for (AnalysisItem item : child.getFields()) {
+                    if (item.getKey().getKeyID() == derivedKey.getParentKey().getKeyID()) {
+                        NamedKey namedKey = (NamedKey) item.getKey().toBaseKey();
+                        namedKey.setIndexed(true);
+                    }
+                }
+                new FeedStorage().updateDataFeedConfiguration(child, conn);
+            }
+        }
         populateFields(conn);    
     }
 
@@ -137,9 +152,11 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
+
+
     public Feed createFeedObject(FeedDefinition parent) {
         try {
-            return new CompositeFeed(compositeFeedNodes, obtainChildConnections());
+            return new CompositeFeed(compositeFeedNodes, obtainChildConnections(), this);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
