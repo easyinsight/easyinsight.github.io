@@ -141,6 +141,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
             System.out.println("came in as " + tempDate);
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(tempDate);
+            if (timezoneShift) {
+                calendar.add(Calendar.MILLISECOND, -(insightRequestMetadata.getUtcOffset() * 60 * 1000));
+            }
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
@@ -190,9 +193,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
-                if (timezoneShift) {
-                    calendar.add(Calendar.MILLISECOND, -(insightRequestMetadata.getUtcOffset() * 60 * 1000));
-                }
+
                 finalDate = calendar.getTime();
                 System.out.println("end date was " + finalDate);
                 resultValue = new DateValue(finalDate);
