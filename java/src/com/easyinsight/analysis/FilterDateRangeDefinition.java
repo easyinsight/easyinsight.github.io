@@ -177,6 +177,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         Date workingEndDate;
         Date workingStartDate;
         // scale the query time back to UTC because it's in the database as UTC
+        System.out.println("start date = " + startDate.getTime());
+        System.out.println("end date = " + endDate.getTime());
         workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
