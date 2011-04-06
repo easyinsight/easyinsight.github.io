@@ -152,7 +152,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         if (tempDate != null) {
             System.out.println("came in as " + tempDate);
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(tempDate);
+
             if (timezoneShift) {
                 int time = insightRequestMetadata.getUtcOffset() / 60;
                 String string;
@@ -167,6 +167,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 System.out.println("using " + timeZone.getID() + " against start date of " + tempDate);
                 calendar.setTimeZone(timeZone);
             }
+            calendar.setTime(tempDate);
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
