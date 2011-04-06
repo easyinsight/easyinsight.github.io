@@ -60,23 +60,25 @@ public class DashboardService {
             updateStmt.setBoolean(1, false);
             updateStmt.setLong(2, dashboardID);
             updateStmt.executeUpdate();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_DASHBOARD_INSTALL_ID FROM EXCHANGE_DASHBOARD_INSTALL WHERE USER_ID = ? AND " +
-                    "dashboard_id = ?");
-            queryStmt.setLong(1, SecurityUtil.getUserID());
-            queryStmt.setLong(2, dashboardID);
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                PreparedStatement updateTimeStmt = conn.prepareStatement("UPDATE EXCHANGE_DASHBOARD_INSTALL SET install_date = ? WHERE EXCHANGE_DASHBOARD_INSTALL_ID = ?");
-                updateTimeStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-                updateTimeStmt.setLong(2, id);
-                updateTimeStmt.executeUpdate();
-            } else {
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCHANGE_DASHBOARD_INSTALL (USER_ID, DASHBOARD_ID, INSTALL_DATE) VALUES (?, ?, ?)");
-                insertStmt.setLong(1, SecurityUtil.getUserID());
-                insertStmt.setLong(2, sourceDashboardID);
-                insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-                insertStmt.execute();
+            if (sourceDashboardID > 0) {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_DASHBOARD_INSTALL_ID FROM EXCHANGE_DASHBOARD_INSTALL WHERE USER_ID = ? AND " +
+                        "dashboard_id = ?");
+                queryStmt.setLong(1, SecurityUtil.getUserID());
+                queryStmt.setLong(2, dashboardID);
+                ResultSet rs = queryStmt.executeQuery();
+                if (rs.next()) {
+                    long id = rs.getLong(1);
+                    PreparedStatement updateTimeStmt = conn.prepareStatement("UPDATE EXCHANGE_DASHBOARD_INSTALL SET install_date = ? WHERE EXCHANGE_DASHBOARD_INSTALL_ID = ?");
+                    updateTimeStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    updateTimeStmt.setLong(2, id);
+                    updateTimeStmt.executeUpdate();
+                } else {
+                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCHANGE_DASHBOARD_INSTALL (USER_ID, DASHBOARD_ID, INSTALL_DATE) VALUES (?, ?, ?)");
+                    insertStmt.setLong(1, SecurityUtil.getUserID());
+                    insertStmt.setLong(2, sourceDashboardID);
+                    insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                    insertStmt.execute();
+                }
             }
             conn.commit();
         } catch (Exception e) {
