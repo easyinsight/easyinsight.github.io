@@ -150,6 +150,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         }
         Value resultValue;
         if (tempDate != null) {
+            System.out.println("came in as " + tempDate);
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(tempDate);
             if (timezoneShift) {
@@ -163,6 +164,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     string = "GMT";
                 }
                 TimeZone timeZone = TimeZone.getTimeZone(string);
+                System.out.println("using " + timeZone.getID() + " against start date of " + tempDate);
                 calendar.setTimeZone(timeZone);
             }
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
@@ -216,6 +218,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 }
 
                 finalDate = calendar.getTime();
+                System.out.println("end date was " + finalDate);
                 resultValue = new DateValue(finalDate);
             } else {
                 switch (dateLevel) {
