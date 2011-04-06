@@ -343,7 +343,7 @@ public class DataService {
                 boolean dateTime = dataSource.getDataSource().checkDateTime(item.toDisplay());
                 if (dateTime) {
                     AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
-                    dateDim.setTimeshift(false);
+                    dateDim.setTimeshift(true);
                 }
             }
         }
