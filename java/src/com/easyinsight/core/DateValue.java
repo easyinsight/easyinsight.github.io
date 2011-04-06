@@ -19,6 +19,7 @@ public class DateValue extends Value implements Serializable {
     private int day;
     private int hour;
     private int minute;
+    private boolean dateTime;
     /*
     public var year:int;
         public var month:int;
@@ -30,6 +31,14 @@ public class DateValue extends Value implements Serializable {
     private static final long serialVersionUID = 8170674055682369820L;
 
     public DateValue() {
+    }
+
+    public boolean isDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(boolean dateTime) {
+        this.dateTime = dateTime;
     }
 
     public void calculate(Calendar cal) {

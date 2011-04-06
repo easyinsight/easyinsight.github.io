@@ -19,18 +19,15 @@ public class PipelineData {
     private InsightRequestMetadata insightRequestMetadata;
     private Map<String, String> dataSourceProperties;
     private Set<AnalysisItem> allRequestedItems;
-    private Set<AnalysisDateDimension> dateTimeSet;
 
     public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
-                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems,
-                        Set<AnalysisDateDimension> dateTimeSet) {
+                        List<AnalysisItem> allItems, Map<String, String> dataSourceProperties, Set<AnalysisItem> allRequestedItems) {
         this.report = report;
         this.reportItems = reportItems;
         this.insightRequestMetadata = insightRequestMetadata;
         this.allItems = allItems;
         this.dataSourceProperties = dataSourceProperties;
         this.allRequestedItems = allRequestedItems;
-        this.dateTimeSet = dateTimeSet;
     }
 
     public void setAllRequestedItems(Set<AnalysisItem> allRequestedItems) {
@@ -71,9 +68,5 @@ public class PipelineData {
 
     public void setInsightRequestMetadata(InsightRequestMetadata insightRequestMetadata) {
         this.insightRequestMetadata = insightRequestMetadata;
-    }
-
-    public boolean isDateTime(AnalysisDateDimension dateDimension) {
-        return dateTimeSet.contains(dateDimension);
     }
 }

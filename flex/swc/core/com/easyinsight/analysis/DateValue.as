@@ -11,6 +11,8 @@ package com.easyinsight.analysis
         public var hour:int;
         public var minute:int;
 
+        public var dateTime:Boolean;
+
         public var cachedDate:Date;
 
         public var date:Date;
@@ -23,10 +25,14 @@ package com.easyinsight.analysis
         private function getDate():Date {
             if (cachedDate == null) {
                 cachedDate = new Date();
-                cachedDate.setUTCFullYear(year, month, day);
-                //cachedDate.setFullYear(year, month, day);
-                //cachedDate.setHours(hour, minute);
-                cachedDate.setUTCHours(hour, minute);
+                if (dateTime) {
+                    cachedDate.setUTCFullYear(year, month, day);
+                    cachedDate.setUTCHours(hour, minute);
+                } else {
+                    cachedDate.setFullYear(year, month, day);
+                    cachedDate.setHours(hour, minute);
+                }
+
             }
             return cachedDate;
         }
