@@ -229,7 +229,10 @@ public class DataStorage {
         if (countRS.next()) {
             long dataLength = countRS.getLong("Data_length");
             long indexLength = countRS.getLong("Index_length");
-            if (dataSourceType == FeedType.CONSTANT_CONTACT_CONTACTS.getType() || dataSourceType == FeedType.HIGHRISE_CONTACTS.getType()) {
+            if (dataSourceType == FeedType.CONSTANT_CONTACT_CONTACTS.getType() || dataSourceType == FeedType.HIGHRISE_CONTACTS.getType()
+                    || dataSourceType == FeedType.HIGHRISE_CONTACT_NOTES.getType() || dataSourceType == FeedType.HIGHRISE_CASE_NOTES.getType() ||
+                    dataSourceType == FeedType.HIGHRISE_CONTACT_NOTES.getType() || dataSourceType == FeedType.HIGHRISE_DEAL_NOTES.getType() ||
+                    dataSourceType == FeedType.HIGHRISE_EMAILS.getType()) {
                 return dataLength;
             }
             return dataLength + indexLength;
