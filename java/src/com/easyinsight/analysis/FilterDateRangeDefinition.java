@@ -145,18 +145,18 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        Date workingEndDate = new Date(endDate.getTime());
-        Date workingStartDate = new Date(startDate.getTime());
+        Date workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        Date workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         // but now it's in the app transformed into the user time!
         Calendar startCal = Calendar.getInstance();
-        startCal.setTime(startDate);
+        startCal.setTime(workingStartDate);
         startCal.set(Calendar.HOUR_OF_DAY, 0);
         startCal.set(Calendar.MINUTE, 0);
         startCal.set(Calendar.SECOND, 0);
         startCal.set(Calendar.MILLISECOND, 0);
         workingStartDate = startCal.getTime();
         Calendar endCal = Calendar.getInstance();
-        endCal.setTime(endDate);
+        endCal.setTime(workingEndDate);
         endCal.set(Calendar.HOUR_OF_DAY, 0);
         endCal.set(Calendar.MINUTE, 0);
         endCal.set(Calendar.SECOND, 0);
