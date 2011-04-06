@@ -57,7 +57,9 @@ public class LastValueFilter extends HBox implements IFilter {
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.feedID = _feedID;
-            window.detailClass = LastValueFilterEditor;
+            if (_filterDefinition is LastValueFilterDefinition) {
+                window.detailClass = LastValueFilterEditor;
+            }
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;
