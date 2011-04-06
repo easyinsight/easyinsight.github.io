@@ -190,11 +190,11 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 break;
         }
         if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
-            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+            /*cal.setTimeZone(TimeZone.getTimeZone("GMT"));
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);*/
         }
         return cal.getTimeInMillis();
     }
