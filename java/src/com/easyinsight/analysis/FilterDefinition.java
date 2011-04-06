@@ -175,11 +175,9 @@ public class FilterDefinition implements Serializable, Cloneable {
     public void timeshift(Feed dataSource) {
         if (getField() != null) {
             if (getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension dateDim = (AnalysisDateDimension) getField();
                 boolean dateTime = dataSource.getDataSource().checkDateTime(getField().toDisplay());
-                if (dateTime) {
-                    AnalysisDateDimension dateDim = (AnalysisDateDimension) getField();
-                    dateDim.setTimeshift(false);
-                }
+                dateDim.setTimeshift(dateTime);
             }
         }
     }

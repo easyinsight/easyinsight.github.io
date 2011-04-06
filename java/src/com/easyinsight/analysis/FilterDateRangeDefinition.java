@@ -215,8 +215,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         endCal.set(Calendar.SECOND, 0);
         endCal.set(Calendar.MILLISECOND, 0);
         workingEndDate = endCal.getTime();
-        System.out.println("start date = " + new Date(workingEndDate.getTime()));
-        System.out.println("end date = " + new Date(workingStartDate.getTime()));
+        System.out.println("end date = " + new Date(workingEndDate.getTime()));
+        System.out.println("start date = " + new Date(workingStartDate.getTime()));
         /*if (date.isTimeshift()) {
 
         } else {
