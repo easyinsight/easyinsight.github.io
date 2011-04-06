@@ -39,13 +39,18 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     private int intervalAmount;
     private int mode;
 
-    public MaterializedRollingFilterDefinition(RollingFilterDefinition rollingFilterDefinition, Date now) {
+    public MaterializedRollingFilterDefinition(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
         super(rollingFilterDefinition.getField());
         if (now == null) {
             now = new Date();
         }
         limitDate = findStartDate(rollingFilterDefinition, now);
         endDate = findEndDate(rollingFilterDefinition, now);
+        AnalysisDateDimension date = (AnalysisDateDimension) rollingFilterDefinition.getField();
+        if (date.isTimeshift()) {
+            endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+            limitDate = limitDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+        }
         mode = rollingFilterDefinition.getCustomBeforeOrAfter();
     }
 
