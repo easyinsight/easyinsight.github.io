@@ -199,6 +199,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
 
         AnalysisDateDimension date = (AnalysisDateDimension) getField();
         System.out.println("shift = " + date.isTimeshift());
+        System.out.println("initial dates = " + endDate + " and " + startDate);
         workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         Calendar startCal = Calendar.getInstance();
