@@ -156,7 +156,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
     public Feed createFeedObject(FeedDefinition parent) {
         try {
-            return new CompositeFeed(compositeFeedNodes, obtainChildConnections(), this);
+            return new CompositeFeed(compositeFeedNodes, obtainChildConnections());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -27,15 +27,13 @@ public class CompositeFeed extends Feed {
 
     private List<CompositeFeedNode> compositeFeedNodes;
     private List<CompositeFeedConnection> connections;
-    private FeedDefinition parent;
 
     public CompositeFeed() {
     }
 
-    public CompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections, FeedDefinition parent) {
+    public CompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> connections) {
         this.compositeFeedNodes = compositeFeedNodes;
         this.connections = connections;
-        this.parent = parent;
     }
 
     public List<Long> getDataSourceIDs() {
@@ -416,12 +414,9 @@ public class CompositeFeed extends Feed {
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
             Pipeline pipeline;
-            System.out.println("feed type = " + parent.getFeedType().getType());
-            if (parent.getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
-                System.out.println("using comp report pipeline");
+            if (getDataSource().getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
                 pipeline = new CompositeReportPipeline();
             } else {
-                System.out.println("using alt report pipeline");
                 pipeline = new AltCompositeReportPipeline();
             }
             WSListDefinition analysisDefinition = new WSListDefinition();
