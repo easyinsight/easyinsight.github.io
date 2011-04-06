@@ -74,6 +74,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         } else {
             string = "GMT";
         }
+        System.out.println(string);
         TimeZone timeZone = TimeZone.getTimeZone(string);
         cal.setTimeZone(timeZone);
         switch (interval) {
