@@ -19,8 +19,6 @@ public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDef
         super(key);
         this.lowValue = lowValue;
         this.highValue = highValue;
-        System.out.println("pipeline start date = " + lowValue);
-        System.out.println("pipeline end date = " + highValue);
     }
 
     public boolean allows(Value value) {

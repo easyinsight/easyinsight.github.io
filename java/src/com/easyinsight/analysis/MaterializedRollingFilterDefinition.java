@@ -74,10 +74,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         } else {
             string = "GMT";
         }
-        System.out.println(string);
         TimeZone timeZone = TimeZone.getTimeZone(string);
         cal.setTimeZone(timeZone);
-        System.out.println("Now = " + cal.getTime());
         switch (interval) {
             case CUSTOM:
                 if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
@@ -192,7 +190,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 break;
         }
         //if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
-            System.out.println("Zero'ing out " + cal.getTime());
+
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));

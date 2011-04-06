@@ -98,7 +98,7 @@ public class RollingFilterDefinition extends FilterDefinition {
             long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now, insightRequestMetadata);
             long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now, insightRequestMetadata);
 
-            System.out.println("init = " + new Date(startTime) + " to " + new Date(endTime));
+
             AnalysisDateDimension date = (AnalysisDateDimension) getField();
             long workingEndDate;
             long workingStartDate;
@@ -106,7 +106,6 @@ public class RollingFilterDefinition extends FilterDefinition {
             workingStartDate = startTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;*/
             workingEndDate = endTime;
             workingStartDate = startTime;
-            System.out.println(new Date(workingStartDate) + " to " + new Date(workingEndDate));
             /*if (date.isTimeshift()) {
 
             } else {*/
