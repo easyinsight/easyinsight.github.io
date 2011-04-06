@@ -156,7 +156,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         startCal.set(Calendar.MILLISECOND, 0);
         workingStartDate = startCal.getTime();
         Calendar endCal = Calendar.getInstance();
-        endCal.setTime(startDate);
+        endCal.setTime(endDate);
         endCal.set(Calendar.HOUR, 0);
         endCal.set(Calendar.MINUTE, 0);
         endCal.set(Calendar.SECOND, 0);
@@ -209,7 +209,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         startCal.set(Calendar.MILLISECOND, 0);
         workingStartDate = startCal.getTime();
         Calendar endCal = Calendar.getInstance();
-        endCal.setTime(startDate);
+        endCal.setTime(endDate);
         endCal.set(Calendar.HOUR, 0);
         endCal.set(Calendar.MINUTE, 0);
         endCal.set(Calendar.SECOND, 0);
