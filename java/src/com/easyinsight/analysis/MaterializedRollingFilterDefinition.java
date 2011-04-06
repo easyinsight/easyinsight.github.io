@@ -131,6 +131,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 cal.set(Calendar.MILLISECOND, 0);
                 int quarterMonth = cal.get(Calendar.MONTH) - cal.get(Calendar.MONTH) % 3;
                 cal.set(Calendar.MONTH, quarterMonth);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
                 break;
             case YEAR_TO_NOW:
                 cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -190,7 +191,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 // TODO: ?
                 break;
         }
-        if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
+        //if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
             System.out.println("Zero'ing out " + cal.getTime());
             int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
             int year = cal.get(Calendar.YEAR);
@@ -201,7 +202,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             cal.set(Calendar.MILLISECOND, 0);
             cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
             cal.set(Calendar.YEAR, year);
-        }
+        //}
         return cal.getTimeInMillis();
     }
 
