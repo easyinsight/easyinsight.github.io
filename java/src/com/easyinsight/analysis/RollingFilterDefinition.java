@@ -100,12 +100,13 @@ public class RollingFilterDefinition extends FilterDefinition {
             AnalysisDateDimension date = (AnalysisDateDimension) getField();
             long workingEndDate;
             long workingStartDate;
+            workingEndDate = endTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+            workingStartDate = startTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
             /*if (date.isTimeshift()) {
-                workingEndDate = endTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
-                workingStartDate = startTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+
             } else {*/
-            workingEndDate = endTime;
-            workingStartDate = startTime;
+            /*workingEndDate = endTime;
+            workingStartDate = startTime;*/
             //}
             if (customBeforeOrAfter == RollingFilterDefinition.AFTER) {
                 preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate));
