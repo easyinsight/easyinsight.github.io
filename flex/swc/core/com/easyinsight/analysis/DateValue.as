@@ -23,8 +23,10 @@ package com.easyinsight.analysis
         private function getDate():Date {
             if (cachedDate == null) {
                 cachedDate = new Date();
-                cachedDate.setFullYear(year, month, day);
-                cachedDate.setHours(hour, minute);
+                cachedDate.setUTCFullYear(year, month, day);
+                //cachedDate.setFullYear(year, month, day);
+                //cachedDate.setHours(hour, minute);
+                cachedDate.setUTCHours(hour, minute);
             }
             return cachedDate;
         }
