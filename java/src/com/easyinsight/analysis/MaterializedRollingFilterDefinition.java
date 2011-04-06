@@ -77,6 +77,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         System.out.println(string);
         TimeZone timeZone = TimeZone.getTimeZone(string);
         cal.setTimeZone(timeZone);
+        System.out.println("Now = " + cal.getTime());
         switch (interval) {
             case CUSTOM:
                 if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
@@ -190,15 +191,16 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 break;
         }
         if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
+            System.out.println("Zero'ing out " + cal.getTime());
+            int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
+            int year = cal.get(Calendar.YEAR);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
+            cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
+            cal.set(Calendar.YEAR, year);
         }
         return cal.getTimeInMillis();
     }
