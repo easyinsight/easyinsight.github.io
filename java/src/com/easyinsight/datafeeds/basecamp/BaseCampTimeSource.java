@@ -11,8 +11,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.storage.IWhere;
-import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
@@ -58,8 +56,8 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
     }
 
     @Override
-    protected boolean clearsData() {
-        return false;
+    public boolean gmtTime() {
+        return true;
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
@@ -67,38 +65,21 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
         String url = baseCampCompositeSource.getUrl();
 
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
-        DateFormat deadlineTimeFormat = new SimpleDateFormat(XMLDATETIMEFORMAT);
 
 
+        DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
         HttpClient client = getHttpClient(token.getTokenValue(), "");
+        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         Builder builder = new Builder();
         try {
             BaseCampCache basecampCache = baseCampCompositeSource.getOrCreateCache(client);
             Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition, false);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
-                DataSet ds = new DataSet();
                 Node curProject = projectNodes.get(i);
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
                 String projectName = queryField(curProject, "name/text()");
-                String projectChangedOnString = queryField(curProject, "last-changed-on/text()");
-
-                Date projectChangedAt;
-                if (projectChangedOnString == null) {
-                    projectChangedAt = new Date();
-                } else {
-                    projectChangedAt = deadlineTimeFormat.parse(projectChangedOnString);
-                }
-
-                long delta = lastRefreshDate.getTime() - projectChangedAt.getTime();
-
-                long daysSinceChange = delta / (60 * 60 * 1000 * 24);
-                System.out.println(projectName + " - " + projectChangedOnString + " - " + daysSinceChange);
-
-                if (daysSinceChange > 2) {
-                    continue;
-                }
                 loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
                 if ("template".equals(projectStatus)) {
@@ -144,6 +125,10 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                                 row.addValue(keys.get(COUNT), new NumericValue(1));
                                 hasEntries = true;
                             }
+                            if (dataStorage != null) {
+                                dataStorage.insertData(ds);
+                                ds = new DataSet();
+                            }
                         } catch (Exception e) {
                             if ("Premature end of file.".equals(e.getMessage())) {
                                 LogClass.debug(e.getMessage());
@@ -159,16 +144,25 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
                     IRow row = ds.createRow();
                     row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
                     row.addValue(keys.get(PROJECTNAME), projectName);
+                    if (writeDuring) {
+                        dataStorage.insertData(ds);
+                        ds = new DataSet();
+                    }
                 }
-                StringWhere stringWhere = new StringWhere(keys.get(PROJECTID), projectIdToRetrieve);
-                dataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
             }
         } catch (ReportException re) {
             throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        return null;
+        if (!writeDuring) {
+            if (parentDefinition.isAdjustDates()) {
+                ds = adjustDates(ds);
+            }
+            return ds;
+        } else {
+            return null;
+        }
     }
 
     @NotNull
