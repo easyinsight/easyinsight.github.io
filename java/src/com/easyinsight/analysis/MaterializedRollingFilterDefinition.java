@@ -55,6 +55,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         mode = rollingFilterDefinition.getCustomBeforeOrAfter();
     }
 
+    public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
+        return findStartDate(rollingFilterDefinition, now, new InsightRequestMetadata());
+    }
+
     public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
         int interval = rollingFilterDefinition.getInterval();
         int intervalAmount = -rollingFilterDefinition.getCustomIntervalAmount();
@@ -185,6 +189,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 break;
         }
         return cal.getTimeInMillis();
+    }
+
+    public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
+        return findEndDate(rollingFilterDefinition, now, new InsightRequestMetadata());
     }
 
     public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
