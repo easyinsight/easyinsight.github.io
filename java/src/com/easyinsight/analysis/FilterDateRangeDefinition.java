@@ -177,16 +177,19 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         Date workingEndDate;
         Date workingStartDate;
         // scale the query time back to UTC because it's in the database as UTC
-        System.out.println("start date = " + new Date(startDate.getTime()));
-        System.out.println("end date = " + new Date(endDate.getTime()));
+
         AnalysisDateDimension date = (AnalysisDateDimension) getField();
-        if (date.isTimeshift()) {
-            workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
-            workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        System.out.println("shift = " + date.isTimeshift());
+        workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        System.out.println("start date = " + new Date(workingEndDate.getTime()));
+        System.out.println("end date = " + new Date(workingStartDate.getTime()));
+        /*if (date.isTimeshift()) {
+
         } else {
             workingEndDate = endDate;
             workingStartDate = startDate;
-        }
+        }*/
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate.getTime()));
         return start;
