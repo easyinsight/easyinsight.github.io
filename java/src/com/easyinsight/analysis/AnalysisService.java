@@ -469,7 +469,7 @@ public class AnalysisService {
                 try {
                     session.delete(dbAnalysisDef);
                     session.flush();
-                } catch (ObjectNotFoundException e) {
+                } catch (Exception e) {
 
                     // hibernate not cooperating, so delete it the hard way
 
