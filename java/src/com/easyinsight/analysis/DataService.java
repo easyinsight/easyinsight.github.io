@@ -340,11 +340,9 @@ public class DataService {
     private void timeshift(Collection<AnalysisItem> items, Collection<FilterDefinition> filters, Feed dataSource) {
         for (AnalysisItem item : items) {
             if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
                 boolean dateTime = dataSource.getDataSource().checkDateTime(item.toDisplay());
-                if (dateTime) {
-                    AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
-                    dateDim.setTimeshift(true);
-                }
+                dateDim.setTimeshift(dateTime);
             }
         }
         for (FilterDefinition filter : filters) {
