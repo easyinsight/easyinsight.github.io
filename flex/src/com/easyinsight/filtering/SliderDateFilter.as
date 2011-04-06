@@ -343,9 +343,6 @@ import mx.rpc.events.ResultEvent;
 			
 			newLowDate.setTime(lowDate.valueOf() + delta * (lowValue / 100));
 			newHighDate.setTime(lowDate.valueOf() + delta * (highValue / 100));
-            newHighDate.setHours(23);
-            newHighDate.setMinutes(59);
-            newHighDate.setSeconds(59);
 			
 			_filterDefinition.startDate = newLowDate;
 			_filterDefinition.endDate = newHighDate;
@@ -365,9 +362,6 @@ import mx.rpc.events.ResultEvent;
 			var newHighVal:int = ((event.newDate.valueOf() - lowDate.valueOf()) / delta) * 100;
 			hslider.values = [ hslider.values[0], newHighVal ] ;
 			_filterDefinition.endDate = event.newDate;
-            _filterDefinition.endDate.setHours(23);
-            _filterDefinition.endDate.setMinutes(59);
-            _filterDefinition.endDate.setSeconds(59);
             _filterDefinition.sliding = false;
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, null, this));
 		}
