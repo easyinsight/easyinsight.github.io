@@ -169,7 +169,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             Map<String, Key> keys = newDataSourceFields(parentDefinition);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             System.out.println("Refreshing " + getDataFeedID() + " for account " + accountID + " at " + new Date());
-            if (clearsData()) {
+            if (clearsData() || lastRefreshTime == null || lastRefreshTime.getTime() < 100) {
                 dataStorage.truncate(); 
             }
             DataSet dataSet = getDataSet(newDataSourceFields(parentDefinition), now, parentDefinition, dataStorage, conn, callDataID, lastRefreshTime);
