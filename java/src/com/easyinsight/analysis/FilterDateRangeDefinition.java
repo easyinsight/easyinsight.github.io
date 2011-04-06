@@ -157,9 +157,9 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         workingStartDate = startCal.getTime();
         Calendar endCal = Calendar.getInstance();
         endCal.setTime(workingEndDate);
-        endCal.set(Calendar.HOUR_OF_DAY, 0);
-        endCal.set(Calendar.MINUTE, 0);
-        endCal.set(Calendar.SECOND, 0);
+        endCal.set(Calendar.HOUR_OF_DAY, 23);
+        endCal.set(Calendar.MINUTE, 59);
+        endCal.set(Calendar.SECOND, 59);
         endCal.set(Calendar.MILLISECOND, 0);
         workingEndDate = endCal.getTime();
         AnalysisDateDimension date = (AnalysisDateDimension) getField();
