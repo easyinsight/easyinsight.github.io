@@ -171,6 +171,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+            timeshift(validQueryItems, filters, feed);
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
@@ -231,6 +232,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+            timeshift(validQueryItems, filters, feed);
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
@@ -270,6 +272,7 @@ public class DataService {
         }
         insightRequestMetadata.setAggregateQuery(aggregateQuery);
         Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+        timeshift(validQueryItems, filters, feed);
         DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
         Pipeline pipeline = new StandardReportPipeline();
         pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
@@ -307,6 +310,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+            timeshift(validQueryItems, filters, feed);
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, conn);
             List<String> auditMessages = dataSet.getAudits();
             auditMessages.add("At raw data source level, had " + dataSet.getRows().size() + " rows of data");
@@ -337,7 +341,7 @@ public class DataService {
         }
     }
 
-    private void timeshift(Collection<AnalysisItem> items, Collection<FilterDefinition> filters, Feed dataSource) {
+    private static void timeshift(Collection<AnalysisItem> items, Collection<FilterDefinition> filters, Feed dataSource) {
         for (AnalysisItem item : items) {
             if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
