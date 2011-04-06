@@ -164,8 +164,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         workingEndDate = endCal.getTime();
         AnalysisDateDimension date = (AnalysisDateDimension) getField();
         if (date.isTimeshift()) {
-            workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
-            workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
+            workingEndDate = new Date(workingEndDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+            workingStartDate = new Date(workingStartDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         }
         return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, sliding);
     }
