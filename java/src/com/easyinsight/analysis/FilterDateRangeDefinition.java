@@ -144,10 +144,29 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         this.endDate = endDate;
     }
 
-    public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {        
-        // but now it's in the app transformed into the user time!
+    public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         Date workingEndDate = new Date(endDate.getTime());
         Date workingStartDate = new Date(startDate.getTime());
+        // but now it's in the app transformed into the user time!
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(startDate);
+        startCal.set(Calendar.HOUR, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        workingStartDate = startCal.getTime();
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTime(startDate);
+        endCal.set(Calendar.HOUR, 0);
+        endCal.set(Calendar.MINUTE, 0);
+        endCal.set(Calendar.SECOND, 0);
+        endCal.set(Calendar.MILLISECOND, 0);
+        workingEndDate = endCal.getTime();
+        AnalysisDateDimension date = (AnalysisDateDimension) getField();
+        if (date.isTimeshift()) {
+            workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
+            workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        }
         return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, sliding);
     }
 
@@ -182,6 +201,20 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         System.out.println("shift = " + date.isTimeshift());
         workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(startDate);
+        startCal.set(Calendar.HOUR, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        workingStartDate = startCal.getTime();
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTime(startDate);
+        endCal.set(Calendar.HOUR, 0);
+        endCal.set(Calendar.MINUTE, 0);
+        endCal.set(Calendar.SECOND, 0);
+        endCal.set(Calendar.MILLISECOND, 0);
+        workingEndDate = endCal.getTime();
         System.out.println("start date = " + new Date(workingEndDate.getTime()));
         System.out.println("end date = " + new Date(workingStartDate.getTime()));
         /*if (date.isTimeshift()) {
