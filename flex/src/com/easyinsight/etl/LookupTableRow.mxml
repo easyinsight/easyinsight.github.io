@@ -64,7 +64,7 @@
                 _pair.targetValue = targetValue;
             } else if (_mode == "date") {
                 var dateValue:DateValue = new DateValue();
-                //dateValue.date = dateField.selectedDate;
+                dateValue.date = dateField.selectedDate;
                 _pair.targetValue = dateValue;
             } else if (_mode == "measure") {
                 var numValue:NumericValue = new NumericValue();

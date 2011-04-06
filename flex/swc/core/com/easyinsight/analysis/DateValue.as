@@ -12,6 +12,8 @@ package com.easyinsight.analysis
         public var minute:int;
 
         public var cachedDate:Date;
+
+        public var date:Date;
 				
 		public function DateValue()
 		{
