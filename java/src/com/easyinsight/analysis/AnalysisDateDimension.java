@@ -166,6 +166,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 TimeZone timeZone = TimeZone.getTimeZone(string);
                 System.out.println("using " + timeZone.getID() + " against start date of " + tempDate);
                 calendar.setTimeZone(timeZone);
+                tempDate = new Date(System.currentTimeMillis() - insightRequestMetadata.getUtcOffset() * 60 * 1000);
             }
             calendar.setTime(tempDate);
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
