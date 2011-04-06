@@ -5,6 +5,7 @@ import com.easyinsight.core.DateValue;
 
 import java.util.Date;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * User: James Boe
@@ -44,8 +45,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         if (now == null) {
             now = new Date();
         }
-        limitDate = findStartDate(rollingFilterDefinition, now);
-        endDate = findEndDate(rollingFilterDefinition, now);
+        limitDate = findStartDate(rollingFilterDefinition, now, insightRequestMetadata);
+        endDate = findEndDate(rollingFilterDefinition, now, insightRequestMetadata);
         AnalysisDateDimension date = (AnalysisDateDimension) rollingFilterDefinition.getField();
         if (date.isTimeshift()) {
             endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
@@ -54,12 +55,23 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         mode = rollingFilterDefinition.getCustomBeforeOrAfter();
     }
 
-    public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
+    public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
         int interval = rollingFilterDefinition.getInterval();
         int intervalAmount = -rollingFilterDefinition.getCustomIntervalAmount();
         int intervalType = rollingFilterDefinition.getCustomIntervalType(); 
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
+        int time = insightRequestMetadata.getUtcOffset() / 60;
+        String string;
+        if (time > 0) {
+            string = "GMT-"+time;
+        } else if (time < 0) {
+            string = "GMT+"+time;
+        } else {
+            string = "GMT";
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(string);
+        cal.setTimeZone(timeZone);
         switch (interval) {
             case CUSTOM:
                 if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
@@ -175,12 +187,23 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         return cal.getTimeInMillis();
     }
 
-    public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
+    public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
         int interval = rollingFilterDefinition.getInterval();
         int intervalAmount = rollingFilterDefinition.getCustomIntervalAmount();
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
+        int time = insightRequestMetadata.getUtcOffset() / 60;
+        String string;
+        if (time > 0) {
+            string = "GMT-"+time;
+        } else if (time < 0) {
+            string = "GMT+"+time;
+        } else {
+            string = "GMT";
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(string);
+        cal.setTimeZone(timeZone);
         switch (interval) {
             case DAY_TO_NOW:
             case WEEK_TO_NOW:

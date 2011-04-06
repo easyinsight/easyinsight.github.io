@@ -95,13 +95,15 @@ public class RollingFilterDefinition extends FilterDefinition {
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         if (interval != MaterializedRollingFilterDefinition.LAST_DAY) {
             Date now = insightRequestMetadata.getNow();
-            long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now);
-            long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now);
+            long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now, insightRequestMetadata);
+            long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now, insightRequestMetadata);
             AnalysisDateDimension date = (AnalysisDateDimension) getField();
             long workingEndDate;
             long workingStartDate;
             workingEndDate = endTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
             workingStartDate = startTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
+
+            System.out.println(new Date(workingStartDate) + " to " + new Date(workingEndDate));
             /*if (date.isTimeshift()) {
 
             } else {*/
