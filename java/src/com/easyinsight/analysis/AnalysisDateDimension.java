@@ -150,12 +150,12 @@ public class AnalysisDateDimension extends AnalysisDimension {
         }
         Value resultValue;
         if (tempDate != null) {
-            System.out.println("came in as " + tempDate);
+            //System.out.println("came in as " + tempDate);
             Calendar calendar = Calendar.getInstance();
             //calendar.setTime(tempDate);
             if (timezoneShift) {
                 int time = insightRequestMetadata.getUtcOffset() / 60;
-                System.out.println("offset = " + insightRequestMetadata.getUtcOffset() + " and time = " + time);
+                //System.out.println("offset = " + insightRequestMetadata.getUtcOffset() + " and time = " + time);
                 String string;
                 if (time > 0) {
                     string = "GMT-"+Math.abs(time);
@@ -165,7 +165,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     string = "GMT";
                 }
                 TimeZone timeZone = TimeZone.getTimeZone(string);
-                System.out.println("using " + timeZone.getID() + " against start date of " + tempDate);
+                //System.out.println("using " + timeZone.getID() + " against start date of " + tempDate);
                 calendar.setTimeZone(timeZone);
             }
             calendar.setTimeInMillis(tempDate.getTime());
@@ -220,7 +220,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 }
 
                 finalDate = calendar.getTime();
-                System.out.println("end date was " + finalDate);
+                //System.out.println("end date was " + finalDate);
                 resultValue = new DateValue(finalDate);
             } else {
                 switch (dateLevel) {

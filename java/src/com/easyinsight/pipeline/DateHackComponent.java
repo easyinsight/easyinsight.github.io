@@ -37,9 +37,6 @@ public class DateHackComponent implements IComponent {
                     if (value != null && value.type() == Value.DATE) {
                         DateValue dateValue = (DateValue) value;
                         dateValue.calculate(date.isTimeshift() ? shiftedCal : cal);
-                        System.out.println("Result was " + dateValue.getMonth() + " - " + dateValue.getDay() + " - " + dateValue.getHour() + ":" + dateValue.getMinute());
-                        /*dateValue.setDateTime(date.isTimeshift() && (date.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL ||
-                            date.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL));*/
                     }
                 }
             }
