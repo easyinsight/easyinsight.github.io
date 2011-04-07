@@ -25,13 +25,13 @@ package com.easyinsight.analysis
         private function getDate():Date {
             if (cachedDate == null) {
                 cachedDate = new Date();
-                if (dateTime) {
+                /*if (dateTime) {
                     cachedDate.setUTCFullYear(year, month, day);
                     cachedDate.setUTCHours(hour, minute);
-                } else {
+                } else {*/
                     cachedDate.setFullYear(year, month, day);
                     cachedDate.setHours(hour, minute);
-                }
+                //}
 
             }
             return cachedDate;
