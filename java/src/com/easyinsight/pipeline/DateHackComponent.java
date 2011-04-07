@@ -20,9 +20,9 @@ public class DateHackComponent implements IComponent {
         int time = pipelineData.getInsightRequestMetadata().getUtcOffset() / 60;
         String string;
         if (time > 0) {
-            string = "GMT-"+time;
+            string = "GMT-"+Math.abs(time);
         } else if (time < 0) {
-            string = "GMT+"+time;
+            string = "GMT+"+Math.abs(time);
         } else {
             string = "GMT";
         }

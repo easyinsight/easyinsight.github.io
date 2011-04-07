@@ -155,12 +155,12 @@ public class AnalysisDateDimension extends AnalysisDimension {
             //calendar.setTime(tempDate);
             if (timezoneShift) {
                 int time = insightRequestMetadata.getUtcOffset() / 60;
-                System.out.println("offset = " + insightRequestMetadata.getUtcOffset());
+                System.out.println("offset = " + insightRequestMetadata.getUtcOffset() + " and time = " + time);
                 String string;
                 if (time > 0) {
-                    string = "GMT-"+time;
+                    string = "GMT-"+Math.abs(time);
                 } else if (time < 0) {
-                    string = "GMT+"+time;
+                    string = "GMT+"+Math.abs(time);
                 } else {
                     string = "GMT";
                 }
