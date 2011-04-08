@@ -15,12 +15,19 @@ public class ChildConnection {
     private FeedType targetFeedType;
     private String sourceKey;
     private String targetKey;
+    private Key fixedKey;
 
     public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, String sourceKey, String targetKey) {
         this.sourceFeedType = sourceFeedType;
         this.targetFeedType = targetFeedType;
         this.sourceKey = sourceKey;
         this.targetKey = targetKey;
+    }
+
+    public ChildConnection(FeedType sourceFeedType, FeedType targetFeedType, Key fixedKey) {
+        this.sourceFeedType = sourceFeedType;
+        this.targetFeedType = targetFeedType;
+        this.fixedKey = fixedKey;
     }
 
     public FeedType getSourceFeedType() {
@@ -56,9 +63,14 @@ public class ChildConnection {
     }
 
     public CompositeFeedConnection createConnection(IServerDataSourceDefinition sourceDef, IServerDataSourceDefinition targetDef) {
-        Key sourceKey = sourceDef.getField(getSourceKey());
-        Key targetKey = targetDef.getField(getTargetKey());
-        return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                    sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName());
+        if (fixedKey == null) {
+            Key sourceKey = sourceDef.getField(getSourceKey());
+            Key targetKey = targetDef.getField(getTargetKey());
+            return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
+                        sourceKey, targetKey, sourceDef.getFeedName(), targetDef.getFeedName());
+        } else {
+            return new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
+                    fixedKey, fixedKey, sourceDef.getFeedName(), targetDef.getFeedName());
+        }
     }
 }
