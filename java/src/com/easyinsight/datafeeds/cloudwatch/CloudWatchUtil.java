@@ -2,29 +2,23 @@ package com.easyinsight.datafeeds.cloudwatch;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.core.DateValue;
-import com.easyinsight.core.NumericValue;
 
-import java.io.UnsupportedEncodingException;
+import java.io.ByteArrayInputStream;
 import java.util.*;
-import java.io.InputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 
+import com.xerox.amazonws.ec2.VolumeInfo;
+import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
@@ -36,53 +30,24 @@ public class CloudWatchUtil {
 
     private static String getDateAsISO8601String(Date date) {
         String result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date);
-        //convert YYYYMMDDTHH:mm:ss+HH00 into YYYYMMDDTHH:mm:ss+HH:00
-        //- note the added colon for the Timezone
         result = result.substring(0, result.length()-2)
         + ":" + result.substring(result.length()-2);
         return result;
     }
 
-    public static void blah(String key, String secretKey) throws InvalidKeyException, NoSuchAlgorithmException, IOException {
+    public static DataSet getEBSDataSet(String key, String secretKey, VolumeInfo volumeInfo, AnalysisMeasure analysisMeasure, Collection<AnalysisDimension> dimensions,
+                                     Date startDate, Date endDate, int period, AnalysisDateDimension dateDimension) throws Exception {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("Action", "ListMetrics");
-        params.put("Namespace", "AWS/EC2");
-        params.put("SignatureMethod", "HmacSHA256");
-        params.put("SignatureVersion", "2");
-        params.put("Version", "2009-05-15");
-        String url = new SignedRequestsHelper(key, secretKey).sign(params);
-        HttpClient httpClient = new HttpClient();
-        HttpMethod method = new GetMethod(url);
-        int statusCode = httpClient.executeMethod(method);
-        System.out.println(method.getResponseBodyAsString());
-    }
-
-    public static DataSet getDataSet(String key, String secretKey, EC2Info ec2Info, AnalysisMeasure analysisMeasure, Collection<AnalysisDimension> dimensions,
-                                     Date startDate, Date endDate, int period, AnalysisDateDimension dateDimension)
-            throws NoSuchAlgorithmException,
-            IOException, InvalidKeyException, ParserConfigurationException, SAXException, ParseException {
-        Map<String, String> params = new HashMap<String, String>();
-        /*params.put("Action", "ListMetrics");
-        params.put("SignatureMethod", "HmacSHA256");
-        params.put("SignatureVersion", "2");
-        params.put("Version", "2009-05-15");*/
 
         params.put("Action", "GetMetricStatistics");
         params.put("StartTime", getDateAsISO8601String(startDate));
         params.put("EndTime", getDateAsISO8601String(endDate));
-        if (ec2Info != null) {
-            //params.put("Dimension", "InstanceId");
-            params.put("Dimensions.member.1.Name", "InstanceId");
-            params.put("Dimensions.member.1.Value", ec2Info.getInstanceID());
-            //params.put("Dimension.member.2", "x");
-            //params.put("Dimensions.member.1", "Name");
-            //params.put("Dimensions.member.1", "InstanceId=" + ec2Info.getInstanceID());
-            //params.put("Dimensions.member.3", "Value");
-            //params.put("Dimensions.member.2", ec2Info.getInstanceID());
+        if (volumeInfo != null) {
+            params.put("Dimensions.member.1.Name", "VolumeId");
+            params.put("Dimensions.member.1.Value", volumeInfo.getVolumeId());
         }
-        params.put("Namespace", "AWS/EC2");
-        params.put("Period", "3600");
-        //params.put("Statistics.member.1", "Average");
+        params.put("Namespace", "AWS/EBS");
+        params.put("Period", String.valueOf(period));
         if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
             params.put("Statistics.member.1", "Average");
         } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
@@ -109,69 +74,245 @@ public class CloudWatchUtil {
             System.out.println(method.getStatusText());
         }
 
-        //System.out.println(method.getResponseBodyAsString());
-        InputStream content = method.getResponseBodyAsStream();
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(content);
-        Node result = document.getChildNodes().item(0);
-        Node datapoints = result.getChildNodes().item(1).getChildNodes().item(1);
-
-        NodeList members = datapoints.getChildNodes();
+        String string = method.getResponseBodyAsString();
+        string = string.replace("xmlns=\"http://monitoring.amazonaws.com/doc/2009-05-15/\"", "");
+        Builder builder = new Builder();
+        Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
         DataSet dataSet = new DataSet();
-        for (int i = 0; i < members.getLength(); i++) {
-            Node memberNode = members.item(i);
-            if ("member".equals(memberNode.getNodeName())) {
-                IRow row = dataSet.createRow();
+        Nodes dataPointNodes = doc.query("/GetMetricStatisticsResponse/GetMetricStatisticsResult/Datapoints/member");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        for (int i = 0; i < dataPointNodes.size(); i++) {
+            IRow row = dataSet.createRow();
+            Node dataPointNode = dataPointNodes.get(i);
+            String timestampString = dataPointNode.query("Timestamp/text()").get(0).getValue();
+            Date time = format.parse(timestampString);
+            row.addValue(dateDimension.createAggregateKey(), time);
+            String value = "0";
+            if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+                value = dataPointNode.query("Average/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
+                value = dataPointNode.query("Sum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
+                value = dataPointNode.query("Maximum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
+                value = dataPointNode.query("Minimum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                value = dataPointNode.query("Samples/text()").get(0).getValue();
+            }
+            double result = Double.parseDouble(value);
+            row.addValue(analysisMeasure.createAggregateKey(), result);
+            if (volumeInfo != null) {
                 for (AnalysisDimension dimension : dimensions) {
-                    if (CloudWatchDataSource.IMAGE_ID.equals(dimension.getKey().toKeyString())) {
-                        row.addValue(dimension.createAggregateKey(), ec2Info.getAmiID());
-                    } else if (CloudWatchDataSource.INSTANCE_ID.equals(dimension.getKey().toKeyString())) {
-                        row.addValue(dimension.createAggregateKey(), ec2Info.getInstanceID());
-                    } else if (CloudWatchDataSource.GROUP_NAME.equals(dimension.getKey().toKeyString())) {
-                        row.addValue(dimension.createAggregateKey(), ec2Info.getGroup());
-                    } else if (CloudWatchDataSource.HOST_NAME.equals(dimension.getKey().toKeyString())) {
-                        row.addValue(dimension.createAggregateKey(), ec2Info.getHostName());
+                    if (AmazonEBSSource.VOLUME.equals(dimension.getKey().toKeyString())) {
+                        row.addValue(dimension.createAggregateKey(), volumeInfo.getVolumeId());
                     }
-                }
-                String timestamp = memberNode.getChildNodes().item(1).getTextContent();
-                Date dateVal = format.parse(timestamp);
-
-                String value = null;
-                if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
-                    value = findNode("Average", memberNode);
-                } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
-                    value = findNode("Sum", memberNode);
-                } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
-                    value = findNode("Maximum", memberNode);
-                } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
-                    value = findNode("Minimum", memberNode);
-                } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
-                    value = findNode("Samples", memberNode);
-                }
-                if (value != null) {
-
-                    row.addValue(dateDimension.createAggregateKey(), new DateValue(dateVal));
-                    row.addValue(analysisMeasure.createAggregateKey(), new NumericValue(Double.parseDouble(value)));
                 }
             }
         }
         return dataSet;
     }
 
-    private static String findNode(String nodeName, Node node) {
-        for (int i = 0; i < node.getChildNodes().getLength(); i++) {
-            Node child = node.getChildNodes().item(i);
-            if (nodeName.equals(child.getNodeName())) {
-                return child.getTextContent();
+    public static DataSet getRDSDataSet(String key, String secretKey, String dbInstance, AnalysisMeasure analysisMeasure, Collection<AnalysisDimension> dimensions,
+                                     Date startDate, Date endDate, int period, AnalysisDateDimension dateDimension) throws Exception {
+        Map<String, String> params = new HashMap<String, String>();
+
+        params.put("Action", "GetMetricStatistics");
+        params.put("StartTime", getDateAsISO8601String(startDate));
+        params.put("EndTime", getDateAsISO8601String(endDate));
+        if (dbInstance != null) {
+            params.put("Dimensions.member.1.Name", "DBInstanceIdentifier");
+            params.put("Dimensions.member.1.Value", dbInstance);
+        }
+        params.put("Namespace", "AWS/RDS");
+        params.put("Period", String.valueOf(period));
+        if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+            params.put("Statistics.member.1", "Average");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
+            params.put("Statistics.member.1", "Sum");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
+            params.put("Statistics.member.1", "Maximum");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
+            params.put("Statistics.member.1", "Minimum");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+            params.put("Statistics.member.1", "Samples");
+        }
+        params.put("MeasureName", analysisMeasure.getKey().toKeyString());
+        params.put("SignatureMethod", "HmacSHA256");
+        params.put("SignatureVersion", "2");
+        params.put("Version", "2009-05-15");
+
+        String url = new SignedRequestsHelper(key, secretKey).sign(params);
+        HttpClient httpClient = new HttpClient();
+        HttpMethod method = new GetMethod(url);
+        int statusCode = httpClient.executeMethod(method);
+
+        if (statusCode != HttpStatus.SC_OK) {
+          System.err.println("Method failed: " + method.getStatusLine());
+            System.out.println(method.getStatusText());
+        }
+
+        String string = method.getResponseBodyAsString();
+        string = string.replace("xmlns=\"http://monitoring.amazonaws.com/doc/2009-05-15/\"", "");
+        Builder builder = new Builder();
+        Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+        DataSet dataSet = new DataSet();
+        Nodes dataPointNodes = doc.query("/GetMetricStatisticsResponse/GetMetricStatisticsResult/Datapoints/member");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        for (int i = 0; i < dataPointNodes.size(); i++) {
+            IRow row = dataSet.createRow();
+            Node dataPointNode = dataPointNodes.get(i);
+            String timestampString = dataPointNode.query("Timestamp/text()").get(0).getValue();
+            Date time = format.parse(timestampString);
+            row.addValue(dateDimension.createAggregateKey(), time);
+            String value = "0";
+            if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+                value = dataPointNode.query("Average/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
+                value = dataPointNode.query("Sum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
+                value = dataPointNode.query("Maximum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
+                value = dataPointNode.query("Minimum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                value = dataPointNode.query("Samples/text()").get(0).getValue();
+            }
+            double result = Double.parseDouble(value);
+            row.addValue(analysisMeasure.createAggregateKey(), result);
+            if (dbInstance != null) {
+                for (AnalysisDimension dimension : dimensions) {
+                    if (AmazonRDSSource.INSTANCE_IDENTIFIER.equals(dimension.getKey().toKeyString())) {
+                        row.addValue(dimension.createAggregateKey(), dbInstance);
+                    }
+                }
             }
         }
-        return null;
+        return dataSet;
     }
 
-    public static void main(String[] args) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        blah("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+    public static DataSet getDataSet(String key, String secretKey, EC2Info ec2Info, AnalysisMeasure analysisMeasure, Collection<AnalysisDimension> dimensions,
+                                     Date startDate, Date endDate, int period, AnalysisDateDimension dateDimension)
+            throws NoSuchAlgorithmException,
+            IOException, InvalidKeyException, ParserConfigurationException, SAXException, ParseException, ParsingException {
+        Map<String, String> params = new HashMap<String, String>();
+
+        params.put("Action", "GetMetricStatistics");
+        params.put("StartTime", getDateAsISO8601String(startDate));
+        params.put("EndTime", getDateAsISO8601String(endDate));
+        if (ec2Info != null) {
+            params.put("Dimensions.member.1.Name", "InstanceId");
+            params.put("Dimensions.member.1.Value", ec2Info.getInstanceID());
+        }
+        params.put("Namespace", "AWS/EC2");
+        params.put("Period", String.valueOf(period));
+        if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+            params.put("Statistics.member.1", "Average");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
+            params.put("Statistics.member.1", "Sum");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
+            params.put("Statistics.member.1", "Maximum");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
+            params.put("Statistics.member.1", "Minimum");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+            params.put("Statistics.member.1", "Samples");
+        }
+        params.put("MeasureName", analysisMeasure.getKey().toKeyString());
+        params.put("SignatureMethod", "HmacSHA256");
+        params.put("SignatureVersion", "2");
+        params.put("Version", "2009-05-15");
+
+        String url = new SignedRequestsHelper(key, secretKey).sign(params);
+        HttpClient httpClient = new HttpClient();
+        HttpMethod method = new GetMethod(url);
+        int statusCode = httpClient.executeMethod(method);
+
+        if (statusCode != HttpStatus.SC_OK) {
+          System.err.println("Method failed: " + method.getStatusLine());
+            System.out.println(method.getStatusText());
+        }
+
+        String string = method.getResponseBodyAsString();
+        string = string.replace("xmlns=\"http://monitoring.amazonaws.com/doc/2009-05-15/\"", "");
+        Builder builder = new Builder();
+        Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+        DataSet dataSet = new DataSet();
+        Nodes dataPointNodes = doc.query("/GetMetricStatisticsResponse/GetMetricStatisticsResult/Datapoints/member");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        for (int i = 0; i < dataPointNodes.size(); i++) {
+            IRow row = dataSet.createRow();
+            Node dataPointNode = dataPointNodes.get(i);
+            String timestampString = dataPointNode.query("Timestamp/text()").get(0).getValue();
+            Date time = format.parse(timestampString);
+            row.addValue(dateDimension.createAggregateKey(), time);
+            String value = "0";
+            if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+                value = dataPointNode.query("Average/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
+                value = dataPointNode.query("Sum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
+                value = dataPointNode.query("Maximum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
+                value = dataPointNode.query("Minimum/text()").get(0).getValue();
+            } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                value = dataPointNode.query("Samples/text()").get(0).getValue();
+            }
+            double result = Double.parseDouble(value);
+            row.addValue(analysisMeasure.createAggregateKey(), result);
+            if (ec2Info != null) {
+                for (AnalysisDimension dimension : dimensions) {
+                    if (AmazonEC2Source.IMAGE_ID.equals(dimension.getKey().toKeyString())) {
+                        row.addValue(dimension.createAggregateKey(), ec2Info.getAmiID());
+                    } else if (AmazonEC2Source.INSTANCE_ID.equals(dimension.getKey().toKeyString())) {
+                        row.addValue(dimension.createAggregateKey(), ec2Info.getInstanceID());
+                    } else if (AmazonEC2Source.GROUP_NAME.equals(dimension.getKey().toKeyString())) {
+                        row.addValue(dimension.createAggregateKey(), ec2Info.getGroup());
+                    } else if (AmazonEC2Source.HOST_NAME.equals(dimension.getKey().toKeyString())) {
+                        row.addValue(dimension.createAggregateKey(), ec2Info.getHostName());
+                    }
+                }
+            }
+        }
+        return dataSet;
+    }
+
+    public static Document blah(String key, String secretKey) throws InvalidKeyException, NoSuchAlgorithmException, IOException, ParsingException {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("Action", "ListMetrics");
+        params.put("Namespace", "AWS/RDS");
+        params.put("SignatureMethod", "HmacSHA256");
+        params.put("SignatureVersion", "2");
+        params.put("Version", "2009-05-15");
+        String url = new SignedRequestsHelper(key, secretKey).sign(params);
+        HttpClient httpClient = new HttpClient();
+        HttpMethod method = new GetMethod(url);
+        int statusCode = httpClient.executeMethod(method);
+        String string = method.getResponseBodyAsString();
+        string = string.replaceAll("xmlns=\"http://monitoring.amazonaws.com/doc/2009-05-15/\"", "");
+        return new Builder().build(new ByteArrayInputStream(string.getBytes("UTF-8")));
+    }
+
+    public static void main(String[] args) throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParsingException {
+        Document doc = blah("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+        Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+        Nodes members = doc.query("/ListMetricsResponse/ListMetricsResult/Metrics/member");
+        for (int i = 0; i < members.size(); i++) {
+            Node member = members.get(i);
+            String measureName = member.query("MeasureName/text()").get(0).getValue();
+            String nameSpace = member.query("Namespace/text()").get(0).getValue();
+            Nodes dimensions = member.query("Dimensions/member/Name/text()");
+            if (dimensions.size() > 0) {
+                System.out.println("Measure = " + measureName);
+                System.out.println("Namespace = " + nameSpace);
+                String dimensionName = member.query("Dimensions/member/Name/text()").get(0).getValue();
+                String dimensionValue = member.query("Dimensions/member/Value/text()").get(0).getValue();
+                System.out.println("\t" + dimensionName + " = " + dimensionValue);
+                Set<String> strings = map.get(nameSpace);
+                if (strings == null) {
+                    strings = new HashSet<String>();
+                    map.put(nameSpace, strings);
+                }
+                strings.add(measureName);
+            }
+        }
+        System.out.println(map);
     }
 }

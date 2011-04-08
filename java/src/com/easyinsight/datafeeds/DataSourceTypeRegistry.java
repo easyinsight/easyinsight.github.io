@@ -7,7 +7,7 @@ import com.easyinsight.datafeeds.campaignmonitor.CMClientSource;
 import com.easyinsight.datafeeds.campaignmonitor.CampaignMonitorDataSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
-import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
+import com.easyinsight.datafeeds.cloudwatch.*;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.constantcontact.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
@@ -156,6 +156,10 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.ZENDESK_ORGANIZATION, ZendeskOrganizationSource.class);
         registerType(FeedType.ZENDESK_TICKET, ZendeskTicketSource.class);
         registerType(FeedType.ZENDESK_GROUP_TO_USER, ZendeskGroupToUserJoinSource.class);
+        registerType(FeedType.AMAZON_EC2, AmazonEC2Source.class);
+        registerType(FeedType.AMAZON_EBS, AmazonEBSSource.class);
+        registerType(FeedType.AMAZON_SQS, AmazonSQSSource.class);
+        registerType(FeedType.AMAZON_RDS, AmazonRDSSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

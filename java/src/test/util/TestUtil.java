@@ -25,6 +25,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 
 /**
  * User: James Boe
@@ -89,6 +90,18 @@ public class TestUtil {
         conn.setAutoCommit(true);
         Database.instance().closeConnection(conn);
         return feedDefinition.getDataFeedID();
+    }
+
+    public static void login(String userName) {
+        StatelessSession session = Database.instance().createStatelessSession();
+        try {
+            User user = (User) session.createQuery("from User where userName = ?").setString(0, userName).list().get(0);
+            TestSecurityProvider testSecurityProvider = new TestSecurityProvider();
+            testSecurityProvider.setUserPrincipal(user.getUserID());
+            SecurityUtil.setSecurityProvider(testSecurityProvider);
+        } finally {
+            session.close();
+        }
     }
 
     /**

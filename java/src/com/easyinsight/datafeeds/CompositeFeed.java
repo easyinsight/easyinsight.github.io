@@ -149,6 +149,7 @@ public class CompositeFeed extends Feed {
         Map<Long, QueryStateNode> neededNodes = new HashMap<Long, QueryStateNode>();
 
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>(analysisItems);
+        Set<AnalysisItem> alwaysSet = new HashSet<AnalysisItem>();
         for (CompositeFeedNode node : compositeFeedNodes) {
             QueryStateNode queryStateNode = new QueryStateNode(node.getDataFeedID(), conn);
             queryNodeMap.put(node.getDataFeedID(), queryStateNode);
@@ -158,6 +159,9 @@ public class CompositeFeed extends Feed {
                     itemSet.remove(analysisItem);
                     neededNodes.put(queryStateNode.feedID, queryStateNode);
                     queryStateNode.addItem(analysisItem);
+                } else if (alwaysPassThrough(analysisItem)) {
+                    alwaysSet.add(analysisItem);
+                    queryStateNode.addItem(analysisItem);
                 }
             }
             if (filters != null) {
@@ -165,11 +169,15 @@ public class CompositeFeed extends Feed {
                     if (filterDefinition.isSingleSource()) {
                         if (queryStateNode.handles(filterDefinition.getField().getKey())) {
                             queryStateNode.addFilter(filterDefinition);
+                        } else if (alwaysPassThrough(filterDefinition.getField())) {
+                            queryStateNode.addFilter(filterDefinition);
                         }
                     }
                 }
             }
         }
+
+        itemSet.removeAll(alwaysSet);
 
         if (itemSet.size() > 0) {
             StringBuilder builder = new StringBuilder();
@@ -361,6 +369,10 @@ public class CompositeFeed extends Feed {
         dataSet.setAudits(auditStrings);
 
         return dataSet;
+    }
+
+    protected boolean alwaysPassThrough(AnalysisItem analysisItem) {
+        return false;
     }
 
     private class QueryStateNode {

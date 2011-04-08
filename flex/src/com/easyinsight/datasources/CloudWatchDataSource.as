@@ -1,10 +1,9 @@
 package com.easyinsight.datasources
 {
-import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource")]
-	public class CloudWatchDataSource extends ServerDataSourceDefinition
+	public class CloudWatchDataSource extends CompositeServerDataSource
 	{
         public var cwUserName:String;
         public var cwPassword:String;

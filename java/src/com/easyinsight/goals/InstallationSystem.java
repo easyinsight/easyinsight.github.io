@@ -20,9 +20,7 @@ import java.util.*;
 public class InstallationSystem {
 
     private EIConnection conn;
-    private GoalStorage goalStorage = new GoalStorage();
     private FeedStorage feedStorage = new FeedStorage();
-    private SolutionService solutionService = new SolutionService();
 
     public InstallationSystem(EIConnection conn) {
         this.conn = conn;
@@ -35,7 +33,11 @@ public class InstallationSystem {
         ResultSet rs = queryStmt.executeQuery();
         rs.next();
         int type = rs.getInt(1);
-        FeedDefinition dataSource = new DataSourceTypeRegistry().createDataSource(FeedType.valueOf(type));
+        return installConnection(type);
+    }
+
+    public FeedDefinition installConnection(int dataSourceType) throws Exception {
+        FeedDefinition dataSource = new DataSourceTypeRegistry().createDataSource(FeedType.valueOf(dataSourceType));
         dataSource.setApiKey(RandomTextGenerator.generateText(12));
         dataSource.setDateCreated(new Date());
         dataSource.setDateUpdated(new Date());

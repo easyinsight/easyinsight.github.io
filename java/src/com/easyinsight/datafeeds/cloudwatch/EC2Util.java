@@ -1,5 +1,10 @@
 package com.easyinsight.datafeeds.cloudwatch;
 
+import com.xerox.amazonws.ec2.VolumeInfo;
+import nu.xom.Builder;
+import nu.xom.Nodes;
+import nu.xom.ParsingException;
+import nu.xom.ValidityException;
 import org.xml.sax.SAXException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -15,10 +20,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.Mac;
-import java.util.List;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.io.ByteArrayInputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.security.SignatureException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,8 +44,36 @@ public class EC2Util {
 
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     private static String hmacString = "Action{0}AWSAccessKeyId{1}SignatureVersion1Timestamp{2}Version2006-10-01";
+    private static String dbHmacString = "Action{0}AWSAccessKeyId{1}SignatureVersion1Timestamp{2}Version2010-07-28";
     private static String queryString = "https://ec2.amazonaws.com?Action={0}&AWSAccessKeyId={1}&SignatureVersion=1&Timestamp={2}&" +
             "Version=2006-10-01&Signature={3}";
+
+    private static String dbQueryString = "https://rds.amazonaws.com/?Action={0}&AWSAccessKeyId={1}&SignatureVersion=2&SignatureMethod=HmacSHA256&Timestamp={2}&" +
+            "Version=2010-07-28&Signature={3}";
+
+    public static List<String> getDatabaseInstances(String key, String secretKey) throws ParserConfigurationException, SignatureException, IOException, SAXException, InvalidKeyException, NoSuchAlgorithmException, ParsingException {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("Action", "DescribeDBInstances");
+        params.put("SignatureMethod", "HmacSHA256");
+        params.put("SignatureVersion", "2");
+        params.put("Version", "2010-07-28");
+        String url = new RDSSignedRequestsHelper(key, secretKey).sign(params);
+
+        HttpClient httpClient = new HttpClient();
+        HttpMethod method = new GetMethod(url);
+        int statusCode = httpClient.executeMethod(method);
+        String string = method.getResponseBodyAsString();
+        string = string.replace("xmlns=\"http://rds.amazonaws.com/doc/2010-07-28/\"", "");
+        nu.xom.Document doc = new Builder().build(new ByteArrayInputStream(string.getBytes()));
+        Nodes instanceNodes = doc.query("/DescribeDBInstancesResponse/DescribeDBInstancesResult/DBInstances/DBInstance");
+        List<String> instances = new ArrayList<String>();
+        for (int i = 0; i < instanceNodes.size(); i++) {
+            nu.xom.Node node = instanceNodes.get(i);
+            instances.add(node.query("DBInstanceIdentifier/text()").get(0).getValue());
+        }
+
+        return instances;
+    }
 
     public static List<EC2Info> getInstances(String key, String secretKey) throws ParserConfigurationException, SignatureException, IOException, SAXException {
         String action = "DescribeInstances";
@@ -169,26 +202,52 @@ public class EC2Util {
             return result;
         }
 
-    public static DataSet createDataSet(List<EC2Info> ec2Infos, Collection<AnalysisDimension> dimensions) {
+    public static DataSet createDataSetForEBS(List<VolumeInfo> volumeInfos, Collection<AnalysisDimension> dimensions) {
         DataSet dataSet = new DataSet();
-        for (EC2Info ec2Info : ec2Infos) {
+        for (VolumeInfo volumeInfo : volumeInfos) {
             IRow row = dataSet.createRow();
             for (AnalysisDimension dimension : dimensions) {
-                if (CloudWatchDataSource.IMAGE_ID.equals(dimension.getKey().toKeyString())) {
-                    row.addValue(dimension.getKey(), ec2Info.getAmiID());
-                } else if (CloudWatchDataSource.INSTANCE_ID.equals(dimension.getKey().toKeyString())) {
-                    row.addValue(dimension.getKey(), ec2Info.getInstanceID());
-                } else if (CloudWatchDataSource.GROUP_NAME.equals(dimension.getKey().toKeyString())) {
-                    row.addValue(dimension.getKey(), ec2Info.getGroup());
-                } else if (CloudWatchDataSource.HOST_NAME.equals(dimension.getKey().toKeyString())) {
-                    row.addValue(dimension.getKey(), ec2Info.getHostName());
+                if (AmazonEBSSource.VOLUME.equals(dimension.getKey().toKeyString())) {
+                    row.addValue(dimension.createAggregateKey(), volumeInfo.getVolumeId());
                 }
             }
         }
         return dataSet;
     }
 
-    public static void main(String[] args) throws IOException, SignatureException, ParserConfigurationException, SAXException {
-        EC2Util.getInstances("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+    public static DataSet createDataSetForRDS(List<String> infos, Collection<AnalysisDimension> dimensions) {
+        DataSet dataSet = new DataSet();
+        for (String info : infos) {
+            IRow row = dataSet.createRow();
+            for (AnalysisDimension dimension : dimensions) {
+                if (AmazonRDSSource.INSTANCE_IDENTIFIER.equals(dimension.getKey().toKeyString())) {
+                    row.addValue(dimension.createAggregateKey(), info);
+                }
+            }
+        }
+        return dataSet;
+    }
+
+    public static DataSet createDataSet(List<EC2Info> ec2Infos, Collection<AnalysisDimension> dimensions) {
+        DataSet dataSet = new DataSet();
+        for (EC2Info ec2Info : ec2Infos) {
+            IRow row = dataSet.createRow();
+            for (AnalysisDimension dimension : dimensions) {
+                if (AmazonEC2Source.IMAGE_ID.equals(dimension.getKey().toKeyString())) {
+                    row.addValue(dimension.createAggregateKey(), ec2Info.getAmiID());
+                } else if (AmazonEC2Source.INSTANCE_ID.equals(dimension.getKey().toKeyString())) {
+                    row.addValue(dimension.createAggregateKey(), ec2Info.getInstanceID());
+                } else if (AmazonEC2Source.GROUP_NAME.equals(dimension.getKey().toKeyString())) {
+                    row.addValue(dimension.createAggregateKey(), ec2Info.getGroup());
+                } else if (AmazonEC2Source.HOST_NAME.equals(dimension.getKey().toKeyString())) {
+                    row.addValue(dimension.createAggregateKey(), ec2Info.getHostName());
+                }
+            }
+        }
+        return dataSet;
+    }
+
+    public static void main(String[] args) throws IOException, SignatureException, ParserConfigurationException, SAXException, InvalidKeyException, NoSuchAlgorithmException, ParsingException {
+        EC2Util.getDatabaseInstances("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
     }
 }
