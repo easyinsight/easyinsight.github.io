@@ -56,6 +56,9 @@ import java.sql.Connection;
  */
 public class SalesforceBaseDataSource extends CompositeServerDataSource {
 
+    public static final String SALESFORCE_CONSUMER_KEY = "3MVG9VmVOCGHKYBQUAbz7d7kk6x2g29kEbyFhTBt7u..yutNvp7evoFyWTm2q4tZfWRdxekrK6fhhwf5BN4Tq";
+    public static final String SALESFORCE_SECRET_KEY = "5028271817562655674";
+
     public static final String OPPORTUNITY = "Opportunity";
     public static final String ACCOUNT = "Account";
     public static final String LEAD = "Lead";
