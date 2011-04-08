@@ -3,6 +3,7 @@ package com.easyinsight.users;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksCompositeSource;
+import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedType;
@@ -11,6 +12,7 @@ import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import flex.messaging.FlexContext;
+import net.smartam.leeloo.client.request.OAuthClientRequest;
 import oauth.signpost.OAuth;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
@@ -87,12 +89,21 @@ public class TokenService {
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else if (type == FeedType.SALESFORCE.getType()) {
-                consumer = new DefaultOAuthConsumer(SALESFORCE_CONSUMER_KEY,
-                        "5028271817562655674");
+                /*consumer = new DefaultOAuthConsumer(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY,
+                        SalesforceBaseDataSource.SALESFORCE_SECRET_KEY);
                 provider = new DefaultOAuthProvider(
                         "https://login.salesforce.com" + "/_nc_external/system/security/oauth/RequestTokenHandler",
                         "https://login.salesforce.com" + "/_nc_external/system/security/oauth/AccessTokenHandler",
-                        "https://login.salesforce.com" + "/setup/secur/RemoteAccessAuthorizationPage.apexp");
+                        "https://login.salesforce.com" + "/setup/secur/RemoteAccessAuthorizationPage.apexp");*/
+
+                OAuthClientRequest clientRequest = OAuthClientRequest.authorizationLocation("https://na1.salesforce.com/services/oauth2/authorize").
+                        setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
+                        setRedirectURI("https://localhost/app/oauth").
+                        setResponseType("code").
+                        //setRedirectURI("https://localhost/app/oauth").
+                        buildQueryMessage();
+                return new OAuthResponse(clientRequest.getLocationUri(), true);
+
             } else {
                 throw new RuntimeException();
             }

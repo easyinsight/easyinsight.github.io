@@ -4,7 +4,19 @@ import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.logging.LogClass;
+import net.smartam.leeloo.client.OAuthClient;
+import net.smartam.leeloo.client.URLConnectionClient;
+import net.smartam.leeloo.client.request.OAuthClientRequest;
+import net.smartam.leeloo.client.response.OAuthJSONAccessTokenResponse;
+import net.smartam.leeloo.common.message.types.GrantType;
+import oauth.signpost.OAuthConsumer;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,6 +36,34 @@ public class OAuthServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            String code = req.getParameter("code");
+            if(code != null) {
+                OAuthClientRequest request = OAuthClientRequest.tokenLocation("https://na1.salesforce.com/services/oauth2/token").
+                        setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
+                        setClientSecret(SalesforceBaseDataSource.SALESFORCE_SECRET_KEY).
+                        setRedirectURI("https://localhost/app/oauth").
+                        setCode(code).buildBodyMessage();
+                OAuthClient client = new OAuthClient(new URLConnectionClient());
+                OAuthJSONAccessTokenResponse response = client.accessToken(request);
+                String token = response.getAccessToken();
+                System.out.println(response.getBody());
+                String instanceUrl = response.getParam("instance_url");
+                String idUrl = response.getParam("id");
+                //HttpGet httpRequest = new HttpGet(instanceUrl + "/services/data/v20.0/query/?q=SELECT+name+from+Account");
+                HttpGet httpRequest = new HttpGet(idUrl);
+                httpRequest.setHeader("Accept", "application/xml");
+                httpRequest.setHeader("Content-Type", "application/xml");
+                httpRequest.setHeader("Authorization", "OAuth " + token);
+
+
+                org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+                String string = cc.execute(httpRequest, responseHandler);
+                System.out.println(string);
+                    return;
+                }
+
             String verifier = req.getParameter("oauth_verifier");
             String dataSourceID = req.getParameter("dataSourceID");
             int redirectType = Integer.parseInt(req.getParameter("redirectTarget"));
@@ -49,6 +89,7 @@ public class OAuthServlet extends HttpServlet {
                         redirectURL = "https://www.easy-insight.com/app/#connectionConfig="+feedDefinition.getApiKey();
                     } else {
                         redirectURL = "https://staging.easy-insight.com/app/#connectionConfig="+feedDefinition.getApiKey();
+                        redirectURL = "https://localhost/app/#connectionConfig="+feedDefinition.getApiKey();
                     }
                 } else {
                     if (ConfigLoader.instance().isProduction()) {
