@@ -98,7 +98,7 @@ public class TokenService {
 
                 OAuthClientRequest clientRequest = OAuthClientRequest.authorizationLocation("https://na1.salesforce.com/services/oauth2/authorize").
                         setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
-                        setRedirectURI("https://localhost/app/oauth").
+                        setRedirectURI("https://www.easy-insight.com/app/oauth").
                         setResponseType("code").
                         //setRedirectURI("https://localhost/app/oauth").
                         buildQueryMessage();
