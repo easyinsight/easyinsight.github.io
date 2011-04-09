@@ -11,6 +11,8 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import nu.xom.*;
@@ -81,17 +83,26 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return FeedType.BASECAMP;
     }
 
+    @Override
+    protected boolean clearsData() {
+        return false;
+    }
+
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
+        DateFormat deadlineTimeFormat = new SimpleDateFormat(XMLDATETIMEFORMAT);
         DateFormat altFormat = new SimpleDateFormat(ALTDATEFORMAT);
 
-        DataSet ds = new DataSet();
+        if (lastRefreshDate == null) {
+            lastRefreshDate = new Date(1);
+        }
+
+        //DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false, conn);
 
-        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
         try {
@@ -99,10 +110,30 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
             Document projects = runRestRequest("/projects.xml", client, builder, url, null, true, parentDefinition, false);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
+                DataSet ds = new DataSet();
                 Node curProject = projectNodes.get(i);
                 String projectName = queryField(curProject, "name/text()");
                 String projectCreatedAtString = queryField(curProject, "created-on/text()");
+                String projectChangedOnString = queryField(curProject, "last-changed-on/text()");
+
+
+
                 Date projectCreatedAt = deadlineFormat.parse(projectCreatedAtString);
+                Date projectChangedAt;
+                if (projectChangedOnString == null) {
+                    projectChangedAt = new Date();
+                } else {
+                    projectChangedAt = deadlineTimeFormat.parse(projectChangedOnString);
+                }
+
+                long delta = lastRefreshDate.getTime() - projectChangedAt.getTime();
+
+                long daysSinceChange = delta / (60 * 60 * 1000 * 24);
+
+                if (daysSinceChange > 0) {
+                    continue;
+                }
+
                 String announcement = queryField(curProject, "announcement/text()"); 
                 loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", callDataID);
                 String projectStatus = queryField(curProject, "status/text()");
@@ -127,13 +158,11 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     String id = queryField(milestoneNode, "id/text()");
                     String milestoneName = queryField(milestoneNode, "title/text()");
                     String milestoneDl = queryField(milestoneNode, "deadline/text()");
-                    System.out.println("deadline = " + milestoneDl);
-                    Date milestoneDeadline = null;
+                    Date milestoneDeadline;
                     try {
                         milestoneDeadline = deadlineFormat.parse(milestoneDl);
                     } catch (ParseException e) {
                         milestoneDeadline = altFormat.parse(milestoneDl);
-                        System.out.println("parsed into " + milestoneDeadline);
                     }
                     String milestoneCreatedOnString = queryField(milestoneNode, "created-on/text()");
                     Date milestoneCreatedOn = deadlineFormat.parse(milestoneCreatedOnString);
@@ -298,25 +327,15 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     }
                 }
 
-                if (writeDuring) {
-                    dataStorage.insertData(ds);
-                    ds = new DataSet();
-                }
-
+                StringWhere stringWhere = new StringWhere(keys.get(PROJECTID), projectIdToRetrieve);
+                dataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
             }
         } catch (ReportException re) {
             throw re;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        if (!writeDuring) {
-            if (parentDefinition.isAdjustDates()) {
-                ds = adjustDates(ds);
-            }
-            return ds;
-        } else {
-            return null;
-        }
+        return null;
     }
 
     private static class MilestoneInfo {
