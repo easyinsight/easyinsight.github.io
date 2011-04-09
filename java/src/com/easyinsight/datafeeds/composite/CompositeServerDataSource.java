@@ -144,7 +144,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             feedDefinition.setUploadPolicy(uploadPolicy);
             FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, uploadPolicy);
             metadata = feedCreationResult.getTableDefinitionMetadata();
-            metadata.commit();
+            if (metadata != null) {
+                metadata.commit();
+            }
         } catch (SQLException e) {
             if (metadata != null) {
                 metadata.rollback();
