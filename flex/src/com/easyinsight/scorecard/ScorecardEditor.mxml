@@ -117,6 +117,7 @@
         }
 
         private function saved(event:ScorecardSaveEvent):void {
+            _scorecardID = event.scorecard.scorecardID;
             this.kpis = event.scorecard.kpis;
             this.scorecard = event.scorecard;
             var feedFragmentObject:Object = new Object();
@@ -129,6 +130,7 @@
         private function viewScorecard():void {
             if (scorecardChanged) {
                 createPromptWindow("You have unsaved changes to this scorecard.", function():void {
+                    _scorecardID = scorecard.scorecardID;
                     scorecardView();
                 });
             } else {
