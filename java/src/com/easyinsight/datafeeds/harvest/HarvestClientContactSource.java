@@ -74,7 +74,7 @@ public class HarvestClientContactSource extends HarvestBaseSource {
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
         try {
-            Document contacts = runRestRequest("/contacts", client, builder, source.getUrl(), true, source, true);
+            Document contacts = runRestRequest("/contacts", client, builder, source.getUrl(), true, source, false);
             Nodes contactNodes = contacts.query("/contacts/contact");
             for(int i = 0;i < contactNodes.size();i++) {
                 Node curContact = contactNodes.get(i);

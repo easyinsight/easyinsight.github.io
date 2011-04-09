@@ -71,12 +71,12 @@ public class HarvestProjectSource extends HarvestBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_ACTIVE), true));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_BILLABLE), true));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_BILL_BY), true));
-        analysisItems.add(new AnalysisMeasure(keys.get(HOURLY), AggregationTypes.AVERAGE));
+        analysisItems.add(new AnalysisMeasure(keys.get(HOURLY), HOURLY, AggregationTypes.AVERAGE, true, FormattingConfiguration.CURRENCY));
         AnalysisDimension clientID = new AnalysisDimension(keys.get(CLIENT_ID), true);
         clientID.setHidden(true);
         analysisItems.add(clientID);
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_CODE), true));
-        analysisItems.add(new AnalysisDimension(keys.get(NOTES), true));
+        analysisItems.add(new AnalysisText(keys.get(NOTES)));
         analysisItems.add(new AnalysisDimension(keys.get(BUDGET_BY), true));
         analysisItems.add(new AnalysisMeasure(keys.get(BUDGET), AggregationTypes.SUM));
         analysisItems.add(new AnalysisDateDimension(keys.get(FIRST_RECORD), true, AnalysisDateDimension.DAY_LEVEL));

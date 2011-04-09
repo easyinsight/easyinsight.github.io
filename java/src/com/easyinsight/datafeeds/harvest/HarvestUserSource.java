@@ -63,7 +63,7 @@ public class HarvestUserSource extends HarvestBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(FIRST_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(LAST_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(FUTURE_PROJECTS_ACCESS), true));
-        analysisItems.add(new AnalysisMeasure(keys.get(DEFAULT_HOURLY_RATE), AggregationTypes.AVERAGE));
+        analysisItems.add(new AnalysisMeasure(keys.get(DEFAULT_HOURLY_RATE), DEFAULT_HOURLY_RATE, AggregationTypes.AVERAGE, true, FormattingConfiguration.CURRENCY));
         analysisItems.add(new AnalysisDimension(keys.get(IS_ACTIVE), true));
         analysisItems.add(new AnalysisDimension(keys.get(IS_ADMIN), true));
         analysisItems.add(new AnalysisDimension(keys.get(IS_CONTRACTOR), true));
@@ -81,7 +81,7 @@ public class HarvestUserSource extends HarvestBaseSource {
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
         try {
-            Document users = runRestRequest("/people", client, builder, source.getUrl(), true, parentDefinition, true);
+            Document users = runRestRequest("/people", client, builder, source.getUrl(), true, parentDefinition, false);
             Nodes userNodes = users.query("/users/user");
             for(int i = 0;i < userNodes.size();i++) {
                 Node user = userNodes.get(i);

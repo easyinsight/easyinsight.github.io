@@ -50,7 +50,7 @@ public class HarvestTaskAssignmentSource extends HarvestBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(BILLABLE), true));
         analysisItems.add(new AnalysisDimension(keys.get(DEACTIVATED), true));
         analysisItems.add(new AnalysisMeasure(keys.get(BUDGET), AggregationTypes.SUM));
-        analysisItems.add(new AnalysisMeasure(keys.get(HOURLY), AggregationTypes.AVERAGE));
+        analysisItems.add(new AnalysisMeasure(keys.get(HOURLY), HOURLY, AggregationTypes.AVERAGE, true, FormattingConfiguration.CURRENCY));
         analysisItems.add(new AnalysisMeasure(keys.get(TASK_ASSIGNMENT_COUNT), AggregationTypes.SUM));
         return analysisItems;
     }
@@ -68,7 +68,7 @@ public class HarvestTaskAssignmentSource extends HarvestBaseSource {
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectId = queryField(curProject, "id/text()");
-                Document assignments = runRestRequest("/projects/" + projectId + "/task_assignments", client, builder, source.getUrl(), true, source, true);
+                Document assignments = runRestRequest("/projects/" + projectId + "/task_assignments", client, builder, source.getUrl(), true, source, false);
                 Nodes assignmentNodes = assignments.query("/task-assignments/task-assignment");
                 for(int j = 0;j < assignmentNodes.size();j++) {
                     Node curAssignment = assignmentNodes.get(j);

@@ -77,7 +77,7 @@ public class HarvestTimeSource extends HarvestBaseSource {
         analysisItems.add(userIdDim);
 
         analysisItems.add(new AnalysisMeasure(keys.get(HOURS), AggregationTypes.SUM));
-        analysisItems.add(new AnalysisDimension(keys.get(NOTES), true));
+        analysisItems.add(new AnalysisText(keys.get(NOTES)));
         analysisItems.add(new AnalysisDateDimension(keys.get(SPENT_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDimension(keys.get(IS_BILLED), true));
         analysisItems.add(new AnalysisDimension(keys.get(IS_CLOSED), true));
@@ -102,7 +102,7 @@ public class HarvestTimeSource extends HarvestBaseSource {
                 String latestRecord = queryField(curProject, "hint-latest-record-at/text()");
                 String earliestRecord = queryField(curProject, "hint-earliest-record-at/text()");
 
-                Document entries = runRestRequest("/projects/" + projectId + "/entries?from=" + OUT_DATE.format(DATE_FORMAT.parse(earliestRecord)) + "&to=" + OUT_DATE.format(DATE_FORMAT.parse(latestRecord)), client, builder, source.getUrl(), true, source, true);
+                Document entries = runRestRequest("/projects/" + projectId + "/entries?from=" + OUT_DATE.format(DATE_FORMAT.parse(earliestRecord)) + "&to=" + OUT_DATE.format(DATE_FORMAT.parse(latestRecord)), client, builder, source.getUrl(), true, source, false);
                 Nodes entryNodes = entries.query("/day-entries/day-entry");
                 for(int j = 0;j < entryNodes.size();j++) {
                     Node timeEntry = entryNodes.get(j);

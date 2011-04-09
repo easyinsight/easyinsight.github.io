@@ -41,7 +41,7 @@ public class HarvestTaskSource extends HarvestBaseSource {
         analysisItems.add(taskId);
         analysisItems.add(new AnalysisDimension(keys.get(DEACTIVATED), true));
         analysisItems.add(new AnalysisDimension(keys.get(BILLABLE_BY_DEFAULT), true));
-        analysisItems.add(new AnalysisMeasure(keys.get(DEFAULT_HOURLY_RATE), AggregationTypes.AVERAGE));
+        analysisItems.add(new AnalysisMeasure(keys.get(DEFAULT_HOURLY_RATE), DEFAULT_HOURLY_RATE, AggregationTypes.AVERAGE, true, FormattingConfiguration.CURRENCY));
         analysisItems.add(new AnalysisDimension(keys.get(DEFAULT), true));
         analysisItems.add(new AnalysisDimension(keys.get(NAME), true));
         analysisItems.add(new AnalysisMeasure(keys.get(TASK_COUNT), AggregationTypes.SUM));
@@ -70,7 +70,7 @@ public class HarvestTaskSource extends HarvestBaseSource {
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
         try {
-            Document tasks = runRestRequest("/tasks", client, builder, source.getUrl(), true, source, true);
+            Document tasks = runRestRequest("/tasks", client, builder, source.getUrl(), true, source, false);
             Nodes taskNodes = tasks.query("/tasks/task");
             for(int i = 0;i < taskNodes.size();i++) {
                 Node curTask = taskNodes.get(i);

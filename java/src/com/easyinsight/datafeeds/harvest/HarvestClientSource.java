@@ -64,7 +64,7 @@ public class HarvestClientSource extends HarvestBaseSource {
         HttpClient client = getHttpClient(source.getUsername(), source.getPassword());
         Builder builder = new Builder();
         try {
-            Document clients = runRestRequest("/clients", client, builder, source.getUrl(), true, parentDefinition, true);
+            Document clients = runRestRequest("/clients", client, builder, source.getUrl(), true, parentDefinition, false);
             Nodes clientNodes = clients.query("/clients/client");
             for(int i = 0;i < clientNodes.size();i++) {
                 Node curClient = clientNodes.get(i);

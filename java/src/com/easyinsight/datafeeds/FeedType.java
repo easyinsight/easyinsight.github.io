@@ -118,6 +118,7 @@ public class FeedType {
     public static final FeedType HARVEST_EXPENSE_CATEGORIES = new FeedType(110);
     public static final FeedType AMAZON_SQS = new FeedType(111);
     public static final FeedType AMAZON_RDS = new FeedType(112);
+    public static final FeedType HARVEST_INVOICES = new FeedType(113);
 
     private int type;
 

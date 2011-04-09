@@ -1,13 +1,17 @@
 package com.easyinsight.datafeeds.harvest;
 
 import com.easyinsight.PasswordStorage;
-import com.easyinsight.analysis.DataSourceConnectivityReportFault;
-import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.datafeeds.freshbooks.FreshbooksExpenseSource;
+import com.easyinsight.datafeeds.freshbooks.FreshbooksInvoiceSource;
+import com.easyinsight.datafeeds.freshbooks.FreshbooksPaymentSource;
+import com.easyinsight.datafeeds.freshbooks.FreshbooksTimeEntrySource;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.users.Account;
@@ -40,7 +44,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
 
     public Document getOrRetrieveProjects(HttpClient client, Builder builder) throws ParsingException {
         if(projects == null) {
-            projects = runRestRequest("/projects", client, builder, getUrl(), true, this, true);
+            projects = runRestRequest("/projects", client, builder, getUrl(), true, this, false);
         }
         return projects;
     }
@@ -87,7 +91,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
     public String validateCredentials() {
         Builder builder = new Builder();
         try {
-            Document d = runRestRequest("/projects", getHttpClient(username, password), builder, getUrl(), true, null, true);
+            Document d = runRestRequest("/projects", getHttpClient(username, password), builder, getUrl(), true, null, false);
         } catch(Exception e) {
             return e.getMessage();
         }
@@ -120,6 +124,8 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.HARVEST_TASK_ASSIGNMENTS);
         types.add(FeedType.HARVEST_USERS);
         types.add(FeedType.HARVEST_EXPENSES);
+        types.add(FeedType.HARVEST_EXPENSE_CATEGORIES);
+        types.add(FeedType.HARVEST_INVOICES);
         return types;
     }
 
@@ -131,7 +137,11 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HARVEST_PROJECT, FeedType.HARVEST_TIME, HarvestProjectSource.PROJECT_ID, HarvestTimeSource.PROJECT_ID),
                 new ChildConnection(FeedType.HARVEST_PROJECT, FeedType.HARVEST_TASK_ASSIGNMENTS, HarvestProjectSource.PROJECT_ID, HarvestTaskAssignmentSource.PROJECT_ID),
                 new ChildConnection(FeedType.HARVEST_TASKS, FeedType.HARVEST_TASK_ASSIGNMENTS, HarvestTaskSource.ID,  HarvestTaskAssignmentSource.TASK_ID),
-                new ChildConnection(FeedType.HARVEST_USERS, FeedType.HARVEST_TIME, HarvestUserSource.USER_ID,  HarvestTimeSource.USER_ID)
+                new ChildConnection(FeedType.HARVEST_USERS, FeedType.HARVEST_TIME, HarvestUserSource.USER_ID,  HarvestTimeSource.USER_ID),
+                new ChildConnection(FeedType.HARVEST_PROJECT, FeedType.HARVEST_EXPENSES, HarvestProjectSource.PROJECT_ID, HarvestExpenseSource.PROJECT_ID),
+                new ChildConnection(FeedType.HARVEST_USERS,  FeedType.HARVEST_EXPENSES, HarvestUserSource.USER_ID, HarvestExpenseSource.USER_ID),
+                new ChildConnection(FeedType.HARVEST_EXPENSE_CATEGORIES, FeedType.HARVEST_EXPENSES, HarvestExpenseCategoriesSource.ID, HarvestExpenseSource.EXPENSE_CATEGORY_ID),
+                new ChildConnection(FeedType.HARVEST_CLIENT, FeedType.HARVEST_INVOICES, HarvestClientSource.CLIENT_ID, HarvestInvoiceSource.CLIENT_ID)
                 );
     }
 
@@ -168,7 +178,17 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
 
     @Override
     public List<KPI> createKPIs() {
-        return new ArrayList<KPI>();
+        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+        rollingFilterDefinition.setField(findAnalysisItem(HarvestInvoiceSource.ISSUED_AT));
+        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.QUARTER);
+        List<KPI> kpis = new ArrayList<KPI>();
+        kpis.add(KPIUtil.createKPIWithFilters("Invoiced Dollars in the Last 90 Days", "document.png", (AnalysisMeasure) findAnalysisItem(HarvestInvoiceSource.AMOUNT),
+            Arrays.asList((FilterDefinition) rollingFilterDefinition), KPI.GOOD, 90));
+        kpis.add(KPIUtil.createKPIForDateFilter("Hours Tracked in the Last 90 Days", "clock.png", (AnalysisMeasure) findAnalysisItem(HarvestTimeSource.HOURS),
+            (AnalysisDimension) findAnalysisItem(HarvestTimeSource.CREATED_AT), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
+        kpis.add(KPIUtil.createKPIForDateFilter("Expenses in the Last 90 Days", "money.png", (AnalysisMeasure) findAnalysisItem(HarvestExpenseSource.TOTAL_COST),
+            (AnalysisDimension) findAnalysisItem(HarvestExpenseSource.SPENT_AT), MaterializedRollingFilterDefinition.QUARTER, new ArrayList<FilterDefinition>(), KPI.GOOD, 90));
+        return kpis;
     }
 
     protected static HttpClient getHttpClient(String username, String password) {

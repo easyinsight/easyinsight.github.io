@@ -75,7 +75,7 @@ public class HarvestExpenseSource extends HarvestBaseSource {
         projectId.setHidden(true);
         analysisItems.add(projectId);
         analysisItems.add(new AnalysisDateDimension(keys.get(SPENT_AT), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisMeasure(keys.get(TOTAL_COST), AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(TOTAL_COST), TOTAL_COST, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         analysisItems.add(new AnalysisMeasure(keys.get(UNITS), AggregationTypes.SUM));
         AnalysisItem userId = new AnalysisDimension(keys.get(USER_ID), true);
         userId.setHidden(true);
@@ -101,7 +101,7 @@ public class HarvestExpenseSource extends HarvestBaseSource {
                 if(lastRefreshDate != null) {
                     reqString += "&updated_since=" + URLEncoder.encode(UPDATED_SINCE_FORMAT.format(lastRefreshDate), "UTF-8");
                 }
-                Document entries = runRestRequest(reqString, client, builder, source.getUrl(), true, source, true);
+                Document entries = runRestRequest(reqString, client, builder, source.getUrl(), true, source, false);
                 Nodes entryNodes = entries.query("/expenses/expense");
                 if(lastRefreshDate == null) {
                     DataSet ds = new DataSet();
