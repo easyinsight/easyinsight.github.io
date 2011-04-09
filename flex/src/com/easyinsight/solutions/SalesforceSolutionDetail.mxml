@@ -1,8 +1,6 @@
 <?xml version="1.0" ?>
 <solutions:SolutionDetailRenderer xmlns:mx="http://www.adobe.com/2006/mxml"
-                                  xmlns:solutions="com.easyinsight.solutions.*"
-         width="100%" height="100%" paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0"
-         backgroundColor="#818285">
+                                  xmlns:solutions="com.easyinsight.solutions.*">
     <solutions:states>
         <mx:State name="AccountBelowRequired">
             <mx:RemoveChild target="{installButton}"/>
@@ -19,72 +17,43 @@
     </solutions:states>
     <mx:Script><![CDATA[
 
-
         override protected function toAccountBelowRequiredState():void {
             currentState = "AccountBelowRequired";
         }
         ]]></mx:Script>
-    <mx:HBox width="1000" height="100%" backgroundSize="100%" paddingLeft="20"
-             paddingRight="20" paddingTop="20" paddingBottom="20">
-        <mx:VBox horizontalAlign="center" height="100%">
-            <mx:Image source="{logo}" click="toVendorPage()"/>
-            <mx:Spacer height="100%"/>
-            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="5" paddingBottom="5" horizontalAlign="center">
-                <mx:Box height="190" verticalAlign="middle" paddingLeft="10" paddingRight="20">
-                    <mx:TextArea width="370" backgroundAlpha="0" borderStyle="none" selectable="false"
-                             borderThickness="0" editable="false" height="170" fontSize="16"
-                             text="Want instant insight and reporting on your project management? You can get started with Easy Insight in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation. The full power of enterprise business intelligence is yours for the taking, all delivered with incredible ease of use."/>
-                </mx:Box>
-                <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:VBox horizontalAlign="center">
-                    <mx:Label text="Looking for tips, tricks, and documentation?" fontSize="16"/>
-                    <mx:LinkButton label="Look at Basecamp blog posts" fontSize="16" textDecoration="underline" click="navigateToURL(new URLRequest('http://jamesboe.blogspot.com/search/label/Google%20Analytics'), '_blank')"/>
-                </mx:VBox>
-                <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <mx:Box id="authBox"/>
-                <mx:VBox id="controlsBox" paddingTop="25" paddingBottom="30">
-                    <mx:Button label="Get Started Now!" fontSize="24" click="installSolution()" styleName="blueButton" id="installButton"/>
-                </mx:VBox>
-            </mx:VBox>
-            <mx:Spacer height="100%"/>
+    <mx:HBox width="1100" height="100%" horizontalGap="0">
+        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#000000" rightColor="#FFFFFF"/>
+
+        <mx:VBox width="1000" height="100%" backgroundColor="#FFFFFF" horizontalAlign="center" verticalGap="10"
+                 paddingBottom="20" paddingLeft="20"
+                 paddingRight="20" paddingTop="20">
+            <mx:HBox verticalAlign="middle" width="100%">
+
+                <mx:Image source="{logo}" click="toVendorPage()"/>
+                <mx:Spacer width="100%"/>
+                <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="620"
+                             height="60"
+                             text="Want the ability to perform custom Salesforce reporting? Whether it's simple reports on your sales pipeline or in depth business intelligence analysis, Easy Insight can get you that visibility in a couple of clicks!"
+                             fontSize="14"/>
+                <mx:Spacer width="100%"/>
+
+            </mx:HBox>
+            <mx:HRule width="100%" strokeColor="#333333"/>
+            <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
+                <mx:Button label="Connect to Highrise" fontSize="20" click="installSolution()" styleName="grayButton"
+                           id="installButton"/>
+            </mx:Box>
+            <mx:HRule width="100%" strokeColor="#333333"/>
+            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="50">
+                <mx:Image source="../assets/highrise/CompanyDealTreeSmall.png" height="150"/>
+                <mx:Image source="../assets/highrise/ContactHeatMapSmall.png" height="150"/>
+            </mx:HBox>
+            <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
+                         height="150"
+                         text="Need to build Salesforce reports on your accounts, opportunities, leads, or anything else? Easy Insight gives you the ability to create simple lists of contact information, pie charts of deal dollars by company, line charts of contact creation over time, and anything else you may want! Ad hoc report creation allows you to drag in fields from any of the key Salesforce subject matters to create the reports you need to manage and optimize your sales activities. You can apply dynamic filters to restrict the data down to a particular date range, show only deals matching a certain tag, or only open cases. Once you have a report you like, you can export the data to Excel and set it up to deliver over email on a recurring schedule."
+                         fontSize="14"/>
+
         </mx:VBox>
-        <mx:Spacer width="100%"/>
-        <mx:VBox width="530" height="100%">
-            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="5" paddingBottom="5">
-                <mx:HBox horizontalAlign="center" width="100%" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:Label text="Why Use Easy Insight with Basecamp?" fontSize="18"/>
-                </mx:HBox>
-                <mx:HRule width="100%" strokeColor="#3370ce"/>
-                <!--<mx:HBox width="100%" horizontalAlign="center">
-                    <mx:Label text="Easy Data Exploration" fontSize="16"/>
-                </mx:HBox>-->
-                <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
-                    <mx:Image source="../assets/GA2.png" maxWidth="200" maxHeight="120"/>
-                    <mx:VBox>
-                        <mx:Text text="Ad hoc reporting on your todos and time &#13;tracking" fontSize="14"/>
-                        <mx:Text text="Improve your software life cycle &#13;management" fontSize="14"/>
-                        <mx:Text text="Track your engineering and billing trends" fontSize="14"/>                        
-                    </mx:VBox>
-                </mx:HBox>
-            </mx:VBox>
-            <mx:Spacer height="100%"/>
-            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="5" paddingBottom="5" horizontalAlign="center">
-                <mx:HBox width="100%" horizontalAlign="center">
-                    <mx:Label text="Installation Instructions" fontSize="16"/>
-                </mx:HBox>
-                <mx:TextArea backgroundAlpha="0" borderStyle="none" selectable="false"
-                             borderThickness="0" editable="false" height="120" fontSize="12" width="90%"
-                        text="First, if not already enabled, you need to enable API access of your Basecamp account. Once that's done, click the button to the left to install the Basecamp solution into your account. After installing the data source, you'll be prompted for your Basecamp URL and credentials. Once you hit Create with a valid URL and credentials, Easy Insight will pull over key aggregate data from your Basecamp installation through the API. This process may take a little time, depending on the size of your installation."/>
-            </mx:VBox>
-            <mx:Spacer height="100%"/>
-            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
-                    paddingTop="5" paddingBottom="5" horizontalAlign="center">
-                <mx:Text text="Basecamp and 37signals are registered trademarks of 37signals, LLC."/>
-                <mx:Text text="Easy Insight is in no way affiliated with 37signals nor Basecamp"/>
-            </mx:VBox>
-        </mx:VBox>
+        <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="#000000"/>
     </mx:HBox>
 </solutions:SolutionDetailRenderer>
