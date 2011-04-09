@@ -6,45 +6,33 @@ import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.constantcontact.ConstantContactCompositeSource;
 import com.easyinsight.kpi.KPI;
-import com.easyinsight.logging.LogClass;
-import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
-import com.easyinsight.users.Credentials;
+
 import com.easyinsight.users.Account;
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.users.TokenStorage;
-import com.sforce.soap.partner.*;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.ParsingException;
+
+import net.smartam.leeloo.client.OAuthClient;
+import net.smartam.leeloo.client.URLConnectionClient;
+import net.smartam.leeloo.client.request.OAuthClientRequest;
+import net.smartam.leeloo.client.response.OAuthJSONAccessTokenResponse;
+import net.smartam.leeloo.common.message.types.GrantType;
+import nu.xom.*;
 import oauth.signpost.OAuthConsumer;
-import oauth.signpost.OAuthProvider;
+
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.signature.HmacSha1MessageSigner;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.jetbrains.annotations.NotNull;
-
-import javax.persistence.Transient;
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.BindingProvider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.sql.Connection;
@@ -59,75 +47,81 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
     public static final String SALESFORCE_CONSUMER_KEY = "3MVG9VmVOCGHKYBQUAbz7d7kk6x2g29kEbyFhTBt7u..yutNvp7evoFyWTm2q4tZfWRdxekrK6fhhwf5BN4Tq";
     public static final String SALESFORCE_SECRET_KEY = "5028271817562655674";
 
-    public static final String OPPORTUNITY = "Opportunity";
-    public static final String ACCOUNT = "Account";
-    public static final String LEAD = "Lead";
-    public static final String CAMPAIGN = "Campaign";
-    public static final String CONTACT = "Contact";
-    public static final String CASE = "Case";
+    private String accessToken;
 
-    @Transient
-    private String tokenKey;
-    @Transient
-    private String tokenSecret;
-    @Transient
-    private String pin;
+    private String instanceName;
 
-    @Transient
-    protected SessionHeader sessionHeader;
+    private String refreshToken;
 
-    @Transient
-    protected Soap service;
+    public String getRefreshToken() {
+        return refreshToken;
+    }
 
-    @Override
-    public Map<String, Key> newDataSourceFields(FeedDefinition parentDefinition) {
-        try {
-            Map<String, Key> keys = new HashMap<String, Key>();
-            /*if(service == null || sessionHeader == null)
-                login(credentials);
-            keys.putAll(getKeysForObject(OPPORTUNITY));
-            keys.putAll(getKeysForObject(ACCOUNT));
-            keys.putAll(getKeysForObject(LEAD));
-            keys.putAll(getKeysForObject(CAMPAIGN));
-            keys.putAll(getKeysForObject(CONTACT));
-            keys.putAll(getKeysForObject(CASE));*/
-            return keys;
-        }
-        catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-        //throw new UnsupportedOperationException();
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     @Override
-    public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
+    public void customStorage(Connection conn) throws SQLException {
+        super.customStorage(conn);
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SALESFORCE_DEFINITION WHERE DATA_SOURCE_ID = ?");
+        clearStmt.setLong(1, getDataFeedID());
+        clearStmt.executeUpdate();
+        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO SALESFORCE_DEFINITION (DATA_SOURCE_ID, ACCESS_TOKEN, REFRESH_TOKEN, INSTANCE_NAME) VALUES (?, ?, ?, ?)");
+        saveStmt.setLong(1, getDataFeedID());
+        saveStmt.setString(2, accessToken);
+        saveStmt.setString(3, refreshToken);
+        saveStmt.setString(4, instanceName);
+        saveStmt.execute();
+    }
+
+    @Override
+    public void customLoad(Connection conn) throws SQLException {
+        super.customLoad(conn);
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT ACCESS_TOKEN, REFRESH_TOKEN, INSTANCE_NAME FROM SALESFORCE_DEFINITION WHERE DATA_SOURCE_ID = ?");
+        loadStmt.setLong(1, getDataFeedID());
+        ResultSet rs = loadStmt.executeQuery();
+        if (rs.next()) {
+            accessToken = rs.getString(1);
+            refreshToken = rs.getString(2);
+            instanceName = rs.getString(3);
+        }
+    }
+
+    @Override
+    public void exchangeTokens(EIConnection conn, HttpServletRequest httpRequest, String externalPin) throws Exception {
         try {
-            if (externalPin != null) {
-                pin = externalPin;
-            }
-            if (pin != null && !"".equals(pin)) {
-                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
-                provider.retrieveAccessToken(consumer, pin.trim());
-                tokenKey = consumer.getToken();
-                tokenSecret = consumer.getTokenSecret();
-                pin = null;
-                URL url = new URL("https://na5.salesforce.com/services/data/v20.0/query/?q=SELECT+name+from+Account");
-                HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-                consumer.sign(httpConn);
-                httpConn.connect();
-                byte[] b = new byte[1024];
-                String out = "";
-                while(httpConn.getInputStream().read(b) > 0) {
-                    String s = new String(b);
-                    out = out + s;
+            if (httpRequest != null) {
+                String code = httpRequest.getParameter("code");
+                if (code != null) {
+                    OAuthClientRequest request = OAuthClientRequest.tokenLocation("https://na1.salesforce.com/services/oauth2/token").
+                                setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
+                                setClientSecret(SalesforceBaseDataSource.SALESFORCE_SECRET_KEY).
+                                setRedirectURI("https://localhost/app/oauth").
+                                setCode(code).buildBodyMessage();
+                    OAuthClient client = new OAuthClient(new URLConnectionClient());
+                    OAuthJSONAccessTokenResponse response = client.accessToken(request);
+                    accessToken = response.getAccessToken();
+                    refreshToken = response.getRefreshToken();
+                    instanceName = response.getParam("instance_url");
                 }
-
-                System.out.println(out);
-
             }
-        } catch (OAuthCommunicationException oe) {
-            throw new UserMessageException(oe, "The specified verifier token was rejected. Please try to authorize access again.");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -148,13 +142,13 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         return new ArrayList<ChildConnection>();
     }
 
-    public boolean isConfigured() {
-        return true;
+    @Override
+    public List<CompositeFeedConnection> obtainChildConnections() throws SQLException {
+        return getConnections();
     }
 
-    @Override
-    public Feed createFeedObject(FeedDefinition parent) {
-        return new SalesforceFeed();
+    public boolean isConfigured() {
+        return true;
     }
 
     @Override
@@ -162,131 +156,18 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         return FeedType.SALESFORCE;
     }
 
-    private Map<String, Key> getKeysForObject(String s) throws InvalidSObjectFault, UnexpectedErrorFault {
-        Map<String, Key> keys = new HashMap<String, Key>();
-        DescribeSObjectResultType response = service.describeSObject(sessionHeader, s);
-        for(FieldType f : response.getFields()) {
-            if(!"REFERENCE".equals(f.getType().name()))
-                keys.put(s + "." + f.getName(), new NamedKey(s + "." + f.getName()));
-        }
-        return keys;
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        try {
-            /*if(sessionHeader == null)
-                login(credentials);*/
-
-            List<AnalysisItem> items = new LinkedList<AnalysisItem>();
-            /*List<AnalysisItem> opportunityItems = getAnalysisItemsForObject(OPPORTUNITY, keys);
-            List<AnalysisItem> accountItems = getAnalysisItemsForObject(ACCOUNT, keys);
-            List<AnalysisItem> leadItems = getAnalysisItemsForObject(LEAD, keys);
-            List<AnalysisItem> campaignItems = getAnalysisItemsForObject(CAMPAIGN, keys);
-            List<AnalysisItem> caseItems = getAnalysisItemsForObject(CASE, keys);
-            List<AnalysisItem> contactItems = getAnalysisItemsForObject(CONTACT, keys);
-            defineFolder("Opportunities").getChildItems().addAll(opportunityItems);
-            defineFolder("Accounts").getChildItems().addAll(accountItems);
-            defineFolder("Leads").getChildItems().addAll(leadItems);
-            defineFolder("Campaigns").getChildItems().addAll(campaignItems);
-            defineFolder("Cases").getChildItems().addAll(caseItems);
-            defineFolder("Contacts").getChildItems().addAll(contactItems);
-            items.addAll(opportunityItems);
-            items.addAll(accountItems);
-            items.addAll(leadItems);
-            items.addAll(campaignItems);
-            items.addAll(caseItems);
-            items.addAll(contactItems);*/
-            return items;
-        }
-        catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-        //throw new UnsupportedOperationException();
-    }
-
     public int getDataSourceType() {
         return DataSourceInfo.LIVE;
     }
 
-    private List<AnalysisItem> getAnalysisItemsForObject(String s, Map<String, Key> keys) throws InvalidSObjectFault, UnexpectedErrorFault {
-        List<AnalysisItem> items = new LinkedList<AnalysisItem>();
-        DescribeSObjectResultType response = service.describeSObject(sessionHeader, s);
-        for(FieldType f : response.getFields()) {
-            String fieldName = s + "." + f.getName();
-            String friendlyName = f.getName();
-            if (friendlyName.endsWith("__c")) {
-                friendlyName = friendlyName.substring(0, friendlyName.length() - 3);
-            }
-            if("BOOLEAN".equals(f.getType().name()) ||
-                    "STRING".equals(f.getType().name()) ||
-                    "TEXTAREA".equals(f.getType().name()) ||
-                    "PHONE".equals(f.getType().name()) ||
-                    "URL".equals(f.getType().name()) ||
-                    "PICKLIST".equals(f.getType().name())) {
-                items.add(new AnalysisDimension(keys.get(fieldName), friendlyName));
-            }
-            else if("DOUBLE".equals(f.getType().name()) || "INT".equals(f.getType().name())) {
-                items.add(new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.SUM));
-            } else if ("CURRENCY".equals(f.getType().name())) {
-                AnalysisMeasure analysisMeasure = new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.SUM);
-                FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-                formattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
-                analysisMeasure.setFormattingConfiguration(formattingConfiguration);
-                items.add(analysisMeasure);
-            } else if ("PERCENT".equals(f.getType().name())) {
-                AnalysisMeasure analysisMeasure = new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.AVERAGE);
-                FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
-                formattingConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
-                analysisMeasure.setFormattingConfiguration(formattingConfiguration);
-                items.add(analysisMeasure);
-            } else if ("DATE".equals(f.getType().name())) {
-                items.add(new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL));
-            } else if ("DATETIME".equals(f.getType().name())) {
-                AnalysisDateDimension dateDimension = new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
-                dateDimension.setCustomDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss'Z'");
-                items.add(dateDimension);
-            }
-        }
-        return items;
-    }
-
-    public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
-        return new DataSet();
-    }
-
     @Override
     public String validateCredentials() {
-        /*try {
-            if (sessionHeader == null) login(credentials);
-            return null;
-        } catch (Exception e) {
-            return e.getMessage();
-        }*/
-        throw new UnsupportedOperationException();
-    }
-
-    private void login(Credentials c) throws InvalidIdFault, UnexpectedErrorFault, LoginFault {
-        if(service == null) {
-            SforceService sf = new SforceService();
-            service = sf.getSoap();
-        }
-
-        LoginResultType result = service.login(c.getUserName(), c.getPassword());
-        ((BindingProvider) service).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, result.getServerUrl());
-        sessionHeader = new SessionHeader();
-        sessionHeader.setSessionId(result.getSessionId());
-    }
-
-    @NotNull
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return new ArrayList<String>();
+        return null;
     }
 
     @Override
     public List<KPI> createKPIs() {
         List<KPI> kpis = new ArrayList<KPI>();
-        
         return kpis;
     }
 
@@ -320,6 +201,120 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
             } else {
                 throw e;
             }
+        }
+    }
+
+    protected List<IServerDataSourceDefinition> obtainChildDataSources(EIConnection conn) throws Exception {
+        List<IServerDataSourceDefinition> sources = new ArrayList<IServerDataSourceDefinition>();
+        HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
+        httpRequest.setHeader("Accept", "application/xml");
+        httpRequest.setHeader("Content-Type", "application/xml");
+        httpRequest.setHeader("Authorization", "OAuth " + accessToken);
+
+
+        org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+        String string = cc.execute(httpRequest, responseHandler);
+
+        Builder builder = new Builder();
+        Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+        Nodes sobjectNodes = doc.query("/DescribeGlobal/sobjects");
+        List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
+        List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
+        List<SFConnection> connectionList = new ArrayList<SFConnection>();
+        Map<String, SalesforceSObjectSource> map = new HashMap<String, SalesforceSObjectSource>();
+        for (int i = 0; i < sobjectNodes.size(); i++) {
+            Node sobjectNode = sobjectNodes.get(i);
+            String name = sobjectNode.query("name/text()").get(0).getValue();
+            String searchableString = sobjectNode.query("searchable/text()").get(0).getValue();
+            boolean searchable = Boolean.parseBoolean(searchableString);
+            if (searchable) {
+                SalesforceSObjectSource salesforceSObjectSource = new SalesforceSObjectSource();
+                salesforceSObjectSource.setSobjectName(name);
+                salesforceSObjectSource.setFeedName(name);
+                newDefinition(salesforceSObjectSource, conn, "", getUploadPolicy());
+                CompositeFeedNode node = new CompositeFeedNode();
+                node.setDataFeedID(salesforceSObjectSource.getDataFeedID());
+                nodes.add(node);
+                map.put(name, salesforceSObjectSource);
+                connectionList.addAll(connections(name));
+            }
+        }
+        setCompositeFeedNodes(nodes);
+
+        for (SFConnection connection : connectionList) {
+            if (connection.source.equals(connection.target)) {
+                continue;
+            }
+            SalesforceSObjectSource source = map.get(connection.source);
+            SalesforceSObjectSource target = map.get(connection.target);
+            if (source != null & target != null) {
+                AnalysisItem sourceItem = source.findAnalysisItem(connection.sourceField);
+                AnalysisItem targetItem = target.findAnalysisItem(connection.targetField);
+                if (sourceItem == null) {
+                    System.out.println("Could not find field " + connection.sourceField + " on " + connection.source);
+                }
+                if (targetItem == null) {
+                    System.out.println("Could not find field " + connection.targetField + " on " + connection.target);
+                }
+                System.out.println("Connecting " + connection.source + " to " + connection.target);
+                if (sourceItem != null && targetItem != null) {
+                    connections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceItem, targetItem,
+                        source.getFeedName(), target.getFeedName()));
+                }
+            }
+        }
+        setConnections(connections);
+        populateFields(conn);
+        return sources;
+    }
+
+    private List<SFConnection> connections(String sobjectName) throws Exception {
+        List<SFConnection> connections = new ArrayList<SFConnection>();
+        HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/" + sobjectName + "/describe/");
+        httpRequest.setHeader("Accept", "application/xml");
+        httpRequest.setHeader("Content-Type", "application/xml");
+        httpRequest.setHeader("Authorization", "OAuth " + accessToken);
+
+
+        org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+        String string = cc.execute(httpRequest, responseHandler);
+        Builder builder = new Builder();
+        Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+        Nodes fieldsNodes = doc.query("/" + sobjectName + "/fields");
+        String idField = null;
+        for (int i = 0; i < fieldsNodes.size(); i++) {
+            Node fieldNode = fieldsNodes.get(i);
+            String type = fieldNode.query("type/text()").get(0).getValue();
+            if ("id".equals(type)) {
+                idField = fieldNode.query("name/text()").get(0).getValue();
+            }
+        }
+        Nodes relNodes = doc.query("/" + sobjectName + "/childRelationships");
+        for (int i = 0; i < relNodes.size(); i++) {
+            Node relNode = relNodes.get(i);
+            String targetSObject = relNode.query("childSObject/text()").get(0).getValue();
+            String targetField = relNode.query("field/text()").get(0).getValue();
+            //String relationship = relNode.query("relationshipName/text()").get(0).getValue();
+            connections.add(new SFConnection(sobjectName, targetSObject, idField, targetField));
+        }
+        return connections;
+    }
+
+    private static class SFConnection {
+        private String source;
+        private String target;
+        private String sourceField;
+        private String targetField;
+
+        private SFConnection(String source, String target, String sourceField, String targetField) {
+            this.source = source;
+            this.target = target;
+            this.sourceField = sourceField;
+            this.targetField = targetField;
         }
     }
 }

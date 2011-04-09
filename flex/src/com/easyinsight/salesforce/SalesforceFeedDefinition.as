@@ -9,7 +9,9 @@ import com.easyinsight.datasources.DataSourceType;
 	public class SalesforceFeedDefinition extends ServerDataSourceDefinition
 	{
 
-    public var pin:String;
+    public var accessToken:String;
+    public var refreshToken:String;
+    public var instanceName:String;
 
 		public function SalesforceFeedDefinition()
 		{

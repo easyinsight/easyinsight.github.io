@@ -382,6 +382,7 @@ public class CompositeFeed extends Feed {
         private List<AnalysisItem> allAnalysisItems = new ArrayList<AnalysisItem>();
         private Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         private Collection<AnalysisItem> allFeedItems;
+        private Collection<AnalysisItem> joinItems = new HashSet<AnalysisItem>();
         private DataSet myDataSet;
         private String dataSourceName;
         private EIConnection conn;
@@ -396,6 +397,12 @@ public class CompositeFeed extends Feed {
 
         public boolean handles(Key key) {
             return key.hasDataSource(feedID);
+        }
+
+        public void addJoinItem(AnalysisItem analysisItem) {
+            addItem(analysisItem);
+            joinItems.add(analysisItem);
+            //neededKeys.add(analysisItem.getKey());
         }
 
         public void addItem(AnalysisItem analysisItem) {
@@ -413,7 +420,7 @@ public class CompositeFeed extends Feed {
             if (!alreadyHaveItem) {
                 for (AnalysisItem analysisItem : getFields()) {
                     if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toBaseKey().getKeyID() == key.toBaseKey().getKeyID()) {
-                        neededItems.add(analysisItem);
+                        addJoinItem(analysisItem);
                     }
                 }
             }
@@ -429,7 +436,7 @@ public class CompositeFeed extends Feed {
             if (getDataSource().getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
                 pipeline = new CompositeReportPipeline();
             } else {
-                pipeline = new AltCompositeReportPipeline();
+                pipeline = new AltCompositeReportPipeline(joinItems);
             }
             WSListDefinition analysisDefinition = new WSListDefinition();
             analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));

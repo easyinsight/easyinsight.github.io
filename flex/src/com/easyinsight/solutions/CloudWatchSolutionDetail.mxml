@@ -33,24 +33,26 @@
                 <mx:Spacer width="100%"/>
                 <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="620"
                              height="60"
-                             text="Want instant visibility into the cloud? You can get started with Easy Insight in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation. The full power of enterprise business intelligence is yours for the taking, all delivered with incredible ease of use."
+                             text="Want the ability to perform custom reporting on your Amazon infrastructure? Whether it's simple reports on I/O or in depth analysis, Easy Insight can get you that visibility in a couple of clicks!"
                              fontSize="14"/>
                 <mx:Spacer width="100%"/>
 
             </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:Box id="controlsBox" width="100%" horizontalAlign="center">
-                <mx:Button label="Connect to FreshBooks" fontSize="20" click="installSolution()" styleName="grayButton"
+                <mx:Button label="Connect to Amazon" fontSize="20" click="installSolution()" styleName="grayButton"
                            id="installButton"/>
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
-            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="50">
-                <mx:Image source="../assets/freshbooks/FreshbooksReportEditorSmall.jpg" height="150"/>
+            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="20">
+                <mx:Image source="../assets/CCKPISmall.jpg" height="194"/>
+                <mx:Image source="../assets/highrise/ContactHeatMapSmall.png" height="194"/>
             </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="120"
-                         text="Take advantage of Easy Insight to extend your CloudWatch reporting capabilities to the next level of visibility and analysis. Keep a pulse on the health of your cloud's system health through KPIs of your CPU and I/O operations."
-                         fontSize="14"/>            
+                         text="Take advantage of Easy Insight to extend your Amazon reporting capabilities to the next level of visibility and analysis. Keep a pulse on the health of your EC2 systems through KPIs of CPU utilization and I/O amounts. Easily apply custom filters to analyze data by instance, image, or any of the other fields in the various Amazon systems. View data as lists, charts, trees, maps, or any of the other rich forms of visualization offered by Easy Insight. Share the reports with your coworkers or embed them into iGoogle or another dashboard."
+                         fontSize="14"/>
+
         </mx:VBox>
         <solutions:HeaderShadeArea width="50" height="100%" leftColor="#FFFFFF" rightColor="#000000"/>
     </mx:HBox>

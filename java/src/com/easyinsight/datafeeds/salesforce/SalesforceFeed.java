@@ -3,17 +3,19 @@ package com.easyinsight.datafeeds.salesforce;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.analysis.*;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.users.Credentials;
-import com.sforce.soap.partner.*;
-
-import javax.persistence.Transient;
-import javax.xml.ws.BindingProvider;
+import java.io.ByteArrayInputStream;
 import java.util.*;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.Node;
+import nu.xom.Nodes;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * User: James Boe
@@ -22,154 +24,56 @@ import org.w3c.dom.Node;
  */
 public class SalesforceFeed extends Feed {
 
-    private static final String[] subjectOrder = new String[] { "Account, Opportunity"};
+    private String sobjectName;
 
-    @Transient
-    protected SessionHeader sessionHeader;
-
-    @Transient
-    protected Soap service;
-
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws ReportException {
-        /*AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
-        try {
-            if (sessionHeader == null)
-                login(insightRequestMetadata.getCredentialForDataSource(getFeedID()));
-            StringBuilder queryBuilder = new StringBuilder();
-            queryBuilder.append("select ");
-            Set<String> subjects = new HashSet<String>();
-            String keyString = analysisItem.getKey().toKeyString();
-            String[] keyTokens = keyString.split("\\.");
-            String querySubject = keyTokens[0];
-            queryBuilder.append(keyString);
-            queryBuilder.append(",");
-            subjects.add(querySubject);
-            queryBuilder.deleteCharAt(queryBuilder.length() - 1);
-            queryBuilder.append(" from ");
-            queryBuilder.append(findCoreSubject(subjects));
-            *//*for (String querySubject : querySubjects) {
-                queryBuilder.append(querySubject);
-                queryBuilder.append(",");
-            }*//*
-            QueryResultType queryResultType = service.query(sessionHeader, queryBuilder.toString());
-            if (queryResultType.isDone()) {
-                List<SObject> objects = queryResultType.getRecords();
-                for (SObject object : objects) {
-                    List<Object> blahs = object.getAny();
-                    for (Object blah : blahs) {
-                        Element element = (Element) blah;
-                        metadata.addValue(analysisItem, new StringValue(element.getTextContent()), insightRequestMetadata);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return metadata;*/
-        throw new UnsupportedOperationException();
-    }
-    
-    public String findCoreSubject(Set<String> subjects) {
-        List<String> subjectList = new ArrayList<String>(subjects);
-        Collections.sort(subjectList, new Comparator<String>() {
-
-            public int compare(String o1, String o2) {
-                Integer index1 = findIndex(o1);
-                Integer index2 = findIndex(o2);
-                return index1.compareTo(index2);
-            }
-        });
-        return subjectList.get(0);
-    }
-
-    private int findIndex(String subject) {
-       for (int i = 0; i < subjectOrder.length; i++) {
-            String testSubject = subjectOrder[i];
-            if (subject.equals(testSubject)) {
-                return i;
-            }
-        }
-        return -1;
+    public SalesforceFeed(String sobjectName) {
+        this.sobjectName = sobjectName;
     }
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
-        /*DataSet dataSet = new DataSet();
         try {
-            if (sessionHeader == null)
-                login(insightRequestMetadata.getCredentialForDataSource(getFeedID()));
+            SalesforceBaseDataSource salesforceBaseDataSource = (SalesforceBaseDataSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
             StringBuilder queryBuilder = new StringBuilder();
-            queryBuilder.append("select ");
-            Map<String, AnalysisItem> keyLookupMap = new HashMap<String, AnalysisItem>();
-            Set<String> subjects = new HashSet<String>();
+            queryBuilder.append("SELECT+");
             for (AnalysisItem analysisItem : analysisItems) {
                 String keyString = analysisItem.getKey().toKeyString();
-                String[] keyTokens = keyString.split("\\.");
-                String querySubject = keyTokens[0];
                 queryBuilder.append(keyString);
-                keyLookupMap.put(keyString, analysisItem);
                 queryBuilder.append(",");
-                subjects.add(querySubject);
             }
             queryBuilder.deleteCharAt(queryBuilder.length() - 1);
-            queryBuilder.append(" from ");
-            queryBuilder.append(findCoreSubject(subjects));
-            for (String querySubject : querySubjects) {
-                queryBuilder.append(querySubject);
-                queryBuilder.append(",");
-            }
-            QueryResultType queryResultType = service.query(sessionHeader, queryBuilder.toString());
-            if (queryResultType.isDone()) {
-                List<SObject> objects = queryResultType.getRecords();
-                for (SObject object : objects) {
-                    IRow row = dataSet.createRow();
-                    List<Object> blahs = object.getAny();
-                    for (Object blah : blahs) {
-                        Element element = (Element) blah;
-                        parseElement(element, row, keyLookupMap, object.getType());
+            queryBuilder.append("+from+");
+            queryBuilder.append(sobjectName);
+            String url = salesforceBaseDataSource.getInstanceName() + "/services/data/v20.0/query/?q=" + queryBuilder.toString();
 
+            HttpGet httpRequest = new HttpGet(url);
+            httpRequest.setHeader("Accept", "application/xml");
+            httpRequest.setHeader("Content-Type", "application/xml");
+            httpRequest.setHeader("Authorization", "OAuth " + salesforceBaseDataSource.getAccessToken());
+
+
+            org.apache.http.client.HttpClient cc = new DefaultHttpClient();
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+
+            String string = cc.execute(httpRequest, responseHandler);
+
+            Builder builder = new Builder();
+            Document doc = builder.build(new ByteArrayInputStream(string.getBytes()));
+            DataSet dataSet = new DataSet();
+            Nodes records = doc.query("/QueryResult/records");
+            for (int i = 0; i < records.size(); i++) {
+                IRow row = dataSet.createRow();
+                Node record = records.get(i);
+                for (AnalysisItem analysisItem : analysisItems) {
+                    Nodes results = record.query(analysisItem.getKey().toKeyString() + "/text()");
+                    if (results.size() > 0) {
+                        String value = results.get(0).getValue();
+                        row.addValue(analysisItem.createAggregateKey(), value);
                     }
                 }
             }
+            return dataSet;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return dataSet;*/
-        throw new UnsupportedOperationException();
-    }
-
-    private void parseElement(Element element, IRow row, Map<String, AnalysisItem> keyLookupMap, String type) {
-        if (element.getChildNodes().getLength() == 1) {
-            String keyName = element.getNodeName().split(":")[1];
-            String qualifiedName = type + "." + keyName;
-            AnalysisItem analysisItem = keyLookupMap.get(qualifiedName);
-            row.addValue(analysisItem.createAggregateKey(), element.getTextContent());
-        } else if (element.getChildNodes().getLength() > 1) {
-            String querySubject = element.getNodeName().split(":")[1];
-            NodeList childList = element.getChildNodes();
-            for (int i = 0; i < childList.getLength(); i++) {
-                Node child = childList.item(i);
-                String qualifiedName = querySubject + "." + child.getNodeName().split(":")[1];
-                AnalysisItem analysisItem = keyLookupMap.get(qualifiedName);
-                if (analysisItem != null) {
-                    row.addValue(analysisItem.createAggregateKey(), child.getTextContent());
-                }
-            }
-        }
-    }
-
-    public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    private void login(Credentials c) throws InvalidIdFault, UnexpectedErrorFault, LoginFault {
-        if (service == null) {
-            SforceService sf = new SforceService();
-            service = sf.getSoap();
-        }
-
-        LoginResultType result = service.login(c.getUserName(), c.getPassword());
-        ((BindingProvider) service).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, result.getServerUrl());
-        sessionHeader = new SessionHeader();
-        sessionHeader.setSessionId(result.getSessionId());
     }
 }

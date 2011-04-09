@@ -24,6 +24,7 @@ import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
 import com.easyinsight.datafeeds.quickbase.QuickbaseDatabaseSource;
 import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
+import com.easyinsight.datafeeds.salesforce.SalesforceSObjectSource;
 import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
@@ -77,6 +78,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.GOOGLE, GoogleFeedDefinition.class);
         registerType(FeedType.COMPOSITE, CompositeFeedDefinition.class);
         registerType(FeedType.SALESFORCE, SalesforceBaseDataSource.class);
+        registerType(FeedType.SALESFORCE_SUB, SalesforceSObjectSource.class);
         registerType(FeedType.DEFAULT, FeedDefinition.class);
         registerType(FeedType.BASECAMP_MASTER, BaseCampCompositeSource.class);
         registerType(FeedType.ADMIN_STATS, AdminStatsDataSource.class);

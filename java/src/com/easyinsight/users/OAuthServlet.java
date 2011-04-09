@@ -37,17 +37,8 @@ public class OAuthServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String code = req.getParameter("code");
-            if(code != null) {
-                OAuthClientRequest request = OAuthClientRequest.tokenLocation("https://na1.salesforce.com/services/oauth2/token").
-                        setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
-                        setClientSecret(SalesforceBaseDataSource.SALESFORCE_SECRET_KEY).
-                        setRedirectURI("https://localhost/app/oauth").
-                        setCode(code).buildBodyMessage();
-                OAuthClient client = new OAuthClient(new URLConnectionClient());
-                OAuthJSONAccessTokenResponse response = client.accessToken(request);
-                String token = response.getAccessToken();
-                System.out.println(response.getBody());
-                String instanceUrl = response.getParam("instance_url");
+            /*if(code != null) {
+
                 String idUrl = response.getParam("id");
                 //HttpGet httpRequest = new HttpGet(instanceUrl + "/services/data/v20.0/query/?q=SELECT+name+from+Account");
                 HttpGet httpRequest = new HttpGet(idUrl);
@@ -63,10 +54,16 @@ public class OAuthServlet extends HttpServlet {
                 System.out.println(string);
                     return;
                 }
-
+*/
             String verifier = req.getParameter("oauth_verifier");
+            int redirectType;
             String dataSourceID = req.getParameter("dataSourceID");
-            int redirectType = Integer.parseInt(req.getParameter("redirectTarget"));
+            if (dataSourceID == null) {
+                dataSourceID = (String) req.getSession().getAttribute("dataSourceID");
+                redirectType = (Integer) req.getSession().getAttribute("redirectTarget");
+            } else {
+                redirectType = Integer.parseInt(req.getParameter("redirectTarget"));
+            }
 
             EIConnection conn = Database.instance().getConnection();
             try {
@@ -88,8 +85,7 @@ public class OAuthServlet extends HttpServlet {
                     if (ConfigLoader.instance().isProduction()) {
                         redirectURL = "https://www.easy-insight.com/app/#connectionConfig="+feedDefinition.getApiKey();
                     } else {
-                        redirectURL = "https://staging.easy-insight.com/app/#connectionConfig="+feedDefinition.getApiKey();
-                        redirectURL = "https://localhost/app/#connectionConfig="+feedDefinition.getApiKey();
+                        redirectURL = "https://localhost:4443/app/#connectionConfig="+feedDefinition.getApiKey();
                     }
                 } else {
                     if (ConfigLoader.instance().isProduction()) {

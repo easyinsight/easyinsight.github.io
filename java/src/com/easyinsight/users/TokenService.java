@@ -102,6 +102,8 @@ public class TokenService {
                         setResponseType("code").
                         //setRedirectURI("https://localhost/app/oauth").
                         buildQueryMessage();
+                FlexContext.getHttpRequest().getSession().setAttribute("redirectTarget", redirectType);
+                FlexContext.getHttpRequest().getSession().setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(clientRequest.getLocationUri(), true);
 
             } else {
