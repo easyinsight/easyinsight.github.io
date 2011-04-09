@@ -37,13 +37,18 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
     public static final String ZIP_CODE = "Company Zip Code";
     public static final String BACKGROUND = "Company Background";
 
+    public static final String COUNTRY = "Company Country";
+    public static final String STATE = "Company State";
+    public static final String CITY = "Company City";
+
     public HighRiseCompanySource() {
         setFeedName("Company");
     }
 
     @NotNull
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(COMPANY_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, ZIP_CODE, BACKGROUND, UPDATED_AT);
+        return Arrays.asList(COMPANY_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, ZIP_CODE, BACKGROUND, UPDATED_AT,
+                COUNTRY, STATE, CITY);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -52,7 +57,10 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisZipCode(keys.get(ZIP_CODE), true));
         analysisItems.add(new AnalysisDimension(keys.get(BACKGROUND), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPANY_ID), true));
-        analysisItems.add(new AnalysisList(keys.get(TAGS), false, ","));
+        analysisItems.add(new AnalysisDimension(keys.get(COUNTRY), true));
+        analysisItems.add(new AnalysisDimension(keys.get(STATE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CITY), true));
+        analysisItems.add(new AnalysisList(keys.get(TAGS), true, ","));
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
@@ -79,6 +87,9 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                 row.addValue(COMPANY_ID, highriseCompany.getCompanyID());
                 row.addValue(COMPANY_NAME, highriseCompany.getCompanyName());
                 row.addValue(ZIP_CODE, highriseCompany.getZipCode());
+                row.addValue(COUNTRY, highriseCompany.getCountry());
+                row.addValue(STATE, highriseCompany.getState());
+                row.addValue(CITY, highriseCompany.getCity());
                 row.addValue(CREATED_AT, new DateValue(highriseCompany.getCreatedAt()));
                 row.addValue(UPDATED_AT, new DateValue(highriseCompany.getUpdatedAt()));
                 row.addValue(TAGS, highriseCompany.getTags());
@@ -95,11 +106,11 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
 
     @Override
     public int getVersion() {
-        return 3;
+        return 4;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList(new HighRiseCompany1To2(this), new HighRiseCompany2To3(this));
+        return Arrays.asList(new HighRiseCompany1To2(this), new HighRiseCompany2To3(this), new HighRiseCompany3To4(this));
     }
 }

@@ -17,8 +17,12 @@ public class HighriseCompany {
     private Date updatedAt;
     private String zipCode;
     private String background;
+    private String state;
+    private String country;
+    private String city;
 
-    public HighriseCompany(String companyName, String companyID, String tags, String owner, Date createdAt, Date updatedAt, String zipCode, String background) {
+    public HighriseCompany(String companyName, String companyID, String tags, String owner, Date createdAt, Date updatedAt, String zipCode, String background,
+                           String country, String state, String city) {
         this.companyName = companyName;
         this.companyID = companyID;
         this.tags = tags;
@@ -27,6 +31,21 @@ public class HighriseCompany {
         this.updatedAt = updatedAt;
         this.zipCode = zipCode;
         this.background = background;
+        this.country = country;
+        this.state = state;
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public String getCity() {
+        return city;
     }
 
     public String getCompanyName() {

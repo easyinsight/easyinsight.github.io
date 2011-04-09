@@ -85,13 +85,11 @@ public class HighRiseEmailSource extends HighRiseBaseSource {
             System.out.println("...");
             if (lastRefreshDate == null) {
                 for (HighriseEmail email : cache.getEmails()) {
-                    System.out.println("email insert");
                     IRow row = ds.createRow();
                     recordingToRow(email, row);
                 }
             } else {
                 for (HighriseEmail email : cache.getEmails()) {
-                    System.out.println("email update");
                     ds = new DataSet();
                     IRow row = ds.createRow();
                     recordingToRow(email, row);

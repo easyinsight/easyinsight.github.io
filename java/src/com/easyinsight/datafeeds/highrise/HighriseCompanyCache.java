@@ -53,13 +53,18 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                     String id = queryField(companyNode, "id/text()");
                     String background = queryField(companyNode, "background/text()");
                     String zip = "";
+                    String city = "";
+                    String state = "";
+                    String country = "";
                     String tagString = "";
 
                     Nodes contactDataNodes = companyNode.query("contact-data/addresses/address");
                     if (contactDataNodes.size() > 0) {
                         Node contactDataNode = contactDataNodes.get(0);
                         zip = queryField(contactDataNode, "zip/text()");
-
+                        country = queryField(contactDataNode, "country/text()");
+                        state = queryField(contactDataNode, "state/text()");
+                        city = queryField(contactDataNode, "city/text()");
                     }
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
 
@@ -77,7 +82,8 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                         tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
 
                     }
-                    companyList.add(new HighriseCompany(name, id, tagString, responsiblePartyName, createdAt, updatedAt, zip, background));
+                    companyList.add(new HighriseCompany(name, id, tagString, responsiblePartyName, createdAt, updatedAt, zip, background,
+                            country, state, city));
                     companyIDs.add(id);
                     companyCount++;
                 }

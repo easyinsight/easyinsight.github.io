@@ -53,10 +53,10 @@ public class HighRiseCaseSource extends HighRiseBaseSource {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();        
         analysisItems.add(new AnalysisDimension(keys.get(CASE_NAME), true));
-        analysisItems.add(new AnalysisList(keys.get(CASE_ID), false, ","));
+        analysisItems.add(new AnalysisList(keys.get(CASE_ID), true, ","));
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
         analysisItems.add(new AnalysisDimension(keys.get(AUTHOR), true));
-        analysisItems.add(new AnalysisList(keys.get(TAGS), false, ","));
+        analysisItems.add(new AnalysisList(keys.get(TAGS), true, ","));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(CLOSED_AT), true, AnalysisDateDimension.DAY_LEVEL));

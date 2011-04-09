@@ -79,7 +79,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_CITY), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_STATE), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTACT_COUNTRY), true));
-        analysisItems.add(new AnalysisList(keys.get(TAGS), false, ","));
+        analysisItems.add(new AnalysisList(keys.get(TAGS), true, ","));
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
