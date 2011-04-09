@@ -261,12 +261,17 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             updateStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
             updateStmt.setLong(2, auditID);
             updateStmt.executeUpdate();
+            refreshDone();
         } finally {
             DataTypeMutex.mutex().unlock(getFeedType());
         }
         
         //notifyOfDataUpdate();
         return false;
+    }
+
+    protected void refreshDone() {
+
     }
 
     /*private void notifyOfDataUpdate() {

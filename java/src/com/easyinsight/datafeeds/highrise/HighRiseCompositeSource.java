@@ -504,6 +504,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         }
     }
 
+    protected void refreshDone() {
+        highriseCache = null;
+        highriseCompanyCache = null;
+        highriseRecordingsCache = null;
+    }
+
     private boolean isContactLinkable(AnalysisItem analysisItem) {
         String keyString = analysisItem.getKey().toKeyString();
         if (HighRiseContactSource.CONTACT_NAME.equals(keyString)) {
