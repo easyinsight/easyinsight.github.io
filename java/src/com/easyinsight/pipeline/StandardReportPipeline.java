@@ -34,8 +34,16 @@ public class StandardReportPipeline extends Pipeline {
                 components.add(new LookupTableComponent(lookupTable));
             }
         }
+
+        Set<AnalysisItem> items = new HashSet<AnalysisItem>(reportItems);
+        for (AnalysisItem item : allNeededAnalysisItems) {
+            if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION) ||
+                    item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, false, CleanupComponent.AGGREGATE_CALCULATIONS));
+            }
+        }
         
-        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
+        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, items)) {
             AnalysisList analysisList = (AnalysisList) tag;
             if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
         }

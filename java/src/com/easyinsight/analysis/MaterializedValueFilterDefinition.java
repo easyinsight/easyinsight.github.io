@@ -26,14 +26,25 @@ public class MaterializedValueFilterDefinition extends MaterializedFilterDefinit
 
     public boolean allows(Value value) {
         boolean allows;
-        allows = values.contains(value);
-        if (!allows) {
-            if (value.type() == Value.EMPTY) {
-                StringValue emptyValue = new StringValue("");
-                allows = values.contains(emptyValue);
+        if (getKey().hasType(AnalysisItemTypes.LISTING)) {
+            AnalysisList analysisList = (AnalysisList) getKey();
+            Value[] values = analysisList.transformToMultiple(value);
+            for (Value splitValue : values) {
+                if (this.values.contains(splitValue)) {
+                    return true;
+                }
             }
+            return false;
+        } else {
+            allows = values.contains(value);
+            if (!allows) {
+                if (value.type() == Value.EMPTY) {
+                    StringValue emptyValue = new StringValue("");
+                    allows = values.contains(emptyValue);
+                }
+            }
+            if (!inclusive) allows = !allows;
+            return allows;
         }
-        if (!inclusive) allows = !allows;
-        return allows;
     }
 }

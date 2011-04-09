@@ -13,6 +13,12 @@ import java.util.*;
  * Time: 12:16 PM
  */
 public class AltCompositeReportPipeline extends Pipeline {
+    private Collection<AnalysisItem> joinItems;
+
+    public AltCompositeReportPipeline(Collection<AnalysisItem> joinItems) {
+        this.joinItems = joinItems;
+    }
+
     @Override
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report, List<AnalysisItem> allItems) {
         List<IComponent> components = new ArrayList<IComponent>();
@@ -30,16 +36,13 @@ public class AltCompositeReportPipeline extends Pipeline {
                 components.add(new LookupTableComponent(lookupTable));
             }
         }
-
-        for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, allNeededAnalysisItems)) {
-            AnalysisList analysisList = (AnalysisList) tag;
-            if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
-        }
         for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
-
+        for (AnalysisItem item : joinItems) {
+            components.add(new DateTransformComponent(item));
+        }
         return components;
     }
 }
