@@ -232,7 +232,8 @@ public class DataStorage {
             if (dataSourceType == FeedType.CONSTANT_CONTACT_CONTACTS.getType() || dataSourceType == FeedType.HIGHRISE_CONTACTS.getType()
                     || dataSourceType == FeedType.HIGHRISE_CONTACT_NOTES.getType() || dataSourceType == FeedType.HIGHRISE_CASE_NOTES.getType() ||
                     dataSourceType == FeedType.HIGHRISE_CONTACT_NOTES.getType() || dataSourceType == FeedType.HIGHRISE_DEAL_NOTES.getType() ||
-                    dataSourceType == FeedType.HIGHRISE_EMAILS.getType()) {
+                    dataSourceType == FeedType.HIGHRISE_EMAILS.getType() || dataSourceType == FeedType.BASECAMP_TIME.getType() ||
+                    dataSourceType == FeedType.BASECAMP.getType()) {
                 return dataLength;
             }
             return dataLength + indexLength;
