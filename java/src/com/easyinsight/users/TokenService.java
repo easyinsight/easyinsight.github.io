@@ -115,11 +115,11 @@ public class TokenService {
             String requestToken;
             if (redirect) {
                 if (ConfigLoader.instance().isProduction()) {
-                    requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
-                    //requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    //requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    requestToken = provider.retrieveRequestToken(consumer, "https://www.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
                 } else {
-                    requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
-                    //requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    //requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
+                    requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
                 }
             } else {
                 requestToken = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
