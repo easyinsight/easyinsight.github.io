@@ -56,7 +56,13 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     public long create(EIConnection conn, List<AnalysisItem> externalAnalysisItems, FeedDefinition parentDefinition) throws Exception {
         DataStorage metadata = null;
         try {
-            setFields(externalAnalysisItems);
+            if (externalAnalysisItems == null) {
+                Map<String, Key> keys = newDataSourceFields(parentDefinition);
+                List<AnalysisItem> fields = createAnalysisItems(keys, conn, parentDefinition);
+                setFields(fields);
+            } else {
+                setFields(externalAnalysisItems);
+            }
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
             setUploadPolicy(uploadPolicy);

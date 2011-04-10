@@ -89,6 +89,22 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
         return items;
     }
 
+    public String getTokenKey() {
+        return tokenKey;
+    }
+
+    public void setTokenKey(String tokenKey) {
+        this.tokenKey = tokenKey;
+    }
+
+    public String getTokenSecret() {
+        return tokenSecret;
+    }
+
+    public void setTokenSecret(String tokenSecret) {
+        this.tokenSecret = tokenSecret;
+    }
+
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.STORED_PULL;
@@ -107,16 +123,12 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
     @Override
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         try {
-            if (externalPin != null) {
-                pin = externalPin;
-            }
-            if (pin != null && !"".equals(pin) && tokenKey == null && tokenSecret == null) {
+            if (externalPin != null && !"".equals(externalPin)) {
                 OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
                 OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
-                provider.retrieveAccessToken(consumer, pin.trim());
+                provider.retrieveAccessToken(consumer, externalPin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecret = consumer.getTokenSecret();
-                pin = null;
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -149,16 +161,6 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
 
     public static final String CONSUMER_KEY = "pMAaMYgowzMITTDFzMoaIbHsCni3iBZKzz3bEvUYoIHlaSAEv78XoOsmpch9YkLq";
     public static final String CONSUMER_SECRET = "leKpqRVV3M8CMup_x6dY8THBiKT-T4PXSs3cpSVXp0kaMS4AiZYW830yRvH6JU2O";
-
-    private String pin;
-
-    public String getPin() {
-        return pin;
-    }
-
-    public void setPin(String pin) {
-        this.pin = pin;
-    }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
