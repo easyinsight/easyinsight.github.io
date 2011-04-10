@@ -40,9 +40,9 @@ public class AltCompositeReportPipeline extends Pipeline {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
-        for (AnalysisItem item : joinItems) {
+        /*for (AnalysisItem item : joinItems) {
             components.add(new DateTransformComponent(item));
-        }
+        }*/
         return components;
     }
 }
