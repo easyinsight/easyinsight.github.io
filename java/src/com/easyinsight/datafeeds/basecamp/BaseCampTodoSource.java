@@ -126,6 +126,9 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     projectChangedAt = deadlineTimeFormat.parse(projectChangedOnString);
                 }
 
+                if (lastRefreshDate == null) {
+                    lastRefreshDate = new Date(1);
+                }
                 long delta = lastRefreshDate.getTime() - projectChangedAt.getTime();
 
                 long daysSinceChange = delta / (60 * 60 * 1000 * 24);
