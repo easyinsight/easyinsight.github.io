@@ -113,7 +113,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                     OAuthClientRequest request = OAuthClientRequest.tokenLocation("https://na1.salesforce.com/services/oauth2/token").
                                 setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(SalesforceBaseDataSource.SALESFORCE_CONSUMER_KEY).
                                 setClientSecret(SalesforceBaseDataSource.SALESFORCE_SECRET_KEY).
-                                setRedirectURI("https://localhost/app/oauth").
+                                setRedirectURI("https://www.easy-insight.com/app/oauth").
                                 setCode(code).buildBodyMessage();
                     OAuthClient client = new OAuthClient(new URLConnectionClient());
                     OAuthJSONAccessTokenResponse response = client.accessToken(request);
