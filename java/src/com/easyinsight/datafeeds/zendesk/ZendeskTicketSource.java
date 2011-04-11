@@ -371,7 +371,11 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     protected Value queryDate(Node node, String target) throws ParseException {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
-            return new DateValue(javax.xml.bind.DatatypeConverter.parseDateTime(value).getTime());
+            try {
+                return new DateValue(javax.xml.bind.DatatypeConverter.parseDateTime(value).getTime());
+            } catch (Exception e) {
+                return new EmptyValue();
+            }
         }
         return new EmptyValue();
     }
