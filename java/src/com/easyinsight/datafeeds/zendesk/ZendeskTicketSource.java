@@ -255,7 +255,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         row.addValue(keys.get(CREATED_AT), queryDate(ticketNode, "created-at/text()"));
         row.addValue(keys.get(DESCRIPTION), queryField(ticketNode, "description/text()"));
         row.addValue(keys.get(DUE_DATE), queryDate(ticketNode, "due-date/text()"));
-        row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution-time/text()"));
+        //row.addValue(keys.get(RESOLUTION_TIME), queryDate(ticketNode, "resolution-time/text()"));
         row.addValue(keys.get(SOLVED_AT), queryDate(ticketNode, "solved-at/text()"));
         row.addValue(keys.get(UPDATED_AT), queryDate(ticketNode, "updated-at/text()"));
         row.addValue(keys.get(GROUP_ID), queryField(ticketNode, "group-id/text()"));
@@ -372,8 +372,10 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         String value = queryField(node, target);
         if (value != null && !"".equals(value)) {
             try {
+                System.out.println(value);
                 return new DateValue(javax.xml.bind.DatatypeConverter.parseDateTime(value).getTime());
             } catch (Exception e) {
+                LogClass.error(e);
                 return new EmptyValue();
             }
         }
