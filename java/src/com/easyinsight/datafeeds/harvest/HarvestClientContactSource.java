@@ -24,14 +24,15 @@ import java.util.*;
 public class HarvestClientContactSource extends HarvestBaseSource {
 
     public static final String ID = "Contact ID";
-    public static final String CLIENT_ID =  "Contacts - Client ID";
-    public static final String EMAIL = "Contacts - Email";
-    public static final String FIRST_NAME = "Contacts - First Name";
-    public static final String LAST_NAME = "Contacts - Last Name";
-    public static final String OFFICE_PHONE = "Contacts - Office Phone #";
-    public static final String MOBILE_PHONE = "Contacts - Mobile Phone #";
-    public static final String FAX = "Contacts - Fax #";
-    public static final String COUNT = "Contacts - Count";
+    public static final String CLIENT_ID =  "Contact Client ID";
+    public static final String EMAIL = "Contact Email";
+    public static final String FIRST_NAME = "Contact First Name";
+    public static final String LAST_NAME = "Contact Last Name";
+    public static final String FULL_NAME = "Contact Full Name";
+    public static final String OFFICE_PHONE = "Contact Office Phone #";
+    public static final String MOBILE_PHONE = "Contact Mobile Phone #";
+    public static final String FAX = "Contacts Fax #";
+    public static final String COUNT = "Contacts Count";
 
     public HarvestClientContactSource() {
         setFeedName("Contacts");
@@ -45,7 +46,7 @@ public class HarvestClientContactSource extends HarvestBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ID, CLIENT_ID, EMAIL, FIRST_NAME, LAST_NAME, OFFICE_PHONE, MOBILE_PHONE, FAX, COUNT);
+        return Arrays.asList(ID, CLIENT_ID, EMAIL, FIRST_NAME, LAST_NAME, FULL_NAME, OFFICE_PHONE, MOBILE_PHONE, FAX, COUNT);
     }
 
     @Override
@@ -60,6 +61,7 @@ public class HarvestClientContactSource extends HarvestBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL), true));
         analysisItems.add(new AnalysisDimension(keys.get(FIRST_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(LAST_NAME), true));
+        analysisItems.add(new AnalysisDimension(keys.get(FULL_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(OFFICE_PHONE), true));
         analysisItems.add(new AnalysisDimension(keys.get(MOBILE_PHONE), true));
         analysisItems.add(new AnalysisDimension(keys.get(FAX), true));
@@ -86,12 +88,14 @@ public class HarvestClientContactSource extends HarvestBaseSource {
                 String officePhone = queryField(curContact,  "phone-office/text()");
                 String mobilePhone = queryField(curContact, "phone-mobile/text()");
                 String fax = queryField(curContact, "fax/text()");
+                String fullName = firstName + " " + lastName;
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(ID), contactId);
                 row.addValue(keys.get(CLIENT_ID), clientId);
                 row.addValue(keys.get(EMAIL), email);
                 row.addValue(keys.get(FIRST_NAME), firstName);
                 row.addValue(keys.get(LAST_NAME), lastName);
+                row.addValue(keys.get(FULL_NAME), fullName);
                 row.addValue(keys.get(OFFICE_PHONE), officePhone);
                 row.addValue(keys.get(MOBILE_PHONE), mobilePhone);
                 row.addValue(keys.get(FAX), fax);

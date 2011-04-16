@@ -38,7 +38,7 @@ public class HarvestTimeSource extends HarvestBaseSource {
     public static final String IS_BILLED = "Time Tracking Invoiced";
     public static final String IS_CLOSED = "Time Approved";
     public static final String CREATED_AT = "Time Tracking Created At";
-    public static final String TIME_COUNT = "Time Tracking - Entry Count";
+    public static final String TIME_COUNT = "Time Tracking Count";
 
     public HarvestTimeSource() {
         setFeedName("Time Tracking");

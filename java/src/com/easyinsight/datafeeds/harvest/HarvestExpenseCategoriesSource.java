@@ -23,11 +23,11 @@ import java.util.*;
  */
 public class HarvestExpenseCategoriesSource extends HarvestBaseSource {
 
-    public static final String ID = "Expense Categories - ID";
-    public static final String NAME = "Expense Categories - Name";
-    public static final String UNIT_NAME = "Expense Categories - Unit Name";
-    public static final String UNIT_PRICE = "Expense Categories - Unit Price";
-    public static final String DEACTIVATED = "Expense Categories - Deactivated";
+    public static final String ID = "Expense Categories ID";
+    public static final String NAME = "Expense Categories Name";
+    public static final String UNIT_NAME = "Expense Categories Unit Name";
+    public static final String UNIT_PRICE = "Expense Categories Unit Price";
+    public static final String DEACTIVATED = "Expense Categories Deactivated";
 
     @NotNull
     @Override

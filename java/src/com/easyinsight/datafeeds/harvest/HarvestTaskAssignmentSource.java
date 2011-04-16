@@ -22,14 +22,14 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class HarvestTaskAssignmentSource extends HarvestBaseSource {
-    public static final String TASK_ASSIGNMENT_ID = "Task Assignment - ID";
-    public static final String PROJECT_ID = "Task Assignment - Project ID";
-    public static final String TASK_ID = "Task Assignment - Task ID";
-    public static final String BILLABLE = "Task Assignment - Billable";
-    public static final String DEACTIVATED = "Task Assignment - Deactivated";
-    public static final String BUDGET = "Task Assignment - Budget";
-    public static final String HOURLY = "Task Assignment - Hourly Rate";
-    public static final String TASK_ASSIGNMENT_COUNT = "Task Assignment - Count";
+    public static final String TASK_ASSIGNMENT_ID = "Task Assignment ID";
+    public static final String PROJECT_ID = "Task Assignment Project ID";
+    public static final String TASK_ID = "Task Assignment Task ID";
+    public static final String BILLABLE = "Task Assignment Billable";
+    public static final String DEACTIVATED = "Task Assignment Deactivated";
+    public static final String BUDGET = "Task Assignment Budget";
+    public static final String HOURLY = "Task Assignment Hourly Rate";
+    public static final String TASK_ASSIGNMENT_COUNT = "Task Assignment Count";
 
     public HarvestTaskAssignmentSource() {
         setFeedName("Task Assignment");

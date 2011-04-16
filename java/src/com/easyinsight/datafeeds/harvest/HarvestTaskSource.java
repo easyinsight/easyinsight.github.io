@@ -24,13 +24,13 @@ import java.util.*;
  */
 public class HarvestTaskSource extends HarvestBaseSource {
 
-    public static final String BILLABLE_BY_DEFAULT = "Tasks - Billable By Default";
-    public static final String DEACTIVATED = "Tasks - Deactivated";
-    public static final String DEFAULT_HOURLY_RATE = "Tasks - Default Hourly Rate";
-    public static final String ID = "Tasks - ID";
-    public static final String DEFAULT = "Tasks - Default";
-    public static final String NAME = "Tasks - Name";
-    public static final String TASK_COUNT = "Tasks - Count";
+    public static final String BILLABLE_BY_DEFAULT = "Task Billable By Default";
+    public static final String DEACTIVATED = "Task Deactivated";
+    public static final String DEFAULT_HOURLY_RATE = "Task Default Hourly Rate";
+    public static final String ID = "Task ID";
+    public static final String DEFAULT = "Task Default";
+    public static final String NAME = "Task Name";
+    public static final String TASK_COUNT = "Tasks Count";
 
 
     @Override

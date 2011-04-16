@@ -40,7 +40,7 @@ public class HarvestProjectSource extends HarvestBaseSource {
     public static final String BUDGET = "Project Budget";
     public static final String FIRST_RECORD = "Project First Record At";
     public static final String LAST_RECORD = "Project Last Record At";
-    public static final String PROJECT_COUNT = "Project - Count";
+    public static final String PROJECT_COUNT = "Project Count";
     public static final String FEES = "Project Fees"; // FOR FUTURE USE
 
 

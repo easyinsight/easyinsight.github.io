@@ -22,19 +22,20 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class HarvestUserSource extends HarvestBaseSource {
-    public static final String USER_ID = "User - ID";
-    public static final String EMAIL = "User - Email";
-    public static final String FIRST_NAME = "User - First Name";
-    public static final String LAST_NAME = "User - Last Name";
-    public static final String FUTURE_PROJECTS_ACCESS = "User - Default Access to Future Projects";
-    public static final String DEFAULT_HOURLY_RATE = "User - Default Hourly Rate";
-    public static final String IS_ACTIVE = "User - Is Active";
-    public static final String IS_ADMIN = "User - Is Admin";
-    public static final String IS_CONTRACTOR = "User - Is Contractor";
-    public static final String TELEPHONE = "User - Telephone #";
-    public static final String DEPARTMENT = "User - Department";
-    public static final String TIME_ZONE = "User - Time Zone";
-    public static final String COUNT = "User - Count";
+    public static final String USER_ID = "User ID";
+    public static final String EMAIL = "User Email";
+    public static final String FIRST_NAME = "User First Name";
+    public static final String LAST_NAME = "User Last Name";
+    public static final String FUTURE_PROJECTS_ACCESS = "User Default Access to Future Projects";
+    public static final String DEFAULT_HOURLY_RATE = "User Default Hourly Rate";
+    public static final String IS_ACTIVE = "User Is Active";
+    public static final String IS_ADMIN = "User Is Admin";
+    public static final String IS_CONTRACTOR = "User Is Contractor";
+    public static final String TELEPHONE = "User Telephone #";
+    public static final String DEPARTMENT = "User Department";
+    public static final String TIME_ZONE = "User Time Zone";
+    public static final String COUNT = "User Count";
+    private static final String FULL_NAME = "User Full Name";
 
     public HarvestUserSource() {
         setFeedName("Users");
@@ -48,8 +49,8 @@ public class HarvestUserSource extends HarvestBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(USER_ID, EMAIL, FIRST_NAME, LAST_NAME,
-                FUTURE_PROJECTS_ACCESS, DEFAULT_HOURLY_RATE, IS_ACTIVE, IS_ADMIN,
+        return Arrays.asList(USER_ID, EMAIL, FIRST_NAME, LAST_NAME, FULL_NAME,
+                DEFAULT_HOURLY_RATE, IS_ACTIVE, IS_ADMIN,
                 IS_CONTRACTOR, TELEPHONE, DEPARTMENT, TIME_ZONE, COUNT);
     }
 
@@ -62,7 +63,7 @@ public class HarvestUserSource extends HarvestBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(EMAIL), true));
         analysisItems.add(new AnalysisDimension(keys.get(FIRST_NAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(LAST_NAME), true));
-        analysisItems.add(new AnalysisDimension(keys.get(FUTURE_PROJECTS_ACCESS), true));
+        analysisItems.add(new AnalysisDimension(keys.get(FULL_NAME), true));
         analysisItems.add(new AnalysisMeasure(keys.get(DEFAULT_HOURLY_RATE), DEFAULT_HOURLY_RATE, AggregationTypes.AVERAGE, true, FormattingConfiguration.CURRENCY));
         analysisItems.add(new AnalysisDimension(keys.get(IS_ACTIVE), true));
         analysisItems.add(new AnalysisDimension(keys.get(IS_ADMIN), true));
@@ -89,7 +90,6 @@ public class HarvestUserSource extends HarvestBaseSource {
                 String email = queryField(user, "email/text()");
                 String firstName = queryField(user, "first-name/text()");
                 String lastName = queryField(user, "last-name/text()");
-                String accessProjects = queryField(user, "has-access-to-all-future-projects/text()");
                 String hourlyRate = queryField(user, "default-hourly-rate/text()");
                 String isActive = queryField(user, "is-active/text()");
                 String isAdmin = queryField(user, "is-admin/text()");
@@ -97,12 +97,13 @@ public class HarvestUserSource extends HarvestBaseSource {
                 String telephone = queryField(user, "telephone/text()");
                 String department = queryField(user, "department/text()");
                 String timeZone = queryField(user, "timezone/text()");
+                String fullName = firstName + " " + lastName;
                 IRow row = ds.createRow();
                 row.addValue(keys.get(USER_ID), userId);
                 row.addValue(keys.get(EMAIL), email);
                 row.addValue(keys.get(FIRST_NAME), firstName);
                 row.addValue(keys.get(LAST_NAME), lastName);
-                row.addValue(keys.get(FUTURE_PROJECTS_ACCESS), accessProjects);
+                row.addValue(keys.get(FULL_NAME), fullName);
                 if(hourlyRate != null && hourlyRate.length() > 0)
                     row.addValue(keys.get(DEFAULT_HOURLY_RATE), Double.parseDouble(hourlyRate));
                 row.addValue(keys.get(IS_ACTIVE), isActive);

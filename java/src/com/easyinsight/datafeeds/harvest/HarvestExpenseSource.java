@@ -30,14 +30,14 @@ import java.util.*;
  */
 public class HarvestExpenseSource extends HarvestBaseSource {
     public static final String EXPENSE_CATEGORY_ID = "Expenses - Expense Category";
-    public static final String ID = "Expenses - ID";
-    public static final String NOTES = "Expenses - Notes";
-    public static final String PROJECT_ID = "Expenses - Project ID";
-    public static final String SPENT_AT = "Expenses - Spent at";
-    public static final String TOTAL_COST = "Expenses - Total Cost";
-    public static final String UNITS = "Expenses - Units";
+    public static final String ID = "Expenses ID";
+    public static final String NOTES = "Expenses Notes";
+    public static final String PROJECT_ID = "Expenses Project ID";
+    public static final String SPENT_AT = "Expenses Spent At";
+    public static final String TOTAL_COST = "Expenses Total Cost";
+    public static final String UNITS = "Expenses Units";
     public static final String USER_ID = "Expenses - User ID";
-    public static final String IS_CLOSED = "Expenses - Is Closed";
+    public static final String IS_CLOSED = "Expenses Closed";
 
     public static final String XMLDATEFORMAT = "yyyy-MM-dd";
     public static DateFormat DATE_FORMAT = new SimpleDateFormat(XMLDATEFORMAT);

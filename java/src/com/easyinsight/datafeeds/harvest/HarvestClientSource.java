@@ -26,7 +26,7 @@ public class HarvestClientSource extends HarvestBaseSource {
     public static final String NAME = "Client Name";
     public static final String ACTIVE = "Client Active";
     public static final String DETAILS = "Client Details";
-    public static final String CLIENT_COUNT = "Client - Count";
+    public static final String CLIENT_COUNT = "Client Count";
 
 
     public HarvestClientSource() {

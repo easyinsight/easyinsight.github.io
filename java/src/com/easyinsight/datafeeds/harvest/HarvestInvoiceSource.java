@@ -32,25 +32,25 @@ public class HarvestInvoiceSource extends HarvestBaseSource {
     public static final String UPDATED_SINCE_STRING= "yyyy-MM-dd HH:mm";
     public static final DateFormat UPDATED_SINCE_FORMAT = new SimpleDateFormat(UPDATED_SINCE_STRING);
 
-    public static final String ID = "Invoice - ID";
-    public static final String AMOUNT = "Invoice - Amount";
-    public static final String DUE_AMOUNT = "Invoice - Due Amount";
-    public static final String DUE_AT = "Invoice - Due At";
-    public static final String DUE_AT_HUMAN_FORMAT = "Invoice - Due At - Human Readable";
-    public static final String PERIOD_END = "Invoice - Period End";
-    public static final String PERIOD_START = "Invoice - Period Start";
+    public static final String ID = "Invoice ID";
+    public static final String AMOUNT = "Invoice Amount";
+    public static final String DUE_AMOUNT = "Invoice Due Amount";
+    public static final String DUE_AT = "Invoice Due At";
+    public static final String DUE_AT_HUMAN_FORMAT = "Invoice Due At - Human Readable";
+    public static final String PERIOD_END = "Invoice Period End";
+    public static final String PERIOD_START = "Invoice Period Start";
     public static final String CLIENT_ID = "Invoice - Client ID";
-    public static final String CURRENCY = "Invoice - Currency";
-    public static final String ISSUED_AT = "Invoice - Issued At";
-    public static final String NOTES = "Invoice - Notes";
-    public static final String NUMBER = "Invoice - Number";
-    public static final String PURCHASE_ORDER = "Invoice - Purchase Order";
-    public static final String CLIENT_KEY = "Invoice - Client Key";
-    public static final String STATE = "Invoice - State";
-    public static final String TAX = "Invoice - Tax %";
-    public static final String TAX_2 = "Invoice - Tax 2 %";
-    public static final String TAX_AMOUNT = "Invoice - Tax Amount";
-    public static final String TAX_2_AMOUNT = "Invoice - Tax 2 Amount";
+    public static final String CURRENCY = "Invoice Currency";
+    public static final String ISSUED_AT = "Invoice Issued At";
+    public static final String NOTES = "Invoice Notes";
+    public static final String NUMBER = "Invoice Number";
+    public static final String PURCHASE_ORDER = "Invoice Purchase Order";
+    public static final String CLIENT_KEY = "Invoice Client Key";
+    public static final String STATE = "Invoice State";
+    public static final String TAX = "Invoice Tax %";
+    public static final String TAX_2 = "Invoice Tax 2 %";
+    public static final String TAX_AMOUNT = "Invoice Tax Amount";
+    public static final String TAX_2_AMOUNT = "Invoice Tax 2 Amount";
 
     @NotNull
     @Override
