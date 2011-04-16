@@ -14,9 +14,5 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     override public function configClass():Class {
         return CustomDataSourceCreation;
     }
-
-    override public function isLiveData():Boolean {
-        return true;
-    }
 }
 }

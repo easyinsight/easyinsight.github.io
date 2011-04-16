@@ -15,10 +15,6 @@ public class TwitterDataSource extends ServerDataSourceDefinition {
         this.feedName = "Twitter";
     }
 
-    override public function isLiveData():Boolean {
-        return true;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.TWITTER;
     }
