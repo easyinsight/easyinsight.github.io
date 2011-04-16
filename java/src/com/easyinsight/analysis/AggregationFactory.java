@@ -21,6 +21,9 @@ public class AggregationFactory {
                 case AggregationTypes.RANK:
                     aggregationState = new RankAggregationState();
                     break;
+                case AggregationTypes.PERCENT_OF_TOTAL:
+                    aggregationState = new PercentOfTotalAggregationState();
+                    break;
             }
         }
         this.skip = skip;
@@ -67,6 +70,10 @@ public class AggregationFactory {
                 break;
             case AggregationTypes.RANK:
                 aggregation = new RankAggregation(aggregationState, getAggregation(AggregationTypes.SUM));
+                aggregationState.addAggregation(aggregation);
+                break;
+            case AggregationTypes.PERCENT_OF_TOTAL:
+                aggregation = new PercentOfValueAggregation(aggregationState, getAggregation(AggregationTypes.SUM));
                 aggregationState.addAggregation(aggregation);
                 break;
             default:

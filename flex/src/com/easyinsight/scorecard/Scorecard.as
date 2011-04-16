@@ -15,6 +15,7 @@ public class Scorecard extends EventDispatcher {
     public var description:String;
     public var accountVisible:Boolean;
     public var exchangeVisible:Boolean;
+    public var dataSourceID:int;
     private var _configuring:Boolean;
 
     public function Scorecard() {

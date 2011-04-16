@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.filtering.IFilterDetailEditor">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private var namedFilter:NamedFilterReference;
+
+        [Bindable]
+        private var filterName:String;
+
+        public function makeUpdates():FilterDefinition {
+            namedFilter.referenceName = nameInput.text;
+            return namedFilter;
+        }
+
+        public function set filterDefinition(filterDefinition:FilterDefinition):void {
+            namedFilter = filterDefinition as NamedFilterReference;
+            filterName = namedFilter.referenceName;
+        }
+
+        public function set feedID(feedID:int):void {
+        }
+
+        public function set fields(value:ArrayCollection):void {
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Use the Following Named Filter:">
+            <mx:TextInput id="nameInput" text="{filterName}"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

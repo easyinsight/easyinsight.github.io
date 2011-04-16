@@ -16,6 +16,7 @@ public class NewFilterEvent extends Event {
 
     public static const FIELD_FILTER:int = 1;
     public static const OR_FILTER:int = 2;
+    public static const NAMED_REF_FILTER:int = 3;
 
     public var analysisItem:AnalysisItem;
 

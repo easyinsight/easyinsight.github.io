@@ -35,7 +35,6 @@
                     var feedDefinition:AnalysisBasedFeedDefinition = new AnalysisBasedFeedDefinition();
                     feedDefinition.feedName = feedName.text;
                     feedDefinition.analysisDefinitionID = _analysisDefinition.analysisID;
-                    feedDefinition.genre = sourceFeedDefinition.genre;
                     feedDefinition.uploadPolicy = sourceFeedDefinition.uploadPolicy;
                     createButton.enabled = false;
                     showProgress = true;

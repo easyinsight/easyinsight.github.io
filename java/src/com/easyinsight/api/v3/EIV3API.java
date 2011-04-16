@@ -503,7 +503,6 @@ public abstract class EIV3API implements IEIV3API {
                 }
                 feedDefinition.setFeedName(dataSourceName);
                 feedDefinition.setUncheckedAPIEnabled(true);
-                feedDefinition.setValidatedAPIEnabled(true);
                 UploadPolicy uploadPolicy = new UploadPolicy(userID, getAccountID());
                 feedDefinition.setUploadPolicy(uploadPolicy);
                 feedDefinition.setFields(analysisItems);

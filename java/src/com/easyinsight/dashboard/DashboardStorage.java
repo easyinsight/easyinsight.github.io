@@ -262,6 +262,8 @@ public class DashboardStorage {
             element = DashboardStack.loadGrid(elementID, conn);
         } else if (elementType == DashboardElement.IMAGE) {
             element = DashboardImage.loadImage(elementID, conn);
+        } else if (elementType == DashboardElement.SCORECARD) {
+            element = DashboardScorecard.loadReport(elementID, conn);
         } else {
             throw new RuntimeException();
         }

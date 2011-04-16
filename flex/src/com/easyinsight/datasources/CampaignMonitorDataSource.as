@@ -16,10 +16,6 @@ public class CampaignMonitorDataSource extends CompositeServerDataSource {
         this.feedName = "Campaign Monitor";
     }
 
-    override public function isLiveData():Boolean {
-        return false;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.CAMPAIGN_MONITOR;
     }

@@ -5,7 +5,7 @@ import com.easyinsight.quicksearch.EIDescriptor;
 [RemoteClass(alias="com.easyinsight.scorecard.ScorecardDescriptor")]
 public class ScorecardDescriptor extends EIDescriptor {
 
-    public var lastDataTime:Date;
+    public var dataSourceID:int;
 
     public function ScorecardDescriptor() {
         super();

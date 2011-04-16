@@ -75,9 +75,6 @@ public class AnalysisList extends AnalysisDimension {
     }
 
     public Value[] transformToMultiple(Value value) {
-        if (!expanded) {
-            throw new IllegalStateException();
-        }
         Value[] values;
         if (value.type() == Value.STRING) {
             StringValue stringValue = (StringValue) value;

@@ -258,7 +258,6 @@ public abstract class TransactionalLoadAPI implements ITransactionalLoadAPI {
                 }
                 feedDefinition.setFeedName(dataSourceName);
                 feedDefinition.setUncheckedAPIEnabled(true);
-                feedDefinition.setValidatedAPIEnabled(true);
                 UploadPolicy uploadPolicy = new UploadPolicy(userID, getAccountID());
                 feedDefinition.setUploadPolicy(uploadPolicy);
                 boolean hasCount = false;

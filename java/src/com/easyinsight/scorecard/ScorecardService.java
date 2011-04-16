@@ -106,6 +106,19 @@ public class ScorecardService {
         return new ScorecardInternalService().getScorecardDescriptors(userID, accountID).values();
     }
 
+    public List<ScorecardDescriptor> getScorecardDescriptorsForDataSource(long dataSourceID) {
+        long userID = SecurityUtil.getUserID();
+        long accountID = SecurityUtil.getAccountID();
+        List<ScorecardDescriptor> scorecards = new ScorecardInternalService().getScorecardDescriptors(userID, accountID).values();
+        List<ScorecardDescriptor> matchedScorecards = new ArrayList<ScorecardDescriptor>();
+        for (ScorecardDescriptor scorecard : scorecards) {
+            if (scorecard.getDataSourceID() == dataSourceID) {
+                matchedScorecards.add(scorecard);
+            }
+        }
+        return matchedScorecards;
+    }
+
     public Scorecard getScorecard(long scorecardID) {
         SecurityUtil.authorizeScorecard(scorecardID);
         try {

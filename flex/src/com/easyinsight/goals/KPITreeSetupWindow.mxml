@@ -28,7 +28,7 @@
         <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
     </mx:RemoteObject>
     <mx:VBox horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
-        <mx:Label text="Which data source will this KPI tree use?" fontSize="16"/>
+        <mx:Label text="Which data source do you want to use?" fontSize="16"/>
         <mx:ComboBox dataProvider="{dataSources}" id="dataSourceBox" labelField="name"/>
         <mx:Button label="Use This Data Source" styleName="grayButton" click="save()"/>
     </mx:VBox>

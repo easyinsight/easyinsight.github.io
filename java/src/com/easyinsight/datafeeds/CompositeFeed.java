@@ -215,6 +215,10 @@ public class CompositeFeed extends Feed {
             return queryStateNode.myDataSet;
         }
 
+        if (neededNodes.size() == 0) {
+            return new DataSet();
+        }
+
         // determine which keys are matched to which fields as we proceed here
 
         Iterator<QueryStateNode> neededNodeIter = new HashMap<Long, QueryStateNode>(neededNodes).values().iterator();

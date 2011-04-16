@@ -65,6 +65,10 @@ public class AnalysisItemDetailEditor extends Form {
         _analysisItem = val;
     }
 
+    public function get analysisItem():AnalysisItem {
+        return _analysisItem;
+    }
+
     public function save(analysisItem:AnalysisItem):void {
     }
 

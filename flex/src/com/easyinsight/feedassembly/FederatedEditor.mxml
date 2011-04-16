@@ -1,15 +1,21 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         xmlns:feedassembly="com.easyinsight.feedassembly.*"
          implements="com.easyinsight.administration.feed.IFeedAdminDetail"
-        creationComplete="setupListeners()" width="100%" horizontalAlign="center">
+         creationComplete="setupListeners()" width="100%" horizontalAlign="center" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.solutions.AddFeedToSolutionWindow;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.FeedSelectionEvent;
         import com.easyinsight.util.PopUpUtil;
 
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
@@ -18,6 +24,16 @@
             if (dataSources.length > 0) {
                 dataSourceType = FederationSource(dataSources.getItemAt(0)).dataSourceType;
             }
+            if (_federatedSource != null) {
+                initialSetup(_federatedSource);
+                feedService.getDataSourcesForFederated.send(_federatedSource.dataFeedID);
+            }
+        }
+
+        private var _federatedSource:FederatedDataSource;
+
+        public function set federatedSource(value:FederatedDataSource):void {
+            _federatedSource = value;
         }
 
         private function onDelete(event:DeleteFederatedEvent):void {
@@ -72,10 +88,137 @@
             source.dataSourceType = event.feedDescriptor.dataSourceType;
             dataSourceType = event.feedDescriptor.dataSourceType;
             dataSources.addItem(source);
+            ProgressAlert.alert(this, "Retrieving details...", null, feedService.getFeedDefinition);
+            feedService.getFeedDefinition.send(event.feedDescriptor.id);
+        }
+
+        private function gotDataSource():void {
+            var dataSource:FeedDefinitionData = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            dataSourceDefinitions.addItem(dataSource);
+            if (dataSourceDefinitions.length == 1) {
+                initialSetup(dataSource);
+            }
+            createFieldsForNew(dataSource);
+        }
+
+        private function gotDataSources():void {
+            var sources:ArrayCollection = feedService.getDataSourcesForFederated.lastResult as ArrayCollection;
+            for each (var source:FeedDefinitionData in sources) {
+                var fedSource:FederationSource;
+                for each (var testSource:FederationSource in dataSources) {
+                    if (testSource.dataSourceID == source.dataFeedID) {
+                        fedSource = testSource;
+                        break;
+                    }
+                }
+                dataSourceDefinitions.addItem(source);
+                if (fedSource.fieldMappings == null) {
+                    if (dataSourceDefinitions.length == 1) {
+                        initialSetup(source);
+                    }
+                    createFieldsForNew(source);
+                } else {
+                    addMappings(fedSource.fieldMappings, source);
+                }
+            }
+        }
+
+        [Bindable]
+        private var federatedFields:ArrayCollection;
+
+        private var dataSourceDefinitions:ArrayCollection = new ArrayCollection();
+
+
+
+        private function createFieldsForNew(dataSource:FeedDefinitionData):void {
+            var mappings:ArrayCollection = new ArrayCollection();
+            for each (var obj:Object in federatedFields) {
+                var key:String = obj["fed"];
+                for each (var sourceField:AnalysisItem in dataSource.fields) {
+                    var display:String = sourceField.display;
+                    if (key == display) {
+                        var mapping:FieldMapping = new FieldMapping();
+                        mapping.federatedKey = key;
+                        mapping.sourceKey = display;
+                        mappings.addItem(mapping);
+                    }
+                }
+            }
+            addMappings(mappings, dataSource);
+        }
+
+        private function initialSetup(dataSource:FeedDefinitionData):void {
+            federatedFields = new ArrayCollection();
+            for each (var field:AnalysisItem in dataSource.fields) {
+                var o:Object = new Object();
+                o["fed"] = field.display;
+                federatedFields.addItem(o);
+            }
+            createColumns();
+        }
+
+        private function addMappings(mappings:ArrayCollection, dataSource:FeedDefinitionData):void {
+            for each (var obj:Object in federatedFields) {
+                var key:String = obj["fed"];
+                for each (var m:FieldMapping in mappings) {
+                    if (key == m.federatedKey) {
+                        obj[String(dataSource.dataFeedID)] = m.sourceKey;
+                    }
+                }
+            }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("fed")];
+            federatedFields.sort = sort;
+            federatedFields.refresh();
+            createColumns();
+        }
+
+        private function createColumns():void {
+            var columns:Array = [];
+            var federatedColumn:EIDataGridColumn = new EIDataGridColumn();
+            federatedColumn.dataField = "fed";
+            federatedColumn.headerText = "Federated Source";
+            columns.push(federatedColumn);
+            for each (var dataSource:FeedDefinitionData in dataSourceDefinitions) {
+                if (dataSource.dataFeedID == dataSourceChoice.selectedItem.dataSourceID) {
+                    chosenFields = new ArrayCollection(dataSource.fields.toArray());
+                    var sort:Sort = new Sort();
+                    sort.fields = [ new SortField("display")];
+                    chosenFields.sort = sort;
+                    chosenFields.refresh();
+                    fieldsInText = "Fields in " + dataSource.feedName;
+                    var dsColumn:EIDataGridColumn = new EIDataGridColumn();
+                    var factory:ClassFactory = new ClassFactory(MappingEditor);
+                    factory.properties = { dataSource: dataSource };
+                    dsColumn.itemRenderer = factory;
+                    dsColumn.dataField = String(dataSource.dataFeedID);
+                    dsColumn.headerText = dataSource.feedName;
+                    columns.push(dsColumn);
+                }
+            }
+            columnGrid.columns = columns;
+        }
+
+        private function toMappings():void {
+            for each (var fedSource:FederationSource in dataSources) {
+                var mappings:ArrayCollection = new ArrayCollection();
+                for each (var obj:Object in federatedFields) {
+                    var fedKey:String = obj["fed"];
+                    var dsKey:String = obj[String(fedSource.dataSourceID)];
+                    var fieldMap:FieldMapping = new FieldMapping();
+                    fieldMap.federatedKey = fedKey;
+                    fieldMap.sourceKey = dsKey;
+                    mappings.addItem(fieldMap);
+                }
+                fedSource.fieldMappings = mappings;
+            }
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            FederatedDataSource(feedDefinition).sources = dataSources;
+            toMappings();
+            if (feedDefinition != null) {
+                FederatedDataSource(feedDefinition).sources = dataSources;
+            }
         }
 
         public function validate():Boolean {
@@ -85,7 +228,17 @@
             }
             return true;
         }
+
+        [Bindable]
+        private var chosenFields:ArrayCollection;
+
+        [Bindable]
+        private var fieldsInText:String;
         ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="getFeedDefinition" result="gotDataSource()"/>
+        <mx:method name="getDataSourcesForFederated" result="gotDataSources()"/>
+    </mx:RemoteObject>
     <mx:Button label="Add Data Source..." click="addDataSource()" styleName="grayButton"/>
     <mx:DataGrid dataProvider="{dataSources}" rowHeight="28">
         <mx:columns>
@@ -93,4 +246,13 @@
             <util:EIDataGridColumn width="50" sortable="false" dataField="name" headerText="" itemRenderer="com.easyinsight.feedassembly.FederatedControls"/>
         </mx:columns>
     </mx:DataGrid>
+    <mx:ComboBox id="dataSourceChoice" dataProvider="{dataSources}" labelField="name" change="createColumns()"/>
+    <mx:HBox width="90%" height="100%">
+        <mx:DataGrid id="columnGrid" width="66%" dataProvider="{federatedFields}" height="100%"/>
+        <mx:VBox height="100%" horizontalAlign="center" width="34%">
+            <mx:Label text="{fieldsInText}"/>
+            <feedassembly:FederatedList dataProvider="{chosenFields}" labelField="display" height="100%" width="100%"/>
+        </mx:VBox>
+    </mx:HBox>
+
 </mx:VBox>

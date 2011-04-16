@@ -183,7 +183,7 @@ public abstract class Feed implements Serializable {
                 "(DATA_FEED.DATA_FEED_ID = ? OR DATA_FEED.PARENT_SOURCE_ID = ?)");
         versionStmt.setLong(1, getFeedID());
         versionStmt.setLong(2, getFeedID());
-        int version = 0;
+        int version;
         Date date = null;
         ResultSet versionRS = versionStmt.executeQuery();
         if (versionRS.next()) {
@@ -196,8 +196,11 @@ public abstract class Feed implements Serializable {
             stmt.setInt(3, version);
             
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                date = new Date(rs.getTimestamp(1).getTime());
+            while (rs.next()) {
+                Date date1 = new Date(rs.getTimestamp(1).getTime());
+                if (date == null || date.getTime() < date1.getTime()) {
+                    date = date1;
+                }
             }
         }
         DataSourceInfo dataSourceInfo = new DataSourceInfo();

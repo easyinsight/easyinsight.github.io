@@ -539,6 +539,24 @@ public class FeedService {
         processViewers(feedDefinition, session, oldOwners, NotificationBase.REMOVE,  NotificationBase.OWNER);
     }
 
+    public List<FeedDefinition> getDataSourcesForFederated(long federatedDataSourceID) {
+        List<FeedDefinition> dataSources = new ArrayList<FeedDefinition>();
+        SecurityUtil.authorizeFeed(federatedDataSourceID, Roles.SHARER);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            FederatedDataSource federatedDataSource = (FederatedDataSource) feedStorage.getFeedDefinitionData(federatedDataSourceID, conn);
+            for (FederationSource source : federatedDataSource.getSources()) {
+                dataSources.add(feedStorage.getFeedDefinitionData(source.getDataSourceID(), conn));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return dataSources;
+    }
+
     public FeedDefinition getFeedDefinition(long dataFeedID) {
         SecurityUtil.authorizeFeed(dataFeedID, Roles.SHARER);
         try {

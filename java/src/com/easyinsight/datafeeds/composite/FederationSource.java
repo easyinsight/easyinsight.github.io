@@ -1,5 +1,8 @@
 package com.easyinsight.datafeeds.composite;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * User: jamesboe
  * Date: 3/5/11
@@ -10,6 +13,15 @@ public class FederationSource {
     private String value;
     private String name;
     private int dataSourceType;
+    private List<FieldMapping> fieldMappings = new ArrayList<FieldMapping>();
+
+    public List<FieldMapping> getFieldMappings() {
+        return fieldMappings;
+    }
+
+    public void setFieldMappings(List<FieldMapping> fieldMappings) {
+        this.fieldMappings = fieldMappings;
+    }
 
     public int getDataSourceType() {
         return dataSourceType;

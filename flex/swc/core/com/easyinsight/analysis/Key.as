@@ -15,6 +15,10 @@ package com.easyinsight.analysis
 			return null;
 		}
 
+        public function toBaseKey():Key {
+            return null;
+        }
+
         public function internalString():String {
             return null;
         }

@@ -16,10 +16,6 @@ public class HarvestDataSource extends CompositeServerDataSource {
         this.feedName = "Harvest";
     }
 
-    override public function isLiveData():Boolean {
-        return false;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.HARVEST_COMPOSITE;
     }

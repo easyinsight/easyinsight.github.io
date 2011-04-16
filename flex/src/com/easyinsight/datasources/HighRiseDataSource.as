@@ -2,6 +2,8 @@ package com.easyinsight.datasources {
 import com.easyinsight.customupload.HighRiseDataSourceCreation;
 
 
+import com.easyinsight.customupload.HighriseConfiguration;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -24,12 +26,17 @@ public class HighRiseDataSource extends CompositeServerDataSource {
         this.feedName = "Highrise";
     }
 
-    override public function isLiveData():Boolean {
-        return false;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.HIGHRISE;
+    }
+
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        var config:HighriseConfiguration = new HighriseConfiguration();
+        config.dataSourceDefinition = this;
+        config.label = "Highrise Server Configuration";
+        pages.addItem(config);
+        return pages;
     }
 
     override public function configClass():Class {

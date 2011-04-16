@@ -1,0 +1,88 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.HighRiseDataSource;
+        import com.easyinsight.datasources.HighriseTaskWindow;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var url:String;
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:HighRiseDataSource = feedDefinition as HighRiseDataSource;
+            includeEmails = ds.includeEmails;
+            includeContactNotes = ds.includeContactNotes;
+            includeCompanyNotes = ds.includeCompanyNotes;
+            includeDealNotes = ds.includeDealNotes;
+            includeCaseNotes= ds.includeCaseNotes;
+            additionalTokens = ds.additionalTokens;
+            url = ds.url;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:HighRiseDataSource = feedDefinition as HighRiseDataSource;
+            ds.url = urlInput.text;
+            ds.includeEmails = emailsCheckbox.selected;
+            ds.includeContactNotes = contactNotesCheckbox.selected;
+            ds.includeCompanyNotes = companyNotesCheckbox.selected;
+            ds.includeDealNotes = dealNotesCheckbox.selected;
+            ds.includeCaseNotes = caseNotesCheckbox.selected;
+            ds.additionalTokens = additionalTokens;
+        }
+
+        [Bindable]
+        private var includeEmails:Boolean;
+
+        [Bindable]
+        private var includeContactNotes:Boolean;
+
+        [Bindable]
+        private var includeCompanyNotes:Boolean;
+
+        [Bindable]
+        private var includeDealNotes:Boolean;
+
+        [Bindable]
+        private var includeCaseNotes:Boolean;
+
+        private var additionalTokens:ArrayCollection = new ArrayCollection();
+
+        private function configureTasks():void {
+            var window:HighriseTaskWindow = new HighriseTaskWindow();
+            window.tokens = additionalTokens;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
+        <mx:FormItem label="Highrise URL:">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Do you want to report on email activity?" direction="horizontal">
+            <mx:CheckBox id="emailsCheckbox" selected="{includeEmails}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Do you want to report on contact notes?" direction="horizontal">
+            <mx:CheckBox id="contactNotesCheckbox" selected="{includeContactNotes}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Do you want to report on company notes?" direction="horizontal">
+            <mx:CheckBox id="companyNotesCheckbox" selected="{includeCompanyNotes}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Do you want to report on deal notes?" direction="horizontal">
+            <mx:CheckBox id="dealNotesCheckbox" selected="{includeDealNotes}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Do you want to report on case notes?" direction="horizontal">
+            <mx:CheckBox id="caseNotesCheckbox" selected="{includeCaseNotes}"/>
+        </mx:FormItem>
+        <mx:FormItem label="">
+            <mx:Button label="Configure Task Access..." click="configureTasks()" styleName="grayButton"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

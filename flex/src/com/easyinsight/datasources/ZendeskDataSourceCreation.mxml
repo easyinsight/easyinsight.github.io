@@ -32,16 +32,18 @@
         public function validate():Boolean {
             return true;
         }]]></mx:Script>
-    <mx:Form>
-        <mx:FormItem label="Zendesk Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
-		</mx:FormItem>
-        <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.zendesk.com&quot;" fontSize="10"/>
-		<mx:FormItem label="Zendesk Email: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>
-		</mx:FormItem>
-		<mx:FormItem label="Zendesk Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true" width="350"/>
-		</mx:FormItem>
-	</mx:Form>
+    <mx:HBox>
+        <mx:Label text="Zendesk URL:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+    </mx:HBox>
+    <mx:TextArea width="700" text="Your Highrise URL is the browser URL you normally use to connect to Zendesk. For example, if you access Zendesk as yourcompanyname.zendesk.com, put yourcompanyname in as the Highrise URL."
+            editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
+    <mx:HBox>
+        <mx:Label text="Zendesk Email:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>
+    </mx:HBox>
+    <mx:HBox>
+        <mx:Label text="Zendesk Password:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="passwordInput" displayAsPassword="true" width="350"/>
+    </mx:HBox>
 </mx:VBox>

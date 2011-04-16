@@ -190,7 +190,7 @@
         <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="{asyncLabel}"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Create" click="validate()" enabled="{ready}" styleName="grayButton" fontSize="14"/>
-            <mx:Button label="Cancel" click="closeWindow()" styleName="grayButton"
+            <util:CancelButton label="Cancel" click="closeWindow()"
                     fontSize="14"/>
         </mx:HBox>
 	</mx:VBox>

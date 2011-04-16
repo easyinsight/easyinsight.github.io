@@ -458,7 +458,7 @@
         <mx:method name="searchForHiddenChildren" result="gotHiddenChildren()"/>
         <mx:method name="testJoin" result="tested()"/>
     </mx:RemoteObject>
-    <mx:VBox width="1000" height="100%" backgroundColor="#E0E0E0">
+    <mx:VBox width="100%" height="100%" backgroundColor="#E0E0E0">
         <mx:HBox width="100%" paddingLeft="10" paddingRight="10">
             <mx:VBox width="40%">
                 <mx:HBox width="100%" horizontalAlign="center">

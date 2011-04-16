@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+        implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.AnalysisItem;
+
+        import com.easyinsight.analysis.NamedKey;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+
+        [Bindable]
+        private var _fields:ArrayCollection;
+
+        public function set fields(value:ArrayCollection):void {
+            _fields = value;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            for each (var item:AnalysisItem in feedDefinition.fields) {
+                for each (var field:AnalysisItem in _fields) {
+                    if (item.analysisItemID == field.analysisItemID) {
+                        item.key = field.key;
+                    }
+                }
+            }
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:DataGrid dataProvider="{_fields}" width="950" height="100%">
+        <mx:columns>
+            <util:EIDataGridColumn dataField="display" headerText="Field" width="900"/>
+            <util:EIDataGridColumn headerText="" itemRenderer="com.easyinsight.google.IndexCheckbox" width="100"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

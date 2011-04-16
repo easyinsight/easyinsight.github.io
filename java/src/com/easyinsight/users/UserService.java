@@ -2,6 +2,8 @@ package com.easyinsight.users;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.PreferencesService;
@@ -1165,6 +1167,7 @@ public class UserService {
         } else if (account.getExternalLogin() != null) {
             String result = account.getExternalLogin().login(userName, password);
             if (result == null) {
+                session.update(account.getExternalLogin());
                 if (user.getPersonaID() != null) {
                     user.setUiSettings(UISettingRetrieval.getUISettings(user.getPersonaID(), conn, account));
                 }
@@ -1252,5 +1255,35 @@ public class UserService {
             Database.closeConnection(conn);
         }
         return userServiceResponse;
+    }
+
+    public List<SuggestedUser> suggestUsers(long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+            List<SuggestedUser> users = feedDefinition.retrieveUsers(conn);
+            long userID = SecurityUtil.getUserID();
+            PreparedStatement stmt = conn.prepareStatement("SELECT EMAIL FROM USER WHERE USER_ID = ?");
+            stmt.setLong(1, userID);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            String email = rs.getString(1);
+            Iterator<SuggestedUser> iter = users.iterator();
+            while (iter.hasNext()) {
+                SuggestedUser suggestedUser = iter.next();
+                if (email.equals(suggestedUser.getEmailAddress())) {
+                    iter.remove();
+                }
+            }
+            for (SuggestedUser user : users) {
+                user.fillInInfo(conn);
+            }
+            return users;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 }

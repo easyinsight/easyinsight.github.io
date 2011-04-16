@@ -149,6 +149,7 @@ public class AnalysisService {
     public AnalysisItem cloneItem(AnalysisItem analysisItem) {
         try {
             AnalysisItem copy = analysisItem.clone();
+            copy.setOriginalDisplayName(analysisItem.toDisplay());
             copy.setDisplayName("Copy of " + analysisItem.toDisplay());
             copy.setConcrete(false);
             return copy;

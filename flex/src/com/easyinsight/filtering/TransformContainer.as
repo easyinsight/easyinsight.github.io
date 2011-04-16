@@ -254,16 +254,18 @@ public class TransformContainer extends HBox
         } else if (filterDefinition.getType() == FilterDefinition.ROLLING_DATE) {
             filter = new RollingRangeFilter(_feedID, filterDefinition.field);
         } else if (filterDefinition.getType() == FilterDefinition.LAST_VALUE) {
-            filter = new LastValueFilter(_feedID, filterDefinition.field, LastValueFilter.LAST_VALUE);
+            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.LAST_VALUE);
         } else if (filterDefinition.getType() == FilterDefinition.FIRST_VALUE) {
-            filter = new LastValueFilter(_feedID, filterDefinition.field, LastValueFilter.FIRST_VALUE);
+            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.FIRST_VALUE);
         } else if (filterDefinition.getType() == FilterDefinition.NULL) {
-            filter = new LastValueFilter(_feedID, filterDefinition.field, LastValueFilter.NULL_VALUE);
+            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NULL_VALUE);
         } else if (filterDefinition.getType() == FilterDefinition.PATTERN) {
             filter = new PatternFilter(_feedID, filterDefinition.field);
         } else if (filterDefinition.getType() == FilterDefinition.OR) {
             filter = new OrFilterCanvas(_feedID);
             filter.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, passThrough);
+        } else if (filterDefinition.getType() == FilterDefinition.NAMED_REF) {
+            filter = new GenericFilter(_feedID, filterDefinition.field, GenericFilter.NAMED_REF);
         }
         filter.filterEditable = _filterEditable;
         filter.showLabel = _showLabel;
@@ -326,6 +328,9 @@ public class TransformContainer extends HBox
         } else if (event.filterType == NewFilterEvent.OR_FILTER) {
             var orFilter:OrFilter = new OrFilter();
             addFilterDefinition(orFilter);
+        } else if (event.filterType == NewFilterEvent.NAMED_REF_FILTER) {
+            var namedRefFilter:NamedFilterReference = new NamedFilterReference();
+            addFilterDefinition(namedRefFilter);
         }
     }
 

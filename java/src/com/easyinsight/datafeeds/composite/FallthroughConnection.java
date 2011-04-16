@@ -136,6 +136,15 @@ public class FallthroughConnection extends CompositeFeedConnection {
     @Override
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
                             Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn) {
+        Set<Value> sourceProjects = new HashSet<Value>();
+        Set<Value> targetProjects = new HashSet<Value>();
+
+        Key sourceProjectKey;
+        Key targetProjectKey;
+        Key sourceTodoItemKey;
+        Key targetTodoItemKey;
+
+
 
         // start by merging items by to-do to-do ID -> time tracking to-do ID
         // for those items which can't be merged by IDs, merge by project name

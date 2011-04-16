@@ -398,6 +398,8 @@ public class AnalysisDefinition implements Cloneable {
 
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
 
+        Collection<AnalysisItem> reportItems = getReportStructure().values();
+
         if (getAddedItems() != null) {
             for (AnalysisItem analysisItem : getAddedItems()) {
                 AnalysisItem clonedItem;
@@ -409,13 +411,21 @@ public class AnalysisDefinition implements Cloneable {
                     clonedItem = replacementMap.get(analysisItem.getAnalysisItemID());
                 }
                 addedItems.add(clonedItem);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allFields, reportItems, true, true, false, CleanupComponent.AGGREGATE_CALCULATIONS);
+                for (AnalysisItem item : items) {
+                    if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                        AnalysisItem subclonedItem = item.clone();
+                        cleanup(subclonedItem, changingDataSource);
+                        replacementMap.put(item.getAnalysisItemID(), subclonedItem);
+                    }
+                }
             }
         }
 
         allFields = new ArrayList<AnalysisItem>(allFields);
         allFields.addAll(addedItems);
 
-        Collection<AnalysisItem> reportItems = getReportStructure().values();
+
         reportItems.remove(null);
         for (AnalysisItem baseItem : reportItems) {
             if (replacementMap.get(baseItem.getAnalysisItemID()) == null) {
@@ -492,9 +502,16 @@ public class AnalysisDefinition implements Cloneable {
                 if (dataSourceItem != null) {
                     key = dataSourceItem.getKey();
                 } else {
-                    dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                    if (analysisItem.getOriginalDisplayName() != null) {
+                        dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
+                    }
                     if (dataSourceItem != null) {
                         key = dataSourceItem.getKey();
+                    } else {
+                        dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                        if (dataSourceItem != null) {
+                            key = dataSourceItem.getKey();
+                        }
                     }
                 }
             }

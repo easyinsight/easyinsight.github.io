@@ -95,12 +95,12 @@ public class OrFilter extends FilterDefinition {
     public String toQuerySQL(String tableName) {
         StringBuilder sb = new StringBuilder();
         for (FilterDefinition filter : filters) {
-            if (filter.isEnabled()) {
+            if (filter.isEnabled() && filter.validForQuery()) {
                 sb.append(filter.toQuerySQL(tableName));
                 sb.append(" OR ");
             }
         }
-        sb.delete(sb.length() - 5, 4);
+        sb.delete(sb.length() - 5, sb.length() - 1);
         return sb.toString();
     }
 
@@ -119,20 +119,7 @@ public class OrFilter extends FilterDefinition {
 
     @Override
     public boolean validForQuery() {
-        boolean valid = true;
-        if (filters == null || filters.size() == 0) {
-            return false;
-        }
-        int count = 0;
-        for (FilterDefinition filter : filters) {
-            if (filter.isEnabled()) {
-                count++;
-                if (!filter.validForQuery()) {
-                    valid = false;
-                }
-            }
-        }
-        return valid && count > 0;
+        return false;
     }
 
     @Override

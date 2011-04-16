@@ -238,7 +238,7 @@
         }
 
         protected function getMeasureOptions():ArrayCollection {
-            return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count", "Median", "Variance", "Ranking"]);
+            return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count", "Median", "Variance", "Ranking", "Percent of Total"]);
         }
 
         protected function getComplexOptions():ArrayCollection {
@@ -260,6 +260,7 @@
                      analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
                      }*/
                     analysisItem.displayName = fieldNameInput.text;
+                    analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName;
                     analysisItem.key = key;
                     analysisItem.hidden = hiddenCheckbox.selected;                    
                     detailEditor.save(analysisItem);
@@ -284,6 +285,7 @@
                 case "Median":
                 case "Variance":
                 case "Ranking":
+                case "Percent of Total":
                     currentState = "Measure";
                     break;
                 case "Normality":
@@ -390,7 +392,7 @@
                 </mx:Box>
                 <mx:Box>
                     <mx:ComboBox id="measureAggregationBox"
-                         close="aggregationTypeChanged(event)" rowCount="8">
+                         close="aggregationTypeChanged(event)" rowCount="9">
                         <mx:dataProvider>
                             <mx:Array>
                                 <mx:String>Sum</mx:String>
@@ -401,6 +403,7 @@
                                 <mx:String>Median</mx:String>
                                 <mx:String>Variance</mx:String>
                                 <mx:String>Ranking</mx:String>
+                                <mx:String>Percent of Total</mx:String>
                             </mx:Array>
                         </mx:dataProvider>
                     </mx:ComboBox>

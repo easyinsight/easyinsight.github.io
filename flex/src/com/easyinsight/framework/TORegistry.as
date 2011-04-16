@@ -66,6 +66,7 @@ import com.easyinsight.filtering.FilterRangeDefinition;
 import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.filtering.FirstValueFilterDefinition;
 import com.easyinsight.filtering.LastValueFilterDefinition;
+import com.easyinsight.filtering.NamedFilterReference;
 import com.easyinsight.filtering.NullValueFilterDefinition;
 import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
 import com.easyinsight.goals.KPITreeWrapper;
@@ -134,6 +135,7 @@ public class TORegistry {
         var filter6:FirstValueFilterDefinition;
         var filter7:LastValueFilterDefinition;
         var filter8:NullValueFilterDefinition;
+        var filter9:NamedFilterReference;
         var icon:Icon;
         var scorecard:Scorecard;
         var persString:PersistableStringValue;

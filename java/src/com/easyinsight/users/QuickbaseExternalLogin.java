@@ -30,6 +30,9 @@ public class QuickbaseExternalLogin extends ExternalLogin {
     @Column(name="quickbase_external_login_id")
     private long quickbaseExternalLoginID;
 
+    @Column(name="session_ticket")
+    private String sessionTicket;
+
     public String getHostName() {
         return hostName;
     }
@@ -46,6 +49,14 @@ public class QuickbaseExternalLogin extends ExternalLogin {
         this.quickbaseExternalLoginID = quickbaseExternalLoginID;
     }
 
+    public String getSessionTicket() {
+        return sessionTicket;
+    }
+
+    public void setSessionTicket(String sessionTicket) {
+        this.sessionTicket = sessionTicket;
+    }
+
     private static final String AUTHENTICATE_XML = "<username>{0}</username><password>{1}</password><hours>144</hours>";
 
     @Column(name="host_name")
@@ -57,7 +68,7 @@ public class QuickbaseExternalLogin extends ExternalLogin {
             Document doc = executeRequest(hostName, null, "API_Authenticate", requestBody);
             String errorCode = doc.query("/qdbapi/errcode/text()").get(0).getValue();
             if ("0".equals(errorCode)) {
-                //return doc.query("/qdbapi/ticket/text()").get(0).getValue();
+                sessionTicket = doc.query("/qdbapi/ticket/text()").get(0).getValue();
                 return null;
             } else {
                 return doc.query("/qdbapi/errtext/text()").get(0).getValue();

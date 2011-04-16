@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
     <mx:Metadata>
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
 		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
@@ -7,6 +7,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.BatchbookDataSource;
+
+        import mx.validators.Validator;
 
         [Bindable]
         private var urlInputText:String;
@@ -31,14 +33,33 @@
         }
 
         public function validate():Boolean {
+            urlInput.errorString = null;
+            apiInput.errorString = null;
+            var results:Array = Validator.validateAll([urlValidator]);
+            if (results.length > 0) {
+                urlInput.setFocus();
+                urlInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
+            results = Validator.validateAll([apiValidator]);
+            if (results.length > 0) {
+                apiInput.setFocus();
+                apiInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            }
             return true;
         }]]></mx:Script>
-    <mx:Form>
-		<mx:FormItem label="Batchbook URL:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{urlInputText}"/>
-		</mx:FormItem>
-        <mx:FormItem label="Batchbook API Token:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="apiInput" fontWeight="normal" fontFamily="Lucida Grande"/>
-		</mx:FormItem>
-	</mx:Form>
-</mx:HBox>
+    <mx:HBox>
+        <mx:Label text="Batchbook URL:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{urlInputText}" width="350"/>
+    </mx:HBox>
+    <mx:TextArea width="700" text="Your Batchbook URL is the browser URL you normally use to connect to Batchbook. For example, if you access Batchbook as yourcompanyname.batchbook.com, put yourcompanyname in as the Batchbook URL."
+            editable="false" selectable="false" focusEnabled="false" fontSize="12" backgroundAlpha="0"/>
+    <mx:HBox>
+        <mx:Label text="Batchbook API Key:" width="250" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="apiInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
+    </mx:HBox>
+    <mx:Label text="You can find the API key on your Batchbook page under Your Account - Integration." fontSize="12"/>
+    <mx:StringValidator id="urlValidator" source="{urlInput}" property="text" minLength="1"/>
+    <mx:StringValidator id="apiValidator" source="{apiInput}" property="text" minLength="1"/>
+</mx:VBox>

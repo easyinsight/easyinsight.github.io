@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.MouseEvent;
@@ -125,6 +126,10 @@ public class DashboardBox extends VBox {
         } else if (source is DashboardControl) {
             var dashboardControl:DashboardControl = source as DashboardControl;
             element = dashboardControl.createElement();
+        } else if (source is ScorecardDescriptor) {
+            var dashboardScorecard:DashboardScorecard = new DashboardScorecard();
+            dashboardScorecard.scorecard = source as ScorecardDescriptor;
+            element = dashboardScorecard;
         }
         if (this.element != null) {
             dropBox.removeAllChildren();

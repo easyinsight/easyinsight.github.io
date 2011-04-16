@@ -53,8 +53,10 @@ public class AmazonRDSFeed extends AmazonBaseFeed {
             List<String> infos = EC2Util.getDatabaseInstances(key, secretKey);
             DataSet childSet = EC2Util.createDataSetForRDS(infos, dimensions);
             for (IRow row : childSet.getRows()) {
-                DateValue dummyDateValue = new DateValue(endDate);
-                row.addValue(analysisDateDimension.createAggregateKey(), dummyDateValue);
+                if (analysisDateDimension != null) {
+                    DateValue dummyDateValue = new DateValue(endDate);
+                    row.addValue(analysisDateDimension.createAggregateKey(), dummyDateValue);
+                }
                 dataSet.addRow(row);
             }
         }

@@ -232,11 +232,11 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem) {
+    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
         if (getStartDateDimension() != null || getEndDateDimension() != null) {
             return Arrays.asList((IComponent) new DateRangePluginComponent(this));
         } else {
-            return super.createComponents(beforeAggregation, filterProcessor, sourceItem);
+            return super.createComponents(beforeAggregation, filterProcessor, sourceItem, columnLevel);
         }
     }
 

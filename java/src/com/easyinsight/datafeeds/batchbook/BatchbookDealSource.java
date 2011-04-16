@@ -89,6 +89,7 @@ public class BatchbookDealSource extends BatchbookBaseSource {
                 row.addValue(keys.get(DEAL_TITLE), queryField(dealNode, "title/text()"));
                 row.addValue(keys.get(DEAL_DESCRIPTION), queryField(dealNode, "description/text()"));
                 row.addValue(keys.get(DEAL_WITH_ID), queryField(dealNode, "deal_with_id/text()"));
+                row.addValue(keys.get(ASSIGNED_TO), queryField(dealNode, "assigned_to/text()"));
                 row.addValue(keys.get(STATUS), queryField(dealNode, "status/text()"));
                 row.addValue(keys.get(AMOUNT), queryField(dealNode, "amount/text()"));
                 row.addValue(keys.get(DEAL_COUNT), 1);

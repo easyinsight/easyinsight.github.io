@@ -7,6 +7,7 @@ import mx.events.FlexEvent;
 	{
 		public var name:String;
         public var indexed:Boolean;
+        public var keyChanged:Boolean;
 		
 		public function NamedKey()
 		{
@@ -16,6 +17,10 @@ import mx.events.FlexEvent;
 		override public function createString():String {
 			return name;
 		}
+
+        override public function toBaseKey():Key {
+            return this;
+        }
 
         public function get nameValue():String {
             return name;

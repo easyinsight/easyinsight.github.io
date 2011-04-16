@@ -21,6 +21,15 @@ public class Scorecard {
     private long scorecardID;
     private String urlKey;
     private boolean accountVisible;
+    private long dataSourceID;
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
+    }
 
     public String getDescription() {
         return description;

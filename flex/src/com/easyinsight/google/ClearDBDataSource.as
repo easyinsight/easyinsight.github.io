@@ -17,9 +17,5 @@ public class ClearDBDataSource extends ServerDataSourceDefinition {
     public function ClearDBDataSource() {
         super();
     }
-
-    override public function isLiveData():Boolean {
-        return true;
-    }
 }
 }

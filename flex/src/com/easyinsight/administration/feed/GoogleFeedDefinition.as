@@ -16,10 +16,6 @@ import com.easyinsight.customupload.GoogleSpreadsheetSourceCreation;
 			super();
 		}
 
-        override public function isLiveData():Boolean {
-            return true;
-        }
-
         override public function configClass():Class {
             return GoogleSpreadsheetSourceCreation;
         }

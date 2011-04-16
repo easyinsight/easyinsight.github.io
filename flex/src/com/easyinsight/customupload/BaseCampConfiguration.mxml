@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.BaseCampDataSource;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var archivedIncluded:Boolean;
+        [Bindable]
+        private var inactiveIncluded:Boolean;
+        [Bindable]
+        private var milestoneCommentsIncluded:Boolean;
+        [Bindable]
+        private var todoCommentsIncluded:Boolean;
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
+            url = ds.url;
+            archivedIncluded = ds.includeArchived;
+            inactiveIncluded = ds.includeInactive;
+            milestoneCommentsIncluded = ds.includeMilestoneComments;
+            todoCommentsIncluded = ds.includeTodoComments;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
+            ds.url = urlInput.text;
+            ds.includeArchived = archivedCheckbox.selected;
+            ds.includeMilestoneComments = milestoneCommentsCheckbox.selected;
+            ds.includeTodoComments = todoCommentsCheckbox.selected;
+            ds.includeInactive = inactiveCheckbox.selected;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
+        <mx:FormItem label="Basecamp URL:">
+            <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Include On Hold/Inactive Projects:" direction="horizontal">
+            <mx:CheckBox id="inactiveCheckbox" selected="{inactiveIncluded}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on inactive projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>
+        </mx:FormItem>
+        <mx:FormItem label="Include Archived Projects:" direction="horizontal">
+            <mx:CheckBox id="archivedCheckbox" selected="{archivedIncluded}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on archived projects, you can save time on your synchronization by not pulling those projects across into Easy Insight."/>
+        </mx:FormItem>
+        <mx:FormItem label="Include Milestone Comments:" direction="horizontal">
+            <mx:CheckBox id="milestoneCommentsCheckbox" selected="{milestoneCommentsIncluded}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on milestone comments, you can save significant time on your synchronization by not pulling that field across into Easy Insight."/>
+        </mx:FormItem>
+        <mx:FormItem label="Include Todo Comments:" direction="horizontal">
+            <mx:CheckBox id="todoCommentsCheckbox" selected="{todoCommentsIncluded}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you don't have a need to report on todo comments, you can save dramatic time on your synchronization by not pulling that field across into Easy Insight. Please note that for performance reasons, only comments associated to open todo items will be pulled across if you enable this option."/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:VBox>

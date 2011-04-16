@@ -23,7 +23,7 @@
              mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
         <mx:Text text="Join Different Sources" fontSize="24" selectable="false"/>
         <mx:TextArea
-                text="Do you want to join multiple different data sources? For example, if you want to combine Basecamp data with Highrise data or Freshbooks data with spreadsheet data, you would use this option."
+                text="Do you want to join multiple different data sources? For example, if you want to combine Basecamp data with Highrise data or FreshBooks data with spreadsheet data, you would use this option."
                 fontSize="14" backgroundAlpha="0" editable="false" selectable="false" height="120"
                 width="280" textAlign="center"/>
     </mx:VBox>

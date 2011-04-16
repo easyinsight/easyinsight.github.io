@@ -20,12 +20,19 @@
             PopUpManager.removePopUp(this);
         }
 
+        private function newRefFilter():void {
+            dispatchEvent(new NewFilterEvent(NewFilterEvent.NAMED_REF_FILTER));
+            PopUpManager.removePopUp(this);
+        }
+
         [Bindable]
         private var stackIndex:int = 0;
 
         private function updateStack():void {
             if (typeGroup.selectedValue == "fieldFilter") {
                 stackIndex = 0;
+            } else if (typeGroup.selectedValue == "namedRef") {
+                stackIndex = 2;
             } else {
                 stackIndex = 1;
             }
@@ -37,6 +44,7 @@
         <mx:HBox>
             <mx:RadioButton label="Create a Filter on a Field" groupName="typeGroup" value="fieldFilter"/>
             <mx:RadioButton label="Create an Or Filter" groupName="typeGroup" value="orFilter"/>
+            <!--<mx:RadioButton label="Create a Named Reference Filter" groupName="typeGroup" value="namedRef"/>-->
         </mx:HBox>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
             <mx:VBox>
@@ -49,6 +57,10 @@
             </mx:VBox>
             <mx:HBox>
                 <util:SaveButton label="Create a new Or Filter" click="newOrFilter()"/>
+                <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:HBox>
+            <mx:HBox>
+                <util:SaveButton label="Create a new Named Reference Filter" click="newRefFilter()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:ViewStack>

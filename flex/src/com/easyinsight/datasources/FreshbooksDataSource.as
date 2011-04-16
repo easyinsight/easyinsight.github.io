@@ -16,10 +16,6 @@ public class FreshbooksDataSource extends CompositeServerDataSource {
         feedName = "Freshbooks";
     }
 
-    override public function isLiveData():Boolean {
-        return true;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.FRESHBOOKS;
     }

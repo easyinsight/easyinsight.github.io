@@ -16,6 +16,10 @@ package com.easyinsight.analysis
 			return parentKey.createString();
 		}
 
+        override public function toBaseKey():Key {
+            return parentKey.toBaseKey();
+        }
+
         override public function internalString():String {
             return feedID + "-" + parentKey.createString();
         }

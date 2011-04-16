@@ -76,7 +76,7 @@ public class HighRiseDealNotesSource extends HighRiseBaseSource {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
 
         DataSet ds = new DataSet();
-        if (!highRiseCompositeSource.isIncludeContactNotes()) {
+        if (!highRiseCompositeSource.isIncludeDealNotes()) {
             return ds;
         }
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);

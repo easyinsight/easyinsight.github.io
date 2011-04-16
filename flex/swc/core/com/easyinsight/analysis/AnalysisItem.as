@@ -29,6 +29,7 @@ import mx.formatters.Formatter;
         public var itemPosition:int = 0;
         public var filters:ArrayCollection = new ArrayCollection();
         public var lookupTableID:int = 0;
+        public var originalDisplayName:String;
 		
 		public function AnalysisItem() {
 			super();
@@ -50,8 +51,7 @@ import mx.formatters.Formatter;
             if (filters != null && analysisItem.filters != null) {
                 for each (var itemFilter:FilterDefinition in this.filters) {
                     for each (var savedItemFilter:FilterDefinition in analysisItem.filters) {
-                        if (savedItemFilter.field.qualifiedName() == itemFilter.field.qualifiedName() &&
-                                savedItemFilter.getType() == itemFilter.getType()) {
+                        if (itemFilter.matches(savedItemFilter)) {
                             itemFilter.updateFromSaved(savedItemFilter);
                         }
                     }

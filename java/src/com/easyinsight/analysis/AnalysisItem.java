@@ -11,6 +11,7 @@ import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
+import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
@@ -46,6 +47,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="analysis_item_id")
     private long analysisItemID;
+
+    @Column(name="original_display_name")
+    private String originalDisplayName;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="formatting_configuration_id")
@@ -113,6 +117,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setFolder(String folder) {
         this.folder = folder;
+    }
+
+    public String getOriginalDisplayName() {
+        return originalDisplayName;
+    }
+
+    public void setOriginalDisplayName(String originalDisplayName) {
+        this.originalDisplayName = originalDisplayName;
     }
 
     public Long getLookupTableID() {
@@ -344,7 +356,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         items.add(this);
         if (includeFilters && getFilters().size() > 0) {
             for (FilterDefinition filterDefinition : getFilters()) {
-                items.addAll(filterDefinition.getField().getAnalysisItems(allItems, insightItems, getEverything, includeFilters, false, criteria));
+                items.addAll(filterDefinition.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, criteria));
             }
         }
         if (getLookupTableID() != null && getLookupTableID() > 0 && includeFilters) {
@@ -492,5 +504,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
         xml += "</analysisItem>";
         return xml;
+    }
+
+    public void timeshift(Feed dataSource, Collection<FilterDefinition> filters) {
+        for (FilterDefinition filterDefinition : getFilters()) {
+            filterDefinition.timeshift(dataSource, filters);
+        }
     }
 }

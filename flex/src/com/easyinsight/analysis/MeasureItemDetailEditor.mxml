@@ -36,6 +36,9 @@
                 case "Ranking":
                     analysisMeasure = new AnalysisMeasure(AggregationTypes.RANK);
                         break;
+                case "Percent of Total":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.PERCENT_OF_TOTAL);
+                    break;
             }
             return analysisMeasure;
         }

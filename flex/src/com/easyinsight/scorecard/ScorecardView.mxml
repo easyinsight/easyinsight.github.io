@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <skin:BackgroundImage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
-                      xmlns:util="com.easyinsight.util.*" creationComplete="setup()"
-        implements="com.easyinsight.listing.IPerspective">
+                      xmlns:scorecard="com.easyinsight.scorecard.*"
+                      implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -19,53 +19,39 @@
         import mx.managers.BrowserManager;
         import mx.utils.URLUtil;
 
-        private var scorecard:Scorecard;
-
         [Bindable]
         private var kpis:ArrayCollection;
 
-        [Bindable]
-        private var kpiNameFactory:KPINameFactory = new KPINameFactory("name");
-        [Bindable]
-        private var kpiIconFactory:KPINameFactory = new KPINameFactory("icon");
+        private var _scorecard:Scorecard;
+
+        public function set scorecard(value:Scorecard):void {
+            _scorecard = value;
+            invalidateProperties();
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_scorecard != null) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.scorecardViewID = String(_scorecard.urlKey);
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+            }
+        }
 
         private var _scorecardID:int;
 
+        [Bindable(event="scorecardIDChanged")]
+        public function get scorecardID():int {
+            return _scorecardID;
+        }
+
         public function set scorecardID(value:int):void {
+            if (_scorecardID == value) return;
             _scorecardID = value;
+            dispatchEvent(new Event("scorecardIDChanged"));
         }
 
-        private function setup():void {
-            kpiNameFactory.contextMenuAvailable = true;
-            kpiIconFactory.contextMenuAvailable = true;
-            ProgressAlert.alert(this, "Retrieving scorecard...", null, scorecardService.getScorecard);
-            scorecardService.getScorecard.send(_scorecardID);
-        }
-
-        private function gotScorecard():void {
-            scorecard = scorecardService.getScorecard.lastResult as Scorecard;
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.scorecardViewID = String(scorecard.urlKey);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
-            kpis = scorecard.kpis;
-            invalidateSize();
-            refreshValues();
-        }
-
-        private function onProblem(event:ProblemDataEvent):void {
-            refreshValues();
-        }
-
-        protected override function measure():void {
-            super.measure();
-            if (kpis != null) {
-                if (adminGrid != null) {
-                    adminGrid.verticalScrollPolicy = "off";
-                    adminGrid.height = adminGrid.measureHeightOfItems(0, kpis.length) + adminGrid.headerHeight + 4;
-                }
-            }
-        }
 
         private function scorecardView():void {
             dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_EDITOR, {scorecardID: _scorecardID })));
@@ -75,30 +61,6 @@
             dispatchEvent(new AnalysisCloseEvent());
         }
 
-        private function refreshValues():void {
-            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
-            metadata.utcOffset = new Date().getTimezoneOffset();
-            ProgressAlert.alert(this, "Retrieving KPI values...", null, scorecardService.getValues);
-            scorecardService.getValues.send(scorecard, metadata);
-        }
-
-        private function gotValues():void {
-            var results:ScorecardResults = scorecardService.getValues.lastResult as ScorecardResults;
-
-            if (results.reportFault != null) {
-                results.reportFault.popup(this, onProblem);
-            }
-            var outcomes:ArrayCollection = results.outcomes;
-            for each (var outcome:KPIOutcome in outcomes) {
-                for each (var kpi:KPI in kpis) {
-                    if (outcome.kpiName == kpi.name) {
-                        kpi.kpiOutcome = outcome;
-                        break;
-                    }
-                }
-            }
-        }
-
         public function gotFocus():void {
         }
 
@@ -106,16 +68,11 @@
             cleanupBindings();
         }
         ]]></mx:Script>
-    <mx:RemoteObject id="scorecardService" destination="scorecardService">
-        <mx:method name="getScorecard" result="gotScorecard()"/>
-        <mx:method name="getValues" result="gotValues()"/>
-    </mx:RemoteObject>
-
     <mx:VBox height="100%" width="1000" verticalGap="20" horizontalAlign="center">
         <mx:HBox width="100%" paddingLeft="15" paddingTop="15">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()"
                        toolTip="Close" label="Close Editor" labelPlacement="right"/>
-            <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" click="refreshValues()"
+            <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" click="scorecardRenderer.refreshValues()"
                        toolTip="Refresh the Scorecard" label="Refresh" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/pencil.png')" click="scorecardView()"
                                    labelPlacement="right" id="editReportButton"
@@ -123,22 +80,6 @@
                     label="Edit Scorecard"/>
         </mx:HBox>
         <mx:HRule width="100%"/>
-        <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="970" id="adminGrid">
-            <mx:columns>
-                <util:EIDataGridColumn headerText="" dataField="name"
-                                       itemRenderer="{kpiIconFactory}" width="50"
-                                       sortable="false"/>
-                <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
-                <util:EIDataGridColumn headerText="Latest Value" dataField="name"
-                                       itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
-                <util:EIDataGridColumn headerText="" dataField="name"
-                                       itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
-                                       sortable="false"/>
-                <util:EIDataGridColumn headerText="Time" dataField="name"
-                                       itemRenderer="com.easyinsight.scorecard.KPITimeRenderer" width="100"/>
-                <util:EIDataGridColumn headerText="% Change" dataField="name"
-                                       itemRenderer="com.easyinsight.scorecard.KPIChangeRenderer" width="110"/>
-            </mx:columns>
-        </mx:DataGrid>
+        <scorecard:ScorecardRenderer scorecardID="{scorecardID}" id="scorecardRenderer" scorecardAssigned="scorecard = event.scorecard"/>
     </mx:VBox>
 </skin:BackgroundImage>

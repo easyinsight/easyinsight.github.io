@@ -17,10 +17,6 @@ public class LinkedInDataSource extends ServerDataSourceDefinition {
         feedName = "LinkedIn";
     }
 
-    override public function isLiveData():Boolean {
-        return false;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.LINKEDIN;
     }

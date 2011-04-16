@@ -27,9 +27,5 @@ import com.easyinsight.datasources.DataSourceType;
     override public function getFeedType():int {
         return DataSourceType.SALESFORCE;
     }
-
-    override public function isLiveData():Boolean {
-            return true;
-        }
 	}
 }

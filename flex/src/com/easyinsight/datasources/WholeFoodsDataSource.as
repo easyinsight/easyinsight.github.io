@@ -18,10 +18,6 @@ public class WholeFoodsDataSource extends CompositeServerDataSource {
         this.uncheckedAPIEnabled = true;
     }
 
-    override public function isLiveData():Boolean {
-        return false;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.WHOLE_FOODS;
     }

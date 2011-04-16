@@ -33,7 +33,7 @@ public class ScorecardInternalService {
 
     public RolePrioritySet<ScorecardDescriptor> getScorecards(long userID, long accountID, EIConnection conn) throws SQLException {
         RolePrioritySet<ScorecardDescriptor> scorecards = new RolePrioritySet<ScorecardDescriptor>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, SCORECARD.creation_date from " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, SCORECARD.creation_date, SCORECARD.data_source_id from " +
                 "scorecard where scorecard.user_id = ?");
         PreparedStatement userStmt = conn.prepareStatement("SELECT USER.name, USER.first_name FROM USER, SCORECARD WHERE USER.USER_ID = SCORECARD.USER_ID AND " +
                 "SCORECARD.scorecard_id = ?");
@@ -63,9 +63,11 @@ public class ScorecardInternalService {
                 creationDate = new Date(creationTimestamp.getTime());
             }
             scorecardDescriptor.setCreationDate(creationDate);
+            long dataSourceID = rs.getLong(4);
+            scorecardDescriptor.setDataSourceID(dataSourceID);
             scorecards.add(scorecardDescriptor);
         }
-        PreparedStatement accountStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD.SCORECARD_NAME, scorecard.creation_date FROM " +
+        PreparedStatement accountStmt = conn.prepareStatement("SELECT SCORECARD.SCORECARD_ID, SCORECARD.SCORECARD_NAME, scorecard.creation_date, scorecard.data_source_id FROM " +
                 "SCORECARD, USER WHERE SCORECARD.USER_ID = USER.USER_ID AND USER.ACCOUNT_ID = ? and SCORECARD.ACCOUNT_VISIBLE = ?");
         accountStmt.setLong(1, accountID);
         accountStmt.setBoolean(2, true);
@@ -94,6 +96,8 @@ public class ScorecardInternalService {
                 creationDate = new Date(creationTimestamp.getTime());
             }
             scorecardDescriptor.setCreationDate(creationDate);
+            long dataSourceID = accountRS.getLong(4);
+            scorecardDescriptor.setDataSourceID(dataSourceID);
             scorecards.add(scorecardDescriptor);
         }
         PreparedStatement groupStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name, scorecard.group_id, " +
@@ -128,6 +132,8 @@ public class ScorecardInternalService {
                 creationDate = new Date(creationTimestamp.getTime());
             }
             scorecardDescriptor.setCreationDate(creationDate);
+            long dataSourceID = groupRS.getLong(4);
+            scorecardDescriptor.setDataSourceID(dataSourceID);
             scorecards.add(scorecardDescriptor);
         }
         return scorecards;

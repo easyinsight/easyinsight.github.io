@@ -60,11 +60,24 @@ public class FederatedDataSource extends FeedDefinition {
         }
         saveStmt.execute();
         long id = Database.instance().getAutoGenKey(saveStmt);
+        saveStmt.close();
+        PreparedStatement clearMappingsStmt = conn.prepareStatement("DELETE FROM FEDERATED_FIELD_MAPPING WHERE FEDERATED_DATA_SOURCE_ID = ?");
+        clearMappingsStmt.setLong(1, getDataFeedID());
+        clearMappingsStmt.executeUpdate();
+        clearMappingsStmt.close();
         PreparedStatement saveJoinStmt = conn.prepareStatement("INSERT INTO FEDERATED_DATA_SOURCE_TO_DATA_SOURCE (FEDERATED_DATA_SOURCE_ID, DATA_SOURCE_ID) VALUES (?, ?)");
+        PreparedStatement saveMappingsStmt = conn.prepareStatement("INSERT INTO FEDERATED_FIELD_MAPPING (federated_key, SOURCE_KEY, federated_data_source_id, data_source_id) VALUES (?, ?, ?, ?)");
         for (FederationSource source : sources) {
             saveJoinStmt.setLong(1, id);
             saveJoinStmt.setLong(2, source.getDataSourceID());
             saveJoinStmt.execute();
+            for (FieldMapping fieldMapping : source.getFieldMappings()) {
+                saveMappingsStmt.setString(1, fieldMapping.getFederatedKey());
+                saveMappingsStmt.setString(2, fieldMapping.getSourceKey());
+                saveMappingsStmt.setLong(3, getDataFeedID());
+                saveMappingsStmt.setLong(4, source.getDataSourceID());
+                saveMappingsStmt.execute();
+            }
         }
     }
 
@@ -89,6 +102,7 @@ public class FederatedDataSource extends FeedDefinition {
             long id = rs.getLong(1);
             PreparedStatement stmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, FEED_NAME, FEED_TYPE FROM FEDERATED_DATA_SOURCE_TO_DATA_SOURCE, DATA_FEED WHERE FEDERATED_DATA_SOURCE_ID = ? AND " +
                     "DATA_SOURCE_ID = DATA_FEED_ID");
+            PreparedStatement mappingStmt = conn.prepareStatement("SELECT FEDERATED_KEY, SOURCE_KEY FROM federated_field_mapping WHERE federated_data_source_id = ? AND data_source_id = ?");
             stmt.setLong(1, id);
             ResultSet fedRS = stmt.executeQuery();
             while (fedRS.next()) {
@@ -97,6 +111,17 @@ public class FederatedDataSource extends FeedDefinition {
                 federationSource.setName(fedRS.getString(2));
                 federationSource.setDataSourceType(fedRS.getInt(3));
                 sources.add(federationSource);
+                mappingStmt.setLong(1, getDataFeedID());
+                mappingStmt.setLong(2, federationSource.getDataSourceID());
+                ResultSet mappingRS = mappingStmt.executeQuery();
+                List<FieldMapping> mappings = new ArrayList<FieldMapping>();
+                while (mappingRS.next()) {
+                    FieldMapping fieldMapping = new FieldMapping();
+                    fieldMapping.setFederatedKey(mappingRS.getString(1));
+                    fieldMapping.setSourceKey(mappingRS.getString(2));
+                    mappings.add(fieldMapping);
+                }
+                federationSource.setFieldMappings(mappings);
             }
         }
         this.sources = sources;

@@ -47,8 +47,10 @@ public class AmazonEBSFeed extends AmazonBaseFeed {
             List<VolumeInfo> infos = new Jec2(key, secretKey).describeVolumes(new ArrayList<String>());
             DataSet childSet = EC2Util.createDataSetForEBS(infos, dimensions);
             for (IRow row : childSet.getRows()) {
-                DateValue dummyDateValue = new DateValue(endDate);
-                row.addValue(analysisDateDimension.createAggregateKey(), dummyDateValue);
+                if (analysisDateDimension != null) {
+                    DateValue dummyDateValue = new DateValue(endDate);
+                    row.addValue(analysisDateDimension.createAggregateKey(), dummyDateValue);
+                }
                 dataSet.addRow(row);
             }
         }

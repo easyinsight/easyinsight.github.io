@@ -118,7 +118,7 @@ public class ExportService {
         }
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_TYPE, scheduled_account_activity.scheduled_account_activity_id FROM " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, scheduled_account_activity.scheduled_account_activity_id FROM " +
                     "DATA_FEED, SCHEDULED_DATA_SOURCE_REFRESH, scheduled_account_activity WHERE " +
                     "DATA_FEED.data_feed_id = SCHEDULED_DATA_SOURCE_REFRESH.data_source_id and " +
                     "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id and " +
@@ -126,13 +126,13 @@ public class ExportService {
             queryStmt.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                int feedType = rs.getInt(1);
+                long dataSourceID = rs.getLong(1);
                 long id = rs.getLong(2);
                 if (scheduledActivity != null && id == scheduledActivity.getScheduledActivityID()) continue;
                 Iterator<DataSourceDescriptor> descIter = validSources.iterator();
                 while (descIter.hasNext()) {
                     DataSourceDescriptor fd = descIter.next();
-                    if (fd.getDataSourceType() == feedType) {
+                    if (fd.getId() == dataSourceID) {
                         descIter.remove();
                     }
                 }
@@ -149,7 +149,9 @@ public class ExportService {
     private boolean isRefreshable(int feedType) {
         return (feedType == FeedType.BASECAMP_MASTER.getType() || feedType == FeedType.HIGHRISE_COMPOSITE.getType() ||
             feedType == FeedType.PIVOTAL_TRACKER.getType() || feedType == FeedType.WHOLE_FOODS.getType() ||
-            feedType == FeedType.CONSTANT_CONTACT.getType());
+            feedType == FeedType.CONSTANT_CONTACT.getType() || feedType == FeedType.ZENDESK_COMPOSITE.getType() ||
+            feedType == FeedType.HARVEST_COMPOSITE.getType() || feedType == FeedType.QUICKBASE_COMPOSITE.getType() ||
+            feedType == FeedType.LINKEDIN.getType() || feedType == FeedType.BATCHBOOK_COMPOSITE.getType());
     }
 
     public ReportDelivery getReportDelivery(long reportID, int utcOffset) {
@@ -188,8 +190,8 @@ public class ExportService {
                 int activityType = rs.getInt(2);
                 try {
                     activities.add(ScheduledActivity.createActivity(activityType, activityID, conn));
-                } catch (SQLException e) {
-                    LogClass.error(e.getMessage() + " on loading activity " + activityID, e);
+                } catch (Exception e) {
+                    // blah
                 }
             }
             conn.commit();

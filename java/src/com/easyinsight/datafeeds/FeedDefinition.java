@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
@@ -41,10 +42,6 @@ public class FeedDefinition implements Cloneable, Serializable {
     private long size;
     private Date dateCreated;
     private Date dateUpdated;
-    private int viewCount;
-    private int ratingCount;
-    private double ratingAverage;
-    private String ratingSource;
     private boolean dataPersisted;    
     private Collection<Tag> tags = new HashSet<Tag>();
     private String ownerName;
@@ -54,13 +51,10 @@ public class FeedDefinition implements Cloneable, Serializable {
     private String apiKey;
     private boolean uncheckedAPIEnabled;
     private boolean uncheckedAPIUsingBasicAuth;
-    private boolean validatedAPIEnabled;
-    private boolean validatedAPIUsingBasicAuth;
     private boolean inheritAccountAPISettings;
     private List<FeedFolder> folders = new ArrayList<FeedFolder>();
     private boolean visible = true;
     private long parentSourceID;
-    private boolean adjustDates;
     private Date lastRefreshStart;
 
     public boolean customJoinsAllowed() {
@@ -81,14 +75,6 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public boolean requiresConfiguration() {
         return true;
-    }
-
-    public boolean isAdjustDates() {
-        return adjustDates;
-    }
-
-    public void setAdjustDates(boolean adjustDates) {
-        this.adjustDates = adjustDates;
     }
 
     public int getDataSourceType() {
@@ -162,28 +148,12 @@ public class FeedDefinition implements Cloneable, Serializable {
         this.uncheckedAPIUsingBasicAuth = uncheckedAPIUsingBasicAuth;
     }
 
-    public boolean isValidatedAPIUsingBasicAuth() {
-        return validatedAPIUsingBasicAuth;
-    }
-
-    public void setValidatedAPIUsingBasicAuth(boolean validatedAPIUsingBasicAuth) {
-        this.validatedAPIUsingBasicAuth = validatedAPIUsingBasicAuth;
-    }
-
     public boolean isUncheckedAPIEnabled() {
         return uncheckedAPIEnabled;
     }
 
     public void setUncheckedAPIEnabled(boolean uncheckedAPIEnabled) {
         this.uncheckedAPIEnabled = uncheckedAPIEnabled;
-    }
-
-    public boolean isValidatedAPIEnabled() {
-        return validatedAPIEnabled;
-    }
-
-    public void setValidatedAPIEnabled(boolean validatedAPIEnabled) {
-        this.validatedAPIEnabled = validatedAPIEnabled;
     }
 
     public String getApiKey() {
@@ -240,38 +210,6 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void setTags(Collection<Tag> tags) {
         this.tags = tags;
-    }
-
-    public String getRatingSource() {
-        return ratingSource;
-    }
-
-    public void setRatingSource(String ratingSource) {
-        this.ratingSource = ratingSource;
-    }
-
-    public int getViewCount() {
-        return viewCount;
-    }
-
-    public void setViewCount(int viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public int getRatingCount() {
-        return ratingCount;
-    }
-
-    public void setRatingCount(int ratingCount) {
-        this.ratingCount = ratingCount;
-    }
-
-    public double getRatingAverage() {
-        return ratingAverage;
-    }
-
-    public void setRatingAverage(double ratingAverage) {
-        this.ratingAverage = ratingAverage;
     }
 
     public Date getDateCreated() {
@@ -490,6 +428,16 @@ public class FeedDefinition implements Cloneable, Serializable {
         return new ArrayList<KPI>();
     }
 
+    public AnalysisItem findAnalysisItemByKey(String key) {
+        AnalysisItem item = null;
+        for (AnalysisItem field : getFields()) {
+            if (field.getKey().toKeyString().equals(key)) {
+                item = field;
+            }
+        }
+        return item;
+    }
+
     public AnalysisItem findAnalysisItem(String key) {
         AnalysisItem item = null;
         for (AnalysisItem field : getFields()) {
@@ -683,4 +631,9 @@ public class FeedDefinition implements Cloneable, Serializable {
     public boolean checkDateTime(String name) {
         return true;
     }
+
+    public List<SuggestedUser> retrieveUsers(EIConnection conn) throws Exception {
+        return new ArrayList<SuggestedUser>();
+    }
+
 }

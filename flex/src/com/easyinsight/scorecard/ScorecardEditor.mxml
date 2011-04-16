@@ -12,6 +12,8 @@
         import com.easyinsight.framework.InsightRequestMetadata;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.goals.KPITreeSetupEvent;
+        import com.easyinsight.goals.KPITreeSetupWindow;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIEvent;
         import com.easyinsight.kpi.KPIOutcome;
@@ -77,14 +79,29 @@
             addEventListener(KPIEvent.KPI_ADDED, addedKPI);
             addEventListener(KPIEvent.KPI_EDITED, onKPIEdit);
             addEventListener(KPIEvent.KPI_REMOVED, deletedKPI);
+            kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
             if (_scorecardID > 0) {
                 ProgressAlert.alert(this, "Retrieving scorecard...", null, scorecardService.getScorecard);
                 scorecardService.getScorecard.send(_scorecardID);
             } else {
-                scorecard = new Scorecard();
-                scorecard.kpis = kpis;
-                kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+                if (_startDataSourceID == 0) {
+                    var window:KPITreeSetupWindow = new KPITreeSetupWindow();
+                    window.addEventListener(KPITreeSetupEvent.KPI_TREE_SETUP, choseDataSource);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpUtil.centerPopUp(window);
+                } else {
+                    scorecard = new Scorecard();
+                    scorecard.kpis = kpis;
+                    scorecard.dataSourceID = _startDataSourceID;
+                }
             }
+        }
+
+        private function choseDataSource(event:KPITreeSetupEvent):void {
+            _startDataSourceID = event.dataSource.id;
+            scorecard = new Scorecard();
+            scorecard.kpis = kpis;
+            scorecard.dataSourceID = event.dataSource.id;
         }
 
         private function deletedKPI(event:KPIEvent):void {
@@ -144,6 +161,7 @@
 
         private function gotScorecard():void {
             scorecard = scorecardService.getScorecard.lastResult as Scorecard;
+            _startDataSourceID = scorecard.dataSourceID;
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.scorecardAdminID = String(scorecard.urlKey);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);

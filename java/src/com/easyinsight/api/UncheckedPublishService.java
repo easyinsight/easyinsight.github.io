@@ -216,7 +216,6 @@ public abstract class UncheckedPublishService extends PublishService {
             }
             feedDefinition.setFeedName(dataSourceName);
             feedDefinition.setUncheckedAPIEnabled(true);
-            feedDefinition.setValidatedAPIEnabled(true);
             UploadPolicy uploadPolicy = new UploadPolicy(userID, getAccountID());
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(analysisItems);

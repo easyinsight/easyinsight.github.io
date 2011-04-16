@@ -18,6 +18,7 @@ import flash.events.EventDispatcher;
         public static const ORDERED:int = 8;
         public static const OR:int = 9;
         public static const NULL:int = 10;
+        public static const NAMED_REF:int = 11;
 
 		public var field:AnalysisItem;
 		public var applyBeforeAggregation:Boolean = true;
@@ -25,6 +26,8 @@ import flash.events.EventDispatcher;
         public var intrinsic:Boolean = false;
         public var enabled:Boolean = true;
         public var showOnReportView:Boolean = true;
+    public var filterName:String;
+    public var templateFilter:Boolean;
 		
 		public function FilterDefinition()
 			{
@@ -41,7 +44,9 @@ import flash.events.EventDispatcher;
 
         public function updateFromSaved(savedItemFilter:FilterDefinition):void {
             filterID = savedItemFilter.filterID;
-            field.updateFromSaved(savedItemFilter.field);
+            if (field != null) {
+                field.updateFromSaved(savedItemFilter.field);
+            }
         }
 
         public function updateFromReportView(filter:FilterDefinition):void {

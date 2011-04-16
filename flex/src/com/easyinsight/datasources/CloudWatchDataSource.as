@@ -18,9 +18,5 @@ package com.easyinsight.datasources
     override public function configClass():Class {
         return CloudWatchDataSourceCreation;
     }
-
-    override public function isLiveData():Boolean {
-            return true;
-        }
 	}
 }

@@ -22,6 +22,7 @@
 
         private function save():void {
             if (editor.validate()) {
+                editor.updateDataSource(source);
                 if (source == null) {
                     var saveWindow:SaveFederatedFeedWindow = new SaveFederatedFeedWindow();
                     saveWindow.sources = editor.dataSources;

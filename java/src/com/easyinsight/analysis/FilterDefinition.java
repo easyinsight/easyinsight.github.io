@@ -36,8 +36,28 @@ public class FilterDefinition implements Serializable, Cloneable {
     private boolean enabled = true;
     @Column(name="show_on_report_view")
     private boolean showOnReportView = true;
+    @Column(name="filter_name")
+    private String filterName;
+    @Column(name="column_level_template")
+    private boolean templateFilter;
 
     public FilterDefinition() {
+    }
+
+    public boolean isTemplateFilter() {
+        return templateFilter;
+    }
+
+    public void setTemplateFilter(boolean templateFilter) {
+        this.templateFilter = templateFilter;
+    }
+
+    public String getFilterName() {
+        return filterName;
+    }
+
+    public void setFilterName(String filterName) {
+        this.filterName = filterName;
     }
 
     public boolean isShowOnReportView() {
@@ -120,6 +140,9 @@ public class FilterDefinition implements Serializable, Cloneable {
             if (getField().getLookupTableID() != null && getField().getLookupTableID() > 0) {
                 return false;
             }
+            if (isTemplateFilter()) {
+                return false;
+            }
         }
         return enabled;
     }
@@ -157,10 +180,12 @@ public class FilterDefinition implements Serializable, Cloneable {
         }
     }
 
-    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem) {
+    public List<IComponent> createComponents(boolean beforeAggregation, IFilterProcessor filterProcessor, AnalysisItem sourceItem, boolean columnLevel) {
         List<IComponent> components = new ArrayList<IComponent>();
         if (isEnabled() && beforeAggregation == isApplyBeforeAggregation()) {
-            components.add(new FilterComponent(this, filterProcessor));
+            if (!isTemplateFilter() || columnLevel) {
+                components.add(new FilterComponent(this, filterProcessor));
+            }
         }
         /*if (beforeAggregation == isApplyBeforeAggregation()) {
             components.add(new FilterPipelineCleanupComponent(this));
@@ -172,7 +197,7 @@ public class FilterDefinition implements Serializable, Cloneable {
         throw new UnsupportedOperationException();
     }
 
-    public void timeshift(Feed dataSource) {
+    public void timeshift(Feed dataSource, Collection<FilterDefinition> filters) {
         if (getField() != null) {
             if (getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) getField();

@@ -349,8 +349,11 @@ public class DataService {
                 dateDim.setTimeshift(dateTime);
             }
         }
+        for (AnalysisItem item : items) {
+            item.timeshift(dataSource, filters);
+        }
         for (FilterDefinition filter : filters) {
-            filter.timeshift(dataSource);
+            filter.timeshift(dataSource, filters);
         }
     }
 

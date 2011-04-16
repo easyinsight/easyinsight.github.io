@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation"
-        horizontalAlign="center">
+        >
     <mx:Metadata>
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
 		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
@@ -8,12 +8,10 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.HighRiseDataSource;
-        import com.easyinsight.datasources.HighriseTaskWindow;
 
-        import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
-        import mx.managers.PopUpManager;
+
 
         [Bindable]
         private var url:String;
@@ -70,34 +68,24 @@
 
         private var additionalTokens:ArrayCollection = new ArrayCollection();
 
-        public function get savesCredentials():Boolean {
-            return false;
-        }
-
-        private function configureTasks():void {
-            var window:HighriseTaskWindow = new HighriseTaskWindow();
-            window.tokens = additionalTokens;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
         public function validate():Boolean {
             return true;
         }]]></mx:Script>
-    <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-        <mx:FormItem label="Highrise Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
-		</mx:FormItem>
-        <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.highrisehq.com&quot;" fontSize="10"/>
-		<mx:FormItem label="Highrise API Authentication Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
-		</mx:FormItem>
-        <mx:FormItem label="You can find the token on your Highrise page under My Info - API Token." fontSize="10"/>
-    </mx:Form>
+    <mx:HBox>
+        <mx:Label text="Highrise URL:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+    </mx:HBox>
+    <mx:TextArea width="700" text="Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL."
+            editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
+    <mx:HBox>
+        <mx:Label text="Highrise API Authentication Token:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
+    </mx:HBox>
+    <mx:Label text="You can find the token on your Highrise page under My Info - API Token." fontSize="12"/>
     <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" width="700" height="60" selectable="false" focusEnabled="false"
                  text="The next set of options enable you to control just what data Easy Insight pulls over from your Highrise account. Each of these options will significantly increase the time required to synchronize data, so we recommend that you only enable a given option if you need to report against that particular subject matter."
             fontSize="12"/>
-    <mx:HBox>
+    <mx:HBox width="100%" horizontalAlign="center">
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="Do you want to report on email activity?" direction="horizontal">
                 <mx:CheckBox id="emailsCheckbox" selected="{includeEmails}"/>
@@ -118,8 +106,4 @@
             </mx:FormItem>
         </mx:Form>
     </mx:HBox>
-    <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" width="700" height="30" selectable="false" focusEnabled="false"
-                 text="And finally, do you want to report on tasks across multiple users in your Highrise system? If so, please click to Configure Task Access. Otherwise, just ignore this option."
-            fontSize="12"/>
-    <mx:Button label="Configure Task Access" click="configureTasks()"/>
 </mx:VBox>

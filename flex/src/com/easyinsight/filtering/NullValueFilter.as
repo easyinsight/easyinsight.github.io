@@ -11,13 +11,13 @@ import mx.controls.CheckBox;
 import mx.controls.Label;
 import mx.managers.PopUpManager;
 
-public class LastValueFilter extends HBox implements IFilter {
+public class NullValueFilter extends HBox implements IFilter {
 
     public static const LAST_VALUE:int = 1;
     public static const FIRST_VALUE:int = 2;
     public static const NULL_VALUE:int = 3;
 
-    public function LastValueFilter(feedID:int, analysisItem:AnalysisItem, valueType:int) {
+    public function NullValueFilter(feedID:int, analysisItem:AnalysisItem, valueType:int) {
         super();
         _analysisItem = analysisItem;
         _feedID = feedID;
@@ -57,9 +57,6 @@ public class LastValueFilter extends HBox implements IFilter {
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.feedID = _feedID;
-            if (_filterDefinition is LastValueFilterDefinition) {
-                window.detailClass = LastValueFilterEditor;
-            }
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;

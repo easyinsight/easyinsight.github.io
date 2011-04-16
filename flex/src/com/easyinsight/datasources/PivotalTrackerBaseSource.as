@@ -15,10 +15,6 @@ public class PivotalTrackerBaseSource extends ServerDataSourceDefinition {
         feedName = "Pivotal Tracker";
     }
 
-    override public function isLiveData():Boolean {
-        return false;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.PIVOTAL_TRACKER;
     }

@@ -14,10 +14,6 @@ public class ZendeskDataSource extends CompositeServerDataSource {
         this.feedName = "Zendesk";
     }
 
-    override public function isLiveData():Boolean {
-        return false;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.ZENDESK;
     }

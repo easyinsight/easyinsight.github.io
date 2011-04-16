@@ -39,5 +39,5 @@
             <util:EIDataGridColumn headerText="" dataField="token" itemRenderer="com.easyinsight.datasources.HighriseTokenControls" width="100"/>
         </mx:columns>
     </mx:DataGrid>
-    <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+    <util:SaveButton label="Close" click="PopUpManager.removePopUp(this)"/>
 </util:EISlimWindow>

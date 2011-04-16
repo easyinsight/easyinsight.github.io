@@ -1,7 +1,5 @@
 package com.easyinsight.scorecard;
 
-import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -41,8 +39,8 @@ public class ScorecardStorage {
         }
         if (scorecard.getScorecardID() == 0) {
             PreparedStatement insertScorecardStmt = conn.prepareStatement("INSERT INTO SCORECARD (SCORECARD_NAME, USER_ID, URL_KEY, ACCOUNT_VISIBLE," +
-                    "EXCHANGE_VISIBLE, DESCRIPTION, CREATION_DATE, UPDATE_DATE) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "EXCHANGE_VISIBLE, DESCRIPTION, CREATION_DATE, UPDATE_DATE, DATA_SOURCE_ID) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             insertScorecardStmt.setString(1, scorecard.getName());
             insertScorecardStmt.setLong(2, userID);
             insertScorecardStmt.setString(3, scorecard.getUrlKey());
@@ -51,12 +49,17 @@ public class ScorecardStorage {
             insertScorecardStmt.setString(6, scorecard.getDescription());
             insertScorecardStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             insertScorecardStmt.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            if (scorecard.getDataSourceID() == 0) {
+                insertScorecardStmt.setNull(9, Types.BIGINT);
+            } else {
+                insertScorecardStmt.setLong(9, scorecard.getDataSourceID());
+            }
             insertScorecardStmt.execute();
             scorecard.setScorecardID(Database.instance().getAutoGenKey(insertScorecardStmt));
             insertScorecardStmt.close();
         } else {
             PreparedStatement updateScorecardStmt = conn.prepareStatement("UPDATE SCORECARD SET SCORECARD_NAME = ?," +
-                    "USER_ID = ?, URL_KEY = ?, ACCOUNT_VISIBLE = ?, EXCHANGE_VISIBLE = ?, DESCRIPTION = ?, UPDATE_DATE = ? WHERE SCORECARD_ID = ?");
+                    "USER_ID = ?, URL_KEY = ?, ACCOUNT_VISIBLE = ?, EXCHANGE_VISIBLE = ?, DESCRIPTION = ?, UPDATE_DATE = ?, DATA_SOURCE_ID = ? WHERE SCORECARD_ID = ?");
             updateScorecardStmt.setString(1, scorecard.getName());
             updateScorecardStmt.setLong(2, userID);
             updateScorecardStmt.setString(3, scorecard.getUrlKey());
@@ -64,7 +67,12 @@ public class ScorecardStorage {
             updateScorecardStmt.setBoolean(5, scorecard.isExchangeVisible());
             updateScorecardStmt.setString(6, scorecard.getDescription());
             updateScorecardStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
-            updateScorecardStmt.setLong(8, scorecard.getScorecardID());
+            if (scorecard.getDataSourceID() == 0) {
+                updateScorecardStmt.setNull(8, Types.BIGINT);
+            } else {
+                updateScorecardStmt.setLong(8, scorecard.getDataSourceID());
+            }
+            updateScorecardStmt.setLong(9, scorecard.getScorecardID());
             updateScorecardStmt.executeUpdate();
             updateScorecardStmt.close();
         }
@@ -118,7 +126,7 @@ public class ScorecardStorage {
     }
 
     public Scorecard getScorecard(long scorecardID, EIConnection conn) throws Exception {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID, SCORECARD_NAME, URL_KEY, ACCOUNT_VISIBLE, EXCHANGE_VISIBLE, DESCRIPTION FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID, SCORECARD_NAME, URL_KEY, ACCOUNT_VISIBLE, EXCHANGE_VISIBLE, DESCRIPTION, data_source_id FROM " +
                 "SCORECARD WHERE SCORECARD_ID = ?");
         queryStmt.setLong(1, scorecardID);
         ResultSet rs = queryStmt.executeQuery();
@@ -138,6 +146,11 @@ public class ScorecardStorage {
             scorecard.setAccountVisible(rs.getBoolean(4));
             scorecard.setExchangeVisible(rs.getBoolean(5));
             scorecard.setDescription(rs.getString(6));
+            long dataSourceID = rs.getLong(7);
+            if (rs.wasNull()) {
+                dataSourceID = 0;
+            }
+            scorecard.setDataSourceID(dataSourceID);
             PreparedStatement getKPIStmt = conn.prepareStatement("SELECT SCORECARD_TO_KPI.KPI_ID FROM SCORECARD_TO_KPI WHERE " +
                     "scorecard_to_kpi.scorecard_id = ?");
             getKPIStmt.setLong(1, scorecard.getScorecardID());

@@ -18,9 +18,8 @@ public class DateTransformComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        DataSet targetSet = new DataSet();
         for (IRow row : dataSet.getRows()) {
-            IRow targetRow = targetSet.createRow();
+
             Value value = row.getValue(analysisItem.createAggregateKey());
             /*boolean shift = false;
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
@@ -28,10 +27,10 @@ public class DateTransformComponent implements IComponent {
             }*/
             Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), false);
 
-            targetRow.addValue(analysisItem.createAggregateKey(), transformedValue);
+            row.addValue(analysisItem.createAggregateKey(), transformedValue);
 
         }
-        return targetSet;
+        return dataSet;
     }
 
     public void decorate(DataResults listDataResults) {

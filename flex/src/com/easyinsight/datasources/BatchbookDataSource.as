@@ -15,10 +15,6 @@ public class BatchbookDataSource extends CompositeServerDataSource {
         this.feedName = "Batchbook";
     }
 
-    override public function isLiveData():Boolean {
-        return false;
-    }
-
     override public function getFeedType():int {
         return DataSourceType.BATCHBOOK;
     }

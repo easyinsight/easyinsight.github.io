@@ -10,6 +10,8 @@ import com.easyinsight.customupload.QuickbaseDataSourceCreation;
 import com.easyinsight.datasources.CompositeServerDataSource;
 import com.easyinsight.datasources.DataSourceType;
 
+import mx.collections.ArrayCollection;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource")]
 public class QuickbaseCompositeSource extends CompositeServerDataSource {
@@ -26,8 +28,13 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
         this.feedName = "Quickbase";
     }
 
-    override public function isLiveData():Boolean {
-        return true;
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        var index:FieldIndexing = new FieldIndexing();
+        index.fields = fields;
+        index.label = "Indexing";
+        pages.addItem(index);
+        return pages;
     }
 
     override public function getFeedType():int {

@@ -13,10 +13,7 @@ import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Date;
-import java.util.Calendar;
-import java.util.ArrayList;
+import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -235,6 +232,60 @@ public class UserAccountAdminService {
             session.close();
         }
         return message;
+    }
+
+    public void importUsers(List<SuggestedUser> users) {
+        SecurityUtil.authorizeAccountAdmin();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
+            Account account = (Account) results.get(0);
+            User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+            int maxUsers = account.getMaxUsers();
+            int currentUsers = account.getUsers().size();
+            if ((currentUsers + users.size()) >= maxUsers) {
+                throw new RuntimeException("You are at the maximum number of users for your account.");
+            } else {
+                Map<String, String> passwordMap = new HashMap<String, String>();
+                Map<String, User> userMap = new HashMap<String, User>();
+                for (SuggestedUser suggestedUser : users) {
+                    String valid = doesUserExist(suggestedUser.getUserName(), suggestedUser.getEmailAddress());
+                    if (valid == null) {
+                        User user = new User(suggestedUser.getUserName(), null, suggestedUser.getLastName(),
+                                suggestedUser.getEmailAddress());
+                        user.setFirstName(suggestedUser.getFirstName());
+                        final String password = RandomTextGenerator.generateText(12);
+                        userMap.put(user.getUserName(), user);
+                        passwordMap.put(user.getUserName(), password);
+                        user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
+                        user.setHashType("SHA-256");
+                        user.setAccount(account);
+                        account.addUser(user);
+                    }
+                }
+                session.update(account);
+                session.getTransaction().commit();
+                for (Map.Entry<String, User> entry : userMap.entrySet()) {
+                    final String password = passwordMap.get(entry.getKey());
+                    final String userEmail = entry.getValue().getEmail();
+                    final String adminFirstName = admin.getFirstName();
+                    final String adminName = admin.getName();
+                    final String userName = entry.getValue().getUserName();
+                    new Thread(new Runnable() {
+                        public void run() {
+                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password);
+                        }
+                    }).start();
+                }
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+        } finally {
+            session.close();
+        }
     }
 
     public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject) {

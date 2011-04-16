@@ -65,7 +65,6 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         DataSet ds = new DataSet();
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
-        boolean writeDuring = dataStorage != null && !parentDefinition.isAdjustDates();
         if (source.isIncludeTodoComments()) {
 
             String url = source.getUrl();
@@ -133,12 +132,8 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                             }
                         }
                     }
-
-                    if (writeDuring) {
-                        dataStorage.insertData(ds);
-                        ds = new DataSet();
-                    }
-
+                    dataStorage.insertData(ds);
+                    ds = new DataSet();
                 }
             } catch (ReportException re) {
                 throw re;
@@ -146,14 +141,7 @@ public class BaseCampTodoCommentsSource extends BaseCampBaseSource {
                 throw new RuntimeException(e);
             }
         }
-        if (!writeDuring) {
-            if (parentDefinition.isAdjustDates()) {
-                ds = adjustDates(ds);
-            }
-            return ds;
-        } else {
-            return null;
-        }
+        return null;
     }
 
 

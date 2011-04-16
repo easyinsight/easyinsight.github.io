@@ -44,8 +44,10 @@ public class AmazonEC2Feed extends AmazonBaseFeed {
             List<EC2Info> ec2Infos = EC2Util.getInstances(key, secretKey);
             DataSet childSet = EC2Util.createDataSet(ec2Infos, dimensions);
             for (IRow row : childSet.getRows()) {
-                DateValue dummyDateValue = new DateValue(endDate);
-                row.addValue(analysisDateDimension.createAggregateKey(), dummyDateValue);
+                if (analysisDateDimension != null) {
+                    DateValue dummyDateValue = new DateValue(endDate);
+                    row.addValue(analysisDateDimension.createAggregateKey(), dummyDateValue);
+                }
                 dataSet.addRow(row);
             }
         }

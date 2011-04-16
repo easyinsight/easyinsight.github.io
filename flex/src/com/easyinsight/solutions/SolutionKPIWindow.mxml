@@ -59,6 +59,7 @@
             super.commitProperties();
             var scorecard:Scorecard = new Scorecard();
             scorecard.kpis = _kpis;
+            scorecard.dataSourceID = _dataSourceDescriptor.id;
             this.scorecard = scorecard;
         }
 
@@ -70,7 +71,7 @@
                 stackIndex = 3;
             } else {
                 enableScorecards = false;
-                kpiService.installKPIsToScorecard.send(_dataSourceDescriptor.name, _kpis, true);
+                kpiService.installKPIsToScorecard.send(_dataSourceDescriptor.name, _kpis, true, _dataSourceDescriptor.id);
             }
         }
 

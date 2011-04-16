@@ -50,6 +50,16 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return FeedType.COMPOSITE;
     }
 
+    public AnalysisItem findAnalysisItemByKey(Key key) {
+        AnalysisItem item = null;
+        for (AnalysisItem field : getFields()) {
+            if (field.getKey().toKeyString().equals(key)) {
+                item = field;
+            }
+        }
+        return item;
+    }
+
     public void beforeSave(EIConnection conn) throws Exception {
         for (AnalysisItem analysisItem : getFields()) {
             Key key = analysisItem.getKey();

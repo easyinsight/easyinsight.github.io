@@ -286,7 +286,6 @@ public abstract class EIV2API implements IEIV2API {
                 }
                 feedDefinition.setFeedName(dataSourceName);
                 feedDefinition.setUncheckedAPIEnabled(true);
-                feedDefinition.setValidatedAPIEnabled(true);
                 UploadPolicy uploadPolicy = new UploadPolicy(userID, getAccountID());
                 feedDefinition.setUploadPolicy(uploadPolicy);
                 feedDefinition.setFields(analysisItems);

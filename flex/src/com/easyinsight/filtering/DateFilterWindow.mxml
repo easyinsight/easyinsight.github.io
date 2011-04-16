@@ -7,19 +7,19 @@
         import mx.managers.PopUpManager;
 
         private function addLastValue():void {
-            var filter:LastValueFilter = new LastValueFilter(_feedID, _item, LastValueFilter.LAST_VALUE);
+            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.LAST_VALUE);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }
 
         private function addFirstValue():void {
-            var filter:LastValueFilter = new LastValueFilter(_feedID, _item, LastValueFilter.FIRST_VALUE);
+            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.FIRST_VALUE);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }
 
         private function addNullValue():void {
-            var filter:LastValueFilter = new LastValueFilter(_feedID, _item, LastValueFilter.NULL_VALUE);
+            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.NULL_VALUE);
             dispatchEvent(new FilterCreationEvent(filter));
             PopUpManager.removePopUp(this);
         }
@@ -49,7 +49,6 @@
 
         [Bindable]
         private var stackIndex:int;
-
         ]]></mx:Script>
     <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10">
         <mx:Label text="What type of filter do you want to create?" fontSize="16"/>

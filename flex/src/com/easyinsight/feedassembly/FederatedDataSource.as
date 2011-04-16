@@ -23,6 +23,16 @@ public class FederatedDataSource extends FeedDefinitionData {
     public function FederatedDataSource() {
     }
 
+    override public function createAdminPages():ArrayCollection {
+        var pages:ArrayCollection = new ArrayCollection();
+        var editor:FederatedEditor = new FederatedEditor();
+        editor.federatedSource = this;
+        editor.dataSources = this.sources;
+        editor.label = "Federated Data Sources";
+        pages.addItem(editor);
+        return pages;
+    }
+
     override public function getFeedType():int {
         return DataSourceType.FEDERATED;
     }

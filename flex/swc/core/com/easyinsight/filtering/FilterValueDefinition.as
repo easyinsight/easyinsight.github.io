@@ -1,8 +1,9 @@
 package com.easyinsight.filtering
 {
 	import mx.collections.ArrayCollection;
-	
-	[Bindable]
+import mx.controls.Alert;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.FilterValueDefinition")]
 	public class FilterValueDefinition extends FilterDefinition
 	{
@@ -29,7 +30,15 @@ package com.easyinsight.filtering
                 if (matches) {
                     var foundItem:Boolean = false;
                     for each (var obj:Object in filteredValues) {
-                        foundItem = valFilter.filteredValues.getItemIndex(obj) != -1;
+                        var str:String = obj.toString();
+                        for each (var valObj:Object in valFilter.filteredValues) {
+                            var valStr:String = valObj.toString();
+                            if (valStr == str) {
+                                foundItem = true;
+                                break;
+                            }
+                        }
+                        //foundItem = valFilter.filteredValues.getItemIndex(obj) != -1;
                         if (!foundItem) {
                             matches = false;
                             break;

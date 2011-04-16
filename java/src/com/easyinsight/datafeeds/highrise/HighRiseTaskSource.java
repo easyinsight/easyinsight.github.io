@@ -226,9 +226,6 @@ public class HighRiseTaskSource extends HighRiseBaseSource {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        if (parentDefinition.isAdjustDates()) {
-            ds = adjustDates(ds);
-        }
         return ds;
     }
 

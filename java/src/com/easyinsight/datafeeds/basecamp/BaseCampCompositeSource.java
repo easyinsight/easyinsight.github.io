@@ -11,6 +11,7 @@ import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -20,16 +21,16 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import com.easyinsight.users.SuggestedUser;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
-import nu.xom.ParsingException;
+import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
-import nu.xom.Builder;
 
 /**
  * User: James Boe
@@ -361,9 +362,37 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     @Override
     public boolean checkDateTime(String name) {
-        if (BaseCampTimeSource.DATE.equals(name)) {
+        if (BaseCampTimeSource.DATE.equals(name) || BaseCampTodoSource.MILESTONE_COMPLETED_ON.equals(name) ||
+                BaseCampTodoSource.MILESTONE_CREATED_ON.equals(name) || BaseCampTodoSource.DEADLINE.equals(name)) {
             return false;
         }
         return true;
+    }
+
+    private Document getDocument(HttpClient client, Builder builder, String path) throws IOException, ParsingException {
+        HttpMethod restMethod = new GetMethod(getUrl() + path);
+        restMethod.setRequestHeader("Accept", "application/xml");
+        restMethod.setRequestHeader("Content-Type", "application/xml");
+        client.executeMethod(restMethod);
+        return builder.build(restMethod.getResponseBodyAsStream());
+    }
+
+    public List<SuggestedUser> retrieveUsers(EIConnection conn) throws Exception {
+        List<SuggestedUser> users = new ArrayList<SuggestedUser>();
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false, conn);
+        HttpClient client = getHttpClient(token.getTokenValue(), "");
+        Builder builder = new Builder();
+        Document accountDoc = getDocument(client, builder, "/account.xml");
+        String primaryCompanyID = accountDoc.query("/account/primary-company-id/text()").get(0).getValue();
+        Document userDoc = getDocument(client, builder, "/companies/" + primaryCompanyID + "/people.xml");
+        Nodes peopleNodes = userDoc.query("/people/person");
+        for (int i = 0; i < peopleNodes.size(); i++) {
+            Node peopleNode = peopleNodes.get(i);
+            String firstName = peopleNode.query("first-name/text()").get(0).getValue();
+            String lastName = peopleNode.query("last-name/text()").get(0).getValue();
+            String emailAddress = peopleNode.query("email-address/text()").get(0).getValue();
+            users.add(new SuggestedUser(firstName, lastName, emailAddress));
+        }
+        return users;
     }
 }

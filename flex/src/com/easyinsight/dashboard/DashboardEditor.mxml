@@ -16,6 +16,7 @@
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
@@ -44,7 +45,7 @@
             controls.addItem(new DashboardControl("Image", DashboardImage));
             this.availableControls = controls;
             if (_dashboardID == 0) {
-                ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds);
+                ProgressAlert.alert(this, "Retrieving reports...", null, feedService.searchForSubscribedFeeds, scorecardService.getScorecardDescriptorsForDataSource);
                 feedService.searchForSubscribedFeeds.send();
             } else {
                 ProgressAlert.alert(this, "Retrieving data...", null, dashboardService.getDashboard);
@@ -82,6 +83,9 @@
         [Bindable]
         private var availableReports:ArrayCollection = new ArrayCollection();
 
+        [Bindable]
+        private var availableScorecards:ArrayCollection = new ArrayCollection();
+
         private function gotReports():void {
             var reportList:ArrayCollection = analysisService.getInsightDescriptorsForDataSource.lastResult as ArrayCollection;
             for each (var report:InsightDescriptor in reportList) {
@@ -91,6 +95,17 @@
             sort.fields = [ new SortField("name", true) ];
             availableReports.sort = sort;
             availableReports.refresh();
+        }
+
+        private function gotScorecards():void {
+            var scorecardList:ArrayCollection = scorecardService.getScorecardDescriptorsForDataSource.lastResult as ArrayCollection;
+            for each (var scorecard:ScorecardDescriptor in scorecardList) {
+                availableScorecards.addItem(scorecard);
+            }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name", true) ];
+            availableScorecards.sort = sort;
+            availableScorecards.refresh();
         }
 
         private function gotDataSources():void {
@@ -113,8 +128,9 @@
             box.element = _dashboard.rootElement;
             box.allowDelete = false;
             dashboardCanvas.addChild(box);
-            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource);
+            ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource, scorecardService.getScorecardDescriptorsForDataSource);
             analysisService.getInsightDescriptorsForDataSource.send(_dashboard.dataSourceID);
+            scorecardService.getScorecardDescriptorsForDataSource.send(_dashboard.dataSourceID);
             dashboardFilters = _dashboard.filters;
             dataService.getFeedMetadata.send(_dashboard.dataSourceID);
         }
@@ -131,6 +147,7 @@
             dataSourceID = event.dataSource.id;
             ProgressAlert.alert(this, "Retrieving reports...", null, analysisService.getInsightDescriptorsForDataSource);
             analysisService.getInsightDescriptorsForDataSource.send(dataSourceID);
+            scorecardService.getScorecardDescriptorsForDataSource.send(dataSourceID);
             dataService.getFeedMetadata.send(dataSourceID);
             _dashboard.rootElement = grid;
         }
@@ -240,6 +257,9 @@
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
     </mx:RemoteObject>
+    <mx:RemoteObject id="scorecardService" destination="scorecardService">
+        <mx:method name="getScorecardDescriptorsForDataSource" result="gotScorecards()"/>
+    </mx:RemoteObject>
     <mx:HBox width="100%" paddingLeft="15" paddingTop="5">
         <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="closeEditor()"
                    toolTip="Close" labelPlacement="right" label="Close Editor"/>
@@ -256,6 +276,8 @@
             <mx:Label text="Reports" fontSize="14"/>
             <mx:List id="reportsList" dataProvider="{availableReports}" labelField="name" dragEnabled="true"
                      width="100%" height="100%"/>
+            <!--<mx:List id="scorecardList" dataProvider="{availableScorecards}" labelField="name" dragEnabled="true"
+                     width="100%" height="100%"/>-->
         </mx:VBox>
         <mx:VBox width="100%" height="100%" horizontalAlign="center">
             <mx:HBox>

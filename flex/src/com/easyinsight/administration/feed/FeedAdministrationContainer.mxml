@@ -1,29 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
-	xmlns:feed="com.easyinsight.administration.feed.*" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
-        creationComplete="setupListeners()" backgroundColor="#DCE2F8" implements="com.easyinsight.listing.IPerspective">
+<mx:Module xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:skin="com.easyinsight.skin.*"
+           width="100%" height="100%"
+           xmlns:feed="com.easyinsight.administration.feed.*"
+           creationComplete="setupListeners()"
+           implements="com.easyinsight.listing.IPerspective">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.PromptEvent;
         import com.easyinsight.analysis.SavePromptWindow;
-        import com.easyinsight.datasources.DataSourceType;
-        import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.feedassembly.FederatedDataSource;
-        import com.easyinsight.feedassembly.FederatedEditor;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
+        import mx.core.UIComponent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
         import mx.validators.Validator;
         import mx.controls.Alert;
-
-        import com.easyinsight.feedassembly.CompositeFeedDefinition;
-        import com.easyinsight.feedassembly.CompositeWorkspace;
 
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
@@ -45,8 +41,6 @@
         private var showImpl:Boolean = false;
 
         private var _feedID:int;
-
-        private var feedAdminDetail:IFeedAdminDetail;
 
         private var generalValidators:Array = [];
 
@@ -70,40 +64,15 @@
             dispatchEvent(new Event("feedIDChanged"));
         }
 
+        private var pages:ArrayCollection;
+
         private function gotFeedDefinition():void {
             this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
-            liveData = feedDefinition.isLiveData();
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             this.feedType = feedDefinition.getFeedType();
-            if (feedType == DataSourceType.COMPOSITE || feedType == DataSourceType.CLEARDB) {
-                var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
-                var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
-                compositeWorkspace.addExistingDef(compositeFeedDefinition.compositeFeedNodes, compositeFeedDefinition.connections,
-                        compositeFeedDefinition.dataFeedID);
-                implBox.addChild(compositeWorkspace);
-                implBox.label = "Composite Details";
-                showImpl = true;
-                this.feedAdminDetail = compositeWorkspace;
-            } else if (feedType == DataSourceType.FEDERATED) {
-                var fed:FederatedDataSource = feedDefinition as FederatedDataSource;
-                var editor:FederatedEditor = new FederatedEditor();
-                editor.dataSources = fed.sources;
-                implBox.addChild(editor);
-                implBox.label = "Federated Details";
-                showImpl = true;
-                this.feedAdminDetail = editor;
-            } else if (feedDefinition is IServerDataSourceDefinition && !feedDefinition.isLiveData()) {
-                var sds:IServerDataSourceDefinition = feedDefinition as IServerDataSourceDefinition;
-                var configClass:Class = sds.configClass();
-                var admin:ServerDataSourceAdministration = new ServerDataSourceAdministration();
-                admin.dataSourceClass = configClass;
-                admin.dataSourceDefinition = feedDefinition as IServerDataSourceDefinition;
-                implBox.addChild(admin);
-                implBox.label = "Server Configuration";
-                showImpl = true;
-                feedAdminDetail = admin;
-            } else {
-                tabNav.removeChild(implBox);
+            this.pages = feedDefinition.createAdminPages();
+            for each (var page:IFeedAdminDetail in pages) {
+                tabNav.addChild(UIComponent(page));
             }
             if (feedDefinition.fields == null || feedDefinition.fields.length == 0) {
                 tabNav.removeChild(fieldsBox);
@@ -128,8 +97,8 @@
         private function save(saveHandler:Function = null):void {
             var results:Array = Validator.validateAll(generalValidators);
             var detailValidated:Boolean = true;
-            if (feedAdminDetail != null) {
-                detailValidated = feedAdminDetail.validate();
+            for each (var adminPage:IFeedAdminDetail in pages) {
+                detailValidated = adminPage.validate() && detailValidated;
             }
             if (results.length > 0 || !detailValidated) {
                 Alert.show("There are one or more errors which must be fixed before you can save this data source.");
@@ -138,8 +107,8 @@
                 feedDefinition.folders = fieldAdministration.getFolders(analysisItems);
                 feedDefinition.fields = analysisItems;
 
-                if (feedAdminDetail != null) {
-                    feedAdminDetail.updateDataSource(feedDefinition);
+                for each (var page:IFeedAdminDetail in pages) {
+                    page.updateDataSource(feedDefinition);
                 }
 
                 if (saveHandler == null) {
@@ -191,8 +160,6 @@
                 dispatchEvent(new AnalysisCloseEvent());
             }
         }
-        [Bindable]
-        private var liveData:Boolean;
 
         [Bindable]
         private var controlsEnabled:Boolean = true;
@@ -216,9 +183,9 @@
 	<mx:RemoteObject id="feedService" destination="feeds">
 		<mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
 	</mx:RemoteObject>
-    <mx:HBox width="100%" height="100%" horizontalAlign="center">
-        <mx:VBox width="1000" height="100%" paddingLeft="5">
-            <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" enabled="{controlsEnabled}">
+    <skin:BackgroundImage width="100%" height="100%" id="centerCanvas">
+        <mx:VBox paddingLeft="10" paddingRight="10" paddingTop="10" verticalGap="15">
+            <mx:HBox id="buttonBox" enabled="{controlsEnabled}">
                 <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"
                         label="Close Editor" labelPlacement="right"/>
                 <mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"
@@ -233,10 +200,10 @@
                     <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration" dataSourceID="{feedID}" disableControls="disableControls()"
                             enableControls="enableControls()"/>
                 </mx:Box>
-                <mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
+                <!--<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
 
-                </mx:Box>
+                </mx:Box>-->
             </mx:TabNavigator>
         </mx:VBox>
-    </mx:HBox>
+    </skin:BackgroundImage>
 </mx:Module>

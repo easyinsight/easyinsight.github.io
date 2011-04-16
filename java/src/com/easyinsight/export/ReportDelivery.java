@@ -145,6 +145,8 @@ public class ReportDelivery extends ScheduledDelivery {
                 this.senderID = senderID;
             }
             queryStmt.close();
+        } else {
+            throw new RuntimeException("Orphan activity");
         }
     }
 

@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%">
+    <mx:Metadata>
+        [Event(name="scorecardAssigned", type="com.easyinsight.scorecard.ScorecardAssignedEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.customupload.ProblemDataEvent;
+        import com.easyinsight.framework.InsightRequestMetadata;
+        import com.easyinsight.kpi.KPI;
+
+        import com.easyinsight.kpi.KPIOutcome;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+
+        private var _scorecardID:int;
+
+        public function set scorecardID(value:int):void {
+            _scorecardID = value;
+            invalidateProperties();
+        }
+
+        private function gotScorecard():void {
+            _scorecard = scorecardService.getScorecard.lastResult as Scorecard;
+            dispatchEvent(new ScorecardAssignedEvent(_scorecard));
+            kpis = _scorecard.kpis;
+            adminGrid.rowCount = _scorecard.kpis.length;
+            refreshValues();
+        }
+
+        private var _scorecard:Scorecard;
+
+        [Bindable]
+        private var kpis:ArrayCollection;
+
+        [Bindable]
+        private var kpiNameFactory:KPINameFactory = new KPINameFactory("name");
+        [Bindable]
+        private var kpiIconFactory:KPINameFactory = new KPINameFactory("icon");
+
+        public function set scorecard(value:Scorecard):void {
+            _scorecard = value;
+        }
+
+        public function refreshValues():void {
+            var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+            metadata.utcOffset = new Date().getTimezoneOffset();
+            ProgressAlert.alert(this, "Retrieving KPI values...", null, scorecardService.getValues);
+            scorecardService.getValues.send(_scorecard, metadata);
+        }
+
+        private function onProblem(event:ProblemDataEvent):void {
+            refreshValues();
+        }
+
+        private function gotValues():void {
+            var results:ScorecardResults = scorecardService.getValues.lastResult as ScorecardResults;
+
+            if (results.reportFault != null) {
+                results.reportFault.popup(this, onProblem);
+            }
+            var outcomes:ArrayCollection = results.outcomes;
+            for each (var outcome:KPIOutcome in outcomes) {
+                for each (var kpi:KPI in kpis) {
+                    if (outcome.kpiName == kpi.name) {
+                        kpi.kpiOutcome = outcome;
+                        break;
+                    }
+                }
+            }
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            kpiNameFactory.contextMenuAvailable = true;
+            kpiIconFactory.contextMenuAvailable = true;
+            if (_scorecardID > 0 && _scorecard == null) {
+                ProgressAlert.alert(this, "Retrieving scorecard...", null, scorecardService.getScorecard);
+                scorecardService.getScorecard.send(_scorecardID);
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="scorecardService" destination="scorecardService">
+        <mx:method name="getScorecard" result="gotScorecard()"/>
+        <mx:method name="getValues" result="gotValues()"/>
+    </mx:RemoteObject>
+    <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="100%" id="adminGrid">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="" dataField="name"
+                                   itemRenderer="{kpiIconFactory}" width="50"
+                                   sortable="false"/>
+            <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
+            <util:EIDataGridColumn headerText="Latest Value" dataField="name"
+                                   itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
+            <util:EIDataGridColumn headerText="" dataField="name"
+                                   itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
+                                   sortable="false"/>
+            <util:EIDataGridColumn headerText="Time" dataField="name"
+                                   itemRenderer="com.easyinsight.scorecard.KPITimeRenderer" width="100"/>
+            <util:EIDataGridColumn headerText="% Change" dataField="name"
+                                   itemRenderer="com.easyinsight.scorecard.KPIChangeRenderer" width="110"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

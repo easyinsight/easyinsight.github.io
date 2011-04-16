@@ -46,8 +46,10 @@ public class AmazonSQSFeed extends AmazonBaseFeed {
                     row.addValue(analysisItem.createAggregateKey(), 1);
                 }
             }
-            DateValue dummyDateValue = new DateValue(endDate);
-            row.addValue(analysisDateDimension.createAggregateKey(), dummyDateValue);
+            if (analysisDateDimension != null) {
+                DateValue dummyDateValue = new DateValue(endDate);
+                row.addValue(analysisDateDimension.createAggregateKey(), dummyDateValue);
+            }
         }
         return dataSet;
     }

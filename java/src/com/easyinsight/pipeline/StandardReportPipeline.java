@@ -3,7 +3,6 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSHeatMap;
 import com.easyinsight.calculations.CalcGraph;
-import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.etl.LookupTable;
 
@@ -70,14 +69,14 @@ public class StandardReportPipeline extends Pipeline {
 
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null));
+                components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
             }
         }
 
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
             if (analysisItem.getFilters() != null) {
                 for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
-                    components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(analysisItem), analysisItem));
+                    components.addAll(filterDefinition.createComponents(true, new FieldFilterProcessor(analysisItem), analysisItem, true));
                 }
             }
         }
@@ -103,7 +102,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new LinkDecorationComponent());
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor(), null));
+                components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor(), null, false));
             }
         }
         components.add(new LimitsComponent());

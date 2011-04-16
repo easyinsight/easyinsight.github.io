@@ -8,6 +8,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.scorecard.ScorecardInternalService;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
@@ -80,7 +81,7 @@ public class UserUploadService {
         } else if (descriptor.getType() == EIDescriptor.REPORT) {
             return ((InsightDescriptor) descriptor).getDataFeedID();
         } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
-            return 0;
+            return ((ScorecardDescriptor) descriptor).getDataSourceID();
         } else {
             throw new RuntimeException();
         }

@@ -4,7 +4,6 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DefaultFilterProcessor;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.WSAnalysisDefinition;
-import com.easyinsight.core.Key;
 
 import java.util.*;
 
@@ -18,12 +17,12 @@ public class DerivedDataSourcePipeline extends Pipeline {
         List<IComponent> components = new ArrayList<IComponent>();
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor(), null));
+                components.addAll(filterDefinition.createComponents(false, new DefaultFilterProcessor(), null, false));
             }
         }
         if (report.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
-                components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null));
+                components.addAll(filterDefinition.createComponents(true, new DefaultFilterProcessor(), null, false));
             }
         }
         return components;

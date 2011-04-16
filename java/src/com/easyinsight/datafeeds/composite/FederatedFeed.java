@@ -34,19 +34,47 @@ public class FederatedFeed extends Feed {
                 Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
                 Set<AnalysisItem> childAnalysisItems = new HashSet<AnalysisItem>();
                 for (AnalysisItem analysisItem : analysisItems) {
-                    for (AnalysisItem field : feed.getDataSource().getFields()) {
-                        if (field.toDisplay().equals(analysisItem.toDisplay())) {
-                            childAnalysisItems.add(field);
-                            map.put(field, analysisItem);
+                    boolean matched = false;
+                    for (FieldMapping fieldMapping : source.getFieldMappings()) {
+                        if (fieldMapping.getFederatedKey().equals(analysisItem.toDisplay())) {
+                            for (AnalysisItem field : feed.getDataSource().getFields()) {
+                                if (field.toDisplay().equals(fieldMapping.getSourceKey())) {
+                                    matched = true;
+                                    childAnalysisItems.add(field);
+                                    map.put(field, analysisItem);
+                                }
+                            }
+                        }
+                    }
+                    if (!matched) {
+                        for (AnalysisItem field : feed.getDataSource().getFields()) {
+                            if (field.toDisplay().equals(analysisItem.toDisplay())) {
+                                childAnalysisItems.add(field);
+                                map.put(field, analysisItem);
+                            }
                         }
                     }
                 }
                 Map<FilterDefinition, AnalysisItem> backMap = new HashMap<FilterDefinition, AnalysisItem>();
                 for (FilterDefinition filter : filters) {
-                    for (AnalysisItem field : feed.getDataSource().getFields()) {
-                        if (field.toDisplay().equals(filter.getField().toDisplay())) {
-                            backMap.put(filter, filter.getField());
-                            filter.setField(field);
+                    boolean matched = false;
+                    for (FieldMapping fieldMapping : source.getFieldMappings()) {
+                        if (fieldMapping.getFederatedKey().equals(filter.getField().toDisplay())) {
+                            for (AnalysisItem field : feed.getDataSource().getFields()) {
+                                if (field.toDisplay().equals(fieldMapping.getSourceKey())) {
+                                    matched = true;
+                                    backMap.put(filter, filter.getField());
+                                    filter.setField(field);
+                                }
+                            }
+                        }
+                    }
+                    if (!matched) {
+                        for (AnalysisItem field : feed.getDataSource().getFields()) {
+                            if (field.toDisplay().equals(filter.getField().toDisplay())) {
+                                backMap.put(filter, filter.getField());
+                                filter.setField(field);
+                            }
                         }
                     }
                 }

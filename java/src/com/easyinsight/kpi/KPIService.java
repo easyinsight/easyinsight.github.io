@@ -56,7 +56,7 @@ public class KPIService {
         }
     }*/
 
-    public void installKPIsToScorecard(String dataSourceName, List<KPI> kpis, boolean newScorecard) {
+    public void installKPIsToScorecard(String dataSourceName, List<KPI> kpis, boolean newScorecard, long dataSourceID) {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -64,6 +64,7 @@ public class KPIService {
             Scorecard scorecard = new Scorecard();
             scorecard.setName(dataSourceName + " Scorecard");
             scorecard.setKpis(kpis);
+            scorecard.setDataSourceID(dataSourceID);
             new ScorecardStorage().saveScorecardForUser(scorecard, userID, conn);
             conn.commit();
         } catch (Exception e) {
