@@ -58,11 +58,11 @@
             window.prompt = prompt;
             window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
                 save(true, function(event:ScorecardSaveEvent):void {
-                    doneHandler.call();
+                    doneHandler.call(this, event);
                 });
             }, false, 0, true);
             window.addEventListener(PromptEvent.PROMPT_DISCARD, function(event:PromptEvent):void {
-                doneHandler.call();
+                doneHandler.call(this, event);
             }, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -146,8 +146,8 @@
 
         private function viewScorecard():void {
             if (scorecardChanged) {
-                createPromptWindow("You have unsaved changes to this scorecard.", function():void {
-                    _scorecardID = scorecard.scorecardID;
+                createPromptWindow("You have unsaved changes to this scorecard.", function(event:ScorecardSaveEvent):void {
+                    _scorecardID = event.scorecard.scorecardID;
                     scorecardView();
                 });
             } else {

@@ -25,7 +25,7 @@
             _scorecard = scorecardService.getScorecard.lastResult as Scorecard;
             dispatchEvent(new ScorecardAssignedEvent(_scorecard));
             kpis = _scorecard.kpis;
-            adminGrid.rowCount = _scorecard.kpis.length;
+            adminGrid.rowCount = _scorecard.kpis.length + 1;
             refreshValues();
         }
 

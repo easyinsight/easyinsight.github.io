@@ -68,8 +68,8 @@
             cleanupBindings();
         }
         ]]></mx:Script>
-    <mx:VBox height="100%" width="1000" verticalGap="20" horizontalAlign="center">
-        <mx:HBox width="100%" paddingLeft="15" paddingTop="15">
+    <mx:VBox height="100%" width="1000" verticalGap="20" horizontalAlign="center" paddingLeft="10" paddingRight="10">
+        <mx:HBox width="100%" paddingTop="15">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()"
                        toolTip="Close" label="Close Editor" labelPlacement="right"/>
             <mx:Button icon="@Embed(source='../../../../assets/refresh.png')" click="scorecardRenderer.refreshValues()"
