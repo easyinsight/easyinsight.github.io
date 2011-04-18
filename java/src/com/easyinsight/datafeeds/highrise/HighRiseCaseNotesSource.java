@@ -72,7 +72,7 @@ public class HighRiseCaseNotesSource extends HighRiseBaseSource {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
 
         DataSet ds = new DataSet();
-        if (!highRiseCompositeSource.isIncludeContactNotes()) {
+        if (!highRiseCompositeSource.isIncludeCaseNotes()) {
             return ds;
         }
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, conn);
