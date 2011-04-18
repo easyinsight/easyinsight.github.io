@@ -54,7 +54,7 @@ public class FederatedDataSource extends FeedDefinition {
                 Statement.RETURN_GENERATED_KEYS);
         saveStmt.setLong(1, getDataFeedID());
         if (analysisItem == null) {
-            saveStmt.setLong(2, Types.BIGINT);
+            saveStmt.setNull(2, Types.BIGINT);
         } else {
 
         }
