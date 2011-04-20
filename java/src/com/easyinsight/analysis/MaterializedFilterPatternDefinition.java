@@ -44,6 +44,7 @@ public class MaterializedFilterPatternDefinition extends MaterializedFilterDefin
         if (!caseSensitive) {
             string = string.toLowerCase();
         }
+        string = string.replace("\n", "");
         Matcher matcher = pattern.matcher(string);
         return matcher.matches();
     }
