@@ -148,7 +148,7 @@
 
     </style>
 <!-- InstanceEndEditable -->
-    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
+    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">

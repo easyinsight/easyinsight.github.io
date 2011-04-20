@@ -144,7 +144,7 @@
 <!-- InstanceBeginEditable name="doctitle" -->
             <title>Easy Insight - Billing Complete</title>
 <!-- InstanceEndEditable -->
-    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
+    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
 </head>
