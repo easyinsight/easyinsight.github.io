@@ -12,6 +12,7 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
 import nu.xom.Nodes;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -31,8 +32,9 @@ public class SalesforceFeed extends Feed {
     }
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
+        SalesforceBaseDataSource salesforceBaseDataSource = null;
         try {
-            SalesforceBaseDataSource salesforceBaseDataSource = (SalesforceBaseDataSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
+            salesforceBaseDataSource = (SalesforceBaseDataSource) new FeedStorage().getFeedDefinitionData(getDataSource().getParentSourceID(), conn);
             StringBuilder queryBuilder = new StringBuilder();
             queryBuilder.append("SELECT+");
             for (AnalysisItem analysisItem : analysisItems) {
@@ -72,6 +74,8 @@ public class SalesforceFeed extends Feed {
                 }
             }
             return dataSet;
+        } catch (HttpResponseException hre) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Salesforce data.", salesforceBaseDataSource));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
