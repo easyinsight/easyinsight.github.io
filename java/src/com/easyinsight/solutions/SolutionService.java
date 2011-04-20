@@ -555,7 +555,7 @@ public class SolutionService {
             session.close();
             return insightDescriptor;
         } catch (Exception e) {
-            LogClass.error(e);
+            LogClass.error("Installing report " + reportID + " from exchange", e);
             conn.rollback();
             throw new RuntimeException(e);
         } finally {
