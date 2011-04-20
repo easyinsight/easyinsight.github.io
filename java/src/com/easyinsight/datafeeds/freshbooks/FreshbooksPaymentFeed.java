@@ -25,9 +25,14 @@ public class FreshbooksPaymentFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -55,14 +60,16 @@ public class FreshbooksPaymentFeed extends FreshbooksFeed {
                     String invoiceDateString = queryField(invoice, "date/text()");
                     Date invoiceDate = df.parse(invoiceDateString);
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksPaymentSource.INVOICE_ID), invoiceID);
-                    row.addValue(keys.get(FreshbooksPaymentSource.PAYMENT_ID), paymentID);
-                    row.addValue(keys.get(FreshbooksPaymentSource.CLIENT_ID), clientID);
-                    row.addValue(keys.get(FreshbooksPaymentSource.TYPE), type);
-                    row.addValue(keys.get(FreshbooksPaymentSource.NOTES), notes);
-                    if (amountString != null) row.addValue(keys.get(FreshbooksPaymentSource.AMOUNT), Double.parseDouble(amountString));
-                    row.addValue(keys.get(FreshbooksPaymentSource.PAYMENT_DATE), invoiceDate);
-                    row.addValue(keys.get(FreshbooksPaymentSource.COUNT), 1);
+                    addValue(row, FreshbooksPaymentSource.INVOICE_ID, invoiceID, keys);
+                    addValue(row, FreshbooksPaymentSource.PAYMENT_ID, paymentID, keys);
+                    addValue(row, FreshbooksPaymentSource.CLIENT_ID, clientID, keys);
+                    addValue(row, FreshbooksPaymentSource.TYPE, type, keys);
+                    addValue(row, FreshbooksPaymentSource.NOTES, notes, keys);
+                    if (amountString != null) {
+                        addValue(row, FreshbooksPaymentSource.AMOUNT, Double.parseDouble(amountString), keys);
+                    }
+                    addValue(row, FreshbooksPaymentSource.PAYMENT_DATE, invoiceDate, keys);
+                    addValue(row, FreshbooksPaymentSource.COUNT, 1, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);

@@ -23,9 +23,14 @@ public class FreshbooksTaskFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
 
@@ -50,12 +55,14 @@ public class FreshbooksTaskFeed extends FreshbooksFeed {
                     String rate = queryField(invoice, "rate/text()");
 
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksTaskSource.TASK_ID), taskID);
-                    row.addValue(keys.get(FreshbooksTaskSource.NAME), name);
-                    row.addValue(keys.get(FreshbooksTaskSource.DESCRIPTION), description);
-                    row.addValue(keys.get(FreshbooksTaskSource.BILLABLE), billable);
-                    if (rate != null) row.addValue(keys.get(FreshbooksTaskSource.RATE), Double.parseDouble(rate));
-                    row.addValue(keys.get(FreshbooksTaskSource.COUNT), 1);
+                    addValue(row, FreshbooksTaskSource.TASK_ID, taskID, keys);
+                    addValue(row, FreshbooksTaskSource.NAME, name, keys);
+                    addValue(row, FreshbooksTaskSource.DESCRIPTION, description, keys);
+                    addValue(row, FreshbooksTaskSource.BILLABLE, billable, keys);
+                    if (rate != null) {
+                        addValue(row, FreshbooksTaskSource.RATE,  Double.parseDouble(rate), keys);
+                    }
+                    addValue(row, FreshbooksTaskSource.COUNT, 1, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);

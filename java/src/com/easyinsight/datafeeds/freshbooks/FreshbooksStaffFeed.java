@@ -23,17 +23,19 @@ public class FreshbooksStaffFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
 
 
                 Document invoicesDoc = query("staff.list", "", conn);
-                Node invoicesSummaryNode = invoicesDoc.query("/response/staff_members").get(0);
-
-
                 Nodes invoices = invoicesDoc.query("/response/staff_members/member");
                 for (int i = 0; i < invoices.size(); i++) {
                     Node invoice = invoices.get(i);
@@ -45,12 +47,12 @@ public class FreshbooksStaffFeed extends FreshbooksFeed {
                     String staffID = queryField(invoice, "staff_id/text()");
 
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksStaffSource.FIRST_NAME), firstName);
-                    row.addValue(keys.get(FreshbooksStaffSource.STAFF_ID), staffID);
-                    row.addValue(keys.get(FreshbooksStaffSource.LAST_NAME), lastName);
-                    row.addValue(keys.get(FreshbooksStaffSource.NAME), name);
-                    row.addValue(keys.get(FreshbooksStaffSource.USERNAME), userName);
-                    row.addValue(keys.get(FreshbooksStaffSource.EMAIL), email);
+                    addValue(row, FreshbooksStaffSource.FIRST_NAME, firstName, keys);
+                    addValue(row, FreshbooksStaffSource.STAFF_ID, staffID, keys);
+                    addValue(row, FreshbooksStaffSource.LAST_NAME, lastName, keys);
+                    addValue(row, FreshbooksStaffSource.NAME, name, keys);
+                    addValue(row, FreshbooksStaffSource.USERNAME, userName, keys);
+                    addValue(row, FreshbooksStaffSource.EMAIL, email, keys);
                 }
 
             return dataSet;

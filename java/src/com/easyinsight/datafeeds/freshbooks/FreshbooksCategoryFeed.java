@@ -23,9 +23,14 @@ public class FreshbooksCategoryFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
             int requestPage = 1;
@@ -44,8 +49,8 @@ public class FreshbooksCategoryFeed extends FreshbooksFeed {
                     String categoryID = queryField(invoice, "category_id/text()");
                     String categoryName = queryField(invoice, "name/text()");
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksCategorySource.CATEGORY_ID), categoryID);
-                    row.addValue(keys.get(FreshbooksCategorySource.CATEGORY_NAME), categoryName);
+                    addValue(row, FreshbooksCategorySource.CATEGORY_ID, categoryID, keys);
+                    addValue(row, FreshbooksCategorySource.CATEGORY_NAME, categoryName, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);

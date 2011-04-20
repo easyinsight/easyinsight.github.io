@@ -25,9 +25,14 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -53,13 +58,15 @@ public class FreshbooksProjectFeed extends FreshbooksFeed {
                     String clientID = queryField(invoice, "client_id/text()");
                     String rateString = queryField(invoice, "rate/text()");
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksProjectSource.PROJECT_ID), projectID);
-                    row.addValue(keys.get(FreshbooksProjectSource.CLIENT_ID), clientID);
-                    row.addValue(keys.get(FreshbooksProjectSource.DESCRIPTION), description);
-                    row.addValue(keys.get(FreshbooksProjectSource.NAME), name);
-                    row.addValue(keys.get(FreshbooksProjectSource.BILL_METHOD), billMethod);
-                    if (rateString != null) row.addValue(keys.get(FreshbooksProjectSource.RATE), Double.parseDouble(rateString));
-                    row.addValue(keys.get(FreshbooksInvoiceSource.COUNT), 1);
+                    addValue(row, FreshbooksProjectSource.PROJECT_ID, projectID, keys);
+                    addValue(row, FreshbooksProjectSource.CLIENT_ID, clientID, keys);
+                    addValue(row, FreshbooksProjectSource.DESCRIPTION, description, keys);
+                    addValue(row, FreshbooksProjectSource.NAME, name, keys);
+                    addValue(row, FreshbooksProjectSource.BILL_METHOD, billMethod, keys);
+                    if (rateString != null) {
+                        addValue(row, FreshbooksProjectSource.RATE, Double.parseDouble(rateString), keys);
+                    }
+                    addValue(row, FreshbooksProjectSource.COUNT, 1, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);

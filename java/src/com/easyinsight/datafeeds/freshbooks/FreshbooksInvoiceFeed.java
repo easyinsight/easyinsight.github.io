@@ -25,9 +25,14 @@ public class FreshbooksInvoiceFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -36,7 +41,8 @@ public class FreshbooksInvoiceFeed extends FreshbooksFeed {
             int pages;
             int currentPage;
             do {
-                Document invoicesDoc = query("invoice.list", "<page>" + requestPage + "</page>", conn);
+                String string = "<page>" + requestPage + "</page>";
+                Document invoicesDoc = query("invoice.list", string, conn);
                 Node invoicesSummaryNode = invoicesDoc.query("/response/invoices").get(0);
                 String pageString = invoicesSummaryNode.query("@pages").get(0).getValue();
                 String currentPageString = invoicesSummaryNode.query("@page").get(0).getValue();
@@ -56,15 +62,15 @@ public class FreshbooksInvoiceFeed extends FreshbooksFeed {
                     String invoiceDateString = queryField(invoice, "date/text()");
                     Date invoiceDate = df.parse(invoiceDateString);
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksInvoiceSource.INVOICE_ID), invoiceID);
-                    row.addValue(keys.get(FreshbooksInvoiceSource.INVOICE_NUMBER), invoiceNumber);
-                    row.addValue(keys.get(FreshbooksInvoiceSource.CLIENT_ID), clientID);
-                    row.addValue(keys.get(FreshbooksInvoiceSource.STATUS), status);
-                    if (amountString != null) row.addValue(keys.get(FreshbooksInvoiceSource.AMOUNT), Double.parseDouble(amountString));
-                    if (amountOutstandingString != null) row.addValue(keys.get(FreshbooksInvoiceSource.AMOUNT_OUTSTANDING), Double.parseDouble(amountOutstandingString));
-                    if (paidString != null) row.addValue(keys.get(FreshbooksInvoiceSource.AMOUNT_PAID), Double.parseDouble(paidString));
-                    row.addValue(keys.get(FreshbooksInvoiceSource.INVOICE_DATE), invoiceDate);
-                    row.addValue(keys.get(FreshbooksInvoiceSource.COUNT), 1);
+                    addValue(row, FreshbooksInvoiceSource.INVOICE_ID, invoiceID, keys);
+                    addValue(row, FreshbooksInvoiceSource.INVOICE_NUMBER, invoiceNumber, keys);
+                    addValue(row, FreshbooksInvoiceSource.CLIENT_ID, clientID, keys);
+                    addValue(row, FreshbooksInvoiceSource.STATUS, status, keys);
+                    if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT, Double.parseDouble(amountString), keys);
+                    if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT_OUTSTANDING, Double.parseDouble(amountOutstandingString), keys);
+                    if (amountString != null) addValue(row, FreshbooksInvoiceSource.AMOUNT_PAID, Double.parseDouble(paidString), keys);
+                    addValue(row, FreshbooksInvoiceSource.INVOICE_DATE, invoiceDate, keys);
+                    addValue(row, FreshbooksInvoiceSource.COUNT, 1, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);
@@ -75,4 +81,6 @@ public class FreshbooksInvoiceFeed extends FreshbooksFeed {
             throw new RuntimeException(e);
         }
     }
+
+
 }

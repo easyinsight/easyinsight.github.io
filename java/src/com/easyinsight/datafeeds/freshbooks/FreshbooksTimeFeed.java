@@ -25,9 +25,14 @@ public class FreshbooksTimeFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -59,14 +64,16 @@ public class FreshbooksTimeFeed extends FreshbooksFeed {
                     String timeDateString = queryField(invoice, "date/text()");
                     Date entryDate = df.parse(timeDateString);
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksTimeEntrySource.TIME_ENTRY_ID), timeEntryID);
-                    row.addValue(keys.get(FreshbooksTimeEntrySource.STAFF_ID), staffID);
-                    row.addValue(keys.get(FreshbooksTimeEntrySource.PROJECT_ID), projectID);
-                    row.addValue(keys.get(FreshbooksTimeEntrySource.TASK_ID), taskID);
-                    row.addValue(keys.get(FreshbooksTimeEntrySource.NOTES), notes);
-                    if (hoursString != null) row.addValue(keys.get(FreshbooksTimeEntrySource.HOURS), Double.parseDouble(hoursString));
-                    row.addValue(keys.get(FreshbooksTimeEntrySource.DATE), entryDate);
-                    row.addValue(keys.get(FreshbooksTimeEntrySource.COUNT), 1);
+                    addValue(row, FreshbooksTimeEntrySource.TIME_ENTRY_ID, timeEntryID, keys);
+                    addValue(row, FreshbooksTimeEntrySource.STAFF_ID, staffID, keys);
+                    addValue(row, FreshbooksTimeEntrySource.PROJECT_ID, projectID, keys);
+                    addValue(row, FreshbooksTimeEntrySource.TASK_ID, taskID, keys);
+                    addValue(row, FreshbooksTimeEntrySource.NOTES, notes, keys);
+                    if (hoursString != null) {
+                        addValue(row, FreshbooksTimeEntrySource.HOURS, Double.parseDouble(hoursString), keys);
+                    }
+                    addValue(row, FreshbooksTimeEntrySource.DATE, entryDate, keys);
+                    addValue(row, FreshbooksTimeEntrySource.COUNT, 1, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);

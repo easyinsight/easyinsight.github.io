@@ -23,9 +23,14 @@ public class FreshbooksEstimateFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
 
@@ -51,13 +56,15 @@ public class FreshbooksEstimateFeed extends FreshbooksFeed {
 
                     String amountString = queryField(invoice, "amount/text()");
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksEstimateSource.ESTIMATE_ID), invoiceID);
-                    row.addValue(keys.get(FreshbooksEstimateSource.NUMBER), invoiceNumber);
-                    row.addValue(keys.get(FreshbooksEstimateSource.NOTES), notes);
-                    row.addValue(keys.get(FreshbooksEstimateSource.TERMS), terms);
-                    row.addValue(keys.get(FreshbooksEstimateSource.CLIENT_ID), clientID);
-                    if (amountString != null) row.addValue(keys.get(FreshbooksEstimateSource.AMOUNT), Double.parseDouble(amountString));                    
-                    row.addValue(keys.get(FreshbooksEstimateSource.COUNT), 1);
+                    addValue(row, FreshbooksEstimateSource.ESTIMATE_ID, invoiceID, keys);
+                    addValue(row, FreshbooksEstimateSource.NUMBER, invoiceNumber, keys);
+                    addValue(row, FreshbooksEstimateSource.NOTES, notes, keys);
+                    addValue(row, FreshbooksEstimateSource.TERMS, terms, keys);
+                    addValue(row, FreshbooksEstimateSource.CLIENT_ID, clientID, keys);
+                    if (amountString != null) {
+                        addValue(row, FreshbooksEstimateSource.AMOUNT, Double.parseDouble(amountString), keys);
+                    }
+                    addValue(row, FreshbooksEstimateSource.COUNT, 1, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);

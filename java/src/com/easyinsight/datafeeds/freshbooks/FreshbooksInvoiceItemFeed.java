@@ -8,8 +8,6 @@ import nu.xom.Document;
 import nu.xom.Node;
 import nu.xom.Nodes;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -25,12 +23,16 @@ public class FreshbooksInvoiceItemFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
             int requestPage = 1;
             int pages;
@@ -51,20 +53,20 @@ public class FreshbooksInvoiceItemFeed extends FreshbooksFeed {
                     for (int j = 0; j < lineItems.size(); j++) {
                         Node lineItem = lineItems.get(j);
                         IRow row = dataSet.createRow();
-                        row.addValue(keys.get(FreshbooksInvoiceLineSource.INVOICE_ID), invoiceID);
+                        addValue(row, FreshbooksInvoiceLineSource.INVOICE_ID, invoiceID, keys);
                         String lineItemID = queryField(lineItem, "line_id/text()");
                         String amountString = queryField(lineItem, "amount/text()");
                         String quantityString = queryField(lineItem, "quantity/text()");
                         String unitCostString = queryField(lineItem, "unit_cost/text()");
                         String description = queryField(lineItem, "description/text()");
                         String name = queryField(lineItem, "name/text()");
-                        row.addValue(keys.get(FreshbooksInvoiceLineSource.DESCRIPTION), description);
-                        row.addValue(keys.get(FreshbooksInvoiceLineSource.LINE_ID), lineItemID);
-                        row.addValue(keys.get(FreshbooksInvoiceLineSource.NAME), name);
-                        row.addValue(keys.get(FreshbooksInvoiceLineSource.COUNT), 1);
-                        if (amountString != null) row.addValue(keys.get(FreshbooksInvoiceLineSource.AMOUNT), Double.parseDouble(amountString));
-                        if (quantityString != null) row.addValue(keys.get(FreshbooksInvoiceLineSource.QUANTITY), Double.parseDouble(quantityString));
-                        if (unitCostString != null) row.addValue(keys.get(FreshbooksInvoiceLineSource.UNIT_COST), Double.parseDouble(unitCostString));
+                        addValue(row, FreshbooksInvoiceLineSource.DESCRIPTION, description, keys);
+                        addValue(row, FreshbooksInvoiceLineSource.LINE_ID, lineItemID, keys);
+                        addValue(row, FreshbooksInvoiceLineSource.NAME, name, keys);
+                        addValue(row, FreshbooksInvoiceLineSource.COUNT, 1, keys);
+                        if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.AMOUNT, Double.parseDouble(amountString), keys);
+                        if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.QUANTITY, Double.parseDouble(quantityString), keys);
+                        if (amountString != null) addValue(row, FreshbooksInvoiceLineSource.UNIT_COST, Double.parseDouble(unitCostString), keys);
                     }
                 }
                 requestPage++;

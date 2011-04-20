@@ -1,7 +1,10 @@
 package com.easyinsight.datafeeds.freshbooks;
 
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.ReportException;
+import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.logging.LogClass;
@@ -20,6 +23,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.ByteArrayInputStream;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -81,6 +87,27 @@ public abstract class FreshbooksFeed extends Feed {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Freshbooks data.", getParentSource(conn)));
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    protected void addValue(IRow row, String keyName, Object value, Map<String, Collection<Key>> keys) {
+        Collection<Key> keyColl = keys.get(keyName);
+        if (keyColl != null) {
+            for (Key key : keyColl) {
+                if (value instanceof String) {
+                    row.addValue(key, (String) value);
+                } else if (value instanceof Date) {
+                    row.addValue(key, (Date) value);
+                } else if (value instanceof Number) {
+                    row.addValue(key, (Number) value);
+                } else if (value instanceof Value) {
+                    row.addValue(key, (Value) value);
+                } else if (value == null) {
+
+                } else {
+                    throw new RuntimeException();
+                }
+            }
         }
     }
 }

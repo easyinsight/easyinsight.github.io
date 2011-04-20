@@ -25,9 +25,14 @@ public class FreshbooksExpenseFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
             int requestPage = 1;
@@ -55,17 +60,18 @@ public class FreshbooksExpenseFeed extends FreshbooksFeed {
                     String invoiceDateString = queryField(invoice, "date/text()");
                     Date invoiceDate = df.parse(invoiceDateString);
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksExpenseSource.STAFF_ID), staffID);
-                    row.addValue(keys.get(FreshbooksExpenseSource.EXPENSE_ID), expenseID);
-                    row.addValue(keys.get(FreshbooksExpenseSource.CLIENT_ID), clientID);
-                    row.addValue(keys.get(FreshbooksExpenseSource.CATEGORY_ID), categoryID);
-                    row.addValue(keys.get(FreshbooksExpenseSource.PROJECT_ID), projectID);
-                    row.addValue(keys.get(FreshbooksExpenseSource.NOTES), notes);
-                    row.addValue(keys.get(FreshbooksExpenseSource.VENDOR), vendor);
-                    if (amountString != null)
-                        row.addValue(keys.get(FreshbooksExpenseSource.AMOUNT), Double.parseDouble(amountString));
-                    row.addValue(keys.get(FreshbooksExpenseSource.DATE), invoiceDate);
-                    row.addValue(keys.get(FreshbooksExpenseSource.COUNT), 1);
+                    addValue(row, FreshbooksExpenseSource.STAFF_ID, staffID, keys);
+                    addValue(row, FreshbooksExpenseSource.EXPENSE_ID, expenseID, keys);
+                    addValue(row, FreshbooksExpenseSource.CLIENT_ID, clientID, keys);
+                    addValue(row, FreshbooksExpenseSource.CATEGORY_ID, categoryID, keys);
+                    addValue(row, FreshbooksExpenseSource.PROJECT_ID, projectID, keys);
+                    addValue(row, FreshbooksExpenseSource.NOTES, notes, keys);
+                    addValue(row, FreshbooksExpenseSource.VENDOR, vendor, keys);
+                    if (amountString != null) {
+                        addValue(row, FreshbooksExpenseSource.AMOUNT, Double.parseDouble(amountString), keys);
+                    }
+                    addValue(row, FreshbooksExpenseSource.DATE, invoiceDate, keys);
+                    addValue(row, FreshbooksExpenseSource.COUNT, 1, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);

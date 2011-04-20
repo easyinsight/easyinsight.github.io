@@ -23,9 +23,14 @@ public class FreshbooksClientFeed extends FreshbooksFeed {
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            Map<String, Key> keys = new HashMap<String, Key>();
+            Map<String, Collection<Key>> keys = new HashMap<String, Collection<Key>>();
             for (AnalysisItem analysisItem : analysisItems) {
-                keys.put(analysisItem.getKey().toKeyString(), analysisItem.createAggregateKey());
+                Collection<Key> keyColl = keys.get(analysisItem.getKey().toKeyString());
+                if (keyColl == null) {
+                    keyColl = new ArrayList<Key>();
+                    keys.put(analysisItem.getKey().toKeyString(), keyColl);
+                }
+                keyColl.add(analysisItem.createAggregateKey());
             }
             DataSet dataSet = new DataSet();
 
@@ -58,21 +63,21 @@ public class FreshbooksClientFeed extends FreshbooksFeed {
                     String organization = queryField(invoice, "organization/text()");
 
                     IRow row = dataSet.createRow();
-                    row.addValue(keys.get(FreshbooksClientSource.FIRST_NAME), firstName);
-                    row.addValue(keys.get(FreshbooksClientSource.CLIENT_ID), clientID);
-                    row.addValue(keys.get(FreshbooksClientSource.LAST_NAME), lastName);
-                    row.addValue(keys.get(FreshbooksClientSource.NAME), name);
-                    row.addValue(keys.get(FreshbooksClientSource.USERNAME), userName);
-                    row.addValue(keys.get(FreshbooksClientSource.EMAIL), email);
-                    row.addValue(keys.get(FreshbooksClientSource.WORK_PHONE), workPhone);
-                    row.addValue(keys.get(FreshbooksClientSource.PRIMARY_STREET1), address1);
-                    row.addValue(keys.get(FreshbooksClientSource.PRIMARY_STREET2), address2);
-                    row.addValue(keys.get(FreshbooksClientSource.CITY), city);
-                    row.addValue(keys.get(FreshbooksClientSource.STATE), state);
-                    row.addValue(keys.get(FreshbooksClientSource.POSTAL), zip);
-                    row.addValue(keys.get(FreshbooksClientSource.COUNTRY), country);
-                    row.addValue(keys.get(FreshbooksClientSource.ORGANIZATION), organization);
-                    row.addValue(keys.get(FreshbooksClientSource.COUNT), 1);
+                    addValue(row, FreshbooksClientSource.FIRST_NAME, firstName, keys);
+                    addValue(row, FreshbooksClientSource.CLIENT_ID, clientID, keys);
+                    addValue(row, FreshbooksClientSource.LAST_NAME, lastName, keys);
+                    addValue(row, FreshbooksClientSource.NAME, name, keys);
+                    addValue(row, FreshbooksClientSource.USERNAME, userName, keys);
+                    addValue(row, FreshbooksClientSource.EMAIL, email, keys);
+                    addValue(row, FreshbooksClientSource.WORK_PHONE, workPhone, keys);
+                    addValue(row, FreshbooksClientSource.PRIMARY_STREET1, address1, keys);
+                    addValue(row, FreshbooksClientSource.PRIMARY_STREET2, address2, keys);
+                    addValue(row, FreshbooksClientSource.CITY, city, keys);
+                    addValue(row, FreshbooksClientSource.STATE, state, keys);
+                    addValue(row, FreshbooksClientSource.POSTAL, zip, keys);
+                    addValue(row, FreshbooksClientSource.COUNTRY, country, keys);
+                    addValue(row, FreshbooksClientSource.ORGANIZATION, organization, keys);
+                    addValue(row, FreshbooksClientSource.COUNT, 1, keys);
                 }
                 requestPage++;
             } while (currentPage < pages);
