@@ -44,9 +44,9 @@
                            id="installButton"/>
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
-            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="50">
-                <mx:Image source="../assets/highrise/CompanyDealTreeSmall.png" height="150"/>
-                <mx:Image source="../assets/highrise/ContactHeatMapSmall.png" height="150"/>
+            <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="50" verticalAlign="middle">
+                <mx:Image source="../assets/BatchbookTreeReportSmall.jpg"/>
+                <mx:Image source="../assets/BatchbookDealBarChartSmall.jpg"/>
             </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="150"

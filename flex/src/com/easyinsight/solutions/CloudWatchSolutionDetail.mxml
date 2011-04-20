@@ -45,8 +45,8 @@
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="20">
-                <mx:Image source="../assets/CCKPISmall.jpg" height="194"/>
-                <mx:Image source="../assets/highrise/ContactHeatMapSmall.png" height="194"/>
+                <mx:Image source="../assets/AmazonDashboard.jpg"/>
+                <mx:Image source="../assets/AmazonReportEditor.jpg"/>
             </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="120"

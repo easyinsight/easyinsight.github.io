@@ -45,8 +45,8 @@
             </mx:Box>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:HBox width="100%" horizontalAlign="center" paddingBottom="10" horizontalGap="20">
-                <mx:Image source="../assets/highrise/CompanyDealTreeSmall.png" height="150"/>
-                <mx:Image source="../assets/highrise/ContactHeatMapSmall.png" height="150"/>
+                <mx:Image source="../assets/ZendeskDashboard.jpg"/>
+                <mx:Image source="../assets/ZendeskReportEditor.jpg"/>
             </mx:HBox>
             <mx:TextArea backgroundAlpha="0" editable="false" selectable="false" borderStyle="none" width="820"
                          height="120"
