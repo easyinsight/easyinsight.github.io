@@ -39,6 +39,11 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         this.derivationCode = derivationCode;
     }
 
+    @Override
+    public boolean isTimeshift() {
+        return false;
+    }
+
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
