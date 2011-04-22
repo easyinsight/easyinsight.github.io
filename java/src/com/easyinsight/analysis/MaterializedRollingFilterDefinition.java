@@ -62,20 +62,22 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
         int interval = rollingFilterDefinition.getInterval();
         int intervalAmount = -rollingFilterDefinition.getCustomIntervalAmount();
-        int intervalType = rollingFilterDefinition.getCustomIntervalType(); 
+        int intervalType = rollingFilterDefinition.getCustomIntervalType();
         Calendar cal = Calendar.getInstance();
-        cal.setTime(now);
-        int time = insightRequestMetadata.getUtcOffset() / 60;
-        String string;
-        if (time > 0) {
-            string = "GMT-"+time;
-        } else if (time < 0) {
-            string = "GMT+"+time;
-        } else {
-            string = "GMT";
+            cal.setTime(now);
+        if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
+            int time = insightRequestMetadata.getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+time;
+            } else if (time < 0) {
+                string = "GMT+"+time;
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
+            cal.setTimeZone(timeZone);
         }
-        TimeZone timeZone = TimeZone.getTimeZone(string);
-        cal.setTimeZone(timeZone);
         switch (interval) {
             case CUSTOM:
                 if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
