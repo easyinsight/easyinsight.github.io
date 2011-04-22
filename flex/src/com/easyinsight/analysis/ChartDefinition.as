@@ -49,7 +49,14 @@ public class ChartDefinition extends AnalysisDefinition {
                 case ChartTypes.COLUMN_FAMILY:
                 case ChartTypes.BAR_FAMILY:
                 case ChartTypes.PIE_FAMILY:
-                    limitNumber = 15;
+                        switch (chartType) {
+                            case ChartTypes.COLUMN_2D_STACKED:
+                            case ChartTypes.BAR_2D_STACKED:
+                                limitNumber = 100;
+                                break;
+                            default:
+                                limitNumber = 15;
+                        }
                     break;
                 case ChartTypes.PLOT_FAMILY:
                 case ChartTypes.BUBBLE_FAMILY:
