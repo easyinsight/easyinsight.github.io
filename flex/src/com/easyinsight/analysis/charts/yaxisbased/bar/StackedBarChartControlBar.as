@@ -1,6 +1,5 @@
 package com.easyinsight.analysis.charts.yaxisbased.bar {
-import com.easyinsight.analysis.charts.xaxisbased.column.*;
-import com.easyinsight.analysis.charts.xaxisbased.*;
+
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
@@ -14,7 +13,6 @@ import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.charts.ChartDefinitionEditWindow;
-import com.easyinsight.analysis.charts.ChartRotationEvent;
 
 import com.easyinsight.util.PopUpUtil;
 
@@ -22,7 +20,6 @@ import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
 import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;
@@ -86,8 +83,8 @@ public class StackedBarChartControlBar extends ReportControlBar implements IRepo
         if (xAxisDefinition.stackItem != null) {
             stackGrouping.addAnalysisItem(xAxisDefinition.stackItem);
         }
-        if (xAxisDefinition.measure != null) {
-            measureGrouping.addAnalysisItem(xAxisDefinition.measure);
+        if (xAxisDefinition.measures != null && xAxisDefinition.measures.length > 0) {
+            measureGrouping.addAnalysisItem(xAxisDefinition.measures.getItemAt(0) as AnalysisItem);
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
@@ -143,7 +140,7 @@ public class StackedBarChartControlBar extends ReportControlBar implements IRepo
 
     public function createAnalysisDefinition():AnalysisDefinition {
         xAxisDefinition.yaxis = xAxisGrouping.getListColumns()[0];
-        xAxisDefinition.measure = measureGrouping.getListColumns()[0];
+        xAxisDefinition.measures = new ArrayCollection(measureGrouping.getListColumns());
         xAxisDefinition.stackItem = stackGrouping.getListColumns()[0];
         return xAxisDefinition;
     }

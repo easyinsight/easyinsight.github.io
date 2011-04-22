@@ -265,7 +265,8 @@
                 legend.dataProvider = lineChart;
                 legend.direction = "vertical";
             } else {
-                if (lineChartDef.measure != null && lineChartDef.xaxis != null && lineChartDef.yaxis != null) stackIndex = 2;
+                if ((!lineChartDef.multiMeasure && lineChartDef.measure != null && lineChartDef.xaxis != null && lineChartDef.yaxis != null) ||
+                        (lineChartDef.measures != null && lineChartDef.measures.length > 0 && lineChartDef.xaxis != null)) stackIndex = 2;
                 else stackIndex = 1;
                 if (lineChart != null) {
                     lineChart.visible = false;
@@ -322,7 +323,7 @@
                         backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
                     <mx:TextArea fontSize="22"
                                  text="You haven't set up a report yet. Drag two Groupings and one Measure into the labeled areas above the canvas to create a report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="95" editable="false" selectable="false" focusEnabled="false"/>
                 </mx:Box>
             </mx:Box>
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
@@ -332,7 +333,7 @@
                         backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
                     <mx:TextArea fontSize="22"
                                  text="We didn't find any data for the fields and filters that you specified in the report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
+                                 borderStyle="none" backgroundAlpha="0" width="500" height="65" editable="false" selectable="false" focusEnabled="false"/>
                 </mx:Box>
             </mx:Box>
         </mx:ViewStack>

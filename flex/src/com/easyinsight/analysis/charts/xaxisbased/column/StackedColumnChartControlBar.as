@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.charts.xaxisbased.column {
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.charts.xaxisbased.*;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
@@ -85,8 +86,8 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
         if (xAxisDefinition.stackItem != null) {
             stackGrouping.addAnalysisItem(xAxisDefinition.stackItem);
         }
-        if (xAxisDefinition.measure != null) {
-            measureGrouping.addAnalysisItem(xAxisDefinition.measure);
+        if (xAxisDefinition.measures != null && xAxisDefinition.measures.length > 0) {
+            measureGrouping.addAnalysisItem(xAxisDefinition.measures.getItemAt(0) as AnalysisMeasure);
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
@@ -142,7 +143,7 @@ public class StackedColumnChartControlBar extends ReportControlBar implements IR
 
     public function createAnalysisDefinition():AnalysisDefinition {
         xAxisDefinition.xaxis = xAxisGrouping.getListColumns()[0];
-        xAxisDefinition.measure = measureGrouping.getListColumns()[0];
+        xAxisDefinition.measures = new ArrayCollection(measureGrouping.getListColumns());
         xAxisDefinition.stackItem = stackGrouping.getListColumns()[0];
         return xAxisDefinition;
     }

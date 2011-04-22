@@ -110,12 +110,12 @@
                 } else {
                     pieSeries.setStyle("fills", FillProvider.createSolidColors());
                 }
-                this.measureFormatter = pieChartDef.measure.getFormatter();
-                measureName = pieChartDef.measure.qualifiedName();
+                this.measureFormatter = pieChartDef.measures.getItemAt(0).getFormatter();
+                measureName = pieChartDef.measures.getItemAt(0).qualifiedName();
                 dimension = pieChartDef.xaxis.qualifiedName();
                 this.dimensionItem = pieChartDef.xaxis;
             } else {
-                if (pieChartDef.measure != null && pieChartDef.xaxis != null) stackIndex = 2;
+                if (pieChartDef.measures != null && pieChartDef.measures.length > 0 && pieChartDef.xaxis != null) stackIndex = 2;
                 else stackIndex = 1;
                 pieChart.visible = false;
                 legend.visible = false;

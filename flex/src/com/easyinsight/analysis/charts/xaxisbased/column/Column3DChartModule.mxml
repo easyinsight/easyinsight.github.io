@@ -1,108 +1,41 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
-           xmlns:ilog="ilog.charts3d.*" xmlns:ilog2="ilog.charts3d.series.*"
-           implements="com.easyinsight.analysis.IReportRenderer"
-           width="100%" height="100%" creationComplete="onCreation()">
-    <mx:Style>
-        .axisTitles {
-            fontSize: 14;
-            fontFamily: "Tahoma";
-        }
-
-        CartesianChart3D {
-            axisTitleStyleName:axisTitles;
-            fontFamily: "Tahoma";
-            fontSize: 14;
-        }
-    </mx:Style>
+<charts:CartesianChartModule xmlns:mx="http://www.adobe.com/2006/mxml"
+                             implements="com.easyinsight.analysis.IReportRenderer"
+                             width="100%" height="100%" xmlns:charts="com.easyinsight.analysis.charts.*"
+        creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.ChartDefinition;
-        import com.easyinsight.analysis.CustomChangeEvent;
-
-        import com.easyinsight.analysis.FillProvider;
-        import com.easyinsight.analysis.SortFunctionFactory;
-        import com.easyinsight.analysis.charts.Chart3DVisuals;
-
-        import com.easyinsight.pseudocontext.PseudoContextWindow;
-
-        import ilog.charts3d.charts3dClasses.Series3D;
-        import ilog.charts3d.series.ColumnSet3D;
-        import ilog.charts3d.series.ColumnSeries3D;
-        import ilog.charts3d.ColumnChart3D;
-
         import com.easyinsight.analysis.AnalysisItem;
 
-        import mx.binding.utils.BindingUtils;
-        import mx.charts.events.ChartItemEvent;
-        import mx.collections.Sort;
-        import mx.events.FlexEvent;
+        import com.easyinsight.analysis.AnalysisMeasure;
 
-        import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.analysis.ChartDefinition;
 
-        import mx.graphics.BitmapFill;
-        import mx.graphics.IFill;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.SortFunctionFactory;
 
-        import mx.charts.chartClasses.IAxis;
-        import mx.charts.LinearAxis;
-        import mx.formatters.Formatter;
-        import mx.charts.series.items.ColumnSeriesItem;
-        import mx.charts.ChartItem;
+        import com.easyinsight.analysis.charts.Chart3DVisuals;
+
+        import ilog.charts3d.ColumnChart3D;
+
+        import ilog.charts3d.charts3dClasses.CartesianChart3D;
+
+        import ilog.charts3d.charts3dClasses.Series3D;
+        import ilog.charts3d.series.ColumnSeries3D;
+
+        import ilog.charts3d.series.items.ColumnSeries3DItem;
+
         import mx.charts.CategoryAxis;
+        import mx.charts.ChartItem;
+        import mx.charts.HitData;
+        import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.CartesianTransform;
+        import mx.charts.chartClasses.ChartBase;
+        import mx.charts.chartClasses.DataTransform;
+        import mx.charts.chartClasses.Series;
+        import mx.charts.series.items.ColumnSeriesItem;
         import mx.collections.ArrayCollection;
-        import mx.graphics.SolidColor;
-        import mx.managers.PopUpManager;
-
-        [Bindable]
-        private var graphData:ArrayCollection = new ArrayCollection();
-
-        [Bindable]
-        private var _xAxisTitle:String = "";
-
-        [Bindable]
-        private var _yAxisTitle:String = "";
-
-        [Bindable]
-        private var xAxisItem:AnalysisItem;
-        [Bindable]
-        private var yAxisItem:AnalysisItem;
-
-        private var _xField:String;
-        [Bindable]
-        private var yField:String;
-
-        private var measureFormatter:Formatter;
-        private var dimensionFormatter:Formatter;
-
-        private var customColors:Boolean = false;
-
-        private var columnChart:ColumnChart3D;
-
-        private var xAxis:CategoryAxis;
-        private var yAxis:LinearAxis;
-
-        private var columnSeries:ColumnSeries3D;
-
-        private var bgFills:Array;
-
-        private var sortable:Boolean = true;
-        private var selectable:Boolean = true;
-
-        [Bindable]
-        [Embed(source="../../../../../../../assets/water4.JPG")]
-        private var standardFill:Class;
-
-        [Bindable]
-        public function get xField():String {
-            return _xField;
-        }
-
-        public function set xField(val:String):void {
-            _xField = val;
-            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-        }
-
-        private var visuals:Chart3DVisuals = new Chart3DVisuals();
+        import mx.collections.Sort;
 
         private function onCreation():void {
             visuals.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, onCustomChange);
@@ -112,277 +45,116 @@
             dispatchEvent(event);
         }
 
-        override protected function createChildren():void {
-            super.createChildren();
-            bgFills = [];
-            for (var i:int = 0; i < 15; i++) {
-                var bgFill:BitmapFill = new BitmapFill();
-                bgFill.source = standardFill;
-                bgFills.push(bgFill);
+        override protected function getDimensionItem():AnalysisItem {
+            return Column3DChartDefinition(chartDef).xaxis;
+        }
+
+        override protected function getMeasures():ArrayCollection {
+            return Column3DChartDefinition(chartDef).measures;
+        }
+
+        override protected function createChartObject():ChartBase {
+            var chart:ColumnChart3D = new ColumnChart3D();
+            visuals.chart = chart;
+            return chart;
+        }
+
+        override protected function useChartColor():Boolean {
+            return Column3DChartDefinition(chartDef).useChartColor;
+        }
+
+        override protected function getChartColor():uint {
+            return Column3DChartDefinition(chartDef).chartColor;
+        }
+
+        override protected function getColorScheme():String {
+            return Column3DChartDefinition(chartDef).colorScheme;
+        }
+
+        private var visuals:Chart3DVisuals = new Chart3DVisuals();
+
+        override protected function sortData(dataSet:ArrayCollection):void {
+            var columnChartDef:Column3DChartDefinition = chartDef as Column3DChartDefinition;
+            var firstMeasure:AnalysisMeasure = columnChartDef.measures.getItemAt(0) as AnalysisMeasure;
+            if (columnChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
+                var sort:Sort = new Sort();
+                if (columnChartDef.columnSort == ChartDefinition.SORT_X_ASCENDING) {
+                    sort.compareFunction = SortFunctionFactory.createSortFunction(getDimensionItem(), false);
+                } else if (columnChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
+                    sort.compareFunction = SortFunctionFactory.createSortFunction(getDimensionItem(), true);
+                } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
+                    sort.compareFunction = SortFunctionFactory.createSortFunction(firstMeasure, false);
+                } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
+                    sort.compareFunction = SortFunctionFactory.createSortFunction(firstMeasure, true);
+                }
+                dataSet.sort = sort;
+                dataSet.refresh();
             }
         }
 
-        [Bindable]
-        public function get xAxisTitle():String {
-            return _xAxisTitle;
+        override protected function formatDataTip(hd:HitData):String {
+            var dt:String = "";
+            var columnSeriesItem:ColumnSeries3DItem = hd.chartItem as ColumnSeries3DItem;
+            var series:Series3D = columnSeriesItem.element as Series3D;
+            var dataTransform:DataTransform = series.dataTransform;
+            var n:String = series.displayName;
+            if (n != null && n.length > 0)
+                dt += "<b>" + n + "</b><BR/>";
+
+            var xName:String = dataTransform.getAxis(CartesianTransform.HORIZONTAL_AXIS).displayName;
+            if (xName != "")
+                dt += "<i>" + xName + ":</i> ";
+            dt += dataTransform.getAxis(CartesianTransform.HORIZONTAL_AXIS).formatForScreen(ColumnSeriesItem(hd.chartItem).xValue) + "\n";
+
+            var yName:String = dataTransform.getAxis(CartesianTransform.VERTICAL_AXIS).displayName;
+
+            if (yName != "")
+                dt += "<i>" + yName + ":</i> ";
+            dt += measureFormatter.format(ColumnSeriesItem(hd.chartItem).yValue) + "\n";
+
+            return dt;
         }
 
-        public function set xAxisTitle(val:String):void {
-            _xAxisTitle = val;
-            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-        }
-
-        [Bindable]
-        public function get yAxisTitle():String {
-            return _yAxisTitle;
-        }
-
-        public function set yAxisTitle(val:String):void {
-            _yAxisTitle = val;
-            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-        }
-
-        private function createChart():void {
-            if (columnChart == null) {
-
-                // define the chart itself
-
-                columnChart = new ColumnChart3D();
-                //columnChart.projectionType = "oblique";
-                //columnChart.rotationAngle = 26.50;
-                columnChart.percentHeight = 100;
-                columnChart.percentWidth = 100;
-                columnChart.showDataTips = true;
-                visuals.chart = columnChart;
-
-                /*if (selectable) {
-                 columnChart.selectionMode = "multiple";
-                 }*/
-                columnChart.dataProvider = graphData;
-
-                // define the X axis
-
-                xAxis = new CategoryAxis();
-                BindingUtils.bindProperty(xAxis, "categoryField", this, "xField");
-                //xAxis.categoryField = xField;
-                xAxis.dataProvider = graphData;
-                xAxis.labelFunction = renderDimensionAxis;
-                //xAxis.title = xAxisTitle;
-                BindingUtils.bindProperty(xAxis, "title", this, "xAxisTitle");
-                columnChart.horizontalAxis = xAxis;
-
-                // define the Y axis
-
-                yAxis = new LinearAxis();
-                //yAxis.title = yAxisTitle;
-                BindingUtils.bindProperty(yAxis, "title", this, "yAxisTitle");
-                yAxis.labelFunction = renderAxis;
-                columnChart.verticalAxis = yAxis;
-
-                // create the data series
-
-                var columnSet:ColumnSet3D = new ColumnSet3D();
-                columnSeries = new ColumnSeries3D();
-                //columnSeries.setStyle("itemRenderer", new CustomChartRendererFactory());
-                columnSeries.setStyle("stroke", s1);
-                columnSeries.fillFunction = customFill;
-                columnSeries.xField = xField;
-                columnSeries.yField = yField;
-                //columnSeries.labelFunction = renderChartLabel;
-                columnSeries.dataProvider = graphData;
-                columnSeries.dataFunction = myDataFunction;
-                BindingUtils.bindProperty(columnSeries, "displayName", this, "xAxisTitle");
-                columnSeries.setStyle("showDataEffect", interpolateIn);
-                //var mySeries:Array = new Array();
-                //mySeries.push(columnSeries);
-                columnSet.series = [ columnSeries ];
-                columnChart.series = [ columnSet ];
-                columnChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
-                canvas.addChild(columnChart);
-            } else {
-                columnChart.visible = true;
+        override public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            super.renderReport(dataSet, analysisDefinition, clientProcessorMap, additionalProperties);
+            var chartDef:Column3DChartDefinition = analysisDefinition as Column3DChartDefinition;
+            if (chartDef.elevationAngle > 0) {
+                visuals.elevationAngle = chartDef.elevationAngle;
+                visuals.rotationAngle = chartDef.rotationAngle;
             }
         }
 
-        private function myDataFunction(series:Series3D, item:Object, fieldName:String):Object {
-            if (fieldName == 'yValue')
-                return(item[yAxisItem.qualifiedName()].toNumber());
-            else if (fieldName == "xValue")
-                return(item[xAxisItem.qualifiedName()].toString());
-            else
-                return null;
+        override protected function assignDimensionAxis(axis:CategoryAxis, chart:ChartBase):void {
+            CartesianChart3D(chart).horizontalAxis = axis;
         }
 
-        private function renderChartLabel(element:ChartItem, series:Series3D):String {
-            var columnSeriesItem:ColumnSeriesItem = element as ColumnSeriesItem;
-            return measureFormatter.format(columnSeriesItem.xNumber);
+        override protected function assignMeasureAxis(axis:LinearAxis, chart:ChartBase):void {
+            CartesianChart3D(chart).verticalAxis = axis;
         }
 
-        private function customFill(element:ChartItem, index:Number):IFill {
-            if (columnChartDef.useChartColor) {
-                return new SolidColor(columnChartDef.chartColor);
-            } else {
-                return FillProvider.getColor(columnChartDef.colorScheme, bgFills, index);
-            }
+        override protected function createSeries(measure:AnalysisMeasure, dataSet:ArrayCollection, xField:String, measureNumber:int):Series {
+            var columnSeries:ColumnSeries3D = new ColumnSeries3D();
+            columnSeries.xField = xField;
+            columnSeries.yField = measure.qualifiedName();
+            columnSeries.labelFunction = function (element:ChartItem, series:Series):String {
+                var columnSeriesItem:ColumnSeries3DItem = element as ColumnSeries3DItem;
+                return measure.getFormatter().format(columnSeriesItem.xNumber);
+            };
+            columnSeries.dataProvider = dataSet;
+            columnSeries.dataFunction = function(series:Series, item:Object, fieldName:String):Object {
+                if (fieldName == 'yValue')
+                    return(item[measure.qualifiedName()].toNumber());
+                else if (fieldName == "xValue")
+                    return(item[xField].toString());
+                else
+                    return null;
+            };
+            columnSeries.displayName = measure.display;
+            columnSeries.setStyle("showDataEffect", interpolateIn);
+            columnSeries.setStyle("hideDataEffect", interpolateIn);
+            return columnSeries;
         }
-
-        private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
-            return measureFormatter.format(labelValue);
-        }
-
-        public function createFilterRawData():FilterRawData {
-            var filterRawData:FilterRawData = new FilterRawData();
-            for (var i:int = 0; i < columnChart.selectedChartItems.length; i++) {
-                var obj:ChartItem = columnChart.selectedChartItems[i];
-                filterRawData.addPair(xAxisItem, obj.item[xAxisItem.key.createString()]);
-            }
-            return filterRawData;
-        }
-
-        private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
-            return dimensionFormatter.format(item);
-        }
-
-        private function onClick(event:ChartItemEvent):void {
-
-            var window:PseudoContextWindow = new PseudoContextWindow(xAxisItem, passThrough, this, columnChartDef, event.hitData.item);
-            PopUpManager.addPopUp(window, this);
-            window.x = event.stageX + 5;
-            window.y = event.stageY + 5;
-        }
-
-        private function passThrough(event:Event):void {
-            dispatchEvent(event);
-        }
-
-        [Bindable]
-        private var stackIndex:int = 0;
-
-        private var columnChartDef:Column3DChartDefinition;
-
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
-            columnChartDef = analysisDefinition as Column3DChartDefinition;
-
-            if (dataSet.length > 0) {
-                canvas.setStyle("backgroundAlpha", columnChartDef.backgroundAlpha);
-                 if (columnChartDef.columnSort != ChartDefinition.SORT_UNSORTED) {
-                    var sort:Sort = new Sort();
-                    if (columnChartDef.columnSort == ChartDefinition.SORT_X_ASCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, false);
-                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, true);
-                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, false);
-                    } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, true);
-                    }
-                    dataSet.sort = sort;
-                    dataSet.refresh();
-                }
-                stackIndex = 0;
-                xField = columnChartDef.xaxis.qualifiedName();
-                createChart();
-
-                if (columnChartDef.elevationAngle > 0) {
-                    visuals.elevationAngle = columnChartDef.elevationAngle;
-                    visuals.rotationAngle = columnChartDef.rotationAngle;
-                }
-
-                measureFormatter = columnChartDef.measure.getFormatter();
-                dimensionFormatter = columnChartDef.xaxis.getFormatter();
-
-                var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
-                if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
-                    xAxisItem = newXAxisItem;
-                    /*if (sortable) {
-                     xAxisTitleRendererFactory.analysisItem = xAxisItem;
-                     }*/
-                }
-
-                var newYAxisItem:AnalysisItem = columnChartDef.measure;
-                if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
-                    yAxisItem = newYAxisItem;
-                    /*if (sortable) {
-                     yAxisTitleRendererFactory.analysisItem = yAxisItem;
-                     }*/
-                }
-
-                var newXField:String = newXAxisItem.qualifiedName();
-                if (newXField != xField) {
-                    xAxis.categoryField = xField;
-                    columnSeries.xField = xField;
-                }
-
-                var newXAxisTitle:String = newXAxisItem.display;
-                if (newXAxisTitle != xAxisTitle) {
-                    xAxisTitle = newXAxisTitle;
-                    //xAxis.title = xAxisTitle;
-                    columnSeries.displayName = xAxisTitle;
-                }
-
-                var newYField:String = newYAxisItem.qualifiedName();
-                if (newYField != yField) {
-                    yField = newYField;
-                    columnSeries.yField = yField;
-                }
-
-                var newYAxisTitle:String = newYAxisItem.display;
-                if (newYAxisTitle != yAxisTitle) {
-                    yAxisTitle = newYAxisTitle;
-                    //yAxis.title = yAxisTitle;
-                }
-                columnChart.dataProvider = dataSet;
-                columnSeries.dataProvider = dataSet;
-                xAxis.dataProvider = dataSet;
-            } else {
-                if (columnChartDef.measure != null && columnChartDef.xaxis != null) stackIndex = 2;
-                else stackIndex = 1;
-                if (columnChart != null) {
-                    columnChart.dataProvider = new ArrayCollection();
-                    columnSeries.dataProvider = new ArrayCollection();
-                    xAxis.dataProvider = new ArrayCollection();
-                    columnChart.visible = false;
-                }
-            }
-
-            graphData = dataSet;
-        }
-
-        public function updateExportMetadata():void {
-        }
-
-        public function preserveValues():Boolean {
-            return true;
-        }
-
-        public function onCustomChangeEvent(event:CustomChangeEvent):void {
-        }]]></mx:Script>
-    <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
-    <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
-    <mx:Canvas width="100%" height="100%" id="canvas">
-        <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
-                      mouseEnabled="false">
-            <mx:Canvas width="100%" height="100%"/>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
-                    backgroundAlpha=".1">
-                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
-                        verticalAlign="middle"
-                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                    <mx:TextArea fontSize="22"
-                                 text="You haven't set up a report yet. Drag one Grouping and one Measure into the labeled areas above the canvas to create a report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="95"/>
-                </mx:Box>
-            </mx:Box>
-            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
-                    backgroundAlpha=".1">
-                <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"
-                        verticalAlign="middle"
-                        backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-                    <mx:TextArea fontSize="22"
-                                 text="We didn't find any data for the fields and filters that you specified in the report."
-                                 borderStyle="none" backgroundAlpha="0" width="500" height="65"/>
-                </mx:Box>
-            </mx:Box>
-        </mx:ViewStack>
-    </mx:Canvas>
-</mx:Module>
+        ]]></mx:Script>
+    <mx:SeriesSlide id="interpolateIn" duration="1000" direction="up"/>
+    <mx:SeriesSlide id="interpolateOut" duration="1000" direction="down"/>
+</charts:CartesianChartModule>

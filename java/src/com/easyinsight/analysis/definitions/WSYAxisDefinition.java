@@ -13,7 +13,7 @@ import java.util.*;
  * Time: 6:43:40 PM
  */
 public abstract class WSYAxisDefinition extends WSChartDefinition {
-    private AnalysisItem measure;
+    private List<AnalysisItem> measures;
     private AnalysisItem yaxis;
 
     private String colorScheme;
@@ -34,27 +34,26 @@ public abstract class WSYAxisDefinition extends WSChartDefinition {
         this.yaxis = yaxis;
     }
 
-    public AnalysisItem getMeasure() {
-        return measure;
+    public List<AnalysisItem> getMeasures() {
+        return measures;
     }
 
-    public void setMeasure(AnalysisItem measure) {
-        this.measure = measure;
+    public void setMeasures(List<AnalysisItem> measures) {
+        this.measures = measures;
     }
 
     public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("yAxis", Arrays.asList(yaxis), structure);
-        addItems("measure", Arrays.asList(measure), structure);
+        addItems("measure", measures, structure);
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         yaxis = firstItem("yAxis", structure);
-        measure = firstItem("measure", structure);
+        measures = items("measure", structure);
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
-        Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
-        columnList.add(measure);
+        Set<AnalysisItem> columnList = new HashSet<AnalysisItem>(measures);
         columnList.add(yaxis);
         return columnList;
     }

@@ -14,7 +14,7 @@ import java.util.*;
  */
 public abstract class WSXAxisDefinition extends WSChartDefinition {
 
-    private AnalysisItem measure;
+    private List<AnalysisItem> measures;
     private AnalysisItem xaxis;
 
     private double yAxisMin;
@@ -54,27 +54,26 @@ public abstract class WSXAxisDefinition extends WSChartDefinition {
         this.xaxis = xaxis;
     }
 
-    public AnalysisItem getMeasure() {
-        return measure;
+    public List<AnalysisItem> getMeasures() {
+        return measures;
     }
 
-    public void setMeasure(AnalysisItem measure) {
-        this.measure = measure;
+    public void setMeasures(List<AnalysisItem> measures) {
+        this.measures = measures;
     }
 
     public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("xAxis", Arrays.asList(xaxis), structure);
-        addItems("measure", Arrays.asList(measure), structure);
+        addItems("measure", measures, structure);
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         xaxis = firstItem("xAxis", structure);
-        measure = firstItem("measure", structure);
+        measures = items("measure", structure);
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
-        Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
-        columnList.add(measure);
+        Set<AnalysisItem> columnList = new HashSet<AnalysisItem>(measures);
         columnList.add(xaxis);
         return columnList;
     }

@@ -71,7 +71,7 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 dimensionValue = "(No Value)";
             }
             newObject[xaxis.qualifiedName()] = xVal;
-            newObject[dimensionValue] = object[measure.qualifiedName()];
+            newObject[dimensionValue] = object[measures.getItemAt(0).qualifiedName()];
             if (!uniques.contains(dimensionValue)) {
                 uniques.addItem(dimensionValue);
             }

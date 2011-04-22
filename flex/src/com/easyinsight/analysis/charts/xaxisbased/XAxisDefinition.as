@@ -1,8 +1,8 @@
 package com.easyinsight.analysis.charts.xaxisbased {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.ChartDefinition;
-import com.easyinsight.analysis.ComboBoxReportFormItem;
 import com.easyinsight.analysis.FillProvider;
 
 import mx.collections.ArrayCollection;
@@ -10,11 +10,8 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSXAxisChartDefinition")]
 public class XAxisDefinition extends ChartDefinition{
 
-    public var measure:AnalysisItem;
+    public var measures:ArrayCollection;
     public var xaxis:AnalysisItem;
-
-    public var yAxisMin:Number;
-    public var yAxisMax:Number;
 
     public var colorScheme:String = FillProvider.defaultFill;
 
@@ -23,10 +20,7 @@ public class XAxisDefinition extends ChartDefinition{
     }
 
     override public function populate(fields:ArrayCollection):void {
-        var measures:ArrayCollection = findItems(fields, AnalysisItemTypes.MEASURE);
-        if (measures.length > 0) {
-            measure = measures.getItemAt(0) as AnalysisItem;
-        }
+        this.measures = findItems(fields, AnalysisItemTypes.MEASURE);
         var dimensions:ArrayCollection = findItems(fields, AnalysisItemTypes.DIMENSION);
         if (dimensions.length > 0) {
             xaxis = dimensions.getItemAt(0) as AnalysisItem;
@@ -34,7 +28,12 @@ public class XAxisDefinition extends ChartDefinition{
     }
 
     override public function getFields():ArrayCollection {
-        return new ArrayCollection([ xaxis, measure]);
+        var fields:Array = [];
+        fields.push(xaxis);
+        for each (var measure:AnalysisMeasure in measures) {
+            fields.push(measure);
+        }
+        return new ArrayCollection(fields);
     }
 }
 }

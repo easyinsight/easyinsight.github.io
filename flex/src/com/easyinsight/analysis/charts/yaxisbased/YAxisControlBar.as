@@ -3,6 +3,7 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.DimensionDropArea;
@@ -40,7 +41,7 @@ public class YAxisControlBar extends ReportControlBar implements IReportControlB
         yAxisGrouping.dropAreaType = DimensionDropArea;
         yAxisGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         measureGrouping = new ListDropAreaGrouping();
-        measureGrouping.maxElements = 1;
+        measureGrouping.unlimited = true;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
@@ -69,8 +70,10 @@ public class YAxisControlBar extends ReportControlBar implements IReportControlB
          if (yAxisDefinition.yaxis != null) {
             yAxisGrouping.addAnalysisItem(yAxisDefinition.yaxis);
         }
-        if (yAxisDefinition.measure != null) {
-            measureGrouping.addAnalysisItem(yAxisDefinition.measure);
+        if (yAxisDefinition.measures != null) {
+            for each (var measure:AnalysisMeasure in yAxisDefinition.measures) {
+                measureGrouping.addAnalysisItem(measure);
+            }
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
@@ -125,7 +128,7 @@ public class YAxisControlBar extends ReportControlBar implements IReportControlB
 
     public function createAnalysisDefinition():AnalysisDefinition {
         yAxisDefinition.yaxis = yAxisGrouping.getListColumns()[0];
-        yAxisDefinition.measure = measureGrouping.getListColumns()[0];
+        yAxisDefinition.measures = new ArrayCollection(measureGrouping.getListColumns());
         return yAxisDefinition;
     }
 

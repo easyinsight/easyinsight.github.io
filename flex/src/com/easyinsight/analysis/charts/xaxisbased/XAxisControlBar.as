@@ -3,6 +3,7 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.DimensionDropArea;
@@ -20,7 +21,6 @@ import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
 import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;
@@ -40,7 +40,7 @@ public class XAxisControlBar extends ReportControlBar implements IReportControlB
         xAxisGrouping.dropAreaType = DimensionDropArea;
         xAxisGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         measureGrouping = new ListDropAreaGrouping();
-        measureGrouping.maxElements = 1;
+        measureGrouping.unlimited = true;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
@@ -69,8 +69,10 @@ public class XAxisControlBar extends ReportControlBar implements IReportControlB
          if (xAxisDefinition.xaxis != null) {
             xAxisGrouping.addAnalysisItem(xAxisDefinition.xaxis);
         }
-        if (xAxisDefinition.measure != null) {
-            measureGrouping.addAnalysisItem(xAxisDefinition.measure);
+        if (xAxisDefinition.measures != null) {
+            for each (var measure:AnalysisMeasure in xAxisDefinition.measures) {
+                measureGrouping.addAnalysisItem(measure);
+            }
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
@@ -125,7 +127,7 @@ public class XAxisControlBar extends ReportControlBar implements IReportControlB
 
     public function createAnalysisDefinition():AnalysisDefinition {
         xAxisDefinition.xaxis = xAxisGrouping.getListColumns()[0];
-        xAxisDefinition.measure = measureGrouping.getListColumns()[0];
+        xAxisDefinition.measures = new ArrayCollection(measureGrouping.getListColumns());
         return xAxisDefinition;
     }
 

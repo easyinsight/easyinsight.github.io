@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.charts.xaxisbased.pie {
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.charts.xaxisbased.*;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
@@ -70,8 +71,8 @@ public class PieControlBar extends ReportControlBar implements IReportControlBar
          if (xAxisDefinition.xaxis != null) {
             xAxisGrouping.addAnalysisItem(xAxisDefinition.xaxis);
         }
-        if (xAxisDefinition.measure != null) {
-            measureGrouping.addAnalysisItem(xAxisDefinition.measure);
+        if (xAxisDefinition.measures != null && xAxisDefinition.measures.length > 0) {
+            measureGrouping.addAnalysisItem(xAxisDefinition.measures.getItemAt(0) as AnalysisMeasure);
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
@@ -130,7 +131,7 @@ public class PieControlBar extends ReportControlBar implements IReportControlBar
 
     public function createAnalysisDefinition():AnalysisDefinition {
         xAxisDefinition.xaxis = xAxisGrouping.getListColumns()[0];
-        xAxisDefinition.measure = measureGrouping.getListColumns()[0];
+        xAxisDefinition.measures = new ArrayCollection(measureGrouping.getListColumns());
         return xAxisDefinition;
     }
 

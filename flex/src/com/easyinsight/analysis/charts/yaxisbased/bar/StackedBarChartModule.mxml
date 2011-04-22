@@ -225,9 +225,9 @@
                     } else if (barChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
                         sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.yaxis, true);
                     } else if (barChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measure, false);
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measures.getItemAt(0) as AnalysisItem, false);
                     } else if (barChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measure, true);
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(barChartDef.measures.getItemAt(0) as AnalysisItem, true);
                     }
                     dataSet.sort = sort;
                     dataSet.refresh();
@@ -248,7 +248,7 @@
                     var key:String = uniques.getItemAt(i) as String;
 
                     var uniqueLineSeries:BarSeries = new BarSeries();
-                    //uniqueLineSeries.fillFunction = customFill;
+                    uniqueLineSeries.setStyle("fill", FillProvider.getColor(barChartDef.colorScheme, bgFills, i, 90));
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
@@ -260,10 +260,10 @@
                 barSet.series = mySeries;
                 barChart.series = [ barSet ];
 
-                measureFormatter = barChartDef.measure.getFormatter();
+                measureFormatter = barChartDef.measures.getItemAt(0).getFormatter();
                 dimensionFormatter = barChartDef.yaxis.getFormatter();
 
-                var newXAxisItem:AnalysisItem = barChartDef.measure;
+                var newXAxisItem:AnalysisItem = barChartDef.measures.getItemAt(0) as AnalysisItem;
                 if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
                     xAxisItem = newXAxisItem;
                 }
@@ -293,7 +293,7 @@
 
                 barChart.dataProvider = dataObjs;
             } else {
-                if (barChartDef.measure != null && barChartDef.yaxis != null) stackIndex = 2;
+                if (barChartDef.measures != null && barChartDef.measures.length > 0 && barChartDef.yaxis != null) stackIndex = 2;
                 else stackIndex = 1;
                 if (barChart != null) {
                     barChart.dataProvider = new ArrayCollection();
@@ -325,9 +325,10 @@
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
     <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
     <mx:Canvas width="100%" height="100%" backgroundAlpha="1" backgroundColor="#FFFFFF">
+        <mx:HBox width="100%" height="100%" id="canvas"/>
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
                       mouseEnabled="false">
-            <mx:HBox width="100%" height="100%" id="canvas"/>
+            <mx:HBox width="100%" height="100%"/>
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
                     backgroundAlpha=".1">
                 <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"

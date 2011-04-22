@@ -35,6 +35,7 @@
         import mx.charts.CategoryAxis;
         import mx.charts.ChartItem;
         import mx.charts.ColumnChart;
+        import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
@@ -124,6 +125,10 @@
             dispatchEvent(event);
         }
 
+        private function formatDataTip(hd:HitData):String {
+            return "Blah";
+        }
+
         private function createChart():void {
             if (columnChart == null) {
 
@@ -134,7 +139,8 @@
                 columnChart.percentHeight = 100;
                 columnChart.percentWidth = 100;
                 columnChart.showDataTips = true;
-                columnChart.cacheAsBitmap = true;
+                //columnChart.cacheAsBitmap = true;
+                //columnChart.dataTipFunction = formatDataTip;
                 /*if (selectable) {
                  columnChart.selectionMode = "multiple";
                  }*/
@@ -216,9 +222,9 @@
                     } else if (columnChartDef.columnSort == ChartDefinition.SORT_X_DESCENDING) {
                         sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.xaxis, true);
                     } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_ASCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, false);
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measures.getItemAt(0) as AnalysisItem, false);
                     } else if (columnChartDef.columnSort == ChartDefinition.SORT_Y_DESCENDING) {
-                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measure, true);
+                        sort.compareFunction = SortFunctionFactory.createSortFunction(columnChartDef.measures.getItemAt(0) as AnalysisItem, true);
                     }
                     dataSet.sort = sort;
                     dataSet.refresh();
@@ -239,14 +245,13 @@
                     var key:String = uniques.getItemAt(i) as String;
 
                     var uniqueLineSeries:ColumnSeries = new ColumnSeries();
-                    //uniqueLineSeries.fillFunction = customFill;
+                    uniqueLineSeries.setStyle("fill", FillProvider.getColor(columnChartDef.colorScheme, bgFills, i));
                     //uniqueLineSeries.xField = columnChartDef.xaxis.qualifiedName();
                     if (key == null || key == "") {
                         key = "[ No Value ]";
                     }
                     uniqueLineSeries.yField = key;
                     uniqueLineSeries.displayName = key;
-                    //uniqueLineSeries.dataProvider = seriesData[key];
                     mySeries.push(uniqueLineSeries);
                 }
 
@@ -256,7 +261,7 @@
                 columnChart.setStyle("fontFamily", columnChartDef.fontName);
                 columnChart.setStyle("fontSize", columnChartDef.fontSize);
 
-                measureFormatter = columnChartDef.measure.getFormatter();
+                measureFormatter = columnChartDef.measures.getItemAt(0).getFormatter();
                 dimensionFormatter = columnChartDef.xaxis.getFormatter();
 
                 var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
@@ -264,7 +269,7 @@
                     xAxisItem = newXAxisItem;
                 }
 
-                var newYAxisItem:AnalysisItem = columnChartDef.measure;
+                var newYAxisItem:AnalysisItem = columnChartDef.measures.getItemAt(0) as AnalysisItem;
                 if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
                     yAxisItem = newYAxisItem;
                 }
@@ -300,7 +305,7 @@
                 //columnSeries.dataProvider = dataSet;
                 //xAxis.dataProvider = dataSet;
             } else {
-                if (columnChartDef.measure != null && columnChartDef.xaxis != null) stackIndex = 2;
+                if (columnChartDef.measures != null && columnChartDef.measures.length > 0 && columnChartDef.xaxis != null) stackIndex = 2;
                 else stackIndex = 1;
                 if (columnChart != null) {
                     columnChart.dataProvider = new ArrayCollection();
@@ -331,9 +336,12 @@
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
     <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
     <mx:Canvas width="100%" height="100%" backgroundAlpha="1" backgroundColor="#FFFFFF">
+        <mx:HBox width="100%" height="100%" id="canvas">
+
+        </mx:HBox>
         <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}" creationPolicy="all" mouseChildren="false"
                       mouseEnabled="false">
-            <mx:HBox width="100%" height="100%" id="canvas"/>
+            <mx:HBox width="100%" height="100%"/>
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000"
                     backgroundAlpha=".1">
                 <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center"

@@ -72,7 +72,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
                 dimensionValue = "(No Value)";
             }
             newObject[yaxis.qualifiedName()] = xVal;
-            newObject[dimensionValue] = object[measure.qualifiedName()];
+            newObject[dimensionValue] = object[measures.getItemAt(0).qualifiedName()];
             if (!uniques.contains(dimensionValue)) {
                 uniques.addItem(dimensionValue);
             }
