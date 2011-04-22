@@ -214,17 +214,19 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
-        int time = insightRequestMetadata.getUtcOffset() / 60;
-        String string;
-        if (time > 0) {
-            string = "GMT-"+time;
-        } else if (time < 0) {
-            string = "GMT+"+time;
-        } else {
-            string = "GMT";
+        if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
+            int time = insightRequestMetadata.getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+time;
+            } else if (time < 0) {
+                string = "GMT+"+time;
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
+            cal.setTimeZone(timeZone);
         }
-        TimeZone timeZone = TimeZone.getTimeZone(string);
-        cal.setTimeZone(timeZone);
         switch (interval) {
             case DAY_TO_NOW:
             case WEEK_TO_NOW:
