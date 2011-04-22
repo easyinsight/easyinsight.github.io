@@ -9,7 +9,6 @@ public class FillProvider {
 
     public static const linearGradients:String = "Linear Gradients";
     public static const radialGradients:String = "Radial Gradients";
-    public static const solidColors:String = "Solid Colors";
     public static const highContrast:String = "High Contrast";
     public static const ocean:String = "Ocean";
 
@@ -18,17 +17,35 @@ public class FillProvider {
     public function FillProvider() {
     }
 
-    public static function getColor(scheme:String, defaults:Array, index:int):IFill {
+    public static function getColors(scheme:String, defaults:Array, angle:int = 0):Array {
         var array:Array;
         if (scheme == FillProvider.highContrast) {
             array = FillProvider.createSAPColors();
         } else if (scheme == FillProvider.linearGradients) {
-            array = FillProvider.createLinearGradients();
+            array = FillProvider.createLinearGradients(angle);
         } else if (scheme == FillProvider.radialGradients) {
             array = FillProvider.createRadialGradients();
         } else {
             if (defaults == null) {
-                array = FillProvider.createLinearGradients();
+                array = FillProvider.createLinearGradients(angle);
+            } else {
+                array = defaults;
+            }
+        }
+        return array;
+    }
+
+    public static function getColor(scheme:String, defaults:Array, index:int, angle:int = 0):IFill {
+        var array:Array;
+        if (scheme == FillProvider.highContrast) {
+            array = FillProvider.createSAPColors();
+        } else if (scheme == FillProvider.linearGradients) {
+            array = FillProvider.createLinearGradients(angle);
+        } else if (scheme == FillProvider.radialGradients) {
+            array = FillProvider.createRadialGradients();
+        } else {
+            if (defaults == null) {
+                array = FillProvider.createLinearGradients(angle);
             } else {
                 array = defaults;
             }
@@ -47,12 +64,12 @@ public class FillProvider {
         ];
     }
 
-    public static function createLinearGradients():Array {
-        return [ lg(0xf9fbf5, 0xa6bc59), lg(0xf1f3f7, 0x597197), lg(0xf9f3e0, 0xd6ab2a),
-        lg(0xfcf3ef, 0xd86068), lg(0xe9f1e5, 0x5d9942), lg(0xd4c5cd, 0x7a4c6c),
+    public static function createLinearGradients(angle:int):Array {
+        return [ lg(0xf9fbf5, 0xa6bc59, angle), lg(0xf1f3f7, 0x597197, angle), lg(0xf9f3e0, 0xd6ab2a, angle),
+        lg(0xfcf3ef, 0xd86068, angle), lg(0xe9f1e5, 0x5d9942, angle), lg(0xd4c5cd, 0x7a4c6c, angle),
 
-        lg(0xffffff, 0xF0B400), lg(0xffffff, 0x1E6C0B), lg(0xffffff, 0x00488C),
-        lg(0xffffff, 0x332600), lg(0xffffff, 0xD84000), lg(0xffffff, 0x846D74)];
+        lg(0xffffff, 0xF0B400, angle), lg(0xffffff, 0x1E6C0B, angle), lg(0xffffff, 0x00488C, angle),
+        lg(0xffffff, 0x332600, angle), lg(0xffffff, 0xD84000, angle), lg(0xffffff, 0x846D74, angle)];
     }
 
     public static function createRadialGradients():Array {
@@ -71,8 +88,9 @@ public class FillProvider {
         ];
     }
 
-    private static function lg(startColor:uint, endColor:uint):LinearGradient {
+    private static function lg(startColor:uint, endColor:uint, angle:int = 0):LinearGradient {
         var gradient:LinearGradient = new LinearGradient();
+        gradient.angle = angle;
         var entry1:GradientEntry = new GradientEntry(endColor, 0.0);
         var entry2:GradientEntry = new GradientEntry(startColor, 0.15);
         var entry3:GradientEntry = new GradientEntry(endColor, .5);
@@ -84,6 +102,7 @@ public class FillProvider {
 
     private static function cg(startColor:uint, endColor:uint):IFill {
         var gradient:RadialGradient = new RadialGradient();
+        gradient.angle = 90;
         var entry1:GradientEntry = new GradientEntry(startColor, 0.0);
         var entry2:GradientEntry = new GradientEntry(endColor, .3);
         var entry3:GradientEntry = new GradientEntry(endColor, .7);
