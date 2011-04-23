@@ -150,7 +150,7 @@
     <div id="contentHeaderStart">
     </div>
         <div id="midContent">
-            <div style="height:1300px;padding-left:30px">
+            <div style="height:1500px;padding-left:30px">
                 <table class="featureTable">
                     <tr style="font-size:18px">
                         <td class="firstOptionCell" style="width:300px;border: 1px solid #FF0000"></td>
@@ -284,7 +284,28 @@
                     </tr>
 
                     <tr>
+                        <td class="firstCell">Amazon Web Services</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
                         <td class="firstCell">Basecamp</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Batchbook</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">ClearDB</td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
@@ -305,7 +326,7 @@
                         <td><img src="/images/check.png"/></td>
                     </tr>
                     <tr>
-                        <td class="firstCell">Freshbooks</td>
+                        <td class="firstCell">FreshBooks</td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
@@ -313,6 +334,13 @@
                     </tr>
                     <tr>
                         <td class="firstCell">Google Analytics</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Harvest</td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
@@ -336,6 +364,13 @@
                     </tr>
                     <tr>
                         <td class="firstCell">SendGrid</td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                        <td><img src="/images/check.png"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstCell">Zendesk</td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
                         <td><img src="/images/check.png"/></td>
