@@ -32,6 +32,7 @@ import java.util.Date;
 import java.sql.*;
 
 import com.easyinsight.util.ServiceUtil;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 /**
@@ -462,7 +463,14 @@ public class UserUploadService {
             int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
             if (role <= Roles.SHARER) {
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
-                feedDefinition.delete(conn);
+                try {
+                    feedDefinition.delete(conn);
+                } catch (HibernateException e) {
+                    LogClass.error(e);
+                    PreparedStatement manualDeleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                    manualDeleteStmt.setLong(1, dataFeedID);
+                    manualDeleteStmt.executeUpdate();
+                }
             } else if (role == Roles.SUBSCRIBER) {
             } else {
                 throw new SecurityException();

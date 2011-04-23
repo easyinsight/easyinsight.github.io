@@ -20,6 +20,15 @@ public class InsightRequestMetadata implements Serializable {
     private boolean aggregateQuery = true;
     private boolean gmtData;
     private List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
+    private boolean suppressShifts;
+
+    public boolean isSuppressShifts() {
+        return suppressShifts;
+    }
+
+    public void setSuppressShifts(boolean suppressShifts) {
+        this.suppressShifts = suppressShifts;
+    }
 
     public List<JoinOverride> getJoinOverrides() {
         return joinOverrides;

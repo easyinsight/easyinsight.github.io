@@ -267,7 +267,9 @@ public class ExportService {
             if (drillThroughFilters != null) {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
-            ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, new InsightRequestMetadata());
+            InsightRequestMetadata insightRequestMetadata =new InsightRequestMetadata();
+            insightRequestMetadata.setSuppressShifts(true);
+            ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
             return toCSV(analysisDefinition, listDataResults);
         } catch (Exception e) {
             LogClass.error(e);
@@ -285,6 +287,7 @@ public class ExportService {
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
+            insightRequestMetadata.setSuppressShifts(true);
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                 analysisDefinition.updateMetadata();
@@ -469,6 +472,7 @@ public class ExportService {
         if (analysisDefinition.getAnalysisID() > 0) SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
+            insightRequestMetadata.setSuppressShifts(true);
             analysisDefinition.updateMetadata();
             ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
             return toExcel(analysisDefinition, listDataResults);
@@ -835,6 +839,7 @@ public class ExportService {
 
     public static String exportScorecard(long scorecardID, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws Exception {
         SecurityUtil.authorizeScorecard(scorecardID);
+        insightRequestMetadata.setSuppressShifts(true);
         Scorecard scorecard = new ScorecardStorage().getScorecard(scorecardID, conn);
         List<KPIOutcome> outcomes = new ScorecardService().getValues(scorecard.getKpis(), conn, insightRequestMetadata);
         for (KPI kpi : scorecard.getKpis()) {

@@ -216,6 +216,10 @@ public class FilterValueDefinition extends FilterDefinition {
             for (Value value : valueSet) {
                 preparedStatement.setString(start++, value.toString());
             }
+        } else {
+            for (Value value : valueSet) {
+                preparedStatement.setString(start++, value.toString());
+            }
         }
         return start;
     }

@@ -262,26 +262,26 @@ public class CompositeFeed extends Feed {
                             queryStateNode.addKey(join);
                         }
                         for (AnalysisItem sourceItem : localEdge.connection.getSourceItems()) {
-                            queryStateNode.addItem(sourceItem);
+                            queryStateNode.addJoinItem(sourceItem);
                         }
                         for (Key join : localEdge.connection.getTargetJoins()) {
                             targetNode.addKey(join);
                         }
                         for (AnalysisItem sourceItem : localEdge.connection.getTargetItems()) {
-                            targetNode.addItem(sourceItem);
+                            targetNode.addJoinItem(sourceItem);
                         }
                     } else {
                         for (Key join : localEdge.connection.getTargetJoins()) {
                             queryStateNode.addKey(join);
                         }
                         for (AnalysisItem sourceItem : localEdge.connection.getTargetItems()) {
-                            queryStateNode.addItem(sourceItem);
+                            queryStateNode.addJoinItem(sourceItem);
                         }
                         for (Key join : localEdge.connection.getSourceJoins()) {
                             targetNode.addKey(join);
                         }
                         for (AnalysisItem sourceItem : localEdge.connection.getSourceItems()) {
-                            targetNode.addItem(sourceItem);
+                            targetNode.addJoinItem(sourceItem);
                         }
                     }
                 }
@@ -404,6 +404,12 @@ public class CompositeFeed extends Feed {
         }
 
         public void addJoinItem(AnalysisItem analysisItem) {
+            for (AnalysisItem field : getFields()) {
+                if (analysisItem.toDisplay().equals(field.toDisplay())) {
+                    analysisItem = field;
+                    break;
+                }
+            }
             addItem(analysisItem);
             joinItems.add(analysisItem);
             //neededKeys.add(analysisItem.getKey());

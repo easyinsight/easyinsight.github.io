@@ -41,6 +41,10 @@ public class AltCompositeReportPipeline extends Pipeline {
         }
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, true));
         for (AnalysisItem item : joinItems) {
+            for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, joinItems)) {
+                AnalysisList analysisList = (AnalysisList) tag;
+                if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
+            }
             components.add(new DateTransformComponent(item));
         }
         return components;

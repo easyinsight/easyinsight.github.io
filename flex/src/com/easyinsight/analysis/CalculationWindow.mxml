@@ -322,12 +322,12 @@
                 <mx:Grid horizontalGap="0">
                     <mx:GridRow>
                         <mx:GridItem borderStyle="solid" borderThickness="1">
-                            <mx:Label text="{example1}"/>
+                            <mx:Text text="{example1}" selectable="true"/>
                         </mx:GridItem>
                     </mx:GridRow>
                     <mx:GridRow>
                         <mx:GridItem borderStyle="solid" borderThickness="1">
-                            <mx:Label text="{example2}"/>
+                            <mx:Text text="{example2}" selectable="true"/>
                         </mx:GridItem>
                     </mx:GridRow>
                 </mx:Grid>

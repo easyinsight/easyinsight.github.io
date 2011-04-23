@@ -355,6 +355,8 @@ public class DataStorage {
             }
         }
 
+        System.out.println("*** ACTUALLY MIGRATING");
+
         if (newFieldsFound || !fieldMigrations.isEmpty()) {
             int previousVersion = metadata.getVersion();
             this.version = previousVersion + 1;
@@ -681,7 +683,7 @@ public class DataStorage {
     private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, Collection<Key> groupByItems, boolean aggregateQuery) {
         for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.isDerived()) {
-                throw new RuntimeException("Attempt made to query a derived analysis item");
+                throw new RuntimeException("Attempt made to query derived analysis item " + analysisItem.toDisplay() + " of class " + analysisItem.getClass().getName());
             }
             String columnName = analysisItem.toKeySQL();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {

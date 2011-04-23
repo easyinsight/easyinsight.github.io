@@ -215,7 +215,12 @@ public class CompositeFeedConnection implements Serializable {
                 }
             }
         } else {
-            myJoinDimension = sourceItem.createAggregateKey();
+            for (AnalysisItem item : sourceFields) {
+                if (item.getKey().toKeyString().equals(sourceItem.getKey().toKeyString())) {
+                    myJoinDimension = item.createAggregateKey();
+                }
+            }
+            //myJoinDimension = sourceItem.createAggregateKey();
         }
         Key fromJoinDimension = null;
         if (targetItem == null) {
@@ -225,7 +230,11 @@ public class CompositeFeedConnection implements Serializable {
                 }
             }
         } else {
-            fromJoinDimension = targetItem.createAggregateKey();
+            for (AnalysisItem item : targetFields) {
+                if (item.getKey().toKeyString().equals(targetItem.getKey().toKeyString())) {
+                    fromJoinDimension = item.createAggregateKey();
+                }
+            }
         }
         if (myJoinDimension == null) {
             System.out.println("Couldn't find " + getSourceJoin().toKeyString() + " on " + sourceName);

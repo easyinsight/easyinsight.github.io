@@ -110,6 +110,13 @@
             UIComponent(editor).addEventListener(FlexEvent.UPDATE_COMPLETE, onEvent);
             Container(editor).label = "Item";
             tabNavigator.addChildAt(editor as DisplayObject, 0);
+            if (_analysisItem != null) {
+                if (_analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    tabNavigator.removeChild(linksBox);
+                } else {
+                    tabNavigator.removeChild(filtersBox);
+                }
+            }
         }
 
         private var lastTab:int = 0;
@@ -127,11 +134,12 @@
 
         private function onSaveComplete(event:AnalysisItemSaveEvent):void {
             if (event.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                event.analysisItem.filters = transformContainer.getFilterDefinitions();
                 event.analysisItem.links = new ArrayCollection();
             } else {
+                event.analysisItem.filters = new ArrayCollection();
                 event.analysisItem.links = links;
             }
-            event.analysisItem.filters = transformContainer.getFilterDefinitions();
             dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, _originalWrapper, true));
             editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
             PopUpManager.removePopUp(this);
@@ -173,7 +181,7 @@
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" id="primaryBox">
         <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120" id="tabNavigator">
             <mx:VBox label="Links" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                 paddingTop="5" horizontalAlign="center" width="550" height="300" updateComplete="onEvent(event)">
+                 paddingTop="5" horizontalAlign="center" width="550" height="300" updateComplete="onEvent(event)" id="linksBox">
                 <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
                                        borderStyle="none" fontSize="14"
                                        text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs), as well as links to external URLs."/>
@@ -197,7 +205,7 @@
                 </mx:ViewStack>
             </mx:VBox>
             <mx:VBox label="Filters" width="650" height="300" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                     paddingTop="5" horizontalAlign="center" updateComplete="onEvent(event)">
+                     paddingTop="5" horizontalAlign="center" updateComplete="onEvent(event)" id="filtersBox">
                 <util:AutoSizeTextArea width="515" editable="false" selectable="false" backgroundAlpha="0"
                                        borderStyle="none" fontSize="14"
                                        text="You can define filters at the column level by dragging fields from the left hand list into the drop area below. Any filters you define here will only be applied to this column."/>
