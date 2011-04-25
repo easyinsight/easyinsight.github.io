@@ -66,7 +66,7 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
             } else {
                 target = "/recordings.xml?since=" + dateString + "&n=" + (25 * page);
             }
-            Document recordingsDoc = runRestRequest(target, client, builder, url, true, true, parentDefinition);
+            Document recordingsDoc = runRestRequest(target, client, builder, url, true, false, parentDefinition);
             Nodes recordingNodes = recordingsDoc.query("/recordings/recording");
             count = recordingNodes.size();
             for (int i = 0; i < recordingNodes.size(); i++) {
@@ -96,6 +96,15 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
                         dealNotes.add(recording);
                     } else if ("Kase".equals(subjectType)) {
                         caseNotes.add(recording);
+                    }
+                    String collectionType = queryField(recordingNode, "collection-type/text()");
+                    String collectionID = queryField(recordingNode, "collection-id/text()");
+                    if (collectionType != null) {
+                        if ("Kase".equals(collectionType) && !"Kase".equals(subjectType)) {
+                            caseNotes.add(new Recording(body, createdAt, updatedAt, collectionID, id, author));
+                        } else if ("Deal".equals(collectionType) && !"Deal".equals(subjectType)) {
+                            dealNotes.add(new Recording(body, createdAt, updatedAt, collectionID, id, author));
+                        }
                     }
                 } else if ("Email".equals(type)) {
                     String authorID = queryField(recordingNode, "author-id/text()");
