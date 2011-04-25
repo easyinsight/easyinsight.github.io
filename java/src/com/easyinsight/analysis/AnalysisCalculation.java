@@ -73,11 +73,10 @@ public class AnalysisCalculation extends AnalysisMeasure {
             tree = (CalculationTreeNode) ret.getTree();
             visitor = new ResolverVisitor(allItems, new FunctionFactory());
             tree.accept(visitor);
-        } catch (RecognitionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        } catch (FunctionException fe) {
+        }  catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
         }
 
         VariableListVisitor variableVisitor = new VariableListVisitor();

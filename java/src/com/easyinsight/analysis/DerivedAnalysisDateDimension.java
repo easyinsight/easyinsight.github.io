@@ -5,10 +5,8 @@ import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
-import com.easyinsight.logging.LogClass;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -58,9 +56,10 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             tree = (CalculationTreeNode) ret.getTree();
             visitor = new ResolverVisitor(allItems, new FunctionFactory());
             tree.accept(visitor);
-        } catch (RecognitionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        } catch (FunctionException fe) {
+            throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
         }
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
@@ -86,26 +85,6 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         }
 
         return analysisItemList;
-    }
-
-    private CalculationTreeNode evalString(String s) {
-        CalculationTreeNode calculationTreeNode;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        try {
-            ret = parser.expr();
-            calculationTreeNode = (CalculationTreeNode) ret.getTree();
-            //visitor = new ResolverVisitor(r, new FunctionFactory());
-            //calculationTreeNode.accept(visitor);
-        } catch (RecognitionException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-        return calculationTreeNode;
     }
 
     public Value calculate(IRow row, Collection<AnalysisItem> analysisItems) {
@@ -136,11 +115,10 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
             calculationTreeNode.accept(rowVisitor);
             return rowVisitor.getResult();
-        } catch (RecognitionException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + toDisplay() + ".", this));
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage() + " in calculating " + derivationCode, e);
         }
     }
 

@@ -73,7 +73,12 @@ public abstract class WSXAxisDefinition extends WSChartDefinition {
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
-        Set<AnalysisItem> columnList = new HashSet<AnalysisItem>(measures);
+        Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
+        if (measures != null) {
+            for (AnalysisItem analysisItem : measures) {
+                columnList.add(analysisItem);
+            }
+        }
         columnList.add(xaxis);
         return columnList;
     }

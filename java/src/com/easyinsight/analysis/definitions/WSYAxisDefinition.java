@@ -53,7 +53,12 @@ public abstract class WSYAxisDefinition extends WSChartDefinition {
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
-        Set<AnalysisItem> columnList = new HashSet<AnalysisItem>(measures);
+        Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
+        if (measures != null) {
+            for (AnalysisItem measure : measures) {
+                columnList.add(measure);
+            }
+        }
         columnList.add(yaxis);
         return columnList;
     }
