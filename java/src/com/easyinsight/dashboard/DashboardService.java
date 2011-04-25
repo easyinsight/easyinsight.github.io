@@ -60,7 +60,7 @@ public class DashboardService {
             updateStmt.setBoolean(1, false);
             updateStmt.setLong(2, dashboardID);
             updateStmt.executeUpdate();
-            if (sourceDashboardID > 0) {
+            try {
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_DASHBOARD_INSTALL_ID FROM EXCHANGE_DASHBOARD_INSTALL WHERE USER_ID = ? AND " +
                         "dashboard_id = ?");
                 queryStmt.setLong(1, SecurityUtil.getUserID());
@@ -79,6 +79,8 @@ public class DashboardService {
                     insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
                     insertStmt.execute();
                 }
+            } catch (SQLException e) {
+                LogClass.error("Error updating exchange info for dashboard " + sourceDashboardID, e);
             }
             conn.commit();
         } catch (Exception e) {
