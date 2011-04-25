@@ -170,10 +170,10 @@
             chart.setStyle("fontFamily", chartDef.fontName);
             chart.setStyle("fontSize", chartDef.fontSize);
 
-            var style:CSSStyleDeclaration = new CSSStyleDeclaration(".chartAxis");
+            /*var style:CSSStyleDeclaration = new CSSStyleDeclaration(".chartAxis");
             style.setStyle("fontFamily", chartDef.fontName);
             style.setStyle("fontSize", chartDef.fontSize);
-            StyleManager.setStyleDeclaration(".chartAxis", style, true);
+            StyleManager.setStyleDeclaration(".chartAxis", style, true);*/
 
             chart.setStyle("axisTitleStyleName", "chartAxis");
         }
