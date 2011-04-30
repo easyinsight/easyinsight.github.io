@@ -9,6 +9,7 @@ import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.pipeline.CleanupComponent;
+import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.SecurityUtil;
 
 
@@ -165,7 +166,7 @@ public class Dashboard implements Cloneable {
         }
     }
 
-    public Dashboard cloneDashboard(Map<Long, AnalysisDefinition> reportReplacementMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource) throws CloneNotSupportedException {
+    public Dashboard cloneDashboard(Map<Long, AnalysisDefinition> reportReplacementMap, Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource) throws CloneNotSupportedException {
         Dashboard dashboard = this.clone();
         dashboard.setTemporary(true);
         dashboard.setAuthorName(SecurityUtil.getUserName());
@@ -204,6 +205,11 @@ public class Dashboard implements Cloneable {
 
         dashboard.setFilters(filterDefinitions);
         dashboard.getRootElement().updateReportIDs(reportReplacementMap);
+        dashboard.getRootElement().updateScorecardIDs(scorecardReplacmenetMap);
         return dashboard;
+    }
+
+    public Set<Long> containedScorecards() {
+        return rootElement.containedScorecards();
     }
 }

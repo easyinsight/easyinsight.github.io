@@ -165,11 +165,10 @@ public class AnalysisCalculation extends AnalysisMeasure {
             } else {
                 return new NumericValue(result.toDouble());
             }
-        } catch (RecognitionException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } catch (FunctionException fe) {
             throw new ReportException(new AnalysisItemFault(fe.getMessage(), this));
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage() + " in calculating " + calculationString, e);
         }
     }
 

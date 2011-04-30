@@ -3,6 +3,7 @@ package com.easyinsight.dashboard;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.scorecard.Scorecard;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -133,6 +134,22 @@ public class DashboardStack extends DashboardElement {
             reports.addAll(gridItem.getDashboardElement().containedReports());
         }
         return reports;
+    }
+
+    @Override
+    public Set<Long> containedScorecards() {
+        Set<Long> reports = new HashSet<Long>();
+        for (DashboardStackItem gridItem : gridItems) {
+            reports.addAll(gridItem.getDashboardElement().containedScorecards());
+        }
+        return reports;
+    }
+
+    @Override
+    public void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap) {
+        for (DashboardStackItem gridItem : gridItems) {
+            gridItem.getDashboardElement().updateScorecardIDs(scorecardReplacementMap);
+        }
     }
 
     @Override

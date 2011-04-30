@@ -3,6 +3,7 @@ package com.easyinsight.dashboard;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.scorecard.Scorecard;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -52,4 +53,7 @@ public abstract class DashboardElement implements Cloneable {
 
     public abstract Set<Long> containedReports();
     public abstract void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap);
+
+    public abstract Set<Long> containedScorecards();
+    public abstract void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap);
 }

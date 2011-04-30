@@ -3,6 +3,7 @@ package com.easyinsight.dashboard;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.preferences.ImageDescriptor;
+import com.easyinsight.scorecard.Scorecard;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,6 +47,15 @@ public class DashboardImage extends DashboardElement {
     @Override
     public Set<Long> containedReports() {
         return new HashSet<Long>();
+    }
+
+    @Override
+    public Set<Long> containedScorecards() {
+        return new HashSet<Long>();
+    }
+
+    @Override
+    public void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap) {
     }
 
     @Override

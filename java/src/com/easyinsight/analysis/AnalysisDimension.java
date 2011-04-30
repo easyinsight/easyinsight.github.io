@@ -1,9 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Key;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.StringValue;
+import com.easyinsight.core.*;
 
 import javax.persistence.*;
 import java.util.List;
@@ -65,11 +62,6 @@ public class AnalysisDimension extends AnalysisItem {
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything, boolean includeFilters, boolean completelyShallow, int criteria) {
         List<AnalysisItem> analysisItems = super.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, completelyShallow, criteria);
-        /*if (getVirtualDimension() != null) {
-            analysisItems.add(getVirtualDimension().getBaseDimension());
-        } else {
-            analysisItems.add(this);
-        }*/
         if (keyDimension != null) {
             analysisItems.add(keyDimension);
         }
@@ -81,7 +73,9 @@ public class AnalysisDimension extends AnalysisItem {
     }
 
     public AnalysisItemResultMetadata createResultMetadata() {
-        return new AnalysisDimensionResultMetadata();
+        AnalysisDimensionResultMetadata metadata = new AnalysisDimensionResultMetadata();
+        metadata.addValue(this, new EmptyValue(), null);
+        return metadata;
     }
 
     public AnalysisDimension(Key key, boolean group) {

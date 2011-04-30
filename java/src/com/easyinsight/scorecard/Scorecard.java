@@ -1,5 +1,7 @@
 package com.easyinsight.scorecard;
 
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.kpi.KPI;
 
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ import java.util.List;
  * Date: Jan 18, 2010
  * Time: 2:29:00 PM
  */
-public class Scorecard {
+public class Scorecard implements Cloneable {
     // need goals here...
 
     private List<KPI> kpis = new ArrayList<KPI>();
@@ -22,6 +24,18 @@ public class Scorecard {
     private String urlKey;
     private boolean accountVisible;
     private long dataSourceID;
+
+    public Scorecard clone(FeedDefinition target, List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        Scorecard scorecard = (Scorecard) super.clone();
+        scorecard.setScorecardID(0);
+        scorecard.setUrlKey(null);
+        List<KPI> clonedKPIs = new ArrayList<KPI>();
+        for (KPI kpi : kpis) {
+            clonedKPIs.add(kpi.clone(target, allFields, true));
+        }
+        scorecard.setKpis(clonedKPIs);
+        return scorecard;
+    }
 
     public long getDataSourceID() {
         return dataSourceID;

@@ -19,6 +19,36 @@
 
         private var _reportName:String;
 
+        private var _showToolbar:Boolean = true;
+
+        private var _showFilters:Boolean = true;
+
+        private var _insecureEmbed:Boolean;
+
+        [Bindable(event="showToolbarChanged")]
+        public function get showToolbar():Boolean {
+            return _showToolbar;
+        }
+
+        public function set showToolbar(value:Boolean):void {
+            if (_showToolbar == value) return;
+            _showToolbar = value;
+            dispatchEvent(new Event("showToolbarChanged"));
+            updateURL();
+        }
+
+        [Bindable(event="showFiltersChanged")]
+        public function get showFilters():Boolean {
+            return _showFilters;
+        }
+
+        public function set showFilters(value:Boolean):void {
+            if (_showFilters == value) return;
+            _showFilters = value;
+            dispatchEvent(new Event("showFiltersChanged"));
+            updateURL();
+        }
+
         [Bindable(event="reportWidthChanged")]
         public function get reportWidth():uint {
             return _reportWidth;
@@ -63,14 +93,23 @@
             updateURL();
         }
 
+
         private function updateURL():void {
-            url = "<iframe width=\""+_reportWidth+"\" height=\"" + _reportHeight +"\" src=\"https://www.easy-insight.com/app/embed.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&analysisID=" + _urlKey + "&reportType=" + _reportType + "&reportName=" + escape(_reportName) + "&dataSourceID=" + _dataSourceID + "\"></iframe>";
+            var str:String = "https://www.easy-insight.com/app/embed.jsp?width=" + _reportWidth + "&height=" + _reportHeight + "&analysisID=" +
+                    _urlKey + "&reportType=" + _reportType + "&reportName=" + escape(_reportName) + "&dataSourceID=" + _dataSourceID;
+            if (_showToolbar) {
+                str += "&showToolbar=1";
+            }
+            if (_showFilters) {
+                str += "&showFilters=1";
+            }
+            url = "<iframe width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" src=\""+ str + "\"></iframe>";
         }
 
         private function copyToClipboard():void {
             System.setClipboard(url);
         }
-		]]>
+        ]]>
 	</mx:Script>
 	<mx:VBox horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
@@ -79,6 +118,15 @@
             </mx:FormItem>
             <mx:FormItem label="Report Height:">
                 <mx:NumericStepper id="heightStepper" value="{reportHeight}" minimum="50" maximum="2400" change="reportHeight = heightStepper.value"/>
+            </mx:FormItem>
+            <mx:FormItem label="Show Tool Bar:">
+                <mx:CheckBox id="toolBarCheckbox" change="showToolbar = toolBarCheckbox.selected"/>
+            </mx:FormItem>
+            <mx:FormItem label="Show Filters:">
+                <mx:CheckBox id="filtersCheckbox" change="showFilters = filtersCheckbox.selected"/>
+            </mx:FormItem>
+            <mx:FormItem label="Publicly Visible Embed:">
+                <mx:CheckBox id="publiclyVislbeEmbed"/>
             </mx:FormItem>
         </mx:Form>
         <mx:Label text="You can paste this HTML into any web page to embed the report into the page." fontSize="14"/>

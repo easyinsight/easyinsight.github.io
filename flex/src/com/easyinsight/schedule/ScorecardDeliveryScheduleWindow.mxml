@@ -1,0 +1,298 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:schedule="com.easyinsight.schedule.*"
+                    creationComplete="setup()" title="Scorecard Email Delivery">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.analysis.PromptEvent;
+        import com.easyinsight.analysis.SavePromptWindow;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.UserAudit;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        [Bindable]
+        private var scorecards:ArrayCollection;
+
+        private var _activity:ScorecardDelivery;
+
+        [Bindable]
+        private var scorecardID:int;
+
+        private function setup():void {
+            addEventListener(RecipientEvent.DELETE_RECIPIENT, deleteRecipient);
+            if (_fixedScorecardName == null) {
+                scorecardService.getScorecardDescriptors.send();
+            }
+            shareService.getUserStubs.send(false);
+        }
+
+        private function deleteRecipient(event:RecipientEvent):void {
+            if (event.user != null) recipients.removeItemAt(recipients.getItemIndex(event.user));
+            else recipients.removeItemAt(recipients.getItemIndex(event.email));
+        }
+
+
+        [Bindable(event="activityChanged")]
+        public function get activity():ScheduledActivity {
+            return _activity;
+        }
+
+        public function set activity(value:ScheduledActivity):void {
+            if (_activity == value) return;
+            _activity = value as ScorecardDelivery;
+            dispatchEvent(new Event("activityChanged"));
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_activity != null) {
+                htmlEmail = _activity.htmlEmail;
+                for each (var user:UserStub in _activity.users) {
+                    recipients.addItem(user);
+                }
+                for each (var email:String in _activity.emails) {
+                    recipients.addItem(email);
+                }
+                scorecardID = _activity.scorecardID;
+                body = _activity.body;
+                subjectLine = _activity.subject;
+                fromUserID = _activity.senderID;
+                formatValue = String(_activity.deliveryFormat);
+            } else {
+                fromUserID = User.getInstance().userID;
+            }
+        }
+
+        private var newActivity:Boolean;
+
+        private function save():void {
+            var subjectResults:Array = Validator.validateAll([subjectValidator]);
+            if (subjectResults.length > 0) {
+                subjectInput.setFocus();
+                subjectInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return;
+            }
+            var users:ArrayCollection = new ArrayCollection();
+            var emails:ArrayCollection = new ArrayCollection();
+            for each (var obj:Object in recipients) {
+                if (obj is UserStub) {
+                    users.addItem(obj);
+                } else {
+                    emails.addItem(obj);
+                }
+            }
+            if (users.length == 0 && emails.length == 0) {
+                var window:SavePromptWindow = new SavePromptWindow();
+                window.prompt = "You must define at least one recipient.";
+                window.defineOption("Add Recipient", PromptEvent.PROMPT_SAVE);
+                window.defineOption("Cancel", PromptEvent.PROMPT_CANCEL);
+                window.addEventListener(PromptEvent.PROMPT_SAVE, function(event:PromptEvent):void {
+                    addRecipient();
+                }, false, 0, true);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+                return;
+            }
+            newActivity = _activity == null;
+            if (activity == null) {
+                activity = new ScorecardDelivery();
+            }
+            if (scheduleConfiguration.save()) {
+
+                _activity.users = users;
+                _activity.emails = emails;
+                _activity.deliveryFormat = int(outputFormatBox.selectedItem.data);
+
+                _activity.htmlEmail = htmlEmailCheckbox.selected;
+                if (_fixedScorecardID > 0) {
+                    _activity.scorecardID = _fixedScorecardID;
+                    _activity.scorecardName = _fixedScorecardName;
+                } else {
+                    _activity.scorecardName = reportComboBox.selectedItem.name;
+                    _activity.scorecardID = reportComboBox.selectedItem.id;
+                }
+                _activity.senderID = fromComboBox.selectedItem.userID;
+                _activity.body = bodyTextInput.text;
+                _activity.subject = subjectInput.text;
+                var utcOffset:int = new Date().getTimezoneOffset();
+                UserAudit.instance().audit(UserAudit.SET_UP_EMAIL);
+                ProgressAlert.alert(this, "Saving...", null, exportService.addOrUpdateSchedule);
+                exportService.addOrUpdateSchedule.send(_activity, utcOffset);
+            }
+        }
+
+        private function saved():void {
+            if (newActivity) {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.NEW_ACTIVITY, _activity));
+            } else {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.EDIT_ACTIVITY, _activity));
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var htmlEmail:Boolean = true;
+
+        private function insertReportLink():void {
+            var key:String;
+            if (_fixedScorecardURLKey != null) {
+                key = _fixedScorecardURLKey;
+            } else {
+                key = reportComboBox.selectedItem.urlKey;
+            }
+            var url:String = "<a href=\"https://www.easy-insight.com/app/#reportID=" + key + "\">View the Report in Easy Insight</a>";
+            bodyTextInput.insertTextAtCursor(url);
+        }
+
+        [Bindable]
+        private var recipients:ArrayCollection = new ArrayCollection();
+
+        private function gotReports():void {
+            scorecards = scorecardService.getScorecardDescriptors.lastResult as ArrayCollection;
+        }
+
+        private function addRecipient():void {
+            var window:RecipientWindow = new RecipientWindow();
+            window.addEventListener(RecipientEvent.ADD_RECIPIENT, onAddUser, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAddUser(event:RecipientEvent):void {
+            if (event.user != null) recipients.addItem(event.user);
+            else recipients.addItem(event.email);
+        }
+
+        private var _fixedScorecardID:int;
+
+        private var _fixedScorecardName:String;
+
+        private var _fixedScorecardURLKey:String;
+
+        protected override function createChildren():void {
+            super.createChildren();
+            if (_fixedScorecardID > 0) {
+                form.removeChild(reportComboBoxItem);
+            }
+        }
+
+        public function set fixedScorecardID(value:int):void {
+            _fixedScorecardID = value;
+        }
+
+        public function set fixedScorecardName(value:String):void {
+            _fixedScorecardName = value;
+        }
+
+        public function set fixedScorecardURLKey(value:String):void {
+            _fixedScorecardURLKey = value;
+        }
+
+        private function gotUserStubs():void {
+            var users:ArrayCollection = shareService.getUserStubs.lastResult as ArrayCollection;
+            var fakeUser:UserStub = new UserStub();
+            fakeUser.userID = 0;
+            fakeUser.firstName = null;
+            fakeUser.fullName = "reports@easy-insight.com";
+            users.addItemAt(fakeUser, 0);
+            this.users = users;
+        }
+
+        [Bindable]
+        private var users:ArrayCollection;
+
+        [Bindable]
+        private var fromUserID:int;
+
+        [Bindable]
+        private var body:String;
+
+        [Bindable]
+        private var subjectLine:String;
+
+        [Bindable]
+        private var formatValue:String;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="exportService" id="exportService">
+        <mx:method name="addOrUpdateSchedule" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="scorecardService" id="scorecardService">
+        <mx:method name="getScorecardDescriptors" result="gotReports()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="shareService" destination="share">
+		<mx:method name="getUserStubs" result="gotUserStubs()"/>
+	</mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        <mx:HBox>
+            <mx:VBox>
+                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" id="form">
+                    <mx:FormItem label="Report:" id="reportComboBoxItem">
+                        <util:SmartComboBox dataProvider="{scorecards}" selectedValue="{scorecardID}" selectedProperty="id"
+                                            id="reportComboBox" labelField="name"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Output Format:">
+                        <util:SmartComboBox id="outputFormatBox" selectedValue="{formatValue}" selectedProperty="data"
+                                            labelField="label">
+                            <util:dataProvider>
+                                <mx:ArrayCollection>
+                                    <mx:Array>
+                                        <mx:Object label="HTML Table" data="4"/>
+                                    </mx:Array>
+                                </mx:ArrayCollection>
+                            </util:dataProvider>
+                        </util:SmartComboBox>
+                    </mx:FormItem>
+
+                </mx:Form>
+                <schedule:ScheduleConfiguration activity="{activity}" id="scheduleConfiguration"/>
+                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                    <mx:FormItem label="Send From:">
+                        <util:SmartComboBox dataProvider="{users}" selectedValue="{fromUserID}" selectedProperty="userID" id="fromComboBox" labelField="displayName"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Recipients:">
+                        <mx:VBox>
+                            <mx:Button label="Add Recipient..." click="addRecipient()"/>
+                            <mx:DataGrid dataProvider="{recipients}" rowHeight="28">
+                                <mx:columns>
+                                    <util:EIDataGridColumn headerText="User" dataField="displayName" width="300"
+                                            itemRenderer="com.easyinsight.schedule.RecipientRenderer"/>
+                                    <util:EIDataGridColumn headerText="" dataField="displayName"
+                                                           itemRenderer="com.easyinsight.schedule.RecipientControls"
+                                                           width="50"
+                                                           sortable="false"/>
+                                </mx:columns>
+                            </mx:DataGrid>
+                        </mx:VBox>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Label text="How do you want to set up the scorecard email?"/>
+                <mx:HBox>
+                    <mx:CheckBox label="HTML Email" selected="{htmlEmail}" id="htmlEmailCheckbox"/>
+                    <mx:Button toolTip="Insert Scorecard Link" click="insertReportLink()"
+                               icon="@Embed(source='../../../../assets/link.png')"/>
+                </mx:HBox>
+                <mx:Form>
+                    <mx:FormItem label="Subject Line:">
+                        <mx:TextInput width="400" id="subjectInput" text="{subjectLine}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Email Body:">
+                        <schedule:CursorTextArea id="bodyTextInput" text="{body}" width="400" height="300"
+                                                 borderStyle="inset" borderThickness="1"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Save" click="save()"/>
+            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:StringValidator id="subjectValidator" source="{subjectInput}" property="text" minLength="1"/>
+</util:EITitleWindow>

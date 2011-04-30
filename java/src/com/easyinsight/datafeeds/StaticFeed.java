@@ -39,7 +39,6 @@ public class StaticFeed extends Feed implements Serializable {
             insightRequestMetadata.setGmtData(getDataSource().gmtTime());
             dataSet = source.retrieveData(analysisItems, filters, null, insightRequestMetadata);
         } catch (SQLException e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             source.closeConnection();

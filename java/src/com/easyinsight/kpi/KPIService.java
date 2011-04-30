@@ -31,7 +31,8 @@ public class KPIService {
     public KPI copyKPI(KPI sourceKPI) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            KPI kpi = sourceKPI.clone();
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(sourceKPI.getCoreFeedID(), conn);
+            KPI kpi = sourceKPI.clone(dataSource, dataSource.getFields(), false);
             kpi.setKpiOutcome(null);
             kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
             kpi.setName("Copy of " + kpi.getName());
@@ -100,26 +101,6 @@ public class KPIService {
             }
             conn.commit();
             return kpis;
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-    }
-
-    public KPI installKPIToConnection(long targetDataSourceID, long kpiID) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            KPI kpi = kpiStorage.getKPI(kpiID, conn);
-            KPI clonedKPI = kpi.clone();
-            clonedKPI.setCoreFeedID(targetDataSourceID);
-            kpiStorage.saveKPI(clonedKPI, conn);
-            conn.commit();
-            return clonedKPI;
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();

@@ -851,29 +851,40 @@ public class ExportService {
             }
         }
         StringBuilder sb = new StringBuilder();
-        String style = "style=\"font-size:12px;font-family:Verdana,serif;border-style:solid;border-width:1px;border-spacing:0\"";
+        String style = "style=\"width:100%;font-size:12px;font-family:\"Lucida Sans Unicode\", \"Lucida Grande\", Sans-Serif,serif;border-collapse:collapse;text-align:left\"";
         sb.append("<table " + style + ">");
-        sb.append("<tr style=\"background-color:#EEEEEE\">");
-        sb.append("<td>KPI Name</td>");
-        sb.append("<td>Latest Value</td>");
-        sb.append("<td>Time</td>");
-        sb.append("<td>% Change</td>");
+        sb.append("<thead>");
+        sb.append("<tr style=\"\">");
+        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\"></td>");
+        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\">KPI Name</td>");
+        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\">Latest Value</td>");
+        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\">Time</td>");
+        sb.append("<th style=\"font-size: 14px;font-weight: normal;padding: 10px 8px;color: #039\">% Change</td>");
         NumberFormat nf = NumberFormat.getNumberInstance();
         nf.setMaximumFractionDigits(2);
         sb.append("</tr>");
+        sb.append("</thead>");
+        int i = 1;
         for (KPI kpi : scorecard.getKpis()) {
             sb.append("<tr>");
-            sb.append("<td style=\"border-style:solid;border-width:1px\">");
+            String tdStyle = "padding: 8px;color: #669;";
+            if (i % 2 == 1) {
+                tdStyle += "background: #e8edff;";
+            }
+            sb.append("<td style=\""+tdStyle+"text-align:center\">");
+            sb.append("<img src=\"http://www.easy-insight.com/icons/16x16/"+kpi.getIconImage()+"\"/>");
+            sb.append("</td>");
+            sb.append("<td style=\""+tdStyle+"\">");
             sb.append(kpi.getName());
             sb.append("</td>");
-            sb.append("<td style=\"border-style:solid;border-width:1px\">");
+            sb.append("<td style=\""+tdStyle+"\">");
             sb.append(createValue(0, kpi.getAnalysisMeasure(), new NumericValue(kpi.getKpiOutcome().getOutcomeValue())));
             sb.append("</td>");
-            sb.append("<td style=\"border-style:solid;border-width:1px\";padding-left:6px>");
+            sb.append("<td style=\""+tdStyle+"\">");
             sb.append(kpi.getDayWindow());
             sb.append(" days");
             sb.append("</td>");
-            sb.append("<td style=\"border-style:solid;border-width:1px\">");
+            sb.append("<td style=\""+tdStyle+"\">");
             String percent;
             if (kpi.getKpiOutcome() != null) {
                 Double percentChange = kpi.getKpiOutcome().getPercentChange();
@@ -888,6 +899,7 @@ public class ExportService {
             sb.append(percent);
             sb.append("</td>");
             sb.append("</tr>");
+            i++;
         }
         sb.append("</table>");
         return sb.toString();

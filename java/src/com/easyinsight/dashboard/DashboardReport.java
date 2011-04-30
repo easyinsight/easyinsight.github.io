@@ -3,6 +3,7 @@ package com.easyinsight.dashboard;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.security.Roles;
 
 import java.sql.PreparedStatement;
@@ -69,6 +70,15 @@ public class DashboardReport extends DashboardElement {
         Set<Long> ids = new HashSet<Long>();
         ids.add(report.getId());
         return ids;
+    }
+
+    @Override
+    public Set<Long> containedScorecards() {
+        return new HashSet<Long>();
+    }
+
+    @Override
+    public void updateScorecardIDs(Map<Long, Scorecard> scorecardReplacementMap) {
     }
 
     @Override

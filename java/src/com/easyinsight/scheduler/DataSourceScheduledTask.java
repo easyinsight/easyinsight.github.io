@@ -77,6 +77,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
                                 DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
                             }
                         }
+                        ((FeedDefinition)dataSource).setLastRefreshStart(now);
                         feedStorage.updateDataFeedConfiguration((FeedDefinition) dataSource, conn);
                     } finally {
                         SecurityUtil.clearThreadLocal();

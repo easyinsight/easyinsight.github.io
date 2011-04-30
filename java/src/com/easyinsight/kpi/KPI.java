@@ -2,9 +2,13 @@ package com.easyinsight.kpi;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.Key;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.pipeline.CleanupComponent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -139,20 +143,70 @@ public class KPI implements Cloneable {
         this.temporary = temporary;
     }
 
-    public KPI clone() {
+    private void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
+        if (changingDataSource) {
+            // TODO: validate calculations and lookup tables--if necessary to create, should emit something with the report
+            analysisItem.setLookupTableID(null);
+        }
+    }
+
+    public KPI clone(FeedDefinition target, List<AnalysisItem> allFields, boolean changingDataSource) {
         try {
+            Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+            AnalysisItem clonedItem = getAnalysisMeasure().clone();
+            cleanup(clonedItem, changingDataSource);
+            replacementMap.put(getAnalysisMeasure().getAnalysisItemID(), clonedItem);
             KPI clonedKPI = (KPI) super.clone();
             clonedKPI.setKpiID(0);
             clonedKPI.setKpiOutcome(null);
-            List<FilterDefinition> copyFilters = new ArrayList<FilterDefinition>();
-            for (FilterDefinition filter : filters) {
-                //filter.beforeSave(session);
-                FilterDefinition clonedFilter = filter.clone();
-                clonedFilter.setField(clonedFilter.getField().clone());
-                copyFilters.add(clonedFilter);
+            clonedKPI.setCoreFeedID(target.getDataFeedID());
+            clonedKPI.setCoreFeedUrlKey(target.getApiKey());
+            clonedKPI.setCoreFeedName(target.getFeedName());
+            clonedKPI.setAnalysisMeasure((AnalysisMeasure) clonedItem);
+            List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
+            if (this.getFilters() != null) {
+                for (FilterDefinition persistableFilterDefinition : this.getFilters()) {
+                    filterDefinitions.add(persistableFilterDefinition.clone());
+                    List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, CleanupComponent.AGGREGATE_CALCULATIONS);
+                    for (AnalysisItem item : filterItems) {
+                        if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                            AnalysisItem clonedFilterItem = item.clone();
+                            cleanup(clonedFilterItem, changingDataSource);
+                            replacementMap.put(item.getAnalysisItemID(), clonedFilterItem);
+                        }
+                    }
+                }
             }
-            clonedKPI.setFilters(copyFilters);
-            clonedKPI.setAnalysisMeasure((AnalysisMeasure) getAnalysisMeasure().clone());
+            for (AnalysisItem analysisItem : replacementMap.values()) {
+                Key key = null;
+                AnalysisItem dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.toDisplay());
+                if (dataSourceItem != null) {
+                    key = dataSourceItem.getKey();
+                } else {
+                    if (analysisItem.getOriginalDisplayName() != null) {
+                        dataSourceItem = target.findAnalysisItemByDisplayName(analysisItem.getOriginalDisplayName());
+                    }
+                    if (dataSourceItem != null) {
+                        key = dataSourceItem.getKey();
+                    } else {
+                        dataSourceItem = target.findAnalysisItem(analysisItem.getKey().toKeyString());
+                        if (dataSourceItem != null) {
+                            key = dataSourceItem.getKey();
+                        }
+                    }
+                }
+                if (key != null) {
+                    analysisItem.setKey(key);
+                } else {
+                    Key clonedKey = analysisItem.getKey().clone();
+                    analysisItem.setKey(clonedKey);
+                }
+                analysisItem.updateIDs(replacementMap);
+            }
+            for (FilterDefinition filter : filterDefinitions) {
+                filter.updateIDs(replacementMap);
+            }
+            clonedKPI.setFilters(filterDefinitions);
             return clonedKPI;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);

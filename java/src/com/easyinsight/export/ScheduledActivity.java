@@ -102,6 +102,9 @@ public abstract class ScheduledActivity {
             case ScheduledActivity.REPORT_DELIVERY:
                 scheduledActivity = new ReportDelivery();
                 break;
+            case ScheduledActivity.SCORECARD_DELIVERY:
+                scheduledActivity = new ScorecardDelivery();
+                break;
             default:
                 throw new RuntimeException();
         }        

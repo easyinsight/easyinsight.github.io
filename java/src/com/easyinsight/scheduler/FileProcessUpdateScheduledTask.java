@@ -3,6 +3,7 @@ package com.easyinsight.scheduler;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.dataset.PersistableDataSetForm;
@@ -47,7 +48,7 @@ public class FileProcessUpdateScheduledTask {
     public void updateData(long feedID, boolean update, Connection conn, byte[] bytes) throws Exception {
         DataStorage metadata = null;
         try {
-            FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) UserUploadService.getFeedDefinition(feedID);
+            FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) new FeedStorage().getFeedDefinitionData(feedID, conn);
             /*if(background) {
                 AsyncRunningEvent ev = new AsyncRunningEvent();
                 ev.setTask(this);

@@ -445,12 +445,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     protected void addItems(String key, List<AnalysisItem> items, Map<String, AnalysisItem> structure) {
-        for (int i = 0; i < items.size(); i++) {
-            String compositeKey = key + "-" + i;
-            AnalysisItem analysisItem = items.get(i);
-            if (analysisItem != null) {
-                structure.put(compositeKey, analysisItem);
-                analysisItem.setItemPosition(i);
+        if (items != null) {
+            for (int i = 0; i < items.size(); i++) {
+                String compositeKey = key + "-" + i;
+                AnalysisItem analysisItem = items.get(i);
+                if (analysisItem != null) {
+                    structure.put(compositeKey, analysisItem);
+                    analysisItem.setItemPosition(i);
+                }
             }
         }
     }

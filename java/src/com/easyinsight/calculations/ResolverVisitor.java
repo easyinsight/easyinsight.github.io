@@ -79,6 +79,9 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
 
     public void visit(FunctionNode node) {
         node.resolveFunction(functionResolver);
+        if (node.getFunction() == null) {
+            throw new FunctionException("We couldn't resolve function " + node.getChild(0).getText().trim() + ".");
+        }
         if(node.getFunction() instanceof CastFunction) {
             CastFunction f = (CastFunction) node.getFunction();
             if(node.getChildCount() != 2 || !(node.getChild(1) instanceof VariableNode)) {
@@ -91,7 +94,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
         else {
             int parameters = node.getFunction().getParameterCount();
             if (parameters != -1 && parameters != node.getChildCount() - 1) {
-                throw new FunctionException(node.getChild(0).toString() + " requires " + parameters + " parameters. ");
+                throw new FunctionException(node.getChild(0).toString() + " requires " + parameters + " parameters.");
             }
             for(int i = 1;i < node.getChildCount();i++) {
                 ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(analysisItems, functionResolver));

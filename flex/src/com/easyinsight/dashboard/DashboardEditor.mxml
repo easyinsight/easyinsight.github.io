@@ -276,8 +276,8 @@
             <mx:Label text="Reports" fontSize="14"/>
             <mx:List id="reportsList" dataProvider="{availableReports}" labelField="name" dragEnabled="true"
                      width="100%" height="100%"/>
-            <!--<mx:List id="scorecardList" dataProvider="{availableScorecards}" labelField="name" dragEnabled="true"
-                     width="100%" height="100%"/>-->
+            <mx:List id="scorecardList" dataProvider="{availableScorecards}" labelField="name" dragEnabled="true"
+                     width="100%" height="100%"/>
         </mx:VBox>
         <mx:VBox width="100%" height="100%" horizontalAlign="center">
             <mx:HBox>

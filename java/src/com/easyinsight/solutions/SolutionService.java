@@ -11,6 +11,8 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.exchange.ExchangeItem;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.AuthorizationManager;
@@ -455,8 +457,6 @@ public class SolutionService {
                 }
             }
 
-
-
             Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
 
             FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
@@ -480,7 +480,27 @@ public class SolutionService {
                 new AnalysisStorage().saveAnalysis(copiedReport, session);
             }
 
-            Dashboard copiedDashboard = dashboard.cloneDashboard(reportReplacementMap, true, targetDataSource.getFields(), targetDataSource);
+            Set<Long> scorecardIDs = dashboard.containedScorecards();
+            List<Scorecard> scorecards = new ArrayList<Scorecard>();
+
+            for (Long containedScorecardID : scorecardIDs) {
+                Scorecard scorecard = new ScorecardStorage().getScorecard(containedScorecardID, conn);
+                scorecards.add(scorecard);
+            }
+
+            Map<Long, Scorecard> scorecardReplacementMap = new HashMap<Long, Scorecard>();
+            List<Scorecard> scorecardList = new ArrayList<Scorecard>();
+            for (Scorecard child : scorecards) {
+                Scorecard copyScorecard = copyScorecardToDataSource(targetDataSource, child);
+                scorecardReplacementMap.put(child.getScorecardID(), copyScorecard);
+                scorecardList.add(copyScorecard);
+            }
+
+            for (Scorecard copiedScorecard : scorecardList) {
+                new ScorecardStorage().saveScorecardForUser(copiedScorecard, SecurityUtil.getUserID(), conn);
+            }
+
+            Dashboard copiedDashboard = dashboard.cloneDashboard(reportReplacementMap, scorecardReplacementMap, true, targetDataSource.getFields(), targetDataSource);
 
             copiedDashboard.setDataSourceID(dataSourceID);
 
@@ -602,6 +622,13 @@ public class SolutionService {
         }
         map.put(localDefinition.getDataFeedID(), sourceDefinition.getDataFeedID());
         return map;
+    }
+
+    private Scorecard copyScorecardToDataSource(FeedDefinition localDefinition, Scorecard scorecard) throws CloneNotSupportedException {
+        Scorecard clonedScorecard = scorecard.clone(localDefinition, localDefinition.getFields());
+        clonedScorecard.setExchangeVisible(false);
+        clonedScorecard.setDataSourceID(localDefinition.getDataFeedID());
+        return clonedScorecard;
     }
 
     private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report) throws CloneNotSupportedException {

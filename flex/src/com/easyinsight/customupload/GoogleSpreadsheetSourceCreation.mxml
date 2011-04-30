@@ -28,7 +28,7 @@
 
         private function install():void {
             ProgressAlert.alert(this, "Retrieving access information...", null, tokenService.getOAuthURL);
-            tokenService.getOAuthURL.send(1, 0);
+            tokenService.getOAuthURL.send(1, false, null, null, 0);
         }
 
         private function gotURL():void {

@@ -36,6 +36,7 @@ import com.easyinsight.customupload.CampaignMonitorDataSourceCreation;
 import com.easyinsight.customupload.ConfigureDataSource;
 import com.easyinsight.customupload.CsvFileUploadFormat;
 import com.easyinsight.customupload.ExcelUploadFormat;
+import com.easyinsight.customupload.FileBasedFeedDefinition;
 import com.easyinsight.customupload.FlatFileUploadFormat;
 import com.easyinsight.customupload.RedirectDataSource;
 import com.easyinsight.customupload.UploadResponse;
@@ -173,6 +174,7 @@ public class TORegistry {
         var clearDBSource:ClearDBCompositeSource;
         var clearDBDataSource:ClearDBDataSource;
         var connection:CompositeFeedConnection;
+        var fileBased:FileBasedFeedDefinition;
         var fed:FederatedDataSource;
         var fedSource:FederationSource;
         var zenSource:ZendeskDataSource;

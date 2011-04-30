@@ -7,6 +7,7 @@ import flash.events.MouseEvent;
 
 import mx.containers.HBox;
 import mx.controls.Image;
+import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.controls.Text;
 import mx.managers.PopUpManager;
@@ -32,9 +33,10 @@ public class ReportDeliverySetupLine extends HBox {
         var image:Image = new Image();
         image.source = warningIcon;
         addChild(image);
-        var setupText:Text = new Text();
+        var setupText:Label = new Label();
         setupText.text = "Your connection to " + _dataSource.name + " is currently not set up to refresh.";
         setupText.setStyle("fontSize", 16);
+        setupText.maxWidth = 600;
         addChild(setupText);
         var button:LinkButton = new LinkButton();
         button.label = "Set up refresh";

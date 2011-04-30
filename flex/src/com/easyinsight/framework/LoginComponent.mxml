@@ -10,19 +10,19 @@
                   exitState="exitPasswordResetStateChange()">
             <mx:RemoveChild target="{loginForm}"/>
             <mx:AddChild relativeTo="{coreBox}">
-                <mx:ViewStack selectedIndex="{stackIndex}">
+                <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true">
                     <mx:VBox horizontalAlign="center">
                         <mx:Label text="Send a reset email" fontSize="14"/>
-                        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                        <mx:Form>
                             <mx:FormItem label="Email Address:" direction="horizontal">
-                                <mx:TextInput id="emailAddressInput"/>
+                                <mx:TextInput id="emailAddressInput" width="350"/>
                                 <mx:Label text="{emailFailure}" visible="{emailFailure != null}"/>
                             </mx:FormItem>
                         </mx:Form>
                         <mx:Button label="Send Email" click="resetPassword()"/>
-                        <mx:HRule width="50"/>
+                        <mx:HRule width="100%"/>
                         <mx:Label text="Already got reset email?" fontSize="14"/>
-                        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                        <mx:Form>
                             <mx:FormItem label="Manually Enter Reset Key:" direction="horizontal">
                                 <mx:TextInput id="resetKey"/>
                             </mx:FormItem>
@@ -49,6 +49,7 @@
 
         import com.easyinsight.util.CookieUtil;
 
+        import mx.controls.Alert;
         import mx.messaging.config.ServerConfig;
         import mx.rpc.AsyncResponder;
         import mx.rpc.AsyncToken;
@@ -118,6 +119,7 @@
             stackIndex = 0;
             var result:Boolean = authService.remindPassword.lastResult as Boolean;
             if (result) {
+                Alert.show("An email has been sent to the address you specified to reset your password.");
                 currentState = "PasswordReset";
             } else {
                 emailFailure = "No such email address was found in Easy Insight.";
