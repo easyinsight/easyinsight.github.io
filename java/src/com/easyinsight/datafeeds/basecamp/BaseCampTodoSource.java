@@ -133,7 +133,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
                 long daysSinceChange = delta / (60 * 60 * 1000 * 24);
 
-                if (daysSinceChange > 0) {
+                if (daysSinceChange > 2) {
                     continue;
                 }
 

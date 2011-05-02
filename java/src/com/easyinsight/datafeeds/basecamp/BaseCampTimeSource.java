@@ -98,7 +98,7 @@ public class BaseCampTimeSource extends BaseCampBaseSource {
 
                 long daysSinceChange = delta / (60 * 60 * 1000 * 24);
 
-                if (daysSinceChange > 0) {
+                if (daysSinceChange > 2) {
                     continue;
                 }
                 loadingProgress(i, projectNodes.size(), "Synchronizing with time tracking data of " + projectName + "...", callDataID);
