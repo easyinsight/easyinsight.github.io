@@ -45,12 +45,27 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             ((CalculationTreeNode) node.getChild(1)).accept(node2);
             Value result2 = node2.getResult();
             if (result.type() == Value.STRING || result2.type() == Value.STRING) {
-                result = new StringValue(result.toString() + result2.toString());
+                result = new StringValue(minusQuotes(result) + minusQuotes(result2));
             } else if(!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null)
                 result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
             else
                 result = new EmptyValue();
         }
+    }
+
+    public String minusQuotes(Value value) {
+        String string = value.toString();
+        if (string.length() >= 2) {
+            char first = string.charAt(0);
+            char end = string.charAt(string.length() - 1);
+            if (first == '"' && end == '"') {
+                if (string.length() == 2) {
+                    return "";
+                }
+                return string.substring(1, string.length() - 1);
+            }
+        }
+        return string;
     }
 
     public void visit(SubtractNode node) {
