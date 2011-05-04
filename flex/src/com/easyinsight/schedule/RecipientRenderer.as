@@ -14,7 +14,7 @@ public class RecipientRenderer extends Label {
     override public function set data(val:Object):void {
         obj = val;
         if (obj is UserStub) {
-            text = UserStub(obj).fullName;
+            text = UserStub(obj).displayName;
         } else {
             text = String(obj);
         }
