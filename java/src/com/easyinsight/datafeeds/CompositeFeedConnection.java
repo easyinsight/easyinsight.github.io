@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.Row;
 import com.easyinsight.core.DerivedKey;
@@ -9,7 +8,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.logging.LogClass;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -219,16 +217,25 @@ public class CompositeFeedConnection implements Serializable {
         return false;
     }
 
+    private boolean matches(AnalysisItem source, Key targetKey) {
+        Key key = source.getKey();
+        return (key.toKeyString().equals(targetKey.toKeyString()));
+    }
+
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
                             Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID) {
         Key myJoinDimension = null;
-        System.out.println(sourceSet.getRows().size() + " - " + dataSet.getRows().size());
-        System.out.println(Runtime.getRuntime().totalMemory() + " and " + Runtime.getRuntime().freeMemory());
-        System.out.println(sourceName + " to " + targetName);
         if (sourceItem == null) {
             for (AnalysisItem item : sourceFields) {
                 if (matches(item, getSourceJoin(), sourceID)) {
                     myJoinDimension = item.createAggregateKey();
+                }
+            }
+            if (myJoinDimension == null) {
+                for (AnalysisItem item : sourceFields) {
+                    if (matches(item, getSourceJoin())) {
+                        myJoinDimension = item.createAggregateKey();
+                    }
                 }
             }
         } else {
@@ -237,7 +244,13 @@ public class CompositeFeedConnection implements Serializable {
                     myJoinDimension = item.createAggregateKey();
                 }
             }
-            //myJoinDimension = sourceItem.createAggregateKey();
+            if (myJoinDimension == null) {
+                for (AnalysisItem item : sourceFields) {
+                    if (matches(item, sourceItem.getKey())) {
+                        myJoinDimension = item.createAggregateKey();
+                    }
+                }
+            }
         }
         Key fromJoinDimension = null;
         if (targetItem == null) {
@@ -246,10 +259,24 @@ public class CompositeFeedConnection implements Serializable {
                     fromJoinDimension = item.createAggregateKey();
                 }
             }
+            if (fromJoinDimension == null) {
+                for (AnalysisItem item : targetFields) {
+                    if (matches(item, getTargetJoin())) {
+                        fromJoinDimension = item.createAggregateKey();
+                    }
+                }
+            }
         } else {
             for (AnalysisItem item : targetFields) {
                 if (matches(item, targetItem.getKey(), targetID)) {
                     fromJoinDimension = item.createAggregateKey();
+                }
+            }
+            if (fromJoinDimension == null) {
+                for (AnalysisItem item : targetFields) {
+                    if (matches(item, targetItem.getKey())) {
+                        fromJoinDimension = item.createAggregateKey();
+                    }
                 }
             }
         }
@@ -262,7 +289,7 @@ public class CompositeFeedConnection implements Serializable {
         String mergeString = "Merging data set on " + sourceName + " : " + myJoinDimension.toKeyString() + " to " + targetName + " : " + fromJoinDimension.toKeyString();
 
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
-        int size = Math.max(sourceSet.getRows().size(), dataSet.getRows().size());
+
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
         List<IRow> sourceSetRows = sourceSet.getRows();
         List<IRow> targetSetRows = dataSet.getRows();
@@ -283,15 +310,10 @@ public class CompositeFeedConnection implements Serializable {
             sourceIter.remove();
         }
         DataSet result = new DataSet();
-        System.out.println("index size = " + index.size());
         Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
-        //List<IRow> compositeRows = new ArrayList<IRow>(size);
         Iterator<IRow> targetIter = targetSetRows.iterator();
-        int mergeCount = 0;
-        int rowCount = 0;
         while (targetIter.hasNext()) {
             IRow row = targetIter.next();
-            rowCount++;
             Value joinDimensionValue = row.getValue(fromJoinDimension);
             if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
                 unjoinedRows.add(row);
@@ -302,10 +324,6 @@ public class CompositeFeedConnection implements Serializable {
                     unjoinedRows.add(row);
                 } else {
                     for (IRow sourceRow : sourceRows) {
-                        mergeCount++;
-                        if (mergeCount % 1000 == 0) {
-                            System.out.println(mergeCount + "and " + rowCount + " on joining " + joinDimensionValue + " and " + sourceRows.size());
-                        }
                         sourceRow.merge(row, result);
                     }
                 }
@@ -322,7 +340,7 @@ public class CompositeFeedConnection implements Serializable {
         for (IRow row : unjoinedRows) {
             result.createRow().addValues(row);
         }
-        //compositeRows.addAll(unjoinedRows);
+        System.out.println("result = " + result.getRows().size());
         return new MergeAudit(mergeString, result);
     }
 
