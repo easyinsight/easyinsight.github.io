@@ -25,7 +25,6 @@ public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDef
         boolean allowed = false;        
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
-            System.out.println("comparing " + dateValue.getDate() + " to " + lowValue + " and " + highValue);
             allowed = dateValue.getDate().compareTo(lowValue) >= 0 && dateValue.getDate().compareTo(highValue) <= 0;
         }
         return allowed;
