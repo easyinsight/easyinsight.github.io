@@ -288,7 +288,7 @@ public class CompositeFeedConnection implements Serializable {
                     for (IRow sourceRow : sourceRows) {
                         mergeCount++;
                         if (mergeCount % 1000 == 0) {
-                            System.out.println(mergeCount + "and " + rowCount + " on joining " + joinDimensionValue);
+                            System.out.println(mergeCount + "and " + rowCount + " on joining " + joinDimensionValue + " and " + sourceRows.size());
                         }
                         compositeRows.add(sourceRow.merge(row));
                     }
