@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.dataset.DataSet;
 
 import java.util.Collection;
 import java.util.Map;
@@ -31,7 +32,7 @@ public interface IRow {
 
     void addValue(Key tag, Date value);
 
-    IRow merge(IRow row);
+    IRow merge(IRow row, DataSet dataSet);
 
     Collection<Key> getKeys();
 

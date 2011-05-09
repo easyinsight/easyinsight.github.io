@@ -117,7 +117,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
                     unjoinedSourceRows.add(row);
                 } else {
                     for (IRow sourceRow : blahRows) {
-                        compositeRows.add(sourceRow.merge(row));
+                        compositeRows.add(sourceRow.merge(row, null));
                     }
                 }
             } else {

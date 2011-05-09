@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import com.easyinsight.dataset.DataSet;
 
 import java.util.*;
 import java.io.Serializable;
@@ -31,7 +32,7 @@ public class Row implements IRow, Serializable {
     }
 
     public Value getValue(Key rowName) {
-        int key = dataSetKeys.getKey(rowName);
+        Short key = dataSetKeys.getKey(rowName);
         if (key >= valueMap.length) {
             return EmptyValue.EMPTY_VALUE;
         }
@@ -43,7 +44,7 @@ public class Row implements IRow, Serializable {
     }
 
     public Value getValue(AnalysisItem analysisItem) {
-        int key = dataSetKeys.getKey(analysisItem);
+        Short key = dataSetKeys.getKey(analysisItem);
         if (key >= valueMap.length) {
             return EmptyValue.EMPTY_VALUE;
         }
@@ -136,9 +137,9 @@ public class Row implements IRow, Serializable {
         addValue(new NamedKey(s), new NumericValue(value));
     }
 
-    public IRow merge(IRow row) {
+    public IRow merge(IRow row, DataSet dataSet) {
         Row otherRow = (Row) row;
-        Row mergedRow = new Row(dataSetKeys.getKeys().size() + otherRow.dataSetKeys.getKeys().size(), dataSetKeys);
+        IRow mergedRow = dataSet.createRow(dataSetKeys.getKeys().size() + otherRow.dataSetKeys.getKeys().size());
         for (Key key : dataSetKeys.getKeys()) {
             Value value = getValue(key);
             if (value != null) {

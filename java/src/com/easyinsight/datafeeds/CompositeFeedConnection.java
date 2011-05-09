@@ -268,9 +268,10 @@ public class CompositeFeedConnection implements Serializable {
             }
             sourceIter.remove();
         }
+        DataSet result = new DataSet();
         System.out.println("index size = " + index.size());
         Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
-        List<IRow> compositeRows = new ArrayList<IRow>(size);
+        //List<IRow> compositeRows = new ArrayList<IRow>(size);
         Iterator<IRow> targetIter = targetSetRows.iterator();
         int mergeCount = 0;
         int rowCount = 0;
@@ -291,13 +292,13 @@ public class CompositeFeedConnection implements Serializable {
                         if (mergeCount % 1000 == 0) {
                             System.out.println(mergeCount + "and " + rowCount + " on joining " + joinDimensionValue + " and " + sourceRows.size());
                         }
-                        compositeRows.add(sourceRow.merge(row));
+                        sourceRow.merge(row, result);
                     }
                 }
             }
             targetIter.remove();
         }
-        DataSet result = new DataSet(compositeRows);
+
 
         for (List<IRow> rows : indexCopy.values()) {
             for (IRow row : rows) {
@@ -307,7 +308,7 @@ public class CompositeFeedConnection implements Serializable {
         for (IRow row : unjoinedRows) {
             result.createRow().addValues(row);
         }
-        compositeRows.addAll(unjoinedRows);
+        //compositeRows.addAll(unjoinedRows);
         return new MergeAudit(mergeString, result);
     }
 
