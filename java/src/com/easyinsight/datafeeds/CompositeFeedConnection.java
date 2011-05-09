@@ -256,7 +256,7 @@ public class CompositeFeedConnection implements Serializable {
         while (sourceIter.hasNext()) {
             IRow row = sourceIter.next();
             Value joinDimensionValue = row.getValue(myJoinDimension);
-            if (joinDimensionValue == null) {
+            if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
                 LogClass.debug("bad bad bad");
             } else {
                 List<IRow> rows = index.get(joinDimensionValue);
@@ -278,7 +278,7 @@ public class CompositeFeedConnection implements Serializable {
             IRow row = targetIter.next();
             rowCount++;
             Value joinDimensionValue = row.getValue(fromJoinDimension);
-            if (joinDimensionValue == null) {
+            if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
                 LogClass.debug("bad bad bad");
             } else {
                 indexCopy.remove(joinDimensionValue);
