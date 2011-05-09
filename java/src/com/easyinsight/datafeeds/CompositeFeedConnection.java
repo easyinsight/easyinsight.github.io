@@ -340,7 +340,6 @@ public class CompositeFeedConnection implements Serializable {
         for (IRow row : unjoinedRows) {
             result.createRow().addValues(row);
         }
-        System.out.println("result = " + result.getRows().size());
         return new MergeAudit(mergeString, result);
     }
 
