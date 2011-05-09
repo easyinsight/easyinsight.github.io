@@ -267,12 +267,15 @@ public class CompositeFeedConnection implements Serializable {
             }
             sourceIter.remove();
         }
+        System.out.println("index size = " + index);
         Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
         List<IRow> compositeRows = new ArrayList<IRow>(size);
         Iterator<IRow> targetIter = targetSetRows.iterator();
         int mergeCount = 0;
+        int rowCount = 0;
         while (targetIter.hasNext()) {
             IRow row = targetIter.next();
+            rowCount++;
             Value joinDimensionValue = row.getValue(fromJoinDimension);
             if (joinDimensionValue == null) {
                 LogClass.debug("bad bad bad");
@@ -285,7 +288,7 @@ public class CompositeFeedConnection implements Serializable {
                     for (IRow sourceRow : sourceRows) {
                         mergeCount++;
                         if (mergeCount % 1000 == 0) {
-                            System.out.println(mergeCount);
+                            System.out.println(mergeCount + "and " + rowCount + " on joining " + joinDimensionValue);
                         }
                         compositeRows.add(sourceRow.merge(row));
                     }
