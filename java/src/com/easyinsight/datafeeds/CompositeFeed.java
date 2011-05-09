@@ -215,7 +215,7 @@ public class CompositeFeed extends Feed {
         if (neededNodes.size() == 1) {
             QueryStateNode queryStateNode = neededNodes.values().iterator().next();
             queryStateNode.produceDataSet(insightRequestMetadata);
-            return queryStateNode.myDataSet;
+            return queryStateNode.queryData.dataSet;
         }
 
         if (neededNodes.size() == 0) {
@@ -313,7 +313,7 @@ public class CompositeFeed extends Feed {
 
         while (iter.hasNext()) {
             QueryStateNode sourceNode = iter.next();
-            if (sourceNode.myDataSet == null) {
+            if (sourceNode.queryData.dataSet == null) {
                 sourceNode.produceDataSet(insightRequestMetadata);
             }
             Edge last = iter.getSpanningTreeEdge(sourceNode);
@@ -325,7 +325,7 @@ public class CompositeFeed extends Feed {
                 } else {
                     targetNode = reducedGraph.getEdgeSource(last);
                 }
-                if (targetNode.myDataSet == null) {
+                if (targetNode.queryData.dataSet == null) {
                     targetNode.produceDataSet(insightRequestMetadata);
                 }
                 if (last.connection.getSourceFeedID() != sourceNode.feedID) {
@@ -333,15 +333,15 @@ public class CompositeFeed extends Feed {
                     sourceNode = targetNode;
                     targetNode = swap;
                 }
-                MergeAudit mergeAudit = last.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems,
+                MergeAudit mergeAudit = last.connection.merge(sourceNode.queryData.dataSet, targetNode.queryData.dataSet,
+                        sourceNode.queryData.neededItems, targetNode.queryData.neededItems,
                         sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
                 dataSet = mergeAudit.getDataSet();
                 auditStrings.addAll(mergeAudit.getMergeStrings());
                 //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
-                sourceNode.myDataSet = dataSet;
-                targetNode.myDataSet = dataSet;
-                sourceNode.neededItems.addAll(targetNode.neededItems);
-                targetNode.neededItems.addAll(sourceNode.neededItems);
+                sourceNode.queryData.dataSet = dataSet;
+                sourceNode.queryData.neededItems.addAll(targetNode.queryData.neededItems);
+                targetNode.queryData = sourceNode.queryData;
             }
 
         }
@@ -378,19 +378,25 @@ public class CompositeFeed extends Feed {
         return dataSet;
     }
 
+    private class QueryData {
+        private DataSet dataSet;
+        private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
+    }
+
     protected boolean alwaysPassThrough(AnalysisItem analysisItem) {
         return false;
     }
 
     private class QueryStateNode {
         private long feedID;
+        private QueryData queryData = new QueryData();
         //private Set<Key> neededKeys = new HashSet<Key>();
-        private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
+        //private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
         private List<AnalysisItem> allAnalysisItems = new ArrayList<AnalysisItem>();
         private Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         private Collection<AnalysisItem> allFeedItems;
         private Collection<AnalysisItem> joinItems = new HashSet<AnalysisItem>();
-        private DataSet myDataSet;
+        //private DataSet myDataSet;
         private String dataSourceName;
         private EIConnection conn;
 
@@ -419,13 +425,13 @@ public class CompositeFeed extends Feed {
         }
 
         public void addItem(AnalysisItem analysisItem) {
-            neededItems.add(analysisItem);
+            queryData.neededItems.add(analysisItem);
             //neededKeys.add(analysisItem.getKey());
         }
 
         public void addKey(Key key) {
             boolean alreadyHaveItem = false;
-            for (AnalysisItem analysisItem : neededItems) {
+            for (AnalysisItem analysisItem : queryData.neededItems) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(key.toKeyString())) {
                     alreadyHaveItem = true;
                 }
@@ -443,7 +449,7 @@ public class CompositeFeed extends Feed {
 
             Feed feed = FeedRegistry.instance().getFeed(feedID, conn);
 
-            DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
+            DataSet dataSet = feed.getAggregateDataSet(queryData.neededItems, filters, insightRequestMetadata, allAnalysisItems, false, conn);
 
             Pipeline pipeline;
             if (getDataSource().getFeedType().getType() == FeedType.BASECAMP_MASTER.getType()) {
@@ -452,9 +458,9 @@ public class CompositeFeed extends Feed {
                 pipeline = new AltCompositeReportPipeline(joinItems);
             }
             WSListDefinition analysisDefinition = new WSListDefinition();
-            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
+            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(queryData.neededItems));
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-            myDataSet = pipeline.toDataSet(dataSet);
+            queryData.dataSet = pipeline.toDataSet(dataSet);
         }
 
         public void addFilter(FilterDefinition filterDefinition) {
