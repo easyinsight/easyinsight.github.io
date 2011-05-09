@@ -225,7 +225,6 @@ public class CompositeFeedConnection implements Serializable {
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
                             Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID) {
         Key myJoinDimension = null;
-        System.out.println(sourceName + " - " + sourceSet.getRows().size() + " to " + targetName + " - " + dataSet.getRows().size());
         if (sourceItem == null) {
             for (AnalysisItem item : sourceFields) {
                 if (matches(item, getSourceJoin(), sourceID)) {
