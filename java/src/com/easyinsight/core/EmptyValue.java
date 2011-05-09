@@ -11,7 +11,7 @@ import com.easyinsight.logging.LogClass;
 public class EmptyValue extends Value {
     private static final long serialVersionUID = -3929345976490773936L;
 
-    private String blah = "";
+    private int blah = 0;
 
     public static EmptyValue EMPTY_VALUE = new EmptyValue();
 
@@ -35,14 +35,13 @@ public class EmptyValue extends Value {
 
         EmptyValue that = (EmptyValue) o;
 
-        if (!blah.equals(that.blah)) return false;
+        return blah == that.blah;
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        return blah.hashCode();
+        return blah;
     }
 
     @Override

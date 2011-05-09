@@ -267,7 +267,7 @@ public class CompositeFeedConnection implements Serializable {
             }
             sourceIter.remove();
         }
-        System.out.println("index size = " + index);
+        System.out.println("index size = " + index.size());
         Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
         List<IRow> compositeRows = new ArrayList<IRow>(size);
         Iterator<IRow> targetIter = targetSetRows.iterator();
