@@ -19,7 +19,7 @@ public class DataSetKeys {
         keyMap.put(target, position);
     }
 
-    public int getKey(Key key) {
+    public Short getKey(Key key) {
         Short position = keyMap.get(key);
         if (position == null) {
             position = max;
@@ -30,7 +30,7 @@ public class DataSetKeys {
         return position;
     }
 
-    public int getKey(AnalysisItem analysisItem) {
+    public Short getKey(AnalysisItem analysisItem) {
         Short position = keyMap.get(analysisItem.getKey());
         if (position == null) {
             position = keyMap.get(analysisItem.createAggregateKey());
