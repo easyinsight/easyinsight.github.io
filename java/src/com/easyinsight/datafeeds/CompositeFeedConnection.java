@@ -279,7 +279,7 @@ public class CompositeFeedConnection implements Serializable {
             rowCount++;
             Value joinDimensionValue = row.getValue(fromJoinDimension);
             if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
-                compositeRows.add(row);
+                unjoinedRows.add(row);
             } else {
                 indexCopy.remove(joinDimensionValue);
                 List<IRow> sourceRows = index.get(joinDimensionValue);
@@ -303,7 +303,6 @@ public class CompositeFeedConnection implements Serializable {
             for (IRow row : rows) {
                 result.createRow().addValues(row);
             }
-            //compositeRows.addAll(rows);
         }
         for (IRow row : unjoinedRows) {
             result.createRow().addValues(row);
