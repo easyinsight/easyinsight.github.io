@@ -245,8 +245,13 @@ public class CompositeFeedConnection implements Serializable {
         String mergeString = "Merging data set on " + sourceName + " : " + myJoinDimension.toKeyString() + " to " + targetName + " : " + fromJoinDimension.toKeyString();
 
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
+        int size = Math.max(sourceSet.getRows().size(), dataSet.getRows().size());
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
-        for (IRow row : sourceSet.getRows()) {
+        List<IRow> sourceSetRows = sourceSet.getRows();
+        List<IRow> targetSetRows = dataSet.getRows();
+        Iterator<IRow> sourceIter = sourceSetRows.iterator();
+        while (sourceIter.hasNext()) {
+            IRow row = sourceIter.next();
             Value joinDimensionValue = row.getValue(myJoinDimension);
             if (joinDimensionValue == null) {
                 LogClass.debug("bad bad bad");
@@ -258,10 +263,13 @@ public class CompositeFeedConnection implements Serializable {
                 }
                 rows.add(row);
             }
+            sourceIter.remove();
         }
         Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
-        List<IRow> compositeRows = new LinkedList<IRow>();
-        for (IRow row : dataSet.getRows()) {
+        List<IRow> compositeRows = new ArrayList<IRow>(size);
+        Iterator<IRow> targetIter = targetSetRows.iterator();
+        while (targetIter.hasNext()) {
+            IRow row = targetIter.next();
             Value joinDimensionValue = row.getValue(fromJoinDimension);
             if (joinDimensionValue == null) {
                 LogClass.debug("bad bad bad");
@@ -276,6 +284,7 @@ public class CompositeFeedConnection implements Serializable {
                     }
                 }
             }
+            targetIter.remove();
         }
         for (List<IRow> rows : indexCopy.values()) {
             compositeRows.addAll(rows);

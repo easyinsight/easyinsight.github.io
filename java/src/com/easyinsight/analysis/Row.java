@@ -138,7 +138,7 @@ public class Row implements IRow, Serializable {
 
     public IRow merge(IRow row) {
         Row otherRow = (Row) row;
-        Row mergedRow = new Row(dataSetKeys);
+        Row mergedRow = new Row(dataSetKeys.getKeys().size() + otherRow.dataSetKeys.getKeys().size(), dataSetKeys);
         for (Key key : dataSetKeys.getKeys()) {
             Value value = getValue(key);
             if (value != null) {
