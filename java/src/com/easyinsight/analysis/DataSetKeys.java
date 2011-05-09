@@ -2,9 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -14,6 +12,7 @@ import java.util.Map;
 public class DataSetKeys {
     private Map<Key, Short> keyMap = new HashMap<Key, Short>();
     private short max;
+    private List<Key> keys = new ArrayList<Key>();
 
     public void replaceKey(Key source, Key target) {
         short position = keyMap.get(source);
@@ -26,6 +25,7 @@ public class DataSetKeys {
             position = max;
             keyMap.put(key, position);
             max++;
+            keys.add(key);
         }
         return position;
     }
@@ -44,7 +44,6 @@ public class DataSetKeys {
     }
 
     public Collection<Key> getKeys() {
-        keyMap.remove(null);
-        return keyMap.keySet();
+        return keys;
     }
 }
