@@ -210,6 +210,7 @@ public class CompositeFeedConnection implements Serializable {
         Key myJoinDimension = null;
         System.out.println(sourceSet.getRows().size() + " - " + dataSet.getRows().size());
         System.out.println(Runtime.getRuntime().totalMemory() + " and " + Runtime.getRuntime().freeMemory());
+        System.out.println(sourceName + " to " + targetName);
         if (sourceItem == null) {
             for (AnalysisItem item : sourceFields) {
                 if (item.getKey().toKeyString().equals(getSourceJoin().toKeyString())) {
@@ -252,12 +253,11 @@ public class CompositeFeedConnection implements Serializable {
         List<IRow> sourceSetRows = sourceSet.getRows();
         List<IRow> targetSetRows = dataSet.getRows();
         Iterator<IRow> sourceIter = sourceSetRows.iterator();
-        List<IRow> compositeRows = new ArrayList<IRow>(size);
         while (sourceIter.hasNext()) {
             IRow row = sourceIter.next();
             Value joinDimensionValue = row.getValue(myJoinDimension);
-            if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
-                compositeRows.add(row);
+            if (joinDimensionValue == null) {
+                LogClass.debug("bad bad bad");
             } else {
                 List<IRow> rows = index.get(joinDimensionValue);
                 if (rows == null){
@@ -270,7 +270,7 @@ public class CompositeFeedConnection implements Serializable {
         }
         System.out.println("index size = " + index.size());
         Map<Value, List<IRow>> indexCopy = new HashMap<Value, List<IRow>>(index);
-
+        List<IRow> compositeRows = new ArrayList<IRow>(size);
         Iterator<IRow> targetIter = targetSetRows.iterator();
         int mergeCount = 0;
         int rowCount = 0;
@@ -278,8 +278,8 @@ public class CompositeFeedConnection implements Serializable {
             IRow row = targetIter.next();
             rowCount++;
             Value joinDimensionValue = row.getValue(fromJoinDimension);
-            if (joinDimensionValue == null || joinDimensionValue.type() == Value.EMPTY) {
-                compositeRows.add(row);
+            if (joinDimensionValue == null) {
+                LogClass.debug("bad bad bad");
             } else {
                 indexCopy.remove(joinDimensionValue);
                 List<IRow> sourceRows = index.get(joinDimensionValue);

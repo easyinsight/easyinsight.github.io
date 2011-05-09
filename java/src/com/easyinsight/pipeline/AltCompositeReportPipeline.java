@@ -47,6 +47,8 @@ public class AltCompositeReportPipeline extends Pipeline {
             }
             components.add(new DateTransformComponent(item));
         }
+        components.add(new NormalizationComponent());
+        components.add(new AggregationComponent());
         return components;
     }
 }
