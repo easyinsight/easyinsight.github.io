@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.Row;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
@@ -205,21 +206,34 @@ public class CompositeFeedConnection implements Serializable {
         }
     }
 
+    private boolean matches(AnalysisItem source, Key targetKey, long sourceID) {
+        Key key = source.getKey();
+        if (key.toKeyString().equals(targetKey.toKeyString())) {
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                if (derivedKey.getFeedID() == sourceID) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn) {
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID) {
         Key myJoinDimension = null;
         System.out.println(sourceSet.getRows().size() + " - " + dataSet.getRows().size());
         System.out.println(Runtime.getRuntime().totalMemory() + " and " + Runtime.getRuntime().freeMemory());
         System.out.println(sourceName + " to " + targetName);
         if (sourceItem == null) {
             for (AnalysisItem item : sourceFields) {
-                if (item.getKey().toKeyString().equals(getSourceJoin().toKeyString())) {
+                if (matches(item, getSourceJoin(), sourceID)) {
                     myJoinDimension = item.createAggregateKey();
                 }
             }
         } else {
             for (AnalysisItem item : sourceFields) {
-                if (item.getKey().toKeyString().equals(sourceItem.getKey().toKeyString())) {
+                if (matches(item, sourceItem.getKey(), sourceID)) {
                     myJoinDimension = item.createAggregateKey();
                 }
             }
@@ -228,13 +242,13 @@ public class CompositeFeedConnection implements Serializable {
         Key fromJoinDimension = null;
         if (targetItem == null) {
             for (AnalysisItem item : targetFields) {
-                if (item.getKey().toKeyString().equals(getTargetJoin().toKeyString())) {
+                if (matches(item, getTargetJoin(), targetID)) {
                     fromJoinDimension = item.createAggregateKey();
                 }
             }
         } else {
             for (AnalysisItem item : targetFields) {
-                if (item.getKey().toKeyString().equals(targetItem.getKey().toKeyString())) {
+                if (matches(item, targetItem.getKey(), targetID)) {
                     fromJoinDimension = item.createAggregateKey();
                 }
             }

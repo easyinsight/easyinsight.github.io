@@ -115,6 +115,8 @@ public class CompositeFeed extends Feed {
             return getDataSet(analysisItems, filters, insightRequestMetadata, conn);
         } catch (ReportException re) {
             throw re;
+        } catch (InvalidFieldsException ife) {
+            throw ife;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -180,12 +182,13 @@ public class CompositeFeed extends Feed {
         itemSet.removeAll(alwaysSet);
 
         if (itemSet.size() > 0) {
-            StringBuilder builder = new StringBuilder();
+            /*StringBuilder builder = new StringBuilder();
             for (AnalysisItem analysisItem : itemSet) {
                 builder.append(analysisItem.toDisplay()).append(",");
             }
-            builder.deleteCharAt(builder.length() - 1);
-            throw new RuntimeException("Could not find a data source to handle fields " + builder.toString() + ".");
+            builder.deleteCharAt(builder.length() - 1);*/
+            throw new InvalidFieldsException(itemSet);
+            /*throw new RuntimeException("Could not find a data source to handle fields " + builder.toString() + ".");*/
         }
 
         for (CompositeFeedConnection connection : connections) {
@@ -331,7 +334,7 @@ public class CompositeFeed extends Feed {
                     targetNode = swap;
                 }
                 MergeAudit mergeAudit = last.connection.merge(sourceNode.myDataSet, targetNode.myDataSet, sourceNode.neededItems, targetNode.neededItems,
-                        sourceNode.dataSourceName, targetNode.dataSourceName, conn);
+                        sourceNode.dataSourceName, targetNode.dataSourceName, conn, sourceNode.feedID, targetNode.feedID);
                 dataSet = mergeAudit.getDataSet();
                 auditStrings.addAll(mergeAudit.getMergeStrings());
                 //dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);

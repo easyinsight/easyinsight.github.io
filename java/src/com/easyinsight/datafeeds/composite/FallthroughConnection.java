@@ -135,7 +135,7 @@ public class FallthroughConnection extends CompositeFeedConnection {
 
     @Override
     public MergeAudit merge(DataSet sourceSet, DataSet dataSet, Set<AnalysisItem> sourceFields,
-                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn) {
+                            Set<AnalysisItem> targetFields, String sourceName, String targetName, EIConnection conn, long sourceID, long targetID) {
         Set<Value> sourceProjects = new HashSet<Value>();
         Set<Value> targetProjects = new HashSet<Value>();
 
