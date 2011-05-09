@@ -297,11 +297,19 @@ public class CompositeFeedConnection implements Serializable {
             }
             targetIter.remove();
         }
+        DataSet result = new DataSet(compositeRows);
+
         for (List<IRow> rows : indexCopy.values()) {
-            compositeRows.addAll(rows);
+            for (IRow row : rows) {
+                result.createRow().addValues(row);
+            }
+            //compositeRows.addAll(rows);
+        }
+        for (IRow row : unjoinedRows) {
+            result.createRow().addValues(row);
         }
         compositeRows.addAll(unjoinedRows);
-        return new MergeAudit(mergeString, new DataSet(compositeRows));
+        return new MergeAudit(mergeString, result);
     }
 
     private List<Key> removeSourceKeys;
