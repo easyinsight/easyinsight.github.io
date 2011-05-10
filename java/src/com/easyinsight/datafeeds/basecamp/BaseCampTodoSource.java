@@ -83,10 +83,10 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return FeedType.BASECAMP;
     }
 
-    @Override
+    /*@Override
     protected boolean clearsData() {
         return false;
-    }
+    }*/
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
@@ -126,7 +126,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     projectChangedAt = deadlineTimeFormat.parse(projectChangedOnString);
                 }
 
-                if (lastRefreshDate == null) {
+                /*if (lastRefreshDate == null) {
                     lastRefreshDate = new Date(1);
                 }
                 long delta = lastRefreshDate.getTime() - projectChangedAt.getTime();
@@ -135,7 +135,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
                 if (daysSinceChange > 2) {
                     continue;
-                }
+                }*/
 
                 String announcement = queryField(curProject, "announcement/text()"); 
                 loadingProgress(i, projectNodes.size(), "Synchronizing with todo items of " + projectName + "...", callDataID);
@@ -329,9 +329,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                         row.addValue(keys.get(MILESTONE_ID), entry.getKey());
                     }
                 }
-
-                StringWhere stringWhere = new StringWhere(keys.get(PROJECTID), projectIdToRetrieve);
-                dataStorage.updateData(ds, Arrays.asList((IWhere) stringWhere));
+                dataStorage.insertData(ds);
             }
         } catch (ReportException re) {
             throw re;
