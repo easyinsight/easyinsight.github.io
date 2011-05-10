@@ -21,6 +21,7 @@ import com.google.gdata.data.analytics.AccountEntry;
 import com.google.gdata.data.analytics.AccountFeed;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.InvalidEntryException;
+import com.google.gdata.util.ServiceException;
 
 import java.util.*;
 import java.net.URL;
@@ -297,6 +298,8 @@ public class GoogleAnalyticsFeed extends Feed {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (InvalidEntryException iee) {
             throw new ReportException(new GenericReportFault(iee.getMessage()));
+        } catch (ServiceException se) {
+            throw new ReportException(new GenericReportFault(se.getMessage()));
         } catch (ReportException tme) {
             throw tme;
         } catch (Exception e) {
