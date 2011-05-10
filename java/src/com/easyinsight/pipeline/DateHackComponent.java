@@ -17,17 +17,19 @@ public class DateHackComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         Calendar cal = Calendar.getInstance();
         Calendar shiftedCal = Calendar.getInstance();
-        int time = pipelineData.getInsightRequestMetadata().getUtcOffset() / 60;
-        String string;
-        if (time > 0) {
-            string = "GMT-"+Math.abs(time);
-        } else if (time < 0) {
-            string = "GMT+"+Math.abs(time);
-        } else {
-            string = "GMT";
+        if (!pipelineData.getInsightRequestMetadata().isSuppressShifts()) {
+            int time = pipelineData.getInsightRequestMetadata().getUtcOffset() / 60;
+            String string;
+            if (time > 0) {
+                string = "GMT-"+Math.abs(time);
+            } else if (time < 0) {
+                string = "GMT+"+Math.abs(time);
+            } else {
+                string = "GMT";
+            }
+            TimeZone timeZone = TimeZone.getTimeZone(string);
+            shiftedCal.setTimeZone(timeZone);
         }
-        TimeZone timeZone = TimeZone.getTimeZone(string);
-        shiftedCal.setTimeZone(timeZone);
 
         for (IRow row : dataSet.getRows()) {
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
