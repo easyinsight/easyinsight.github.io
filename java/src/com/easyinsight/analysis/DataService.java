@@ -361,9 +361,9 @@ public class DataService {
             if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
                 boolean dateTime = dataSource.getDataSource().checkDateTime(item.toDisplay());
-                if (!insightRequestMetadata.isSuppressShifts()) {
+                //if (!insightRequestMetadata.isSuppressShifts()) {
                     dateDim.setTimeshift(dateTime);
-                }
+                //}
             }
         }
         for (AnalysisItem item : items) {
