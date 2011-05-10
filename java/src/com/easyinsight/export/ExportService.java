@@ -808,7 +808,7 @@ public class ExportService {
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             cal.setTime(dateValue.getDate());
-            cell.setCellValue(cal.getTime());
+            cell.setCellValue(cal);
         }
     }
 
