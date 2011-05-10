@@ -49,6 +49,8 @@ public class DateValue extends Value implements Serializable {
             day = cal.get(Calendar.DAY_OF_MONTH);
             hour = cal.get(Calendar.HOUR_OF_DAY);
             minute = cal.get(Calendar.MINUTE);
+            cal.setTimeInMillis(date.getTime());
+            date = cal.getTime();
         }
     }
 
