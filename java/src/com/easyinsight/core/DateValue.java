@@ -43,6 +43,7 @@ public class DateValue extends Value implements Serializable {
 
     public void calculate(Calendar cal) {
         if (date != null) {
+            System.out.println("at this point, time = " + date);
             cal.setTime(date);
             year = cal.get(Calendar.YEAR);
             month = cal.get(Calendar.MONTH);
@@ -51,6 +52,7 @@ public class DateValue extends Value implements Serializable {
             minute = cal.get(Calendar.MINUTE);
             cal.setTimeInMillis(date.getTime());
             date = cal.getTime();
+            System.out.println("and now date = " + date);
         }
     }
 
